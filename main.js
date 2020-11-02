@@ -1,8 +1,7 @@
 const {app, BrowserWindow, Menu, shell} = require('electron')
 const path = require('path')
-const glob = require('glob')
 const getPort = require('get-port')
-const eggLauncher = require('./main/lanucher')
+const eggLauncher = require('./app/lanucher')
 
 // glogger
 global.GLOGGER = require('electron-log')
@@ -27,7 +26,7 @@ for (let i = 0; i < process.argv.length; i++) {
 }  
 GLOGGER.info('options', options);
 
-if (process.mas) app.setName('box')
+if (process.mas) app.setName('electron-egg')
 
 app.on('web-contents-created', (e, webContents) => {
     webContents.on('new-window', (event, url) => {
@@ -39,7 +38,7 @@ app.on('web-contents-created', (e, webContents) => {
 async function createWindow () {
   MAIN_WINDOW = new BrowserWindow({
     width: 800,
-    height: 800,
+    height: 600,
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
@@ -61,7 +60,7 @@ async function createWindow () {
   }
 
   // loding页
-  MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/index.html'))
+  MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/public/loading.html'))
   
   // egg服务
   setTimeout(function(){
@@ -92,7 +91,6 @@ async function startServer (options) {
 } 
 
 async function initialize () {
-  loadDemos()
   app.whenReady().then(() => {
     createWindow()
     app.on('activate', function () {
@@ -108,11 +106,6 @@ async function initialize () {
       app.quit()
     }
   })
-}
-
-function loadDemos () {
-  let files = glob.sync(path.join(__dirname, 'main/**/*.js'))
-  files.forEach((file) => { require(file) })
 }
 
 initialize()
