@@ -60,7 +60,7 @@ async function createWindow () {
   }
 
   // loding页
-  MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/public/loading.html'))
+  MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/app/public/loading.html'))
   
   // egg服务
   setTimeout(function(){
