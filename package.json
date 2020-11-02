@@ -1,0 +1,114 @@
+{
+  "name": "electron-egg",
+  "version": "1.0.0",
+  "description": "A fast, desktop software development framework",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --env=local",
+    "build-w": "electron-builder -w",
+    "build-m": "electron-builder -m",
+    "build-l": "electron-builder -l"
+  },
+  "build": {
+    "productName": "electron-egg",
+    "appId": "com.electron.egg",
+    "copyright": "wallace5303",
+    "directories": {
+      "output": "out"
+    },
+    "asar": true,
+    "files": [
+      "**/*"
+    ],
+    "electronDownload": {
+      "mirror": "https://npm.taobao.org/mirrors/electron/"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "./build/icons/icon.ico",
+      "uninstallerIcon": "./build/icons/icon.ico",
+      "installerHeaderIcon": "./build/icons/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "demo"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://github.com/wallace5303/electron-egg"
+      }
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "mac": {
+      "icon": "build/icons/icon.icns"
+    },
+    "win": {
+      "icon": "build/icons/icon.ico",
+      "artifactName": "${productName}_windows_${version}.${ext}",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "icon": "build/icons"
+    }
+  },
+  "repository": "https://github.com/wallace5303/electron-egg.git",
+  "keywords": [
+    "Electron",
+    "Egg"
+  ],
+  "author": "wallace5303",
+  "license": "Apache",
+  "devDependencies": {
+    "devtron": "^1.4.0",
+    "electron": "^8.4.1",
+    "electron-builder": "^22.7.0",
+    "autod": "^3.0.1",
+    "autod-egg": "^1.1.0",
+    "egg-bin": "^4.12.3",
+    "egg-ci": "^1.11.0",
+    "egg-mock": "^3.21.0",
+    "eslint": "^5.13.0",
+    "eslint-config-egg": "^7.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "prettier": "^1.16.4",
+    "webstorm-disable-index": "^1.2.0"
+  },
+  "dependencies": {
+    "egg": "^2.15.1",
+    "egg-cors": "^2.2.0",
+    "egg-jwt": "^3.1.6",
+    "egg-view-ejs": "^2.0.0",
+    "electron-log": "^4.2.2",
+    "electron-store": "^6.0.1",
+    "electron-updater": "^4.3.5",
+    "get-port": "^5.1.1",
+    "glob": "^7.1.6",
+    "lodash": "^4.17.11",
+    "keyv": "^3.1.0",
+    "semver": "^5.4.1"
+  }
+}
