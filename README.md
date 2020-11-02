@@ -1,8 +1,6 @@
 # electron-egg
 一个快速、功能丰富的桌面软件开发框架，基于electron和egg.js
 
-## 1
-
 ## 开始使用
 
 1. 下载
