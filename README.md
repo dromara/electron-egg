@@ -41,9 +41,6 @@
 1. electron日志：./logs/main.log
 2. egg日志：./logs/
 
-## 文档
-[查看](http://box.kaka996.com/)
-
 ## 项目案例
 
 1. 网址管理大师
