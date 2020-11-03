@@ -1,15 +1,21 @@
 # electron-egg
 一个快速、功能丰富的桌面软件开发框架，基于electron和egg.js
 
+## 特性
+1. 可以用服务端的开发思维，来编写桌面软件
+2. 也可以用前端来开发，数据服务请求外部api即可
+3. 服务端的技术场景几乎都可以使用，如：路由、中间件、控制器、服务、定时任务、队列、插件等
+4. 桌面软件常见功能，后续逐步集成并完善或提供demo。
+
 ## 开始使用
 
 1. 下载
-```
-# gitee
-git clone https://gitee.com/wallace5303/electron-egg.git
-# github
-git clone https://github.com/wallace5303/electron-egg.git
-```
+    ```
+    # gitee
+    git clone https://gitee.com/wallace5303/electron-egg.git
+    # github
+    git clone https://github.com/wallace5303/electron-egg.git
+    ```
 
 2. 启动
     ```
