@@ -1,6 +1,8 @@
 # electron-egg
 一个快速、功能丰富的桌面软件开发框架，基于electron和egg.js
 
+[官网: http://b.kaka996.com/](http://b.kaka996.com/#/feed)
+
 ## 特性
 1. 直接打包成windows版、Mac版、Linux版或者以web网站运行
 2. 可以用服务端的开发思维，来编写桌面软件
@@ -46,7 +48,7 @@
 
 1. 网址管理大师
 ![](https://i.loli.net/2020/11/02/ByFDKeY6nmdxGoc.png)
-[体验web版本和客户端版](http://b.kaka996.com/#/feed)
+[体验web版本和客户端版](http://b.kaka996.com/)
 
 注：# 联系作者（邮箱：530353222@qq.com）展示你的项目
 
