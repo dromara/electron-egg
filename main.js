@@ -1,30 +1,21 @@
 const {app, BrowserWindow, Menu, shell} = require('electron')
 const path = require('path')
 const getPort = require('get-port')
-const eggLauncher = require('./app/lanucher')
+const eggLauncher = require('./electron/lanucher')
+const setup = require('./electron/index')
+const config = require('./electron/config').get()
 
-// glogger
-global.GLOGGER = require('electron-log')
-GLOGGER.transports.console.level = 'silly'
-GLOGGER.transports.file.file = './logs/main.log'
+setup()
 
 // 主窗口
 global.MAIN_WINDOW = null
 
-// console.log('path:', app.getAppPath())
-// return;
-let options = {
-  env: 'prod',
-  eggPort: 7068,
-  workers: 1
-};
 for (let i = 0; i < process.argv.length; i++) {
   const tmpArgv = process.argv[i];
   if (tmpArgv.indexOf('--env=') !== -1) {
-    options.env = tmpArgv.substr(6);
+    config.egg.env = tmpArgv.substr(6);
   }
-}  
-GLOGGER.info('options', options);
+}
 
 if (process.mas) app.setName('electron-egg')
 
@@ -36,25 +27,13 @@ app.on('web-contents-created', (e, webContents) => {
 });
 
 async function createWindow () {
-  MAIN_WINDOW = new BrowserWindow({
-    width: 800,
-    height: 600,
-    minWidth: 800,
-    minHeight: 600,
-    webPreferences: {
-      //webSecurity: false,
-      nodeIntegration: true,
-      preload: path.join(__dirname, 'preload.js')
-    },
-    //frame: false,
-    //titleBarStyle: 'hidden'
-  })
+  MAIN_WINDOW = new BrowserWindow(config.windowsOption)
 
   // if (process.platform === 'linux') {
   //   windowOptions.icon = path.join(__dirname, '/assets/app-icon/png/512.png')
   // }
 
-  if (options.env === 'prod') {
+  if (config.egg.env === 'prod') {
     //隐藏菜单
     Menu.setApplicationMenu(null)
   }
@@ -64,7 +43,7 @@ async function createWindow () {
   
   // egg服务
   setTimeout(function(){
-    startServer(options)
+    startServer(config.egg)
   }, 100)
 
   return MAIN_WINDOW;
@@ -72,17 +51,12 @@ async function createWindow () {
 
 async function startServer (options) {
   let startRes = null;
-  options.eggPort = await getPort({port: options.eggPort})
-  let params = {
-    port: options.eggPort,
-    title: 'electron-egg',
-    workers: 1,
-    env: options.env
-  }
-  startRes = await eggLauncher.start(params).then((res) => res, (err) => err)
-  GLOGGER.info('startRes:', startRes);
+  options.port = await getPort({port: options.port})
+  ELog.info('config.egg', options);
+  startRes = await eggLauncher.start(options).then((res) => res, (err) => err)
+  ELog.info('startRes:', startRes);
   if (startRes === 'success') {
-    let url = 'http://localhost:' + options.eggPort
+    let url = 'http://localhost:' + options.port
     MAIN_WINDOW.loadURL(url)
 
     return
@@ -91,6 +65,7 @@ async function startServer (options) {
 } 
 
 async function initialize () {
+  // loadFiles()
   app.whenReady().then(() => {
     createWindow()
     app.on('activate', function () {

@@ -60,6 +60,10 @@ exports.stop = function () {
     return true;
 };
 
+exports.setup = function () {
+  return true;
+};
+
 function stringify(obj, ignore) {
     const result = {};
     Object.keys(obj).forEach(key => {
