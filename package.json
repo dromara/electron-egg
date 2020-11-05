@@ -101,6 +101,7 @@
     "webstorm-disable-index": "^1.2.0"
   },
   "dependencies": {
+    "dayjs": "^1.9.5",
     "egg": "^2.15.1",
     "egg-cors": "^2.2.0",
     "egg-jwt": "^3.1.6",

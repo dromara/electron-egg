@@ -1,12 +1,10 @@
 const {app, BrowserWindow, Menu, shell} = require('electron')
 const path = require('path')
 const getPort = require('get-port')
-const eggLauncher = require('./app/lanucher')
+const eggLauncher = require('./electron/lanucher')
+const setup = require('./electron/index')
 
-// glogger
-global.GLOGGER = require('electron-log')
-GLOGGER.transports.console.level = 'silly'
-GLOGGER.transports.file.file = './logs/main.log'
+setup()
 
 // 主窗口
 global.MAIN_WINDOW = null
@@ -24,7 +22,7 @@ for (let i = 0; i < process.argv.length; i++) {
     options.env = tmpArgv.substr(6);
   }
 }  
-GLOGGER.info('options', options);
+ELog.info('options', options);
 
 if (process.mas) app.setName('electron-egg')
 
@@ -80,7 +78,7 @@ async function startServer (options) {
     env: options.env
   }
   startRes = await eggLauncher.start(params).then((res) => res, (err) => err)
-  GLOGGER.info('startRes:', startRes);
+  ELog.info('startRes:', startRes);
   if (startRes === 'success') {
     let url = 'http://localhost:' + options.eggPort
     MAIN_WINDOW.loadURL(url)
@@ -91,6 +89,7 @@ async function startServer (options) {
 } 
 
 async function initialize () {
+  // loadFiles()
   app.whenReady().then(() => {
     createWindow()
     app.on('activate', function () {
