@@ -9,8 +9,6 @@ setup()
 // 主窗口
 global.MAIN_WINDOW = null
 
-// console.log('path:', app.getAppPath())
-// return;
 let options = {
   env: 'prod',
   eggPort: 7068,

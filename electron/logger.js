@@ -3,7 +3,6 @@ const ELog = require('electron-log')
 const config = require('./config')
 
 exports.setup = function () {
-  console.log('glogger');
   let logConfig = config.get().log;
   for (let transport in logConfig) {
     const configInfo = logConfig[transport];
