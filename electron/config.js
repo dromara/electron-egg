@@ -30,6 +30,7 @@ exports.get = function () {
       title: 'electron-egg',
       env: 'prod',
       port: 7068,
+      hostname: '0.0.0.0',
       workers: 1
     }
   }
