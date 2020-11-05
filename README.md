@@ -3,6 +3,8 @@
 
 [官网: http://b.kaka996.com/](http://b.kaka996.com/#/feed)
 
+[文档迁移到了羽雀](https://www.yuque.com/u34495/mivcfg/xnhmms)
+
 ## 特性
 1. 直接打包成windows版、Mac版、Linux版或者以web网站运行
 2. 可以用服务端的开发思维，来编写桌面软件
@@ -39,10 +41,6 @@
     # 打包 （linux版本）
     npm run build-l
     ```
-
-## 日志
-1. electron日志：./logs/main.log
-2. egg日志：./logs/
 
 ## 项目案例
 
