@@ -12,6 +12,25 @@ exports.get = function () {
         format: '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}] {text}',
         maxSize: '1048576' // 1048576 (1mb) by default.
       }
+    },
+    windowsOption: {
+      width: 800,
+      height: 600,
+      minWidth: 800,
+      minHeight: 600,
+      webPreferences: {
+        //webSecurity: false,
+        nodeIntegration: true,
+        preload: path.join(__dirname, 'preload.js')
+      },
+      //frame: false,
+      //titleBarStyle: 'hidden'
+    },
+    egg: {
+      title: 'electron-egg',
+      env: 'prod',
+      port: 7068,
+      workers: 1
     }
   }
 
