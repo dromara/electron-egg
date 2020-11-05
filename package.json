@@ -1,6 +1,6 @@
 {
   "name": "electron-egg",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -8,7 +8,10 @@
     "dev": "electron . --env=local",
     "build-w": "electron-builder -w",
     "build-m": "electron-builder -m",
-    "build-l": "electron-builder -l"
+    "build-l": "electron-builder -l",
+    "web-start": "egg-scripts start --daemon --title=electron-egg --ignore-stderr --env=prod --workers=1",
+    "web-stop": "egg-scripts stop --title=electron-egg",
+    "web-dev": "egg-bin dev"
   },
   "build": {
     "productName": "electron-egg",
@@ -101,6 +104,7 @@
     "egg": "^2.15.1",
     "egg-cors": "^2.2.0",
     "egg-jwt": "^3.1.6",
+    "egg-scripts": "^2.13.0",
     "egg-view-ejs": "^2.0.0",
     "electron-log": "^4.2.2",
     "electron-store": "^6.0.1",
@@ -108,7 +112,6 @@
     "get-port": "^5.1.1",
     "glob": "^7.1.6",
     "lodash": "^4.17.11",
-    "keyv": "^3.1.0",
     "semver": "^5.4.1"
   }
 }
