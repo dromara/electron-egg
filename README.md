@@ -32,14 +32,27 @@
     ```
     # 开发者模式
     npm run dev
+
     # 生产者模式
     npm run start
-    # 打包 （windows版本）
+
+    # 打包-windows版本
     npm run build-w
-    # 打包 （mac版本）
+
+    # 打包-mac版本
     npm run build-m
-    # 打包 （linux版本）
+
+    # 打包-linux版本
     npm run build-l
+
+    # web运行-开发模式
+    npm run web-dev
+
+    # web运行-生产者模式-启动
+    npm run web-start
+
+    # web运行-生产者模式-停止
+    npm run web-stop
     ```
 
 ## 项目案例
