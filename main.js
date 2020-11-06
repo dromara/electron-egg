@@ -2,18 +2,19 @@ const {app, BrowserWindow, Menu, shell} = require('electron')
 const path = require('path')
 const getPort = require('get-port')
 const eggLauncher = require('./electron/lanucher')
-const setup = require('./electron/index')
+const setup = require('./electron/setup')
 const config = require('./electron/config').get()
 
 setup()
 
+//return
 // 主窗口
 global.MAIN_WINDOW = null
 
 for (let i = 0; i < process.argv.length; i++) {
-  const tmpArgv = process.argv[i];
+  const tmpArgv = process.argv[i]
   if (tmpArgv.indexOf('--env=') !== -1) {
-    config.egg.env = tmpArgv.substr(6);
+    config.egg.env = tmpArgv.substr(6)
   }
 }
 
@@ -21,8 +22,8 @@ if (process.mas) app.setName('electron-egg')
 
 app.on('web-contents-created', (e, webContents) => {
     webContents.on('new-window', (event, url) => {
-        event.preventDefault();
-        shell.openExternal(url);
+        event.preventDefault()
+        shell.openExternal(url)
     });
 });
 
@@ -46,15 +47,15 @@ async function createWindow () {
     startServer(config.egg)
   }, 100)
 
-  return MAIN_WINDOW;
+  return MAIN_WINDOW
 }
 
 async function startServer (options) {
-  let startRes = null;
+  let startRes = null
   options.port = await getPort({port: options.port})
-  ELog.info('config.egg', options);
+  ELog.info('config.egg', options)
   startRes = await eggLauncher.start(options).then((res) => res, (err) => err)
-  ELog.info('startRes:', startRes);
+  ELog.info('startRes:', startRes)
   if (startRes === 'success') {
     let url = 'http://localhost:' + options.port
     MAIN_WINDOW.loadURL(url)
@@ -65,7 +66,6 @@ async function startServer (options) {
 } 
 
 async function initialize () {
-  // loadFiles()
   app.whenReady().then(() => {
     createWindow()
     app.on('activate', function () {

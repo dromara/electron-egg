@@ -56,20 +56,12 @@ exports.start = function (argv) {
     });
 };
 
-exports.stop = function () {
-    return true;
-};
-
-exports.setup = function () {
-  return true;
-};
-
 function stringify(obj, ignore) {
-    const result = {};
-    Object.keys(obj).forEach(key => {
-      if (!ignore.includes(key)) {
-        result[key] = obj[key];
-      }
-    });
-    return JSON.stringify(result);
+  const result = {};
+  Object.keys(obj).forEach(key => {
+    if (!ignore.includes(key)) {
+      result[key] = obj[key];
+    }
+  });
+  return JSON.stringify(result);
 }
