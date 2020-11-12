@@ -45,11 +45,10 @@ class AppBootHook {
       utils.chmodPath(storageDir, '777');
     }
     const file = storageDir + 'db.json';
-    // utils.chmodPath(file);
     const adapter = new FileSync(file);
     const db = lowdb(adapter);
-    if (!db.has('kv').value()) {
-      db.set('kv', {}).write();
+    if (!db.has('default').value()) {
+      db.set('default', {}).write();
     }
   }
 
