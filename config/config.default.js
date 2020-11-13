@@ -2,7 +2,7 @@
 
 'use strict';
 const path = require('path');
-const electronEggConfig = require('../electron/config').get('web-egg');
+const electronEggConfig = require('../electron/config').get('webEgg');
 
 /**
  * @param {Egg.EggAppInfo} appInfo app info
@@ -91,14 +91,8 @@ module.exports = appInfo => {
   };
 
   config.ejs = {};
-  //getPort();
   return {
     ...config,
     ...userConfig,
   };
 };
-
-// function getPort () {
-//   const dbFile = path.normalize('./storage/db.json');
-//   console.log('dbFile:', dbFile);
-// }

@@ -4,13 +4,14 @@ const eggLauncher = require('./electron/lanucher')
 const setup = require('./electron/setup')
 const electronConfig = require('./electron/config')
 const storage = require('./electron/storage')
+const autoUpdater = require('./electron/autoUpdater')
+
+// main window
+global.MAIN_WINDOW = null
 
 // Initialize 
 setup()
 // return
-
-// main window
-global.MAIN_WINDOW = null
 
 if (process.mas) app.setName('electron-egg')
 
@@ -73,6 +74,12 @@ async function createWindow () {
     startServer(eggConfig)
   }, 100)
 
+  // check update
+  const updateConfig = electronConfig.get('autoUpdate')
+  if (updateConfig.enable) {
+    autoUpdater.checkUpdate()
+  }
+
   return MAIN_WINDOW
 }
 
@@ -80,7 +87,7 @@ async function startServer (options) {
   let startRes = null
   ELog.info('[main] [startServer] options', options)
   startRes = await eggLauncher.start(options).then((res) => res, (err) => err)
-  ELog.info('startRes:', startRes)
+  ELog.info('[main] [startServer] startRes:', startRes)
   if (startRes === 'success') {
     let url = 'http://localhost:' + options.port
     MAIN_WINDOW.loadURL(url)

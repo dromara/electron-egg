@@ -32,11 +32,18 @@ const config = {
     port: 7068,
     hostname: '0.0.0.0',
     workers: 1
+  },
+  autoUpdate: {
+    enable: true,
+    options: {
+      provider: 'generic', // or github, s3, bintray
+      url: '' // resource dir
+    }
   }
 }
 
 exports.get = function (flag = '') {
-  console.log('config flag:', flag);
+  console.log('[config] [get] flag:', flag);
   if (flag === 'log') {
     return config.log;
   }
@@ -45,18 +52,20 @@ exports.get = function (flag = '') {
     return config.windowsOption;
   }
 
-  if (flag === 'web-egg') {
+  if (flag === 'webEgg') {
     return config.egg;
   }
-
+  
   if (flag === 'egg') {
     const eggConfig = storage.getEggConfig();
-    console.log('eggConfig:', eggConfig);
     if (eggConfig.port) {
-      console.log('eggConfig.port:', eggConfig.port);
       config.egg.port = eggConfig.port;
     }
     return config.egg;
+  }
+
+  if (flag === 'autoUpdate') {
+    return config.autoUpdate;
   }
   
   return {};

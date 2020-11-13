@@ -50,8 +50,8 @@ exports.getEggConfig = function () {
 };
 
 exports.setDynamicPort = async function () {
-  const eggConfig = config.get('egg');
-  console.log('setDynamicPort eggConfig:', eggConfig);
+  // const eggConfig = config.get('egg');
+  // console.log('setDynamicPort eggConfig:', eggConfig);
   // const dynamicPort = await getPort({port: eggConfig.port})
   const dynamicPort = await getPort();
   const res = this.instance()

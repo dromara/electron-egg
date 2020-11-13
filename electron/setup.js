@@ -3,10 +3,12 @@
 global.ELog = require('electron-log');
 const storage = require('./storage');
 const config = require('./config');
+const autoUpdater = require('./autoUpdater');
 
 module.exports = () => {
   storage.setup();
   logger();
+  autoUpdater.setup();
 }
 
 function logger () {
