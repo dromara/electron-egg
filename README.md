@@ -61,13 +61,8 @@
 ![](https://i.loli.net/2020/11/02/ByFDKeY6nmdxGoc.png)
 [体验web版本和客户端版](http://b.kaka996.com/)
 
-注：# 联系作者（邮箱：530353222@qq.com）展示你的项目
-
 ## 进行中功能
 1. 软件自动更新
-2. 数据本地存储
-3. mac版功能兼容
-4. 以web版运行
 
 ## 欢迎star
 
