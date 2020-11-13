@@ -2,7 +2,7 @@
 
 'use strict';
 const path = require('path');
-const electronConfig = require('../electron/config').get()
+const electronEggConfig = require('../electron/config').get('web-egg');
 
 /**
  * @param {Egg.EggAppInfo} appInfo app info
@@ -27,8 +27,8 @@ module.exports = appInfo => {
 
   config.cluster = {
     listen: {
-      port: electronConfig.egg.port || 7068,
-      hostname: electronConfig.egg.hostname || '0.0.0.0',
+      port: electronEggConfig.port || 7068,
+      hostname: electronEggConfig.hostname || '0.0.0.0',
       // path: '/var/run/egg.sock',
     },
   };
@@ -91,9 +91,14 @@ module.exports = appInfo => {
   };
 
   config.ejs = {};
-
+  //getPort();
   return {
     ...config,
     ...userConfig,
   };
 };
+
+// function getPort () {
+//   const dbFile = path.normalize('./storage/db.json');
+//   console.log('dbFile:', dbFile);
+// }

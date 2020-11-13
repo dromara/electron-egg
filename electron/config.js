@@ -2,6 +2,7 @@
 
 const path = require('path');
 const dayjs = require('dayjs');
+const storage = require('./storage');
 
 const config = {
   log: {
@@ -34,8 +35,31 @@ const config = {
   }
 }
 
-exports.get = function () {
-  return config;
+exports.get = function (flag = '') {
+  console.log('config flag:', flag);
+  if (flag === 'log') {
+    return config.log;
+  }
+
+  if (flag === 'windowsOption') {
+    return config.windowsOption;
+  }
+
+  if (flag === 'web-egg') {
+    return config.egg;
+  }
+
+  if (flag === 'egg') {
+    const eggConfig = storage.getEggConfig();
+    console.log('eggConfig:', eggConfig);
+    if (eggConfig.port) {
+      console.log('eggConfig.port:', eggConfig.port);
+      config.egg.port = eggConfig.port;
+    }
+    return config.egg;
+  }
+  
+  return {};
 };
 
 exports = module.exports;

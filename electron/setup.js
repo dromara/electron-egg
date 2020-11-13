@@ -1,14 +1,16 @@
 'use strict';
 
-global.ELog = require('electron-log')
-const config = require('./config')
+global.ELog = require('electron-log');
+const storage = require('./storage');
+const config = require('./config');
 
 module.exports = () => {
+  storage.setup();
   logger();
 }
 
 function logger () {
-  let logConfig = config.get().log;
+  let logConfig = config.get('log');
   for (let transport in logConfig) {
     const configInfo = logConfig[transport];
     if (transport === 'file') {
