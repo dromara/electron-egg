@@ -34,7 +34,7 @@ const config = {
     workers: 1
   },
   autoUpdate: {
-    enable: true,
+    enable: false,
     options: {
       provider: 'generic', // or github, s3, bintray
       url: '' // resource dir

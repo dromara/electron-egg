@@ -6,7 +6,6 @@ const FileSync = require('lowdb/adapters/FileSync');
 const fs = require('fs');
 const getPort = require('get-port');
 const utils = require('../app/utils/utils');
-const config = require('./config');
 
 const storageDir = path.normalize('./storage/');
 
