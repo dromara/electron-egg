@@ -1,7 +1,7 @@
 # electron-egg
-一个快速、功能丰富的桌面软件开发框架，基于electron和egg.js
+一个简单、快速、功能丰富的桌面软件开发框架，基于electron和egg.js
 
-[官网: http://b.kaka996.com/](http://b.kaka996.com/#/feed)
+[官网: http://b.kaka996.com/](http://b.kaka996.com/)
 
 [文档迁移到了羽雀](https://www.yuque.com/u34495/mivcfg/xnhmms)
 
@@ -56,11 +56,14 @@
     npm run web-stop
     ```
 
-## 项目案例
+## 项目demo
 
-1. 网址管理大师
+1. 网址管理大师(开源)
 ![](https://i.loli.net/2020/11/02/ByFDKeY6nmdxGoc.png)
-[体验web版本和客户端版](http://b.kaka996.com/)
+    [地址](https://gitee.com/wallace5303/box)
+
+## 交流
+1. qq群：735532437
 
 ## 进行中功能
 1. 软件自动更新(已完成)
