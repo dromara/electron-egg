@@ -37,7 +37,7 @@ const config = {
     enable: false,
     options: {
       provider: 'generic', // or github, s3, bintray
-      url: '' // resource dir
+      url: 'https://raw.githubusercontent.com/wallace5303/electron-egg/master/' // resource dir
     }
   }
 }
