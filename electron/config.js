@@ -21,7 +21,7 @@ const config = {
     webPreferences: {
       //webSecurity: false,
       nodeIntegration: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, '../preload.js')
     },
     //frame: false,
     //titleBarStyle: 'hidden'
