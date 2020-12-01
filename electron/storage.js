@@ -10,6 +10,8 @@ const utils = require('../app/utils/utils');
 const storageDir = path.normalize('./storage/');
 
 exports.setup = function () {
+  // const userDataDir = app.getPath('userData');
+  // const storageDir = path.normalize(path.join(userDataDir, 'storage'));
   if (!fs.existsSync(storageDir)) {
     utils.mkdir(storageDir);
     utils.chmodPath(storageDir, '777');
