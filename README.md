@@ -58,7 +58,7 @@
 
 ## 项目demo
 
-1. 网站助手(开源)
+1. [网站助手-已开源](https://gitee.com/wallace5303/website-assistant)
 ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/js.gif)
 ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/json.gif)
 
