@@ -58,9 +58,11 @@
 
 ## 项目demo
 
-1. 网址管理大师(开源)
-![](https://i.loli.net/2020/11/02/ByFDKeY6nmdxGoc.png)
-    [地址](https://gitee.com/wallace5303/box)
+1. 网站助手(开源)
+![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/js.gif)
+![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/json.gif)
+
+    [地址](https://gitee.com/wallace5303/website-assistant)
 
 ## 交流
 1. qq群：735532437
