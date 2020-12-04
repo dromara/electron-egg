@@ -58,11 +58,11 @@
 
 ## 项目demo
 
-1. [网站助手-已开源](https://gitee.com/wallace5303/website-assistant)
+1. [网站助手-已开源](https://gitee.com/wallace5303/aweb-helper)
 ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/js.gif)
 ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/json.gif)
 
-    [地址](https://gitee.com/wallace5303/website-assistant)
+    [地址](https://gitee.com/wallace5303/aweb-helper)
 
 ## 交流
 1. qq群：735532437
