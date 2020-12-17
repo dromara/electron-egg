@@ -5,15 +5,9 @@
       theme="dark"
     >
       <div class="logo"></div>
-      <a-menu theme="dark" mode="inline" :default-selected-keys="['1']">
-        <a-menu-item class="menu-item" key="1">
-          <a-icon type="home" />
-        </a-menu-item>
-        <a-menu-item class="menu-item" key="2">
-          <a-icon type="appstore" />
-        </a-menu-item>
-        <a-menu-item class="menu-item" key="3">
-          <a-icon type="setting" />
+      <a-menu class="menu-item" theme="dark" mode="inline" @click="menuHandle" :default-selected-keys="['menu_1']">
+        <a-menu-item :key="index" v-for="(menuInfo, index) in menu" :title="menuInfo.title">
+          <a-icon :type="menuInfo.icon" />
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -21,18 +15,9 @@
       <a-layout-sider
         theme="light"
       >
-        <a-menu theme="light" mode="inline" :default-selected-keys="['1']">
-          <a-menu-item key="1">
-            <span class="nav-text">nav 1</span>
-          </a-menu-item>
-          <a-menu-item key="2">
-            <span class="nav-text">nav 2</span>
-          </a-menu-item>
-          <a-menu-item key="3">
-            <span class="nav-text">nav 3</span>
-          </a-menu-item>
-          <a-menu-item key="4">
-            <span class="nav-text">nav 4</span>
+        <a-menu class="sub-menu-item" theme="light" mode="inline" v-model="subMenuKey" :default-selected-keys="subMenuKey">
+          <a-menu-item :key="subIndex" v-for="(menuInfo, subIndex) in subMenu">
+            <span class="nav-text">{{ menuInfo.title }}</span>
           </a-menu-item>
         </a-menu>
       </a-layout-sider>
@@ -50,9 +35,55 @@ export default {
   data() {
     return {
       collapsed: true,
+      menu: {
+        'menu_1' : {
+          icon: 'home',
+          title: ''
+        },
+        'menu_2' : {
+          icon: 'setting',
+          title: ''
+        },
+      },
+      menuKey: 'menu_1',
+      subMenuKey: ['subMenu_1'],
+      subMenu: {},
+      subMenuList: {
+        'menu_1' : {
+          'subMenu_1' : {
+            title: 'home菜单1',
+            page: ''
+          },
+          'subMenu_2' : {
+            title: 'home菜单2',
+            page: ''
+          },
+        },
+        'menu_2' : {
+          'subMenu_1' : {
+            title: 'setting菜单1',
+            page: ''
+          },
+          'subMenu_2' : {
+            title: 'setting菜单2',
+            page: ''
+          },
+        },
+      },
+      contentPage: ''
     };
   },
+  mounted () {
+    this.menuHandle({key: 'menu_1'})
+  },
   methods: {
+    menuHandle (item) {
+      this.subMenu = this.subMenuList[item.key]
+      this.subMenuKey = ['subMenu_1']
+    },
+    subMenuHandle (index) {
+      console.log('sub menu key:', index)
+    }
   },
 };
 </script>
@@ -63,8 +94,17 @@ export default {
   background: rgba(139, 137, 137, 0.2);
   margin: 16px;
 }
-#components-layout-demo-responsive .menu-item {
+#components-layout-demo-responsive .menu-item .ant-menu-item {
   background-color: #001529;
+}
+#components-layout-demo-responsive .sub-menu-item .ant-menu-item::after {
+  border-right: 3px solid #F2F2F2;
+}
+#components-layout-demo-responsive .sub-menu-item .ant-menu-item-selected {
+  background-color:#F2F2F2;
+  span {
+    color: #111;
+  }
 }
 
 // /deep/ .ant-menu-item a {
