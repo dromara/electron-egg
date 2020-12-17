@@ -17,13 +17,15 @@
       >
         <a-menu class="sub-menu-item" theme="light" mode="inline" v-model="subMenuKey" :default-selected-keys="subMenuKey">
           <a-menu-item :key="subIndex" v-for="(menuInfo, subIndex) in subMenu">
-            <span class="nav-text">{{ menuInfo.title }}</span>
+            <router-link :to="{ path: menuInfo.page }">
+              <span>{{ menuInfo.title }}</span>
+            </router-link>
           </a-menu-item>
         </a-menu>
       </a-layout-sider>
       <a-layout-content :style="{ margin: '24px 16px 0' }">
         <div :style="{ padding: '24px', background: '#fff', minHeight: '360px' }">
-          content
+          <router-view />
         </div>
       </a-layout-content>
     </a-layout>
@@ -52,11 +54,11 @@ export default {
         'menu_1' : {
           'subMenu_1' : {
             title: 'home菜单1',
-            page: ''
+            page: '/testa'
           },
           'subMenu_2' : {
             title: 'home菜单2',
-            page: ''
+            page: '/testb'
           },
         },
         'menu_2' : {
