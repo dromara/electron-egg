@@ -13,6 +13,12 @@
 5. 桌面软件常见功能，后续逐步集成并完善或提供demo。
 6. 软件自动更新。
 
+## 默认UI
+
+- 使用vue编写，经典三栏样式
+
+![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/electron-egg-ui-1.png)
+
 ## 开始使用
 
 1. 下载
@@ -59,10 +65,10 @@
 ## 项目demo
 
 1. [网站助手-已开源](https://gitee.com/wallace5303/aweb-helper)
+
+    web版&客户端
 ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/js.gif)
 ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/json.gif)
-
-    [地址](https://gitee.com/wallace5303/aweb-helper)
 
 ## 交流
 1. qq群：735532437
