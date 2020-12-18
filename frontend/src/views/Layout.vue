@@ -54,21 +54,21 @@ export default {
       subMenuList: {
         'menu_1' : {
           'subMenu_1' : {
-            title: 'home菜单1',
+            title: '首页菜单1',
             page: '/testa'
           },
           'subMenu_2' : {
-            title: 'home菜单2',
+            title: '首页菜单2',
             page: '/testb'
           },
         },
         'menu_2' : {
           'subMenu_1' : {
-            title: 'setting菜单1',
+            title: '设置菜单1',
             page: '/testc/testc'
           },
           'subMenu_2' : {
-            title: 'setting菜单2',
+            title: '设置菜单2',
             page: '/testd'
           },
         },
@@ -83,10 +83,9 @@ export default {
     menuHandle (item) {
       this.subMenu = this.subMenuList[item.key]
       this.subMenuKey = ['subMenu_1']
+      const linkPage = this.subMenu['subMenu_1']['page']
+      this.$router.push(linkPage)
     },
-    subMenuHandle (index) {
-      console.log('sub menu key:', index)
-    }
   },
 };
 </script>
