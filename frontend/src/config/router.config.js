@@ -10,12 +10,12 @@ export const constantRouterMap = [
         {
           path: 'testc',
           name: 'testc',
-          component: { template: '<div>ccc</div>' }
+          component: { template: '<div>这是设置内一</div>' }
         },
         {
           path: '/testd',
           name: 'testd',
-          component: { template: '<div>ddd</div>' }
+          component: { template: '<div>这是设置内二</div>' }
         }
       ]
     },

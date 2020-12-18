@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h1>aaaaa</h1>
+    <h1>这是首页内一</h1>
   </div>
 </template>
 
