@@ -32,6 +32,8 @@
 2. 启动
     ```
     # 进入目录 ./electron-egg/
+    # 提升安装速度，使用国内镜像
+    npm config set registry https://registry.npm.taobao.org
     npm install
     npm run dev
     ```
