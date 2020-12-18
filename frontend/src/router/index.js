@@ -11,18 +11,6 @@ Router.prototype.push = function push (location, onResolve, onReject) {
 
 Vue.use(Router)
 
-// const Foo = { template: '<div>foo</div>' }
-// const Bar = { template: '<div>bar</div>' }
-// const constantRouterMap = [
-//     { path: '/testa', component: Foo },
-//     { path: '/testb', component: Bar }
-// ]
-
-// const constantRouterMap = [
-
-//     { path: '/testb', component: () => import('@/views/Contentb') }
-//   ]
-
 export default new Router({
   mode: 'history',
   routes: constantRouterMap

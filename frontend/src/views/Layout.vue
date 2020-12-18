@@ -2,10 +2,11 @@
   <a-layout id="components-layout-demo-responsive">
     <a-layout-sider
       v-model="collapsed"
-      theme="dark"
+      theme="light"
+      class="layout-sider"
     >
-      <div class="logo"></div>
-      <a-menu class="menu-item" theme="dark" mode="inline" @click="menuHandle" :default-selected-keys="['menu_1']">
+      <div class="logo"><img class="pic-logo" src="~@/assets/logo.png"></div>
+      <a-menu class="menu-item" theme="light" mode="inline" @click="menuHandle" :default-selected-keys="['menu_1']">
         <a-menu-item :key="index" v-for="(menuInfo, index) in menu" :title="menuInfo.title">
           <a-icon :type="menuInfo.icon" />
         </a-menu-item>
@@ -14,7 +15,7 @@
     <a-layout>
       <a-layout-sider
         theme="light"
-        style="background-color: #FAFAFA;"
+        class="sub-layout-sider"
       >
         <a-menu class="sub-menu-item" theme="light" mode="inline" v-model="subMenuKey" :default-selected-keys="subMenuKey">
           <a-menu-item :key="subIndex" v-for="(menuInfo, subIndex) in subMenu">
@@ -94,16 +95,25 @@ export default {
 // 嵌套
 #components-layout-demo-responsive {
   .logo {
+    border-bottom: 1px solid #e8e8e8;
+  }
+  .pic-logo {
     height: 32px;
-    background: rgba(139, 137, 137, 0.2);
-    margin: 16px;
-  }  
+    //background: rgba(139, 137, 137, 0.2);
+    margin: 10px;
+  }
+  .layout-sider {
+    border-right: 1px solid #e8e8e8;
+  }
   .menu-item {
     .ant-menu-item {
-      background-color: #001529;
+      background-color: #fff;
       margin-top: 0px;
       margin-bottom: 0px;
     }
+  }
+  .sub-layout-sider {
+    background-color: #FAFAFA;
   }
   .sub-menu-item {
     .ant-menu-item {
