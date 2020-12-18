@@ -64,11 +64,11 @@ export default {
         'menu_2' : {
           'subMenu_1' : {
             title: 'setting菜单1',
-            page: ''
+            page: '/testc/testc'
           },
           'subMenu_2' : {
             title: 'setting菜单2',
-            page: ''
+            page: '/testd'
           },
         },
       },
