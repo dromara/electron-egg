@@ -6,10 +6,11 @@ const FileSync = require('lowdb/adapters/FileSync');
 const fs = require('fs');
 const getPort = require('get-port');
 const utils = require('../app/utils/utils');
-
-const storageDir = path.normalize('./storage/');
+const os = require('os');
+const storageDir = path.normalize(os.homedir() + '/electron-egg-storage/');
 
 exports.setup = function () {
+  // console.log('storageDir', storageDir);
   if (!fs.existsSync(storageDir)) {
     utils.mkdir(storageDir);
     utils.chmodPath(storageDir, '777');
@@ -27,7 +28,7 @@ exports.setup = function () {
 
 exports.instance = function (file = null) {
   if (!file) {
-      file = path.normalize('./storage/db.json');
+      file = path.normalize(storageDir +'db.json');
   }
   const isExist = fs.existsSync(file);
   if (!isExist) {
