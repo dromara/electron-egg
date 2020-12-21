@@ -14,13 +14,15 @@ setup()
 // return
 
 // argv
-const eggConfig = electronConfig.get('egg')
+let ENV = 'prod'
 for (let i = 0; i < process.argv.length; i++) {
   const tmpArgv = process.argv[i]
   if (tmpArgv.indexOf('--env=') !== -1) {
-    eggConfig.env = tmpArgv.substr(6)
+    ENV = tmpArgv.substr(6)
   }
 }
+const eggConfig = electronConfig.get('egg', ENV)
+eggConfig.env = ENV
 
 if (process.mas) app.setName('electron-egg')
 
@@ -60,10 +62,10 @@ async function createWindow () {
   if (eggConfig.env === 'prod') {
     // hidden menu
     Menu.setApplicationMenu(null)
-    
+
     // dynamic port
     await storage.setDynamicPort()
-    eggConfig.port = electronConfig.get('egg').port
+    eggConfig.port = electronConfig.get('egg', eggConfig.env).port
   }
 
   // loding page

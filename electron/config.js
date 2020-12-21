@@ -42,7 +42,7 @@ const config = {
   }
 }
 
-exports.get = function (flag = '') {
+exports.get = function (flag = '', env = 'prod') {
   console.log('[config] [get] flag:', flag);
   if (flag === 'log') {
     return config.log;
@@ -58,7 +58,7 @@ exports.get = function (flag = '') {
   
   if (flag === 'egg') {
     const eggConfig = storage.getEggConfig();
-    if (eggConfig.port) {
+    if (env === 'prod' && eggConfig.port) {
       config.egg.port = eggConfig.port;
     }
     return config.egg;
