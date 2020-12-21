@@ -13,6 +13,15 @@ global.MAIN_WINDOW = null
 setup()
 // return
 
+// argv
+const eggConfig = electronConfig.get('egg')
+for (let i = 0; i < process.argv.length; i++) {
+  const tmpArgv = process.argv[i]
+  if (tmpArgv.indexOf('--env=') !== -1) {
+    eggConfig.env = tmpArgv.substr(6)
+  }
+}
+
 if (process.mas) app.setName('electron-egg')
 
 // Open url with the default browser
@@ -24,10 +33,6 @@ app.on('web-contents-created', (e, webContents) => {
 });
 
 async function initialize () {
-
-  // dynamic port
-  await storage.setDynamicPort();
-  
   app.whenReady().then(() => {
     createWindow()
     app.on('activate', function () {
@@ -46,15 +51,6 @@ async function initialize () {
 }
 
 async function createWindow () {
-  // argv
-  const eggConfig = electronConfig.get('egg')
-  for (let i = 0; i < process.argv.length; i++) {
-    const tmpArgv = process.argv[i]
-    if (tmpArgv.indexOf('--env=') !== -1) {
-      eggConfig.env = tmpArgv.substr(6)
-    }
-  }
-
   MAIN_WINDOW = new BrowserWindow(electronConfig.get('windowsOption'))
   
   // if (process.platform === 'linux') {
@@ -64,6 +60,10 @@ async function createWindow () {
   if (eggConfig.env === 'prod') {
     // hidden menu
     Menu.setApplicationMenu(null)
+    
+    // dynamic port
+    await storage.setDynamicPort()
+    eggConfig.port = electronConfig.get('egg').port
   }
 
   // loding page
