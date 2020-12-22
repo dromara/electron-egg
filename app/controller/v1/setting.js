@@ -5,23 +5,25 @@ const BaseController = require('../base');
 class SettingController extends BaseController {
 
   async autoLaunchEnable() {
+    const self = this;
     const { ctx } = this;
 
     const data = {
       title: 'hello electron-egg'
     };
 
-    await ctx.render('index.ejs', data);
+    self.sendSuccess(data);
   }
   
   async autoLaunchDisable() {
+    const self = this;
     const { ctx } = this;
 
     const data = {
       title: 'hello'
     };
 
-    await ctx.render('hello.ejs', data);
+    self.sendSuccess(data);
   }
 }
 

@@ -13,4 +13,7 @@ module.exports = app => {
 
   // html
   router.get('/home', controller.v1.home.index);
+
+  // 引入其他路由
+  require('./setting')(app);
 };
