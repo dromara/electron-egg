@@ -15,5 +15,6 @@ module.exports = app => {
   router.get('/home', controller.v1.home.index);
 
   // 引入其他路由
+  require('./example')(app);
   require('./setting')(app);
 };

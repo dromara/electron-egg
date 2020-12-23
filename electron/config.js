@@ -39,10 +39,6 @@ const config = {
       provider: 'generic', // or github, s3, bintray
       url: 'https://raw.githubusercontent.com/wallace5303/electron-egg/master/' // resource dir
     }
-  },
-  electronApi: {
-    port: 7069,
-    hostname: '0.0.0.0',
   }
 }
 

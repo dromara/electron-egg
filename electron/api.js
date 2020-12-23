@@ -5,7 +5,6 @@ const path = require('path');
 const _ = require('lodash');
 const storage = require('./storage');
 
-
 const apis = {};
 
 exports.setup = async function () {
@@ -13,7 +12,7 @@ exports.setup = async function () {
   setApi();
 
   // use api server
-  let port = await storage.setApiDynamicPort();
+  let port = await storage.setIpcDynamicPort();
   console.log('api port:', port);
   const listen = 'localhost';
   port = port ? port : 7069;
@@ -80,11 +79,12 @@ function setApi() {
 };
 
 /**
- * get api method name for proteus-web
- * ex.) jsname='user' method='get' => 'userGet'
+ * get api method name
+ * ex.) jsname='user' method='get' => 'user.get'
  * @param {String} jsname
  * @param {String} method
  */
 function getApiName (jsname, method) {
-  return jsname + method.charAt(0).toUpperCase() + method.slice(1);
+  return jsname + '.' + method;
+  //return jsname + method.charAt(0).toUpperCase() + method.slice(1);
 };

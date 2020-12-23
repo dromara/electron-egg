@@ -6,6 +6,7 @@ const FileSync = require('lowdb/adapters/FileSync');
 const fs = require('fs');
 const getPort = require('get-port');
 const utils = require('../app/utils/utils');
+const storageKey = require('../app/const/storageKey');
 const os = require('os');
 const storageDir = path.normalize(os.homedir() + '/electron-egg-storage/');
 
@@ -18,9 +19,9 @@ exports.setup = function () {
   const file = storageDir + 'db.json';
   const adapter = new FileSync(file);
   const db = lowdb(adapter);
-
-  if (!db.has('egg_config').value()) {
-    db.set('egg_config', {}).write();
+  const eggConfigKey = storageKey.EGG_CONFIG;
+  if (!db.has(eggConfigKey).value()) {
+    db.set(eggConfigKey, {}).write();
   }
 
   return true;
@@ -42,8 +43,9 @@ exports.instance = function (file = null) {
 };
 
 exports.getEggConfig = function () {
+  const key = storageKey.EGG_CONFIG;
   const res = this.instance()
-  .get('egg_config')
+  .get(key)
   .value();
 
   return res;
@@ -54,17 +56,19 @@ exports.setDynamicPort = async function () {
   // console.log('setDynamicPort eggConfig:', eggConfig);
   // const dynamicPort = await getPort({port: eggConfig.port})
   const dynamicPort = await getPort();
+  const key = storageKey.EGG_CONFIG + '.port';
   const res = this.instance()
-    .set('egg_config.port', dynamicPort)
+    .set(key, dynamicPort)
     .write();
   
   return res;
 };
 
-exports.setApiDynamicPort = async function () {
+exports.setIpcDynamicPort = async function () {
+  const key = storageKey.ELECTRON_IPC + '.port';
   const dynamicPort = await getPort();
   this.instance()
-    .set('electron_api.port', dynamicPort)
+    .set(key, dynamicPort)
     .write();
   
   return dynamicPort;
