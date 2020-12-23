@@ -61,4 +61,13 @@ exports.setDynamicPort = async function () {
   return res;
 };
 
+exports.setApiDynamicPort = async function () {
+  const dynamicPort = await getPort();
+  this.instance()
+    .set('electron_api.port', dynamicPort)
+    .write();
+  
+  return dynamicPort;
+};
+
 exports = module.exports;

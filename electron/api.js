@@ -3,23 +3,24 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const _ = require('lodash');
+const storage = require('./storage');
+
 
 const apis = {};
 
-exports.setup = function () {
+exports.setup = async function () {
   ELog.info('[api] [setup]');
   setApi();
 
-  // use monitor server
-  const mConfig = {};
-  const listen = mConfig.listen || '0.0.0.0';
-  const port = 7069;
-  const timeout = 10000;
+  // use api server
+  let port = await storage.setApiDynamicPort();
+  console.log('api port:', port);
+  const listen = 'localhost';
+  port = port ? port : 7069;
 
   const server = http.createServer(function(req, res) {
-    ELog.info('[ Monitor ] command received', { method: req.method, url: req.url });
+    ELog.info('[ api ] command received', { method: req.method, url: req.url });
     if ((req.method === 'POST' && req.url === '/send')) {
-
       let body = '';
       req.setEncoding('utf8');
       req
@@ -35,7 +36,7 @@ exports.setup = function () {
           return res.end('request body parse failure.');
         }
         if (!apis[message.cmd]) {
-          ELog.info('[ Monitor ] invalid command called:', message.cmd);
+          ELog.info('[ api ] invalid command called:', message.cmd);
           res.statusCode = 404;
           return res.end('NG');
         }
@@ -43,7 +44,7 @@ exports.setup = function () {
         const start = Date.now();
         const data = apis[message.cmd]();
         const elapsed = Date.now() - start;
-        ELog.info(`monitor api [${message.cmd}] success. elapsed: ${elapsed}ms`, data);
+        ELog.info(`api [${message.cmd}] success. elapsed: ${elapsed}ms`, data);
         res.statusCode = 200;
         const result = {
           code: 0,
@@ -58,21 +59,21 @@ exports.setup = function () {
   });
 
   server.listen(port, listen, function() {
-    ELog.info('[ Monitor ] server is listening on', `${listen}:${port}`);
+    ELog.info('[ api ] server is listening on', `${listen}:${port}`);
   });  
 };
 
 function setApi() {
   const apiDir = path.normalize(__dirname + '/apis');
-  console.log('apiDir:', apiDir);
+  // console.log('apiDir:', apiDir);
   fs.readdirSync(apiDir).forEach(function(filename) {
     if (path.extname(filename) === '.js' && filename !== 'index.js') {
       const name = path.basename(filename, '.js');
-      //const file = apiDir + filename;
-      _.map(require(`./apis/${filename}`), function(fn, method) {
+      const fileObj = require(`./apis/${filename}`);
+      _.map(fileObj, function(fn, method) {
         let methodName = getApiName(name, method);
         apis[methodName] = fn;
-        ELog.info('[ Monitor ]', methodName);
+        // ELog.info('[ Monitor ]', methodName);
       });
     }
   });
