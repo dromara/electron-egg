@@ -33,7 +33,7 @@ class StorageService extends BaseService {
    * getElectronIPCPort
    */
   getElectronIPCPort() {
-    const key = storageKey.ELECTRON_IPC + 'port';
+    const key = storageKey.ELECTRON_IPC + '.port';
     const port = this.instance()
     .get(key)
     .value();

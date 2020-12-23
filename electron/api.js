@@ -8,17 +8,16 @@ const storage = require('./storage');
 const apis = {};
 
 exports.setup = async function () {
-  ELog.info('[api] [setup]');
   setApi();
 
   // use api server
   let port = await storage.setIpcDynamicPort();
-  console.log('api port:', port);
+  ELog.info('[api] [setup] dynamic port:', port);
   const listen = 'localhost';
   port = port ? port : 7069;
 
   const server = http.createServer(function(req, res) {
-    ELog.info('[ api ] command received', { method: req.method, url: req.url });
+    ELog.info('[ api ] [setup] command received', { method: req.method, url: req.url });
     if ((req.method === 'POST' && req.url === '/send')) {
       let body = '';
       req.setEncoding('utf8');
@@ -35,7 +34,7 @@ exports.setup = async function () {
           return res.end('request body parse failure.');
         }
         if (!apis[message.cmd]) {
-          ELog.info('[ api ] invalid command called:', message.cmd);
+          ELog.info('[ api ] [setup] invalid command called:', message.cmd);
           res.statusCode = 404;
           return res.end('NG');
         }
@@ -43,11 +42,11 @@ exports.setup = async function () {
         const start = Date.now();
         const data = apis[message.cmd]();
         const elapsed = Date.now() - start;
-        ELog.info(`api [${message.cmd}] success. elapsed: ${elapsed}ms`, data);
+        ELog.info(`[api] [setup] [${message.cmd}] success. elapsed: ${elapsed}ms`, data);
         res.statusCode = 200;
         const result = {
           code: 0,
-          data,
+          data: data,
         };
         res.end(JSON.stringify(result));
       });
@@ -58,7 +57,7 @@ exports.setup = async function () {
   });
 
   server.listen(port, listen, function() {
-    ELog.info('[ api ] server is listening on', `${listen}:${port}`);
+    ELog.info('[ api ] [setup] server is listening on', `${listen}:${port}`);
   });  
 };
 

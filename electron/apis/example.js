@@ -1,6 +1,7 @@
 'use strict';
 
-const {app} = require('electron');
+const path = require('path');
+const { app, shell } = require('electron');
 
 exports.getPath = function () {
   const dir = app.getAppPath();
@@ -9,11 +10,20 @@ exports.getPath = function () {
   return dir;
 }
 
-exports.openDir = function () {
-  const dir = app.getAppPath();
-  ELog.info('dir:', dir);
+exports.openDir = function (dir = 'D:/www/xing/electron-egg') { 
+  if (!dir) {
+    return false;
+  }
+  dir = getElectronPath(dir);
+  shell.openItem(dir);
 
-  return dir;
+  return true;
 }
 
-exports = module.exports;
+function getElectronPath (filepath) {
+  filepath = path.resolve(filepath);
+  filepath=filepath.replace("resources",""); 
+  filepath=filepath.replace("app.asar",""); 
+  filepath = path.normalize(filepath);
+  return filepath;
+};

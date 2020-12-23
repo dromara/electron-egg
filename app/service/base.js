@@ -11,18 +11,25 @@ class BaseService extends Service {
     if (!method) {
       return 'Method does not exist';
     }
-    const res = {};
+    let result = {
+      code: 0,
+      data: null
+    };
     const port = this.service.storage.getElectronIPCPort();
     const url  = 'localhost:' + port + '/send';
+
     try {
-      res = await request.post(url)
-        .send({ cmd: method, data: data });
-      console.log(res);
+      const response = await request.post(url)
+        .send({ cmd: method, data: data })
+        .set('accept', 'json');
+        
+        result = JSON.parse(response.text);  
     } catch (err) {
-      console.error(err);
+      ELog.error('[base] [ipcCall] request error:', err);
+      result.code = -10;
     }
 
-    return res;
+    return result;
   }
 }
 

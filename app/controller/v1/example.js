@@ -6,7 +6,7 @@ class ExampleController extends BaseController {
 
   async openLocalDir() {
     const self = this;
-    const { ctx } = this;
+    const { service } = this;
 
     const data = {
       title: 'example test'
