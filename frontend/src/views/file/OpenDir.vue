@@ -26,10 +26,6 @@ const data = [
     id: 'picture'
   },
   {
-    content: '【视频】目录',
-    id: 'video'
-  },
-  {
     content: '【文档】目录',
     id: 'doc'
   },

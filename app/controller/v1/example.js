@@ -1,6 +1,7 @@
 'use strict';
 
 const BaseController = require('../base'); 
+const os = require('os');
 
 class ExampleController extends BaseController {
 
@@ -13,19 +14,16 @@ class ExampleController extends BaseController {
     let dir = '';
     switch (id) {
       case 'download' :
-        dir = 'C:/Users/Public/Downloads';
+        dir = os.homedir() + '/Downloads';
         break;
       case 'picture' :
-        dir = 'C:/Users/Public/Pictures';
+        dir = os.homedir() + '/Pictures';
         break;    
-      case 'video' :
-        dir = 'C:/Users/Public/Videos';
-        break;
       case 'doc' :
-        dir = 'C:/Users/Public/Documents';
+        dir = os.homedir() + '/Documents';
         break;      
       case 'music' :
-        dir = 'C:/Users/Public/Music';
+        dir = os.homedir() + '/Music';
         break;    
     }
 
