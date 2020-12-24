@@ -56,17 +56,17 @@ export default {
         'menu_1' : {
           'subMenu_1' : {
             title: '打开文件夹',
-            page: '/file/openDir'
+            page: 'fileOpenDir'
           }
         },
         'menu_2' : {
           'subMenu_1' : {
             title: '设置菜单1',
-            page: '/testc/testc'
+            page: '/setting1'
           },
           'subMenu_2' : {
             title: '设置菜单2',
-            page: '/testd'
+            page: '/setting2'
           },
         },
       },

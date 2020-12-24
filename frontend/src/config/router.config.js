@@ -4,32 +4,24 @@
  */
 export const constantRouterMap = [
   {
-    path: '/file',
+    path: '/',
     component: { template: '<div><router-view /></div>' },
     children: [
       {
-        path: 'openDir',
+        path: 'fileOpenDir',
         name: 'FileOpenDir',
         component: () => import('@/views/file/OpenDir')
-      }
-    ]
-  },
-  {
-    path: '/testc',
-    component: { template: '<div><router-view /></div>' },
-    children: [
+      },
       {
-        path: 'testc',
-        name: 'testc',
+        path: 'setting1',
+        name: 'setting1',
         component: { template: '<div><h1>这是设置内一</h1></div>' }
       },
       {
-        path: '/testd',
-        name: 'testd',
+        path: 'setting2',
+        name: 'setting2',
         component: { template: '<div><h1>这是设置内二</h1></div>' }
-      }
+      },
     ]
-  },
-  { path: '/testa', component: () => import('@/views/Contenta') },
-  { path: '/testb', component: () => import('@/views/Contentb') }
+  }
 ]
