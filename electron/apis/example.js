@@ -20,7 +20,7 @@ exports.openDir = function (dir = '') {
 }
 
 function getElectronPath (filepath) {
-  filepath = path.resolve(filepath);
+  //filepath = path.resolve(filepath);
   filepath=filepath.replace("resources",""); 
   filepath=filepath.replace("app.asar",""); 
   filepath = path.normalize(filepath);

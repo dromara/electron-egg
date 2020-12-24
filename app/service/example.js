@@ -6,7 +6,7 @@ class ExampleService extends BaseService {
   async openLocalDir() {
     const self = this;
 
-    await self.ipcCall('example.openDir', 'a', 'b', 'c');
+    await self.ipcCall('example.openDir');
 
     return true;
   }
