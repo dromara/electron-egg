@@ -5,12 +5,11 @@ const { app, shell } = require('electron');
 
 exports.getPath = function () {
   const dir = app.getAppPath();
-  ELog.info('dir:', dir);
 
   return dir;
 }
 
-exports.openDir = function (dir = '') { 
+exports.openDir = function (dir = '') {
   if (!dir) {
     return false;
   }

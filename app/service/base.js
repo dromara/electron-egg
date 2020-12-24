@@ -7,28 +7,29 @@ class BaseService extends Service {
   /*
    * ipc call
    */
-  async ipcCall(method = '', data = {}) {
-    if (!method) {
-      return 'Method does not exist';
-    }
+  async ipcCall(method = '', ...params) {
     let result = {
       err: null,
       data: null
     };
+    if (!method) {
+      result.err = 'Method does not exist';
+      return result;
+    }
+
     const port = this.service.storage.getElectronIPCPort();
     const url  = 'localhost:' + port + '/send';
-
     try {
       const response = await request.post(url)
-        .send({ cmd: method, data: data })
+        .send({ cmd: method, params: params })
         .set('accept', 'json');
         
         result = JSON.parse(response.text);  
     } catch (err) {
-      ELog.error('[base] [ipcCall] request error:', err);
+      this.app.logger.error('[base] [ipcCall] request error:', err);
       result.err = 'request err';
     }
-    ELog.error('[base] [ipcCall] result:', result);
+    this.app.logger.info('[base] [ipcCall] result:', result);
 
     return result;
   }
