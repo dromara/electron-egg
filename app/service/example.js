@@ -3,10 +3,10 @@
 const BaseService = require('./base');
 
 class ExampleService extends BaseService {
-  async openLocalDir() {
+  async openLocalDir(dir) {
     const self = this;
 
-    await self.ipcCall('example.openDir');
+    await self.ipcCall('example.openDir', dir);
 
     return true;
   }

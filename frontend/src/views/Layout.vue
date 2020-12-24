@@ -55,13 +55,9 @@ export default {
       subMenuList: {
         'menu_1' : {
           'subMenu_1' : {
-            title: '首页菜单1',
-            page: '/testa'
-          },
-          'subMenu_2' : {
-            title: '首页菜单2',
-            page: '/testb'
-          },
+            title: '打开文件夹',
+            page: '/file/openDir'
+          }
         },
         'menu_2' : {
           'subMenu_1' : {
