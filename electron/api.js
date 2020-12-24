@@ -45,7 +45,7 @@ exports.setup = async function () {
         ELog.info(`[api] [setup] [${message.cmd}] success. elapsed: ${elapsed}ms`, data);
         res.statusCode = 200;
         const result = {
-          code: 0,
+          err: null,
           data: data,
         };
         res.end(JSON.stringify(result));

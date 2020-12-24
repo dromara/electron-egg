@@ -10,7 +10,7 @@ exports.getPath = function () {
   return dir;
 }
 
-exports.openDir = function (dir = 'D:/www/xing/electron-egg') { 
+exports.openDir = function (dir = '') { 
   if (!dir) {
     return false;
   }

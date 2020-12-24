@@ -12,7 +12,7 @@ class BaseService extends Service {
       return 'Method does not exist';
     }
     let result = {
-      code: 0,
+      err: null,
       data: null
     };
     const port = this.service.storage.getElectronIPCPort();
@@ -26,8 +26,9 @@ class BaseService extends Service {
         result = JSON.parse(response.text);  
     } catch (err) {
       ELog.error('[base] [ipcCall] request error:', err);
-      result.code = -10;
+      result.err = 'request err';
     }
+    ELog.error('[base] [ipcCall] result:', result);
 
     return result;
   }
