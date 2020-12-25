@@ -10,7 +10,7 @@ const lowdb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const utils = require('./app/utils/utils');
 const os = require('os');
-const storageDir = path.normalize(os.homedir() + '/electron-egg-storage/');
+const storageDir = path.normalize(os.userInfo().homedir + '/electron-egg-storage/');
 
 class AppBootHook {
   constructor(app) {

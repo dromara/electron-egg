@@ -8,7 +8,7 @@ const FileSync = require('lowdb/adapters/FileSync');
 const storageKey = require('../const/storageKey');
 const fs = require('fs');
 const os = require('os');
-const storageDir = path.normalize(os.homedir() + '/electron-egg-storage/');
+const storageDir = path.normalize(os.userInfo().homedir + '/electron-egg-storage/');
 
 class StorageService extends BaseService {
   /*
