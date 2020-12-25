@@ -15,9 +15,9 @@
 
 ## 默认UI
 
-- 使用vue编写，经典三栏样式
+- 使用vue编写，经典三栏样式，可自定义
 
-![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/electron-egg-ui-1.png)
+![](./build/img/home.png)
 
 ## 开始使用
 
