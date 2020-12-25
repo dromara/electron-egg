@@ -14,16 +14,16 @@ class ExampleController extends BaseController {
     let dir = '';
     switch (id) {
       case 'download' :
-        dir = os.homedir() + '/Downloads';
+        dir = os.userInfo().homedir + '/Downloads';
         break;
       case 'picture' :
-        dir = os.homedir() + '/Pictures';
+        dir = os.userInfo().homedir + '/Pictures';
         break;    
       case 'doc' :
-        dir = os.homedir() + '/Documents';
+        dir = os.userInfo().homedir + '/Documents';
         break;      
       case 'music' :
-        dir = os.homedir() + '/Music';
+        dir = os.userInfo().homedir + '/Music';
         break;    
     }
 
