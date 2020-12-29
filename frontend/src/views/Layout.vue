@@ -57,7 +57,11 @@ export default {
           'subMenu_1' : {
             title: '打开文件夹',
             page: 'fileOpenDir'
-          }
+          },
+          'subMenu_2' : {
+            title: '上传文件到sm图床',
+            page: 'uploadFile'
+          },
         },
         'menu_2' : {
           'subMenu_1' : {
