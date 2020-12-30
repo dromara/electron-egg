@@ -1,7 +1,7 @@
 <template>
   <div>
     <h3 :style="{ marginBottom: '16px' }">
-      demo 打开文件夹实现
+      demo1 打开文件夹实现
     </h3>
     <a-list bordered :data-source="data">
       <a-list-item @click="openDirectry(item.id)" slot="renderItem" slot-scope="item">
