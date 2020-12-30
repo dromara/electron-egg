@@ -3,7 +3,8 @@ import request from '@/utils/request'
 
 const mainApi = {
   outApi: '/v1/outApi',
-  openDir: '/v1/example/openLocalDir'
+  openDir: '/v1/example/openLocalDir',
+  uploadFile: '/v1/example/uploadFile',
 }
 
 /**
@@ -25,6 +26,17 @@ const mainApi = {
 export function openDir (parameter) {
   return request({
     url: mainApi.openDir,
+    method: 'post',
+    data: parameter
+  })
+}
+
+/**
+ * uploadFile
+ */
+export function uploadFile (parameter) {
+  return request({
+    url: mainApi.uploadFile,
     method: 'post',
     data: parameter
   })

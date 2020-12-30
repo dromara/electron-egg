@@ -13,6 +13,11 @@ export const constantRouterMap = [
         component: () => import('@/views/file/OpenDir')
       },
       {
+        path: 'uploadFile',
+        name: 'UploadFile',
+        component: () => import('@/views/file/UploadFile')
+      },
+      {
         path: 'setting1',
         name: 'setting1',
         component: { template: '<div><h1>这是设置内一</h1></div>' }
