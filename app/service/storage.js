@@ -41,6 +41,13 @@ class StorageService extends BaseService {
     return port;
   }
 
+  /*
+   * getStorageDir
+   */
+  getStorageDir() {
+    return storageDir;
+  }
+
 }
 
 module.exports = StorageService;
