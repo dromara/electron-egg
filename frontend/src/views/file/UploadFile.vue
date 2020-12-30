@@ -7,7 +7,7 @@
     <a-upload-dragger
         name="file"
         :multiple="true"
-        action="http://localhost:7068/api/v1/example/uploadFile"
+        :action="action_url"
         @change="handleChange"
     >
         <p class="ant-upload-drag-icon">
@@ -44,6 +44,7 @@
 export default {
   data() {
     return {
+      action_url: process.env.VUE_APP_API_BASE_URL + '/v1/example/uploadFile',
       image_info: [],
       num: 0
     };

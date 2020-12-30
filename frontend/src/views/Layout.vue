@@ -55,13 +55,13 @@ export default {
       subMenuList: {
         'menu_1' : {
           'subMenu_1' : {
-            title: '打开文件夹',
-            page: 'fileOpenDir'
-          },
-          'subMenu_2' : {
             title: '上传文件到sm图床',
             page: 'uploadFile'
           },
+          'subMenu_2' : {
+            title: '打开文件夹',
+            page: 'fileOpenDir'
+          }
         },
         'menu_2' : {
           'subMenu_1' : {

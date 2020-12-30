@@ -1,8 +1,6 @@
 'use strict';
 
 const BaseService = require('./base');
-const fs = require('fs');
-const path = require('path');
 
 class ExampleService extends BaseService {
   async openLocalDir(dir) {
@@ -13,41 +11,6 @@ class ExampleService extends BaseService {
     return true;
   }
 
-  async getSMMSToken() {
-    const res = {
-      code: 1000,
-      message: 'unknown error',
-    };
-
-    try {
-      //throw new Error('Sync Error');
-      params = {
-        username: '',
-        password: ''
-      };
-      const url = 'https://sm.ms/api/v2/token';
-      const response = await this.app.curl(url, {
-        method: 'POST',
-        contentType: 'application/json',
-        data: params,
-        dataType: 'json',
-        timeout: 15000,
-      });
-      const result = response.data;
-      if (this.app.config.env === 'local') {
-        this.app.logger.info('[ExampleService] [getSMMSToken]: info result:%j', result);
-      }
-      // this.app.logger.info('[OutapiService] [api]: result:%j', result);
-      if (result.code !== 'success') {
-        this.app.logger.error('[ExampleService] [getSMMSToken]: res error result:%j', result);
-      }
-      return result;
-    } catch (e) {
-      this.app.logger.error('[ExampleService] [getSMMSToken]:  ERROR ', e);
-    }
-
-    return res;
-  }
   async uploadFileToSMMS(tmpFile) {
     const res = {
       code: 1000,
@@ -67,8 +30,6 @@ class ExampleService extends BaseService {
         files: {
           smfile: tmpFile,
         },
-        //contentType: 'application/json',
-        //data: params,
         dataType: 'json',
         timeout: 15000,
       });
