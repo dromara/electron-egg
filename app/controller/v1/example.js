@@ -51,7 +51,7 @@ class ExampleController extends BaseController {
     //   const uploadRes = await service.example.uploadFileToSMMS(fileStream);
     // }
     const file = ctx.request.files[0];
-    this.app.logger.info('file:', file);
+    //this.app.logger.info('file:', file);
 
     try {
       let tmpFile = fs.readFileSync(file.filepath) 

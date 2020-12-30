@@ -6,7 +6,9 @@
 module.exports = app => {
   const { router, controller } = app;
   // open launch
-  router.get('/api/v1/setting/autoLaunchEnable', controller.v1.setting.autoLaunchEnable);
+  router.post('/api/v1/setting/autoLaunchEnable', controller.v1.setting.autoLaunchEnable);
   // close launch 
-  router.get('/api/v1/setting/autoLaunchDisable', controller.v1.setting.autoLaunchDisable);
+  router.post('/api/v1/setting/autoLaunchDisable', controller.v1.setting.autoLaunchDisable);
+  // is launch 
+  router.post('/api/v1/setting/autoLaunchIsEnabled', controller.v1.setting.autoLaunchIsEnabled);
 };

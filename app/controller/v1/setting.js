@@ -5,25 +5,34 @@ const BaseController = require('../base');
 class SettingController extends BaseController {
 
   async autoLaunchEnable() {
-    const self = this;
-    const { ctx } = this;
+    const { service } = this;
+    const data = {};
 
-    const data = {
-      title: 'hello electron-egg'
-    };
+    await service.setting.autoLaunchEnable();
 
-    self.sendSuccess(data);
+    this.sendSuccess(data);
   }
   
   async autoLaunchDisable() {
-    const self = this;
-    const { ctx } = this;
+    const { service } = this;
+    const data = {};
+    
+    await service.setting.autoLaunchDisable();
+
+    this.sendSuccess(data);
+  }
+
+  async autoLaunchIsEnabled() {
+    const { service } = this;
 
     const data = {
-      title: 'hello'
+      isEnabled: null
     };
 
-    self.sendSuccess(data);
+    const isEnabled = await service.setting.autoLaunchIsEnabled();
+    data.isEnabled = isEnabled;
+
+    this.sendSuccess(data);
   }
 }
 
