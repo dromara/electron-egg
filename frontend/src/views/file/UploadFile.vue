@@ -44,7 +44,7 @@
 export default {
   data() {
     return {
-      action_url: process.env.VUE_APP_API_BASE_URL + '/v1/example/uploadFile',
+      action_url: process.env.VUE_APP_API_BASE_URL + '/api/v1/example/uploadFile',
       image_info: [],
       num: 0
     };

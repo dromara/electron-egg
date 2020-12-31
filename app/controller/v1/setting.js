@@ -6,18 +6,22 @@ class SettingController extends BaseController {
 
   async autoLaunchEnable() {
     const { service } = this;
-    const data = {};
 
     await service.setting.autoLaunchEnable();
+    const data = {
+      isEnabled: true
+    };
 
     this.sendSuccess(data);
   }
   
   async autoLaunchDisable() {
     const { service } = this;
-    const data = {};
     
     await service.setting.autoLaunchDisable();
+    const data = {
+      isEnabled: false
+    };
 
     this.sendSuccess(data);
   }

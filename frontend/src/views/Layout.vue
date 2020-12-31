@@ -65,13 +65,9 @@ export default {
         },
         'menu_2' : {
           'subMenu_1' : {
-            title: '设置菜单1',
-            page: '/setting1'
-          },
-          'subMenu_2' : {
-            title: '设置菜单2',
-            page: '/setting2'
-          },
+            title: '基础设置',
+            page: '/setting'
+          }
         },
       },
       contentPage: ''

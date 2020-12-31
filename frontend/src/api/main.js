@@ -2,9 +2,12 @@ import request from '@/utils/request'
 // import storage from 'store'
 
 const mainApi = {
-  outApi: '/v1/outApi',
-  openDir: '/v1/example/openLocalDir',
-  uploadFile: '/v1/example/uploadFile',
+  outApi: '/api/v1/outApi',
+  openDir: '/api/v1/example/openLocalDir',
+  uploadFile: '/api/v1/example/uploadFile',
+  autoLaunchEnable: '/api/v1/setting/autoLaunchEnable',
+  autoLaunchDisable: '/api/v1/setting/autoLaunchDisable',
+  autoLaunchIsEnabled: '/api/v1/setting/autoLaunchIsEnabled'
 }
 
 /**
@@ -37,6 +40,39 @@ export function openDir (parameter) {
 export function uploadFile (parameter) {
   return request({
     url: mainApi.uploadFile,
+    method: 'post',
+    data: parameter
+  })
+}
+
+/**
+ * autoLaunchEnable
+ */
+export function autoLaunchEnable (parameter) {
+  return request({
+    url: mainApi.autoLaunchEnable,
+    method: 'post',
+    data: parameter
+  })
+}
+
+/**
+ * autoLaunchDisable
+ */
+export function autoLaunchDisable (parameter) {
+  return request({
+    url: mainApi.autoLaunchDisable,
+    method: 'post',
+    data: parameter
+  })
+}
+
+/**
+ * autoLaunchIsEnabled
+ */
+export function autoLaunchIsEnabled (parameter) {
+  return request({
+    url: mainApi.autoLaunchIsEnabled,
     method: 'post',
     data: parameter
   })

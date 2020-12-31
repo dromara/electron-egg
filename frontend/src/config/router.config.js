@@ -18,15 +18,10 @@ export const constantRouterMap = [
         component: () => import('@/views/file/UploadFile')
       },
       {
-        path: 'setting1',
-        name: 'setting1',
-        component: { template: '<div><h1>这是设置内一</h1></div>' }
-      },
-      {
-        path: 'setting2',
-        name: 'setting2',
-        component: { template: '<div><h1>这是设置内二</h1></div>' }
-      },
+        path: 'setting',
+        name: 'setting',
+        component: () => import('@/views/Setting')
+      }
     ]
   }
 ]
