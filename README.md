@@ -1,9 +1,7 @@
 # electron-egg
 一个简单、快速、功能丰富的桌面软件开发框架，基于electron和egg.js
 
-[官网: http://b.kaka996.com/](http://b.kaka996.com/)
-
-[文档迁移到了羽雀](https://www.yuque.com/u34495/mivcfg/xnhmms)
+[教程文档](https://www.yuque.com/u34495/mivcfg/xnhmms)
 
 ## 特性
 1. 直接打包成windows版、Mac版、Linux版或者以web网站运行。
@@ -17,7 +15,8 @@
 
 - 使用vue编写，经典三栏样式，可自定义
 
-![](./build/img/home.png)
+![](./build/img/upload_pic.png)
+![](./build/img/open_dir.png)
 
 ## 开始使用
 
@@ -29,14 +28,14 @@
     git clone https://github.com/wallace5303/electron-egg.git
     ```
 
-2. 启动
+2. 安装
     ```
     # 进入目录 ./electron-egg/
     # 提升安装速度，使用国内镜像
     npm config set registry https://registry.npm.taobao.org
     npm install
-    npm run dev
     ```
+    
 3. 常用命令
     ```
     # 开发者模式
@@ -64,7 +63,7 @@
     npm run web-stop
     ```
 
-## 项目demo
+## 项目案例
 
 1. [网站助手-已开源](https://gitee.com/wallace5303/aweb-helper)
 
@@ -77,8 +76,16 @@
 2. 把一些常用或者重复的功能，做成桌面小工具，给自己或者别人用，确实省了不少时间^_^ 
 
 ## 进行中功能
-1. 软件自动更新(已完成)
-2. 默认UI(已完成)
+
+1. 软件自动更新（已完成）
+2. 数据本地存储（已完成）
+3. mac版功能兼容（已完成）
+4. 以web版运行（已完成）
+5. 默认UI（已完成）
+6. egg与electron通信（已完成）
+7. 打开文件功能demo（已完成）
+8. 上传文件到sm图床demo（已完成）
+9. 开发模式实时渲染页面（已完成）
 
 ## 欢迎star
 
