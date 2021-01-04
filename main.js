@@ -26,14 +26,6 @@ eggConfig.env = ENV
 
 if (process.mas) app.setName('electron-egg')
 
-// Open url with the default browser
-app.on('web-contents-created', (e, webContents) => {
-    webContents.on('new-window', (event, url) => {
-        event.preventDefault()
-        shell.openExternal(url)
-    });
-});
-
 async function initialize () {
   app.whenReady().then(() => {
     createWindow()
@@ -50,6 +42,14 @@ async function initialize () {
       app.quit()
     }
   })
+
+  // Open url with the default browser
+  // app.on('web-contents-created', (e, webContents) => {
+  //   webContents.on('new-window', (event, url) => {
+  //       event.preventDefault()
+  //       shell.openExternal(url)
+  //   });
+  // });
 }
 
 async function createWindow () {
@@ -72,9 +72,7 @@ async function createWindow () {
   MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/app/public/loading.html'))
   
   // egg server
-  setTimeout(function(){
-    startServer(eggConfig)
-  }, 100)
+  await startServer(eggConfig)
 
   // check update
   const updateConfig = electronConfig.get('autoUpdate')
@@ -86,16 +84,36 @@ async function createWindow () {
 }
 
 async function startServer (options) {
-  let startRes = null
   ELog.info('[main] [startServer] options', options)
+  const protocol = 'http://'
+  let startRes = null
+  let url = null
+  if (ENV === 'prod') {
+    url = protocol + options.hostname + ':' + options.port
+  } else {
+    const developmentModeConfig = electronConfig.get('developmentMode', ENV)
+    const selectMode = developmentModeConfig.default
+    const modeInfo = developmentModeConfig.mode[selectMode]
+    switch (selectMode) {
+      case 'vue' :
+        url = protocol + modeInfo.hostname + ':' + modeInfo.port
+        break
+      case 'react' :
+        url = protocol + modeInfo.hostname + ':' + modeInfo.port
+        break
+      case 'ejs' :
+        url = protocol + modeInfo.hostname + ':' + modeInfo.port
+        break
+    }
+  }
+  ELog.info('[main] [url]:', url)
   startRes = await eggLauncher.start(options).then((res) => res, (err) => err)
   ELog.info('[main] [startServer] startRes:', startRes)
   if (startRes === 'success') {
-    let url = 'http://localhost:' + options.port
     MAIN_WINDOW.loadURL(url)
-
     return true
   }
+  
   app.relaunch()
 }
 

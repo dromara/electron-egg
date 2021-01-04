@@ -5,6 +5,23 @@ const dayjs = require('dayjs');
 const storage = require('./storage');
 
 const config = {
+  developmentMode: {
+    default: 'vue',
+    mode: {
+      vue: {
+        hostname: 'localhost',
+        port: 8080
+      },
+      react: {
+        hostname: 'localhost',
+        port: 3000
+      },
+      ejs: {
+        hostname: 'localhost',
+        port: 7068 // The same as the egg port
+      }
+    }
+  },
   log: {
     file: {
       fileName: path.normalize('./logs/electron-' + dayjs().format('YYYY-MM-DD') + '.log'),
@@ -30,7 +47,7 @@ const config = {
     title: 'electron-egg',
     env: 'prod',
     port: 7068,
-    hostname: '0.0.0.0',
+    hostname: 'localhost',
     workers: 1
   },
   autoUpdate: {
@@ -44,6 +61,10 @@ const config = {
 
 exports.get = function (flag = '', env = 'prod') {
   console.log('[config] [get] flag:', flag);
+  if (flag === 'developmentMode') {
+    return config.developmentMode;
+  }
+
   if (flag === 'log') {
     return config.log;
   }
