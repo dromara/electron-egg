@@ -21,6 +21,16 @@ class HomeController extends BaseController {
       title: 'hello'
     };
 
+    this.sendSuccess(data);
+  }
+
+  async helloPage() {
+    const { ctx } = this;
+
+    const data = {
+      title: 'hello'
+    };
+
     await ctx.render('hello.ejs', data);
   }
 }
