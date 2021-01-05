@@ -1,5 +1,5 @@
 # electron-egg
-一个简单、快速、功能丰富的桌面软件开发框架，基于electron和egg.js
+一个简单、快速、功能丰富的跨平台桌面软件开发框架。
 
 [教程文档](https://www.yuque.com/u34495/mivcfg/xnhmms)
 
