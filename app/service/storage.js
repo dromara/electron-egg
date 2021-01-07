@@ -8,7 +8,9 @@ const FileSync = require('lowdb/adapters/FileSync');
 const storageKey = require('../const/storageKey');
 const fs = require('fs');
 const os = require('os');
-const storageDir = path.normalize(os.userInfo().homedir + '/electron-egg-storage/');
+const pkg = require('../../package.json');
+const storageDir = path.normalize(os.userInfo().homedir + '/' + pkg.name + '/');
+const storageDb = pkg.build.appId + '_db.json';
 
 class StorageService extends BaseService {
   /*
@@ -16,7 +18,7 @@ class StorageService extends BaseService {
    */
   instance(file = null) {
     if (!file) {
-        file = path.normalize(storageDir +'db.json');
+        file = path.normalize(storageDir + storageDb);
     }
     const isExist = fs.existsSync(file);
     if (!isExist) {

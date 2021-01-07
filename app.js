@@ -10,7 +10,9 @@ const lowdb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const utils = require('./app/utils/utils');
 const os = require('os');
-const storageDir = path.normalize(os.userInfo().homedir + '/electron-egg-storage/');
+const pkg = require('./package.json');
+const storageDir = path.normalize(os.userInfo().homedir + '/' + pkg.name + '/');
+const storageDb = pkg.build.appId + '_db.json';
 
 class AppBootHook {
   constructor(app) {
@@ -45,7 +47,7 @@ class AppBootHook {
       utils.mkdir(storageDir);
       utils.chmodPath(storageDir, '777');
     }
-    const file = storageDir + 'db.json';
+    const file = storageDir + storageDb;
     const adapter = new FileSync(file);
     const db = lowdb(adapter);
     if (!db.has('default').value()) {
