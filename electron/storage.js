@@ -10,7 +10,7 @@ const storageKey = require('../app/const/storageKey');
 const os = require('os');
 const pkg = require('../package.json');
 const storageDir = path.normalize(os.userInfo().homedir + '/' + pkg.name + '/');
-const storageDb = pkg.build.appId + '_db.json';
+const storageDb = 'db.json';
 
 exports.setup = function () {
   // console.log('storageDir', storageDir);

@@ -10,7 +10,7 @@ const fs = require('fs');
 const os = require('os');
 const pkg = require('../../package.json');
 const storageDir = path.normalize(os.userInfo().homedir + '/' + pkg.name + '/');
-const storageDb = pkg.build.appId + '_db.json';
+const storageDb = 'db.json';
 
 class StorageService extends BaseService {
   /*
