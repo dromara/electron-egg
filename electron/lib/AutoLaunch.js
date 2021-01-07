@@ -21,7 +21,6 @@ class AutoLaunch {
 
   isEnabled () {
     const enabled = app.getLoginItemSettings(LOGIN_SETTING_OPTIONS).openAtLogin;
-    console.log('AutoLaunch isEnabled:', enabled);
     return enabled;
   }
 }
