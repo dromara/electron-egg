@@ -25,6 +25,12 @@ class SocketService extends BaseService {
     });
   }
 
+  async getWsUrl () {
+    const port = this.service.storage.getElectronIPCPort();
+    const url  = 'http://localhost:' + port;
+
+    return url;
+  }
 }
 
 module.exports = SocketService;
