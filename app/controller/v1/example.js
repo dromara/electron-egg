@@ -64,6 +64,17 @@ class ExampleController extends BaseController {
 
     self.sendData(uploadRes);
   }
+
+  async getWsUrl() {
+    const self = this;
+    const { service } = this;
+    const data = {};
+
+    const addr = await service.socket.getWsUrl();
+    data.url = addr;
+
+    self.sendSuccess(data);
+  }
 }
 
 module.exports = ExampleController;
