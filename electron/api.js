@@ -4,6 +4,7 @@ const http = require('http');
 const path = require('path');
 const _ = require('lodash');
 const storage = require('./storage');
+const socketIo = require('socket.io');
 
 const apis = {};
 
@@ -55,6 +56,20 @@ exports.setup = async function () {
       res.statusCode = 404;
       res.end('NOT FOUND');
     }
+  });
+
+  // socket io
+  const io = socketIo(server);
+  io.on('connection', (socket) => {
+    socket.on('ipc', (message, callback) => {
+      ELog.info('[ api ] [setup] socket id:' + socket.id + ' message cmd: ' + message.cmd);
+      const data = apis[message.cmd](...message.params);
+      const result = {
+        err: null,
+        data: data,
+      };
+      callback(result);
+    });
   });
 
   server.listen(port, listen, function() {
