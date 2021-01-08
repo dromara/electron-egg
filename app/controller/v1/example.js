@@ -75,6 +75,53 @@ class ExampleController extends BaseController {
 
     self.sendSuccess(data);
   }
+
+  async addTestData() {
+    const self = this;
+    const { service } = this;
+    const data = {};
+
+    const userInfo = {
+      name: 'jame',
+      age: 18,
+      gender: 'man'
+    }
+    await service.storage.addTestData(userInfo);
+
+    self.sendSuccess(data);
+  }
+
+  async delTestData() {
+    const self = this;
+    const { service } = this;
+    const data = {};
+    const name = 'jame';
+    await service.storage.delTestData(name);
+
+    self.sendSuccess(data);
+  }
+
+  async updateTestData() {
+    const self = this;
+    const { service } = this;
+    const data = {};
+    const name = 'jame';
+    const age = 20;
+    await service.storage.updateTestData(name, age);
+
+    self.sendSuccess(data);
+  }
+
+  async getTestData() {
+    const self = this;
+    const { service } = this;
+    const data = {};
+    const name = 'jame';
+    const user = await service.storage.getTestData(name);
+    data.user = user;
+
+    self.sendSuccess(data);
+  }
 }
 
 module.exports = ExampleController;

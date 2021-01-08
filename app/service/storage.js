@@ -50,6 +50,62 @@ class StorageService extends BaseService {
     return storageDir;
   }
 
+  /*
+   * add Test data
+   */
+  async addTestData(user) {
+    const key = storageKey.TEST_DATA;
+    if (!this.instance().has(key).value()) {
+      this.instance().set(key, []).write();
+    }
+    
+    const data = this.instance()
+    .get(key)
+    .push(user)
+    .write();
+
+    return data;
+  }
+
+  /*
+   * del Test data
+   */
+  async delTestData(name = '') {
+    const key = storageKey.TEST_DATA;
+    const data = this.instance()
+    .get(key)
+    .remove({name: name})
+    .write();
+
+    return data;
+  }
+
+  /*
+   * update Test data
+   */
+  async updateTestData(name= '', age = 0) {
+    const key = storageKey.TEST_DATA;
+    const data = this.instance()
+    .get(key)
+    .find({name: name})
+    .assign({ age: age})
+    .write();
+
+    return data;
+  }
+
+  /*
+   * get Test data
+   */
+  async getTestData(name = '') {
+    const key = storageKey.TEST_DATA;
+    const data = this.instance()
+    .get(key)
+    .find({name: name})
+    .value();
+
+    return data;
+  }
 }
 
 module.exports = StorageService;
