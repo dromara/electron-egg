@@ -65,12 +65,7 @@
 
 ## 项目案例
 
-1. [免费手机号-云短信](https://kaka996.coding.net/p/resource/d/tx-resource2/git/raw/master/tmp-phone/tmp-phone_windows_1.3.0.exe)
-
-    [windows下载1.3.0](https://kaka996.coding.net/p/resource/d/tx-resource2/git/raw/master/tmp-phone/tmp-phone_windows_1.3.0.exe)
-    ![](./build/img/tmp-phone-home.png)
-
-2. [网站助手-已开源](https://gitee.com/wallace5303/aweb-helper)
+1. [网站助手-已开源](https://gitee.com/wallace5303/aweb-helper)
 
     web版&客户端
 ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/js.gif)
