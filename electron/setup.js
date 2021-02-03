@@ -3,13 +3,18 @@
 global.ELog = require('electron-log');
 const storage = require('./storage');
 const config = require('./config');
-// const autoUpdater = require('./autoUpdater');
+const is = require('electron-is');
 const api = require('./api');
 
 module.exports = () => {
   storage.setup();
   logger();
-  // autoUpdater.setup();
+  const updateConfig = config.get('autoUpdate');
+  if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
+    || (is.linux() && updateConfig.linux)) {
+    const autoUpdater = require('./autoUpdater');
+    autoUpdater.setup();
+  }
   api.setup();
 }
 

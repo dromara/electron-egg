@@ -1,10 +1,10 @@
-const {app, BrowserWindow, Menu, shell} = require('electron')
+const {app, BrowserWindow, Menu} = require('electron')
 const path = require('path')
 const eggLauncher = require('./electron/lanucher')
 const setup = require('./electron/setup')
 const electronConfig = require('./electron/config')
 const storage = require('./electron/storage')
-// const autoUpdater = require('./electron/autoUpdater')
+const is = require('electron-is')
 
 // main window
 global.MAIN_WINDOW = null
@@ -76,9 +76,10 @@ async function createWindow () {
 
   // check update
   const updateConfig = electronConfig.get('autoUpdate')
-  if (updateConfig.enable) {
-    // windows可以开启；macOs 需要签名验证
-    //autoUpdater.checkUpdate()
+  if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
+    || (is.linux() && updateConfig.linux)) {
+    const autoUpdater = require('./autoUpdater');
+    autoUpdater.checkUpdate();
   }
 
   return MAIN_WINDOW
