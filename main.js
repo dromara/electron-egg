@@ -78,7 +78,7 @@ async function createWindow () {
   const updateConfig = electronConfig.get('autoUpdate')
   if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
     || (is.linux() && updateConfig.linux)) {
-    const autoUpdater = require('./autoUpdater');
+    const autoUpdater = require('./electron/autoUpdater');
     autoUpdater.checkUpdate();
   }
 
