@@ -9,11 +9,10 @@ const utils = require('../app/utils/utils');
 const storageKey = require('../app/const/storageKey');
 const os = require('os');
 const pkg = require('../package.json');
-const storageDir = path.normalize(os.userInfo().homedir + '/' + pkg.name + '/');
 const storageDb = 'db.json';
 
 exports.setup = function () {
-  // console.log('storageDir', storageDir);
+  const storageDir = this.getStorageDir();
   if (!fs.existsSync(storageDir)) {
     utils.mkdir(storageDir);
     utils.chmodPath(storageDir, '777');
@@ -31,7 +30,8 @@ exports.setup = function () {
 
 exports.instance = function (file = null) {
   if (!file) {
-      file = path.normalize(storageDir + storageDb);
+    const storageDir = this.getStorageDir();
+    file = path.normalize(storageDir + storageDb);
   }
   const isExist = fs.existsSync(file);
   if (!isExist) {
@@ -75,5 +75,12 @@ exports.setIpcDynamicPort = async function () {
   
   return dynamicPort;
 };
+
+exports.getStorageDir = function () {
+  const userHomeDir = os.userInfo().homedir;
+  const storageDir = path.normalize(userHomeDir + '/' + pkg.name + '/');
+
+  return storageDir;
+}
 
 exports = module.exports;

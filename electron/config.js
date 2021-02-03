@@ -24,7 +24,7 @@ const config = {
   },
   log: {
     file: {
-      fileName: path.normalize('./logs/electron-' + dayjs().format('YYYY-MM-DD') + '.log'),
+      fileName: path.normalize(storage.getStorageDir() + 'logs/electron-' + dayjs().format('YYYY-MM-DD') + '.log'),
       level: 'silly', // error, warn, info, verbose, debug, silly
       format: '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}] {text}',
       maxSize: '1048576' // 1048576 (1mb) by default.

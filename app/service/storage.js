@@ -9,7 +9,6 @@ const storageKey = require('../const/storageKey');
 const fs = require('fs');
 const os = require('os');
 const pkg = require('../../package.json');
-const storageDir = path.normalize(os.userInfo().homedir + '/' + pkg.name + '/');
 const storageDb = 'db.json';
 
 class StorageService extends BaseService {
@@ -18,7 +17,12 @@ class StorageService extends BaseService {
    */
   instance(file = null) {
     if (!file) {
-        file = path.normalize(storageDir + storageDb);
+      const storageDir = this.getStorageDir();
+      if (!fs.existsSync(storageDir)) {
+        utils.mkdir(storageDir);
+        utils.chmodPath(storageDir, '777');
+      }
+      file = path.normalize(storageDir + storageDb);
     }
     const isExist = fs.existsSync(file);
     if (!isExist) {
@@ -47,6 +51,9 @@ class StorageService extends BaseService {
    * getStorageDir
    */
   getStorageDir() {
+    const userHomeDir = os.userInfo().homedir;
+    const storageDir = path.normalize(userHomeDir + '/' + pkg.name + '/');
+
     return storageDir;
   }
 

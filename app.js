@@ -4,15 +4,6 @@
  */
 'use strict';
 global.CODE = require('./app/const/statusCode');
-const fs = require('fs');
-const path = require('path');
-const lowdb = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
-const utils = require('./app/utils/utils');
-const os = require('os');
-const pkg = require('./package.json');
-const storageDir = path.normalize(os.userInfo().homedir + '/' + pkg.name + '/');
-const storageDb = 'db.json';
 
 class AppBootHook {
   constructor(app) {
@@ -42,17 +33,6 @@ class AppBootHook {
   async didReady() {
     // Worker is ready, can do some things
     // don't need to block the app boot.
-    // 数据库
-    if (!fs.existsSync(storageDir)) {
-      utils.mkdir(storageDir);
-      utils.chmodPath(storageDir, '777');
-    }
-    const file = storageDir + storageDb;
-    const adapter = new FileSync(file);
-    const db = lowdb(adapter);
-    if (!db.has('default').value()) {
-      db.set('default', {}).write();
-    }
   }
 
   async serverDidReady() {
