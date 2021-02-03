@@ -18,7 +18,7 @@
   </a-list>
 </template>
 <script>
-import { autoLaunchEnable, autoLaunchDisable, autoLaunchIsEnabled } from '@/api/main'
+import { localApi } from '@/api/main'
 
 export default {
   data () {
@@ -31,7 +31,7 @@ export default {
   },
   methods: {
     autoLaunchInit () {
-      autoLaunchIsEnabled({}).then(res => {
+      localApi('autoLaunchIsEnabled', {}).then(res => {
         if (res.code !== 0) {
           return false
         }
@@ -45,7 +45,7 @@ export default {
         'checkStatus': checkStatus
       }
       if (checkStatus) {
-        autoLaunchEnable(params).then(res => {
+        localApi('autoLaunchEnable', params).then(res => {
           if (res.code !== 0) {
             return false
           }
@@ -54,7 +54,7 @@ export default {
           console.log('err:', err)
         })
       } else {
-        autoLaunchDisable(params).then(res => {
+        localApi('autoLaunchDisable', params).then(res => {
           if (res.code !== 0) {
             return false
           }

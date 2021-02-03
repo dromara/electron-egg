@@ -19,7 +19,7 @@ export const constantRouterMap = [
       },
       {
         path: 'setting',
-        name: 'setting',
+        name: 'Setting',
         component: () => import('@/views/Setting')
       }
     ]

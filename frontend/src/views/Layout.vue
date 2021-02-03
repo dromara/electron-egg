@@ -19,14 +19,14 @@
       >
         <a-menu class="sub-menu-item" theme="light" mode="inline" v-model="subMenuKey" :default-selected-keys="subMenuKey">
           <a-menu-item :key="subIndex" v-for="(menuInfo, subIndex) in subMenu">
-            <router-link :to="{ path: menuInfo.page }">
+          <router-link :to="{ name: menuInfo.pageName, params: menuInfo.params}">
               <span>{{ menuInfo.title }}</span>
             </router-link>
           </a-menu-item>
         </a-menu>
       </a-layout-sider>
       <a-layout-content :style="{}">
-        <div :style="{ padding: '24px', background: '#fff', minHeight: '560px' }">
+        <div :style="{ padding: '10px', background: '#fff', minHeight: '560px' }">
           <router-view />
         </div>
       </a-layout-content>
@@ -56,17 +56,20 @@ export default {
         'menu_1' : {
           'subMenu_1' : {
             title: '上传文件到sm图床',
-            page: 'uploadFile'
+            pageName: 'UploadFile',
+            params: {}
           },
           'subMenu_2' : {
             title: '打开文件夹',
-            page: 'fileOpenDir'
+            pageName: 'FileOpenDir',
+            params: {},
           }
         },
         'menu_2' : {
           'subMenu_1' : {
             title: '基础设置',
-            page: '/setting'
+            pageName: 'Setting',
+            params: {},
           }
         },
       },
@@ -80,8 +83,8 @@ export default {
     menuHandle (item) {
       this.subMenu = this.subMenuList[item.key]
       this.subMenuKey = ['subMenu_1']
-      const linkPage = this.subMenu['subMenu_1']['page']
-      this.$router.push(linkPage)
+      const linkInfo = this.subMenu['subMenu_1']
+      this.$router.push({ name: linkInfo.pageName, params: linkInfo.params})
     },
   },
 };

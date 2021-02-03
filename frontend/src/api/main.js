@@ -13,15 +13,24 @@ const mainApi = {
 /**
  * outApi
  */
-// export function outApi (parameter) {
-//   parameter.data.token = storage.get(ACCESS_TOKEN)
-//   parameter.data.uid = storage.get(USER_INFO) ? storage.get(USER_INFO).uid : ''
-//   return request({
-//     url: mainApi.outApi,
-//     method: 'post',
-//     data: parameter
-//   })
-// }
+export function outApi (uri, parameter) {
+  return request({
+    url: mainApi[uri],
+    method: 'post',
+    data: parameter
+  })
+}
+
+/**
+ * local api
+ */
+export function localApi (uri, parameter) {
+  return request({
+    url: mainApi[uri],
+    method: 'post',
+    data: parameter
+  })
+}
 
 /**
  * openDir
@@ -40,39 +49,6 @@ export function openDir (parameter) {
 export function uploadFile (parameter) {
   return request({
     url: mainApi.uploadFile,
-    method: 'post',
-    data: parameter
-  })
-}
-
-/**
- * autoLaunchEnable
- */
-export function autoLaunchEnable (parameter) {
-  return request({
-    url: mainApi.autoLaunchEnable,
-    method: 'post',
-    data: parameter
-  })
-}
-
-/**
- * autoLaunchDisable
- */
-export function autoLaunchDisable (parameter) {
-  return request({
-    url: mainApi.autoLaunchDisable,
-    method: 'post',
-    data: parameter
-  })
-}
-
-/**
- * autoLaunchIsEnabled
- */
-export function autoLaunchIsEnabled (parameter) {
-  return request({
-    url: mainApi.autoLaunchIsEnabled,
     method: 'post',
     data: parameter
   })
