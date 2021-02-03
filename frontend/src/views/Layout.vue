@@ -20,8 +20,8 @@
         <a-menu class="sub-menu-item" theme="light" mode="inline" v-model="subMenuKey" :default-selected-keys="subMenuKey">
           <a-menu-item :key="subIndex" v-for="(menuInfo, subIndex) in subMenu">
           <router-link :to="{ name: menuInfo.pageName, params: menuInfo.params}">
-              <span>{{ menuInfo.title }}</span>
-            </router-link>
+            <span>{{ menuInfo.title }}</span>
+          </router-link>
           </a-menu-item>
         </a-menu>
       </a-layout-sider>
