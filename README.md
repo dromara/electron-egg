@@ -30,9 +30,9 @@
 
 2. 安装
     ```
-    # 进入目录 ./electron-egg/
-    # 提升安装速度，使用国内镜像
+    # 提升安装速度，使用国内镜像；注：勿使用cnpm命令，可能出现安装不完整
     npm config set registry https://registry.npm.taobao.org
+    # 进入目录 ./electron-egg/
     npm install
     ```
     
