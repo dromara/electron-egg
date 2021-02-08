@@ -8,6 +8,7 @@ const FileSync = require('lowdb/adapters/FileSync');
 const storageKey = require('../const/storageKey');
 const fs = require('fs');
 const os = require('os');
+const utils = require('../utils/utils');
 const pkg = require('../../package.json');
 const storageDb = 'db.json';
 
