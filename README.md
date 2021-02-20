@@ -65,10 +65,17 @@
 
 ## 项目案例
 
-1. [网站助手-已开源](https://gitee.com/wallace5303/aweb-helper)
+1. [小明云存储](https://gitee.com/wallace5303/xm-pic)
 
-    web版&客户端
-![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/box/js.gif)
+![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-config.png)
+
+![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-provider.png)
+
+![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-history.png)
+
+![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-detail.png)
+
+
 
 ## 交流
 1. qq群：735532437
