@@ -5,9 +5,12 @@ const setup = require('./electron/setup')
 const electronConfig = require('./electron/config')
 const storage = require('./electron/storage')
 const is = require('electron-is')
+const setTray = require('./electron/tray')
 
 // main window
 global.MAIN_WINDOW = null
+global.APP_TRAY = null;
+global.CAN_QUIT = false;
 
 // Initialize 
 setup()
@@ -71,6 +74,9 @@ async function createWindow () {
   // loding page
   MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/app/public/loading.html'))
   
+  // tray 
+  setTray();
+
   // egg server
   await startServer(eggConfig)
 
