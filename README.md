@@ -1,7 +1,9 @@
-# electron-egg
+# electron-egg 
 一个简单、快速、功能丰富的跨平台桌面软件开发框架。
 
-[教程文档](https://www.yuque.com/u34495/mivcfg/xnhmms)
+查看：[教程文档](https://www.yuque.com/u34495/mivcfg/xnhmms)
+
+🏆 码云最有价值开源项目
 
 ## 特性
 1. 直接打包成windows版、Mac版、Linux版或者以web网站运行。
