@@ -91,6 +91,12 @@ module.exports = appInfo => {
   };
 
   config.ejs = {};
+
+  config.multipart = {
+    mode: 'file',
+    fileExtensions: [ '.xlsx' ] // 增加你需要的文件扩展名
+  };
+
   return {
     ...config,
     ...userConfig,

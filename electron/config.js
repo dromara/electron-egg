@@ -5,16 +5,33 @@ const dayjs = require('dayjs');
 const storage = require('./storage');
 
 const config = {
+  developmentMode: {
+    default: 'vue',
+    mode: {
+      vue: {
+        hostname: 'localhost',
+        port: 8080
+      },
+      react: {
+        hostname: 'localhost',
+        port: 3000
+      },
+      ejs: {
+        hostname: 'localhost',
+        port: 7068 // The same as the egg port
+      }
+    }
+  },
   log: {
     file: {
-      fileName: path.normalize('./logs/electron-' + dayjs().format('YYYY-MM-DD') + '.log'),
+      fileName: path.normalize(storage.getStorageDir() + 'logs/electron-' + dayjs().format('YYYY-MM-DD') + '.log'),
       level: 'silly', // error, warn, info, verbose, debug, silly
       format: '[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}] {text}',
       maxSize: '1048576' // 1048576 (1mb) by default.
     }
   },
   windowsOption: {
-    width: 800,
+    width: 980,
     height: 600,
     minWidth: 800,
     minHeight: 600,
@@ -30,11 +47,13 @@ const config = {
     title: 'electron-egg',
     env: 'prod',
     port: 7068,
-    hostname: '0.0.0.0',
+    hostname: 'localhost',
     workers: 1
   },
   autoUpdate: {
-    enable: false,
+    windows: false, // windows可以开启；macOs 需要签名验证
+    macOS: false,
+    Linux: false,
     options: {
       provider: 'generic', // or github, s3, bintray
       url: 'https://raw.githubusercontent.com/wallace5303/electron-egg/master/' // resource dir
@@ -42,8 +61,12 @@ const config = {
   }
 }
 
-exports.get = function (flag = '') {
+exports.get = function (flag = '', env = 'prod') {
   console.log('[config] [get] flag:', flag);
+  if (flag === 'developmentMode') {
+    return config.developmentMode;
+  }
+
   if (flag === 'log') {
     return config.log;
   }
@@ -58,7 +81,7 @@ exports.get = function (flag = '') {
   
   if (flag === 'egg') {
     const eggConfig = storage.getEggConfig();
-    if (eggConfig.port) {
+    if (env === 'prod' && eggConfig.port) {
       config.egg.port = eggConfig.port;
     }
     return config.egg;

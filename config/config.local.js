@@ -1,5 +1,6 @@
 'use strict';
 // 本地环境-配置文件
+const storageDir = require('../electron/storage').getStorageDir();
 
 /*
  * 远程调用
@@ -8,5 +9,5 @@ exports.outApi = {
   login: 'http://local.com/api/login',
 };
 exports.logger = {
-  dir: './logs/local',
+  dir: storageDir + 'logs/local',
 };

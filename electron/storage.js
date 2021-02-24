@@ -6,22 +6,23 @@ const FileSync = require('lowdb/adapters/FileSync');
 const fs = require('fs');
 const getPort = require('get-port');
 const utils = require('../app/utils/utils');
-
-const storageDir = path.normalize('./storage/');
+const storageKey = require('../app/const/storageKey');
+const os = require('os');
+const pkg = require('../package.json');
+const storageDb = 'db.json';
 
 exports.setup = function () {
-  // const userDataDir = app.getPath('userData');
-  // const storageDir = path.normalize(path.join(userDataDir, 'storage'));
+  const storageDir = this.getStorageDir();
   if (!fs.existsSync(storageDir)) {
     utils.mkdir(storageDir);
     utils.chmodPath(storageDir, '777');
   }
-  const file = storageDir + 'db.json';
+  const file = storageDir + storageDb;
   const adapter = new FileSync(file);
   const db = lowdb(adapter);
-
-  if (!db.has('egg_config').value()) {
-    db.set('egg_config', {}).write();
+  const eggConfigKey = storageKey.EGG_CONFIG;
+  if (!db.has(eggConfigKey).value()) {
+    db.set(eggConfigKey, {}).write();
   }
 
   return true;
@@ -29,7 +30,8 @@ exports.setup = function () {
 
 exports.instance = function (file = null) {
   if (!file) {
-      file = path.normalize('./storage/db.json');
+    const storageDir = this.getStorageDir();
+    file = path.normalize(storageDir + storageDb);
   }
   const isExist = fs.existsSync(file);
   if (!isExist) {
@@ -43,8 +45,9 @@ exports.instance = function (file = null) {
 };
 
 exports.getEggConfig = function () {
+  const key = storageKey.EGG_CONFIG;
   const res = this.instance()
-  .get('egg_config')
+  .get(key)
   .value();
 
   return res;
@@ -55,11 +58,29 @@ exports.setDynamicPort = async function () {
   // console.log('setDynamicPort eggConfig:', eggConfig);
   // const dynamicPort = await getPort({port: eggConfig.port})
   const dynamicPort = await getPort();
+  const key = storageKey.EGG_CONFIG + '.port';
   const res = this.instance()
-    .set('egg_config.port', dynamicPort)
+    .set(key, dynamicPort)
     .write();
   
   return res;
 };
+
+exports.setIpcDynamicPort = async function () {
+  const key = storageKey.ELECTRON_IPC + '.port';
+  const dynamicPort = await getPort();
+  this.instance()
+    .set(key, dynamicPort)
+    .write();
+  
+  return dynamicPort;
+};
+
+exports.getStorageDir = function () {
+  const userHomeDir = os.userInfo().homedir;
+  const storageDir = path.normalize(userHomeDir + '/' + pkg.name + '/');
+
+  return storageDir;
+}
 
 exports = module.exports;
