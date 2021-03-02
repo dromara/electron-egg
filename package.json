@@ -9,7 +9,7 @@
     "dev": "electron . --env=local",
     "build-w": "electron-builder -w",
     "build-m": "electron-builder -m",
-    "build-l": "electron-builder -l",
+    "build-l": "electron-builder -l deb tar.xz",
     "web-start": "egg-scripts start --daemon --title=electron-egg --ignore-stderr --env=prod --workers=1",
     "web-stop": "egg-scripts stop --title=electron-egg",
     "web-dev": "egg-bin dev",
@@ -77,7 +77,10 @@
       ]
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "build/icons/256x256.png",
+      "target": [
+        "deb"
+      ]
     }
   },
   "repository": "https://github.com/wallace5303/electron-egg.git",
@@ -85,7 +88,7 @@
     "Electron",
     "Egg"
   ],
-  "author": "wallace5303",
+  "author": "wallace5303, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
     "autod": "^3.0.1",
