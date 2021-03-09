@@ -63,6 +63,11 @@ export default {
             title: '打开文件夹',
             pageName: 'FileOpenDir',
             params: {},
+          },
+          'subMenu_3' : {
+            title: 'IpcExample',
+            pageName: 'IpcExample',
+            params: {},
           }
         },
         'menu_2' : {

@@ -18,6 +18,11 @@ export const constantRouterMap = [
         component: () => import('@/views/file/UploadFile')
       },
       {
+        path: 'ipcExample',
+        name: 'IpcExample',
+        component: () => import('@/views/file/IpcExample')
+      },
+      {
         path: 'setting',
         name: 'Setting',
         component: () => import('@/views/Setting')

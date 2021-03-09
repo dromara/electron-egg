@@ -5,6 +5,7 @@ const storage = require('./storage');
 const config = require('./config');
 const is = require('electron-is');
 const api = require('./api');
+const ipc = require('./ipc');
 
 module.exports = () => {
   storage.setup();
@@ -16,6 +17,8 @@ module.exports = () => {
     autoUpdater.setup();
   }
   api.setup();
+  // 加载所有的主进程函数
+  ipc.loadIPC();
 }
 
 function logger () {

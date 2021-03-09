@@ -37,6 +37,7 @@ const config = {
     minHeight: 600,
     webPreferences: {
       //webSecurity: false,
+      contextIsolation: false, // 设置此项为false后，才可在渲染进程中使用electron api
       nodeIntegration: true,
       preload: path.join(__dirname, '../preload.js')
     },
@@ -78,7 +79,7 @@ exports.get = function (flag = '', env = 'prod') {
   if (flag === 'webEgg') {
     return config.egg;
   }
-  
+
   if (flag === 'egg') {
     const eggConfig = storage.getEggConfig();
     if (env === 'prod' && eggConfig.port) {
@@ -90,7 +91,7 @@ exports.get = function (flag = '', env = 'prod') {
   if (flag === 'autoUpdate') {
     return config.autoUpdate;
   }
-  
+
   return {};
 };
 
