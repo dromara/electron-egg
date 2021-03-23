@@ -21,7 +21,7 @@ module.exports = () => {
   }
   // electron业务模块
   api.setup();
-  // 加载所有的主进程函数
+  // ipc模块
   ipc.setup();
 }
 
