@@ -1,6 +1,8 @@
 const { answerRenderer } = require('./index')
 
-answerRenderer('example.test', async (name) => {
-  const luckNum = (Math.random()*1000).toFixed()
-  return `${name}, 你的幸运数字是：${luckNum}`
+answerRenderer('example.hello', async (msg) => {
+  let newMsg = msg + " +1"
+  let reply = ''
+  reply = '收到：' + msg + '，返回：' + newMsg
+  return reply
 })

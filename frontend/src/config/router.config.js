@@ -10,17 +10,17 @@ export const constantRouterMap = [
       {
         path: 'fileOpenDir',
         name: 'FileOpenDir',
-        component: () => import('@/views/file/OpenDir')
+        component: () => import('@/views/example/OpenDir')
       },
       {
         path: 'uploadFile',
         name: 'UploadFile',
-        component: () => import('@/views/file/UploadFile')
+        component: () => import('@/views/example/UploadFile')
       },
       {
-        path: 'ipcExample',
-        name: 'IpcExample',
-        component: () => import('@/views/file/IpcExample')
+        path: 'ipc',
+        name: 'Ipc',
+        component: () => import('@/views/example/Ipc')
       },
       {
         path: 'setting',

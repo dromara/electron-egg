@@ -65,8 +65,8 @@ export default {
             params: {},
           },
           'subMenu_3' : {
-            title: 'IpcExample',
-            pageName: 'IpcExample',
+            title: '通信',
+            pageName: 'Ipc',
             params: {},
           }
         },

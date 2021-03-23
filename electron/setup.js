@@ -8,17 +8,21 @@ const api = require('./api');
 const ipc = require('./ipc');
 
 module.exports = () => {
+  // 存储模块
   storage.setup();
+  // 日志
   logger();
+  // 自动更新
   const updateConfig = config.get('autoUpdate');
   if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
     || (is.linux() && updateConfig.linux)) {
     const autoUpdater = require('./autoUpdater');
     autoUpdater.setup();
   }
+  // electron业务模块
   api.setup();
   // 加载所有的主进程函数
-  ipc.loadIPC();
+  ipc.setup();
 }
 
 function logger () {

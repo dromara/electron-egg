@@ -28,7 +28,7 @@ module.exports.answerRenderer = (channel, callback) => {
 /**
  * 加载所有的主程序
  */
-module.exports.loadIPC = () => {
+module.exports.setup = () => {
   const ipcDir = path.normalize(__dirname + '/')
 
   fs.readdirSync(ipcDir).forEach(function (filename) {
