@@ -72,7 +72,7 @@ async function createWindow () {
   }
 
   // loding page
-  MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/app/public/loading.html'))
+  MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/asset/loading.html'))
   
   // tray 
   setTray();
