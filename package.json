@@ -1,6 +1,6 @@
 {
   "name": "electron-egg",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "softName": "electron-egg",
