@@ -33,6 +33,8 @@ exports.setup = function () {
   autoUpdater.on('update-downloaded', (info) => {
     sendStatusToWindow('Update downloaded');
     // quit and update
+    MAIN_WINDOW.destroy();
+    app.quit();
     autoUpdater.quitAndInstall();
   });
 

@@ -63,6 +63,11 @@ export default {
             title: '打开文件夹',
             pageName: 'FileOpenDir',
             params: {},
+          },
+          'subMenu_3' : {
+            title: '通信',
+            pageName: 'Ipc',
+            params: {},
           }
         },
         'menu_2' : {

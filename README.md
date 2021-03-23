@@ -95,6 +95,11 @@
 8. 上传文件到sm图床demo（已完成）
 9. 开发模式实时渲染页面（已完成）
 
+## 关于pr
+请前往[GitHub项目](https://github.com/wallace5303/electron-egg)提pr（避免代码同步后，pr被覆盖掉），感谢！
+
+地址：https://github.com/wallace5303/electron-egg
+
 ## 欢迎star
 
 

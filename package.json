@@ -1,6 +1,6 @@
 {
   "name": "electron-egg",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "softName": "electron-egg",
@@ -9,7 +9,7 @@
     "dev": "electron . --env=local",
     "build-w": "electron-builder -w",
     "build-m": "electron-builder -m",
-    "build-l": "electron-builder -l",
+    "build-l": "electron-builder -l deb tar.xz",
     "web-start": "egg-scripts start --daemon --title=electron-egg --ignore-stderr --env=prod --workers=1",
     "web-stop": "egg-scripts stop --title=electron-egg",
     "web-dev": "egg-bin dev",
@@ -77,7 +77,10 @@
       ]
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "build/icons/256x256.png",
+      "target": [
+        "deb"
+      ]
     }
   },
   "repository": "https://github.com/wallace5303/electron-egg.git",
@@ -85,7 +88,7 @@
     "Electron",
     "Egg"
   ],
-  "author": "wallace5303",
+  "author": "wallace5303, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
     "autod": "^3.0.1",
@@ -112,6 +115,7 @@
     "egg-view-ejs": "^2.0.0",
     "electron-is": "^3.0.0",
     "electron-log": "^4.2.2",
+    "electron-updater": "^4.3.5",
     "get-port": "^5.1.1",
     "glob": "^7.1.6",
     "lodash": "^4.17.11",

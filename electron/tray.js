@@ -20,7 +20,7 @@ module.exports = () => {
       app.quit()
     }
   }]
-  let iconPath = path.join(app.getAppPath(), '/app/public/images/tray_logo.png');
+  let iconPath = path.join(app.getAppPath(), '/asset/images/tray_logo.png');
   APP_TRAY = new Tray(iconPath);
   const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
   APP_TRAY.setToolTip(pkg.softName);
