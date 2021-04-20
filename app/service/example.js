@@ -11,6 +11,12 @@ class ExampleService extends BaseService {
     return true;
   }
 
+  async executeJS(str) {
+    const self = this;
+    let result = await self.ipcCall('example.executeJS', str);
+    return result;
+  }
+
   async uploadFileToSMMS(tmpFile) {
     const res = {
       code: 1000,
