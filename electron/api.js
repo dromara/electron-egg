@@ -61,17 +61,27 @@ exports.setup = async function () {
     socket.on('ipc', (message, callback) => {
       ELog.info('[ api ] [setup] socket id:' + socket.id + ' message cmd: ' + message.cmd);
       const data = apis[message.cmd](...message.params);
-      const result = {
-        err: null,
-        data: data,
-      };
-      callback(result);
+      if (data && typeof data.then === 'function') { // 判断是否是异步
+        data.then((data) => {
+          const result = {
+            err: null,
+            data: data,
+          };
+          callback(result)
+        });
+      } else {
+        const result = {
+          err: null,
+          data: data,
+        };
+        callback(result);
+      }
     });
   });
 
   server.listen(port, listen, function() {
     ELog.info('[ api ] [setup] server is listening on', `${listen}:${port}`);
-  });  
+  });
 };
 
 function setApi() {
@@ -88,7 +98,7 @@ function setApi() {
       });
     }
   });
-};
+}
 
 /**
  * get api method name
@@ -99,4 +109,4 @@ function setApi() {
 function getApiName (jsname, method) {
   return jsname + '.' + method;
   //return jsname + method.charAt(0).toUpperCase() + method.slice(1);
-};
+}
