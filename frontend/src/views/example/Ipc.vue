@@ -15,7 +15,7 @@
     </div>
     <div style="margin-top: 20px;">
       <h3 :style="{ marginBottom: '16px' }">
-        demo4 远程API执行网页函数
+        demo4 主进程API执行网页函数
       </h3>
       <a-list bordered>
         <a-input-search v-model="content2" @search="executeJSHandle">
