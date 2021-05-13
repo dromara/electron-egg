@@ -6,7 +6,7 @@
   "softName": "electron-egg",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --env=local",
+    "dev": "concurrently \"cd ./frontend && npm run serve\" \"electron . --env=local\"",
     "build-w": "electron-builder -w",
     "build-m": "electron-builder -m",
     "build-l": "electron-builder -l deb tar.xz",
@@ -93,6 +93,7 @@
   "devDependencies": {
     "autod": "^3.0.1",
     "autod-egg": "^1.1.0",
+    "concurrently": "^6.1.0",
     "devtron": "^1.4.0",
     "egg-bin": "^4.12.3",
     "egg-ci": "^1.11.0",
