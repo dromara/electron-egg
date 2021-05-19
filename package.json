@@ -1,12 +1,13 @@
 {
   "name": "electron-egg",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "softName": "electron-egg",
   "scripts": {
     "start": "electron .",
     "dev": "concurrently \"cd ./frontend && npm run serve\" \"electron . --env=local\"",
+    "dev-server": "electron . --env=local",
     "build-w": "electron-builder -w",
     "build-m": "electron-builder -m",
     "build-l": "electron-builder -l deb tar.xz",
