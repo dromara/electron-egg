@@ -41,6 +41,9 @@
 3. 常用命令
     ```
     # 开发者模式
+    # 1：启动前端服务
+    cd frontend && npm run serve
+    # 2：启动后端服务
     npm run dev
 
     # 生产者模式
