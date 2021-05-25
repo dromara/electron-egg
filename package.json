@@ -6,8 +6,8 @@
   "softName": "electron-egg",
   "scripts": {
     "start": "electron .",
-    "dev": "concurrently \"cd ./frontend && npm run serve\" \"electron . --env=local\"",
-    "dev-server": "electron . --env=local",
+    "dev": "electron . --env=local",
+    "test": "concurrently \"cd ./frontend && npm run serve\" \"electron . --env=local\"",
     "build-w": "electron-builder -w",
     "build-m": "electron-builder -m",
     "build-l": "electron-builder -l deb tar.xz",
