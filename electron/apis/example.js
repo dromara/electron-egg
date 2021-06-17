@@ -17,7 +17,7 @@ exports.openDir = function (dir = '') {
     return false;
   }
   dir = getElectronPath(dir);
-  shell.openItem(dir);
+  shell.openPath(dir);
   return true;
 }
 
