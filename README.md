@@ -42,7 +42,7 @@
     ```
     # 开发者模式
         # 1：【进入前端目录】，启动vue
-        cd frontend && npm run serve
+        cd frontend && npm install && npm run serve
         
         # 2：【根目录】，启动后端服务
         cd ../ && npm run dev
