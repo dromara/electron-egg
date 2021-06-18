@@ -41,7 +41,11 @@
 3. 常用命令
     ```
     # 开发者模式
-    npm run dev
+        # 1：【进入前端目录】，启动vue
+        cd frontend && npm install && npm run serve
+        
+        # 2：【根目录】，启动后端服务
+        cd ../ && npm run dev
 
     # 生产者模式
     npm run start

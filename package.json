@@ -1,12 +1,13 @@
 {
   "name": "electron-egg",
-  "version": "1.9.0",
+  "version": "1.9.4",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "softName": "electron-egg",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --env=local",
+    "test": "concurrently \"cd ./frontend && npm run serve\" \"electron . --env=local\"",
     "build-w": "electron-builder -w",
     "build-m": "electron-builder -m",
     "build-l": "electron-builder -l deb tar.xz",
@@ -93,11 +94,12 @@
   "devDependencies": {
     "autod": "^3.0.1",
     "autod-egg": "^1.1.0",
+    "concurrently": "^6.1.0",
     "devtron": "^1.4.0",
     "egg-bin": "^4.12.3",
     "egg-ci": "^1.11.0",
     "egg-mock": "^3.21.0",
-    "electron": "^8.4.1",
+    "electron": "^12.0.10",
     "electron-builder": "^22.7.0",
     "eslint": "^5.13.0",
     "eslint-config-egg": "^7.1.0",

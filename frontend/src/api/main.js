@@ -5,6 +5,7 @@ const mainApi = {
   outApi: '/api/v1/outApi',
   openDir: '/api/v1/example/openLocalDir',
   uploadFile: '/api/v1/example/uploadFile',
+  executeJS: '/api/v1/example/executeJS',
   autoLaunchEnable: '/api/v1/setting/autoLaunchEnable',
   autoLaunchDisable: '/api/v1/setting/autoLaunchDisable',
   autoLaunchIsEnabled: '/api/v1/setting/autoLaunchIsEnabled'
@@ -49,6 +50,17 @@ export function openDir (parameter) {
 export function uploadFile (parameter) {
   return request({
     url: mainApi.uploadFile,
+    method: 'post',
+    data: parameter
+  })
+}
+
+/**
+ * executeJS
+ */
+export function executeJS (parameter) {
+  return request({
+    url: mainApi.executeJS,
     method: 'post',
     data: parameter
   })

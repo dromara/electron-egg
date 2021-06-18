@@ -1,6 +1,6 @@
 const { ipcMain: ipc } = require('electron')
 const path = require('path')
-const fs = require('fs-extra')
+const fs = require('fs')
 
 /**
  * 发送响应信息给渲染进程
