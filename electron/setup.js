@@ -1,6 +1,6 @@
 'use strict';
 
-const storage = require('./storage');
+const storage = require('./lib/storage');
 const config = require('./config');
 const is = require('electron-is');
 const api = require('./api');
@@ -10,17 +10,25 @@ const eLogger = require('./lib/eLogger');
 module.exports = () => {
   // 存储模块
   storage.setup();
+
   // 日志
   eLogger.setup();
+
   // 自动更新
+  loadUpdate();
+
+  // electron业务模块
+  api.setup();
+
+  // ipc模块
+  ipc.setup();
+}
+
+function loadUpdate () {
   const updateConfig = config.get('autoUpdate');
   if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
     || (is.linux() && updateConfig.linux)) {
-    const autoUpdater = require('./autoUpdater');
+    const autoUpdater = require('./lib/autoUpdater');
     autoUpdater.setup();
   }
-  // electron业务模块
-  api.setup();
-  // ipc模块
-  ipc.setup();
 }

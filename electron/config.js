@@ -2,7 +2,7 @@
 
 const path = require('path');
 const dayjs = require('dayjs');
-const storage = require('./storage');
+const storage = require('./lib/storage');
 
 const config = {
   developmentMode: {

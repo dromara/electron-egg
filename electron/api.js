@@ -3,7 +3,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const _ = require('lodash');
-const storage = require('./storage');
+const storage = require('./lib/storage');
 const socketIo = require('socket.io');
 const eLogger = require('./lib/eLogger').get();
 

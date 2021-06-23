@@ -2,7 +2,7 @@
 
 const {app, Tray, Menu} = require('electron');
 const path = require('path');
-const pkg = require('../package.json');
+const pkg = require('../../package.json');
 
 module.exports = () => {
   MAIN_WINDOW.on('close', (event) => {

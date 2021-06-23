@@ -5,10 +5,10 @@ const lowdb = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 const fs = require('fs');
 const getPort = require('get-port');
-const utils = require('../app/utils/utils');
-const storageKey = require('../app/const/storageKey');
+const utils = require('../../app/utils/utils');
+const storageKey = require('../../app/const/storageKey');
 const os = require('os');
-const pkg = require('../package.json');
+const pkg = require('../../package.json');
 const storageDb = 'db.json';
 
 exports.setup = function () {

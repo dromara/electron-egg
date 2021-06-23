@@ -1,11 +1,11 @@
 const {app, BrowserWindow, Menu} = require('electron')
 const path = require('path')
-const eggLauncher = require('./electron/lanucher')
+const eggLauncher = require('./electron/lib/lanucher')
 const setup = require('./electron/setup')
 const electronConfig = require('./electron/config')
-const storage = require('./electron/storage')
+const storage = require('./electron/lib/storage')
 const is = require('electron-is')
-const setTray = require('./electron/tray')
+const setTray = require('./electron/lib/tray')
 
 // main window
 global.MAIN_WINDOW = null

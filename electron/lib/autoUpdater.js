@@ -2,10 +2,10 @@
 
 const updater = require("electron-updater");
 const autoUpdater = updater.autoUpdater;
-const config = require('./config');
+const config = require('../config');
 const path = require('path');
 const {app} = require('electron');
-const eLogger = require('./lib/eLogger').get();
+const eLogger = require('./eLogger').get();
 
 exports.setup = function () {
   const pkgInfo = require(path.join(app.getAppPath(), 'package.json'));
