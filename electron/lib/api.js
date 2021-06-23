@@ -3,9 +3,10 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const _ = require('lodash');
-const storage = require('./lib/storage');
+const storage = require('./storage');
 const socketIo = require('socket.io');
-const eLogger = require('./lib/eLogger').get();
+const eLogger = require('./eLogger').get();
+const {app} = require('electron');
 
 const apis = {};
 
@@ -86,12 +87,12 @@ exports.setup = async function () {
 };
 
 function setApi() {
-  const apiDir = path.normalize(__dirname + '/apis');
-  // console.log('apiDir:', apiDir);
+  const baseDir = app.getAppPath();
+  const apiDir = path.join(baseDir, 'electron/apis');
   fs.readdirSync(apiDir).forEach(function(filename) {
     if (path.extname(filename) === '.js' && filename !== 'index.js') {
       const name = path.basename(filename, '.js');
-      const fileObj = require(`./apis/${filename}`);
+      const fileObj = require(`${apiDir}/${filename}`);
       _.map(fileObj, function(fn, method) {
         let methodName = getApiName(name, method);
         apis[methodName] = fn;
