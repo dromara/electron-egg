@@ -5,6 +5,7 @@ const path = require('path');
 const _ = require('lodash');
 const storage = require('./storage');
 const socketIo = require('socket.io');
+const eLogger = require('./lib/eLogger').get();
 
 const apis = {};
 
@@ -13,12 +14,12 @@ exports.setup = async function () {
 
   // use api server
   let port = await storage.setIpcDynamicPort();
-  ELog.info('[api] [setup] dynamic port:', port);
+  eLogger.info('[api] [setup] dynamic port:', port);
   const listen = 'localhost';
   port = port ? port : 7069;
 
   const server = http.createServer(function(req, res) {
-    ELog.info('[ api ] [setup] command received', { method: req.method, url: req.url });
+    eLogger.info('[ api ] [setup] command received', { method: req.method, url: req.url });
     if ((req.method === 'POST' && req.url === '/send')) {
       let body = '';
       req.setEncoding('utf8');
@@ -35,12 +36,12 @@ exports.setup = async function () {
           return res.end('request body parse failure.');
         }
         if (!apis[message.cmd]) {
-          ELog.info('[ api ] [setup] invalid command called:', message.cmd);
+          eLogger.info('[ api ] [setup] invalid command called:', message.cmd);
           res.statusCode = 404;
           return res.end('NG');
         }
 
-        ELog.info('[ api ] [setup] command received message:', message);
+        eLogger.info('[ api ] [setup] command received message:', message);
         const data = apis[message.cmd](...message.params);
         res.statusCode = 200;
         const result = {
@@ -59,7 +60,7 @@ exports.setup = async function () {
   const io = socketIo(server);
   io.on('connection', (socket) => {
     socket.on('ipc', (message, callback) => {
-      ELog.info('[ api ] [setup] socket id:' + socket.id + ' message cmd: ' + message.cmd);
+      eLogger.info('[ api ] [setup] socket id:' + socket.id + ' message cmd: ' + message.cmd);
       const data = apis[message.cmd](...message.params);
       if (data && typeof data.then === 'function') { // 判断是否是异步
         data.then((data) => {
@@ -80,7 +81,7 @@ exports.setup = async function () {
   });
 
   server.listen(port, listen, function() {
-    ELog.info('[ api ] [setup] server is listening on', `${listen}:${port}`);
+    eLogger.info('[ api ] [setup] server is listening on', `${listen}:${port}`);
   });
 };
 
@@ -94,7 +95,7 @@ function setApi() {
       _.map(fileObj, function(fn, method) {
         let methodName = getApiName(name, method);
         apis[methodName] = fn;
-        // ELog.info('[ Monitor ]', methodName);
+        // eLogger.info('[ Monitor ]', methodName);
       });
     }
   });

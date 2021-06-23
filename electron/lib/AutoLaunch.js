@@ -1,5 +1,5 @@
 const { app } = require('electron');
-const { LOGIN_SETTING_OPTIONS } = require('./Constant').AutoLaunch;
+const { LOGIN_SETTING_OPTIONS } = require('./constant').AutoLaunch;
 
 class AutoLaunch {
   enable () {

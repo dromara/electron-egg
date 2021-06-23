@@ -1,6 +1,6 @@
 'use strict'
 
-const AutoLaunchManager = require('../lib/AutoLaunch')
+const AutoLaunchManager = require('../lib/autoLaunch')
 
 exports.autoLaunchEnable = function () {
   const autoLaunchManager = new AutoLaunchManager()

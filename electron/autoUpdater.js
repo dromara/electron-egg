@@ -5,10 +5,11 @@ const autoUpdater = updater.autoUpdater;
 const config = require('./config');
 const path = require('path');
 const {app} = require('electron');
+const eLogger = require('./lib/eLogger').get();
 
 exports.setup = function () {
   const pkgInfo = require(path.join(app.getAppPath(), 'package.json'));
-  ELog.info('[autoUpdater] [setup] current version: ', pkgInfo.version);
+  eLogger.info('[autoUpdater] [setup] current version: ', pkgInfo.version);
   const updateConfig = config.get('autoUpdate');
   autoUpdater.setFeedURL(updateConfig.options);
 
@@ -45,7 +46,7 @@ exports.checkUpdate = function () {
 }
 
 function sendStatusToWindow(text) {
-  ELog.info(text);
+  eLogger.info(text);
   MAIN_WINDOW.webContents.send('message', text);
 }
 

@@ -27,6 +27,9 @@ for (let i = 0; i < process.argv.length; i++) {
 const eggConfig = electronConfig.get('egg', ENV)
 eggConfig.env = ENV
 
+// eLogger
+const eLogger = require('./electron/lib/eLogger').get();
+
 if (process.mas) app.setName('electron-egg')
 
 async function initialize () {
@@ -92,7 +95,7 @@ async function createWindow () {
 }
 
 async function startServer (options) {
-  ELog.info('[main] [startServer] options', options)
+  eLogger.info('[main] [startServer] options', options)
   const protocol = 'http://'
   let startRes = null
   let url = null
@@ -114,9 +117,9 @@ async function startServer (options) {
         break
     }
   }
-  ELog.info('[main] [url]:', url)
+  eLogger.info('[main] [url]:', url)
   startRes = await eggLauncher.start(options).then((res) => res, (err) => err)
-  ELog.info('[main] [startServer] startRes:', startRes)
+  eLogger.info('[main] [startServer] startRes:', startRes)
   if (startRes === 'success') {
     MAIN_WINDOW.loadURL(url)
     return true
