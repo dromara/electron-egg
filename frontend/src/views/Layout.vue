@@ -68,6 +68,11 @@ export default {
             title: '通信',
             pageName: 'Ipc',
             params: {},
+          },
+          'subMenu_4' : {
+            title: '快捷键',
+            pageName: 'Shortcut',
+            params: {},
           }
         },
         'menu_2' : {

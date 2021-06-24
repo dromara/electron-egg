@@ -2,7 +2,7 @@
   <div>
     <div>
       <h3 :style="{ marginBottom: '16px' }">
-        demo3 渲染进程与主进程IPC通信
+        demo3-1 渲染进程与主进程IPC通信
       </h3>
       <a-list bordered>
         <!-- <a-button @click="helloHandle">打招呼</a-button> -->
@@ -15,7 +15,7 @@
     </div>
     <div style="margin-top: 20px;">
       <h3 :style="{ marginBottom: '16px' }">
-        demo4 主进程API执行网页函数
+        demo3-2 主进程API执行网页函数
       </h3>
       <a-list bordered>
         <a-input-search v-model="content2" @search="executeJSHandle">

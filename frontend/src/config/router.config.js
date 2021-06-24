@@ -23,6 +23,11 @@ export const constantRouterMap = [
         component: () => import('@/views/example/Ipc')
       },
       {
+        path: 'shortcut',
+        name: 'Shortcut',
+        component: () => import('@/views/example/Shortcut')
+      },
+      {
         path: 'setting',
         name: 'Setting',
         component: () => import('@/views/Setting')
