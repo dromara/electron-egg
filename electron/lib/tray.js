@@ -4,7 +4,7 @@ const {app, Tray, Menu} = require('electron');
 const path = require('path');
 const pkg = require('../../package.json');
 
-module.exports = () => {
+exports.setup = function () {
   MAIN_WINDOW.on('close', (event) => {
     if (!CAN_QUIT) {
       MAIN_WINDOW.hide();
@@ -36,3 +36,5 @@ module.exports = () => {
   });
   return APP_TRAY;
 }
+
+exports = module.exports;

@@ -4,7 +4,8 @@ const path = require('path');
 const {
   app,
   webContents,
-  shell
+  shell,
+  globalShortcut
 } = require('electron');
 
 exports.getPath = function () {
@@ -25,6 +26,19 @@ exports.executeJS = function (str) {
   let jscode = `(()=>{alert('${str}');return 'fromJs:${str}';})()`;
   console.log(jscode);
   return webContents.fromId(1).executeJavaScript(jscode);
+}
+
+exports.shortcut = function (shortcutStr = '') {
+  // if (!dir) {
+  //   return false;
+  // }
+  // globalShortcut.register("CommandOrControl+Shift+S", () => {
+  //   MAIN_WINDOW.show()
+  // })
+  // globalShortcut.register("CommandOrControl+Shift+H", () => {
+  //   MAIN_WINDOW.hide()
+  // })
+  return true;
 }
 
 function getElectronPath(filepath) {

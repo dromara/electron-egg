@@ -83,4 +83,25 @@ exports.getStorageDir = function () {
   return storageDir;
 }
 
+exports.getPreferences = function () {
+  const key = storageKey.PREFERENCES;
+  if (!this.instance().has(key).value()) {
+    this.instance().set(key, {}).write();
+  }
+  const res = this.instance()
+  .get(key)
+  .value();
+
+  return res;
+};
+
+exports.setShortcuts = function (data) {
+  const key = storageKey.PREFERENCES + '.shortcuts';
+  const res = this.instance()
+  .set(key, data)
+  .write();
+
+  return res;
+};
+
 exports = module.exports;

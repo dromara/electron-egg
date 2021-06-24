@@ -4,8 +4,8 @@ const eggLauncher = require('./electron/lib/lanucher')
 const setup = require('./electron/setup')
 const electronConfig = require('./electron/config')
 const storage = require('./electron/lib/storage')
-const is = require('electron-is')
 const setTray = require('./electron/lib/tray')
+const preferences = require('./electron/preferences')
 
 // main window
 global.MAIN_WINDOW = null
@@ -76,20 +76,12 @@ async function createWindow () {
 
   // loding page
   MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/asset/loading.html'))
-  
-  // tray 
-  setTray();
+
+  // options register
+  preferences()
 
   // egg server
   await startServer(eggConfig)
-
-  // check update
-  const updateConfig = electronConfig.get('autoUpdate')
-  if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
-    || (is.linux() && updateConfig.linux)) {
-    const autoUpdater = require('./electron/autoUpdater');
-    autoUpdater.checkUpdate();
-  }
 
   return MAIN_WINDOW
 }
