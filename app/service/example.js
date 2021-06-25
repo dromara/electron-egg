@@ -17,6 +17,12 @@ class ExampleService extends BaseService {
     return result;
   }
 
+  async setShortcut(shortcutStr) {
+    const self = this;
+    let result = await self.ipcCall('example.setShortcut', shortcutStr);
+    return result;
+  }
+
   async uploadFileToSMMS(tmpFile) {
     const res = {
       code: 1000,

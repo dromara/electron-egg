@@ -74,6 +74,18 @@ class ExampleController extends BaseController {
     self.sendData(uploadRes);
   }
 
+  async setShortcut() {
+    const self = this;
+    const { ctx, service } = this;
+    const body = ctx.request.body;
+    const shortcutStr = body.shortcutStr;
+    const data = {};
+
+    await service.example.setShortcut(shortcutStr);
+
+    self.sendSuccess(data);
+  }
+
   async getWsUrl() {
     const self = this;
     const { service } = this;

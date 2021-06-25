@@ -7,6 +7,7 @@ const {
   shell,
   globalShortcut
 } = require('electron');
+const shortcut = require('../lib/shortcut');
 
 exports.getPath = function () {
   const dir = app.getAppPath();
@@ -28,16 +29,14 @@ exports.executeJS = function (str) {
   return webContents.fromId(1).executeJavaScript(jscode);
 }
 
-exports.shortcut = function (shortcutStr = '') {
-  // if (!dir) {
-  //   return false;
-  // }
-  // globalShortcut.register("CommandOrControl+Shift+S", () => {
-  //   MAIN_WINDOW.show()
-  // })
-  // globalShortcut.register("CommandOrControl+Shift+H", () => {
-  //   MAIN_WINDOW.hide()
-  // })
+exports.setShortcut = function (shortcutStr = "") {
+  if (!shortcutStr || shortcutStr == "") {
+    return false;
+  }
+  shortcut.register(shortcutStr, true, function (){
+    MAIN_WINDOW.show()
+  });
+  
   return true;
 }
 

@@ -21,7 +21,7 @@ exports.setup = function () {
   // }
 }
 
-exports.register = function (cmd, fn, force = true) {
+exports.register = function (cmd, force = true, fn) {
   const isRegistered = this.isRegistered(cmd);
   console.log('[shortcut] [register] cmd:', [cmd, isRegistered]);
   if (isRegistered && !force) {

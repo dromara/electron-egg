@@ -4,89 +4,75 @@
       demo4 快捷键
     </h3>
     <a-row :gutter="[16,16]">
-      <a-col :span="12">
-        显示窗口
-        <!-- <HotkeyInput
-          :hotkey.sync="hotKeyObj.keys"
-          :verify="handleHotkeyVerify"
-          placeholder="请按需要绑定的按键，支持组合按键"
-        /> -->
-        <a-input-search
-          style="width: 272px;"
-          v-model="cmd"
-          @search="handleSetting"
-          placeholder="快捷键">
-          <a-button slot="enterButton">
-            保存
-          </a-button>
-        </a-input-search>
-      </a-col>
-      <a-col :span="12">
-        隐藏窗口
-        <a-input-search
-          style="width: 272px;"
-          v-model="cmd"
-          @search="handleSetting"
-          placeholder="快捷键">
-          <a-button slot="enterButton">
-            保存
-          </a-button>
-        </a-input-search>
-      </a-col>
-    </a-row>  
-    <a-row :gutter="[16,16]">
-      <a-col :span="12">
+      <a-col :span="24">
         窗口最小化
-        <a-input-search
-          style="width: 272px;"
-          v-model="cmd"
-          @search="handleSetting"
-          placeholder="快捷键">
-          <a-button slot="enterButton">
-            保存
-          </a-button>
-        </a-input-search>
-      </a-col>
-      <a-col :span="12">
-        窗口还原
-        <a-input-search
-          style="width: 272px;"
-          v-model="cmd"
-          @search="handleSetting"
-          placeholder="快捷键">
-          <a-button slot="enterButton">
-            保存
-          </a-button>
-        </a-input-search>
+        <a-form @submit="handleSubmit" :form="form">
+          <a-form-item>
+            <hot-key-input
+              style="width: 100%;"
+              :hotkey.sync="hotKeyObj.keys"
+              :verify="handleHotkeyVerify"
+              :max="1"
+              type="lowser"
+              :reset="true"
+              :shake="false"
+              :range="null"
+              placeholder="快捷键">
+            </hot-key-input>
+          </a-form-item>
+          <a-form-item
+            :wrapperCol="{ span: 24 }"
+            style="text-align: center"
+          >
+            <a-button htmlType="submit" type="primary">保存</a-button>
+          </a-form-item>
+        </a-form>  
       </a-col>
     </a-row>
   </div>
 </template>
 <script>
-// import VHotkey from "v-hotkey";
-// import { openDir } from '@/api/main'
+import { localApi } from '@/api/main'
 
 export default {
   components: {},
   data() {
     return {
+      form: this.$form.createForm(this),
       cmd: '',
       hotKeyObj: {
         tab: 'save',
-        // keys: undefined
-        keys: ["Ctrl+A", "Alt+D"]
+        keys: ["Ctrl+q"]
       },
     };
   },
   methods: {
-    handleSetting (value) {
-      console.log('cmd:', value)
-      //this.cmd = ''
-    },
     handleHotkeyVerify(hotkey) {
-      console.log('验证：', hotkey, this.hotKeyObj)
+      console.log('组合键：', hotkey)
       return true;
     },
+    handleSubmit (e) {
+      e.preventDefault()
+      console.log('submit 验证：', this.hotKeyObj)
+      const shortcutStr = this.hotKeyObj.keys[0];
+      const params = {
+        'shortcutStr': shortcutStr
+      }
+      localApi('setShortcut', params).then(res => {
+        if (res.code !== 0) {
+          return false
+        }
+        this.autoLaunchChecked = res.data.isEnabled;
+      }).catch(err => {
+        console.log('err:', err)
+      })
+
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          console.log('Received values of form: ', values)
+        }
+      })
+    }
   }
 };
 </script>

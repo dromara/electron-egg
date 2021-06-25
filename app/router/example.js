@@ -21,4 +21,6 @@ module.exports = app => {
   router.post('/api/v1/example/updateTestData', controller.v1.example.updateTestData);
   // get test data
   router.post('/api/v1/example/getTestData', controller.v1.example.getTestData);
+  // set shortcut
+  router.post('/api/v1/example/setShortcut', controller.v1.example.setShortcut);
 };
