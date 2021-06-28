@@ -42,7 +42,7 @@ export default {
       cmd: '',
       hotKeyObj: {
         tab: 'save',
-        keys: ["Ctrl+q"]
+        keys: ['Ctrl+k']
       },
     };
   },
@@ -56,13 +56,16 @@ export default {
       console.log('submit 验证：', this.hotKeyObj)
       const shortcutStr = this.hotKeyObj.keys[0];
       const params = {
-        'shortcutStr': shortcutStr
+        id: 'mini_window',
+        name: '窗口最小化',
+        cmd: shortcutStr
       }
       localApi('setShortcut', params).then(res => {
         if (res.code !== 0) {
+          // this.$message.info('error')
           return false
         }
-        this.autoLaunchChecked = res.data.isEnabled;
+        this.$message.info('设置成功，请按【设置的快捷键】查看效果')
       }).catch(err => {
         console.log('err:', err)
       })

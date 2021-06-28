@@ -29,12 +29,9 @@ exports.executeJS = function (str) {
   return webContents.fromId(1).executeJavaScript(jscode);
 }
 
-exports.setShortcut = function (shortcutStr = "") {
-  if (!shortcutStr || shortcutStr == "") {
-    return false;
-  }
-  shortcut.register(shortcutStr, true, function (){
-    MAIN_WINDOW.show()
+exports.setShortcut = function (shortcutObj) {
+  shortcut.register(shortcutObj, true, function (){
+    MAIN_WINDOW.hide()
   });
   
   return true;

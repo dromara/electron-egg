@@ -3,31 +3,22 @@
 const { globalShortcut } = require('electron');
 const storage = require('./storage');
 
-const shortcutList = {
-  'CommandOrControl+Shift+s': 'showWindow',
-  'CommandOrControl+Shift+h': 'hideWindow',
-}
-
 exports.setup = function () {
   // default
-  //const preferences = storage.getPreferences();
-  // const shortcuts = preferences.hasOwnProperty('shortcuts') ? preferences.shortcuts : {};
-  // storage.setShortcuts(shortcuts);
-
-  // for (let key in shortcuts) {
-  //   const fn = this.shortcuts[key]();
-  //   console.log(fn.toString());
-  //   this.register(key, fn);
-  // }
+  storage.iniPreferences();
 }
 
-exports.register = function (cmd, force = true, fn) {
-  const isRegistered = this.isRegistered(cmd);
-  console.log('[shortcut] [register] cmd:', [cmd, isRegistered]);
-  if (isRegistered && !force) {
-    return;
+exports.register = function (shortcutObj, force = true, fn) {
+  if (!shortcutObj['id'] || !shortcutObj['name'] || !shortcutObj['cmd']) {
+    return false;
   }
-  globalShortcut.register(cmd, fn)
+  const isRegistered = this.isRegistered(shortcutObj['cmd']);
+  console.log('[shortcut] [register] cmd:', [shortcutObj['cmd'], isRegistered]);
+  if (isRegistered && !force) {
+    return false;
+  }
+  storage.setShortcuts(shortcutObj);
+  globalShortcut.register(shortcutObj['cmd'], fn)
 }
 
 exports.isRegistered = function (cmd) {
@@ -37,13 +28,5 @@ exports.isRegistered = function (cmd) {
 exports.unregister = function (cmd) {
   globalShortcut.unregister(cmd)
 }
-
-// function showWindow () {
-//   MAIN_WINDOW.show()
-// }
-
-// function hideWindow () {
-//   MAIN_WINDOW.hide()
-// }
 
 exports = module.exports;

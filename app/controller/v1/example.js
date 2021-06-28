@@ -77,11 +77,14 @@ class ExampleController extends BaseController {
   async setShortcut() {
     const self = this;
     const { ctx, service } = this;
-    const body = ctx.request.body;
-    const shortcutStr = body.shortcutStr;
+    const shortcutObj = ctx.request.body;
     const data = {};
 
-    await service.example.setShortcut(shortcutStr);
+    if (!shortcutObj['id'] || !shortcutObj['name'] || !shortcutObj['cmd']) {
+      self.sendFail({}, 'param error', 100);
+    }
+
+    await service.example.setShortcut(shortcutObj);
 
     self.sendSuccess(data);
   }

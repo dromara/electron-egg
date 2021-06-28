@@ -10,6 +10,7 @@ const storageKey = require('../../app/const/storageKey');
 const os = require('os');
 const pkg = require('../../package.json');
 const storageDb = 'db.json';
+const _ = require('lodash');
 
 exports.setup = function () {
   const storageDir = this.getStorageDir();
@@ -83,7 +84,7 @@ exports.getStorageDir = function () {
   return storageDir;
 }
 
-exports.getPreferences = function () {
+exports.iniPreferences = function () {
   const key = storageKey.PREFERENCES;
   if (!this.instance().has(key).value()) {
     this.instance().set(key, {}).write();
@@ -97,11 +98,43 @@ exports.getPreferences = function () {
 
 exports.setShortcuts = function (data) {
   const key = storageKey.PREFERENCES + '.shortcuts';
-  const res = this.instance()
-  .set(key, data)
-  .write();
+  if (!this.instance().has(key).value()) {
+    this.instance().set(key, []).write();
+  }
+  const item = this.instance().get(key).find({id: data.id}).value();
+  if (_.isEmpty(item)) {
+    this.instance()
+    .get(key)
+    .push(data)
+    .write();
+  } else {
+    this.instance()
+    .get(key)
+    .find({id: data.id})
+    .assign(data)
+    .write();
+  }
+  // const count = this.instance()
+  // .get(key)
+  // .filter(function(o) {
+  //   let isHas = false;
+  //   if (o.cmd == data.cmd) {
+  //     isHas = true;
+  //   }
+  //   return isHas;
+  // })
+  // .size()
+  // .value();
+  // if (count > 0) {
+  //   return false;
+  // }
 
-  return res;
+  // this.instance()
+  // .get(key)
+  // .push(data)
+  // .write();
+
+  return true;
 };
 
 exports = module.exports;
