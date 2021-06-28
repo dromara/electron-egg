@@ -1,9 +1,8 @@
 'use strict';
-const util = require('util');
+
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const _ = require('lodash');
 const readline = require('readline');
 const net = require('net');
 

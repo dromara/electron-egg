@@ -3,7 +3,7 @@
 const storage = require('./lib/storage');
 const config = require('./config');
 const is = require('electron-is');
-const api = require('./lib/api');
+const api = require('./api');
 const ipc = require('./ipc');
 const eLogger = require('./lib/eLogger');
 
@@ -21,7 +21,7 @@ module.exports = () => {
   api.setup();
 
   // ipc模块
-  ipc.setup();
+  //ipc.setup();
 }
 
 function loadUpdate () {
@@ -31,4 +31,6 @@ function loadUpdate () {
     const autoUpdater = require('./lib/autoUpdater');
     autoUpdater.setup();
   }
+
+  return true;
 }

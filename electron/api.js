@@ -4,9 +4,9 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const _ = require('lodash');
-const storage = require('./storage');
+const storage = require('./lib/storage');
 const socketIo = require('socket.io');
-const eLogger = require('./eLogger').get();
+const eLogger = require('./lib/eLogger').get();
 // const {app} = require('electron');
 
 const apis = {};
@@ -17,7 +17,7 @@ exports.setup = async function () {
 
   // use api server
   let port = await storage.setIpcDynamicPort();
-  eLogger.info('[api] [setup] dynamic port:', port);
+  eLogger.info('[api] [setup] dynamic ipc port:', port);
   const listen = 'localhost';
   port = port ? port : 7069;
 
@@ -86,31 +86,54 @@ exports.setup = async function () {
   server.listen(port, listen, function() {
     eLogger.info('[ api ] [setup] server is listening on', `${listen}:${port}`);
   });
+
+  return true;
 };
 
 function setApi() {
   // fs读文件的时候，用path正规化 [打包读文件问题]
-  const apiDir = path.normalize(__dirname + '/../apis/');
+  const apiDir = path.normalize(__dirname + '/apis');
   eLogger.info('[setApi] apiDir: ', apiDir);
-  // const baseDir = app.getAppPath();
-  // const apiDir = path.join(baseDir, 'electron/apis');
-  fs.readdirSync(apiDir).forEach(function(filename) {
-    eLogger.info('[setApi] filename: ', filename);
+  const fileArr = fs.readdirSync(apiDir);
+  eLogger.info('[setApi] fileArr: ', fileArr);
+  for (let i = 0; i < fileArr.length; i++) {
+    let filename = fileArr[i];
     if (path.extname(filename) === '.js' && filename !== 'index.js') {
       const name = path.basename(filename, '.js');
-      // require文件的时候，用相对路径并且不能path处理 [打包读文件问题]
-      //const fileObj = require(`../apis/${filename}`);
-      const filepath = '../apis/' + filename;
-      eLogger.info('[setApi] filepath: ', filepath);
-      const fileObj = require(`${filepath}`);
+      const fileObj = require(`./apis/${filename}`);
       _.map(fileObj, function(fn, method) {
         let methodName = getApiName(name, method);
         apis[methodName] = fn;
         eLogger.info('[setApi] method Name', methodName);
       });
     }
-  });
+  }
+  
+  return true;
 }
+
+// function setApi() {
+//   // fs读文件的时候，用path正规化 [打包读文件问题]
+//   const apiDir = path.normalize(__dirname + '/apis');
+//   eLogger.info('[setApi] apiDir: ', apiDir);
+//   // const baseDir = app.getAppPath();
+//   // const apiDir = path.join(baseDir, 'electron/apis');
+//   fs.readdirSync(apiDir).forEach(function(filename) {
+//     if (path.extname(filename) === '.js' && filename !== 'index.js') {
+//       const name = path.basename(filename, '.js');
+//       // require文件的时候，用相对路径并且不能path处理 [打包读文件问题]
+//       //const fileObj = require(`../apis/${filename}`);
+//       //const filepath = './apis/' + filename;
+//       //eLogger.info('[setApi] filepath: ', filepath);
+//       const fileObj = require(`./apis/${filepath}`);
+//       _.map(fileObj, function(fn, method) {
+//         let methodName = getApiName(name, method);
+//         apis[methodName] = fn;
+//         //eLogger.info('[setApi] method Name', methodName);
+//       });
+//     }
+//   });
+// }
 
 /**
  * get api method name
