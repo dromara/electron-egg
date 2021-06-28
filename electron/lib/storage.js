@@ -114,25 +114,6 @@ exports.setShortcuts = function (data) {
     .assign(data)
     .write();
   }
-  // const count = this.instance()
-  // .get(key)
-  // .filter(function(o) {
-  //   let isHas = false;
-  //   if (o.cmd == data.cmd) {
-  //     isHas = true;
-  //   }
-  //   return isHas;
-  // })
-  // .size()
-  // .value();
-  // if (count > 0) {
-  //   return false;
-  // }
-
-  // this.instance()
-  // .get(key)
-  // .push(data)
-  // .write();
 
   return true;
 };

@@ -13,7 +13,7 @@ exports.register = function (shortcutObj, force = true, fn) {
     return false;
   }
   const isRegistered = this.isRegistered(shortcutObj['cmd']);
-  console.log('[shortcut] [register] cmd:', [shortcutObj['cmd'], isRegistered]);
+  // console.log('[shortcut] [register] cmd:', [shortcutObj['cmd'], isRegistered]);
   if (isRegistered && !force) {
     return false;
   }

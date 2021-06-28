@@ -4,8 +4,7 @@ const path = require('path');
 const {
   app,
   webContents,
-  shell,
-  globalShortcut
+  shell
 } = require('electron');
 const shortcut = require('../lib/shortcut');
 
