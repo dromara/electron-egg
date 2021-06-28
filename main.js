@@ -4,7 +4,6 @@ const eggLauncher = require('./electron/lib/lanucher')
 const setup = require('./electron/setup')
 const electronConfig = require('./electron/config')
 const storage = require('./electron/lib/storage')
-const setTray = require('./electron/lib/tray')
 const preferences = require('./electron/preferences')
 
 // main window
@@ -48,22 +47,10 @@ async function initialize () {
       app.quit()
     }
   })
-
-  // Open url with the default browser
-  // app.on('web-contents-created', (e, webContents) => {
-  //   webContents.on('new-window', (event, url) => {
-  //       event.preventDefault()
-  //       shell.openExternal(url)
-  //   });
-  // });
 }
 
 async function createWindow () {
   MAIN_WINDOW = new BrowserWindow(electronConfig.get('windowsOption'))
-  
-  // if (process.platform === 'linux') {
-  //   windowOptions.icon = path.join(__dirname, '/assets/app-icon/png/512.png')
-  // }
 
   if (eggConfig.env === 'prod') {
     // hidden menu
@@ -82,6 +69,10 @@ async function createWindow () {
 
   // egg server
   await startServer(eggConfig)
+
+  process.on('uncaughtException', function(err) {
+    eLogger.error(err);
+  });
 
   return MAIN_WINDOW
 }

@@ -1,4 +1,5 @@
 'use strict';
+
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
@@ -6,11 +7,12 @@ const _ = require('lodash');
 const storage = require('./storage');
 const socketIo = require('socket.io');
 const eLogger = require('./eLogger').get();
-const {app} = require('electron');
+// const {app} = require('electron');
 
 const apis = {};
 
 exports.setup = async function () {
+  eLogger.info('[api] [setup] start');
   setApi();
 
   // use api server
@@ -87,16 +89,24 @@ exports.setup = async function () {
 };
 
 function setApi() {
-  const baseDir = app.getAppPath();
-  const apiDir = path.join(baseDir, 'electron/apis');
+  // fs读文件的时候，用path正规化 [打包读文件问题]
+  const apiDir = path.normalize(__dirname + '/../apis/');
+  eLogger.info('[setApi] apiDir: ', apiDir);
+  // const baseDir = app.getAppPath();
+  // const apiDir = path.join(baseDir, 'electron/apis');
   fs.readdirSync(apiDir).forEach(function(filename) {
+    eLogger.info('[setApi] filename: ', filename);
     if (path.extname(filename) === '.js' && filename !== 'index.js') {
       const name = path.basename(filename, '.js');
-      const fileObj = require(`${apiDir}/${filename}`);
+      // require文件的时候，用相对路径并且不能path处理 [打包读文件问题]
+      //const fileObj = require(`../apis/${filename}`);
+      const filepath = '../apis/' + filename;
+      eLogger.info('[setApi] filepath: ', filepath);
+      const fileObj = require(`${filepath}`);
       _.map(fileObj, function(fn, method) {
         let methodName = getApiName(name, method);
         apis[methodName] = fn;
-        // eLogger.info('[ Monitor ]', methodName);
+        eLogger.info('[setApi] method Name', methodName);
       });
     }
   });
