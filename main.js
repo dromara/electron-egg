@@ -69,10 +69,6 @@ async function createWindow () {
   // egg server
   await startServer(eggConfig)
 
-  // process.on('uncaughtException', function(err) {
-  //   eLogger.error(err);
-  // });
-
   return MAIN_WINDOW
 }
 

@@ -45,7 +45,7 @@ const config = {
     //titleBarStyle: 'hidden'
   },
   egg: {
-    title: 'electron-egg',
+    title: 'electron-egg', // 进程的title属性标识，无需改动
     env: 'prod',
     port: 7068,
     hostname: 'localhost',
