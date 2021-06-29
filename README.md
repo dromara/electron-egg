@@ -52,12 +52,12 @@
     npm run start
 
     # 打包-windows版本
-    npm run build-w
-    npm run build-w-64
+    npm run build-w (32位)
+    npm run build-w-64 (64位)
 
     # 打包-mac版本
     npm run build-m
-    npm run build-m-arm64
+    npm run build-m-arm64 (苹果M1芯片架构)
 
     # 打包-linux版本
     npm run build-l
