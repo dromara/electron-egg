@@ -52,9 +52,11 @@
 
     # 打包-windows版本
     npm run build-w
+    npm run build-w-64
 
     # 打包-mac版本
     npm run build-m
+    npm run build-m-arm64
 
     # 打包-linux版本
     npm run build-l

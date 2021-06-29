@@ -8,8 +8,10 @@
     "start": "electron .",
     "dev": "electron . --env=local",
     "test": "concurrently \"cd ./frontend && npm run serve\" \"electron . --env=local\"",
-    "build-w": "electron-builder -w",
+    "build-w": "electron-builder -w --ia32",
+    "build-w-64": "electron-builder -w --x64",
     "build-m": "electron-builder -m",
+    "build-m-arm64": "electron-builder -m --arm64",
     "build-l": "electron-builder -l deb tar.xz",
     "web-start": "egg-scripts start --daemon --title=electron-egg --ignore-stderr --env=prod --workers=1",
     "web-stop": "egg-scripts stop --title=electron-egg",
@@ -47,38 +49,26 @@
         "url": "https://github.com/wallace5303/electron-egg"
       }
     ],
-    "dmg": {
-      "contents": [
-        {
-          "x": 410,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        },
-        {
-          "x": 130,
-          "y": 150,
-          "type": "file"
-        }
-      ]
-    },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/icon.icns",
+      "artifactName": "${productName}-macos-${version}.${ext}",
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
       "icon": "build/icons/icon.ico",
-      "artifactName": "${productName}_windows_${version}.${ext}",
+      "artifactName": "${productName}-windows-${version}.${ext}",
       "target": [
         {
-          "target": "nsis",
-          "arch": [
-            "ia32"
-          ]
+          "target": "nsis"
         }
       ]
     },
     "linux": {
       "icon": "build/icons/256x256.png",
+      "artifactName": "${productName}-linux-${version}.${ext}",
       "target": [
         "deb"
       ]
