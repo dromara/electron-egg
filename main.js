@@ -13,7 +13,6 @@ global.CAN_QUIT = false;
 
 // Initialize 
 setup()
-//return
 
 // argv
 let ENV = 'prod'
@@ -70,9 +69,9 @@ async function createWindow () {
   // egg server
   await startServer(eggConfig)
 
-  process.on('uncaughtException', function(err) {
-    eLogger.error(err);
-  });
+  // process.on('uncaughtException', function(err) {
+  //   eLogger.error(err);
+  // });
 
   return MAIN_WINDOW
 }

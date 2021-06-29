@@ -4,9 +4,9 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const _ = require('lodash');
-const storage = require('./lib/storage');
+const storage = require('./storage');
 const socketIo = require('socket.io');
-const eLogger = require('./lib/eLogger').get();
+const eLogger = require('./eLogger').get();
 // const {app} = require('electron');
 
 const apis = {};
@@ -64,9 +64,6 @@ exports.setup = async function () {
   io.on('connection', (socket) => {
     socket.on('ipc', (message, callback) => {
       eLogger.info('[ api ] [setup] socket id:' + socket.id + ' message cmd: ' + message.cmd);
-      
-      // const filepath = message;
-      // const fileObj = require(`./apis/${filepath}`);
       const data = apis[message.cmd](...message.params);
       if (data && typeof data.then === 'function') { // 判断是否是异步
         data.then((data) => {
@@ -93,54 +90,12 @@ exports.setup = async function () {
   return true;
 };
 
-// function setApi() {
-//   // fs读文件的时候，用path正规化 [打包读文件问题]
-//   const apiDir = path.normalize(__dirname + '/apis');
-//   eLogger.info('[setApi] apiDir: ', apiDir);
-//   const fileArr = fs.readdirSync(apiDir);
-//   eLogger.info('[setApi] fileArr: ', fileArr);
-//   for (let i = 0; i < fileArr.length; i++) {
-//     let filename = fileArr[i];
-//     if (path.extname(filename) === '.js' && filename !== 'index.js') {
-//       const name = path.basename(filename, '.js');
-//       const fileObj = require(`./apis/${filename}`);
-//       _.map(fileObj, function(fn, method) {
-//         let methodName = getApiName(name, method);
-//         apis[methodName] = fn;
-//         eLogger.info('[setApi] method Name', methodName);
-//       });
-//     }
-//   }
-  
-//   return true;
-// }
-
-// function setApi() {
-//   // fs读文件的时候，用path正规化 [打包读文件问题]
-//   const apiDir = path.normalize(__dirname + '/apis');
-//   eLogger.info('[setApi] apiDir: ', apiDir);
-//   // const baseDir = app.getAppPath();
-//   // const apiDir = path.join(baseDir, 'electron/apis');
-//   fs.readdirSync(apiDir).forEach(function(filename) {
-//     if (path.extname(filename) === '.js' && filename !== 'index.js') {
-//       const name = path.basename(filename, '.js');
-//       // require文件的时候，用相对路径并且不能path处理 [打包读文件问题]
-//       const fileObj = require(`./apis/${filename}`);
-//       _.map(fileObj, function(fn, method) {
-//         let methodName = getApiName(name, method);
-//         apis[methodName] = fn;
-//         //eLogger.info('[setApi] method Name', methodName);
-//       });
-//     }
-//   });
-// }
-
 function setApi() {
-  const apiDir = path.normalize(__dirname + '/apis');
+  const apiDir = path.normalize(__dirname + '/../apis');
   fs.readdirSync(apiDir).forEach(function(filename) {
     if (path.extname(filename) === '.js' && filename !== 'index.js') {
       const name = path.basename(filename, '.js');
-      const fileObj = require(`./apis/${filename}`);
+      const fileObj = require(`../apis/${filename}`);
       _.map(fileObj, function(fn, method) {
         let methodName = getApiName(name, method);
         apis[methodName] = fn;
