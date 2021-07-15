@@ -41,7 +41,7 @@ module.exports = {
     'indent': ["off", 2]
   },
   parserOptions: {
-    ecmaVersion: 2015,
+    ecmaVersion: 7,
     "sourceType": "module"
   },
   "parser": "vue-eslint-parser",
