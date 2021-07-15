@@ -5,8 +5,8 @@ module.exports = {
   },
   'extends': [],
   rules: {
-    //"parser": "vue-eslint-parser",
     'no-console': 'off',
+    "parser": "vue-eslint-parser",
     "no-unused-vars":"off", //重要 var 变量为引入
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'generator-star-spacing': 'off',
@@ -44,7 +44,6 @@ module.exports = {
     ecmaVersion: 7,
     "sourceType": "module"
   },
-  "parser": "vue-eslint-parser",
   overrides: [
     {
       files: [
