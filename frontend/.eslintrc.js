@@ -4,9 +4,9 @@ module.exports = {
     node: true
   },
   'extends': [],
+  "parser": "vue-eslint-parser",
   rules: {
     'no-console': 'off',
-    "parser": "vue-eslint-parser",
     "no-unused-vars":"off", //重要 var 变量为引入
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'generator-star-spacing': 'off',
