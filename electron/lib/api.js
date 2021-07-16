@@ -22,7 +22,7 @@ exports.setup = async function () {
   port = port ? port : 7069;
 
   const server = http.createServer(function(req, res) {
-    eLogger.info('[ api ] [setup] command received', { method: req.method, url: req.url });
+    eLogger.info('[api] [setup] command received', { method: req.method, url: req.url });
     if ((req.method === 'POST' && req.url === '/send')) {
       let body = '';
       req.setEncoding('utf8');
@@ -39,12 +39,12 @@ exports.setup = async function () {
           return res.end('request body parse failure.');
         }
         if (!apis[message.cmd]) {
-          eLogger.info('[ api ] [setup] invalid command called:', message.cmd);
+          eLogger.info('[api] [setup] invalid command called:', message.cmd);
           res.statusCode = 404;
           return res.end('NG');
         }
 
-        eLogger.info('[ api ] [setup] command received message:', message);
+        eLogger.info('[api] [setup] command received message:', message);
         const data = apis[message.cmd](...message.params);
         res.statusCode = 200;
         const result = {
@@ -63,7 +63,7 @@ exports.setup = async function () {
   const io = socketIo(server);
   io.on('connection', (socket) => {
     socket.on('ipc', (message, callback) => {
-      eLogger.info('[ api ] [setup] socket id:' + socket.id + ' message cmd: ' + message.cmd);
+      eLogger.info('[api] [setup] socket id:' + socket.id + ' message cmd: ' + message.cmd);
       const data = apis[message.cmd](...message.params);
       if (data && typeof data.then === 'function') { // 判断是否是异步
         data.then((data) => {
@@ -84,7 +84,7 @@ exports.setup = async function () {
   });
 
   server.listen(port, listen, function() {
-    eLogger.info('[ api ] [setup] server is listening on', `${listen}:${port}`);
+    eLogger.info('[api] [setup] server is listening on', `${listen}:${port}`);
   });
 
   return true;

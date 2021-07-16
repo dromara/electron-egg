@@ -2,6 +2,7 @@
 
 const shortcut = require('./lib/shortcut');
 const tray = require('./lib/tray');
+const awaken = require('./lib/awaken');
 
 module.exports = () => {
   // shortcut
@@ -9,4 +10,7 @@ module.exports = () => {
 
   // tray
   tray.setup();
+
+  // awaken 
+  awaken.setup();
 }

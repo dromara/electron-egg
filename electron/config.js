@@ -59,26 +59,15 @@ const config = {
       provider: 'generic', // or github, s3, bintray
       url: 'https://raw.githubusercontent.com/wallace5303/electron-egg/master/' // resource dir
     }
+  },
+  awakeProtocol: {
+    protocol: 'electron-egg', // 自定义协议名（默认你的应用名称-英文）
+    args: []
   }
 }
 
 exports.get = function (flag = '', env = 'prod') {
   console.log('[config] [get] flag:', flag);
-  if (flag === 'developmentMode') {
-    return config.developmentMode;
-  }
-
-  if (flag === 'log') {
-    return config.log;
-  }
-
-  if (flag === 'windowsOption') {
-    return config.windowsOption;
-  }
-
-  if (flag === 'webEgg') {
-    return config.egg;
-  }
 
   if (flag === 'egg') {
     const eggConfig = storage.getEggConfig();
@@ -88,8 +77,8 @@ exports.get = function (flag = '', env = 'prod') {
     return config.egg;
   }
 
-  if (flag === 'autoUpdate') {
-    return config.autoUpdate;
+  if (flag in config) {
+    return config[flag];
   }
 
   return {};
