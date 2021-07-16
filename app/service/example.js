@@ -59,6 +59,24 @@ class ExampleService extends BaseService {
 
     return res;
   }
+
+  async autoLaunchEnable() {
+    const callResult = await this.ipcCall('example.autoLaunchEnable');
+
+    return callResult.data;
+  }
+
+  async autoLaunchDisable() {
+    const callResult = await this.ipcCall('example.autoLaunchDisable');
+
+    return callResult.data;
+  }
+
+  async autoLaunchIsEnabled() {
+    const callResult = await this.ipcCall('example.autoLaunchIsEnabled');
+
+    return callResult.data;
+  }
 }
 
 module.exports = ExampleService;

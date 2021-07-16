@@ -23,4 +23,10 @@ module.exports = app => {
   router.post('/api/v1/example/getTestData', controller.v1.example.getTestData);
   // set shortcut
   router.post('/api/v1/example/setShortcut', controller.v1.example.setShortcut);
+  // open launch
+  router.post('/api/v1/example/autoLaunchEnable', controller.v1.example.autoLaunchEnable);
+  // close launch 
+  router.post('/api/v1/example/autoLaunchDisable', controller.v1.example.autoLaunchDisable);
+  // is launch 
+  router.post('/api/v1/example/autoLaunchIsEnabled', controller.v1.example.autoLaunchIsEnabled);
 };

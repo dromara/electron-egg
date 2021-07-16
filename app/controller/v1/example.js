@@ -146,6 +146,41 @@ class ExampleController extends BaseController {
 
     self.sendSuccess(data);
   }
+
+  async autoLaunchEnable() {
+    const { service } = this;
+
+    await service.example.autoLaunchEnable();
+    const data = {
+      isEnabled: true
+    };
+
+    this.sendSuccess(data);
+  }
+  
+  async autoLaunchDisable() {
+    const { service } = this;
+    
+    await service.example.autoLaunchDisable();
+    const data = {
+      isEnabled: false
+    };
+
+    this.sendSuccess(data);
+  }
+
+  async autoLaunchIsEnabled() {
+    const { service } = this;
+
+    const data = {
+      isEnabled: null
+    };
+
+    const isEnabled = await service.example.autoLaunchIsEnabled();
+    data.isEnabled = isEnabled;
+
+    this.sendSuccess(data);
+  }
 }
 
 module.exports = ExampleController;

@@ -7,9 +7,9 @@ const mainApi = {
   uploadFile: '/api/v1/example/uploadFile',
   executeJS: '/api/v1/example/executeJS',
   setShortcut: '/api/v1/example/setShortcut',
-  autoLaunchEnable: '/api/v1/setting/autoLaunchEnable',
-  autoLaunchDisable: '/api/v1/setting/autoLaunchDisable',
-  autoLaunchIsEnabled: '/api/v1/setting/autoLaunchIsEnabled'
+  autoLaunchEnable: '/api/v1/example/autoLaunchEnable',
+  autoLaunchDisable: '/api/v1/example/autoLaunchDisable',
+  autoLaunchIsEnabled: '/api/v1/example/autoLaunchIsEnabled'
 }
 
 /**

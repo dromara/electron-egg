@@ -1,11 +1,9 @@
 'use strict';
 
 const path = require('path');
-const {
-  app,
-  webContents,
-  shell
-} = require('electron');
+
+const {app, webContents, shell} = require('electron');
+const AutoLaunchManager = require('../lib/autoLaunch');
 const shortcut = require('../lib/shortcut');
 
 exports.getPath = function () {
@@ -34,6 +32,24 @@ exports.setShortcut = function (shortcutObj) {
   });
   
   return true;
+}
+
+exports.autoLaunchEnable = function () {
+  const autoLaunchManager = new AutoLaunchManager()
+  const enable = autoLaunchManager.enable()
+  return enable
+}
+
+exports.autoLaunchDisable = function () {
+  const autoLaunchManager = new AutoLaunchManager()
+  const disable = autoLaunchManager.disable()
+  return disable
+}
+
+exports.autoLaunchIsEnabled = function () {
+  const autoLaunchManager = new AutoLaunchManager()
+  const isEnable = autoLaunchManager.isEnabled()
+  return isEnable
 }
 
 function getElectronPath(filepath) {

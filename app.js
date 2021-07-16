@@ -3,7 +3,6 @@
  * @param app
  */
 'use strict';
-global.CODE = require('./app/const/statusCode');
 
 class AppBootHook {
   constructor(app) {
