@@ -7,8 +7,6 @@
 class AppBootHook {
   constructor(app) {
     this.app = app;
-    global.OS_PLATFORM = process.platform;
-    global.IS_WIN = /^win/.test(process.platform);
   }
 
   configWillLoad() {
