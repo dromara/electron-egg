@@ -6,6 +6,7 @@ const is = require('electron-is');
 const api = require('./lib/api');
 const ipc = require('./ipc');
 const eLogger = require('./lib/eLogger');
+const crash = require('./lib/crashReport');
 
 module.exports = () => {
   // 存储模块
@@ -22,6 +23,9 @@ module.exports = () => {
 
   // ipc模块
   ipc.setup();
+
+  // 崩溃上报
+  crash.setup();
 }
 
 function loadUpdate () {

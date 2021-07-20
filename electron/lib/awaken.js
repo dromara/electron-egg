@@ -19,14 +19,14 @@ exports.setup = function () {
 	handleArgv(process.argv);
 
 	app.on('second-instance', (event, argv) => {
-			if (process.platform === 'win32') {
-					handleArgv(argv)
-			}
+		if (process.platform === 'win32') {
+			handleArgv(argv)
+		}
 	})
 
 	// 仅用于macOS
 	app.on('open-url', (event, urlStr) => {
-			handleUrl(urlStr)
+		handleUrl(urlStr)
 	})
 
 	// 参数处理
@@ -44,10 +44,10 @@ exports.setup = function () {
 		}
 		const {hostname, pathname, search} = new URL(awakeUrlStr);
 		awakeUrlInfo = {
-				urlStr: awakeUrlStr,
-				urlHost: hostname,
-				urlPath: pathname,
-				urlParams: search && search.slice(1)
+			urlStr: awakeUrlStr,
+			urlHost: hostname,
+			urlPath: pathname,
+			urlParams: search && search.slice(1)
 		}
 		eLogger.info('[awaken] [handleUrl] awakeUrlInfo:', awakeUrlInfo);
 	}

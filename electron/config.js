@@ -63,6 +63,14 @@ const config = {
   awakeProtocol: {
     protocol: 'electron-egg', // 自定义协议名（默认你的应用名称-英文）
     args: []
+  },
+  crashReport: {
+    submitURL: "",
+    productName: "", 
+    rateLimit: false,
+    uploadToServer: false, 
+    ignoreSystemCrashHandler: true,
+    compress: false
   }
 }
 
