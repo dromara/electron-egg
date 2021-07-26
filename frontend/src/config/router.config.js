@@ -28,6 +28,11 @@ export const constantRouterMap = [
         component: () => import('@/views/example/Shortcut')
       },
       {
+        path: 'openSoftware',
+        name: 'OpenSoftware',
+        component: () => import('@/views/example/OpenSoftware')
+      },
+      {
         path: 'setting',
         name: 'Setting',
         component: () => import('@/views/Setting')

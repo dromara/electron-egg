@@ -29,4 +29,6 @@ module.exports = app => {
   router.post('/api/v1/example/autoLaunchDisable', controller.v1.example.autoLaunchDisable);
   // is launch 
   router.post('/api/v1/example/autoLaunchIsEnabled', controller.v1.example.autoLaunchIsEnabled);
+  // open software
+  router.post('/api/v1/example/openSoftware', controller.v1.example.openSoftware);
 };

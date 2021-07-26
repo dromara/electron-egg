@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-
 const {app, webContents, shell} = require('electron');
 const AutoLaunchManager = require('../lib/autoLaunch');
 const shortcut = require('../lib/shortcut');
@@ -50,6 +49,17 @@ exports.autoLaunchIsEnabled = function () {
   const autoLaunchManager = new AutoLaunchManager()
   const isEnable = autoLaunchManager.isEnabled()
   return isEnable
+}
+
+exports.openSoftware = function (softName = '') {
+  if (!softName) {
+    return false;
+  }
+
+  let powershellPath = path.join(app.getAppPath(), "..", "tmp", softName);
+  console.log(powershellPath);
+
+  return true;
 }
 
 function getElectronPath(filepath) {

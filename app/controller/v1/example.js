@@ -181,6 +181,14 @@ class ExampleController extends BaseController {
 
     this.sendSuccess(data);
   }
+
+  async openSoftware() {
+    const { service } = this;
+    const data = {};
+    await service.example.openSoftware('powershell.exe');
+
+    this.sendSuccess(data);
+  }
 }
 
 module.exports = ExampleController;

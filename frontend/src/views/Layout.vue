@@ -73,6 +73,11 @@ export default {
             title: '快捷键',
             pageName: 'Shortcut',
             params: {},
+          },
+          'subMenu_5' : {
+            title: '打开其它软件',
+            pageName: 'OpenSoftware',
+            params: {},
           }
         },
         'menu_2' : {

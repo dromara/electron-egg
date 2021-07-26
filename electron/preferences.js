@@ -13,8 +13,4 @@ module.exports = () => {
 
   // awaken 
   awaken.setup();
-
-  // Open third party software
-  
-  
 }
