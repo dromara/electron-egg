@@ -29,6 +29,10 @@
     "files": [
       "**/*"
     ],
+    "extraResources":  {
+      "from": "./build/extraResources/",
+      "to": "extraResources"
+    },
     "electronDownload": {
       "mirror": "https://npm.taobao.org/mirrors/electron/"
     },
@@ -50,7 +54,7 @@
       }
     ],
     "mac": {
-      "icon": "build/icons/icon.icns",
+      "icon": "./build/icons/icon.icns",
       "artifactName": "${productName}-macos-${version}.${ext}",
       "target": [
         "dmg",
@@ -58,7 +62,7 @@
       ]
     },
     "win": {
-      "icon": "build/icons/icon.ico",
+      "icon": "./build/icons/icon.ico",
       "artifactName": "${productName}-windows-${version}.${ext}",
       "target": [
         {
@@ -67,7 +71,7 @@
       ]
     },
     "linux": {
-      "icon": "build/icons/256x256.png",
+      "icon": "./build/icons/256x256.png",
       "artifactName": "${productName}-linux-${version}.${ext}",
       "target": [
         "deb"

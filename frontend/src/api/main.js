@@ -36,33 +36,11 @@ export function localApi (uri, parameter) {
 }
 
 /**
- * openDir
- */
-export function openDir (parameter) {
-  return request({
-    url: mainApi.openDir,
-    method: 'post',
-    data: parameter
-  })
-}
-
-/**
  * uploadFile
  */
 export function uploadFile (parameter) {
   return request({
     url: mainApi.uploadFile,
-    method: 'post',
-    data: parameter
-  })
-}
-
-/**
- * executeJS
- */
-export function executeJS (parameter) {
-  return request({
-    url: mainApi.executeJS,
     method: 'post',
     data: parameter
   })

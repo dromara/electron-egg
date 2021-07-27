@@ -28,7 +28,7 @@
   </div>
 </template>
 <script>
-import { executeJS } from '@/api/main'
+import { localApi } from '@/api/main'
 export default {
   data() {
     return {
@@ -45,13 +45,13 @@ export default {
       })
     },
     executeJSHandle(value) {
-        executeJS({str: value}).then(res => {
-          if (res.code == 0) {
-            console.log(res.data);
-          }
-        }).catch(err => {
-          console.log('err:', err)
-        })
+      localApi('executeJS', {str: value}).then(res => {
+        if (res.code == 0) {
+          console.log(res.data);
+        }
+      }).catch(err => {
+        console.log('err:', err)
+      })
     }
   }
 }

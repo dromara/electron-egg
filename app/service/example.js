@@ -79,8 +79,9 @@ class ExampleService extends BaseService {
   }
 
   async openSoftware(softName) {
-    let result = await this.ipcCall('example.openSoftware', softName);
-    return result;
+    const callResult = await this.ipcCall('example.openSoftware', softName);
+    
+    return callResult.data;
   }
 }
 

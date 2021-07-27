@@ -75,7 +75,7 @@ export default {
             params: {},
           },
           'subMenu_5' : {
-            title: '打开其它软件',
+            title: '调用其它软件',
             pageName: 'OpenSoftware',
             params: {},
           }

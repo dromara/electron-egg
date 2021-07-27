@@ -82,6 +82,7 @@ class ExampleController extends BaseController {
 
     if (!shortcutObj['id'] || !shortcutObj['name'] || !shortcutObj['cmd']) {
       self.sendFail({}, 'param error', 100);
+      return;
     }
 
     await service.example.setShortcut(shortcutObj);
@@ -182,11 +183,17 @@ class ExampleController extends BaseController {
     this.sendSuccess(data);
   }
 
+  /**
+   * 调用其它程序
+   */
   async openSoftware() {
     const { service } = this;
     const data = {};
-    await service.example.openSoftware('powershell.exe');
-
+    const openResult = await service.example.openSoftware('powershell.exe');
+    if (!openResult) {
+      this.sendFail({}, '程序不存在', 100);
+      return;
+    }
     this.sendSuccess(data);
   }
 }

@@ -14,7 +14,7 @@
   </div>
 </template>
 <script>
-import { openDir } from '@/api/main'
+import { localApi } from '@/api/main'
 
 const data = [
   {
@@ -47,14 +47,13 @@ export default {
       const params = {
         'id': id
       }
-      openDir(params).then(res => {
+      localApi('openDir', params).then(res => {
         if (res.code !== 0) {
           return false
         }
-
-        }).catch(err => {
-          console.log('err:', err)
-        })
+      }).catch(err => {
+        console.log('err:', err)
+      })
     },
   }
 };
