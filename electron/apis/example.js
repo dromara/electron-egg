@@ -87,14 +87,11 @@ exports.openSoftware = function (softName = '') {
   let softwarePath = '';
   if (app.isPackaged) {
     // 打包后
-    softwarePath = path.join(app.getAppPath(), "extraResources", softName);
+    softwarePath = path.join(app.getAppPath(), "..", "extraResources", softName);
   } else {
     // 打包前
     softwarePath = path.join(app.getAppPath(), "build", "extraResources", softName);
   }
-  console.log(softwarePath);
-  eLogger.info('[example] [openSoftware] softwarePath:', softwarePath);
-
   // 检查程序是否存在
   if (!fs.existsSync(softwarePath)) {
     return false;

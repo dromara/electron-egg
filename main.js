@@ -5,6 +5,7 @@ const setup = require('./electron/setup')
 const electronConfig = require('./electron/config')
 const storage = require('./electron/lib/storage')
 const preferences = require('./electron/preferences')
+const pkg = require('./package.json');
 
 // main window
 global.MAIN_WINDOW = null
@@ -28,7 +29,9 @@ eggConfig.env = ENV
 // eLogger
 const eLogger = require('./electron/lib/eLogger').get();
 
-if (process.mas) app.setName('electron-egg')
+if (process.mas) {
+  app.setName(pkg.softName)
+}
 
 async function initialize () {
   app.whenReady().then(() => {
