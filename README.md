@@ -9,16 +9,17 @@
 
 ## 特性
 1. 跨平台：一套代码，可以打包成windows版、Mac版、Linux版或者以web网站运行
-2. 高性能：可启动多个工作进程
+2. 简单高效：支持vue、react、ejs等，数据服务请求外部api即可
 3. 工程化：可以用服务端的开发思维，来编写桌面软件
-4. 快速入门：也可以用前端来开发，数据服务请求外部api即可
+4. 高性能：可启动多个工作进程
 5. 功能丰富：服务端的技术场景都可以使用，如：路由、中间件、控制器、服务、定时任务、队列、插件等
 6. 功能demo：桌面软件常见功能，后续逐步集成并完善或提供demo
 7. 自动更新
+8. 更多功能请看文档
 
 ## 默认UI
 
-- 使用vue编写，经典三栏样式，可自定义
+- demo使用vue编写，经典三栏样式，可自定义（使用你自己的前端页面）
 
 ![](./build/img/file.png)
 ![](./build/img/ipc.png)
@@ -80,13 +81,11 @@
 
 ![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-config.png)
 
-![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-provider.png)
-
 ![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-history.png)
 
 ![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-detail.png)
 
-
+2. 可联系我（qq：530353222），展示你的项目。
 
 ## 交流
 1. qq群：735532437
@@ -106,7 +105,7 @@
 
 地址：https://github.com/wallace5303/electron-egg
 
-## 欢迎star
+## 感谢star
 
 
 
