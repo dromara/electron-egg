@@ -51,7 +51,7 @@
         # 2：【根目录】，启动后端服务
         cd ../ && npm run dev
 
-    # 生产者模式
+    # 预发布模式（环境变量为：prod）
     npm run start
 
     # 打包-windows版本
