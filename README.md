@@ -1,7 +1,10 @@
 # electron-egg 
+[![star](https://gitee.com/wallace5303/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/wallace5303/electron-egg/stargazers)
+
 一个简单、快速、功能丰富的跨平台桌面软件开发框架。
 
 - 🏆 码云最有价值开源项目
+
 
 ## 文档
 - [教程文档](https://www.yuque.com/u34495/mivcfg/xnhmms)
