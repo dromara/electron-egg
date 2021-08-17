@@ -22,19 +22,25 @@
 
 ## 使用场景
 
-1. 常规桌面软件
-![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/file.png)
-![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
+### 1. 常规桌面软件
+- demo
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/file.png)
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
 
-2. 游戏（h5相关技术开发）
+### 2. 游戏（h5相关技术开发）
+- 忍者100层
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee_game_1.png)
 
-3. 任意网站变桌面软件
-    - discuz-q论坛
+### 3. 任意网站变桌面软件
+- discuz-q论坛
+
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/dq-feed.png)
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/dq-user.png)
 
-4. web项目
+### 4. web项目
+- 网站助手：http://b.kaka996.com/
 
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/web-helper.png)
 
 
 ## 开始使用
@@ -92,9 +98,9 @@
 
 1. [小明云存储](https://gitee.com/wallace5303/xm-pic)
 
-![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-config.png)
+![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
 
-![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-detail.png)
+![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-detail.png)
 
 2. 可联系我（qq：530353222），展示你的项目。
 

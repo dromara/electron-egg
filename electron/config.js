@@ -31,10 +31,10 @@ const config = {
     }
   },
   windowsOption: {
-    width: 500,
-    height: 900,
-    // minWidth: 500,
-    // minHeight: 600,
+    width: 980,
+    height: 600,
+    minWidth: 980,
+    minHeight: 600,
     webPreferences: {
       //webSecurity: false,
       contextIsolation: false, // 设置此项为false后，才可在渲染进程中使用electron api
@@ -73,8 +73,8 @@ const config = {
     compress: false
   },
   remoteUrl: {
-    enable: true,
-    url: 'https://discuz.chat/'
+    enable: false,
+    url: 'https://discuz.chat/' // Any web url
   },
 }
 
