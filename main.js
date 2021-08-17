@@ -80,6 +80,14 @@ async function startServer (options) {
   const protocol = 'http://'
   let startRes = null
   let url = null
+  const remoteConfig = electronConfig.get('remoteUrl');
+
+  if (remoteConfig.enable) {
+    url = remoteConfig.url
+    MAIN_WINDOW.loadURL(url)
+    return true
+  }
+  
   if (ENV === 'prod') {
     url = protocol + options.hostname + ':' + options.port
   } else {

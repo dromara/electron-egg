@@ -20,12 +20,22 @@
 7. 自动更新
 8. 更多功能请看文档
 
-## 默认UI
+## 使用场景
 
-- demo使用vue编写，经典三栏样式，可自定义（使用你自己的前端页面）
+1. 常规桌面软件
+![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/file.png)
+![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
 
-![](./build/img/file.png)
-![](./build/img/ipc.png)
+2. 游戏（h5相关技术开发）
+
+3. 任意网站变桌面软件
+    - discuz-q论坛
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/dq-feed.png)
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/dq-user.png)
+
+4. web项目
+
+
 
 ## 开始使用
 
@@ -83,8 +93,6 @@
 1. [小明云存储](https://gitee.com/wallace5303/xm-pic)
 
 ![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-config.png)
-
-![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-history.png)
 
 ![](https://cdn.jsdelivr.net/gh/wallace5303/file-resource/normal/xm-pic-detail.png)
 

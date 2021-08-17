@@ -31,21 +31,21 @@ const config = {
     }
   },
   windowsOption: {
-    width: 980,
-    height: 600,
-    minWidth: 800,
-    minHeight: 600,
+    width: 500,
+    height: 900,
+    // minWidth: 500,
+    // minHeight: 600,
     webPreferences: {
       //webSecurity: false,
       contextIsolation: false, // 设置此项为false后，才可在渲染进程中使用electron api
       nodeIntegration: true,
       preload: path.join(__dirname, '../preload.js')
     },
-    //frame: false,
+    frame: true,
     //titleBarStyle: 'hidden'
   },
   egg: {
-    title: 'electron-egg', // 进程的title属性标识，无需改动
+    title: 'electron-egg', // 进程的title属性标识（默认你的应用名称-英文）
     env: 'prod',
     port: 7068,
     hostname: 'localhost',
@@ -71,7 +71,11 @@ const config = {
     uploadToServer: false, 
     ignoreSystemCrashHandler: true,
     compress: false
-  }
+  },
+  remoteUrl: {
+    enable: true,
+    url: 'https://discuz.chat/'
+  },
 }
 
 exports.get = function (flag = '', env = 'prod') {
