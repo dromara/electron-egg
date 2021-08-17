@@ -33,7 +33,7 @@ const config = {
   windowsOption: {
     width: 980,
     height: 600,
-    minWidth: 980,
+    minWidth: 800,
     minHeight: 600,
     webPreferences: {
       //webSecurity: false,
