@@ -1,4 +1,4 @@
-const {app, BrowserWindow, Menu} = require('electron')
+const {app, BrowserWindow, BrowserView, Menu} = require('electron')
 const path = require('path')
 const eggLauncher = require('./electron/lib/lanucher')
 const setup = require('./electron/setup')
@@ -27,7 +27,10 @@ const eggConfig = electronConfig.get('egg', ENV)
 eggConfig.env = ENV
 
 // eLogger
-const eLogger = require('./electron/lib/eLogger').get();
+const eLogger = require('./electron/lib/eLogger').get()
+
+// loading html
+const loadingHtml = path.join('file://', __dirname, '/asset/loading.html')
 
 if (process.mas) {
   app.setName(pkg.softName)
@@ -52,7 +55,11 @@ async function initialize () {
 }
 
 async function createWindow () {
-  MAIN_WINDOW = new BrowserWindow(electronConfig.get('windowsOption'))
+  const winOptions = electronConfig.get('windowsOption')
+  MAIN_WINDOW = new BrowserWindow(winOptions)
+
+  // loading html
+  loadingView(winOptions)
 
   if (eggConfig.env === 'prod') {
     // hidden menu
@@ -62,9 +69,6 @@ async function createWindow () {
     await storage.setDynamicPort()
     eggConfig.port = electronConfig.get('egg', eggConfig.env).port
   }
-
-  // loding page
-  MAIN_WINDOW.loadURL(path.join('file://', __dirname, '/asset/loading.html'))
 
   // options register
   preferences()
@@ -84,7 +88,7 @@ async function startServer (options) {
 
   if (remoteConfig.enable) {
     url = remoteConfig.url
-    MAIN_WINDOW.loadURL(url)
+    loadMainUrl(url)
     return true
   }
   
@@ -110,11 +114,34 @@ async function startServer (options) {
   startRes = await eggLauncher.start(options).then((res) => res, (err) => err)
   eLogger.info('[main] [startServer] startRes:', startRes)
   if (startRes === 'success') {
-    MAIN_WINDOW.loadURL(url)
+    loadMainUrl(url)
     return true
   }
   
   app.relaunch()
+}
+
+/**
+ * White screen optimization
+ */
+function loadingView (winOptions) {
+  const loadingBrowserView = new BrowserView()
+  MAIN_WINDOW.setBrowserView(loadingBrowserView)
+  loadingBrowserView.setBounds({
+    x: 0,
+    y: 0,
+    width: winOptions.width,
+    height: winOptions.height
+  });
+  loadingBrowserView.webContents.loadURL(loadingHtml);
+  
+  MAIN_WINDOW.webContents.on('dom-ready', async (event) => {
+    MAIN_WINDOW.removeBrowserView(loadingBrowserView);
+  });
+}
+
+function loadMainUrl (url) {
+  MAIN_WINDOW.loadURL(url)
 }
 
 initialize()
