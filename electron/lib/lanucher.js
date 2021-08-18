@@ -19,8 +19,8 @@ exports.start = function (argv) {
     argv.baseDir = baseDir;
     argv.framework = path.join(baseDir, 'node_modules/egg');
 
-    const pkgInfo = require(path.join(baseDir, 'package.json'));
-    argv.title = argv.title || `egg-server-${pkgInfo.name}`;
+    const appName = app.getName();
+    argv.title = argv.title || `egg-server-${appName}`;
 
     // normalize env
     env.HOME = baseDir;
