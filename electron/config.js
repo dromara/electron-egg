@@ -52,12 +52,12 @@ const config = {
     workers: 1
   },
   autoUpdate: {
-    windows: true, // windows可以开启；macOs 需要签名验证
+    windows: false, // windows可以开启；macOs 需要签名验证
     macOS: false,
     Linux: false,
     options: {
       provider: 'generic', // or github, s3, bintray
-      url: 'http://img01.kaka996.com/exe/electron-egg/' // resource dir, end with '/'
+      url: 'http://kodo.qiniu.com/exe/electron-egg/' // resource dir, end with '/'
     }
   },
   awakeProtocol: {

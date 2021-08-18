@@ -14,7 +14,7 @@ exports.setup = function () {
 
   const updateConfig = config.get('autoUpdate');
   let server = updateConfig.options.url;
-  server = `${server}${platformObj.platform}/${platformObj.arch}`;
+  server = `${server}${platformObj.platform}/`;
   eLogger.info('[autoUpdater] [setup] server: ', server);
   updateConfig.options.url = server;
 
