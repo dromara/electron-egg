@@ -3,15 +3,26 @@
 const updater = require("electron-updater");
 const autoUpdater = updater.autoUpdater;
 const config = require('../config');
-const path = require('path');
 const {app} = require('electron');
 const eLogger = require('./eLogger').get();
+const helper = require('./helper');
 
 exports.setup = function () {
-  const pkgInfo = require(path.join(app.getAppPath(), 'package.json'));
-  eLogger.info('[autoUpdater] [setup] current version: ', pkgInfo.version);
+  const version = app.getVersion();
+  eLogger.info('[autoUpdater] [setup] current version: ', version);
+  const platformObj = helper.getPlatform();
+
   const updateConfig = config.get('autoUpdate');
-  autoUpdater.setFeedURL(updateConfig.options);
+  let server = updateConfig.options.url;
+  server = `${server}${platformObj.platform}/${platformObj.arch}`;
+  eLogger.info('[autoUpdater] [setup] server: ', server);
+  updateConfig.options.url = server;
+
+  try {
+    autoUpdater.setFeedURL(updateConfig.options);
+  } catch (error) {
+    eLogger.error('[autoUpdater] [setup] setFeedURL error : ', error);
+  }
 
   autoUpdater.on('checking-for-update', () => {
     sendStatusToWindow('Checking for update...');
@@ -34,8 +45,7 @@ exports.setup = function () {
   autoUpdater.on('update-downloaded', (info) => {
     sendStatusToWindow('Update downloaded');
     // quit and update
-    MAIN_WINDOW.destroy();
-    app.quit();
+    helper.appQuit();
     autoUpdater.quitAndInstall();
   });
 
