@@ -57,7 +57,7 @@ const config = {
     Linux: false,
     options: {
       provider: 'generic', // or github, s3, bintray
-      url: 'http://kodo.qiniu.com/exe/electron-egg/' // resource dir, end with '/'
+      url: 'http://kodo.qiniu.com/' // resource dir, end with '/'
     }
   },
   awakeProtocol: {
