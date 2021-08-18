@@ -5,6 +5,7 @@ const config = require('./config');
 const shortcut = require('./lib/shortcut');
 const tray = require('./lib/tray');
 const awaken = require('./lib/awaken');
+const security = require('./lib/security');
 
 module.exports = () => {
   // shortcut
@@ -15,6 +16,9 @@ module.exports = () => {
 
   // awaken 
   awaken.setup();
+
+  // security 
+  security.setup();
 
   // check update
   const updateConfig = config.get('autoUpdate');

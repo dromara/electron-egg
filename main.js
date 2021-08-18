@@ -6,6 +6,7 @@ const electronConfig = require('./electron/config')
 const storage = require('./electron/lib/storage')
 const preferences = require('./electron/preferences')
 const pkg = require('./package.json');
+const helper = require('./electron/lib/helper');
 
 // main window
 global.MAIN_WINDOW = null
@@ -48,8 +49,8 @@ async function initialize () {
   
   app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') {
-      console.log('window-all-closed quit')
-      app.quit()
+      eLogger.info('[main] [initialize] window-all-closed quit')
+      helper.appQuit()
     }
   })
 }

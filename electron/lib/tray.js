@@ -3,6 +3,7 @@
 const {app, Tray, Menu} = require('electron');
 const path = require('path');
 const pkg = require('../../package.json');
+const helper = require('./helper');
 
 exports.setup = function () {
   MAIN_WINDOW.on('close', (event) => {
@@ -16,8 +17,7 @@ exports.setup = function () {
   let trayMenuTemplate = [{
     label: '退出',
     click: function () {
-      MAIN_WINDOW.destroy();
-      app.quit()
+      helper.appQuit();
     }
   }]
   let iconPath = path.join(app.getAppPath(), '/asset/images/tray_logo.png');

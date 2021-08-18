@@ -6,6 +6,12 @@ const {app} = require('electron');
 
 exports = module.exports;
 
+/**
+ * egg server start
+ * 
+ * @param {Object} argv
+ * @return {Promise}
+ */
 exports.start = function (argv) {
     const { env } = process;
 
