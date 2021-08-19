@@ -24,17 +24,21 @@
 
 ### 1. 常规桌面软件
 - demo
+
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/file.png)
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
 
 ### 2. 游戏（h5相关技术开发）
 - 忍者100层
+
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee_game_1.png)
 
 ### 3. 任意网站变桌面软件
 - Youtube
+
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/youtub.png)
 - discuz-q论坛
+
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/dq-feed.png)
 
 ### 4. web项目
