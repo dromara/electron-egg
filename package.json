@@ -29,7 +29,7 @@
     "files": [
       "**/*"
     ],
-    "extraResources":  {
+    "extraResources": {
       "from": "./build/extraResources/",
       "to": "extraResources"
     },
