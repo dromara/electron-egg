@@ -25,18 +25,22 @@
 
 ### 1. 常规桌面软件
 - demo
+
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/file.png)
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
 
 ### 2. 游戏（h5相关技术开发）
 - 忍者100层
+
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee_game_1.png)
 
 ### 3. 任意网站变桌面软件
+- Youtube
+
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/youtub.png)
 - discuz-q论坛
 
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/dq-feed.png)
-    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/dq-user.png)
 
 ### 4. web项目
 - 网站助手：http://b.kaka996.com/
@@ -56,7 +60,7 @@
 
 2. 安装
     ```
-    # 提升安装速度，使用国内镜像；注：勿使用cnpm命令，可能出现安装不完整
+    # 提升安装速度，使用国内镜像；
     npm config set registry https://registry.npm.taobao.org
     # 进入目录 ./electron-egg/
     npm install
