@@ -1,10 +1,14 @@
 module.exports = {
   root: true,
-  env: {
-    node: true
+  parserOptions: {
+    sourceType: 'module'
   },
-  'extends': [],
-  "parser": "vue-eslint-parser",
+  parser: 'vue-eslint-parser',
+  env: {
+    browser: true,
+    node: true,
+    es6: true,
+  },
   rules: {
     'no-console': 'off',
     "no-unused-vars":"off", //重要 var 变量为引入
@@ -14,7 +18,7 @@ module.exports = {
     // 'vue/max-attributes-per-line': [
     //   2,
     //   {
-    //     'singleline': 5,
+    //     'singleline': 10,
     //     'multiline': {
     //       'max': 1,
     //       'allowFirstLine': false
@@ -39,10 +43,6 @@ module.exports = {
     'template-curly-spacing': 'off',
     //'indent': 'off',
     'indent': ["off", 2]
-  },
-  parserOptions: {
-    ecmaVersion: 7,
-    "sourceType": "module"
   },
   overrides: [
     {

@@ -25,10 +25,11 @@
           </a-menu-item>
         </a-menu>
       </a-layout-sider>
-      <a-layout-content :style="{}">
-        <div :style="{ padding: '10px', background: '#fff', minHeight: '560px' }">
+      <a-layout-content :style="{padding: '10px', background: '#fff' }">
+        <!-- <div :style="{ padding: '10px', background: '#fff', minHeight: '560px' }">
           <router-view />
-        </div>
+        </div> -->
+        <router-view />
       </a-layout-content>
     </a-layout>
   </a-layout>
@@ -108,6 +109,7 @@ export default {
 <style lang="less" scoped>
 // 嵌套
 #components-layout-demo-responsive {
+  height: 100%;
   .logo {
     border-bottom: 1px solid #e8e8e8;
   }
@@ -151,34 +153,4 @@ export default {
     border-right: 0px solid #FAFAFA;
   }
 }
-
-// #components-layout-demo-responsive .logo {
-//   height: 32px;
-//   background: rgba(139, 137, 137, 0.2);
-//   margin: 16px;
-// }
-// #components-layout-demo-responsive .menu-item .ant-menu-item {
-//   background-color: #001529;
-//   margin-top: 0px;
-//   margin-bottom: 0px;
-// }
-// #components-layout-demo-responsive .sub-menu-item .ant-menu-item {
-//   margin-top: 0px;
-//   margin-bottom: 0px;
-// }
-// #components-layout-demo-responsive .sub-menu-item .ant-menu-item::after {
-//   border-right: 3px solid #F2F2F2;
-// }
-// #components-layout-demo-responsive .sub-menu-item.ant-menu {
-//   background: #FAFAFA;
-// }
-// #components-layout-demo-responsive .sub-menu-item.ant-menu-inline {
-//   border-right: 0px solid #FAFAFA;
-// }
-// #components-layout-demo-responsive .sub-menu-item .ant-menu-item-selected {
-//   background-color:#F2F2F2;
-//   span {
-//     color: #111;
-//   }
-// }
 </style>
