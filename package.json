@@ -13,13 +13,13 @@
     "build-m": "electron-builder -m",
     "build-m-arm64": "electron-builder -m --arm64",
     "build-l": "electron-builder -l deb tar.xz",
-    "web-start": "egg-scripts start --daemon --title=electron-egg --ignore-stderr --env=prod --workers=1",
-    "web-stop": "egg-scripts stop --title=electron-egg",
+    "web-start": "egg-scripts start --daemon --title=${name} --ignore-stderr --env=prod --workers=1",
+    "web-stop": "egg-scripts stop --title=${name}",
     "web-dev": "egg-bin dev",
     "rd": "node ./tools/replace_dist --dist_dir=./frontend/dist"
   },
   "build": {
-    "productName": "electron-egg",
+    "productName": "${softName}",
     "appId": "com.electron.egg",
     "copyright": "wallace5303",
     "directories": {
@@ -55,7 +55,7 @@
     ],
     "mac": {
       "icon": "./build/icons/icon.icns",
-      "artifactName": "${productName}-macos-${version}.${ext}",
+      "artifactName": "${softName}-macos-${version}.${ext}",
       "target": [
         "dmg",
         "zip"
@@ -63,7 +63,7 @@
     },
     "win": {
       "icon": "./build/icons/icon.ico",
-      "artifactName": "${productName}-windows-${version}.${ext}",
+      "artifactName": "${softName}-windows-${version}.${ext}",
       "target": [
         {
           "target": "nsis"
@@ -72,7 +72,7 @@
     },
     "linux": {
       "icon": "./build/icons/256x256.png",
-      "artifactName": "${productName}-linux-${version}.${ext}",
+      "artifactName": "${softName}-linux-${version}.${ext}",
       "target": [
         "deb"
       ]
