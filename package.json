@@ -20,7 +20,7 @@
   },
   "build": {
     "productName": "${softName}",
-    "appId": "com.electron.egg",
+    "appId": "com.electron.${name}",
     "copyright": "wallace5303",
     "directories": {
       "output": "out"
