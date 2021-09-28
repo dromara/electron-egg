@@ -74,7 +74,7 @@ export default {
 <style lang="less" scoped>
 #app-demo-system-launch {
   padding: 0px 10px;
-  text-align: center;
+  text-align: left;
   width: 100%;
   .one-block-1 {
     font-size: 16px;

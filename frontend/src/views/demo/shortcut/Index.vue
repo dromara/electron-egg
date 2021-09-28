@@ -2,13 +2,13 @@
   <div id="app-demo-shortcut">
     <div class="one-block-1">
       <span>
-        快捷键
+        1. 快捷键
       </span>
     </div>  
     <div class="one-block-2">
       <a-row :gutter="[16,16]">
         <a-col :span="24">
-          1. 窗口最小化
+          【窗口最小化】
           <a-form :form="form" @submit="handleSubmit">
             <a-form-item>
               <hot-key-input
@@ -86,7 +86,7 @@ export default {
 <style lang="less" scoped>
 #app-demo-shortcut {
   padding: 0px 10px;
-  text-align: center;
+  text-align: left;
   width: 100%;
   .one-block-1 {
     font-size: 16px;

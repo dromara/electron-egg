@@ -14,6 +14,7 @@ module.exports = {
     'no-console': 'off',
     "no-unused-vars":"off", //重要 var 变量为引入
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    "no-tabs":"off",
     'generator-star-spacing': 'off',
     'no-mixed-operators': 0,
     "vue/max-attributes-per-line": [2, {

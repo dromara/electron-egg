@@ -2,10 +2,12 @@
   <div id="app-demo-software-open">
     <div class="one-block-1">
       <span>
-        调用其它软件（exe、bash等可执行程序）
+        1. 调用其它软件（exe、bash等可执行程序）
       </span>
       <p/>
-      注：请先将【powershell.exe】复制到【electron-egg/build/extraResources】目录中
+      <span class="sub-content">
+        注：请先将【powershell.exe】复制到【electron-egg/build/extraResources】目录中
+      </span> 
     </div>  
     <div class="one-block-2">
       <a-list bordered :data-source="data">
@@ -52,11 +54,14 @@ export default {
 <style lang="less" scoped>
 #app-demo-software-open {
   padding: 0px 10px;
-  text-align: center;
+  text-align: left;
   width: 100%;
   .one-block-1 {
     font-size: 16px;
     padding-top: 10px;
+    .sub-content {
+      font-size: 14px;
+    }
   }
   .one-block-2 {
     padding-top: 10px;

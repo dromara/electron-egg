@@ -2,7 +2,7 @@
   <div id="app-demo-file">
     <div class="one-block-1">
       <span>
-        上传文件到sm图床
+        1. 上传文件到sm图床
       </span>
     </div>  
     <div class="one-block-2">
@@ -35,7 +35,7 @@
     </div>
     <div class="one-block-1">
       <span>
-        打开文件夹
+        2. 打开文件夹
       </span>
     </div>  
     <div class="one-block-2">
@@ -51,19 +51,20 @@
     </div>
     <div class="one-block-1">
       <span>
-        保存到目录
+        3. 选择保存目录
       </span>
     </div>  
     <div class="one-block-2">
-			<a-input addon-before="保存目录" v-model="dir_path" :value="dir_path" />
-			<a-button @click="selectDir">修改目录</a-button>
-      <!-- <a-card hoverable style="width: 100%">
-        <template slot="actions" class="ant-card-actions">
-          <a @click="selectDir">修改目录</a>
-        </template>
-        <a-card-meta v-model="dir_path" title="保存目录" :description="dir_path">
-        </a-card-meta>
-      </a-card> -->
+      <a-row>
+        <a-col :span="12">
+          <a-input v-model="dir_path" :value="dir_path" addon-before="保存目录" />
+        </a-col>
+        <a-col :span="12">
+          <a-button @click="selectDir">
+            修改目录
+          </a-button>
+        </a-col>
+      </a-row>
     </div>
   </div>
 </template>
@@ -141,6 +142,7 @@ export default {
         if (res.code !== 0) {
           return false
         }
+				console.log('res.data.dir:', res.data.dir)
         this.dir_path = res.data.dir;
       }).catch(err => {
         this.$message.error('异常')
@@ -152,7 +154,7 @@ export default {
 <style lang="less" scoped>
 #app-demo-file {
   padding: 0px 10px;
-  text-align: center;
+  text-align: left;
   width: 100%;
   .one-block-1 {
     font-size: 16px;

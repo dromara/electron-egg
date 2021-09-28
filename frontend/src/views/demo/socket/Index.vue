@@ -2,7 +2,7 @@
   <div id="app-demo-socket-ipc">
     <div class="one-block-1">
       <span>
-        渲染进程与主进程IPC通信
+        1. 渲染进程与主进程IPC通信
       </span>
     </div>  
     <div class="one-block-2">
@@ -16,7 +16,7 @@
     </div>
     <div class="one-block-1">
       <span>
-        主进程API执行网页函数
+        2. 主进程API执行网页函数
       </span>
     </div>  
     <div class="one-block-2">
@@ -62,7 +62,7 @@ export default {
 <style lang="less" scoped>
 #app-demo-socket-ipc {
   padding: 0px 10px;
-  text-align: center;
+  text-align: left;
   width: 100%;
   .one-block-1 {
     font-size: 16px;
