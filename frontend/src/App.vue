@@ -1,19 +1,13 @@
 <template>
   <div id="app">
-    <Layout />
+    <router-view/>
   </div>
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld.vue'
-// import { Button } from 'ant-design-vue'
-import Layout from './views/Layout'
-
 export default {
   name: 'App',
-  components: {
-    Layout
-  },
+  components: {},
   data() {
     return {
       current: ['mail'],

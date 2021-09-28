@@ -2,40 +2,53 @@
  * 基础路由
  * @type { *[] }
  */
+ import {AppSider, DemoMenu} from '@/layouts'
+
+ const RouteView = {
+   name: 'RouteView',
+   render: (h) => h('router-view')
+ }
 export const constantRouterMap = [
   {
     path: '/',
-    component: { template: '<div><router-view /></div>' },
+    component: AppSider,
     children: [
       {
-        path: 'fileOpenDir',
-        name: 'FileOpenDir',
-        component: () => import('@/views/example/OpenDir')
+        path: '/demo',
+        name: 'Demo',
+        component: DemoMenu,
+        children: [
+          {
+            path: '/demo/file/open-dir',
+            name: 'DemoFileOpenDir',
+            component: () => import('@/views/demo/file/OpenDir')
+          },
+          {
+            path: '/demo/file/upload-file',
+            name: 'DemoFileUploadFile',
+            component: () => import('@/views/demo/file/UploadFile')
+          },
+          {
+            path: '/demo/socket/ipc',
+            name: 'DemoSocketIpc',
+            component: () => import('@/views/demo/socket/Ipc')
+          },
+          {
+            path: '/demo/shortcut/index',
+            name: 'DemoShortcutIndex',
+            component: () => import('@/views/demo/shortcut/Index')
+          },
+          {
+            path: '/demo/software/open',
+            name: 'DemoSoftwareOpen',
+            component: () => import('@/views/demo/software/Open')
+          },
+        ]  
       },
       {
-        path: 'uploadFile',
-        name: 'UploadFile',
-        component: () => import('@/views/example/UploadFile')
-      },
-      {
-        path: 'ipc',
-        name: 'Ipc',
-        component: () => import('@/views/example/Ipc')
-      },
-      {
-        path: 'shortcut',
-        name: 'Shortcut',
-        component: () => import('@/views/example/Shortcut')
-      },
-      {
-        path: 'openSoftware',
-        name: 'OpenSoftware',
-        component: () => import('@/views/example/OpenSoftware')
-      },
-      {
-        path: 'setting',
-        name: 'Setting',
-        component: () => import('@/views/Setting')
+        path: '/other/index',
+        name: 'OtherIndex',
+        component: () => import('@/views/other/Index')
       }
     ]
   }
