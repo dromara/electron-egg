@@ -6,7 +6,6 @@
       </span>
     </div>  
     <div class="one-block-2">
-      e
     </div>
   </div>
 </template>

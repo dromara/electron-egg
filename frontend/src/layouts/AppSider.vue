@@ -32,7 +32,7 @@ export default {
         'menu_1' : {
           icon: 'home',
           title: '功能',
-          pageName: 'DemoFileUploadFile',
+          pageName: 'DemoFileIndex',
           params: {},
         },
         'menu_2' : {

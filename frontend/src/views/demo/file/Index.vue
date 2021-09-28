@@ -1,5 +1,6 @@
 <template>
-  <div id="app-demo-file-upload">
+  <div id="app-demo-file">
+		<!-- 1 -->
     <div class="one-block-1">
       <span>
         上传文件到sm图床
@@ -32,20 +33,71 @@
           <a :href="item.url" target="_blank">{{ item.url }}</a>
         </a-list-item>
       </a-list>
+    </div>
+		<!-- 2 -->
+    <div class="one-block-1">
+      <span>
+        打开文件夹
+      </span>
     </div>  
+    <div class="one-block-2">
+      <a-list :grid="{ gutter: 16, column: 4 }" :data-source="file_list">
+        <a-list-item slot="renderItem" slot-scope="item" @click="openDirectry(item.id)">
+          <a-card :title="item.content">
+            <a-button type="link">
+              打开
+            </a-button>
+          </a-card>
+        </a-list-item>
+      </a-list>
+    </div>
   </div>
 </template>
 <script>
+import { localApi } from '@/api/main'
+
+const fileList = [
+  {
+    content: '【下载】目录',
+    id: 'download'
+  },
+  {
+    content: '【图片】目录',
+    id: 'picture'
+  },
+  {
+    content: '【文档】目录',
+    id: 'doc'
+  },
+  {
+    content: '【音乐】目录',
+    id: 'music'
+  }
+];
+
 export default {
   data() {
     return {
+      file_list: fileList,
       action_url: process.env.VUE_APP_API_BASE_URL + '/api/v1/example/uploadFile',
       image_info: [],
       num: 0
     };
   },
   methods: {
-    handleChange(info) {
+    openDirectry (id) {
+      const params = {
+        'id': id
+      }
+      localApi('openDir', params).then(res => {
+        if (res.code !== 0) {
+          return false
+        }
+      }).catch(err => {
+        console.log('err:', err)
+      })
+    },
+		handleChange(info) {
       const status = info.file.status;
       if (status !== 'uploading') {
         console.log(info.file);
@@ -73,7 +125,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-file-upload {
+#app-demo-file {
   padding: 0px 10px;
   text-align: center;
   width: 100%;

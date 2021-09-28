@@ -4,7 +4,7 @@
       theme="light"
       class="layout-sider"
     >
-      <a-menu class="sub-menu-item" theme="light" mode="inline" :default-selected-keys="['menu_1']">
+      <a-menu class="sub-menu-item" theme="light" mode="inline" :default-selected-keys="['menu_100']">
         <a-menu-item v-for="(menuInfo, subIndex) in menu" :key="subIndex">
           <router-link :to="{ name: menuInfo.pageName, params: menuInfo.params}">
             <span>{{ menuInfo.title }}</span>
@@ -24,40 +24,34 @@ export default {
   data() {
     return {
       menu: {
-        'menu_1' : {
+        'menu_100' : {
           icon: 'profile',
-          title: '文件 - 上传文件',
-          pageName: 'DemoFileUploadFile',
+          title: '文件',
+          pageName: 'DemoFileIndex',
           params: {}
         },
-        'menu_2' : {
+        'menu_300' : {
           icon: 'profile',
-          title: '文件 - 打开文件夹',
-          pageName: 'DemoFileOpenDir',
+          title: '通信',
+          pageName: 'DemoSocketIndex',
           params: {}
         },
-        'menu_3' : {
+        'menu_500' : {
           icon: 'profile',
-          title: '通信 - IPC',
-          pageName: 'DemoSocketIpc',
+          title: '软件',
+          pageName: 'DemoSoftwareIndex',
           params: {}
         },
-        'menu_4' : {
+        'menu_600' : {
           icon: 'profile',
-          title: '快捷键 - 注册',
+          title: '系统',
+          pageName: 'DemoSystemIndex',
+          params: {}
+        },
+        'menu_900' : {
+          icon: 'profile',
+          title: '快捷键',
           pageName: 'DemoShortcutIndex',
-          params: {}
-        },
-        'menu_5' : {
-          icon: 'profile',
-          title: '软件 - 打开第三方软件',
-          pageName: 'DemoSoftwareOpen',
-          params: {}
-        },
-        'menu_6' : {
-          icon: 'profile',
-          title: '系统 - 开机启动',
-          pageName: 'DemoSystemAutoLaunch',
           params: {}
         },
       }
@@ -66,7 +60,7 @@ export default {
   created () {
   },
   mounted () {
-    this.menuHandle({key: 'menu_1'})
+    this.menuHandle({key: 'menu_100'})
   },
   methods: {
     menuHandle (item) {
@@ -79,7 +73,7 @@ export default {
 <style lang="less" scoped>
 #app-demo-menu {
   height: 100%;
-  text-align: left;
+  text-align: center;
   .layout-sider {
     border-top: 1px solid #e8e8e8;
     border-right: 0px solid #e8e8e8;

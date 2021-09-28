@@ -1,10 +1,5 @@
 <template>
   <div id="app-demo-system-launch">
-    <!-- <div class="one-block-1">
-      <span>
-        开机启动
-      </span>
-    </div>   -->
     <div class="one-block-2">
       <a-list class="set-auto" itemLayout="horizontal">
         <a-list-item style="text-align: left;">

@@ -19,19 +19,14 @@ export const constantRouterMap = [
         component: DemoMenu,
         children: [
           {
-            path: '/demo/file/open-dir',
-            name: 'DemoFileOpenDir',
-            component: () => import('@/views/demo/file/OpenDir')
+            path: '/demo/file/index',
+            name: 'DemoFileIndex',
+            component: () => import('@/views/demo/file/Index')
           },
           {
-            path: '/demo/file/upload-file',
-            name: 'DemoFileUploadFile',
-            component: () => import('@/views/demo/file/UploadFile')
-          },
-          {
-            path: '/demo/socket/ipc',
-            name: 'DemoSocketIpc',
-            component: () => import('@/views/demo/socket/Ipc')
+            path: '/demo/socket/index',
+            name: 'DemoSocketIndex',
+            component: () => import('@/views/demo/socket/Index')
           },
           {
             path: '/demo/shortcut/index',
@@ -40,13 +35,13 @@ export const constantRouterMap = [
           },
           {
             path: '/demo/software/open',
-            name: 'DemoSoftwareOpen',
-            component: () => import('@/views/demo/software/Open')
+            name: 'DemoSoftwareIndex',
+            component: () => import('@/views/demo/software/Index')
           },
           {
-            path: '/demo/system/autoLaunch',
-            name: 'DemoSystemAutoLaunch',
-            component: () => import('@/views/demo/system/AutoLaunch')
+            path: '/demo/system/index',
+            name: 'DemoSystemIndex',
+            component: () => import('@/views/demo/system/Index')
           },
         ]  
       },
