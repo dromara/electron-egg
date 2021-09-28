@@ -54,6 +54,12 @@ export default {
           pageName: 'DemoSoftwareOpen',
           params: {}
         },
+        'menu_6' : {
+          icon: 'profile',
+          title: '系统 - 开机启动',
+          pageName: 'DemoSystemAutoLaunch',
+          params: {}
+        },
       }
     };
   },
@@ -71,13 +77,12 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-// 嵌套
 #app-demo-menu {
   height: 100%;
   text-align: left;
   .layout-sider {
     border-top: 1px solid #e8e8e8;
-    border-right: 1px solid #e8e8e8;
+    border-right: 0px solid #e8e8e8;
     background-color: #FAFAFA;
   }
 }

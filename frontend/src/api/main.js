@@ -22,14 +22,3 @@ export function localApi (uri, parameter) {
     data: parameter
   })
 }
-
-/**
- * uploadFile
- */
-export function uploadFile (parameter) {
-  return request({
-    url: mainApi.uploadFile,
-    method: 'post',
-    data: parameter
-  })
-}

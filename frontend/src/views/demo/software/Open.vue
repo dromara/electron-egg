@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     openSoft (id) {
-			localApi('openSoftware', {}).then(res => {
+			localApi('openSoftware', {id:id}).then(res => {
 				if (res.code !== 0) {
 					this.$message.info(res.msg)
 					return false

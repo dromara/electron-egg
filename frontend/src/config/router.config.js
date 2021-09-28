@@ -43,6 +43,11 @@ export const constantRouterMap = [
             name: 'DemoSoftwareOpen',
             component: () => import('@/views/demo/software/Open')
           },
+          {
+            path: '/demo/system/autoLaunch',
+            name: 'DemoSystemAutoLaunch',
+            component: () => import('@/views/demo/system/AutoLaunch')
+          },
         ]  
       },
       {
