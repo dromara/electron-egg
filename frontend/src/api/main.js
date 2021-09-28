@@ -10,6 +10,7 @@ const mainApi = {
   autoLaunchDisable: '/api/v1/example/autoLaunchDisable',
   autoLaunchIsEnabled: '/api/v1/example/autoLaunchIsEnabled',
   openSoftware: '/api/v1/example/openSoftware',
+  selectFileDir: '/api/v1/example/selectFileDir',
 }
 
 /**

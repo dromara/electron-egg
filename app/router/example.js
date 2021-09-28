@@ -31,4 +31,6 @@ module.exports = app => {
   router.post('/api/v1/example/autoLaunchIsEnabled', controller.v1.example.autoLaunchIsEnabled);
   // open software
   router.post('/api/v1/example/openSoftware', controller.v1.example.openSoftware);
+  // select file dir
+  router.post('/api/v1/example/selectFileDir', controller.v1.example.selectFileDir);
 };

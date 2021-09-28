@@ -196,6 +196,21 @@ class ExampleController extends BaseController {
     }
     this.sendSuccess(data);
   }
+
+  /**
+   * 选择文件夹目录
+   */
+  async selectFileDir() {
+    const { service } = this;
+
+    const data = {
+      dir: ''
+    };
+    const dir = await service.example.selectDir();
+    data.dir = dir;
+
+    this.sendSuccess(data);
+  }
 }
 
 module.exports = ExampleController;

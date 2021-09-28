@@ -2,8 +2,9 @@
 
 const path = require('path');
 const fs = require('fs');
+const _ = require('lodash');
 const {exec} = require('child_process');
-const {app, webContents, shell} = require('electron');
+const {app, webContents, shell, dialog} = require('electron');
 const AutoLaunchManager = require('../lib/autoLaunch');
 const shortcut = require('../lib/shortcut');
 const eLogger = require('../lib/eLogger').get();
@@ -101,6 +102,21 @@ exports.openSoftware = function (softName = '') {
   exec(cmdStr);
 
   return true;
+}
+
+/**
+ * 选择目录
+ */
+ exports.selectDir = function () {
+  var filePaths = dialog.showOpenDialogSync({
+    properties: ['openDirectory', 'createDirectory']
+  });
+  console.log('[example] [selectDir] filePaths:', filePaths);
+  if (_.isEmpty(filePaths)) {
+    return null
+  }
+
+  return filePaths[0];
 }
 
 function getElectronPath(filepath) {

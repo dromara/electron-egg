@@ -8,6 +8,14 @@ module.exports = {
         "maxAssetSize": 30000000,
       }
     },
+    chainWebpack: config => {
+      config
+        .plugin('html')
+        .tap(args => {
+          args[0].title= 'electron-egg'
+          return args
+        })
+    },
     css: {
       loaderOptions: {
           less: {

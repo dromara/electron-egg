@@ -4,12 +4,12 @@
     :class="{ cursor: focus, 'hot-key-input-shark': isShark }"
     :style="$props.style"
     tabindex="0"
+    :placeholder="list.length ? '' : placeholder"
     @focus="handleFocus"
     @blur="focus = false"
     @keydown.prevent="handleKeydown"
-    :placeholder="list.length ? '' : placeholder"
   >
-    <div class="hot-item" v-for="(item, index) in list" :key="index">
+    <div v-for="(item, index) in list" :key="index" class="hot-item">
       <span class="hot-text">{{ formatItemText(item.text) }} </span>
       <i class="icon-close" @click="handleDeleteKey(index)"></i>
     </div>
@@ -47,7 +47,7 @@ export default {
     // 默认绑定值
     // 传入 ['Ctrl+d'] 格式时会自动处理成 [{ text: 'Ctrl+d', controlKey: { altKey: false, ctrlKey: true, shiftKey: false, key: 'd', code: 'KeyD } }]
     hotkey: {
-      type: Array | Object,
+      type: [Array , Object],
       required: true,
     },
     // 校验函数 判断是否允许显示快捷键

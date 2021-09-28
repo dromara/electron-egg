@@ -1,6 +1,5 @@
 <template>
   <div id="app-demo-file">
-		<!-- 1 -->
     <div class="one-block-1">
       <span>
         上传文件到sm图床
@@ -34,7 +33,6 @@
         </a-list-item>
       </a-list>
     </div>
-		<!-- 2 -->
     <div class="one-block-1">
       <span>
         打开文件夹
@@ -50,6 +48,22 @@
           </a-card>
         </a-list-item>
       </a-list>
+    </div>
+    <div class="one-block-1">
+      <span>
+        保存到目录
+      </span>
+    </div>  
+    <div class="one-block-2">
+			<a-input addon-before="保存目录" v-model="dir_path" :value="dir_path" />
+			<a-button @click="selectDir">修改目录</a-button>
+      <!-- <a-card hoverable style="width: 100%">
+        <template slot="actions" class="ant-card-actions">
+          <a @click="selectDir">修改目录</a>
+        </template>
+        <a-card-meta v-model="dir_path" title="保存目录" :description="dir_path">
+        </a-card-meta>
+      </a-card> -->
     </div>
   </div>
 </template>
@@ -81,7 +95,8 @@ export default {
       file_list: fileList,
       action_url: process.env.VUE_APP_API_BASE_URL + '/api/v1/example/uploadFile',
       image_info: [],
-      num: 0
+      num: 0,
+			dir_path: "D:\\www\\xing\\electron-egg",
     };
   },
   methods: {
@@ -120,7 +135,17 @@ export default {
       } else if (status === 'error') {
         this.$message.error(`${info.file.name} file upload failed.`);
       }
-    }
+    },
+		selectDir() {
+      localApi('selectFileDir', {}).then(res => {
+        if (res.code !== 0) {
+          return false
+        }
+        this.dir_path = res.data.dir;
+      }).catch(err => {
+        this.$message.error('异常')
+      })
+    },
   }
 };
 </script>

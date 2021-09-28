@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <style>
+      /* 滚动条 */
+      ::-webkit-scrollbar{width:8px;height:4px}
+      ::-webkit-scrollbar-button{width:10px;height:0}
+      ::-webkit-scrollbar-track{background:0 0}
+      ::-webkit-scrollbar-thumb{background:#E6FFEE;-webkit-transition:.3s;transition:.3s}
+      ::-webkit-scrollbar-thumb:hover{background-color:#07C160}
+      ::-webkit-scrollbar-thumb:active{background-color:#E6FFEE}
+    </style>
   </head>
   <body>
     <noscript>

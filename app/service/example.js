@@ -83,6 +83,15 @@ class ExampleService extends BaseService {
     
     return callResult.data;
   }
+
+  async selectDir() {
+    const result = await this.ipcCall('example.selectDir');
+    if (!result.data) {
+      return '';
+    }
+
+    return result.data;
+  } 
 }
 
 module.exports = ExampleService;
