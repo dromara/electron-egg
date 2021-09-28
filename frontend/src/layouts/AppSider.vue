@@ -32,7 +32,7 @@ export default {
         'menu_1' : {
           icon: 'home',
           title: '功能',
-          pageName: 'DemoFileOpenDir',
+          pageName: 'DemoFileUploadFile',
           params: {},
         },
         'menu_2' : {
@@ -44,17 +44,12 @@ export default {
       }
     };
   },
-  created () {
-    console.log('AppSider created:');
-    //this.menuHandle({key: 'menu_1'})
-  },
+  created () {},
   mounted () {
-    console.log('AppSider mounted:');
     this.menuHandle({key: 'menu_1'})
   },
   methods: {
     menuHandle (item) {
-      console.log('AppSider methods:');
       const linkInfo = this.menu[item.key]
       this.$router.push({ name: linkInfo.pageName, params: linkInfo.params})
     },

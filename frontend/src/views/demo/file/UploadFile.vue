@@ -1,46 +1,41 @@
 <template>
-  <div>
-    <h3 :style="{ marginBottom: '16px' }">
-      demo2 上传文件到sm图床实现
-    </h3>
-    <!-- dev调试时，action参数：请填写你本地完整的api地址，如：http://localhost:7068/api/v1/example/uploadFile -->
-    <a-upload-dragger
+  <div id="app-demo-file-upload">
+    <div class="one-block-1">
+      <span>
+        上传文件到sm图床
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <!-- dev调试时，action参数：请填写你本地完整的api地址，如：http://localhost:7068/api/v1/example/uploadFile -->
+      <a-upload-dragger
         name="file"
         :multiple="true"
         :action="action_url"
         @change="handleChange"
-    >
+      >
         <p class="ant-upload-drag-icon">
-        <a-icon type="inbox" />
+          <a-icon type="inbox" />
         </p>
         <p class="ant-upload-text">
-        Click or drag file to this area to upload
+          Click or drag file to this area to upload
         </p>
         <p class="ant-upload-hint">
-        Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-        band files
+          Support for a single or bulk upload. Strictly prohibit from uploading company data or other
+          band files
         </p>
-    </a-upload-dragger>
-    <!-- <a-card hoverable style="width: 240px">
-      <img
-        slot="cover"
-        alt="example"
-        src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png"
-      />
-
-    </a-card> -->
-    <p/>
-    <a-list v-if="image_info.length !== 0" size="small" bordered :data-source="image_info">
-      <a-list-item style="text-align:left;" slot="renderItem" slot-scope="item">
-        {{ item.id }}.&nbsp;{{ item.imageUrlText }}:&nbsp;
-        <a :href="item.url" target="_blank">{{ item.url }}</a>
-      </a-list-item>
-    </a-list>
+      </a-upload-dragger>
+    </div>
+    <div class="one-block-2">
+      <a-list v-if="image_info.length !== 0" size="small" bordered :data-source="image_info">
+        <a-list-item slot="renderItem" slot-scope="item" style="text-align:left;">
+          {{ item.id }}.&nbsp;{{ item.imageUrlText }}:&nbsp;
+          <a :href="item.url" target="_blank">{{ item.url }}</a>
+        </a-list-item>
+      </a-list>
+    </div>  
   </div>
 </template>
 <script>
-//import { uploadFile } from '@/api/main'
-
 export default {
   data() {
     return {
@@ -77,4 +72,17 @@ export default {
   }
 };
 </script>
-<style></style>
+<style lang="less" scoped>
+#app-demo-file-upload {
+  padding: 0px 10px;
+  text-align: center;
+  width: 100%;
+  .one-block-1 {
+    font-size: 16px;
+    padding-top: 10px;
+  }
+  .one-block-2 {
+    padding-top: 10px;
+  }
+}
+</style>

@@ -1,17 +1,22 @@
 <template>
-  <div>
-    <h3 :style="{ marginBottom: '16px' }">
-      demo5 调用其它软件（exe、bash等可执行程序）
-    </h3>
-    注：请先将【powershell.exe】复制到【electron-egg/build/extraResources】目录中
-    <a-list bordered :data-source="data">
-      <a-list-item @click="openSoft(item.id)" slot="renderItem" slot-scope="item">
-        {{ item.content }}
-        <a-button type="link">
-          执行
-        </a-button>
-      </a-list-item>
-    </a-list>
+  <div id="app-demo-software-open">
+    <div class="one-block-1">
+      <span>
+        调用其它软件（exe、bash等可执行程序）
+      </span>
+      <p/>
+      注：请先将【powershell.exe】复制到【electron-egg/build/extraResources】目录中
+    </div>  
+    <div class="one-block-2">
+      <a-list bordered :data-source="data">
+        <a-list-item slot="renderItem" slot-scope="item" @click="openSoft(item.id)">
+          {{ item.content }}
+          <a-button type="link">
+            执行
+          </a-button>
+        </a-list-item>
+      </a-list>
+    </div>
   </div>
 </template>
 <script>
@@ -32,7 +37,6 @@ export default {
   },
   methods: {
     openSoft (id) {
-      console.log('id:', id);
 			localApi('openSoftware', {}).then(res => {
 				if (res.code !== 0) {
 					this.$message.info(res.msg)
@@ -45,4 +49,17 @@ export default {
   }
 };
 </script>
-<style></style>
+<style lang="less" scoped>
+#app-demo-software-open {
+  padding: 0px 10px;
+  text-align: center;
+  width: 100%;
+  .one-block-1 {
+    font-size: 16px;
+    padding-top: 10px;
+  }
+  .one-block-2 {
+    padding-top: 10px;
+  }
+}
+</style>

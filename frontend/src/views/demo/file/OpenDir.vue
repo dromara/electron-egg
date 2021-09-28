@@ -1,16 +1,21 @@
 <template>
-  <div>
-    <h3 :style="{ marginBottom: '16px' }">
-      demo1 打开文件夹实现
-    </h3>
-    <a-list bordered :data-source="data">
-      <a-list-item @click="openDirectry(item.id)" slot="renderItem" slot-scope="item">
-        {{ item.content }}
-        <a-button type="link">
-          打开
-        </a-button>
-      </a-list-item>
-    </a-list>
+  <div id="app-demo-open-file">
+    <div class="one-block-1">
+      <span>
+        打开文件夹
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-list :grid="{ gutter: 16, column: 4 }" :data-source="data">
+        <a-list-item slot="renderItem" slot-scope="item" @click="openDirectry(item.id)">
+          <a-card :title="item.content">
+            <a-button type="link">
+              打开
+            </a-button>
+          </a-card>
+        </a-list-item>
+      </a-list>
+    </div>
   </div>
 </template>
 <script>
@@ -43,7 +48,6 @@ export default {
   },
   methods: {
     openDirectry (id) {
-      console.log('id:', id)
       const params = {
         'id': id
       }
@@ -58,4 +62,17 @@ export default {
   }
 };
 </script>
-<style></style>
+<style lang="less" scoped>
+#app-demo-open-file {
+  padding: 0px 10px;
+  text-align: center;
+  width: 100%;
+  .one-block-1 {
+    font-size: 16px;
+    padding-top: 10px;
+  }
+  .one-block-2 {
+    padding-top: 10px;
+  }
+}
+</style>

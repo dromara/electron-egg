@@ -1,34 +1,38 @@
 <template>
-  <div>
-    <h3 :style="{ marginBottom: '16px' }">
-      demo4 快捷键
-    </h3>
-    <a-row :gutter="[16,16]">
-      <a-col :span="24">
-        窗口最小化
-        <a-form @submit="handleSubmit" :form="form">
-          <a-form-item>
-            <hot-key-input
-              style="width: 100%;"
-              :hotkey.sync="hotKeyObj.keys"
-              :verify="handleHotkeyVerify"
-              :max="1"
-              type="lowser"
-              :reset="true"
-              :shake="false"
-              :range="null"
-              placeholder="快捷键">
-            </hot-key-input>
-          </a-form-item>
-          <a-form-item
-            :wrapperCol="{ span: 24 }"
-            style="text-align: center"
-          >
-            <a-button htmlType="submit" type="primary">保存</a-button>
-          </a-form-item>
-        </a-form>  
-      </a-col>
-    </a-row>
+  <div id="app-demo-shortcut">
+    <div class="one-block-1">
+      <span>
+        快捷键
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-row :gutter="[16,16]">
+        <a-col :span="24">
+          1. 窗口最小化
+          <a-form :form="form" @submit="handleSubmit">
+            <a-form-item>
+              <hot-key-input
+                style="width: 100%;"
+                :hotkey.sync="hotKeyObj.keys"
+                :verify="handleHotkeyVerify"
+                :max="1"
+                type="lowser"
+                :reset="true"
+                :shake="false"
+                :range="null"
+                placeholder="快捷键">
+              </hot-key-input>
+            </a-form-item>
+            <a-form-item
+              :wrapperCol="{ span: 24 }"
+              style="text-align: center"
+            >
+              <a-button htmlType="submit" type="primary">保存</a-button>
+            </a-form-item>
+          </a-form>  
+        </a-col>
+      </a-row>
+    </div>
   </div>
 </template>
 <script>
@@ -79,4 +83,17 @@ export default {
   }
 };
 </script>
-<style></style>
+<style lang="less" scoped>
+#app-demo-shortcut {
+  padding: 0px 10px;
+  text-align: center;
+  width: 100%;
+  .one-block-1 {
+    font-size: 16px;
+    padding-top: 10px;
+  }
+  .one-block-2 {
+    padding-top: 10px;
+  }
+}
+</style>

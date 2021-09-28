@@ -1,11 +1,12 @@
 <template>
-  <div>
-    <div>
-      <h3 :style="{ marginBottom: '16px' }">
-        demo3-1 渲染进程与主进程IPC通信
-      </h3>
+  <div id="app-demo-socket-ipc">
+    <div class="one-block-1">
+      <span>
+        渲染进程与主进程IPC通信
+      </span>
+    </div>  
+    <div class="one-block-2">
       <a-list bordered>
-        <!-- <a-button @click="helloHandle">打招呼</a-button> -->
         <a-input-search v-model="content" @search="helloHandle">
           <a-button slot="enterButton">
             send
@@ -13,10 +14,12 @@
         </a-input-search>
       </a-list>
     </div>
-    <div style="margin-top: 20px;">
-      <h3 :style="{ marginBottom: '16px' }">
-        demo3-2 主进程API执行网页函数
-      </h3>
+    <div class="one-block-1">
+      <span>
+        主进程API执行网页函数
+      </span>
+    </div>  
+    <div class="one-block-2">
       <a-list bordered>
         <a-input-search v-model="content2" @search="executeJSHandle">
           <a-button slot="enterButton">
@@ -56,4 +59,17 @@ export default {
   }
 }
 </script>
-<style></style>
+<style lang="less" scoped>
+#app-demo-socket-ipc {
+  padding: 0px 10px;
+  text-align: center;
+  width: 100%;
+  .one-block-1 {
+    font-size: 16px;
+    padding-top: 10px;
+  }
+  .one-block-2 {
+    padding-top: 10px;
+  }
+}
+</style>
