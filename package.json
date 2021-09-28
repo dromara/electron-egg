@@ -3,7 +3,7 @@
   "version": "1.14.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
-  "softName": "electron-egg",
+  "softName": "ElectronEgg",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --env=local",
