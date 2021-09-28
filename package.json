@@ -3,7 +3,6 @@
   "version": "1.14.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
-  "softName": "ElectronEgg",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --env=local",
@@ -13,14 +12,14 @@
     "build-m": "electron-builder -m",
     "build-m-arm64": "electron-builder -m --arm64",
     "build-l": "electron-builder -l deb tar.xz",
-    "web-start": "egg-scripts start --daemon --title=${name} --ignore-stderr --env=prod --workers=1",
-    "web-stop": "egg-scripts stop --title=${name}",
+    "web-start": "egg-scripts start --daemon --title=electron-egg --ignore-stderr --env=prod --workers=1",
+    "web-stop": "egg-scripts stop --title=electron-egg",
     "web-dev": "egg-bin dev",
     "rd": "node ./tools/replace_dist --dist_dir=./frontend/dist"
   },
   "build": {
-    "productName": "${softName}",
-    "appId": "com.electron.${name}",
+    "productName": "electron-egg",
+    "appId": "com.electron.electron-egg",
     "copyright": "wallace5303",
     "directories": {
       "output": "out"
@@ -55,7 +54,7 @@
     ],
     "mac": {
       "icon": "./build/icons/icon.icns",
-      "artifactName": "${softName}-macos-${version}.${ext}",
+      "artifactName": "${productName}-macos-${version}.${ext}",
       "target": [
         "dmg",
         "zip"
@@ -63,7 +62,7 @@
     },
     "win": {
       "icon": "./build/icons/icon.ico",
-      "artifactName": "${softName}-windows-${version}.${ext}",
+      "artifactName": "${productName}-windows-${version}.${ext}",
       "target": [
         {
           "target": "nsis"
@@ -72,7 +71,7 @@
     },
     "linux": {
       "icon": "./build/icons/256x256.png",
-      "artifactName": "${softName}-linux-${version}.${ext}",
+      "artifactName": "${productName}-linux-${version}.${ext}",
       "target": [
         "deb"
       ]
