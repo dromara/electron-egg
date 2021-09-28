@@ -5,7 +5,6 @@ const setup = require('./electron/setup')
 const electronConfig = require('./electron/config')
 const storage = require('./electron/lib/storage')
 const preferences = require('./electron/preferences')
-const pkg = require('./package.json');
 const helper = require('./electron/lib/helper');
 
 // main window
@@ -32,10 +31,6 @@ const eLogger = require('./electron/lib/eLogger').get()
 
 // loading html
 const loadingHtml = path.join('file://', __dirname, '/asset/loading.html')
-
-if (process.mas) {
-  app.setName(pkg.name)
-}
 
 async function initialize () {
   app.whenReady().then(() => {

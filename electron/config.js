@@ -76,6 +76,10 @@ const config = {
     enable: false,
     url: 'https://discuz.chat/' // Any web url
   },
+  tray: {
+    title: 'EE程序', // 托盘显示标题
+    icon: '/asset/images/tray_logo.png' // 托盘图标
+  }
 }
 
 exports.get = function (flag = '', env = 'prod') {
