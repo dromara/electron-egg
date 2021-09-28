@@ -23,7 +23,7 @@ exports.setup = function () {
   let iconPath = path.join(app.getAppPath(), '/asset/images/tray_logo.png');
   APP_TRAY = new Tray(iconPath);
   const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
-  APP_TRAY.setToolTip(pkg.softName);
+  APP_TRAY.setToolTip(pkg.name);
   APP_TRAY.setContextMenu(contextMenu);
   APP_TRAY.on('click', function(){
     if (MAIN_WINDOW.isVisible()) {

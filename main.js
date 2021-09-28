@@ -34,7 +34,7 @@ const eLogger = require('./electron/lib/eLogger').get()
 const loadingHtml = path.join('file://', __dirname, '/asset/loading.html')
 
 if (process.mas) {
-  app.setName(pkg.softName)
+  app.setName(pkg.name)
 }
 
 async function initialize () {
