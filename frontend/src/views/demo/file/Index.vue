@@ -35,19 +35,16 @@
     </div>
     <div class="one-block-1">
       <span>
-        2. 打开文件夹
+        2. 系统原生对话框
       </span>
     </div>  
     <div class="one-block-2">
-      <a-list :grid="{ gutter: 16, column: 4 }" :data-source="file_list">
-        <a-list-item slot="renderItem" slot-scope="item" @click="openDirectry(item.id)">
-          <a-card :title="item.content">
-            <a-button type="link">
-              打开
-            </a-button>
-          </a-card>
-        </a-list-item>
-      </a-list>
+      <a-space>
+        <a-button @click="messageShow('ipc')">消息提示(ipc)</a-button>
+        <a-button @click="messageShowConfirm('ipc')">消息提示与确认(ipc)</a-button>
+        <a-button @click="messageShow('http')">消息提示(http)</a-button>
+        <a-button @click="messageShowConfirm('http')">消息提示与确认(http)</a-button>
+      </a-space>
     </div>
     <div class="one-block-1">
       <span>
@@ -65,6 +62,24 @@
           </a-button>
         </a-col>
       </a-row>
+    </div>      
+    <div class="one-block-1">
+      <span>
+        4. 打开文件夹
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-list :grid="{ gutter: 16, column: 4 }" :data-source="file_list">
+        <a-list-item slot="renderItem" slot-scope="item" @click="openDirectry(item.id)">
+          <a-card :title="item.content">
+            <a-button type="link">
+              打开
+            </a-button>
+          </a-card>
+        </a-list-item>
+      </a-list>
+    </div>
+    <div class="footer">
     </div>
   </div>
 </template>
@@ -137,16 +152,52 @@ export default {
         this.$message.error(`${info.file.name} file upload failed.`);
       }
     },
-		selectDir() {
+    selectDir() {
       localApi('selectFileDir', {}).then(res => {
         if (res.code !== 0) {
           return false
         }
-				console.log('res.data.dir:', res.data.dir)
+        console.log('res.data.dir:', res.data.dir)
         this.dir_path = res.data.dir;
       }).catch(err => {
         this.$message.error('异常')
       })
+    },
+		messageShow(type) {
+      const self = this;
+      console.log('[messageShow] type:', type)
+      if (type == 'http') {
+        localApi('messageShow', {}).then(res => {
+          if (res.code !== 0) {
+            return false
+          }
+          console.log('res:', res)
+        }).catch(err => {
+          self.$message.error(err + '异常')
+        })
+      } else { 
+        self.$ipcCallMain('example.messageShow', '').then(r => {
+          self.$message.info(r);
+        })
+      }
+    },    
+    messageShowConfirm(type) {
+      const self = this;
+      console.log('[messageShowConfirm] type:', type)
+      if (type == 'http') {
+        localApi('messageShowConfirm', {}).then(res => {
+          if (res.code !== 0) {
+            return false
+          }
+          console.log('res:', res)
+        }).catch(err => {
+          self.$message.error(err + '异常')
+        })
+      } else {
+        self.$ipcCallMain('example.messageShowConfirm', '').then(r => {
+          self.$message.info(r);
+        })
+      }
     },
   }
 };
@@ -161,6 +212,9 @@ export default {
     padding-top: 10px;
   }
   .one-block-2 {
+    padding-top: 10px;
+  }
+  .footer {
     padding-top: 10px;
   }
 }

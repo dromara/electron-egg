@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * egg服务调用electron功能时，建议使用该模块
+ */
+
 const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
@@ -7,7 +11,6 @@ const {exec} = require('child_process');
 const {app, webContents, shell, dialog} = require('electron');
 const AutoLaunchManager = require('../lib/autoLaunch');
 const shortcut = require('../lib/shortcut');
-const eLogger = require('../lib/eLogger').get();
 
 /**
  * app根目录
@@ -107,8 +110,8 @@ exports.openSoftware = function (softName = '') {
 /**
  * 选择目录
  */
- exports.selectDir = function () {
-  var filePaths = dialog.showOpenDialogSync({
+exports.selectDir = function () {
+  const filePaths = dialog.showOpenDialogSync({
     properties: ['openDirectory', 'createDirectory']
   });
   console.log('[example] [selectDir] filePaths:', filePaths);
@@ -117,6 +120,50 @@ exports.openSoftware = function (softName = '') {
   }
 
   return filePaths[0];
+}
+
+/**
+ * 测试用的 - 忽略
+ */
+exports.testElectronApi = function () {
+  const filePaths = dialog.showSaveDialogSync({
+    properties: ['openFile', 'multiSelections']
+  });
+  console.log('[example] [testElectronApi] filePaths:', filePaths);
+
+  return true;
+}
+
+/**
+ * 显示消息对话框
+ */
+exports.messageShow = function () {
+  dialog.showMessageBoxSync({
+    type: 'info', // "none", "info", "error", "question" 或者 "warning"
+    title: '自定义标题-message',
+    message: '自定义消息内容',
+    detail: '其它的额外信息'
+  })
+
+  return true;
+}
+
+/**
+ * 显示消息对话框和确认
+ */
+exports.messageShowConfirm = function () {
+  const res = dialog.showMessageBoxSync({
+    type: 'info',
+    title: '自定义标题-message',
+    message: '自定义消息内容',
+    detail: '其它的额外信息',
+    cancelId: 1, // 用于取消对话框的按钮的索引
+    defaultId: 0, // 设置默认选中的按钮
+    buttons: ['确认', '取消'], // 按钮及索引
+  })
+  console.log('[example] [messageShowConfirm] 结果:', res, res === 0 ? '点击确认按钮' : '点击取消按钮');
+
+  return true;
 }
 
 function getElectronPath(filepath) {

@@ -91,7 +91,27 @@ class ExampleService extends BaseService {
     }
 
     return result.data;
+  }
+
+  async testElectronApi(id = 0) {
+    await this.ipcCall('example.testElectronApi');
+
+    return null;
+  }
+
+  async messageShow() {
+    await this.ipcCall('example.messageShow');
+
+    return true;
   } 
+
+  async messageShowConfirm() {
+    await this.ipcCall('example.messageShowConfirm');
+
+    return true;
+  }   
+
+
 }
 
 module.exports = ExampleService;

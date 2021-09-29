@@ -28,6 +28,18 @@
         </a-input-search>
       </a-list>
     </div>
+    <div class="one-block-1">
+      <span>
+        3. 长消息： 服务端持续向前端页面发消息
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-space>
+        <a-button @click="socketMsgStart">开始</a-button>
+        <a-button @click="socketMsgStop">结束</a-button>
+        结果：{{ socketMessageString }}
+      </a-space>
+    </div>
   </div>
 </template>
 <script>
@@ -37,13 +49,14 @@ export default {
     return {
       content: 'hello',
       content2: 'hello world',
-      reply: ''
+      reply: '',
+      socketMessageString: ''
     }
   },
   methods: {
     helloHandle(value) {
       const self = this;
-      this.$callMain('example.hello', value).then(r => {
+      this.$ipcCallMain('example.hello', value).then(r => {
         self.$message.info(r);
       })
     },
@@ -55,7 +68,23 @@ export default {
       }).catch(err => {
         console.log('err:', err)
       })
-    }
+    },
+    socketMsgStart() {
+      const self = this;
+      self.$ipc.on('example.socketMessageStart', (event, result) => {
+        console.log('[ipcRenderer] [socketMsgStart] result:', result)
+        self.socketMessageString = result;
+      })
+      self.$ipc.send('example.socketMessageStart', '时间')
+    },
+    socketMsgStop() {
+      const self = this;
+      self.$ipc.on('example.socketMessageStop', (event, result) => {
+        console.log('[ipcRenderer] [socketMsgStop] result:', result)
+        self.socketMessageString = result;
+      })
+      self.$ipc.send('example.socketMessageStop', '')
+    },
   }
 }
 </script>

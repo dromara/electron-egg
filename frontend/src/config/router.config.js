@@ -43,6 +43,11 @@ export const constantRouterMap = [
             name: 'DemoSystemIndex',
             component: () => import('@/views/demo/system/Index')
           },
+          {
+            path: '/demo/testapi/index',
+            name: 'DemoTestApiIndex',
+            component: () => import('@/views/demo/testapi/Index')
+          },
         ]  
       },
       {

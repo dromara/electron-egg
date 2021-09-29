@@ -11,6 +11,9 @@ const mainApi = {
   autoLaunchIsEnabled: '/api/v1/example/autoLaunchIsEnabled',
   openSoftware: '/api/v1/example/openSoftware',
   selectFileDir: '/api/v1/example/selectFileDir',
+  messageShow: '/api/v1/example/messageShow',
+  messageShowConfirm: '/api/v1/example/messageShowConfirm',
+  testElectronApi: '/api/v1/example/testElectronApi',
 }
 
 /**

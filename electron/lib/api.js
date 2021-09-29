@@ -7,7 +7,6 @@ const _ = require('lodash');
 const storage = require('./storage');
 const socketIo = require('socket.io');
 const eLogger = require('./eLogger').get();
-// const {app} = require('electron');
 
 const apis = {};
 
@@ -112,5 +111,4 @@ function setApi() {
  */
 function getApiName (jsname, method) {
   return jsname + '.' + method;
-  //return jsname + method.charAt(0).toUpperCase() + method.slice(1);
 }

@@ -4,15 +4,15 @@ import 'ant-design-vue/dist/antd.less';
 import App from './App'
 import router from './router'
 import { VueAxios } from './utils/request'
-import InjectIpc from '@/utils/injectIpc'
+import IpcRenderer from '@/utils/ipcRenderer'
 import HotKeyInput from '@/utils/shortcut/index.js'
 
 Vue.use(antd)
 // mount axios to `Vue.$http` and `this.$http`
 Vue.use(VueAxios)
 // 全局注入IPC
-Vue.use(InjectIpc)
-
+Vue.use(IpcRenderer)
+// 快捷键框组件
 Vue.use(HotKeyInput)
 
 Vue.config.productionTip = false

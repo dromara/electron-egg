@@ -7,6 +7,20 @@ const path = require('path');
 
 class ExampleController extends BaseController {
 
+  /**
+   * test electron api
+   */
+  async testElectronApi() {
+    const { ctx, service } = this;
+    const body = ctx.request.body;
+    const id = body.id;
+    const data = {};
+
+    await service.example.testElectronApi(id);
+
+    this.sendSuccess(data);
+  }
+
   async openLocalDir() {
     const self = this;
     const { ctx, service } = this;
@@ -208,6 +222,28 @@ class ExampleController extends BaseController {
     };
     const dir = await service.example.selectDir();
     data.dir = dir;
+
+    this.sendSuccess(data);
+  }
+
+  /**
+   * 显示消息对话框
+   */
+  async messageShow() {
+    const { service } = this;
+    const data = {};
+    await service.example.messageShow();
+
+    this.sendSuccess(data);
+  }
+
+  /**
+   * 显示消息对话框和确认
+   */
+  async messageShowConfirm() {
+    const { service } = this;
+    const data = {};
+    await service.example.messageShowConfirm();
 
     this.sendSuccess(data);
   }

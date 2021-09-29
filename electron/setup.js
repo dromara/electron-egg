@@ -1,10 +1,10 @@
 'use strict';
 
-const storage = require('./lib/storage');
-const config = require('./config');
 const is = require('electron-is');
+const config = require('./config');
+const storage = require('./lib/storage');
 const api = require('./lib/api');
-const ipc = require('./ipc');
+const ipc = require('./lib/ipcMain');
 const eLogger = require('./lib/eLogger');
 const crash = require('./lib/crashReport');
 
