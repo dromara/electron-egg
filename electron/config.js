@@ -54,7 +54,7 @@ const config = {
   autoUpdate: {
     windows: false, // windows可以开启；macOs 需要签名验证
     macOS: false,
-    Linux: false,
+    linux: false,
     options: {
       provider: 'generic', // or github, s3, bintray
       url: 'http://kodo.qiniu.com/' // resource dir, end with '/'
