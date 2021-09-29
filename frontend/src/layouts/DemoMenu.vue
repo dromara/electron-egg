@@ -82,7 +82,7 @@ export default {
   text-align: center;
   .layout-sider {
     border-top: 1px solid #e8e8e8;
-    border-right: 0px solid #e8e8e8;
+    border-right: 1px solid #e8e8e8;
     background-color: #FAFAFA;
   }
 }

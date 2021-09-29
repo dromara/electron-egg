@@ -5,9 +5,9 @@
         1. 测试一些操作系统api
       </span>
     </div>  
-    <div class="one-block-2">
+    <!-- <div class="one-block-2">
       <a-button @click="exec(1)"> 点击 </a-button>
-    </div>
+    </div> -->
   </div>
 </template>
 <script>

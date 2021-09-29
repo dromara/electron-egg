@@ -32,9 +32,9 @@ const config = {
   },
   windowsOption: {
     width: 980,
-    height: 600,
+    height: 650,
     minWidth: 800,
-    minHeight: 600,
+    minHeight: 650,
     webPreferences: {
       //webSecurity: false,
       contextIsolation: false, // 设置此项为false后，才可在渲染进程中使用electron api
