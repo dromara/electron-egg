@@ -3,8 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const fsPro = require('fs-extra');
 
-console.log('moving frontend asset to egg public dir');
-
+console.log('[electron] [replace_dist] moving frontend asset to egg public dir');
+console.log('[electron] [replace_dist] start');
 // argv
 let distDir = '';
 for (let i = 0; i < process.argv.length; i++) {
@@ -14,17 +14,32 @@ for (let i = 0; i < process.argv.length; i++) {
   }
 }
 
-const sourceDir = path.normalize(distDir);
-distDir = path.normalize('./app/public');
+const fileExist = (filePath) => {
+  try {
+    return fs.statSync(filePath).isFile();
+  } catch (err) {
+    return false;
+  }
+};
 
-// del dir and move
-fs.rmdirSync(distDir, {recursive: true});
-fsPro.copySync(sourceDir, distDir);
+const sourceDir = path.normalize(distDir);
+const targetDir = path.normalize('./app/public');
+const sourceIndexFile = path.normalize(sourceDir + '/index.html');
+const targetIndexFile = path.normalize( './app/view/index.ejs');
+if (!fileExist(sourceIndexFile)) {
+  console.log('[electron] [replace_dist] ERROR source dir is empty!!!');
+  return
+}
+
+console.log('[electron] [replace_dist] delete target dir:', targetDir);
+fs.rmdirSync(targetDir, {recursive: true});
+
+console.log('[electron] [replace_dist] copy :', sourceDir);
+fsPro.copySync(sourceDir, targetDir);
 
 // replace ejs
-const sourceFile = path.normalize(distDir + '/index.html');
-const distFile = path.normalize( './app/view/index.ejs');
-fsPro.copySync(sourceFile, distFile);
+fsPro.copySync(sourceIndexFile, targetIndexFile);
+console.log('[electron] [replace_dist] replace index.ejs');
 
-console.log('Move over');
+console.log('[electron] [replace_dist] end');
 
