@@ -11,7 +11,7 @@
 - 文档进行了重新编写，更加直观，一定要看！！！
 
 ## 特性
-0. 很多小伙伴问可以商用么？可以，无任何限制。
+0. 很多小伙伴问可以商用么？基于本框架开发的软件，可以商用。
 1. 跨平台：一套代码，可以打包成windows版、Mac版、Linux版或者以web网站运行
 2. 简单高效：支持vue、react、ejs等
 3. 工程化：可以用服务端的开发思维，来编写桌面软件
@@ -26,7 +26,8 @@
 ### 1. 常规桌面软件
 - demo
 
-    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/file.png)
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/home.png)
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/socket.png)
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
 
 ### 2. 游戏（h5相关技术开发）
