@@ -1,5 +1,4 @@
-const { ipcRenderer: ipc } = window.require('electron')
-
+const { ipcRenderer: ipc } = window.require && window.require('electron') || {}
 /**
  * 异步调用主函数
  * @param ipc

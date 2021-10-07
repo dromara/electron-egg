@@ -53,16 +53,3 @@ exports.setup = () => {
     }
   })
 }
-
-
-
-// exports.setup = () => {
-//   const ipcDir = path.normalize(__dirname + '/../ipc');
-
-//   fs.readdirSync(ipcDir).forEach(function (filename) {
-//     if (path.extname(filename) === '.js' && filename !== 'index.js') {
-//       const filePath = path.join(ipcDir, filename)
-//       require(filePath)
-//     }
-//   })
-// }
