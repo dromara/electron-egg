@@ -48,6 +48,12 @@ export default {
           pageName: 'DemoWindowIndex',
           params: {}
         },
+        'menu_402' : {
+          icon: 'profile',
+          title: '通知',
+          pageName: 'DemoNotificationIndex',
+          params: {}
+        },
         'menu_500' : {
           icon: 'profile',
           title: '软件',

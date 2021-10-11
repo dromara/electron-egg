@@ -9,11 +9,13 @@
  * @param arg 接收到的消息
  */
 
-const {app, dialog, BrowserWindow, BrowserView} = require('electron');
+const {app, dialog, BrowserWindow, BrowserView, Notification} = require('electron');
 const path = require('path');
+const _ = require('lodash');
 
 let myTimer = null;
 let browserViewObj = null;
+let notificationObj = null;
 
 exports.hello = function (event, channel, msg) {
   let newMsg = msg + " +1"
@@ -123,4 +125,43 @@ exports.removeViewContent = function () {
   winObj.loadURL(content);
 
   return winObj.id
+}
+
+/**
+ * 创建系统通知
+ */
+ exports.sendNotification = function (event, channel, arg) {
+  if (!Notification.isSupported()) {
+    return '当前系统不支持通知';
+  }
+
+  let options = {};
+  if (!_.isEmpty(arg.title)) {
+    options.title = arg.title;
+  }
+  if (!_.isEmpty(arg.subtitle)) {
+    options.subtitle = arg.subtitle;
+  }
+  if (!_.isEmpty(arg.body)) {
+    options.body = arg.body;
+  }
+  if (!_.isEmpty(arg.silent)) {
+    options.silent = arg.silent;
+  }
+
+  notificationObj = new Notification(options);
+
+  if (arg.clickEvent) {
+    notificationObj.on('click', (e) => {
+      let data = {
+        type: 'click',
+        msg: '您点击了通知消息'
+      }
+      event.reply(`${channel}`, data)
+    });
+  }
+
+  notificationObj.show();
+
+  return true
 }
