@@ -4,7 +4,7 @@
       theme="light"
       class="layout-sider"
     >
-      <a-menu class="sub-menu-item" theme="light" mode="inline" :default-selected-keys="['menu_100']">
+      <a-menu theme="light" mode="inline" :default-selected-keys="['menu_100']">
         <a-menu-item v-for="(menuInfo, subIndex) in menu" :key="subIndex">
           <router-link :to="{ name: menuInfo.pageName, params: menuInfo.params}">
             <span>{{ menuInfo.title }}</span>
@@ -36,6 +36,12 @@ export default {
           pageName: 'DemoSocketIndex',
           params: {}
         },
+        'menu_400' : {
+          icon: 'profile',
+          title: '视图',
+          pageName: 'DemoWindowViewIndex',
+          params: {}
+        },
         'menu_500' : {
           icon: 'profile',
           title: '软件',
@@ -59,7 +65,7 @@ export default {
           title: '测试',
           pageName: 'DemoTestApiIndex',
           params: {}
-        },
+        }                                                 
       }
     };
   },
@@ -84,6 +90,7 @@ export default {
     border-top: 1px solid #e8e8e8;
     border-right: 1px solid #e8e8e8;
     background-color: #FAFAFA;
+    overflow: auto;
   }
 }
 </style>

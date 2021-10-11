@@ -5,10 +5,10 @@ const setup = require('./electron/setup')
 const electronConfig = require('./electron/config')
 const storage = require('./electron/lib/storage')
 const preferences = require('./electron/preferences')
-const helper = require('./electron/lib/helper');
+const helper = require('./electron/lib/helper')
 
 // main window
-global.MAIN_WINDOW = null
+global.MAIN_WINDOW = null;
 global.APP_TRAY = null;
 global.CAN_QUIT = false;
 
@@ -129,10 +129,10 @@ function loadingView (winOptions) {
     width: winOptions.width,
     height: winOptions.height
   });
-  loadingBrowserView.webContents.loadURL(loadingHtml);
+  loadingBrowserView.webContents.loadURL(loadingHtml)
   
   MAIN_WINDOW.webContents.on('dom-ready', async (event) => {
-    MAIN_WINDOW.removeBrowserView(loadingBrowserView);
+    MAIN_WINDOW.removeBrowserView(loadingBrowserView)
   });
 }
 

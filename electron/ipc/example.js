@@ -9,9 +9,11 @@
  * @param arg 接收到的消息
  */
 
-const {dialog} = require('electron');
+const {app, dialog, BrowserWindow, BrowserView} = require('electron');
+const path = require('path');
 
 let myTimer = null;
+let browserViewObj = null;
 
 exports.hello = function (event, channel, msg) {
   let newMsg = msg + " +1"
@@ -42,7 +44,7 @@ exports.messageShowConfirm = function (event, channel, arg) {
     buttons: ['确认', '取消'], // 按钮及索引
   })
   let data = (res === 0) ? '点击确认按钮' : '点击取消按钮';
-  console.log('[electron] [example] [messageShowConfirm] 结果:', res, );
+  console.log('[electron] [ipc] [example] [messageShowConfirm] 结果:', res, );
 
   return data;
 }
@@ -68,4 +70,35 @@ exports.socketMessageStart = function (event, channel, arg) {
 exports.socketMessageStop = function () {
   clearInterval(myTimer);
   return '停止了'
+}
+
+/**
+ * 加载视图内容
+ */
+exports.loadViewContent = function (event, channel, arg) {
+  let content = null;
+  if (arg.type == 'html') {
+    content = path.join('file://', app.getAppPath(), arg.content)
+  } else {
+    content = arg.content;
+  }
+  
+  browserViewObj = new BrowserView();
+  MAIN_WINDOW.setBrowserView(browserViewObj)
+  browserViewObj.setBounds({
+    x: 300,
+    y: 80,
+    width: 650,
+    height: 480
+  });
+  browserViewObj.webContents.loadURL(content);
+  return true
+}
+
+/**
+ * 移除视图内容
+ */
+exports.removeViewContent = function () {
+  MAIN_WINDOW.removeBrowserView(browserViewObj);
+  return true
 }
