@@ -2,24 +2,22 @@
   <div id="app-demo-window-view">
     <div class="one-block-1">
       <span>
-        1. 嵌入web内容
+        1. 新窗口中加载web内容
       </span>
     </div>  
     <div class="one-block-2">
       <a-space>
-        <a-button @click="loadViewContent(0)">加载百度页面</a-button>
-        <a-button @click="removeViewContent(0)">移除百度页面</a-button>
+        <a-button @click="createWindow(0)">打开哔哩哔哩</a-button>
       </a-space>
     </div>
     <div class="one-block-1">
       <span>
-        2. 嵌入html内容
+        2. 新窗口中加载html内容
       </span>
     </div>  
     <div class="one-block-2">
       <a-space>
-        <a-button @click="loadViewContent(1)">加载html页面</a-button>
-        <a-button @click="removeViewContent(1)">移除html页面</a-button>
+        <a-button @click="createWindow(1)">打开html页面</a-button>
       </a-space>
     </div>
   </div>
@@ -32,7 +30,7 @@ export default {
       views: [
         {
           type: 'web',
-          content: 'https://www.baidu.com/'
+          content: 'https://www.bilibili.com/'
         },
         {
           type: 'html',
@@ -42,15 +40,9 @@ export default {
     };
   },
   methods: {
-    loadViewContent (index) {
+    createWindow (index) {
       const self = this;
-      self.$ipcCallMain('example.loadViewContent', this.views[index]).then(r => {
-        console.log(r);
-      })
-    },
-    removeViewContent (index) {
-      const self = this;
-      self.$ipcCallMain('example.removeViewContent', self.views[index]).then(r => {
+      self.$ipcCallMain('example.createWindow', this.views[index]).then(r => {
         console.log(r);
       })
     },

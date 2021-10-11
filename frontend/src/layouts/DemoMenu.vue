@@ -42,6 +42,12 @@ export default {
           pageName: 'DemoWindowViewIndex',
           params: {}
         },
+        'menu_401' : {
+          icon: 'profile',
+          title: '窗口',
+          pageName: 'DemoWindowIndex',
+          params: {}
+        },
         'menu_500' : {
           icon: 'profile',
           title: '软件',

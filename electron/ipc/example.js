@@ -44,7 +44,7 @@ exports.messageShowConfirm = function (event, channel, arg) {
     buttons: ['确认', '取消'], // 按钮及索引
   })
   let data = (res === 0) ? '点击确认按钮' : '点击取消按钮';
-  console.log('[electron] [ipc] [example] [messageShowConfirm] 结果:', res, );
+  console.log('[electron] [ipc] [example] [messageShowConfirm] 结果:', res);
 
   return data;
 }
@@ -82,14 +82,14 @@ exports.loadViewContent = function (event, channel, arg) {
   } else {
     content = arg.content;
   }
-  
+
   browserViewObj = new BrowserView();
   MAIN_WINDOW.setBrowserView(browserViewObj)
   browserViewObj.setBounds({
     x: 300,
-    y: 80,
+    y: 170,
     width: 650,
-    height: 480
+    height: 400
   });
   browserViewObj.webContents.loadURL(content);
   return true
@@ -101,4 +101,26 @@ exports.loadViewContent = function (event, channel, arg) {
 exports.removeViewContent = function () {
   MAIN_WINDOW.removeBrowserView(browserViewObj);
   return true
+}
+
+/**
+ * 打开新窗口
+ */
+ exports.createWindow = function (event, channel, arg) {
+  let content = null;
+  if (arg.type == 'html') {
+    content = path.join('file://', app.getAppPath(), arg.content)
+  } else {
+    content = arg.content;
+  }
+
+  let winObj = new BrowserWindow({
+    x: 10,
+    y: 10,
+    width: 980, 
+    height: 650 
+  })
+  winObj.loadURL(content);
+
+  return winObj.id
 }
