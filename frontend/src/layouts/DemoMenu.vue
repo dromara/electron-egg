@@ -59,7 +59,13 @@ export default {
           title: '电源监控',
           pageName: 'DemoPowerMonitorIndex',
           params: {}
-        },        
+        },
+        'menu_404' : {
+          icon: 'profile',
+          title: '屏幕信息',
+          pageName: 'DemoScreenIndex',
+          params: {}
+        },      
         'menu_500' : {
           icon: 'profile',
           title: '软件调用',

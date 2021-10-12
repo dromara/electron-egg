@@ -9,7 +9,7 @@
  * @param arg 接收到的消息
  */
 
-const {app, dialog, BrowserWindow, BrowserView, Notification, powerMonitor} = require('electron');
+const {app, dialog, BrowserWindow, BrowserView, Notification, powerMonitor, screen} = require('electron');
 const path = require('path');
 const _ = require('lodash');
 
@@ -108,7 +108,7 @@ exports.removeViewContent = function () {
 /**
  * 打开新窗口
  */
- exports.createWindow = function (event, channel, arg) {
+exports.createWindow = function (event, channel, arg) {
   let content = null;
   if (arg.type == 'html') {
     content = path.join('file://', app.getAppPath(), arg.content)
@@ -130,7 +130,7 @@ exports.removeViewContent = function () {
 /**
  * 创建系统通知
  */
- exports.sendNotification = function (event, channel, arg) {
+exports.sendNotification = function (event, channel, arg) {
   if (!Notification.isSupported()) {
     return '当前系统不支持通知';
   }
@@ -213,4 +213,69 @@ exports.initPowerMonitor = function (event, channel, arg) {
   });
 
   return true
+}
+
+/**
+ * 获取屏幕信息
+ */
+exports.getScreen = function (event, channel, arg) {
+
+  let data = [];
+  let res = {};
+  if (arg == 0) {
+    let res = screen.getCursorScreenPoint();
+    data = [
+      {
+        title: '横坐标',
+        desc: res.x
+      },
+      {
+        title: '纵坐标',
+        desc: res.y
+      },
+    ]
+    
+    return data;
+  }
+  if (arg == 1) {
+    res = screen.getPrimaryDisplay();
+  }
+  if (arg == 2) {
+    let resArr = screen.getAllDisplays();
+    // 数组，只取一个吧
+    res = resArr[0];
+  }
+  // console.log('[electron] [ipc] [example] [getScreen] res:', res);
+  data = [
+    {
+      title: '分辨率',
+      desc: res.bounds.width + ' x ' + res.bounds.height
+    },
+    {
+      title: '单色显示器',
+      desc: res.monochrome ? '是' : '否'
+    },
+    {
+      title: '色深',
+      desc: res. colorDepth
+    },
+    {
+      title: '色域',
+      desc: res.colorSpace
+    },
+    {
+      title: 'scaleFactor',
+      desc: res.scaleFactor
+    },
+    {
+      title: '加速器',
+      desc: res.accelerometerSupport
+    },
+    {
+      title: '触控',
+      desc: res.touchSupport == 'unknown' ? '不支持' : '支持'
+    },
+  ]
+
+  return data;
 }

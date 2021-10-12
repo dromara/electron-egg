@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-window-view">
+  <div id="app-demo-notification">
     <div class="one-block-1">
       <span>
         1. 弹出桌面通知
@@ -72,7 +72,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-window-view {
+#app-demo-notification {
   padding: 0px 10px;
   text-align: left;
   width: 100%;
