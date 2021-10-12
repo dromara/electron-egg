@@ -36,6 +36,7 @@ export default {
           self.$message.info(result.msg);
         }
       })
+      this.$ipc.send('example.initPowerMonitor', '');
     }
   }
 };
