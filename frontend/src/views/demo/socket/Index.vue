@@ -53,7 +53,21 @@ export default {
       socketMessageString: ''
     }
   },
+  mounted () {
+    this.init();
+  },
   methods: {
+    init () {
+      const self = this;
+      self.$ipc.on('example.socketMessageStart', (event, result) => {
+        console.log('[ipcRenderer] [socketMsgStart] result:', result)
+        self.socketMessageString = result;
+      })
+      self.$ipc.on('example.socketMessageStop', (event, result) => {
+        console.log('[ipcRenderer] [socketMsgStop] result:', result)
+        self.socketMessageString = result;
+      })
+    },
     helloHandle(value) {
       const self = this;
       this.$ipcCallMain('example.hello', value).then(r => {
@@ -70,20 +84,10 @@ export default {
       })
     },
     socketMsgStart() {
-      const self = this;
-      self.$ipc.on('example.socketMessageStart', (event, result) => {
-        console.log('[ipcRenderer] [socketMsgStart] result:', result)
-        self.socketMessageString = result;
-      })
-      self.$ipc.send('example.socketMessageStart', '时间')
+      this.$ipc.send('example.socketMessageStart', '时间')
     },
     socketMsgStop() {
-      const self = this;
-      self.$ipc.on('example.socketMessageStop', (event, result) => {
-        console.log('[ipcRenderer] [socketMsgStop] result:', result)
-        self.socketMessageString = result;
-      })
-      self.$ipc.send('example.socketMessageStop', '')
+      this.$ipc.send('example.socketMessageStop', '')
     },
   }
 }

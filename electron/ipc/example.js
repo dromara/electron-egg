@@ -161,6 +161,16 @@ exports.removeViewContent = function () {
     });
   }
 
+  if (arg.closeEvent) {
+    notificationObj.on('close', (e) => {
+      let data = {
+        type: 'close',
+        msg: '您关闭了通知消息'
+      }
+      event.reply(`${channel}`, data)
+    });
+  }
+
   notificationObj.show();
 
   return true

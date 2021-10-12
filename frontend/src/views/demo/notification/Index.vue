@@ -2,7 +2,7 @@
   <div id="app-demo-window-view">
     <div class="one-block-1">
       <span>
-        1. 弹出桌面通知（主进程）
+        1. 弹出桌面通知
       </span>
     </div>  
     <div class="one-block-2">
@@ -10,6 +10,7 @@
         <a-button @click="sendNotification(0)">默认</a-button>
         <a-button @click="sendNotification(1)">发出提示音</a-button>
         <a-button @click="sendNotification(2)">点击通知触发事件</a-button>
+        <a-button @click="sendNotification(3)">关闭通知触发事件</a-button>
       </a-space>
     </div>
   </div>
@@ -31,30 +32,41 @@ export default {
         {
           type: 'main',
           title: '提示音',
-          subtitle: '提示音',
+          subtitle: '副标题-提示音',
           body: '这是通知内容-提示音',
           silent: false,
         },
         {
           type: 'main',
           title: '点击通知事件',
-          subtitle: '点击通知事件',
+          subtitle: '副标题-点击通知事件',
           body: '这是通知内容-点击通知事件',
-          silent: false,
           clickEvent: true
-        }       
+        },
+        {
+          type: 'main',
+          title: '关闭通知事件',
+          subtitle: '副标题-关闭通知事件',
+          body: '这是通知内容-点击通知事件',
+          closeEvent: true
+        },             
       ],
     };
   },
+  mounted () {
+    this.init();
+  },
   methods: {
-    sendNotification (index) {
+    init () {
       const self = this;
       self.$ipc.on('example.sendNotification', (event, result) => {
         if (Object.prototype.toString.call(result) == '[object Object]') {
           self.$message.info(result.msg);
         }  
       })
-      self.$ipc.send('example.sendNotification', this.views[index]);
+    },
+    sendNotification (index) {
+      this.$ipc.send('example.sendNotification', this.views[index]);
     },
   }
 };
