@@ -65,7 +65,13 @@ export default {
           title: '屏幕信息',
           pageName: 'DemoScreenIndex',
           params: {}
-        },      
+        },
+        'menu_405' : {
+          icon: 'profile',
+          title: '系统主题',
+          pageName: 'DemoThemeIndex',
+          params: {}
+        },       
         'menu_500' : {
           icon: 'profile',
           title: '软件调用',

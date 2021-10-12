@@ -9,7 +9,7 @@
  * @param arg 接收到的消息
  */
 
-const {app, dialog, BrowserWindow, BrowserView, Notification, powerMonitor, screen} = require('electron');
+const {app, dialog, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
 const path = require('path');
 const _ = require('lodash');
 
@@ -278,4 +278,30 @@ exports.getScreen = function (event, channel, arg) {
   ]
 
   return data;
+}
+
+/**
+ * 获取系统主题
+ */
+exports.getTheme = function (event, channel, arg) {
+  let theme = 'system';
+  if (nativeTheme.shouldUseHighContrastColors) {
+    theme = 'light';
+  } else if (nativeTheme.shouldUseInvertedColorScheme) {
+    theme = 'dark';
+  }
+  console.log('[electron] [ipc] [example] [getTheme] theme:', theme);
+
+  return theme;
+}
+
+/**
+ * 设置系统主题
+ */
+exports.setTheme = function (event, channel, arg) {
+
+  console.log('[electron] [ipc] [example] [setTheme] theme:', arg);
+  nativeTheme.themeSource = arg;
+
+  return arg;
 }

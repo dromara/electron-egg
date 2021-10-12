@@ -52,7 +52,12 @@ export const constantRouterMap = [
             path: '/demo/screen/index',
             name: 'DemoScreenIndex',
             component: () => import('@/views/demo/screen/Index')
-          },                       
+          },
+          {
+            path: '/demo/theme/index',
+            name: 'DemoThemeIndex',
+            component: () => import('@/views/demo/theme/Index')
+          },                               
           {
             path: '/demo/shortcut/index',
             name: 'DemoShortcutIndex',
