@@ -50,13 +50,19 @@ export default {
         },
         'menu_402' : {
           icon: 'profile',
-          title: '通知',
+          title: '桌面通知',
           pageName: 'DemoNotificationIndex',
           params: {}
         },
+        'menu_403' : {
+          icon: 'profile',
+          title: '电源监控',
+          pageName: 'DemoPowerMonitorIndex',
+          params: {}
+        },        
         'menu_500' : {
           icon: 'profile',
-          title: '软件',
+          title: '软件调用',
           pageName: 'DemoSoftwareIndex',
           params: {}
         },

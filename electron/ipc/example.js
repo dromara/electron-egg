@@ -9,7 +9,7 @@
  * @param arg 接收到的消息
  */
 
-const {app, dialog, BrowserWindow, BrowserView, Notification} = require('electron');
+const {app, dialog, BrowserWindow, BrowserView, Notification, powerMonitor} = require('electron');
 const path = require('path');
 const _ = require('lodash');
 
@@ -172,6 +172,46 @@ exports.removeViewContent = function () {
   }
 
   notificationObj.show();
+
+  return true
+}
+
+/**
+ * 电源监控
+ */
+ exports.initPowerMonitor = function (event, channel, arg) {
+
+  powerMonitor.on('on-ac', (e) => {
+    let data = {
+      type: 'on-ac',
+      msg: '接入了电源'
+    }
+    event.reply(`${channel}`, data)
+  });
+
+  powerMonitor.on('on-battery', (e) => {
+    let data = {
+      type: 'on-battery',
+      msg: '使用电池中'
+    }
+    event.reply(`${channel}`, data)
+  });
+
+  powerMonitor.on('lock-screen', (e) => {
+    let data = {
+      type: 'lock-screen',
+      msg: '锁屏了'
+    }
+    event.reply(`${channel}`, data)
+  });
+
+  powerMonitor.on('on-ac', (e) => {
+    let data = {
+      type: 'unlock-screen',
+      msg: '解锁了'
+    }
+    event.reply(`${channel}`, data)
+  });
 
   return true
 }

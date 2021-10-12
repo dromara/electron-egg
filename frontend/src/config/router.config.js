@@ -42,7 +42,12 @@ export const constantRouterMap = [
             path: '/demo/notification/index',
             name: 'DemoNotificationIndex',
             component: () => import('@/views/demo/notification/Index')
-          },                  
+          },
+          {
+            path: '/demo/powermonitor/index',
+            name: 'DemoPowerMonitorIndex',
+            component: () => import('@/views/demo/powermonitor/Index')
+          },                 
           {
             path: '/demo/shortcut/index',
             name: 'DemoShortcutIndex',
