@@ -180,8 +180,6 @@ exports.removeViewContent = function () {
  * 电源监控
  */
 exports.initPowerMonitor = function (event, channel, arg) {
-
-  console.log('[electron] [ipc] [example] [initPowerMonitor] 结果:', arg);
   powerMonitor.on('on-ac', (e) => {
     let data = {
       type: 'on-ac',
