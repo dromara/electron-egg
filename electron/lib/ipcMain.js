@@ -41,6 +41,7 @@ const getApiName = (jsname, method) => {
  * 加载所有的主程序
  */
 exports.setup = () => {
+  console.log('[electron-lib-ipc] [setup]');
   const ipcDir = path.normalize(__dirname + '/../ipc');
   fs.readdirSync(ipcDir).forEach(function (filename) {
     if (path.extname(filename) === '.js' && filename !== 'index.js') {

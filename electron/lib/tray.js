@@ -5,7 +5,11 @@ const path = require('path');
 const helper = require('./helper');
 const config = require('../config');
 
+/**
+ * 安装模块
+ */
 exports.setup = function () {
+  console.log('[electron-lib-tray] [setup]');
   const cfg = config.get('tray');
 
   // 托盘图标

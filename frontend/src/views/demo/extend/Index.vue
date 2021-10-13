@@ -2,7 +2,7 @@
   <div id="app-demo-screen">
     <div class="one-block-1">
       <span>
-        1. 系统主题模式
+        1. 
       </span>
     </div>
     <div class="one-block-2">
@@ -17,17 +17,7 @@
       2. 设置主题模式（请自行实现前端UI效果）
     </div>  
     <div class="one-block-2">
-      <a-radio-group v-model="currentThemeMode" @change="setTheme">
-        <a-radio :value="themeList[0]">
-          {{ themeList[0] }}
-        </a-radio>
-        <a-radio :value="themeList[1]">
-          {{ themeList[1] }}
-        </a-radio>
-        <a-radio :value="themeList[2]">
-          {{ themeList[2] }}
-        </a-radio>
-      </a-radio-group>
+
     </div>
   </div>
 </template>

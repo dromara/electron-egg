@@ -3,8 +3,12 @@
 const { globalShortcut } = require('electron');
 const storage = require('./storage');
 
+/**
+ * 安装模块
+ */
 exports.setup = function () {
   // default
+  console.log('[electron-lib-shortcut] [setup]');
   storage.iniPreferences();
 }
 

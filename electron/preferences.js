@@ -6,8 +6,9 @@ const shortcut = require('./lib/shortcut');
 const tray = require('./lib/tray');
 const awaken = require('./lib/awaken');
 const security = require('./lib/security');
+const chromeExtension = require('./lib/chromeExtension');
 
-module.exports = () => {
+module.exports = async () => {
   // shortcut
   shortcut.setup();
 
@@ -19,6 +20,9 @@ module.exports = () => {
 
   // security 
   security.setup();
+
+  // chrome extension
+  await chromeExtension.setup();
 
   // check update
   const updateConfig = config.get('autoUpdate');

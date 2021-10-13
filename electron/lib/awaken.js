@@ -8,6 +8,7 @@ const eLogger = require('./eLogger').get();
  * 唤起Electron应用
  */
 exports.setup = function () {
+	console.log('[electron-lib-awaken] [setup]');
 	const protocolInfo = config.get('awakeProtocol');
 	const PROTOCOL = protocolInfo.protocol;
 

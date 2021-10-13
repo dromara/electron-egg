@@ -36,6 +36,12 @@ export default {
           pageName: 'DemoSocketIndex',
           params: {}
         },
+        'menu_301' : {
+          icon: 'profile',
+          title: '扩展程序',
+          pageName: 'DemoExtendIndex',
+          params: {}
+        },
         'menu_400' : {
           icon: 'profile',
           title: '视图',

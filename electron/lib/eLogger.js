@@ -24,7 +24,11 @@ class Log {
   }
 }
 
+/**
+ * 安装模块
+ */
 exports.setup = function () {
+  console.log('[electron-lib-eLogger] [setup]');
   return new Log();
 }
 

@@ -290,7 +290,6 @@ exports.getTheme = function (event, channel, arg) {
   } else if (nativeTheme.shouldUseInvertedColorScheme) {
     theme = 'dark';
   }
-  console.log('[electron] [ipc] [example] [getTheme] theme:', theme);
 
   return theme;
 }
@@ -300,7 +299,7 @@ exports.getTheme = function (event, channel, arg) {
  */
 exports.setTheme = function (event, channel, arg) {
 
-  console.log('[electron] [ipc] [example] [setTheme] theme:', arg);
+  // TODO 好像没有什么明显效果
   nativeTheme.themeSource = arg;
 
   return arg;

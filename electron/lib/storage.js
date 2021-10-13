@@ -12,7 +12,11 @@ const pkg = require('../../package.json');
 const storageDb = 'db.json';
 const _ = require('lodash');
 
+/**
+ * 安装模块
+ */
 exports.setup = function () {
+  console.log('[electron-lib-storage] [setup]');
   const storageDir = this.getStorageDir();
   if (!fs.existsSync(storageDir)) {
     utils.mkdir(storageDir);

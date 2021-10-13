@@ -10,8 +10,11 @@ const eLogger = require('./eLogger').get();
 
 const apis = {};
 
+/**
+ * 安装模块
+ */
 exports.setup = async function () {
-  eLogger.info('[api] [setup] start');
+  console.log('[electron-lib-api] [setup]');
   setApi();
 
   // use api server

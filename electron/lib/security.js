@@ -4,10 +4,10 @@ const helper = require('./helper');
 const eLogger = require('./eLogger').get();
 
 /**
- * security check
+ * 安装模块
  */
 exports.setup = function () {
-	eLogger.info('[security] [setup] process.argv:', process.argv);
+	console.log('[electron-lib-security] [setup]');
 	const runWithDebug = process.argv.find(function(e){
 		let isHasDebug = e.includes("--inspect") || e.includes("--inspect-brk") || e.includes("--remote-debugging-port");
 		return isHasDebug;

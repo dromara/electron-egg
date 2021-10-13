@@ -7,7 +7,11 @@ const {app} = require('electron');
 const eLogger = require('./eLogger').get();
 const helper = require('./helper');
 
+/**
+ * 安装模块
+ */
 exports.setup = function () {
+  console.log('[electron-lib-autoUpater] [setup]');
   const version = app.getVersion();
   eLogger.info('[autoUpdater] [setup] current version: ', version);
   const platformObj = helper.getPlatform();

@@ -67,7 +67,7 @@ async function createWindow () {
   }
 
   // options register
-  preferences()
+  await preferences()
 
   // egg server
   await startServer(eggConfig)

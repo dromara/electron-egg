@@ -29,6 +29,11 @@ export const constantRouterMap = [
             component: () => import('@/views/demo/socket/Index')
           },
           {
+            path: '/demo/extend/index',
+            name: 'DemoExtendIndex',
+            component: () => import('@/views/demo/extend/Index')
+          },
+          {
             path: '/demo/windowview/index',
             name: 'DemoWindowViewIndex',
             component: () => import('@/views/demo/windowview/Index')
