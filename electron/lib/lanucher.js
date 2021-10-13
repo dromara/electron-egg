@@ -50,7 +50,7 @@ exports.start = function (argv) {
     const ignoreKeys = [ '_', '$0', 'env', 'daemon', 'stdout', 'stderr', 'timeout', 'ignore-stderr', 'node' ];
     const clusterOptions = stringify(argv, ignoreKeys);
     const options = JSON.parse(clusterOptions);
-    console.log('[lanucher] options:', options)
+    // console.log('[lanucher] options:', options)
     return new Promise((resolve, reject) => {
       startCluster(options, function(){
         resolve('success');

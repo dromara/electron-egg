@@ -29,9 +29,6 @@ eggConfig.env = ENV
 // eLogger
 const eLogger = require('./electron/lib/eLogger').get()
 
-// loading html
-const loadingHtml = path.join('file://', __dirname, '/asset/loading.html')
-
 async function initialize () {
   app.whenReady().then(() => {
     createWindow()
@@ -129,6 +126,9 @@ function loadingView (winOptions) {
     width: winOptions.width,
     height: winOptions.height
   });
+
+  // loading html
+  const loadingHtml = path.join('file://', __dirname, '/asset/loading.html')
   loadingBrowserView.webContents.loadURL(loadingHtml)
   
   MAIN_WINDOW.webContents.on('dom-ready', async (event) => {
