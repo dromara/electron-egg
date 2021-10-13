@@ -1,6 +1,6 @@
 {
   "name": "electron-egg",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -117,6 +117,7 @@
     "lowdb": "^1.0.0",
     "semver": "^5.4.1",
     "socket.io": "^3.0.5",
-    "socket.io-client": "^3.0.5"
+    "socket.io-client": "^3.0.5",
+    "unzip-crx-3": "^0.2.0"
   }
 }

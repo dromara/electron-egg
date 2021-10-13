@@ -36,12 +36,6 @@ export default {
           pageName: 'DemoSocketIndex',
           params: {}
         },
-        'menu_301' : {
-          icon: 'profile',
-          title: '扩展程序',
-          pageName: 'DemoExtendIndex',
-          params: {}
-        },
         'menu_400' : {
           icon: 'profile',
           title: '视图',
@@ -54,25 +48,31 @@ export default {
           pageName: 'DemoWindowIndex',
           params: {}
         },
-        'menu_402' : {
+        'menu_403' : {
+          icon: 'profile',
+          title: '扩展程序',
+          pageName: 'DemoExtensionIndex',
+          params: {}
+        },
+        'menu_405' : {
           icon: 'profile',
           title: '桌面通知',
           pageName: 'DemoNotificationIndex',
           params: {}
         },
-        'menu_403' : {
+        'menu_407' : {
           icon: 'profile',
           title: '电源监控',
           pageName: 'DemoPowerMonitorIndex',
           params: {}
         },
-        'menu_404' : {
+        'menu_409' : {
           icon: 'profile',
           title: '屏幕信息',
           pageName: 'DemoScreenIndex',
           params: {}
         },
-        'menu_405' : {
+        'menu_411' : {
           icon: 'profile',
           title: '系统主题',
           pageName: 'DemoThemeIndex',

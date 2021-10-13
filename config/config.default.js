@@ -94,7 +94,7 @@ module.exports = appInfo => {
 
   config.multipart = {
     mode: 'file',
-    fileExtensions: [ '.xlsx' ] // 增加你需要的文件扩展名
+    fileExtensions: [ '.xlsx', '.crx' ] // 增加你需要的文件扩展名
   };
 
   return {

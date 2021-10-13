@@ -111,7 +111,13 @@ class ExampleService extends BaseService {
     return true;
   }   
 
+  async loadExtension(filePath) {
+    const self = this;
 
+    await self.ipcCall('example.loadExtension', filePath);
+
+    return true;
+  }
 }
 
 module.exports = ExampleService;

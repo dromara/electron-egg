@@ -11,6 +11,8 @@ const {exec} = require('child_process');
 const {app, webContents, shell, dialog} = require('electron');
 const AutoLaunchManager = require('../lib/autoLaunch');
 const shortcut = require('../lib/shortcut');
+const chromeExtension = require('../lib/chromeExtension');
+const unzip = require("unzip-crx-3");
 
 /**
  * app根目录
@@ -162,6 +164,27 @@ exports.messageShowConfirm = function () {
     buttons: ['确认', '取消'], // 按钮及索引
   })
   console.log('[example] [messageShowConfirm] 结果:', res, res === 0 ? '点击确认按钮' : '点击取消按钮');
+
+  return true;
+}
+
+/**
+ * 加载扩展程序
+ */
+exports.loadExtension = async function (crxFile) {
+  if (_.isEmpty(crxFile)) {
+    return false;
+  }
+
+  const extensionId = path.basename(crxFile, '.crx');
+  const chromeExtensionDir = chromeExtension.getDirectory();
+  const extensionDir = path.join(chromeExtensionDir, extensionId);
+
+  console.log("[api] [example] [loadExtension] extension id:", extensionId);
+  unzip(crxFile, extensionDir).then(() => {    
+    console.log("[api] [example] [loadExtension] unzip success!");
+    chromeExtension.load(extensionId);
+  });
 
   return true;
 }

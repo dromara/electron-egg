@@ -39,5 +39,6 @@ module.exports = app => {
   router.post('/api/v1/example/messageShow', controller.v1.example.messageShow);
   // message show confirm
   router.post('/api/v1/example/messageShowConfirm', controller.v1.example.messageShowConfirm);
-
+  // upload chrome extension
+  router.post('/api/v1/example/uploadExtension', controller.v1.example.uploadExtension);
 };

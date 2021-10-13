@@ -59,7 +59,7 @@ class StorageService extends BaseService {
   }
 
   /*
-   * add Test data
+   * 增 Test data
    */
   async addTestData(user) {
     const key = storageKey.TEST_DATA;
@@ -76,7 +76,7 @@ class StorageService extends BaseService {
   }
 
   /*
-   * del Test data
+   * 删 Test data
    */
   async delTestData(name = '') {
     const key = storageKey.TEST_DATA;
@@ -89,7 +89,7 @@ class StorageService extends BaseService {
   }
 
   /*
-   * update Test data
+   * 改 Test data
    */
   async updateTestData(name= '', age = 0) {
     const key = storageKey.TEST_DATA;
@@ -103,7 +103,7 @@ class StorageService extends BaseService {
   }
 
   /*
-   * get Test data
+   * 查 Test data
    */
   async getTestData(name = '') {
     const key = storageKey.TEST_DATA;

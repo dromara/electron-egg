@@ -29,11 +29,6 @@ export const constantRouterMap = [
             component: () => import('@/views/demo/socket/Index')
           },
           {
-            path: '/demo/extend/index',
-            name: 'DemoExtendIndex',
-            component: () => import('@/views/demo/extend/Index')
-          },
-          {
             path: '/demo/windowview/index',
             name: 'DemoWindowViewIndex',
             component: () => import('@/views/demo/windowview/Index')
@@ -42,6 +37,11 @@ export const constantRouterMap = [
             path: '/demo/window/index',
             name: 'DemoWindowIndex',
             component: () => import('@/views/demo/window/Index')
+          },
+          {
+            path: '/demo/extension/index',
+            name: 'DemoExtensionIndex',
+            component: () => import('@/views/demo/extension/Index')
           },
           {
             path: '/demo/notification/index',
