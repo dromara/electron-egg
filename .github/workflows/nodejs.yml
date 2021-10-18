@@ -5,9 +5,13 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - main
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - main
+      - master
   schedule:
     - cron: '0 2 * * *'
 

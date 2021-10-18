@@ -104,6 +104,7 @@
   "dependencies": {
     "dayjs": "^1.9.5",
     "egg": "^2.15.1",
+    "egg-cluster": "^1.23.3",
     "egg-cors": "^2.2.0",
     "egg-jwt": "^3.1.6",
     "egg-scripts": "^2.13.0",
