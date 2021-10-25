@@ -61,7 +61,7 @@
     git clone https://github.com/wallace5303/electron-egg.git
     ```
 
-2. 安装
+2. 安装，node推荐v14.16.0
     ```
     # 提升安装速度，使用国内镜像；
     npm config set registry https://registry.npm.taobao.org
