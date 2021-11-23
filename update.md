@@ -2,6 +2,7 @@
 1. 增加lowdb数据库实例代码
 2. 更新npm源
 3. 更新electron版本
+4. 打包过滤frontend
 
 ## 1.15.0
 1. 增加chrome扩展程序（重点）

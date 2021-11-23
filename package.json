@@ -26,7 +26,9 @@
     },
     "asar": true,
     "files": [
-      "**/*"
+      "**/*",
+      "!frontend/",
+      "!run/"
     ],
     "extraResources": {
       "from": "./build/extraResources/",
