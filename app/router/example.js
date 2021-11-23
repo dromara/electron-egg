@@ -41,4 +41,6 @@ module.exports = app => {
   router.post('/api/v1/example/messageShowConfirm', controller.v1.example.messageShowConfirm);
   // upload chrome extension
   router.post('/api/v1/example/uploadExtension', controller.v1.example.uploadExtension);
+  // db operation
+  router.post('/api/v1/example/dbOperation', controller.v1.example.dbOperation);
 };

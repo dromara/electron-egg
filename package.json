@@ -1,6 +1,6 @@
 {
   "name": "electron-egg",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -33,7 +33,7 @@
       "to": "extraResources"
     },
     "electronDownload": {
-      "mirror": "https://npm.taobao.org/mirrors/electron/"
+      "mirror": "https://npmmirror.com/mirrors/electron/"
     },
     "nsis": {
       "oneClick": false,
@@ -92,7 +92,7 @@
     "egg-bin": "^4.12.3",
     "egg-ci": "^1.11.0",
     "egg-mock": "^3.21.0",
-    "electron": "^12.0.10",
+    "electron": "^12.2.3",
     "electron-builder": "22.10.4",
     "eslint": "^5.13.0",
     "eslint-config-egg": "^7.1.0",

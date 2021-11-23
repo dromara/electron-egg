@@ -13,6 +13,7 @@ const mainApi = {
   selectFileDir: '/api/v1/example/selectFileDir',
   messageShow: '/api/v1/example/messageShow',
   messageShowConfirm: '/api/v1/example/messageShowConfirm',
+  dbOperation: '/api/v1/example/dbOperation',
   testElectronApi: '/api/v1/example/testElectronApi',
 }
 

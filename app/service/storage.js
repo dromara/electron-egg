@@ -95,8 +95,8 @@ class StorageService extends BaseService {
     const key = storageKey.TEST_DATA;
     const data = this.instance()
     .get(key)
-    .find({name: name})
-    .assign({ age: age})
+    .find({name: name}) // 修改找到的第一个数据，貌似无法批量修改 todo
+    .assign({age: age})
     .write();
 
     return data;
@@ -105,15 +105,45 @@ class StorageService extends BaseService {
   /*
    * 查 Test data
    */
-  async getTestData(name = '') {
+  async getTestData(age = 0) {
     const key = storageKey.TEST_DATA;
-    const data = this.instance()
+    let data = this.instance()
     .get(key)
-    .find({name: name})
+    //.find({age: age}) 查找单个
+    .filter(function(o) {
+      let isHas = true;
+      isHas = age === o.age ? true : false;
+      return isHas;
+    })
+    //.orderBy(['age'], ['name']) 排序
+    //.slice(0, 10) 分页
     .value();
+
+    if (_.isEmpty(data)) {
+      data = []
+    }
 
     return data;
   }
+
+  /*
+   * all Test data
+   */
+    async getAllTestData() {
+      const key = storageKey.TEST_DATA;
+      if (!this.instance().has(key).value()) {
+        this.instance().set(key, []).write();
+      }
+      let data = this.instance()
+      .get(key)
+      .value();
+  
+      if (_.isEmpty(data)) {
+        data = []
+      }
+  
+      return data;
+    }
 }
 
 module.exports = StorageService;

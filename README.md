@@ -64,7 +64,7 @@
 2. 安装，node推荐v14.16.0
     ```
     # 提升安装速度，使用国内镜像；
-    npm config set registry https://registry.npm.taobao.org
+    npm config set registry https://registry.npmmirror.com
     # 进入目录 ./electron-egg/
     npm install
     ```
