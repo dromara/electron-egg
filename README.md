@@ -17,11 +17,12 @@
 ## 特性
 1. 跨平台：一套代码，可以打包成windows版、Mac版、Linux版或者以web网站运行
 2. 简单高效：只需学习js语言，同时支持vue、react、ejs等前端技术
-3. 工程化：可以用服务端的开发思维，来编写桌面软件
-4. 高性能：可启动多个工作进程
-5. 功能丰富：服务端的技术场景，如：路由、中间件、控制器、服务、定时任务、队列、插件等
-6. 功能demo：桌面软件常见功能，后续逐步集成或提供demo
-7. 更多功能请看文档
+3. 前端独立：理论上支持任何前端技术，编写出精美的UI效果
+4. 工程化：可以用服务端的开发思维，来编写桌面软件
+5. 高性能：可启动多个工作进程
+6. 功能丰富：服务端的技术场景，如：路由、中间件、控制器、服务、定时任务、队列、插件等
+7. 功能demo：桌面软件常见功能，后续逐步集成或提供demo
+8. 更多功能请看文档
 
 ## 使用场景
 
@@ -30,20 +31,20 @@
 
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/home.png)
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/socket.png)
-    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
 
-### 2. 游戏（h5相关技术开发）
+### 2. vue、react、angular、web 转换成桌面软件
+- vue-ant-design（本地）
+
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/vue-antd.png)
+
+- Youtube（远程网站）
+
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/youtub.png)
+
+### 3. 游戏（h5相关技术开发）
 - 忍者100层
 
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee_game_1.png)
-
-### 3. vue、react、angular单页应用或网站转换成桌面软件
-- Youtube
-
-    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/youtub.png)
-- discuz-q论坛
-
-    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/dq-feed.png)
 
 ### 4. web项目
 - 网站助手：http://b.kaka996.com/
@@ -104,11 +105,10 @@
 
 ## 项目案例
 
-1. [小明云存储](https://gitee.com/wallace5303/xm-pic)
+1. [小明云存储]
 
 ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
 
-![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-detail.png)
 
 ## 交流
 1. qq群：735532437
