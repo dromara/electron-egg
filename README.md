@@ -37,7 +37,7 @@
 
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee_game_1.png)
 
-### 3. 任意网站变桌面软件
+### 3. vue、react、angular单页应用或网站转换成桌面软件
 - Youtube
 
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/youtub.png)
