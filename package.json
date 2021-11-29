@@ -1,6 +1,6 @@
 {
   "name": "electron-egg",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -101,7 +101,7 @@
     "eslint-plugin-prettier": "^3.0.1",
     "fs-extra": "^9.1.0",
     "prettier": "^1.16.4",
-    "webstorm-disable-index": "^1.2.0"
+    "uglify-js": "^3.14.3"
   },
   "dependencies": {
     "dayjs": "^1.9.5",
