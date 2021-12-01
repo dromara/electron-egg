@@ -3,12 +3,12 @@
 
 一个入门简单、快速高效、功能丰富的JS跨平台桌面软件开发框架。
 
+- 为什么使用？桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
 - 愿景：所有开发者都能学会桌面软件研发
-- 🏆 码云最有价值开源项目
 - gitee：https://gitee.com/wallace5303/electron-egg
 - github：https://github.com/wallace5303/electron-egg
-- 为什么使用？桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
-
+- 🏆 码云最有价值开源项目
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee-zhengshu-1.png)
 
 ## 文档
 - [教程文档](https://www.yuque.com/u34495/mivcfg/xnhmms)
