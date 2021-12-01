@@ -21,10 +21,27 @@ class codeCompress {
    * 备份 app、electron目录代码
    */
   backup () {
-    if (!this.fileExist(sourceIndexFile)) {
-      console.log('[electron] [replace_dist] ERROR source dir is empty!!!');
-      return
+    let backupCodeDir = path.normalize(__dirname + '/../backup_code');
+    if (!fs.existsSync(backupCodeDir)) {
+      this.mkdir(backupCodeDir);
+      this.chmodPath(backupCodeDir, '777');
     }
+
+    for (let i = 0; i < this.dirs.length; i++) {
+      // check code dir
+      let codeDirPath = path.normalize(__dirname + '/../' + this.dirs[i]);
+      if (!this.fileExist(codeDirPath)) {
+        console.log('[electron] [code_compress] ERROR %s not exist', codeDirPath);
+        return
+      }
+
+      // copy
+      let targetDir = path.join(backupCodeDir, this.dirs[i]);
+      fsPro.copySync(codeDirPath, targetDir);  
+
+    }
+
+
 
 
   }
@@ -40,15 +57,45 @@ class codeCompress {
     }
   };
 
-}
+  mkdir (dirpath, dirname) {
+    // 判断是否是第一次调用
+    if (typeof dirname === 'undefined') {
+      if (fs.existsSync(dirpath)) {
+        return;
+      }
+      this.mkdir(dirpath, path.dirname(dirpath));
+    } else {
+      // 判断第二个参数是否正常，避免调用时传入错误参数
+      if (dirname !== path.dirname(dirpath)) {
+        this.mkdir(dirpath);
+        return;
+      }
+      if (fs.existsSync(dirname)) {
+        fs.mkdirSync(dirpath);
+      } else {
+        this.mkdir(dirname, path.dirname(dirname));
+        fs.mkdirSync(dirpath);
+      }
+    }
+  
+    console.log('==> dir end', dirpath);
+  };
 
-// argv
-let distDir = '';
-for (let i = 0; i < process.argv.length; i++) {
-  const tmpArgv = process.argv[i]
-  if (tmpArgv.indexOf('--dist_dir=') !== -1) {
-    distDir = tmpArgv.substr(11)
-  }
+  chmodPath (path, mode) {
+    let files = [];
+    if (fs.existsSync(path)) {
+      files = fs.readdirSync(path);
+      files.forEach((file, index) => {
+        const curPath = path + '/' + file;
+        if (fs.statSync(curPath).isDirectory()) {
+          this.chmodPath(curPath, mode); // 递归删除文件夹
+        } else {
+          fs.chmodSync(curPath, mode);
+        }
+      });
+      fs.chmodSync(path, mode);
+    }
+  };
 }
 
 
