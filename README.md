@@ -118,7 +118,8 @@
 
 地址：https://github.com/wallace5303/electron-egg
 
-## 感谢star
+## 您的star，是我的动力，感谢支持
+![](https://whnb.wang/stars/wallace5303/electron-egg)
 
 
 
