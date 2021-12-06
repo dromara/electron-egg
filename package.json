@@ -46,7 +46,7 @@
       "installerHeaderIcon": "./build/icons/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "demo"
+      "shortcutName": "Ee框架"
     },
     "publish": [
       {
