@@ -91,17 +91,7 @@ async function startServer (options) {
     const developmentModeConfig = electronConfig.get('developmentMode', ENV)
     const selectMode = developmentModeConfig.default
     const modeInfo = developmentModeConfig.mode[selectMode]
-    switch (selectMode) {
-      case 'vue' :
-        url = protocol + modeInfo.hostname + ':' + modeInfo.port
-        break
-      case 'react' :
-        url = protocol + modeInfo.hostname + ':' + modeInfo.port
-        break
-      case 'ejs' :
-        url = protocol + modeInfo.hostname + ':' + modeInfo.port
-        break
-    }
+    url = protocol + modeInfo.hostname + ':' + modeInfo.port
   }
   eLogger.info('[main] [url]:', url)
   startRes = await eggLauncher.start(options).then((res) => res, (err) => err)
