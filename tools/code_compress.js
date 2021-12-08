@@ -20,6 +20,7 @@ class CodeCompress {
    * 备份 app、electron目录代码
    */
   backup () {
+    console.log('[electron] [code_compress] [backup] start');
     this.rmBackup();
 
     for (let i = 0; i < this.dirs.length; i++) {
@@ -47,6 +48,7 @@ class CodeCompress {
    * 还原代码
    */
   restore () {
+    console.log('[electron] [code_compress] [restore] start');
     for (let i = 0; i < this.dirs.length; i++) {
       let codeDirPath = path.join(this.backupCodeDir, this.dirs[i]);
       let targetDir = path.join(this.basePath, this.dirs[i]);
@@ -59,6 +61,7 @@ class CodeCompress {
    * 压缩代码
    */
   compress () {
+    console.log('[electron] [code_compress] [compress] start');
     for (let i = 0; i < this.dirs.length; i++) {
       let codeDirPath = path.join(this.basePath, this.dirs[i]);
       this.compressLoop(codeDirPath);
