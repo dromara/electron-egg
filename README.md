@@ -5,7 +5,7 @@
 <img src="https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/logo.png" width="200" height="200" />
 </div>
 
-一个入门简单、快速高效、功能丰富的JS跨平台桌面软件开发框架。
+一个入门简单、功能丰富的 js 跨平台桌面软件开发框架。
 
 - 为什么使用？桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
 - 愿景：所有开发者都能学会桌面软件研发
@@ -106,13 +106,6 @@
     # web运行-生产者模式-停止
     npm run web-stop
     ```
-
-## 项目案例
-
-1. [小明云存储]
-
-![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/xm-pic-config.png)
-
 
 ## 交流
 1. qq群：735532437
