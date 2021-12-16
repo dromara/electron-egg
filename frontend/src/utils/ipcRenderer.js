@@ -10,7 +10,7 @@ const callMain = (ipc, channel, param) => {
   return new Promise((resolve) => {
     // 声明渲染进程函数, 用于主进程函数回调, 返回数据
     // 调用主进程函数
-    ipc.on(channel, (event, result) => {
+    ipc.once(channel, (event, result) => {
       console.log('[ipcRenderer] [callMain] result:', result)
       resolve(result)
     })
