@@ -30,6 +30,21 @@ eggConfig.env = ENV
 const eLogger = require('./electron/lib/eLogger').get()
 
 async function initialize () {
+
+  // 限制一个窗口
+  const gotTheLock = app.requestSingleInstanceLock()
+  if (!gotTheLock) {
+    helper.appQuit()
+  }
+  app.on('second-instance', (event) => {
+    if (MAIN_WINDOW) {
+      if (MAIN_WINDOW.isMinimized()) {
+        MAIN_WINDOW.restore()
+      }
+      MAIN_WINDOW.focus()
+    }
+  })
+
   app.whenReady().then(() => {
     createWindow()
     app.on('activate', function () {
