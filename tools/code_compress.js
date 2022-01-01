@@ -14,6 +14,10 @@ class CodeCompress {
     ];
     this.basePath = path.normalize(__dirname + '/..');
     this.backupCodeDir = path.join(this.basePath, 'run/backup_code');
+    if (!fs.existsSync(this.backupCodeDir)) {
+      this.mkdir(this.backupCodeDir);
+      this.chmodPath(this.backupCodeDir, '777');
+    }
   }
 
   /**
