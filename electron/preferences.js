@@ -26,9 +26,11 @@ module.exports = async () => {
 
   // check update
   const updateConfig = config.get('autoUpdate');
-  if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
-    || (is.linux() && updateConfig.linux)) {
-    const autoUpdater = require('./lib/autoUpdater');
-    autoUpdater.checkUpdate();
+  if (updateConfig.force) {
+    if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
+      || (is.linux() && updateConfig.linux)) {
+      const autoUpdater = require('./lib/autoUpdater');
+      autoUpdater.checkUpdate();
+    }
   }
 }

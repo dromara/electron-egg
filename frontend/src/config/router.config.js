@@ -67,6 +67,11 @@ export const constantRouterMap = [
             path: '/demo/theme/index',
             name: 'DemoThemeIndex',
             component: () => import('@/views/demo/theme/Index')
+          }, 
+          {
+            path: '/demo/updater/index',
+            name: 'DemoUpdaterIndex',
+            component: () => import('@/views/demo/updater/Index')
           },                               
           {
             path: '/demo/shortcut/index',

@@ -12,15 +12,17 @@
 const {app, dialog, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
 const path = require('path');
 const _ = require('lodash');
+const is = require('electron-is');
+const config = require('../config');
 
 let myTimer = null;
 let browserViewObj = null;
 let notificationObj = null;
 
-exports.hello = function (event, channel, msg) {
-  let newMsg = msg + " +1"
+exports.hello = function (event, channel, arg) {
+  let newMsg = arg + " +1"
   let reply = ''
-  reply = '收到：' + msg + '，返回：' + newMsg
+  reply = '收到：' + arg + '，返回：' + newMsg
   return reply
 }
 
@@ -303,4 +305,18 @@ exports.setTheme = function (event, channel, arg) {
   nativeTheme.themeSource = arg;
 
   return arg;
+}
+
+/**
+ * 检查是否有新版本
+ */
+exports.checkForUpdater = function (event, channel, arg) {
+  const updateConfig = config.get('autoUpdate');
+  if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
+    || (is.linux() && updateConfig.linux)) {
+    const autoUpdater = require('../lib/autoUpdater');
+    autoUpdater.checkUpdate();
+  }
+
+  return;
 }

@@ -12,7 +12,19 @@ export default {
     return {};
   },
   watch: {},
-  methods: {}
+  mounted () {
+    // 初始化一个公共消息通信频道
+    this.initIpc();
+  },
+  methods: {
+    initIpc () {
+      const self = this;
+      self.$ipc.on('public.message', (event, result) => {
+        // 使用ant-desing-vue, message组件
+        self.$message.info(result);
+      })
+    },
+  }
 }
 </script>
 <style>

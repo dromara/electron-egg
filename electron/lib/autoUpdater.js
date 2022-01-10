@@ -14,13 +14,17 @@ exports.setup = function () {
   console.log('[electron-lib-autoUpater] [setup]');
   const version = app.getVersion();
   eLogger.info('[autoUpdater] [setup] current version: ', version);
-  const platformObj = helper.getPlatform();
 
+  // 设置下载服务器地址
   const updateConfig = config.get('autoUpdate');
   let server = updateConfig.options.url;
-  server = `${server}${platformObj.platform}/`;
+  let lastChar = server.substring(server.length - 1);
+  server = lastChar === '/' ? server : server + "/";
   eLogger.info('[autoUpdater] [setup] server: ', server);
   updateConfig.options.url = server;
+
+  // 是否自动下载
+  autoUpdater.autoDownload = updateConfig.force ? true : false;
 
   try {
     autoUpdater.setFeedURL(updateConfig.options);
@@ -29,39 +33,41 @@ exports.setup = function () {
   }
 
   autoUpdater.on('checking-for-update', () => {
-    sendStatusToWindow('Checking for update...');
+    sendStatusToWindow('正在检查更新...');
   })
   autoUpdater.on('update-available', (info) => {
-    sendStatusToWindow('Update available.');
+    sendStatusToWindow('有可用更新');
   })
   autoUpdater.on('update-not-available', (info) => {
-    sendStatusToWindow('Update not available.');
+    sendStatusToWindow('没有可用更新');
   })
   autoUpdater.on('error', (err) => {
-    sendStatusToWindow('Error in auto-updater. ' + err);
+    sendStatusToWindow('更新异常： ' + err);
   })
   autoUpdater.on('download-progress', (progressObj) => {
-    let log_message = "Download speed: " + progressObj.bytesPerSecond;
-    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    let log_message = "下载进度: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - 已下载 ' + progressObj.percent + '%';
     log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
     sendStatusToWindow(log_message);
   })
   autoUpdater.on('update-downloaded', (info) => {
-    sendStatusToWindow('Update downloaded');
+    sendStatusToWindow('下载完成');
     // quit and update
-    helper.appQuit();
-    autoUpdater.quitAndInstall();
+    if (updateConfig.force) {
+      helper.appQuit();
+      autoUpdater.quitAndInstall();
+    }
   });
 
 };
 
 exports.checkUpdate = function () {
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdates();
 }
 
 function sendStatusToWindow(text) {
   eLogger.info(text);
-  MAIN_WINDOW.webContents.send('message', text);
+  MAIN_WINDOW.webContents.send('public.message', text);
 }
 
 exports = module.exports;

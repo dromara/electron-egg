@@ -83,7 +83,13 @@ export default {
           title: '系统主题',
           pageName: 'DemoThemeIndex',
           params: {}
-        },       
+        },   
+        'menu_412' : {
+          icon: 'profile',
+          title: '自动更新',
+          pageName: 'DemoUpdaterIndex',
+          params: {}
+        },    
         'menu_500' : {
           icon: 'profile',
           title: '软件调用',
