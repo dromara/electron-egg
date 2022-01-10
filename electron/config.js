@@ -59,7 +59,7 @@ const config = {
     linux: false,
     options: {
       provider: 'generic', // or github, s3, bintray
-      url: 'https://kaka996.coding.net/p/resource/d/tx-resource2/git/raw/master/ee' // resource dir, end with '/'
+      url: '' // resource dir, end with '/'
     }
   },
   awakeProtocol: {
