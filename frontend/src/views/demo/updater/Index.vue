@@ -8,7 +8,7 @@
     <div class="one-block-2">
       <a-space>
         <a-button @click="checkForUpdater()">检查更新</a-button>
-        <!-- <a-button @click="check(0)">打开哔哩哔哩</a-button> -->
+        <a-button @click="download()">下载并安装</a-button>
       </a-space>
     </div>
     <!-- <div class="one-block-1">
@@ -28,16 +28,36 @@
 export default {
   data() {
     return {
-      views: [],
+      status: 0, // -1:异常，1：有可用更新，2：没有可用更新，3：下载中, 4：下载完成
     };
   },
   mounted () {
-    //this.init();
+    this.init();
   },
   methods: {
+    init () {
+      const self = this;
+      self.$ipc.on('app.updater', (event, result) => {
+        result = JSON.parse(result);
+        console.log('app updater:', result);
+        let text = result.desc;
+        self.status = result.status;
+        self.$message.info(text);
+      })
+    },
     checkForUpdater () {
       const self = this;
       self.$ipcCallMain('example.checkForUpdater').then(r => {
+        console.log(r);
+      })
+    },
+    download () {
+      if (this.status !== 1) {
+        this.$message.info('没有可用版本');
+        return
+      }
+      const self = this;
+      self.$ipcCallMain('example.downloadApp').then(r => {
         console.log(r);
       })
     },

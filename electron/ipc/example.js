@@ -320,3 +320,17 @@ exports.checkForUpdater = function (event, channel, arg) {
 
   return;
 }
+
+/**
+ * 下载新版本
+ */
+exports.downloadApp = function (event, channel, arg) {
+  const updateConfig = config.get('autoUpdate');
+  if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
+    || (is.linux() && updateConfig.linux)) {
+    const autoUpdater = require('../lib/autoUpdater');
+    autoUpdater.download();
+  }
+
+  return;
+}

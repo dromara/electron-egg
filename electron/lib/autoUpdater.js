@@ -6,6 +6,7 @@ const config = require('../config');
 const {app} = require('electron');
 const eLogger = require('./eLogger').get();
 const helper = require('./helper');
+const constant = require('./constant');
 
 /**
  * 安装模块
@@ -33,30 +34,44 @@ exports.setup = function () {
   }
 
   autoUpdater.on('checking-for-update', () => {
-    sendStatusToWindow('正在检查更新...');
+    //sendStatusToWindow('正在检查更新...');
   })
   autoUpdater.on('update-available', (info) => {
-    sendStatusToWindow('有可用更新');
+    info.status = constant.appUpdaterStatus.available;
+    info.desc = '有可用更新';
+    sendStatusToWindow(info);
   })
   autoUpdater.on('update-not-available', (info) => {
-    sendStatusToWindow('没有可用更新');
+    info.status = constant.appUpdaterStatus.noAvailable;
+    info.desc = '没有可用更新';
+    sendStatusToWindow(info);
   })
   autoUpdater.on('error', (err) => {
-    sendStatusToWindow('更新异常： ' + err);
+    let info = {
+      status: constant.appUpdaterStatus.error,
+      desc: err
+    }
+    sendStatusToWindow(info);
   })
   autoUpdater.on('download-progress', (progressObj) => {
-    let log_message = "下载进度: " + progressObj.bytesPerSecond;
-    log_message = log_message + ' - 已下载 ' + progressObj.percent + '%';
-    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-    sendStatusToWindow(log_message);
+    let text = "下载进度: " + progressObj.bytesPerSecond;
+    text = text + ' - 已下载 ' + progressObj.percent + '%';
+    text = text + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+
+    let info = {
+      status: constant.appUpdaterStatus.downloading,
+      desc: text
+    }
+    sendStatusToWindow(info);
   })
   autoUpdater.on('update-downloaded', (info) => {
-    sendStatusToWindow('下载完成');
+    console.log('downloaded info:', info)
+    info.status = constant.appUpdaterStatus.downloaded;
+    info.desc = '下载完成';
+    sendStatusToWindow(info);
     // quit and update
-    if (updateConfig.force) {
-      helper.appQuit();
-      autoUpdater.quitAndInstall();
-    }
+    helper.appQuit();
+    autoUpdater.quitAndInstall();
   });
 
 };
@@ -65,9 +80,14 @@ exports.checkUpdate = function () {
   autoUpdater.checkForUpdates();
 }
 
-function sendStatusToWindow(text) {
-  eLogger.info(text);
-  MAIN_WINDOW.webContents.send('public.message', text);
+exports.download = function () {
+  autoUpdater.downloadUpdate();
+}
+
+function sendStatusToWindow(content = {}) {
+  const textJson = JSON.stringify(content);
+  eLogger.info(textJson);
+  MAIN_WINDOW.webContents.send(constant.ipcChannels.appUpdater, textJson);
 }
 
 exports = module.exports;

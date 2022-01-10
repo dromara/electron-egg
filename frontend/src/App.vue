@@ -19,6 +19,7 @@ export default {
   methods: {
     initIpc () {
       const self = this;
+      // 公共频道
       self.$ipc.on('public.message', (event, result) => {
         // 使用ant-desing-vue, message组件
         self.$message.info(result);
