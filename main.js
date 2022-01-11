@@ -12,19 +12,21 @@ global.MAIN_WINDOW = null;
 global.APP_TRAY = null;
 global.CAN_QUIT = false;
 
-// Initialize 
-setup()
-
 // argv
 let ENV = 'prod'
 for (let i = 0; i < process.argv.length; i++) {
   const tmpArgv = process.argv[i]
   if (tmpArgv.indexOf('--env=') !== -1) {
-    ENV = tmpArgv.substr(6)
+    ENV = tmpArgv.substring(6)
   }
 }
-const eggConfig = electronConfig.get('egg', ENV)
-eggConfig.env = ENV
+process.env.EE_SERVER_ENV = ENV;
+
+// Initialize 
+setup()
+
+const eggConfig = electronConfig.get('egg', process.env.EE_SERVER_ENV)
+eggConfig.env = process.env.EE_SERVER_ENV
 
 // eLogger
 const eLogger = require('./electron/lib/eLogger').get()
@@ -144,5 +146,12 @@ function loadingView (winOptions) {
 function loadMainUrl (url) {
   MAIN_WINDOW.loadURL(url)
 }
+
+/**
+ * Catch exception
+ */
+process.on('uncaughtException', function(err) {
+  eLogger.error(err);
+});
 
 initialize()

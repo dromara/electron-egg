@@ -11,16 +11,17 @@
         <a-button @click="download()">下载并安装</a-button>
       </a-space>
     </div>
-    <!-- <div class="one-block-1">
+    <div class="one-block-1">
       <span>
-        2. 新窗口中加载html内容
+        2. 下载进度
       </span>
     </div>  
     <div class="one-block-2">
+      <a-progress :percent="percentNumber" status="active" />
       <a-space>
-        <a-button @click="createWindow(1)">打开html页面</a-button>
+        {{ progress }}
       </a-space>
-    </div> -->
+    </div>
   </div>
 </template>
 <script>
@@ -29,6 +30,8 @@ export default {
   data() {
     return {
       status: 0, // -1:异常，1：有可用更新，2：没有可用更新，3：下载中, 4：下载完成
+      progress: '',
+      percentNumber: 0
     };
   },
   mounted () {
@@ -39,10 +42,13 @@ export default {
       const self = this;
       self.$ipc.on('app.updater', (event, result) => {
         result = JSON.parse(result);
-        console.log('app updater:', result);
-        let text = result.desc;
         self.status = result.status;
-        self.$message.info(text);
+        if (result.status == 3) {
+          self.progress = result.desc;
+          self.percentNumber = result.percentNumber;
+        } else {
+          self.$message.info(result.desc);
+        }
       })
     },
     checkForUpdater () {

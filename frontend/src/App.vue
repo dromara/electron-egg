@@ -12,20 +12,8 @@ export default {
     return {};
   },
   watch: {},
-  mounted () {
-    // 初始化一个公共消息通信频道
-    this.initIpc();
-  },
-  methods: {
-    initIpc () {
-      const self = this;
-      // 公共频道
-      self.$ipc.on('public.message', (event, result) => {
-        // 使用ant-desing-vue, message组件
-        self.$message.info(result);
-      })
-    },
-  }
+  mounted () {},
+  methods: {}
 }
 </script>
 <style>

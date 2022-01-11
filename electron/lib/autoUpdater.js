@@ -7,6 +7,7 @@ const {app} = require('electron');
 const eLogger = require('./eLogger').get();
 const helper = require('./helper');
 const constant = require('./constant');
+const path = require('path');
 
 /**
  * 安装模块
@@ -26,6 +27,9 @@ exports.setup = function () {
 
   // 是否自动下载
   autoUpdater.autoDownload = updateConfig.force ? true : false;
+  //if (process.env.EE_SERVER_ENV == 'local') {
+    autoUpdater.updateConfigPath = path.join(__dirname, '../../out/dev-app-update.yml')
+  //}
 
   try {
     autoUpdater.setFeedURL(updateConfig.options);
@@ -54,18 +58,24 @@ exports.setup = function () {
     sendStatusToWindow(info);
   })
   autoUpdater.on('download-progress', (progressObj) => {
-    let text = "下载进度: " + progressObj.bytesPerSecond;
-    text = text + ' - 已下载 ' + progressObj.percent + '%';
-    text = text + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    let percentStr = String(progressObj.percent);
+    let endIndex = percentStr.indexOf('.') != -1 ? percentStr.indexOf('.') : percentStr.length;
+    let percentNumber = percentStr.substring(0, endIndex);
+    let totalSize = bytesChange(progressObj.total);
+    let transferredSize = bytesChange(progressObj.transferred);
+    let text = '已下载 ' + percentNumber + '%';
+    text = text + ' (' + transferredSize + "/" + totalSize + ')';
 
     let info = {
       status: constant.appUpdaterStatus.downloading,
-      desc: text
+      desc: text,
+      percentNumber: percentNumber,
+      totalSize: totalSize,
+      transferredSize: transferredSize
     }
     sendStatusToWindow(info);
   })
   autoUpdater.on('update-downloaded', (info) => {
-    console.log('downloaded info:', info)
     info.status = constant.appUpdaterStatus.downloaded;
     info.desc = '下载完成';
     sendStatusToWindow(info);
@@ -73,7 +83,6 @@ exports.setup = function () {
     helper.appQuit();
     autoUpdater.quitAndInstall();
   });
-
 };
 
 exports.checkUpdate = function () {
@@ -88,6 +97,29 @@ function sendStatusToWindow(content = {}) {
   const textJson = JSON.stringify(content);
   eLogger.info(textJson);
   MAIN_WINDOW.webContents.send(constant.ipcChannels.appUpdater, textJson);
+}
+
+
+function bytesChange (limit) {
+  let size = "";
+  if(limit < 0.1 * 1024){                            
+    size = limit.toFixed(2) + "B"
+  }else if(limit < 0.1 * 1024 * 1024){            
+    size = (limit/1024).toFixed(2) + "KB"
+  }else if(limit < 0.1 * 1024 * 1024 * 1024){        
+    size = (limit/(1024 * 1024)).toFixed(2) + "MB"
+  }else{                                            
+    size = (limit/(1024 * 1024 * 1024)).toFixed(2) + "GB"
+  }
+
+  let sizeStr = size + "";                        
+  let index = sizeStr.indexOf(".");                    
+  let dou = sizeStr.substring(index + 1 , index + 3)            
+  if(dou == "00"){
+      return sizeStr.substring(0, index) + sizeStr.substring(index + 3, index + 5)
+  }
+
+  return size;
 }
 
 exports = module.exports;
