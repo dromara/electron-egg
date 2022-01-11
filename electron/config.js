@@ -52,15 +52,14 @@ const config = {
     workers: 1
   },
   autoUpdate: {
-    windows: true, // windows可以开启；macOs 需要签名验证
+    windows: false, // windows可以开启；macOs 需要签名验证
     macOS: false,
     linux: false,
     options: {
       provider: 'generic',
-      url: 'https://kaka996.coding.net/p/resource/d/tx-resource2/git/raw/master/ee' // resource dir
+      url: 'https://www.coding.net/' // resource dir
     },
     force: false, // 强制更新
-    autoDownload: false, // 是否自动下载
   },
   awakeProtocol: {
     protocol: 'electron-egg', // 自定义协议名（默认你的应用名称-英文）

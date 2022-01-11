@@ -25,11 +25,11 @@ exports.setup = function () {
   eLogger.info('[autoUpdater] [setup] server: ', server);
   updateConfig.options.url = server;
 
-  // 是否自动下载
+  // 是否后台自动下载
   autoUpdater.autoDownload = updateConfig.force ? true : false;
-  //if (process.env.EE_SERVER_ENV == 'local') {
+  if (process.env.EE_SERVER_ENV == 'local') {
     autoUpdater.updateConfigPath = path.join(__dirname, '../../out/dev-app-update.yml')
-  //}
+  }
 
   try {
     autoUpdater.setFeedURL(updateConfig.options);
@@ -58,9 +58,7 @@ exports.setup = function () {
     sendStatusToWindow(info);
   })
   autoUpdater.on('download-progress', (progressObj) => {
-    let percentStr = String(progressObj.percent);
-    let endIndex = percentStr.indexOf('.') != -1 ? percentStr.indexOf('.') : percentStr.length;
-    let percentNumber = percentStr.substring(0, endIndex);
+    let percentNumber = parseInt(progressObj.percent);
     let totalSize = bytesChange(progressObj.total);
     let transferredSize = bytesChange(progressObj.transferred);
     let text = '已下载 ' + percentNumber + '%';
