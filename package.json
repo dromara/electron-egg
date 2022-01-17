@@ -6,7 +6,6 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --env=local",
-    "test": "concurrently \"cd ./frontend && npm run serve\" \"electron . --env=local\"",
     "build-w": "electron-builder -w --ia32",
     "build-w-64": "electron-builder -w --x64",
     "build-m": "electron-builder -m",
@@ -89,40 +88,18 @@
   "author": "wallace5303, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
-    "autod": "^3.0.1",
-    "autod-egg": "^1.1.0",
-    "concurrently": "^6.1.0",
-    "devtron": "^1.4.0",
     "egg-bin": "^4.12.3",
-    "egg-ci": "^1.11.0",
-    "egg-mock": "^3.21.0",
     "electron": "^12.2.3",
     "electron-builder": "22.10.4",
     "eslint": "^5.13.0",
     "eslint-config-egg": "^7.1.0",
-    "eslint-plugin-prettier": "^3.0.1",
-    "fs-extra": "^9.1.0",
-    "prettier": "^1.16.4",
-    "uglify-js": "^3.14.3"
+    "eslint-plugin-prettier": "^3.0.1"
   },
   "dependencies": {
-    "dayjs": "^1.9.5",
-    "egg": "^2.15.1",
-    "egg-cluster": "^1.23.3",
-    "egg-cors": "^2.2.0",
-    "egg-jwt": "^3.1.6",
+    "egg": "^2.33.1",
     "egg-scripts": "^2.13.0",
     "egg-view-ejs": "^2.0.0",
-    "electron-is": "^3.0.0",
-    "electron-log": "^4.2.2",
     "electron-updater": "^4.3.5",
-    "get-port": "^5.1.1",
-    "glob": "^7.1.6",
-    "lodash": "^4.17.11",
-    "lowdb": "^1.0.0",
-    "semver": "^5.4.1",
-    "socket.io": "^3.0.5",
-    "socket.io-client": "^3.0.5",
-    "unzip-crx-3": "^0.2.0"
+    "lodash": "^4.17.21"
   }
 }
