@@ -23,7 +23,6 @@ exports.start = function (argv) {
     argv.title = argv.title || `egg-server-${appName}`;
 
     // normalize env
-    env.HOME = baseDir;
     env.NODE_ENV = 'production';
 
     // it makes env big but more robust
@@ -35,10 +34,6 @@ exports.start = function (argv) {
       // adjust env for win
       env.PATH || env.Path,
     ].filter(x => !!x).join(path.delimiter);
-
-    // for alinode
-    env.ENABLE_NODE_LOG = 'YES';
-    env.NODE_LOG_DIR = env.NODE_LOG_DIR || path.join(baseDir, 'logs/alinode');
 
     // cli argv -> process.env.EGG_SERVER_ENV -> `undefined` then egg will use `prod`
     if (argv.env) {
