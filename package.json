@@ -37,7 +37,7 @@
       "to": "extraResources"
     },
     "electronDownload": {
-      "mirror": "https://npmmirror.com/mirrors/electron/"
+      "mirror": "https://registry.npmmirror.com/mirrors/electron/"
     },
     "nsis": {
       "oneClick": false,
