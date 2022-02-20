@@ -24,8 +24,9 @@ module.exports = async (app) => {
   awaken.install(app);
 
   chromeExtension.install(app);
-
+  
   loadUpdate(app);
+
 }
 
 /**

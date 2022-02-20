@@ -13,10 +13,9 @@ module.exports = {
   /**
    * 安装
    */   
-  install (eeApp) {
+  async install (eeApp) {
     console.log('[preload] load chrome extension module');
     const extensionIds = this.getAllIds();
-    
     for (let i = 0; i < extensionIds.length; i++) {
       await this.load(extensionIds[i]);
     }
@@ -49,7 +48,7 @@ module.exports = {
   /**
    * 加载扩展
    */
-  load (extensionId = '') {
+  async load (extensionId = '') {
     if (_.isEmpty(extensionId)) {
       return false
     }
