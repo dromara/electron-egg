@@ -4,8 +4,9 @@
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron . ",
     "dev": "electron . --env=local",
+    "test": "set DEBUG=* && electron . --env=local",
     "build-w": "electron-builder -w --ia32",
     "build-w-64": "electron-builder -w --x64",
     "build-m": "electron-builder -m",
@@ -29,7 +30,9 @@
     "files": [
       "**/*",
       "!frontend/",
-      "!run/"
+      "!run/",
+      "!logs/",
+      "!data/"
     ],
     "extraResources": {
       "from": "./build/extraResources/",
@@ -96,10 +99,11 @@
     "eslint-plugin-prettier": "^3.0.1"
   },
   "dependencies": {
+    "dayjs": "^1.10.7",
     "egg": "^2.33.1",
-    "egg-scripts": "^2.13.0",
-    "egg-view-ejs": "^2.0.0",
-    "electron-updater": "^4.3.5",
-    "lodash": "^4.17.21"
+    "egg-cluster": "^1.27.1",
+    "egg-cors": "^2.2.3",
+    "egg-scripts": "^2.15.2",
+    "egg-view-ejs": "^2.0.1"
   }
 }

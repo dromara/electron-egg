@@ -4,6 +4,9 @@ const BaseController = require('../base');
 
 class HomeController extends BaseController {
 
+  /**
+   * 单页应用入口（vue、react等）
+   */
   async index() {
     const { ctx } = this;
 
@@ -12,26 +15,6 @@ class HomeController extends BaseController {
     };
 
     await ctx.render('index.ejs', data);
-  }
-  
-  async hello() {
-    const { ctx } = this;
-
-    const data = {
-      title: 'hello'
-    };
-
-    this.sendSuccess(data);
-  }
-
-  async helloPage() {
-    const { ctx } = this;
-
-    const data = {
-      title: 'hello'
-    };
-
-    await ctx.render('hello.ejs', data);
   }
 }
 

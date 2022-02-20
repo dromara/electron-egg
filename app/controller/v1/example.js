@@ -21,6 +21,20 @@ class ExampleController extends BaseController {
     this.sendSuccess(data);
   }
 
+  /**
+   * test2
+   */
+  test2() {
+    const { ctx, service } = this;
+    const body = ctx.request.body;
+    console.log('test2 params:', body);
+    const data = {
+      age: 32
+    };
+
+    this.sendSuccess(data);
+  }
+
   async openLocalDir() {
     const self = this;
     const { ctx, service } = this;

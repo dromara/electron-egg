@@ -70,7 +70,7 @@ export default {
     },
     helloHandle(value) {
       const self = this;
-      this.$ipcCallMain('example.hello', value).then(r => {
+      this.$ipcCallMain('controller.example.hello', value).then(r => {
         self.$message.info(r);
       })
     },

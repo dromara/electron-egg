@@ -1,73 +1,34 @@
 'use strict';
 
-const BaseService = require('./base');
-const path = require('path');
+const Storage = require('ee-core').Storage;
+const Service = require('egg').Service;
 const _ = require('lodash');
-const lowdb = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
-const storageKey = require('../const/storageKey');
-const fs = require('fs');
-const os = require('os');
-const utils = require('../utils/utils');
-const pkg = require('../../package.json');
-const storageDb = 'db.json';
 
-class StorageService extends BaseService {
-  /*
-   * instance
-   */
-  instance(file = null) {
-    if (!file) {
-      const storageDir = this.getStorageDir();
-      if (!fs.existsSync(storageDir)) {
-        utils.mkdir(storageDir);
-        utils.chmodPath(storageDir, '777');
-      }
-      file = path.normalize(storageDir + storageDb);
-    }
-    const isExist = fs.existsSync(file);
-    if (!isExist) {
-        return null;
-    }
-  
-    const adapter = new FileSync(file);
-    const db = lowdb(adapter);
-  
-    return db;
-  }
+class StorageService extends Service {
 
-  /*
-   * getElectronIPCPort
-   */
-  getElectronIPCPort() {
-    const key = storageKey.ELECTRON_IPC + '.port';
-    const port = this.instance()
-    .get(key)
-    .value();
-  
-    return port;
-  }
-
-  /*
-   * getStorageDir
-   */
-  getStorageDir() {
-    const userHomeDir = os.userInfo().homedir;
-    const storageDir = path.normalize(userHomeDir + '/' + pkg.name + '/');
-
-    return storageDir;
+  constructor () {
+    super();
+    this.systemDB = Storage.JsonDB.connection('system');
+    this.demoDB = Storage.JsonDB.connection('demo');  
+    this.systemDBKey = {
+      cache: 'cache'
+    };
+    this.demoDBKey = {
+      preferences: 'preferences',
+      test_data: 'test_data'
+    };
   }
 
   /*
    * 增 Test data
    */
   async addTestData(user) {
-    const key = storageKey.TEST_DATA;
-    if (!this.instance().has(key).value()) {
-      this.instance().set(key, []).write();
+    const key = this.demoDBKey.test_data;
+    if (!this.demoDB.has(key).value()) {
+      this.demoDB.set(key, []).write();
     }
     
-    const data = this.instance()
+    const data = this.demoDB
     .get(key)
     .push(user)
     .write();
@@ -79,8 +40,8 @@ class StorageService extends BaseService {
    * 删 Test data
    */
   async delTestData(name = '') {
-    const key = storageKey.TEST_DATA;
-    const data = this.instance()
+    const key = this.demoDBKey.test_data;
+    const data = this.demoDB
     .get(key)
     .remove({name: name})
     .write();
@@ -92,8 +53,8 @@ class StorageService extends BaseService {
    * 改 Test data
    */
   async updateTestData(name= '', age = 0) {
-    const key = storageKey.TEST_DATA;
-    const data = this.instance()
+    const key = this.demoDBKey.test_data;
+    const data = this.demoDB
     .get(key)
     .find({name: name}) // 修改找到的第一个数据，貌似无法批量修改 todo
     .assign({age: age})
@@ -106,8 +67,8 @@ class StorageService extends BaseService {
    * 查 Test data
    */
   async getTestData(age = 0) {
-    const key = storageKey.TEST_DATA;
-    let data = this.instance()
+    const key = this.demoDBKey.test_data;
+    let data = this.demoDB
     .get(key)
     //.find({age: age}) 查找单个
     .filter(function(o) {
@@ -130,11 +91,11 @@ class StorageService extends BaseService {
    * all Test data
    */
     async getAllTestData() {
-      const key = storageKey.TEST_DATA;
-      if (!this.instance().has(key).value()) {
-        this.instance().set(key, []).write();
+      const key = this.demoDBKey.test_data;
+      if (!this.demoDB.has(key).value()) {
+        this.demoDB.set(key, []).write();
       }
-      let data = this.instance()
+      let data = this.demoDB
       .get(key)
       .value();
   

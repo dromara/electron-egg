@@ -1,8 +1,17 @@
 'use strict';
 
-const BaseService = require('./base');
+const Service = require('egg').Service;
+const EeSocket = require('ee-core').Socket.EeSocket;
+const socketClient = EeSocket.getClient();
 
-class ExampleService extends BaseService {
+class ExampleService extends Service {
+
+  async testElectronApi(id = 0) {
+    const res = await socketClient.call('controller.example.test', {name:"gsx"}, {age:12});
+
+    return null;
+  }
+
   async openLocalDir(dir) {
     const self = this;
 
@@ -91,12 +100,6 @@ class ExampleService extends BaseService {
     }
 
     return result.data;
-  }
-
-  async testElectronApi(id = 0) {
-    await this.ipcCall('example.testElectronApi');
-
-    return null;
   }
 
   async messageShow() {

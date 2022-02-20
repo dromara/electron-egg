@@ -4,3 +4,4 @@ logs/
 run/
 .idea/
 package-lock.json
+data/

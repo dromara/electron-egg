@@ -35,6 +35,8 @@ module.exports = app => {
   router.post('/api/v1/example/selectFileDir', controller.v1.example.selectFileDir);
   // test some electron api
   router.post('/api/v1/example/testElectronApi', controller.v1.example.testElectronApi);
+  // test2
+  router.post('/api/v1/example/test2', controller.v1.example.test2);
   // message show
   router.post('/api/v1/example/messageShow', controller.v1.example.messageShow);
   // message show confirm
