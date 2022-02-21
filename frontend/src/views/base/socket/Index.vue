@@ -43,7 +43,7 @@
   </div>
 </template>
 <script>
-import { requestEggApi } from '@/api/main'
+import { requestEggApi, ipcApiRoute } from '@/api/main'
 export default {
   data() {
     return {
@@ -59,35 +59,31 @@ export default {
   methods: {
     init () {
       const self = this;
-      self.$ipc.on('example.socketMessageStart', (event, result) => {
+      self.$ipc.on(ipcApiRoute.socketMessageStart, (event, result) => {
         console.log('[ipcRenderer] [socketMsgStart] result:', result)
         self.socketMessageString = result;
       })
-      self.$ipc.on('example.socketMessageStop', (event, result) => {
+      self.$ipc.on(ipcApiRoute.socketMessageStop, (event, result) => {
         console.log('[ipcRenderer] [socketMsgStop] result:', result)
         self.socketMessageString = result;
       })
     },
     helloHandle(value) {
       const self = this;
-      this.$ipcCallMain('controller.example.hello', value).then(r => {
+      this.$ipcCallMain(ipcApiRoute.hello, value).then(r => {
         self.$message.info(r);
       })
     },
     executeJSHandle(value) {
-      requestEggApi('executeJS', {str: value}).then(res => {
-        if (res.code == 0) {
-          console.log(res.data);
-        }
-      }).catch(err => {
-        console.log('err:', err)
-      })
+      this.$ipcCallMain(ipcApiRoute.executeJS, value).then(r => {
+        console.log(r);
+      })      
     },
     socketMsgStart() {
-      this.$ipc.send('example.socketMessageStart', '时间')
+      this.$ipc.send(ipcApiRoute.socketMessageStart, '时间')
     },
     socketMsgStop() {
-      this.$ipc.send('example.socketMessageStop', '')
+      this.$ipc.send(ipcApiRoute.socketMessageStop, '')
     },
   }
 }

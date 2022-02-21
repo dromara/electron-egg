@@ -12,11 +12,6 @@ class ExampleService extends Service {
     return null;
   }
 
-  async executeJS(str) {
-    let result = await socketClient.call('controller.example.executeJS', str);
-    return result;
-  }
-
   async uploadFileToSMMS(tmpFile) {
     const res = {
       code: 1000,

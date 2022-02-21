@@ -4,6 +4,7 @@ const _ = require('lodash');
 const Controller = require('ee-core').Controller;
 const {app, dialog, webContents, shell, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
 
+let myTimer = null;
 /**
  * 示例控制器
  * @class
@@ -15,6 +16,13 @@ class ExampleController extends Controller {
    * args 前端传的参数
    * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
    */
+
+   constructor(ctx) {
+    super(ctx);
+
+    //this.myTimer = null;
+
+   }
 
   /**
    * test
@@ -35,14 +43,14 @@ class ExampleController extends Controller {
   /**
    * hello
    */
-  hello (args, event) {
+  hello (args) {
     let newMsg = args + " +1";
-    let reply = '';
-    reply = '收到：' + args + '，返回：' + newMsg;
+    let content = '';
+    content = '收到：' + args + '，返回：' + newMsg;
 
     // let channel = "example.socketMessageStop";
     // event.reply(`${channel}`, '另外的数据');
-    return reply;
+    return content;
   }
 
   /**
@@ -102,6 +110,40 @@ class ExampleController extends Controller {
     const dir = app.getPath(args.id);
     shell.openPath(dir);
     return true;
+  }
+
+  /**
+   * 长消息 - 开始
+   */
+  socketMessageStart (args, event) {
+    // 每隔1秒，向前端页面发送消息
+    // 用定时器模拟
+    
+    // 前端ipc频道 channel
+    const channel = 'controller.example.socketMessageStart';
+    myTimer = setInterval(function(e, c, msg) {
+      let timeNow = Date.now();
+      let data = msg + ':' + timeNow;
+      e.reply(`${c}`, data)
+    }, 1000, event, channel, args)
+
+    return '开始了'
+  }
+
+  /**
+   * 长消息 - 停止
+   */
+  socketMessageStop () {
+    clearInterval(myTimer);
+    return '停止了'
+  }
+
+  /**
+   * 执行js
+   */
+  executeJS (args) {
+    let jscode = `(()=>{alert('${args}');return 'fromJs:${args}';})()`;
+    return webContents.fromId(1).executeJavaScript(jscode);
   }
 }
 

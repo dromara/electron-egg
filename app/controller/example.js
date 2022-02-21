@@ -35,15 +35,6 @@ class ExampleController extends BaseController {
     this.sendSuccess(data);
   }
 
-  async executeJS() {
-    const self = this;
-    const { ctx, service } = this;
-    const body = ctx.request.body;
-    const str = body.str;
-    let data = await service.example.executeJS(str);
-    self.sendSuccess(data);
-  }
-
   /**
    * 上传文件
    */  

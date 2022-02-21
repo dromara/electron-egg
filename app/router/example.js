@@ -5,10 +5,7 @@
  */
 module.exports = app => {
   const { router, controller } = app;
-  // open local dir
-  router.post('/api/example/openLocalDir', controller.example.openLocalDir);
-  // executeJS
-  router.post('/api/example/executeJS', controller.example.executeJS);
+
   // upload file
   router.post('/api/example/uploadFile', controller.example.uploadFile);
   // add test data

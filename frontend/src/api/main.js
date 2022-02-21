@@ -2,7 +2,6 @@ import request from '@/utils/request'
 
 const eggApiroute = {
   uploadFile: '/api/example/uploadFile',
-  executeJS: '/api/example/executeJS',
   autoLaunchEnable: '/api/example/autoLaunchEnable',
   autoLaunchDisable: '/api/example/autoLaunchDisable',
   autoLaunchIsEnabled: '/api/example/autoLaunchIsEnabled',
@@ -18,6 +17,10 @@ const ipcApiRoute = {
   messageShowConfirm: 'controller.example.messageShowConfirm',
   selectFolder: 'controller.example.selectFolder',
   openDirectory: 'controller.example.openDirectory',
+  socketMessageStart: 'controller.example.socketMessageStart',
+  socketMessageStop: 'controller.example.socketMessageStop',
+  hello: 'controller.example.hello',
+  executeJS: 'controller.example.executeJS',
 }
 
 /**
