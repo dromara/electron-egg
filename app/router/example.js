@@ -8,14 +8,6 @@ module.exports = app => {
 
   // upload file
   router.post('/api/example/uploadFile', controller.example.uploadFile);
-  // add test data
-  router.post('/api/example/addTestData', controller.example.addTestData);
-  // delete test data
-  router.post('/api/example/delTestData', controller.example.delTestData);
-  // update test data
-  router.post('/api/example/updateTestData', controller.example.updateTestData);
-  // get test data
-  router.post('/api/example/getTestData', controller.example.getTestData);
   // open launch
   router.post('/api/example/autoLaunchEnable', controller.example.autoLaunchEnable);
   // close launch 

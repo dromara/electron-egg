@@ -6,10 +6,10 @@ const _ = require('lodash');
 
 class StorageService extends Service {
 
-  constructor () {
-    super();
-    this.systemDB = Storage.JsonDB.connection('system');
-    this.demoDB = Storage.JsonDB.connection('demo');  
+  constructor (ctx) {
+    super(ctx);
+    this.systemDB = Storage.JsonDB.connection('system').db;
+    this.demoDB = Storage.JsonDB.connection('demo').db;  
     this.systemDBKey = {
       cache: 'cache'
     };

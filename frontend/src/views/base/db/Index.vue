@@ -14,7 +14,7 @@
           • 可使用lodash语法
         </a-col>
         <a-col :span="8">
-          • 数据文件db.json在日志同级目录
+          
         </a-col>
       </a-row>
     </div>

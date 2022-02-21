@@ -43,7 +43,7 @@
   </div>
 </template>
 <script>
-import { requestEggApi, ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main'
 export default {
   data() {
     return {
