@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-screen">
+  <div id="app-base-screen">
     <div class="one-block-1">
       <span>
         1. 系统主题模式
@@ -72,7 +72,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-screen {
+#app-base-screen {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

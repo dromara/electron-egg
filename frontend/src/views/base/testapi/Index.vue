@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-test-api">
+  <div id="app-base-test-api">
     <div class="one-block-1">
       <span>
         1. 测试一些操作系统api
@@ -36,7 +36,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-test-api {
+#app-base-test-api {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

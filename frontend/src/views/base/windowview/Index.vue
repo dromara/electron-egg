@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-window-view">
+  <div id="app-base-window-view">
     <div class="one-block-1">
       <span>
         1. 嵌入web内容
@@ -58,7 +58,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-window-view {
+#app-base-window-view {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

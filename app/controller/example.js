@@ -1,6 +1,6 @@
 'use strict';
 
-const BaseController = require('../base');
+const BaseController = require('./base');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');

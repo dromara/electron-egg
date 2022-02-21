@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-software-open">
+  <div id="app-base-software-open">
     <div class="one-block-1">
       <span>
         1. 调用其它软件（exe、bash等可执行程序）
@@ -52,7 +52,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-software-open {
+#app-base-software-open {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

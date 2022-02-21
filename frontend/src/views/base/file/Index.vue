@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-file">
+  <div id="app-base-file">
     <div class="one-block-1">
       <span>
         1. 上传文件到sm图床
@@ -203,7 +203,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-file {
+#app-base-file {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

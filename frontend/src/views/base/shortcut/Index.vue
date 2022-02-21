@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-shortcut">
+  <div id="app-base-shortcut">
     <div class="one-block-1">
       <span>
         1. 快捷键
@@ -84,7 +84,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-shortcut {
+#app-base-shortcut {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

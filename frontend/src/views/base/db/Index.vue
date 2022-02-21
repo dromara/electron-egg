@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-db">
+  <div id="app-base-db">
     <div class="one-block-1">
       <span>
         1. 本地数据库
@@ -208,7 +208,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-db {
+#app-base-db {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

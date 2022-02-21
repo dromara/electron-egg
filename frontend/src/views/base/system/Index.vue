@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-system-launch">
+  <div id="app-base-system-launch">
     <div class="one-block-2">
       <a-list class="set-auto" itemLayout="horizontal">
         <a-list-item style="text-align: left;">
@@ -72,7 +72,7 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-#app-demo-system-launch {
+#app-base-system-launch {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

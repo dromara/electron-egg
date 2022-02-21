@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-powermonitor">
+  <div id="app-base-powermonitor">
     <div class="one-block-1">
       <span>
         1. 监控电源状态
@@ -42,7 +42,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-powermonitor {
+#app-base-powermonitor {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

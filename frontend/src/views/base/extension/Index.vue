@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-extension">
+  <div id="app-base-extension">
     <div class="one-block-1">
       <span>
         1. 上传扩展程序（crx文件格式）
@@ -67,7 +67,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-extension {
+#app-base-extension {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

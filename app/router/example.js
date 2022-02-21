@@ -6,43 +6,43 @@
 module.exports = app => {
   const { router, controller } = app;
   // open local dir
-  router.post('/api/v1/example/openLocalDir', controller.v1.example.openLocalDir);
+  router.post('/api/example/openLocalDir', controller.example.openLocalDir);
   // executeJS
-  router.post('/api/v1/example/executeJS', controller.v1.example.executeJS);
+  router.post('/api/example/executeJS', controller.example.executeJS);
   // upload file
-  router.post('/api/v1/example/uploadFile', controller.v1.example.uploadFile);
+  router.post('/api/example/uploadFile', controller.example.uploadFile);
   // get ws url
-  router.post('/api/v1/example/getWsUrl', controller.v1.example.getWsUrl);
+  router.post('/api/example/getWsUrl', controller.example.getWsUrl);
   // add test data
-  router.post('/api/v1/example/addTestData', controller.v1.example.addTestData);
+  router.post('/api/example/addTestData', controller.example.addTestData);
   // delete test data
-  router.post('/api/v1/example/delTestData', controller.v1.example.delTestData);
+  router.post('/api/example/delTestData', controller.example.delTestData);
   // update test data
-  router.post('/api/v1/example/updateTestData', controller.v1.example.updateTestData);
+  router.post('/api/example/updateTestData', controller.example.updateTestData);
   // get test data
-  router.post('/api/v1/example/getTestData', controller.v1.example.getTestData);
+  router.post('/api/example/getTestData', controller.example.getTestData);
   // set shortcut
-  router.post('/api/v1/example/setShortcut', controller.v1.example.setShortcut);
+  router.post('/api/example/setShortcut', controller.example.setShortcut);
   // open launch
-  router.post('/api/v1/example/autoLaunchEnable', controller.v1.example.autoLaunchEnable);
+  router.post('/api/example/autoLaunchEnable', controller.example.autoLaunchEnable);
   // close launch 
-  router.post('/api/v1/example/autoLaunchDisable', controller.v1.example.autoLaunchDisable);
+  router.post('/api/example/autoLaunchDisable', controller.example.autoLaunchDisable);
   // is launch 
-  router.post('/api/v1/example/autoLaunchIsEnabled', controller.v1.example.autoLaunchIsEnabled);
+  router.post('/api/example/autoLaunchIsEnabled', controller.example.autoLaunchIsEnabled);
   // open software
-  router.post('/api/v1/example/openSoftware', controller.v1.example.openSoftware);
+  router.post('/api/example/openSoftware', controller.example.openSoftware);
   // select file dir
-  router.post('/api/v1/example/selectFileDir', controller.v1.example.selectFileDir);
+  router.post('/api/example/selectFileDir', controller.example.selectFileDir);
   // test some electron api
-  router.post('/api/v1/example/testElectronApi', controller.v1.example.testElectronApi);
+  router.post('/api/example/testElectronApi', controller.example.testElectronApi);
   // test2
-  router.post('/api/v1/example/test2', controller.v1.example.test2);
+  router.post('/api/example/test2', controller.example.test2);
   // message show
-  router.post('/api/v1/example/messageShow', controller.v1.example.messageShow);
+  router.post('/api/example/messageShow', controller.example.messageShow);
   // message show confirm
-  router.post('/api/v1/example/messageShowConfirm', controller.v1.example.messageShowConfirm);
+  router.post('/api/example/messageShowConfirm', controller.example.messageShowConfirm);
   // upload chrome extension
-  router.post('/api/v1/example/uploadExtension', controller.v1.example.uploadExtension);
+  router.post('/api/example/uploadExtension', controller.example.uploadExtension);
   // db operation
-  router.post('/api/v1/example/dbOperation', controller.v1.example.dbOperation);
+  router.post('/api/example/dbOperation', controller.example.dbOperation);
 };

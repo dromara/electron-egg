@@ -1,5 +1,5 @@
 <template>
-  <div id="app-demo-socket-ipc">
+  <div id="app-base-socket-ipc">
     <div class="one-block-1">
       <span>
         1. 渲染进程与主进程IPC通信
@@ -93,7 +93,7 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-#app-demo-socket-ipc {
+#app-base-socket-ipc {
   padding: 0px 10px;
   text-align: left;
   width: 100%;
