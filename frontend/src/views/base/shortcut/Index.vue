@@ -36,7 +36,7 @@
   </div>
 </template>
 <script>
-import { localApi } from '@/api/main'
+import { requestEggApi } from '@/api/main'
 
 export default {
   components: {},
@@ -64,7 +64,7 @@ export default {
         name: '窗口最小化',
         cmd: shortcutStr
       }
-      localApi('setShortcut', params).then(res => {
+      requestEggApi('setShortcut', params).then(res => {
         if (res.code !== 0) {
           // this.$message.info('error')
           return false

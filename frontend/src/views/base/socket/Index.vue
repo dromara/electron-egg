@@ -43,7 +43,7 @@
   </div>
 </template>
 <script>
-import { localApi } from '@/api/main'
+import { requestEggApi } from '@/api/main'
 export default {
   data() {
     return {
@@ -75,7 +75,7 @@ export default {
       })
     },
     executeJSHandle(value) {
-      localApi('executeJS', {str: value}).then(res => {
+      requestEggApi('executeJS', {str: value}).then(res => {
         if (res.code == 0) {
           console.log(res.data);
         }

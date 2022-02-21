@@ -11,7 +11,7 @@
   </div>
 </template>
 <script>
-import { localApi } from '@/api/main'
+import { requestEggApi } from '@/api/main'
 
 export default {
   data() {
@@ -24,7 +24,7 @@ export default {
       const params = {
         id: id
       }
-			localApi('testElectronApi', params).then(res => {
+			requestEggApi('testElectronApi', params).then(res => {
 				if (res.code !== 0) {
 					return false
 				}

@@ -13,22 +13,19 @@ class ExampleService extends Service {
   }
 
   async openLocalDir(dir) {
-    const self = this;
 
-    await self.ipcCall('example.openDir', dir);
+    await socketClient.call('controller.example.openDir', dir);
 
     return true;
   }
 
   async executeJS(str) {
-    const self = this;
-    let result = await self.ipcCall('example.executeJS', str);
+    let result = await socketClient.call('controller.example.executeJS', str);
     return result;
   }
 
   async setShortcut(shortcutStr) {
-    const self = this;
-    let result = await self.ipcCall('example.setShortcut', shortcutStr);
+    let result = await socketClient.call('controller.example.setShortcut', shortcutStr);
     return result;
   }
 
@@ -70,31 +67,33 @@ class ExampleService extends Service {
   }
 
   async autoLaunchEnable() {
-    const callResult = await this.ipcCall('example.autoLaunchEnable');
+    const callResult = await socketClient.call('controller.example.autoLaunchEnable');
 
     return callResult.data;
   }
 
   async autoLaunchDisable() {
-    const callResult = await this.ipcCall('example.autoLaunchDisable');
+    const callResult = await socketClient.call('controller.example.autoLaunchDisable');
 
     return callResult.data;
   }
 
   async autoLaunchIsEnabled() {
-    const callResult = await this.ipcCall('example.autoLaunchIsEnabled');
+    const callResult = await socketClient.call('controller.example.autoLaunchIsEnabled');
 
     return callResult.data;
   }
 
   async openSoftware(softName) {
-    const callResult = await this.ipcCall('example.openSoftware', softName);
+    const callResult = await socketClient.call('controller.example.openSoftware', softName);
     
     return callResult.data;
   }
 
   async selectDir() {
-    const result = await this.ipcCall('example.selectDir');
+
+    const result = await socketClient.call('controller.example.selectDir');
+    console.log('selectDir: result:', result);
     if (!result.data) {
       return '';
     }
@@ -103,21 +102,20 @@ class ExampleService extends Service {
   }
 
   async messageShow() {
-    await this.ipcCall('example.messageShow');
+    await socketClient.call('controller.example.messageShow');
 
     return true;
   } 
 
   async messageShowConfirm() {
-    await this.ipcCall('example.messageShowConfirm');
+    await socketClient.call('controller.example.messageShowConfirm');
 
     return true;
   }   
 
   async loadExtension(filePath) {
-    const self = this;
 
-    await self.ipcCall('example.loadExtension', filePath);
+    await socketClient.call('controller.example.loadExtension', filePath);
 
     return true;
   }

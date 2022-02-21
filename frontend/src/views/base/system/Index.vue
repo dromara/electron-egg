@@ -22,7 +22,7 @@
   </div>
 </template>
 <script>
-import { localApi } from '@/api/main'
+import { requestEggApi } from '@/api/main'
 
 export default {
   data () {
@@ -35,7 +35,7 @@ export default {
   },
   methods: {
     autoLaunchInit () {
-      localApi('autoLaunchIsEnabled', {}).then(res => {
+      requestEggApi('autoLaunchIsEnabled', {}).then(res => {
         if (res.code !== 0) {
           return false
         }
@@ -49,7 +49,7 @@ export default {
         'checkStatus': checkStatus
       }
       if (checkStatus) {
-        localApi('autoLaunchEnable', params).then(res => {
+        requestEggApi('autoLaunchEnable', params).then(res => {
           if (res.code !== 0) {
             return false
           }
@@ -58,7 +58,7 @@ export default {
           console.log('err:', err)
         })
       } else {
-        localApi('autoLaunchDisable', params).then(res => {
+        requestEggApi('autoLaunchDisable', params).then(res => {
           if (res.code !== 0) {
             return false
           }

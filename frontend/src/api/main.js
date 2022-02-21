@@ -1,28 +1,38 @@
 import request from '@/utils/request'
 
-const mainApi = {
-  openDir: '/api/v1/example/openLocalDir',
-  uploadFile: '/api/v1/example/uploadFile',
-  executeJS: '/api/v1/example/executeJS',
-  setShortcut: '/api/v1/example/setShortcut',
-  autoLaunchEnable: '/api/v1/example/autoLaunchEnable',
-  autoLaunchDisable: '/api/v1/example/autoLaunchDisable',
-  autoLaunchIsEnabled: '/api/v1/example/autoLaunchIsEnabled',
-  openSoftware: '/api/v1/example/openSoftware',
-  selectFileDir: '/api/v1/example/selectFileDir',
-  messageShow: '/api/v1/example/messageShow',
-  messageShowConfirm: '/api/v1/example/messageShowConfirm',
-  dbOperation: '/api/v1/example/dbOperation',
-  testElectronApi: '/api/v1/example/testElectronApi',
+const eggApiroute = {
+  openDir: '/api/example/openLocalDir',
+  uploadFile: '/api/example/uploadFile',
+  executeJS: '/api/example/executeJS',
+  setShortcut: '/api/example/setShortcut',
+  autoLaunchEnable: '/api/example/autoLaunchEnable',
+  autoLaunchDisable: '/api/example/autoLaunchDisable',
+  autoLaunchIsEnabled: '/api/example/autoLaunchIsEnabled',
+  openSoftware: '/api/example/openSoftware',
+  selectFileDir: '/api/example/selectFileDir',
+  messageShow: '/api/example/messageShow',
+  messageShowConfirm: '/api/example/messageShowConfirm',
+  dbOperation: '/api/example/dbOperation',
+  testElectronApi: '/api/example/testElectronApi',
+}
+
+const ipcApiRoute = {
+  messageShow: 'controller.example.messageShow',
+  messageShowConfirm: 'controller.example.messageShowConfirm',
 }
 
 /**
- * local api
+ * 访问egg api
  */
-export function localApi (uri, parameter) {
+const requestEggApi = (uri, parameter) => {
   return request({
-    url: mainApi[uri],
+    url: eggApiroute[uri],
     method: 'post',
     data: parameter
   })
+}
+
+export {
+  requestEggApi,
+  ipcApiRoute
 }

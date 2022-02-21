@@ -4,6 +4,7 @@ const BaseController = require('./base');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
+const Utils = require('ee-core').Utils;
 
 class ExampleController extends BaseController {
 
@@ -71,10 +72,13 @@ class ExampleController extends BaseController {
     self.sendSuccess(data);
   }
 
+  /**
+   * 上传文件
+   */  
   async uploadFile() {
     const self = this;
     const { ctx, service } = this;
-    let tmpDir = service.storage.getStorageDir();
+    let tmpDir = Utils.getLogDir();
     const file = ctx.request.files[0];
 
     try {

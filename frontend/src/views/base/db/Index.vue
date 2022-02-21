@@ -132,7 +132,7 @@
   </div>
 </template>
 <script>
-import { localApi } from '@/api/main'
+import { requestEggApi } from '@/api/main'
 
 export default {
   data() {
@@ -156,7 +156,7 @@ export default {
       const params = {
         action: 'all',
       }
-      localApi('dbOperation', params).then(res => {
+      requestEggApi('dbOperation', params).then(res => {
         if (res.code !== 0) {
           return false
         }
@@ -184,7 +184,7 @@ export default {
       if (ac == 'add' && this.name.length == 0) {
         self.$message.error(`请填写数据`);
       }
-      localApi('dbOperation', params).then(res => {
+      requestEggApi('dbOperation', params).then(res => {
         if (res.code !== 0) {
           return false
         }
