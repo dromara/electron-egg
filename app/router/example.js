@@ -19,8 +19,6 @@ module.exports = app => {
   router.post('/api/example/updateTestData', controller.example.updateTestData);
   // get test data
   router.post('/api/example/getTestData', controller.example.getTestData);
-  // set shortcut
-  router.post('/api/example/setShortcut', controller.example.setShortcut);
   // open launch
   router.post('/api/example/autoLaunchEnable', controller.example.autoLaunchEnable);
   // close launch 
@@ -29,8 +27,6 @@ module.exports = app => {
   router.post('/api/example/autoLaunchIsEnabled', controller.example.autoLaunchIsEnabled);
   // open software
   router.post('/api/example/openSoftware', controller.example.openSoftware);
-  // select file dir
-  router.post('/api/example/selectFileDir', controller.example.selectFileDir);
   // test some electron api
   router.post('/api/example/testElectronApi', controller.example.testElectronApi);
   // test2

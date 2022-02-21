@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const Controller = require('ee-core').Controller;
-const {app, dialog, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
+const {app, dialog, webContents, shell, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
 
 /**
  * 示例控制器
@@ -80,17 +80,29 @@ class ExampleController extends Controller {
   /**
    * 选择目录
    */
-  selectDir () {
+  selectFolder () {
     const filePaths = dialog.showOpenDialogSync({
       properties: ['openDirectory', 'createDirectory']
     });
-    console.log('[example] [selectDir] filePaths:', filePaths);
+
     if (_.isEmpty(filePaths)) {
       return null
     }
 
     return filePaths[0];
-  }  
+  } 
+
+  /**
+   * 打开目录
+   */
+  openDirectory (args) {
+    if (!args.id) {
+      return false;
+    }
+    const dir = app.getPath(args.id);
+    shell.openPath(dir);
+    return true;
+  }
 }
 
 module.exports = ExampleController;

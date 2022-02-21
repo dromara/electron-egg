@@ -1,7 +1,6 @@
 'use strict';
 
 const BaseController = require('./base');
-const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const Utils = require('ee-core').Utils;
@@ -34,33 +33,6 @@ class ExampleController extends BaseController {
     };
 
     this.sendSuccess(data);
-  }
-
-  async openLocalDir() {
-    const self = this;
-    const { ctx, service } = this;
-    const body = ctx.request.body;
-    const id = body.id;
-    const data = {};
-    let dir = '';
-    switch (id) {
-      case 'download' :
-        dir = os.userInfo().homedir + '/Downloads';
-        break;
-      case 'picture' :
-        dir = os.userInfo().homedir + '/Pictures';
-        break;
-      case 'doc' :
-        dir = os.userInfo().homedir + '/Documents';
-        break;
-      case 'music' :
-        dir = os.userInfo().homedir + '/Music';
-        break;
-    }
-
-    await service.example.openLocalDir(dir);
-
-    self.sendSuccess(data);
   }
 
   async executeJS() {
@@ -113,22 +85,6 @@ class ExampleController extends BaseController {
     await service.example.loadExtension(filePath);
 
     self.sendData(data);
-  }
-
-  async setShortcut() {
-    const self = this;
-    const { ctx, service } = this;
-    const shortcutObj = ctx.request.body;
-    const data = {};
-
-    if (!shortcutObj['id'] || !shortcutObj['name'] || !shortcutObj['cmd']) {
-      self.sendFail({}, 'param error', 100);
-      return;
-    }
-
-    await service.example.setShortcut(shortcutObj);
-
-    self.sendSuccess(data);
   }
 
   async dbOperation() {
@@ -254,21 +210,6 @@ class ExampleController extends BaseController {
       this.sendFail({}, '程序不存在', 100);
       return;
     }
-    this.sendSuccess(data);
-  }
-
-  /**
-   * 选择文件夹目录
-   */
-  async selectFileDir() {
-    const { service } = this;
-
-    const data = {
-      dir: ''
-    };
-    const dir = await service.example.selectDir();
-    data.dir = dir;
-
     this.sendSuccess(data);
   }
 

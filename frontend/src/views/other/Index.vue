@@ -10,7 +10,7 @@
   </div>
 </template>
 <script>
-import { localApi } from '@/api/main'
+import { requestEggApi } from '@/api/main'
 
 export default {
   data() {
@@ -19,7 +19,7 @@ export default {
   methods: {
     test () {
       const params = {}
-      localApi('openDir', params).then(res => {
+      requestEggApi('openDir', params).then(res => {
         if (res.code !== 0) {
           return false
         }

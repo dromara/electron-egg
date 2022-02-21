@@ -12,20 +12,8 @@ class ExampleService extends Service {
     return null;
   }
 
-  async openLocalDir(dir) {
-
-    await socketClient.call('controller.example.openDir', dir);
-
-    return true;
-  }
-
   async executeJS(str) {
     let result = await socketClient.call('controller.example.executeJS', str);
-    return result;
-  }
-
-  async setShortcut(shortcutStr) {
-    let result = await socketClient.call('controller.example.setShortcut', shortcutStr);
     return result;
   }
 
@@ -88,15 +76,6 @@ class ExampleService extends Service {
     const callResult = await socketClient.call('controller.example.openSoftware', softName);
     
     return callResult.data;
-  }
-
-  async selectDir() {
-    const result = await socketClient.call('controller.example.selectDir');
-    if (!result) {
-      return '';
-    }
-
-    return result;
   }
 
   async messageShow() {

@@ -87,15 +87,15 @@ import { requestEggApi, ipcApiRoute } from '@/api/main'
 const fileList = [
   {
     content: '【下载】目录',
-    id: 'download'
+    id: 'downloads'
   },
   {
     content: '【图片】目录',
-    id: 'picture'
+    id: 'pictures'
   },
   {
     content: '【文档】目录',
-    id: 'doc'
+    id: 'documents'
   },
   {
     content: '【音乐】目录',
@@ -115,16 +115,9 @@ export default {
   },
   methods: {
     openDirectry (id) {
-      const params = {
-        'id': id
-      }
-      requestEggApi('openDir', params).then(res => {
-        if (res.code !== 0) {
-          return false
-        }
-      }).catch(err => {
-        console.log('err:', err)
-      })
+      this.$ipcCallMain(ipcApiRoute.openDirectory, {id: id}).then(r => {
+        //console.log('r:', r)
+      })      
     },
 		uploadStatus(info) {
       const status = info.file.status;
@@ -151,15 +144,11 @@ export default {
       }
     },
     selectDir() {
-      requestEggApi('selectFileDir', {}).then(res => {
-        if (res.code !== 0) {
-          return false
-        }
-        console.log('res.data.dir:', res.data.dir)
-        this.dir_path = res.data.dir;
-      }).catch(err => {
-        this.$message.error('异常')
-      })
+      const self = this;
+      self.$ipcCallMain(ipcApiRoute.selectFolder, '').then(r => {
+        self.dir_path = r;
+        self.$message.info(r);
+      })      
     },
 		messageShow(type) {
       const self = this;
