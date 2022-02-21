@@ -2,7 +2,7 @@
  * 基础路由
  * @type { *[] }
  */
- import {AppSider, DemoMenu} from '@/layouts'
+ import {AppSider, Menu} from '@/layouts'
 
  const RouteView = {
    name: 'RouteView',
@@ -14,79 +14,79 @@ export const constantRouterMap = [
     component: AppSider,
     children: [
       {
-        path: '/demo',
+        path: '/',
         name: 'Demo',
-        component: DemoMenu,
+        component: Menu,
         children: [
           {
-            path: '/demo/file/index',
-            name: 'DemoFileIndex',
-            component: () => import('@/views/demo/file/Index')
+            path: '/base/file/index',
+            name: 'BaseFileIndex',
+            component: () => import('@/views/base/file/Index')
           },
           {
-            path: '/demo/socket/index',
-            name: 'DemoSocketIndex',
-            component: () => import('@/views/demo/socket/Index')
+            path: '/base/socket/index',
+            name: 'BaseSocketIndex',
+            component: () => import('@/views/base/socket/Index')
           },
           {
-            path: '/demo/db/index',
-            name: 'DemoDBIndex',
-            component: () => import('@/views/demo/db/Index')
+            path: '/base/db/index',
+            name: 'BaseDBIndex',
+            component: () => import('@/views/base/db/Index')
           },
           {
-            path: '/demo/windowview/index',
-            name: 'DemoWindowViewIndex',
-            component: () => import('@/views/demo/windowview/Index')
+            path: '/base/windowview/index',
+            name: 'BaseWindowViewIndex',
+            component: () => import('@/views/base/windowview/Index')
           },
           {
-            path: '/demo/window/index',
-            name: 'DemoWindowIndex',
-            component: () => import('@/views/demo/window/Index')
+            path: '/base/window/index',
+            name: 'BaseWindowIndex',
+            component: () => import('@/views/base/window/Index')
           },
           {
-            path: '/demo/extension/index',
-            name: 'DemoExtensionIndex',
-            component: () => import('@/views/demo/extension/Index')
+            path: '/base/extension/index',
+            name: 'BaseExtensionIndex',
+            component: () => import('@/views/base/extension/Index')
           },
           {
-            path: '/demo/notification/index',
-            name: 'DemoNotificationIndex',
-            component: () => import('@/views/demo/notification/Index')
+            path: '/base/notification/index',
+            name: 'BaseNotificationIndex',
+            component: () => import('@/views/base/notification/Index')
           },
           {
-            path: '/demo/powermonitor/index',
-            name: 'DemoPowerMonitorIndex',
-            component: () => import('@/views/demo/powermonitor/Index')
+            path: '/base/powermonitor/index',
+            name: 'BasePowerMonitorIndex',
+            component: () => import('@/views/base/powermonitor/Index')
           },
           {
-            path: '/demo/screen/index',
-            name: 'DemoScreenIndex',
-            component: () => import('@/views/demo/screen/Index')
+            path: '/base/screen/index',
+            name: 'BaseScreenIndex',
+            component: () => import('@/views/base/screen/Index')
           },
           {
-            path: '/demo/theme/index',
-            name: 'DemoThemeIndex',
-            component: () => import('@/views/demo/theme/Index')
+            path: '/base/theme/index',
+            name: 'BaseThemeIndex',
+            component: () => import('@/views/base/theme/Index')
           },                               
           {
-            path: '/demo/shortcut/index',
-            name: 'DemoShortcutIndex',
-            component: () => import('@/views/demo/shortcut/Index')
+            path: '/base/shortcut/index',
+            name: 'BaseShortcutIndex',
+            component: () => import('@/views/base/shortcut/Index')
           },
           {
-            path: '/demo/software/open',
-            name: 'DemoSoftwareIndex',
-            component: () => import('@/views/demo/software/Index')
+            path: '/base/software/open',
+            name: 'BaseSoftwareIndex',
+            component: () => import('@/views/base/software/Index')
           },
           {
-            path: '/demo/system/index',
-            name: 'DemoSystemIndex',
-            component: () => import('@/views/demo/system/Index')
+            path: '/base/system/index',
+            name: 'BaseSystemIndex',
+            component: () => import('@/views/base/system/Index')
           },
           {
-            path: '/demo/testapi/index',
-            name: 'DemoTestApiIndex',
-            component: () => import('@/views/demo/testapi/Index')
+            path: '/base/testapi/index',
+            name: 'BaseTestApiIndex',
+            component: () => import('@/views/base/testapi/Index')
           },
         ]  
       },

@@ -1,5 +1,4 @@
 import request from '@/utils/request'
-// import storage from 'store'
 
 const mainApi = {
   openDir: '/api/v1/example/openLocalDir',

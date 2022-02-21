@@ -1,5 +1,5 @@
 <template>
-  <a-layout id="app-demo-menu">
+  <a-layout id="app-menu">
     <a-layout-sider
       theme="light"
       class="layout-sider"
@@ -27,85 +27,85 @@ export default {
         'menu_100' : {
           icon: 'profile',
           title: '文件',
-          pageName: 'DemoFileIndex',
+          pageName: 'BaseFileIndex',
           params: {}
         },
         'menu_300' : {
           icon: 'profile',
           title: '通信',
-          pageName: 'DemoSocketIndex',
+          pageName: 'BaseSocketIndex',
           params: {}
         },
         'menu_301' : {
           icon: 'profile',
           title: '数据库',
-          pageName: 'DemoDBIndex',
+          pageName: 'BaseDBIndex',
           params: {}
         },
         'menu_400' : {
           icon: 'profile',
           title: '视图',
-          pageName: 'DemoWindowViewIndex',
+          pageName: 'BaseWindowViewIndex',
           params: {}
         },
         'menu_401' : {
           icon: 'profile',
           title: '窗口',
-          pageName: 'DemoWindowIndex',
+          pageName: 'BaseWindowIndex',
           params: {}
         },
         'menu_403' : {
           icon: 'profile',
           title: '扩展程序',
-          pageName: 'DemoExtensionIndex',
+          pageName: 'BaseExtensionIndex',
           params: {}
         },
         'menu_405' : {
           icon: 'profile',
           title: '桌面通知',
-          pageName: 'DemoNotificationIndex',
+          pageName: 'BaseNotificationIndex',
           params: {}
         },
         'menu_407' : {
           icon: 'profile',
           title: '电源监控',
-          pageName: 'DemoPowerMonitorIndex',
+          pageName: 'BasePowerMonitorIndex',
           params: {}
         },
         'menu_409' : {
           icon: 'profile',
           title: '屏幕信息',
-          pageName: 'DemoScreenIndex',
+          pageName: 'BaseScreenIndex',
           params: {}
         },
         'menu_411' : {
           icon: 'profile',
           title: '系统主题',
-          pageName: 'DemoThemeIndex',
+          pageName: 'BaseThemeIndex',
           params: {}
         },       
         'menu_500' : {
           icon: 'profile',
           title: '软件调用',
-          pageName: 'DemoSoftwareIndex',
+          pageName: 'BaseSoftwareIndex',
           params: {}
         },
         'menu_600' : {
           icon: 'profile',
           title: '系统',
-          pageName: 'DemoSystemIndex',
+          pageName: 'BaseSystemIndex',
           params: {}
         },
         'menu_800' : {
           icon: 'profile',
           title: '快捷键',
-          pageName: 'DemoShortcutIndex',
+          pageName: 'BaseShortcutIndex',
           params: {}
         },
         'menu_900' : {
           icon: 'profile',
           title: '测试',
-          pageName: 'DemoTestApiIndex',
+          pageName: 'BaseTestApiIndex',
           params: {}
         }                                                 
       }
@@ -125,7 +125,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-demo-menu {
+#app-menu {
   height: 100%;
   text-align: center;
   .layout-sider {

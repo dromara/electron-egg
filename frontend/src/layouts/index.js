@@ -1,7 +1,7 @@
 import AppSider from '@/layouts/AppSider'
-import DemoMenu from '@/layouts/DemoMenu'
+import Menu from '@/layouts/Menu'
 
 export {
     AppSider, 
-    DemoMenu
+    Menu
 }
