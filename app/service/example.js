@@ -91,14 +91,12 @@ class ExampleService extends Service {
   }
 
   async selectDir() {
-
     const result = await socketClient.call('controller.example.selectDir');
-    console.log('selectDir: result:', result);
-    if (!result.data) {
+    if (!result) {
       return '';
     }
 
-    return result.data;
+    return result;
   }
 
   async messageShow() {

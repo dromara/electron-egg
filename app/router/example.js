@@ -11,8 +11,6 @@ module.exports = app => {
   router.post('/api/example/executeJS', controller.example.executeJS);
   // upload file
   router.post('/api/example/uploadFile', controller.example.uploadFile);
-  // get ws url
-  router.post('/api/example/getWsUrl', controller.example.getWsUrl);
   // add test data
   router.post('/api/example/addTestData', controller.example.addTestData);
   // delete test data

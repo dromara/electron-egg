@@ -131,17 +131,6 @@ class ExampleController extends BaseController {
     self.sendSuccess(data);
   }
 
-  async getWsUrl() {
-    const self = this;
-    const { service } = this;
-    const data = {};
-
-    const addr = await service.socket.getWsUrl();
-    data.url = addr;
-
-    self.sendSuccess(data);
-  }
-
   async dbOperation() {
     const self = this;
     const { ctx, service } = this;

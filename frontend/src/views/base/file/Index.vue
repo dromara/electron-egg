@@ -110,7 +110,7 @@ export default {
       action_url: process.env.VUE_APP_API_BASE_URL + '/api/example/uploadFile',
       image_info: [],
       num: 0,
-			dir_path: "D:\\www\\xing\\electron-egg",
+			dir_path: "D:\\www\\electron-egg",
     };
   },
   methods: {

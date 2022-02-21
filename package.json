@@ -105,6 +105,7 @@
     "egg-cors": "^2.2.3",
     "egg-scripts": "^2.15.2",
     "egg-view-ejs": "^2.0.1",
+    "electron-is": "^3.0.0",
     "lodash": "^4.17.21"
   }
 }
