@@ -23,6 +23,7 @@
   </div>
 </template>
 <script>
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data() {
@@ -34,15 +35,14 @@ export default {
         },
         {
           type: 'html',
-          content: '/asset/view_example.html'
+          content: '/public/html/view_example.html'
         },        
       ],
     };
   },
   methods: {
     createWindow (index) {
-      const self = this;
-      self.$ipcCallMain('example.createWindow', this.views[index]).then(r => {
+      this.$ipcCallMain(ipcApiRoute.createWindow, this.views[index]).then(r => {
         console.log(r);
       })
     },

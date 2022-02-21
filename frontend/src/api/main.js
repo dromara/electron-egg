@@ -23,6 +23,7 @@ const ipcApiRoute = {
   executeJS: 'controller.example.executeJS',
   loadViewContent: 'controller.example.loadViewContent',
   removeViewContent: 'controller.example.removeViewContent',
+  createWindow: 'controller.example.createWindow',
 }
 
 /**

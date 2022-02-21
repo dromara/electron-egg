@@ -182,6 +182,28 @@ class ExampleController extends Controller {
     this.app.electron.mainWindow.removeBrowserView(browserViewObj);
     return true
   }  
+
+  /**
+   * 打开新窗口
+   */
+  createWindow (args) {
+    let content = null;
+    if (args.type == 'html') {
+      content = path.join('file://', electronApp.getAppPath(), args.content)
+    } else {
+      content = args.content;
+    }
+
+    let winObj = new BrowserWindow({
+      x: 10,
+      y: 10,
+      width: 980, 
+      height: 650 
+    })
+    winObj.loadURL(content);
+
+    return winObj.id
+  }  
 }
 
 module.exports = ExampleController;
