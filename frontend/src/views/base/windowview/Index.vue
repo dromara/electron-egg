@@ -25,6 +25,7 @@
   </div>
 </template>
 <script>
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data() {
@@ -36,7 +37,7 @@ export default {
         },
         {
           type: 'html',
-          content: '/asset/view_example.html'
+          content: '/public/html/view_example.html'
         },        
       ],
     };
@@ -44,13 +45,13 @@ export default {
   methods: {
     loadViewContent (index) {
       const self = this;
-      self.$ipcCallMain('example.loadViewContent', this.views[index]).then(r => {
+      self.$ipcCallMain(ipcApiRoute.loadViewContent, this.views[index]).then(r => {
         console.log(r);
       })
     },
     removeViewContent (index) {
       const self = this;
-      self.$ipcCallMain('example.removeViewContent', self.views[index]).then(r => {
+      self.$ipcCallMain(ipcApiRoute.removeViewContent, self.views[index]).then(r => {
         console.log(r);
       })
     },

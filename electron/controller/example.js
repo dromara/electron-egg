@@ -1,10 +1,16 @@
 'use strict';
 
 const _ = require('lodash');
+const path = require('path');
+const is = require('electron-is');
 const Controller = require('ee-core').Controller;
-const {app, dialog, webContents, shell, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
+const electronApp = require('electron').app;
+const {dialog, webContents, shell, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
 
 let myTimer = null;
+let browserViewObj = null;
+let notificationObj = null;
+
 /**
  * 示例控制器
  * @class
@@ -107,7 +113,7 @@ class ExampleController extends Controller {
     if (!args.id) {
       return false;
     }
-    const dir = app.getPath(args.id);
+    const dir = electronApp.getPath(args.id);
     shell.openPath(dir);
     return true;
   }
@@ -139,12 +145,43 @@ class ExampleController extends Controller {
   }
 
   /**
-   * 执行js
+   * 执行js语句
    */
   executeJS (args) {
     let jscode = `(()=>{alert('${args}');return 'fromJs:${args}';})()`;
     return webContents.fromId(1).executeJavaScript(jscode);
   }
+
+  /**
+   * 加载视图内容
+   */
+  loadViewContent (args) {
+    let content = null;
+    if (args.type == 'html') {
+      content = path.join('file://', electronApp.getAppPath(), args.content)
+    } else {
+      content = args.content;
+    }
+
+    browserViewObj = new BrowserView();
+    this.app.electron.mainWindow.setBrowserView(browserViewObj)
+    browserViewObj.setBounds({
+      x: 300,
+      y: 170,
+      width: 650,
+      height: 400
+    });
+    browserViewObj.webContents.loadURL(content);
+    return true
+  }
+
+  /**
+   * 移除视图内容
+   */
+  removeViewContent () {
+    this.app.electron.mainWindow.removeBrowserView(browserViewObj);
+    return true
+  }  
 }
 
 module.exports = ExampleController;

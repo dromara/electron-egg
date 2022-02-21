@@ -21,6 +21,8 @@ const ipcApiRoute = {
   socketMessageStop: 'controller.example.socketMessageStop',
   hello: 'controller.example.hello',
   executeJS: 'controller.example.executeJS',
+  loadViewContent: 'controller.example.loadViewContent',
+  removeViewContent: 'controller.example.removeViewContent',
 }
 
 /**
