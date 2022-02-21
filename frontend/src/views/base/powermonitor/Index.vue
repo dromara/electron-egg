@@ -17,6 +17,7 @@
   </div>
 </template>
 <script>
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data() {
@@ -30,13 +31,13 @@ export default {
   methods: {
     init () {
       const self = this;
-      self.$ipc.on('example.initPowerMonitor', (event, result) => {
+      self.$ipc.on(ipcApiRoute.initPowerMonitor, (event, result) => {
         if (Object.prototype.toString.call(result) == '[object Object]') {
           self.currentStatus = result.msg;
           self.$message.info(result.msg);
         }
       })
-      this.$ipc.send('example.initPowerMonitor', '');
+      this.$ipc.send(ipcApiRoute.initPowerMonitor, '');
     }
   }
 };

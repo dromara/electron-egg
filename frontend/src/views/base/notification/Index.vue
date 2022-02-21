@@ -16,6 +16,7 @@
   </div>
 </template>
 <script>
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data() {
@@ -59,14 +60,14 @@ export default {
   methods: {
     init () {
       const self = this;
-      self.$ipc.on('example.sendNotification', (event, result) => {
+      self.$ipc.on(ipcApiRoute.sendNotification, (event, result) => {
         if (Object.prototype.toString.call(result) == '[object Object]') {
           self.$message.info(result.msg);
         }  
       })
     },
     sendNotification (index) {
-      this.$ipc.send('example.sendNotification', this.views[index]);
+      this.$ipc.send(ipcApiRoute.sendNotification, this.views[index]);
     },
   }
 };

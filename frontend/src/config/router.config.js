@@ -74,11 +74,6 @@ export const constantRouterMap = [
             component: () => import('@/views/base/theme/Index')
           },                               
           {
-            path: '/base/shortcut/index',
-            name: 'BaseShortcutIndex',
-            component: () => import('@/views/base/shortcut/Index')
-          },
-          {
             path: '/base/software/open',
             name: 'BaseSoftwareIndex',
             component: () => import('@/views/base/software/Index')

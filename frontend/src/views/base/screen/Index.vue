@@ -27,6 +27,7 @@
   </div>
 </template>
 <script>
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data() {
@@ -40,12 +41,12 @@ export default {
   methods: {
     init () {
       const self = this;
-      self.$ipc.on('example.getScreen', (event, result) => {
+      self.$ipc.on(ipcApiRoute.getScreen, (event, result) => {
         self.data = result;
       })
     },
     getScreen (index) {
-      this.$ipc.send('example.getScreen', index);
+      this.$ipc.send(ipcApiRoute.getScreen, index);
     },
   }
 };

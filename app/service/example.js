@@ -49,30 +49,6 @@ class ExampleService extends Service {
     return res;
   }
 
-  async autoLaunchEnable() {
-    const callResult = await socketClient.call('controller.example.autoLaunchEnable');
-
-    return callResult.data;
-  }
-
-  async autoLaunchDisable() {
-    const callResult = await socketClient.call('controller.example.autoLaunchDisable');
-
-    return callResult.data;
-  }
-
-  async autoLaunchIsEnabled() {
-    const callResult = await socketClient.call('controller.example.autoLaunchIsEnabled');
-
-    return callResult.data;
-  }
-
-  async openSoftware(softName) {
-    const callResult = await socketClient.call('controller.example.openSoftware', softName);
-    
-    return callResult.data;
-  }
-
   async messageShow() {
     await socketClient.call('controller.example.messageShow');
 

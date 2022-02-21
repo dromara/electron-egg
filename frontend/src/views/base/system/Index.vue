@@ -22,7 +22,7 @@
   </div>
 </template>
 <script>
-import { requestEggApi } from '@/api/main'
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data () {
@@ -31,41 +31,23 @@ export default {
     }
   },
   mounted () {
-    this.autoLaunchInit()
+    this.init();
   },
   methods: {
-    autoLaunchInit () {
-      requestEggApi('autoLaunchIsEnabled', {}).then(res => {
-        if (res.code !== 0) {
-          return false
-        }
-        this.autoLaunchChecked = res.data.isEnabled;
-      }).catch(err => {
-        console.log('err:', err)
+    init () {
+      const self = this;
+      this.$ipc.on(ipcApiRoute.autoLaunch, (event, result) => {
+        console.log('[ipcRenderer] [autoLaunch] result:', result)
+        self.autoLaunchChecked = result.status;
       })
+      this.$ipc.send(ipcApiRoute.autoLaunch, 'check');
     },
     autoLaunchChange (checkStatus) {
-      const params = {
-        'checkStatus': checkStatus
-      }
+      console.log('[ipcRenderer] [autoLaunch] checkStatus:', checkStatus)
       if (checkStatus) {
-        requestEggApi('autoLaunchEnable', params).then(res => {
-          if (res.code !== 0) {
-            return false
-          }
-          this.autoLaunchChecked = res.data.isEnabled;
-        }).catch(err => {
-          console.log('err:', err)
-        })
+        this.$ipc.send(ipcApiRoute.autoLaunch, 'close');
       } else {
-        requestEggApi('autoLaunchDisable', params).then(res => {
-          if (res.code !== 0) {
-            return false
-          }
-          this.autoLaunchChecked = res.data.isEnabled;
-        }).catch(err => {
-          console.log('err:', err)
-        })        
+        this.$ipc.send(ipcApiRoute.autoLaunch, 'open');       
       }
     },
   }

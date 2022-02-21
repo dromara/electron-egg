@@ -2,12 +2,15 @@
 
 const _ = require('lodash');
 const path = require('path');
+const fs = require('fs');
 const is = require('electron-is');
+const { exec } = require('child_process');
 const unzip = require("unzip-crx-3");
 const Controller = require('ee-core').Controller;
 const electronApp = require('electron').app;
 const {dialog, webContents, shell, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
 const chromeExtension = require('../library/chromeExtension');
+const autoLaunchManager = require('../library/autoLaunch');
 
 let myTimer = null;
 let browserViewObj = null;
@@ -226,7 +229,211 @@ class ExampleController extends Controller {
     });
 
     return true;
+  }
+
+  /**
+   * 创建系统通知
+   */
+  sendNotification (arg, event) {
+    const channel = 'controller.example.sendNotification';
+    if (!Notification.isSupported()) {
+      return '当前系统不支持通知';
+    }
+
+    let options = {};
+    if (!_.isEmpty(arg.title)) {
+      options.title = arg.title;
+    }
+    if (!_.isEmpty(arg.subtitle)) {
+      options.subtitle = arg.subtitle;
+    }
+    if (!_.isEmpty(arg.body)) {
+      options.body = arg.body;
+    }
+    if (!_.isEmpty(arg.silent)) {
+      options.silent = arg.silent;
+    }
+
+    notificationObj = new Notification(options);
+
+    if (arg.clickEvent) {
+      notificationObj.on('click', (e) => {
+        let data = {
+          type: 'click',
+          msg: '您点击了通知消息'
+        }
+        event.reply(`${channel}`, data)
+      });
+    }
+
+    if (arg.closeEvent) {
+      notificationObj.on('close', (e) => {
+        let data = {
+          type: 'close',
+          msg: '您关闭了通知消息'
+        }
+        event.reply(`${channel}`, data)
+      });
+    }
+
+    notificationObj.show();
+
+    return true
   }  
+
+  /**
+   * 电源监控
+   */
+  initPowerMonitor (arg, event) {
+    const channel = 'controller.example.initPowerMonitor';
+    powerMonitor.on('on-ac', (e) => {
+      let data = {
+        type: 'on-ac',
+        msg: '接入了电源'
+      }
+      event.reply(`${channel}`, data)
+    });
+
+    powerMonitor.on('on-battery', (e) => {
+      let data = {
+        type: 'on-battery',
+        msg: '使用电池中'
+      }
+      event.reply(`${channel}`, data)
+    });
+
+    powerMonitor.on('lock-screen', (e) => {
+      let data = {
+        type: 'lock-screen',
+        msg: '锁屏了'
+      }
+      event.reply(`${channel}`, data)
+    });
+
+    powerMonitor.on('unlock-screen', (e) => {
+      let data = {
+        type: 'unlock-screen',
+        msg: '解锁了'
+      }
+      event.reply(`${channel}`, data)
+    });
+
+    return true
+  }  
+
+  /**
+   * 获取屏幕信息
+   */
+  getScreen (arg) {
+    let data = [];
+    let res = {};
+    if (arg == 0) {
+      let res = screen.getCursorScreenPoint();
+      data = [
+        {
+          title: '横坐标',
+          desc: res.x
+        },
+        {
+          title: '纵坐标',
+          desc: res.y
+        },
+      ]
+      
+      return data;
+    }
+    if (arg == 1) {
+      res = screen.getPrimaryDisplay();
+    }
+    if (arg == 2) {
+      let resArr = screen.getAllDisplays();
+      // 数组，只取一个吧
+      res = resArr[0];
+    }
+    // console.log('[electron] [ipc] [example] [getScreen] res:', res);
+    data = [
+      {
+        title: '分辨率',
+        desc: res.bounds.width + ' x ' + res.bounds.height
+      },
+      {
+        title: '单色显示器',
+        desc: res.monochrome ? '是' : '否'
+      },
+      {
+        title: '色深',
+        desc: res. colorDepth
+      },
+      {
+        title: '色域',
+        desc: res.colorSpace
+      },
+      {
+        title: 'scaleFactor',
+        desc: res.scaleFactor
+      },
+      {
+        title: '加速器',
+        desc: res.accelerometerSupport
+      },
+      {
+        title: '触控',
+        desc: res.touchSupport == 'unknown' ? '不支持' : '支持'
+      },
+    ]
+
+    return data;
+  }  
+
+  /**
+   * 调用其它程序（exe、bash等可执行程序）
+   */
+  openSoftware (softName) {
+    if (!softName) {
+      return false;
+    }
+
+    // 资源路径不同
+    let softwarePath = '';
+    if (electronApp.isPackaged) {
+      // 打包后
+      softwarePath = path.join(electronApp.getAppPath(), "..", "extraResources", softName);
+    } else {
+      // 打包前
+      softwarePath = path.join(electronApp.getAppPath(), "build", "extraResources", softName);
+    }
+    // 检查程序是否存在
+    if (!fs.existsSync(softwarePath)) {
+      return false;
+    }
+    // 命令行字符串 并 执行
+    let cmdStr = 'start ' + softwarePath;
+    exec(cmdStr);
+
+    return true;
+  }  
+
+  /**
+   * 开机启动-开启
+   */
+  autoLaunch (type) {
+    console.log('type:', type);
+    let res = {
+      type: type,
+      status: null
+    };
+    if (type == 'check') {
+      res.status = autoLaunchManager.isEnabled();
+    } else if (type == 'open') {
+      autoLaunchManager.enable();
+      res.status = true;
+    } else if (type == 'close') {
+      autoLaunchManager.disable();
+      res.status = false;
+    }
+
+    return res
+  } 
 }
 
 module.exports = ExampleController;

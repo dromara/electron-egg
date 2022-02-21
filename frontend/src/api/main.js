@@ -2,9 +2,6 @@ import request from '@/utils/request'
 
 const eggApiroute = {
   uploadFile: '/api/example/uploadFile',
-  autoLaunchEnable: '/api/example/autoLaunchEnable',
-  autoLaunchDisable: '/api/example/autoLaunchDisable',
-  autoLaunchIsEnabled: '/api/example/autoLaunchIsEnabled',
   openSoftware: '/api/example/openSoftware',
   messageShow: '/api/example/messageShow',
   messageShowConfirm: '/api/example/messageShowConfirm',
@@ -24,6 +21,11 @@ const ipcApiRoute = {
   loadViewContent: 'controller.example.loadViewContent',
   removeViewContent: 'controller.example.removeViewContent',
   createWindow: 'controller.example.createWindow',
+  sendNotification: 'controller.example.sendNotification',
+  initPowerMonitor: 'controller.example.initPowerMonitor',
+  getScreen: 'controller.example.getScreen',
+  openSoftware: 'controller.example.openSoftware', 
+  autoLaunch: 'controller.example.autoLaunch',
 }
 
 /**

@@ -8,14 +8,6 @@ module.exports = app => {
 
   // upload file
   router.post('/api/example/uploadFile', controller.example.uploadFile);
-  // open launch
-  router.post('/api/example/autoLaunchEnable', controller.example.autoLaunchEnable);
-  // close launch 
-  router.post('/api/example/autoLaunchDisable', controller.example.autoLaunchDisable);
-  // is launch 
-  router.post('/api/example/autoLaunchIsEnabled', controller.example.autoLaunchIsEnabled);
-  // open software
-  router.post('/api/example/openSoftware', controller.example.openSoftware);
   // test some electron api
   router.post('/api/example/testElectronApi', controller.example.testElectronApi);
   // test2

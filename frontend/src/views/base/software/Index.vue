@@ -22,12 +22,12 @@
   </div>
 </template>
 <script>
-import { requestEggApi } from '@/api/main'
+import { ipcApiRoute } from '@/api/main'
 
 const data = [
   {
     content: 'powershell.exe',
-    id: 'powershell'
+    id: 'powershell.exe'
   }
 ];
 
@@ -39,14 +39,13 @@ export default {
   },
   methods: {
     openSoft (id) {
-			requestEggApi('openSoftware', {id:id}).then(res => {
-				if (res.code !== 0) {
-					this.$message.info(res.msg)
-					return false
-				}
-			}).catch(err => {
-				console.log('err:', err)
-			})
+      const self = this;
+      this.$ipc.on(ipcApiRoute.openSoftware, (event, result) => {
+        if (!result) {
+          self.$message.error('程序不存在');
+        }
+      })
+      this.$ipc.send(ipcApiRoute.openSoftware, id);      
     },
   }
 };
