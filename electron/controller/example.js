@@ -3,9 +3,11 @@
 const _ = require('lodash');
 const path = require('path');
 const is = require('electron-is');
+const unzip = require("unzip-crx-3");
 const Controller = require('ee-core').Controller;
 const electronApp = require('electron').app;
 const {dialog, webContents, shell, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
+const chromeExtension = require('../library/chromeExtension');
 
 let myTimer = null;
 let browserViewObj = null;
@@ -19,7 +21,7 @@ class ExampleController extends Controller {
 
   /**
    * 所有方法接收两个参数
-   * args 前端传的参数
+   * @param args 前端 或 egg，传的参数（单个参数，或参数数组）
    * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
    */
 
@@ -203,6 +205,27 @@ class ExampleController extends Controller {
     winObj.loadURL(content);
 
     return winObj.id
+  }
+  
+  /**
+   * 加载扩展程序
+   */
+  async loadExtension (args) {
+    const crxFile = args[0];
+    if (_.isEmpty(crxFile)) {
+      return false;
+    }
+    const extensionId = path.basename(crxFile, '.crx');
+    const chromeExtensionDir = chromeExtension.getDirectory();
+    const extensionDir = path.join(chromeExtensionDir, extensionId);
+
+    console.log("[api] [example] [loadExtension] extension id:", extensionId);
+    unzip(crxFile, extensionDir).then(() => {    
+      console.log("[api] [example] [loadExtension] unzip success!");
+      chromeExtension.load(extensionId);
+    });
+
+    return true;
   }  
 }
 

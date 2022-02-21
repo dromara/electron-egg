@@ -60,7 +60,7 @@ class ExampleController extends BaseController {
     const self = this;
     const { ctx, service } = this;
     const data = {};
-    let tmpDir = service.storage.getStorageDir();
+    let tmpDir = Utils.getLogDir();
 
     const file = ctx.request.files[0];
     this.app.logger.info('file:', file);

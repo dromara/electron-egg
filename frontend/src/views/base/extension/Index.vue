@@ -16,7 +16,7 @@
           <a-icon type="inbox" />
         </p>
         <p class="ant-upload-text">
-          Click or drag file to this area to upload
+          上传
         </p>
         <p class="ant-upload-hint">
         </p>
@@ -37,7 +37,7 @@
 export default {
   data() {
     return {
-      action_url: process.env.VUE_APP_API_BASE_URL + '/api/v1/example/uploadExtension',
+      action_url: process.env.VUE_APP_API_BASE_URL + '/api/example/uploadExtension',
     };
   },
   mounted () {
@@ -54,11 +54,6 @@ export default {
       if (status === 'done') {
         const uploadRes = info.file.response;
         console.log('uploadRes:', uploadRes)
-        // if (uploadRes.code !== 'success') {
-        //   this.$message.error(`file upload failed ${uploadRes.code} .`);
-        //   return false;
-        // }
-        // this.$message.success(`${info.file.name} file uploaded successfully.`);
       } else if (status === 'error') {
         this.$message.error(`${info.file.name} file upload failed.`);
       }
