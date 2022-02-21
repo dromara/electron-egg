@@ -32,7 +32,7 @@ export default {
         'menu_1' : {
           icon: 'home',
           title: '功能',
-          pageName: 'DemoFileIndex',
+          pageName: 'BaseIndex',
           params: {},
         },
         'menu_2' : {
@@ -51,6 +51,7 @@ export default {
   methods: {
     menuHandle (item) {
       const linkInfo = this.menu[item.key]
+      console.log('[home] load page:', linkInfo.pageName);
       this.$router.push({ name: linkInfo.pageName, params: linkInfo.params})
     },
   },

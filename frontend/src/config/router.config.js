@@ -14,10 +14,15 @@ export const constantRouterMap = [
     component: AppSider,
     children: [
       {
-        path: '/',
-        name: 'Demo',
+        path: '/base',
+        name: 'Base',
         component: Menu,
         children: [
+          {
+            path: '/base/index',
+            name: 'BaseIndex',
+            component: () => import('@/views/base/file/Index')
+          },
           {
             path: '/base/file/index',
             name: 'BaseFileIndex',
