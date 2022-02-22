@@ -11,7 +11,7 @@ class HomeController extends BaseController {
     const { ctx } = this;
 
     const data = {
-      title: 'hello electron-egg'
+      title: 'hello ee'
     };
 
     await ctx.render('index.ejs', data);

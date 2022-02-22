@@ -67,7 +67,7 @@ module.exports = (appInfo) => {
   /* egg服务 (可选) */
   config.egg = {
     enable: true, // 是否启用
-    title: 'electron-egg', // 进程的title属性标识（默认你的应用名称-英文）
+    title: 'ee', // 进程的title属性标识（默认你的应用名称-英文）
     port: 7068,
     hostname: '127.0.0.1',
     workers: 1 // 工作进程数据
@@ -87,7 +87,7 @@ module.exports = (appInfo) => {
 
   /* 被浏览器唤醒 (可选) */
   config.awakeProtocol = {
-    protocol: 'electron-egg', // 自定义协议名（默认你的应用名称-英文）
+    protocol: 'ee', // 自定义协议名（默认你的应用名称-英文）
     args: []
   };
 

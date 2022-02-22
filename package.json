@@ -1,5 +1,5 @@
 {
-  "name": "electron-egg",
+  "name": "ee",
   "version": "2.0.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
@@ -12,16 +12,16 @@
     "build-m": "electron-builder -m",
     "build-m-arm64": "electron-builder -m --arm64",
     "build-l": "electron-builder -l deb tar.xz",
-    "web-start": "egg-scripts start --daemon --title=electron-egg --ignore-stderr --env=prod --workers=1",
-    "web-stop": "egg-scripts stop --title=electron-egg",
+    "web-start": "egg-scripts start --daemon --title=ee --ignore-stderr --env=prod --workers=1",
+    "web-stop": "egg-scripts stop --title=ee",
     "web-dev": "egg-bin dev",
-    "rd": "node ./tools/replace_dist --dist_dir=./frontend/dist",
-    "compress": "node ./tools/code_compress --compress",
-    "restore": "node ./tools/code_compress --restore"
+    "rd": "ee-cli rd --dist_dir=./frontend/dist",
+    "compress": "ee-cli compress",
+    "restore": "ee-cli restore"
   },
   "build": {
-    "productName": "electron-egg",
-    "appId": "com.electron.electron-egg",
+    "productName": "ee",
+    "appId": "com.electron.ee",
     "copyright": "wallace5303",
     "directories": {
       "output": "out"
@@ -50,12 +50,12 @@
       "installerHeaderIcon": "./build/icons/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Ee框架"
+      "shortcutName": "EE框架"
     },
     "publish": [
       {
         "provider": "generic",
-        "url": "https://github.com/wallace5303/electron-egg"
+        "url": "https://github.com/wallace5303/ee"
       }
     ],
     "mac": {
@@ -83,7 +83,7 @@
       ]
     }
   },
-  "repository": "https://github.com/wallace5303/electron-egg.git",
+  "repository": "https://github.com/wallace5303/ee.git",
   "keywords": [
     "Electron",
     "Egg"
