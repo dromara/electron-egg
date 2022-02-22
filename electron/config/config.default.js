@@ -60,7 +60,7 @@ module.exports = (appInfo) => {
 
   /* 远程web地址 (可选) */
   config.remoteUrl = {
-    enable: enable, // 是否启用
+    enable: false, // 是否启用
     url: 'https://discuz.chat/' // Any web url
   };
 
