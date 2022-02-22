@@ -1,26 +1,15 @@
 'use strict';
 
-const BaseService = require('./base');
+const Service = require('egg').Service;
+const EeSocket = require('ee-core').Socket.EeSocket;
+const socketClient = EeSocket.getClient();
 
-class ExampleService extends BaseService {
-  async openLocalDir(dir) {
-    const self = this;
+class ExampleService extends Service {
 
-    await self.ipcCall('example.openDir', dir);
+  async test1(id = 0) {
+    const res = await socketClient.call('controller.example.test', {name:"gsx"}, {age:12});
 
-    return true;
-  }
-
-  async executeJS(str) {
-    const self = this;
-    let result = await self.ipcCall('example.executeJS', str);
-    return result;
-  }
-
-  async setShortcut(shortcutStr) {
-    const self = this;
-    let result = await self.ipcCall('example.setShortcut', shortcutStr);
-    return result;
+    return null;
   }
 
   async uploadFileToSMMS(tmpFile) {
@@ -60,61 +49,21 @@ class ExampleService extends BaseService {
     return res;
   }
 
-  async autoLaunchEnable() {
-    const callResult = await this.ipcCall('example.autoLaunchEnable');
-
-    return callResult.data;
-  }
-
-  async autoLaunchDisable() {
-    const callResult = await this.ipcCall('example.autoLaunchDisable');
-
-    return callResult.data;
-  }
-
-  async autoLaunchIsEnabled() {
-    const callResult = await this.ipcCall('example.autoLaunchIsEnabled');
-
-    return callResult.data;
-  }
-
-  async openSoftware(softName) {
-    const callResult = await this.ipcCall('example.openSoftware', softName);
-    
-    return callResult.data;
-  }
-
-  async selectDir() {
-    const result = await this.ipcCall('example.selectDir');
-    if (!result.data) {
-      return '';
-    }
-
-    return result.data;
-  }
-
-  async testElectronApi(id = 0) {
-    await this.ipcCall('example.testElectronApi');
-
-    return null;
-  }
-
   async messageShow() {
-    await this.ipcCall('example.messageShow');
+    await socketClient.call('controller.example.messageShow');
 
     return true;
   } 
 
   async messageShowConfirm() {
-    await this.ipcCall('example.messageShowConfirm');
+    await socketClient.call('controller.example.messageShowConfirm');
 
     return true;
   }   
 
   async loadExtension(filePath) {
-    const self = this;
 
-    await self.ipcCall('example.loadExtension', filePath);
+    await socketClient.call('controller.example.loadExtension', filePath);
 
     return true;
   }

@@ -1,8 +1,8 @@
-/* eslint valid-jsdoc: "off" */
-
 'use strict';
+
 const path = require('path');
-const electronEggConfig = require('../electron/config').get('webEgg');
+const Utils = require('ee-core').Utils;
+const eggConfig = Utils.getEggConfig();
 
 /**
  * @param {Egg.EggAppInfo} appInfo app info
@@ -21,21 +21,13 @@ module.exports = appInfo => {
   config.middleware = [];
 
   // add your user config here
-  const userConfig = {
-    // myAppName: 'egg',
-  };
+  const userConfig = {};
 
   config.cluster = {
     listen: {
-      port: electronEggConfig.port || 7068,
-      hostname: electronEggConfig.hostname || '0.0.0.0',
-      // path: '/var/run/egg.sock',
+      port: eggConfig.port || 7068,
+      hostname: eggConfig.hostname || '127.0.0.1',
     },
-  };
-
-  // jwt插件配置(盐)
-  config.jwt = {
-    secret: 'jcgame88',
   };
 
   /* 跨域插件配置-start */
@@ -50,7 +42,7 @@ module.exports = appInfo => {
       // 'http://127.0.0.1:8080'
     ],
     methodnoallow: { enable: false },
-    // 安全配置(很重要)
+    // 安全配置
     csrf: {
       enable: false,
       ignoreJSON: true, // 默认为 false，当设置为 true 时，将会放过所有 content-type 为 `application/json` 的请求
@@ -59,16 +51,9 @@ module.exports = appInfo => {
   // 允许的跨域请求类型(GET,POST)
   config.cors = {
     origin: '*',
-    // allowMethods: 'GET,POST',
     allowMethods: 'GET,POST,HEAD,PUT,OPTIONS,DELETE,PATCH',
   };
   /* 跨域插件配置-end */
-
-  // 校验插件配置(支持 parameter的所有配置项)
-  config.validate = {
-    // convert: false,
-    // validateRoot: false,
-  };
 
   // 获取真实ip
   config.maxProxyCount = 2;

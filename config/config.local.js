@@ -1,13 +1,13 @@
 'use strict';
-// 本地环境-配置文件
-const storageDir = require('../electron/lib/storage').getStorageDir();
+
+const Utils = require('ee-core').Utils;
+const logDir = Utils.getLogDir();
 
 /*
- * 远程调用
+ * 日志dir目录，会随开发环境变动，请谨慎修改
  */
-exports.outApi = {
-  login: 'http://local.com/api/login',
-};
 exports.logger = {
-  dir: storageDir + 'logs/local',
+  dir: logDir,
 };
+
+
