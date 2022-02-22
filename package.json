@@ -15,7 +15,7 @@
     "web-start": "egg-scripts start --daemon --title=ee --ignore-stderr --env=prod --workers=1",
     "web-stop": "egg-scripts stop --title=ee",
     "web-dev": "egg-bin dev",
-    "rd": "node ./node_modules/ee-core/bin/tools rd --dist_dir=./frontend/dist",
+    "rd": "ee-cli rd --dist_dir=./frontend/dist",
     "compress": "ee-cli compress",
     "restore": "ee-cli restore"
   },
@@ -55,7 +55,7 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "https://github.com/wallace5303/ee"
+        "url": "https://github.com/wallace5303/electron-egg"
       }
     ],
     "mac": {
