@@ -96,12 +96,6 @@ export default {
           pageName: 'BaseSystemIndex',
           params: {}
         },
-        'menu_800' : {
-          icon: 'profile',
-          title: '快捷键',
-          pageName: 'BaseShortcutIndex',
-          params: {}
-        },
         'menu_900' : {
           icon: 'profile',
           title: '测试',

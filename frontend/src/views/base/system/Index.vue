@@ -35,29 +35,15 @@ export default {
   },
   methods: {
     init () {
+      // todo .....
       const self = this;
-      // this.$ipc.on(ipcApiRoute.autoLaunch, (event, result) => {
-      //   console.log('[ipcRenderer] [autoLaunch] result:', result)
-      //   this.autoLaunchChecked = result.status;
-      // })
-      // this.$ipc.send(ipcApiRoute.autoLaunch, 'check');
       self.$ipcCall(ipcApiRoute.autoLaunch, 'check').then(result => {
         console.log('[ipcRenderer] [autoLaunch] result:', result)
         this.autoLaunchChecked = result.status;
-        console.log('[ipcRenderer] [autoLaunch] result2:', self.autoLaunchChecked)
       })      
     },
     autoLaunchChange (checkStatus) {
       console.log('[ipcRenderer] [autoLaunch] self.autoLaunchChecked:', this.autoLaunchChecked)
-      // if (checkStatus) {
-      //   this.$ipc.send(ipcApiRoute.autoLaunch, 'close');
-      // } else {
-      //   this.$ipc.send(ipcApiRoute.autoLaunch, 'open');       
-      // }
-      // self.$ipcCall(ipcApiRoute.selectFolder, '').then(r => {
-      //   self.dir_path = r;
-      //   self.$message.info(r);
-      // })
     },
   }
 }
