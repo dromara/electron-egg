@@ -87,19 +87,13 @@ export default {
         'menu_412' : {
           icon: 'profile',
           title: '自动更新',
-          pageName: 'DemoUpdaterIndex',
+          pageName: 'BaseUpdaterIndex',
           params: {}
         },    
         'menu_500' : {
           icon: 'profile',
           title: '软件调用',
           pageName: 'BaseSoftwareIndex',
-          params: {}
-        },
-        'menu_600' : {
-          icon: 'profile',
-          title: '系统',
-          pageName: 'BaseSystemIndex',
           params: {}
         },
         'menu_900' : {
