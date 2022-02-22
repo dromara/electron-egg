@@ -115,7 +115,7 @@ export default {
   },
   methods: {
     openDirectry (id) {
-      this.$ipcCallMain(ipcApiRoute.openDirectory, {id: id}).then(r => {
+      this.$ipcCall(ipcApiRoute.openDirectory, {id: id}).then(r => {
         //console.log('r:', r)
       })      
     },
@@ -145,7 +145,7 @@ export default {
     },
     selectDir() {
       const self = this;
-      self.$ipcCallMain(ipcApiRoute.selectFolder, '').then(r => {
+      self.$ipcCall(ipcApiRoute.selectFolder, '').then(r => {
         self.dir_path = r;
         self.$message.info(r);
       })      
@@ -163,7 +163,7 @@ export default {
           self.$message.error(err + '异常')
         })
       } else { 
-        self.$ipcCallMain(ipcApiRoute.messageShow, '').then(r => {
+        self.$ipcCall(ipcApiRoute.messageShow, '').then(r => {
           self.$message.info(r);
         })
       }
@@ -181,7 +181,7 @@ export default {
           self.$message.error(err + '异常')
         })
       } else {
-        self.$ipcCallMain(ipcApiRoute.messageShowConfirm, '').then(r => {
+        self.$ipcCall(ipcApiRoute.messageShowConfirm, '').then(r => {
           self.$message.info(r);
         })
       }

@@ -36,17 +36,13 @@ export default {
     };
   },
   mounted () {
-    this.init();
   },
   methods: {
-    init () {
+    getScreen (index) {
       const self = this;
-      self.$ipc.on(ipcApiRoute.getScreen, (event, result) => {
+      this.$ipcCall(ipcApiRoute.getScreen, index).then(result => {
         self.data = result;
       })
-    },
-    getScreen (index) {
-      this.$ipc.send(ipcApiRoute.getScreen, index);
     },
   }
 };

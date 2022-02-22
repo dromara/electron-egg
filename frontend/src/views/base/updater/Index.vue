@@ -41,7 +41,8 @@ export default {
   methods: {
     init () {
       const self = this;
-      self.$ipc.on(specialIpcRoute.appUpdater, (event, result) => {
+      this.$ipc.removeAllListeners(specialIpcRoute.appUpdater);
+      this.$ipc.on(specialIpcRoute.appUpdater, (event, result) => {
         result = JSON.parse(result);
         self.status = result.status;
         if (result.status == 3) {
@@ -53,20 +54,18 @@ export default {
       })
     },
     checkForUpdater () {
-      // const self = this;
-      // self.$ipcCallMain('example.checkForUpdater').then(r => {
-      //   console.log(r);
-      // })
+      this.$ipcCall(ipcApiRoute.checkForUpdater).then(r => {
+        console.log(r);
+      })
     },
     download () {
-      // if (this.status !== 1) {
-      //   this.$message.info('没有可用版本');
-      //   return
-      // }
-      // const self = this;
-      // self.$ipcCallMain('example.downloadApp').then(r => {
-      //   console.log(r);
-      // })
+      if (this.status !== 1) {
+        this.$message.info('没有可用版本');
+        return
+      }
+      this.$ipcCall(ipcApiRoute.downloadApp).then(r => {
+        console.log(r);
+      })
     },
   }
 };

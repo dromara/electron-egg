@@ -59,23 +59,27 @@ export default {
   methods: {
     init () {
       const self = this;
-      self.$ipc.on(ipcApiRoute.socketMessageStart, (event, result) => {
+      // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
+      this.$ipc.removeAllListeners(ipcApiRoute.socketMessageStart);
+      this.$ipc.removeAllListeners(ipcApiRoute.socketMessageStop);
+
+      this.$ipc.on(ipcApiRoute.socketMessageStart, (event, result) => {
         console.log('[ipcRenderer] [socketMsgStart] result:', result)
         self.socketMessageString = result;
       })
-      self.$ipc.on(ipcApiRoute.socketMessageStop, (event, result) => {
+      this.$ipc.on(ipcApiRoute.socketMessageStop, (event, result) => {
         console.log('[ipcRenderer] [socketMsgStop] result:', result)
         self.socketMessageString = result;
       })
     },
     helloHandle(value) {
       const self = this;
-      this.$ipcCallMain(ipcApiRoute.hello, value).then(r => {
+      this.$ipcCall(ipcApiRoute.hello, value).then(r => {
         self.$message.info(r);
       })
     },
     executeJSHandle(value) {
-      this.$ipcCallMain(ipcApiRoute.executeJS, value).then(r => {
+      this.$ipcCall(ipcApiRoute.executeJS, value).then(r => {
         console.log(r);
       })      
     },

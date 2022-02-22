@@ -46,28 +46,24 @@ export default {
     };
   },
   mounted () {
-    this.init();
   },
   methods: {
-    init () {
-      const self = this;
-      this.$ipc.on(ipcApiRoute.setTheme, (event, result) => {
-        console.log('result:', result)
-        self.currentThemeMode = result;
-      })
-
-      this.$ipc.on(ipcApiRoute.getTheme, (event, result) => {
-        console.log('result:', result)
-        self.currentThemeMode = result;
-      })
-    },
     setTheme (e) {
+      const self = this;
       this.currentThemeMode = e.target.value;
       console.log('setTheme currentThemeMode:', this.currentThemeMode)
-      this.$ipc.send(ipcApiRoute.setTheme, this.currentThemeMode);
+
+      this.$ipcCall(ipcApiRoute.setTheme, this.currentThemeMode).then(result => {
+        console.log('result:', result)
+        self.currentThemeMode = result;
+      })      
     },
     getTheme () {
-      this.$ipc.send(ipcApiRoute.getTheme, '');
+      const self = this;
+      this.$ipcCall(ipcApiRoute.getTheme).then(result => {
+        console.log('result:', result)
+        self.currentThemeMode = result;
+      })  
     },
   }
 };

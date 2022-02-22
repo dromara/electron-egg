@@ -456,12 +456,11 @@ class ExampleController extends Controller {
    * 检查是否有新版本
    */
   checkForUpdater () {
-    // const updateConfig = config.get('autoUpdate');
-    // if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
-    //   || (is.linux() && updateConfig.linux)) {
-    //   const autoUpdater = require('../lib/autoUpdater');
-    //   autoUpdater.checkUpdate();
-    // }
+    const config = this.app.config.autoUpdate;
+    if ( (is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux) ) {
+      const autoUpdater = require('../library/autoUpdater');
+      autoUpdater.checkUpdate();
+    }    
 
     return;
   }
@@ -470,13 +469,11 @@ class ExampleController extends Controller {
    * 下载新版本
    */
   downloadApp () {
-    // const updateConfig = config.get('autoUpdate');
-    // if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
-    //   || (is.linux() && updateConfig.linux)) {
-    //   const autoUpdater = require('../lib/autoUpdater');
-    //   autoUpdater.download();
-    // }
-
+    const config = this.app.config.autoUpdate;
+    if ( (is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux) ) {
+      const autoUpdater = require('../library/autoUpdater');
+      autoUpdater.download();
+    }  
     return;
   }
 

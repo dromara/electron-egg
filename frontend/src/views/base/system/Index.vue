@@ -41,7 +41,7 @@ export default {
       //   this.autoLaunchChecked = result.status;
       // })
       // this.$ipc.send(ipcApiRoute.autoLaunch, 'check');
-      self.$ipcCallMain(ipcApiRoute.autoLaunch, 'check').then(result => {
+      self.$ipcCall(ipcApiRoute.autoLaunch, 'check').then(result => {
         console.log('[ipcRenderer] [autoLaunch] result:', result)
         this.autoLaunchChecked = result.status;
         console.log('[ipcRenderer] [autoLaunch] result2:', self.autoLaunchChecked)
@@ -54,7 +54,7 @@ export default {
       // } else {
       //   this.$ipc.send(ipcApiRoute.autoLaunch, 'open');       
       // }
-      // self.$ipcCallMain(ipcApiRoute.selectFolder, '').then(r => {
+      // self.$ipcCall(ipcApiRoute.selectFolder, '').then(r => {
       //   self.dir_path = r;
       //   self.$message.info(r);
       // })

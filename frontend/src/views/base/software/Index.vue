@@ -39,13 +39,12 @@ export default {
   },
   methods: {
     openSoft (id) {
-      const self = this;
-      this.$ipc.on(ipcApiRoute.openSoftware, (event, result) => {
+      const self = this;   
+      this.$ipcCall(ipcApiRoute.openSoftware, id).then(result => {
         if (!result) {
           self.$message.error('程序不存在');
         }
-      })
-      this.$ipc.send(ipcApiRoute.openSoftware, id);      
+      })       
     },
   }
 };

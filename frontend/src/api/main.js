@@ -28,10 +28,12 @@ const ipcApiRoute = {
   autoLaunch: 'controller.example.autoLaunch',
   setTheme: 'controller.example.setTheme',
   getTheme: 'controller.example.getTheme',
+  checkForUpdater: 'controller.example.checkForUpdater',
+  downloadApp: 'controller.example.downloadApp',
 }
 
 const specialIpcRoute = {
-  appUpdater: 'app.updater'
+  appUpdater: 'app.updater' // 此频道在后端也有相同定义
 }
 
 /**
