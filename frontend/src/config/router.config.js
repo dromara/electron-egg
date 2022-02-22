@@ -88,6 +88,11 @@ export const constantRouterMap = [
             name: 'BaseTestApiIndex',
             component: () => import('@/views/base/testapi/Index')
           },
+          {
+            path: '/base/updater/index',
+            name: 'BaseUpdaterIndex',
+            component: () => import('@/views/base/updater/Index')
+          },  
         ]  
       },
       {

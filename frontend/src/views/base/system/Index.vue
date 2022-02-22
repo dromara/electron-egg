@@ -14,7 +14,7 @@
             </template>
           </a-list-item-meta>
           <template v-slot:actions>
-            <a-switch v-model="autoLaunchChecked" checkedChildren="开" unCheckedChildren="关" @change="autoLaunchChange(autoLaunchChecked)" />
+            <a-switch v-model="autoLaunchChecked" checkedChildren="开" unCheckedChildren="关" @change="autoLaunchChange()" />
           </template>
         </a-list-item>
       </a-list>
@@ -36,19 +36,28 @@ export default {
   methods: {
     init () {
       const self = this;
-      this.$ipc.on(ipcApiRoute.autoLaunch, (event, result) => {
+      // this.$ipc.on(ipcApiRoute.autoLaunch, (event, result) => {
+      //   console.log('[ipcRenderer] [autoLaunch] result:', result)
+      //   this.autoLaunchChecked = result.status;
+      // })
+      // this.$ipc.send(ipcApiRoute.autoLaunch, 'check');
+      self.$ipcCallMain(ipcApiRoute.autoLaunch, 'check').then(result => {
         console.log('[ipcRenderer] [autoLaunch] result:', result)
-        self.autoLaunchChecked = result.status;
-      })
-      this.$ipc.send(ipcApiRoute.autoLaunch, 'check');
+        this.autoLaunchChecked = result.status;
+        console.log('[ipcRenderer] [autoLaunch] result2:', self.autoLaunchChecked)
+      })      
     },
     autoLaunchChange (checkStatus) {
-      console.log('[ipcRenderer] [autoLaunch] checkStatus:', checkStatus)
-      if (checkStatus) {
-        this.$ipc.send(ipcApiRoute.autoLaunch, 'close');
-      } else {
-        this.$ipc.send(ipcApiRoute.autoLaunch, 'open');       
-      }
+      console.log('[ipcRenderer] [autoLaunch] self.autoLaunchChecked:', this.autoLaunchChecked)
+      // if (checkStatus) {
+      //   this.$ipc.send(ipcApiRoute.autoLaunch, 'close');
+      // } else {
+      //   this.$ipc.send(ipcApiRoute.autoLaunch, 'open');       
+      // }
+      // self.$ipcCallMain(ipcApiRoute.selectFolder, '').then(r => {
+      //   self.dir_path = r;
+      //   self.$message.info(r);
+      // })
     },
   }
 }

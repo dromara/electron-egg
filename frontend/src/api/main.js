@@ -26,6 +26,12 @@ const ipcApiRoute = {
   getScreen: 'controller.example.getScreen',
   openSoftware: 'controller.example.openSoftware', 
   autoLaunch: 'controller.example.autoLaunch',
+  setTheme: 'controller.example.setTheme',
+  getTheme: 'controller.example.getTheme',
+}
+
+const specialIpcRoute = {
+  appUpdater: 'app.updater'
 }
 
 /**
@@ -41,5 +47,6 @@ const requestEggApi = (uri, parameter) => {
 
 export {
   requestEggApi,
-  ipcApiRoute
+  ipcApiRoute,
+  specialIpcRoute
 }

@@ -32,6 +32,7 @@
   </div>
 </template>
 <script>
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data() {
@@ -50,12 +51,12 @@ export default {
   methods: {
     init () {
       const self = this;
-      this.$ipc.on('example.setTheme', (event, result) => {
+      this.$ipc.on(ipcApiRoute.setTheme, (event, result) => {
         console.log('result:', result)
         self.currentThemeMode = result;
       })
 
-      this.$ipc.on('example.getTheme', (event, result) => {
+      this.$ipc.on(ipcApiRoute.getTheme, (event, result) => {
         console.log('result:', result)
         self.currentThemeMode = result;
       })
@@ -63,10 +64,10 @@ export default {
     setTheme (e) {
       this.currentThemeMode = e.target.value;
       console.log('setTheme currentThemeMode:', this.currentThemeMode)
-      this.$ipc.send('example.setTheme', this.currentThemeMode);
+      this.$ipc.send(ipcApiRoute.setTheme, this.currentThemeMode);
     },
     getTheme () {
-      this.$ipc.send('example.getTheme', '');
+      this.$ipc.send(ipcApiRoute.getTheme, '');
     },
   }
 };

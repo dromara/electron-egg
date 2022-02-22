@@ -433,7 +433,62 @@ class ExampleController extends Controller {
     }
 
     return res
-  } 
+  }
+
+  /**
+   * 获取系统主题
+   */
+  getTheme () {
+    let theme = 'system';
+    if (nativeTheme.shouldUseHighContrastColors) {
+      theme = 'light';
+    } else if (nativeTheme.shouldUseInvertedColorScheme) {
+      theme = 'dark';
+    }
+
+    return theme;
+  }
+
+  /**
+   * 设置系统主题
+   */
+  setTheme (args) {
+
+    // TODO 好像没有什么明显效果
+    nativeTheme.themeSource = args;
+
+    return args;
+  }
+
+
+  /**
+   * 检查是否有新版本
+   */
+  checkForUpdater () {
+    // const updateConfig = config.get('autoUpdate');
+    // if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
+    //   || (is.linux() && updateConfig.linux)) {
+    //   const autoUpdater = require('../lib/autoUpdater');
+    //   autoUpdater.checkUpdate();
+    // }
+
+    return;
+  }
+
+  /**
+   * 下载新版本
+   */
+  downloadApp () {
+    // const updateConfig = config.get('autoUpdate');
+    // if ((is.windows() && updateConfig.windows) || (is.macOS() && updateConfig.macOS)
+    //   || (is.linux() && updateConfig.linux)) {
+    //   const autoUpdater = require('../lib/autoUpdater');
+    //   autoUpdater.download();
+    // }
+
+    return;
+  }
+
 }
 
 module.exports = ExampleController;
