@@ -10,7 +10,6 @@
   </div>
 </template>
 <script>
-import { requestEggApi } from '@/api/main'
 
 export default {
   data() {
@@ -18,14 +17,6 @@ export default {
   },
   methods: {
     test () {
-      const params = {}
-      requestEggApi('openDir', params).then(res => {
-        if (res.code !== 0) {
-          return false
-        }
-      }).catch(err => {
-        console.log('err:', err)
-      })
     },
   }
 };

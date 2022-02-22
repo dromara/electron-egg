@@ -10,27 +10,13 @@ class ExampleController extends BaseController {
   /**
    * test electron api
    */
-  async testElectronApi() {
+  async test1() {
     const { ctx, service } = this;
     const body = ctx.request.body;
     const id = body.id;
     const data = {};
 
-    await service.example.testElectronApi(id);
-
-    this.sendSuccess(data);
-  }
-
-  /**
-   * test2
-   */
-  test2() {
-    const { ctx, service } = this;
-    const body = ctx.request.body;
-    console.log('test2 params:', body);
-    const data = {
-      age: 32
-    };
+    await service.example.test1(id);
 
     this.sendSuccess(data);
   }

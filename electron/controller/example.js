@@ -28,27 +28,20 @@ class ExampleController extends Controller {
    * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
    */
 
-   constructor(ctx) {
+  constructor(ctx) {
     super(ctx);
-
-    //this.myTimer = null;
-
-   }
+  }
 
   /**
    * test
    */
-  async test (args) {
-    let obj = {
-      status:'ok'
-    }
+  async test () {
+    const result = await this.service.example.test('electron');
 
     // 调用egg的某个api
-    // const result = await this.app.curlEgg('post', '/api/v1/example/test2', {name: 'gsx2'});
-    // console.log('fffffffffff: ', result);
-    //this.app.logger.info('ssssssssssssssssssss');
+    // const result = await this.app.curlEgg('post', '/api/example/test2', {name: 'electron'});
 
-    return obj;
+    return result;
   }
 
   /**
@@ -59,8 +52,6 @@ class ExampleController extends Controller {
     let content = '';
     content = '收到：' + args + '，返回：' + newMsg;
 
-    // let channel = "example.socketMessageStop";
-    // event.reply(`${channel}`, '另外的数据');
     return content;
   }
 

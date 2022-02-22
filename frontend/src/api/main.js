@@ -6,7 +6,7 @@ const eggApiroute = {
   messageShow: '/api/example/messageShow',
   messageShowConfirm: '/api/example/messageShowConfirm',
   dbOperation: '/api/example/dbOperation',
-  testElectronApi: '/api/example/testElectronApi',
+  test1: '/api/example/test1',
 }
 
 const ipcApiRoute = {

@@ -9,9 +9,7 @@ module.exports = app => {
   // upload file
   router.post('/api/example/uploadFile', controller.example.uploadFile);
   // test some electron api
-  router.post('/api/example/testElectronApi', controller.example.testElectronApi);
-  // test2
-  router.post('/api/example/test2', controller.example.test2);
+  router.post('/api/example/test1', controller.example.test1);
   // message show
   router.post('/api/example/messageShow', controller.example.messageShow);
   // message show confirm

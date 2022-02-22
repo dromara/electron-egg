@@ -6,7 +6,7 @@ const socketClient = EeSocket.getClient();
 
 class ExampleService extends Service {
 
-  async testElectronApi(id = 0) {
+  async test1(id = 0) {
     const res = await socketClient.call('controller.example.test', {name:"gsx"}, {age:12});
 
     return null;

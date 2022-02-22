@@ -24,7 +24,7 @@ export default {
       const params = {
         id: id
       }
-			requestEggApi('testElectronApi', params).then(res => {
+			requestEggApi('test1', params).then(res => {
 				if (res.code !== 0) {
 					return false
 				}
