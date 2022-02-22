@@ -5,3 +5,4 @@ run/
 .idea/
 package-lock.json
 data/
+public/dist/
