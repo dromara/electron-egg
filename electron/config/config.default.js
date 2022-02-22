@@ -60,12 +60,13 @@ module.exports = (appInfo) => {
 
   /* 远程web地址 (可选) */
   config.remoteUrl = {
-    enable: false, // 是否启用
+    enable: enable, // 是否启用
     url: 'https://discuz.chat/' // Any web url
   };
 
   /* egg服务 (可选) */
   config.egg = {
+    enable: true, // 是否启用
     title: 'electron-egg', // 进程的title属性标识（默认你的应用名称-英文）
     port: 7068,
     hostname: '127.0.0.1',
