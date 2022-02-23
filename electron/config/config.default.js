@@ -37,6 +37,9 @@ module.exports = (appInfo) => {
   /* 应用程序顶部菜单 */
   config.openAppMenu = false;
 
+  /* 加载loading页 */
+  config.loadingPage = true;
+
   /* 主窗口 */
   config.windowsOption = {
     width: 980,

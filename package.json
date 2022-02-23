@@ -15,9 +15,9 @@
     "web-start": "egg-scripts start --daemon --title=ee --ignore-stderr --env=prod --workers=1",
     "web-stop": "egg-scripts stop --title=ee",
     "web-dev": "egg-bin dev",
-    "rd": "ee-cli rd --dist_dir=./frontend/dist",
-    "compress": "ee-cli compress",
-    "restore": "ee-cli restore"
+    "rd": "node ./node_modules/ee-core/bin/tools rd --dist_dir=./frontend/dist",
+    "compress": "node ./node_modules/ee-core/bin/tools compress",
+    "restore": "node ./node_modules/ee-core/bin/tools restore"
   },
   "build": {
     "productName": "ee",
@@ -105,7 +105,7 @@
     "egg-cors": "^2.2.3",
     "egg-scripts": "^2.15.2",
     "egg-view-ejs": "^2.0.1",
-    "ee-core": "^1.0.0",
+    "ee-core": "^1.1.0",
     "electron-is": "^3.0.0",
     "lodash": "^4.17.21",
     "unzip-crx-3": "^0.2.0"

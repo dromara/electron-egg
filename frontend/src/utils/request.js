@@ -14,6 +14,12 @@ const request = axios.create({
 const errorHandler = (error) => {
   if (error.response) {
     const data = error.response.data
+    if (error.response.status === 400) {
+      notification.error({
+        message: '该功能需要egg服务',
+        description: data.message
+      })
+    }
     if (error.response.status === 403) {
       notification.error({
         message: 'Forbidden',
