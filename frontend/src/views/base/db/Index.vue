@@ -20,7 +20,7 @@
     </div>
     <div class="one-block-1">
       <span>
-        2. 测试数据 (egg http服务)
+        2. 测试数据
       </span>
     </div>  
     <div class="one-block-2">
