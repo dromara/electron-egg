@@ -40,8 +40,8 @@
       <a-space>
         <a-button @click="messageShow('ipc')">消息提示(ipc)</a-button>
         <a-button @click="messageShowConfirm('ipc')">消息提示与确认(ipc)</a-button>
-        <a-button @click="messageShow('http')">消息提示(http)</a-button>
-        <a-button @click="messageShowConfirm('http')">消息提示与确认(http)</a-button>
+        <a-button @click="messageShow('http')">消息提示(egg http服务)</a-button>
+        <a-button @click="messageShowConfirm('http')">消息提示与确认(egg http服务)</a-button>
       </a-space>
     </div>
     <div class="one-block-1">
