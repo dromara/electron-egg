@@ -35,7 +35,7 @@ module.exports = (appInfo) => {
   config.openDevTools = false;
 
   /* 应用程序顶部菜单 */
-  config.openAppMenu = false;
+  config.openAppMenu = true;
 
   /* 加载loading页 */
   config.loadingPage = true;
@@ -69,7 +69,7 @@ module.exports = (appInfo) => {
 
   /* egg服务 (可选) */
   config.egg = {
-    enable: true, // 是否启用
+    enable: false, // 是否启用
     title: 'ee', // 进程的title属性标识（默认你的应用名称-英文）
     port: 7068,
     hostname: '127.0.0.1',
