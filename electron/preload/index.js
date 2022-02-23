@@ -8,7 +8,6 @@ const is = require('electron-is');
 const tray = require('../library/tray');
 const security = require('../library/security');
 const awaken = require('../library/awaken');
-const chromeExtension = require('../library/chromeExtension');
 
 /**
  * 预加载模块入口
@@ -22,8 +21,6 @@ module.exports = async (app) => {
   security.install(app);
 
   awaken.install(app);
-
-  chromeExtension.install(app);
   
   loadUpdate(app);
 
