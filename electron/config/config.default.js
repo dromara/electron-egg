@@ -23,10 +23,6 @@ module.exports = (appInfo) => {
       react: {
         hostname: 'localhost',
         port: 3000
-      },
-      ejs: {
-        hostname: 'localhost',
-        port: 7068 // The same as the egg port
       }
     }
   };
