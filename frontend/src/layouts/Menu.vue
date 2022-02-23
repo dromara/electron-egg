@@ -54,12 +54,6 @@ export default {
           pageName: 'BaseWindowIndex',
           params: {}
         },
-        'menu_403' : {
-          icon: 'profile',
-          title: '扩展程序',
-          pageName: 'BaseExtensionIndex',
-          params: {}
-        },
         'menu_405' : {
           icon: 'profile',
           title: '桌面通知',

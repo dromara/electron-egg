@@ -49,11 +49,6 @@ export const constantRouterMap = [
             component: () => import('@/views/base/window/Index')
           },
           {
-            path: '/base/extension/index',
-            name: 'BaseExtensionIndex',
-            component: () => import('@/views/base/extension/Index')
-          },
-          {
             path: '/base/notification/index',
             name: 'BaseNotificationIndex',
             component: () => import('@/views/base/notification/Index')

@@ -30,6 +30,8 @@ const ipcApiRoute = {
   getTheme: 'controller.example.getTheme',
   checkForUpdater: 'controller.example.checkForUpdater',
   downloadApp: 'controller.example.downloadApp',
+  dbOperation: 'controller.example.dbOperation',
+  uploadFile: 'controller.example.uploadFile',
 }
 
 const specialIpcRoute = {

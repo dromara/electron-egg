@@ -132,7 +132,7 @@
   </div>
 </template>
 <script>
-import { requestEggApi } from '@/api/main'
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data() {
@@ -156,17 +156,24 @@ export default {
       const params = {
         action: 'all',
       }
-      requestEggApi('dbOperation', params).then(res => {
-        if (res.code !== 0) {
-          return false
-        }
-        if (res.data.all_list.length == 0) {
+      this.$ipcCall(ipcApiRoute.dbOperation, params).then(res => {
+        console.log('res:', res);
+        if (res.all_list.length == 0) {
           return false;
         }
         self.all_list = res.data.all_list;
-      }).catch(err => {
-        console.log('err:', err)
-      })
+      }) 
+      // requestEggApi('dbOperation', params).then(res => {
+      //   if (res.code !== 0) {
+      //     return false
+      //   }
+      //   if (res.data.all_list.length == 0) {
+      //     return false;
+      //   }
+      //   self.all_list = res.data.all_list;
+      // }).catch(err => {
+      //   console.log('err:', err)
+      // })
     },
     dbOperation (ac) {
       const self = this;
@@ -184,25 +191,41 @@ export default {
       if (ac == 'add' && this.name.length == 0) {
         self.$message.error(`请填写数据`);
       }
-      requestEggApi('dbOperation', params).then(res => {
-        if (res.code !== 0) {
-          return false
-        }
+      // requestEggApi('dbOperation', params).then(res => {
+      //   if (res.code !== 0) {
+      //     return false
+      //   }
+      //   if (ac == 'get') {
+      //     if (res.data.result.length == 0) {
+      //       self.$message.error(`没有数据`);
+      //       return;
+      //     }
+      //     self.userList = res.data.result;
+      //   }
+      //   if (res.data.all_list.length == 0) {
+      //     return;
+      //   }
+      //   self.all_list = res.data.all_list;
+      //   self.$message.success(`success`);
+      // }).catch(err => {
+      //   console.log('err:', err)
+      // })
+
+      this.$ipcCall(ipcApiRoute.dbOperation, params).then(res => {
+        console.log('res:', res);
         if (ac == 'get') {
-          if (res.data.result.length == 0) {
+          if (res.result.length == 0) {
             self.$message.error(`没有数据`);
             return;
           }
-          self.userList = res.data.result;
+          self.userList = res.result;
         }
-        if (res.data.all_list.length == 0) {
+        if (res.all_list.length == 0) {
           return;
         }
-        self.all_list = res.data.all_list;
+        self.all_list = res.all_list;
         self.$message.success(`success`);
-      }).catch(err => {
-        console.log('err:', err)
-      })
+      }) 
     },
   }
 };

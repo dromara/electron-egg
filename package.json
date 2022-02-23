@@ -12,9 +12,6 @@
     "build-m": "electron-builder -m",
     "build-m-arm64": "electron-builder -m --arm64",
     "build-l": "electron-builder -l deb tar.xz",
-    "web-start": "egg-scripts start --daemon --title=ee --ignore-stderr --env=prod --workers=1",
-    "web-stop": "egg-scripts stop --title=ee",
-    "web-dev": "egg-bin dev",
     "rd": "node ./node_modules/ee-core/bin/tools rd --dist_dir=./frontend/dist",
     "compress": "node ./node_modules/ee-core/bin/tools compress",
     "restore": "node ./node_modules/ee-core/bin/tools restore"
@@ -85,13 +82,11 @@
   },
   "repository": "https://github.com/wallace5303/ee.git",
   "keywords": [
-    "Electron",
-    "Egg"
+    "Electron"
   ],
   "author": "wallace5303, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
-    "egg-bin": "^4.12.3",
     "electron": "^12.2.3",
     "electron-builder": "22.10.4",
     "eslint": "^5.13.0",
@@ -100,11 +95,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
-    "ee-core": "^1.1.3",
-    "egg": "^2.33.1",
-    "egg-cluster": "^1.27.1",
-    "egg-scripts": "^2.15.2",
-    "egg-view-ejs": "^2.0.1",
+    "ee-core": "^1.1.5",
     "electron-is": "^3.0.0",
     "lodash": "^4.17.21",
     "unzip-crx-3": "^0.2.0"

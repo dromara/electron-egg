@@ -7,6 +7,7 @@ const is = require('electron-is');
 const { exec } = require('child_process');
 const unzip = require("unzip-crx-3");
 const Controller = require('ee-core').Controller;
+const Utils = require('ee-core').Utils;
 const electronApp = require('electron').app;
 const {dialog, webContents, shell, BrowserWindow, BrowserView, Notification, powerMonitor, screen, nativeTheme} = require('electron');
 const chromeExtension = require('../library/chromeExtension');
@@ -38,10 +39,41 @@ class ExampleController extends Controller {
   async test () {
     const result = await this.service.example.test('electron');
 
-    // 调用egg的某个api
-    // const result = await this.app.curlEgg('post', '/api/example/test2', {name: 'electron'});
 
     return result;
+  }
+
+  /**
+   * json数据库操作
+   */   
+  async dbOperation(args) {
+    const { service } = this;
+    const paramsObj = args;
+    //console.log('eeeee paramsObj:', paramsObj);
+    const data = {
+      action: paramsObj.action,
+      result: null,
+      all_list: []
+    };
+    
+    switch (paramsObj.action) {
+      case 'add' :
+        data.result = await service.storage.addTestData(paramsObj.info);;
+        break;
+      case 'del' :
+        data.result = await service.storage.delTestData(paramsObj.delete_name);;
+        break;
+      case 'update' :
+        data.result = await service.storage.updateTestData(paramsObj.update_name, paramsObj.update_age);
+        break;
+      case 'get' :
+        data.result = await service.storage.getTestData(paramsObj.search_age);
+        break;
+    }
+
+    data.all_list = await service.storage.getAllTestData();
+
+    return data;
   }
 
   /**
@@ -477,6 +509,26 @@ class ExampleController extends Controller {
     return;
   }
 
+  /**
+   * 上传文件
+   */  
+  async uploadFile() {
+    // const self = this;
+    // const { ctx, service } = this;
+    // let tmpDir = Utils.getLogDir();
+    // const file = ctx.request.files[0];
+
+    // try {
+    //   let tmpFile = fs.readFileSync(file.filepath)
+    //   fs.writeFileSync(path.join(tmpDir, file.filename), tmpFile)
+    // } finally {
+    //   await fs.unlink(file.filepath, function(){});
+    // }
+    // const fileStream = fs.createReadStream(path.join(tmpDir, file.filename))
+    // const uploadRes = await service.example.uploadFileToSMMS(fileStream);
+
+    // return uploadRes;
+  }
 }
 
 module.exports = ExampleController;

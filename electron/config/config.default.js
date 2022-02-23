@@ -67,13 +67,9 @@ module.exports = (appInfo) => {
     url: 'https://discuz.chat/' // Any web url
   };
 
-  /* egg服务 (可选) */
-  config.egg = {
-    enable: false, // 是否启用
-    title: 'ee', // 进程的title属性标识（默认你的应用名称-英文）
-    port: 7068,
-    hostname: '127.0.0.1',
-    workers: 1 // 工作进程数据
+  /* web渲染服务 */
+  config.webServer = {
+    port: 7068
   };
 
   /* 应用自动升级 (可选) */

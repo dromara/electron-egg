@@ -1,28 +1,5 @@
 <template>
   <div id="app-base-file">
-    <div class="one-block-1">
-      <span>
-        1. 上传文件到sm图床
-      </span>
-    </div>  
-    <div class="one-block-2">
-      <!-- dev调试时，action参数：请填写你本地完整的api地址，如：http://localhost:7068/api/example/uploadFile -->
-      <a-upload-dragger
-        name="file"
-        :multiple="true"
-        :action="action_url"
-        @change="uploadStatus"
-      >
-        <p class="ant-upload-drag-icon">
-          <a-icon type="inbox" />
-        </p>
-        <p class="ant-upload-text">
-          点击 或 拖动到此处
-        </p>
-        <p class="ant-upload-hint">
-        </p>
-      </a-upload-dragger>
-    </div>
     <div class="one-block-2">
       <a-list v-if="image_info.length !== 0" size="small" bordered :data-source="image_info">
         <a-list-item slot="renderItem" slot-scope="item" style="text-align:left;">
@@ -33,20 +10,18 @@
     </div>
     <div class="one-block-1">
       <span>
-        2. 系统原生对话框
+        1. 系统原生对话框
       </span>
     </div>  
     <div class="one-block-2">
       <a-space>
         <a-button @click="messageShow('ipc')">消息提示(ipc)</a-button>
         <a-button @click="messageShowConfirm('ipc')">消息提示与确认(ipc)</a-button>
-        <a-button @click="messageShow('http')">消息提示(egg http服务)</a-button>
-        <a-button @click="messageShowConfirm('http')">消息提示与确认(egg http服务)</a-button>
       </a-space>
     </div>
     <div class="one-block-1">
       <span>
-        3. 选择保存目录
+        2. 选择保存目录
       </span>
     </div>  
     <div class="one-block-2">
@@ -107,7 +82,6 @@ export default {
   data() {
     return {
       file_list: fileList,
-      action_url: process.env.VUE_APP_API_BASE_URL + '/api/example/uploadFile',
       image_info: [],
       num: 0,
 			dir_path: "D:\\www\\ee",
@@ -115,33 +89,9 @@ export default {
   },
   methods: {
     openDirectry (id) {
-      this.$ipcCall(ipcApiRoute.openDirectory, {id: id}).then(r => {
-        //console.log('r:', r)
+      this.$ipcCall(ipcApiRoute.openDirectory, {id: id}).then(res => {
+        //console.log('res:', res)
       })      
-    },
-		uploadStatus(info) {
-      const status = info.file.status;
-      if (status !== 'uploading') {
-        console.log(info.file);
-      }
-      if (status === 'done') {
-        // 去除list列表
-        //info.fileList = [];
-        const uploadRes = info.file.response;
-        console.log('uploadRes:', uploadRes)
-        if (uploadRes.code !== 'success') {
-          this.$message.error(`file upload failed ${uploadRes.code} .`);
-          return false;
-        }
-        this.num++;
-        const picInfo = uploadRes.data;
-        picInfo.id = this.num;
-        picInfo.imageUrlText = 'image url';
-        this.image_info.push(picInfo);
-        this.$message.success(`${info.file.name} file uploaded successfully.`);
-      } else if (status === 'error') {
-        this.$message.error(`${info.file.name} file upload failed.`);
-      }
     },
     selectDir() {
       const self = this;
