@@ -11,7 +11,6 @@
   </div>
 </template>
 <script>
-import { requestEggApi } from '@/api/main'
 
 export default {
   data() {
@@ -24,13 +23,6 @@ export default {
       const params = {
         id: id
       }
-			requestEggApi('test1', params).then(res => {
-				if (res.code !== 0) {
-					return false
-				}
-			}).catch(err => {
-				console.log('err:', err)
-			})
     },
   }
 };

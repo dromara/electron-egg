@@ -57,7 +57,7 @@
   </div>
 </template>
 <script>
-import { requestEggApi, ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main'
 
 const fileList = [
   {
@@ -103,38 +103,16 @@ export default {
 		messageShow(type) {
       const self = this;
       console.log('[messageShow] type:', type)
-      if (type == 'http') {
-        requestEggApi('messageShow', {}).then(res => {
-          if (res.code !== 0) {
-            return false
-          }
-          console.log('res:', res)
-        }).catch(err => {
-          self.$message.error(err + '异常')
-        })
-      } else { 
-        self.$ipcCall(ipcApiRoute.messageShow, '').then(r => {
-          self.$message.info(r);
-        })
-      }
+      this.$ipcCall(ipcApiRoute.messageShow, '').then(r => {
+        self.$message.info(r);
+      })
     },    
     messageShowConfirm(type) {
       const self = this;
       console.log('[messageShowConfirm] type:', type)
-      if (type == 'http') {
-        requestEggApi('messageShowConfirm', {}).then(res => {
-          if (res.code !== 0) {
-            return false
-          }
-          console.log('res:', res)
-        }).catch(err => {
-          self.$message.error(err + '异常')
-        })
-      } else {
-        self.$ipcCall(ipcApiRoute.messageShowConfirm, '').then(r => {
-          self.$message.info(r);
-        })
-      }
+      this.$ipcCall(ipcApiRoute.messageShowConfirm, '').then(r => {
+        self.$message.info(r);
+      })
     },
   }
 };
