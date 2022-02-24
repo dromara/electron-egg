@@ -14,7 +14,7 @@ module.exports = {
    * 安装
    */
   install (eeApp) {
-    console.log('[preload] load AutoUpdater module');
+    eeApp.logger.info('[preload] load AutoUpdater module');
 
     const status = {
       error: -1,
@@ -27,13 +27,13 @@ module.exports = {
     const updateConfig = eeApp.config.autoUpdate;
     const mainWindow = eeApp.electron.mainWindow;
     const version = app.getVersion();
-    console.log('[preload:autoUpdater] current version: ', version);
+    eeApp.logger.info('[preload:autoUpdater] current version: ', version);
   
     // 设置下载服务器地址
     let server = updateConfig.options.url;
     let lastChar = server.substring(server.length - 1);
     server = lastChar === '/' ? server : server + "/";
-    console.log('[preload:autoUpdater] server: ', server);
+    eeApp.logger.info('[preload:autoUpdater] server: ', server);
     updateConfig.options.url = server;
   
     // 是否后台自动下载
@@ -82,6 +82,7 @@ module.exports = {
         totalSize: totalSize,
         transferredSize: transferredSize
       }
+      eeApp.logger.info('[preload:download-progress] progress: ', text);
       sendStatusToWindow(mainWindow, info);
     })
     autoUpdater.on('update-downloaded', (info) => {
@@ -110,7 +111,6 @@ module.exports = {
     autoUpdater.downloadUpdate();
   },
 
-
 }
 
 /**
@@ -118,7 +118,6 @@ module.exports = {
  */
 function sendStatusToWindow(mainWindow, content = {}) {
   const textJson = JSON.stringify(content);
-  eLogger.info(textJson);
   const channel = 'app.updater';
   mainWindow.webContents.send(channel, textJson);
 }

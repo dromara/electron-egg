@@ -15,7 +15,7 @@ const awaken = require('../library/awaken');
 module.exports = async (app) => {
 
   //已实现的功能模块，可选择性使用和修改
-
+  
   tray.install(app);
 
   security.install(app);
@@ -33,7 +33,7 @@ function loadUpdate (app) {
   const config = app.config.autoUpdate;
   if ( (is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux) ) {
     const autoUpdater = require('../library/autoUpdater');
-    autoUpdater.install();
+    autoUpdater.install(app);
 
     // 是否检查更新
     if (config.force) {
