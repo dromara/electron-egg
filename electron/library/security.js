@@ -10,7 +10,7 @@ module.exports = {
    * 安装
    */  
   install (eeApp) {
-    console.log('[preload] load security module');
+    eeApp.logger.info('[preload] load security module');
     const runWithDebug = process.argv.find(function(e){
       let isHasDebug = e.includes("--inspect") || e.includes("--inspect-brk") || e.includes("--remote-debugging-port");
       return isHasDebug;
@@ -18,7 +18,7 @@ module.exports = {
   
     // 不允许远程调试
     if (runWithDebug) {
-      console.log('[error] Remote debugging is not allowed,  runWithDebug:', runWithDebug);
+      eeApp.logger.error('[error] Remote debugging is not allowed,  runWithDebug:', runWithDebug);
       eeApp.appQuit();
     }
   }
