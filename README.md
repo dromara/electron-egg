@@ -36,7 +36,7 @@
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/home.png)
 
 - macOS平台    
-    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/socket.png)
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/mac-socket.png)
 
 - linux平台 (ubuntu)
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ubuntu-db.png)
