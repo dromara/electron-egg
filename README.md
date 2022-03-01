@@ -20,7 +20,7 @@
 
 ## 特性
 1. 跨平台：一套代码，可以打包成windows版、Mac版、Linux版
-2. 简单高效：只需学习js语言，同时支持vue、react、ejs等前端技术
+2. 简单高效：只需学习 js 语言，同时支持vue、react、ejs等前端技术
 3. 前端独立：理论上支持任何前端技术，编写出精美的UI效果
 4. 工程化：可以用服务端的开发思维，来编写桌面软件
 5. 高性能：事件驱动、非阻塞式IO
@@ -58,9 +58,11 @@
 
 ## 开始使用
 
-1. [安装文档](https://www.yuque.com/u34495/mivcfg/qo4uqg)
+- [安装文档](https://www.yuque.com/u34495/mivcfg/qo4uqg)
     
+## 项目案例
 
+- [查看](https://www.yuque.com/u34495/mivcfg/ep4otg)
 
 ## 交流
 1. qq群：735532437
