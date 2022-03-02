@@ -1,6 +1,7 @@
 import request from '@/utils/request'
 
 const ipcApiRoute = {
+  test: 'controller.example.test',
   messageShow: 'controller.example.messageShow',
   messageShowConfirm: 'controller.example.messageShowConfirm',
   selectFolder: 'controller.example.selectFolder',

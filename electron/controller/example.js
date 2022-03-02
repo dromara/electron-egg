@@ -38,6 +38,8 @@ class ExampleController extends Controller {
   async test () {
     const result = await this.service.example.test('electron');
 
+    // let tmpDir = Utils.getLogDir();
+    // console.log('tmpDir:', tmpDir);
 
     return result;
   }

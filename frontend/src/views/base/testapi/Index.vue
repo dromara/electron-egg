@@ -11,6 +11,7 @@
   </div>
 </template>
 <script>
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data() {
@@ -23,6 +24,9 @@ export default {
       const params = {
         id: id
       }
+      this.$ipcCall(ipcApiRoute.test, params).then(res => {
+        console.log('res:', res)
+      }) 
     },
   }
 };
