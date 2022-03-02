@@ -13,7 +13,7 @@ module.exports = {
    * 安装
    */
   install (eeApp) {
-    console.log('[preload] load tray module');
+    eeApp.logger.info('[preload] load tray module');
     const trayConfig = eeApp.config.tray;
     const mainWindow = eeApp.electron.mainWindow;
 

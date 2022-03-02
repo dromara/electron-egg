@@ -11,7 +11,7 @@ module.exports = {
    * 安装
    */     
   install (eeApp) {
-    console.log('[preload] load awaken module');
+    eeApp.logger.info('[preload] load awaken module');
     const protocolInfo = eeApp.config.awakeProtocol;
     const PROTOCOL = protocolInfo.protocol;
   
@@ -49,7 +49,7 @@ module.exports = {
         urlPath: pathname,
         urlParams: search && search.slice(1)
       }
-      console.log('[awaken] [handleUrl] awakeUrlInfo:', awakeUrlInfo);
+      eeApp.logger.info('[awaken] [handleUrl] awakeUrlInfo:', awakeUrlInfo);
     }
   }
 }
