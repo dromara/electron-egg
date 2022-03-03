@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -87,6 +87,7 @@
   "author": "wallace5303, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
+    "debug": "^4.3.3",
     "electron": "^12.2.3",
     "electron-builder": "22.10.4",
     "eslint": "^5.13.0",

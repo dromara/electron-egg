@@ -30,7 +30,5 @@ class Main extends Appliaction {
   }
 }
 
-
-
 new Main();
  
