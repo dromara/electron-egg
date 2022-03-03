@@ -63,7 +63,7 @@ module.exports = (appInfo) => {
     url: 'https://discuz.chat/' // Any web url
   };
 
-  /* web渲染服务 */
+  /* 内置web服务 */
   config.webServer = {
     port: 7068
   };

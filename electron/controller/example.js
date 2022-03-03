@@ -420,7 +420,7 @@ class ExampleController extends Controller {
     // 资源路径不同
     let softwarePath = '';
     if (electronApp.isPackaged) {
-      // 打包后
+      // 打包后  execDir为 应用程序 exe\dmg\dep软件所在目录；打包前该值是项目根目录
       softwarePath = path.join(this.app.config.execDir, "resources", "extraResources", softName);
     } else {
       // 打包前
