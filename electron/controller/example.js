@@ -38,8 +38,8 @@ class ExampleController extends Controller {
   async test () {
     const result = await this.service.example.test('electron');
 
-    // let tmpDir = Utils.getLogDir();
-    // console.log('tmpDir:', tmpDir);
+    let tmpDir = Utils.getLogDir();
+    console.log('tmpDir:', tmpDir);
 
     return result;
   }
@@ -421,11 +421,12 @@ class ExampleController extends Controller {
     let softwarePath = '';
     if (electronApp.isPackaged) {
       // 打包后
-      softwarePath = path.join(electronApp.getAppPath(), "..", "extraResources", softName);
+      softwarePath = path.join(this.app.config.execDir, "resources", "extraResources", softName);
     } else {
       // 打包前
-      softwarePath = path.join(electronApp.getAppPath(), "build", "extraResources", softName);
+      softwarePath = path.join(this.app.config.execDir, "build", "extraResources", softName);
     }
+
     // 检查程序是否存在
     if (!fs.existsSync(softwarePath)) {
       return false;

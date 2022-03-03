@@ -7,7 +7,7 @@
       <p/>
       <span class="sub-content">
         注：请先将【powershell.exe】复制到【electron-egg/build/extraResources】目录中
-      </span> 
+      </span>
     </div>  
     <div class="one-block-2">
       <a-list bordered :data-source="data">
