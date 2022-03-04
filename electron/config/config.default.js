@@ -12,9 +12,9 @@ module.exports = (appInfo) => {
    **/
   const config = {};
 
-  /* 开发模式配置 */
+  /* 应用模式配置 */
   config.developmentMode = {
-    default: 'html',
+    default: 'vue',
     mode: {
       vue: {
         hostname: 'localhost',
