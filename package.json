@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {

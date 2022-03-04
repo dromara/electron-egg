@@ -1,3 +1,13 @@
+## 2.0.3
+1. 增加html模式，前端支持多个html页面
+2. 增加socket服务，第三方应用可调用EE应用
+3. 增加全局config属性: userHome、appVersion、isPackaged、execDir
+4. 增加Utils工具类方法，获取socket端口，socket频道
+5. 优化应用创建逻辑
+6. 优化配置文件
+7. 优化pkg方法
+8. 优化动态端口获取
+
 ## 2.0.0
 1. 框架重构
 2. 增加控制器
