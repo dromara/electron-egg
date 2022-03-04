@@ -95,7 +95,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
-    "ee-core": "^1.1.5",
+    "ee-core": "^1.1.6",
     "electron-is": "^3.0.0",
     "lodash": "^4.17.21",
     "unzip-crx-3": "^0.2.0"
