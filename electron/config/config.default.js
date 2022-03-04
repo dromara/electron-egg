@@ -14,7 +14,7 @@ module.exports = (appInfo) => {
 
   /* 开发模式配置 */
   config.developmentMode = {
-    default: 'vue',
+    default: 'html',
     mode: {
       vue: {
         hostname: 'localhost',
@@ -23,7 +23,11 @@ module.exports = (appInfo) => {
       react: {
         hostname: 'localhost',
         port: 3000
-      }
+      },
+      html: {
+        hostname: 'localhost',
+        indexPage: 'index.html'
+      },
     }
   };
 
@@ -63,9 +67,10 @@ module.exports = (appInfo) => {
     url: 'https://discuz.chat/' // Any web url
   };
 
-  /* 内置web服务 */
-  config.webServer = {
-    port: 7068
+  /* 内置socket服务 */
+  config.socketServer = {
+    port: 7070, // 默认端口
+    isDynamic: false // 如果值为false，框架默认使用port端口（如果默认端口被使用，则随机获取一个）；如果为true，默认端口无效，框架随机生成
   };
 
   /* 应用自动升级 (可选) */
