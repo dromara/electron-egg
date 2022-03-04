@@ -46,9 +46,9 @@
 
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/vue-antd.png)
 
-- Youtube（web项目地址）
+- 禅道项目管理（web项目地址）
 
-    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/youtub.png)
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee-project-7.png)
 
 ### 3. 游戏（h5相关技术开发）
 - 忍者100层
