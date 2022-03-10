@@ -14,6 +14,11 @@
 - 🏆 码云最有价值开源项目
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee-zhengshu-1.png)    
 
+## 头发交流
+最近作者深受脱发困扰，有经验的同学请在评论区发表经验，效果好的方案，您将获得以下服务
+- issue优先解决
+- qq上一对一解决您项目中（使用EE框架）的问题
+
 ## 文档
 - [教程文档](https://www.yuque.com/u34495/mivcfg)
 - 文档进行了重新编写，更加直观，一定要看！！！
