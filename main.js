@@ -4,12 +4,20 @@ class Main extends Appliaction {
 
   constructor() {
     super();
+    // this === eeApp;
   }
 
   /**
    * core app have been loaded
    */
   async ready () {
+    // do some things
+  }
+
+  /**
+   * electron app ready
+   */
+  async electronAppReady () {
     // do some things
   }
 
