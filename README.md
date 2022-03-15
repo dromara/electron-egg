@@ -12,7 +12,7 @@
 - gitee：https://gitee.com/wallace5303/electron-egg
 - github：https://github.com/wallace5303/electron-egg
 - 🏆 码云最有价值开源项目
-    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee-zhengshu-1.png)    
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/electron-egg/ee-zs.png)    
 
 ## 文档
 - [教程文档](https://www.yuque.com/u34495/mivcfg)
