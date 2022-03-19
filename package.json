@@ -96,8 +96,9 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
-    "ee-core": "^1.1.8",
     "electron-is": "^3.0.0",
+    "koa-router": "^10.1.1",
+    "koa-static": "^5.0.0",
     "lodash": "^4.17.21"
   }
 }
