@@ -39,7 +39,7 @@ module.exports = {
     // 点击关闭，最小化到托盘
     mainWindow.on('close', (event) => {
       mainWindow.hide();
-      mainWindow.setSkipTaskbar(true);
+      //mainWindow.setSkipTaskbar(true); 
       event.preventDefault();
     });
     mainWindow.show();
@@ -59,10 +59,10 @@ module.exports = {
     appTray.on('click', function(){
       if (mainWindow.isVisible()) {
         mainWindow.hide();
-        mainWindow.setSkipTaskbar(false);
+        //mainWindow.setSkipTaskbar(true);
       } else {
         mainWindow.show();
-        mainWindow.setSkipTaskbar(true);
+        //mainWindow.setSkipTaskbar(false);
       }
     });
   }
