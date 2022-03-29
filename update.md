@@ -1,3 +1,8 @@
+## 2.0.6
+1. 增加socket service options，支持path,connectTimeout,maxHttpBufferSize,cors等属性
+2. 修复任务栏显示问题
+3. 修复socket跨域问题
+
 ## 2.0.5
 1. 增加生命周期函数 appReady()
 2. 增加dll调用方法
