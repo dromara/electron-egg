@@ -70,7 +70,16 @@ module.exports = (appInfo) => {
   /* 内置socket服务 */
   config.socketServer = {
     port: 7070, // 默认端口
-    isDynamic: false // 如果值为false，框架默认使用port端口（如果默认端口被使用，则随机获取一个）；如果为true，默认端口无效，框架随机生成
+    isDynamic: false, // 如果值为false，框架默认使用port端口（如果默认端口被使用，则随机获取一个）；如果为true，默认端口无效，框架随机生成
+    path: "/socket.io/", // 默认路径名称
+    connectTimeout: 45000, // 客户端连接超时时间
+    pingTimeout: 30000, // 心跳检测超时时间
+    pingInterval: 25000, // 心跳检测间隔
+    maxHttpBufferSize: 1e8, // 每条消息的数据最大值 1M
+    transports: ["polling", "websocket"], // http轮询和websocket
+    cors: {
+      origin: true, // http协议时，要设置允许跨域
+    }
   };
 
   /* 应用自动升级 (可选) */
