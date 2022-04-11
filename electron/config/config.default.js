@@ -69,7 +69,7 @@ module.exports = (appInfo) => {
 
   /* 内置socket服务 */
   config.socketServer = {
-    enable: true, // 是否启用
+    enable: false, // 是否启用
     port: 7070, // 默认端口（如果端口被使用，则随机获取一个）
     path: "/socket.io/", // 默认路径名称
     connectTimeout: 45000, // 客户端连接超时时间
@@ -82,10 +82,13 @@ module.exports = (appInfo) => {
     }
   };
 
-  /* 内置http服务*/
+  /* 内置http服务 */
   config.httpServer = {
     enable: true, // 是否启用
     port: 7071, // 默认端口（如果端口被使用，则随机获取一个）
+    cors: {
+      origin: "*" // 更多参数: https://www.npmjs.com/package/koa2-cors
+    }
   };
 
   /* 主进程 */
