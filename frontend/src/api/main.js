@@ -30,7 +30,22 @@ const specialIpcRoute = {
   appUpdater: 'app.updater' // 此频道在后端也有相同定义
 }
 
+/**
+ * 访问http服务
+ */
+const requestHttp = (uri, parameter) => {
+  const url = uri.split('.').join('/');
+  console.log('url:', url);
+  return request({
+    url: url,
+    method: 'post', 
+    data: parameter, // body
+    params: {}, // URL 参数
+  })
+}
+
 export {
   ipcApiRoute,
-  specialIpcRoute
+  specialIpcRoute,
+  requestHttp
 }

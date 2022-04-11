@@ -7,11 +7,12 @@
     </div>  
     <div class="one-block-2">
       <a-button @click="exec(1)"> 点击 </a-button>
+      <a-button @click="exec2(1)"> 点击2 </a-button>
     </div>
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute, requestHttp } from '@/api/main'
 
 export default {
   data() {
@@ -28,6 +29,14 @@ export default {
         console.log('res:', res)
       }) 
     },
+    exec2 (id) {
+      const params = {
+        id: id
+      }
+      requestHttp(ipcApiRoute.test, params).then(res => {
+        console.log('res2:', res)
+      }) 
+    },    
   }
 };
 </script>

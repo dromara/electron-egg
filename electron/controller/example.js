@@ -41,6 +41,8 @@ class ExampleController extends Controller {
     let tmpDir = Utils.getLogDir();
     console.log('tmpDir:', tmpDir);
 
+    console.log('this.app.request:', this.app.request.query);
+
     return result;
   }
 
