@@ -1,4 +1,4 @@
-## 2.0.7
+## 2.1.0
 1. 增加内置http server服务，支持配置host、端口、跨域等属性
 2. 增加http服务相关demo
 3. 增加socket服务相关demo
