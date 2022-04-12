@@ -66,7 +66,7 @@
 - [查看](https://www.yuque.com/u34495/mivcfg/ep4otg)
 
 ## 交流
-1. qq群：735532437
+1. qq群：735532437 (备注：ee框架)
 
 ## 关于pr
 请前往[GitHub项目](https://github.com/wallace5303/electron-egg)提pr（避免代码同步后，pr被覆盖掉），感谢！
