@@ -31,11 +31,11 @@ const specialIpcRoute = {
 }
 
 /**
- * 访问http服务
+ * 访问内置http服务
  */
 const requestHttp = (uri, parameter) => {
+  // url转换
   const url = uri.split('.').join('/');
-  console.log('url:', url);
   return request({
     url: url,
     method: 'post', 

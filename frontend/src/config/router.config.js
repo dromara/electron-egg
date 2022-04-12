@@ -2,12 +2,8 @@
  * 基础路由
  * @type { *[] }
  */
- import {AppSider, Menu} from '@/layouts'
+import {AppSider, Menu} from '@/layouts'
 
- const RouteView = {
-   name: 'RouteView',
-   render: (h) => h('router-view')
- }
 export const constantRouterMap = [
   {
     path: '/',
@@ -17,12 +13,9 @@ export const constantRouterMap = [
         path: '/base',
         name: 'Base',
         component: Menu,
+        props: { id: 'base' },
+        redirect: { name: 'BaseFileIndex' },
         children: [
-          {
-            path: '/base/index',
-            name: 'BaseIndex',
-            component: () => import('@/views/base/file/Index')
-          },
           {
             path: '/base/file/index',
             name: 'BaseFileIndex',
@@ -91,9 +84,18 @@ export const constantRouterMap = [
         ]  
       },
       {
-        path: '/other/index',
-        name: 'OtherIndex',
-        component: () => import('@/views/other/Index')
+        path: '/other',
+        name: 'Other',
+        component: Menu,
+        props: { id: 'other' },
+        redirect: { name: 'OtherTestIndex' },
+        children: [
+          {
+            path: '/other/test/index',
+            name: 'OtherTestIndex',
+            component: () => import('@/views/other/test/Index')
+          },
+        ] 
       }
     ]
   }
