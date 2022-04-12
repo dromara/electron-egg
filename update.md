@@ -1,3 +1,12 @@
+## 2.0.7
+1. 增加内置http server服务，支持配置host、端口、跨域等属性
+2. 增加http服务相关demo
+3. 优化内置socket server服务，支持开启/关闭
+4. 优化前端主菜单、子菜单
+5. 升级前端组件库
+6. 升级store包
+7. 一些代码优化
+
 ## 2.0.6
 1. 增加socket service options，支持path,connectTimeout,maxHttpBufferSize,cors等属性
 2. 修复任务栏显示问题
