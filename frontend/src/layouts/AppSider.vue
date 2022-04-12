@@ -47,17 +47,13 @@ export default {
     };
   },
   created () {
-    //console.log('[sider] [created] 1');
   },
   mounted () {
-    //console.log('[sider] [mounted] 2');
     this.menuHandle()
   },
   methods: {
     menuHandle (e) {
       this.current = e ? e.key : this.default_key;
-      //console.log('[sider] [methods] 3');
-      //console.log('[sider] [methods] current', this.current);
       const linkInfo = this.menu[this.current]
       console.log('[home] load page:', linkInfo.pageName);
       this.$router.push({ name: linkInfo.pageName, params: linkInfo.params})

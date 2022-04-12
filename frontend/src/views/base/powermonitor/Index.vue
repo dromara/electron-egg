@@ -7,7 +7,7 @@
     </div>  
     <div class="one-block-2">
       <a-space>
-        <p>当前状态：{{ currentStatus }}</p>
+        <p>* 当前状态：{{ currentStatus }}</p>
       </a-space>
       <p>* 拔掉电源，使用电池供电</p>
       <p>* 接入电源</p>

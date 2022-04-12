@@ -24,6 +24,8 @@ const ipcApiRoute = {
   downloadApp: 'controller.example.downloadApp',
   dbOperation: 'controller.example.dbOperation',
   uploadFile: 'controller.example.uploadFile',
+  checkHttpServer: 'controller.example.checkHttpServer',
+  doHttpRequest: 'controller.example.doHttpRequest'
 }
 
 const specialIpcRoute = {

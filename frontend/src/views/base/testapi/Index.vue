@@ -6,8 +6,10 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-button @click="exec(1)"> 点击 </a-button>
-      <a-button @click="exec2(1)"> 点击2 </a-button>
+      <a-space>
+        <a-button @click="exec(1)"> 点击 </a-button>
+        <a-button @click="exec2(1)"> 点击2 </a-button>
+      </a-space>
     </div>
   </div>
 </template>

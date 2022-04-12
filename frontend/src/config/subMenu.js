@@ -69,6 +69,12 @@ export default {
 			pageName: 'BaseSoftwareIndex',
 			params: {}
 		},
+		'menu_510' : {
+			icon: 'profile',
+			title: 'http服务',
+			pageName: 'BaseHttpServerIndex',
+			params: {}
+		},
 		'menu_900' : {
 			icon: 'profile',
 			title: '测试',

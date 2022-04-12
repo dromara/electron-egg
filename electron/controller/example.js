@@ -526,6 +526,48 @@ class ExampleController extends Controller {
 
     // return uploadRes;
   }
+
+  /**
+   * 检测http服务是否开启
+   */ 
+  async checkHttpServer () {
+    const httpServerConfig = this.app.config.httpServer;
+    const url = httpServerConfig.protocol + httpServerConfig.host + ':' + httpServerConfig.port;
+
+    const data = {
+      enable: httpServerConfig.enable,
+      server: url
+    }
+    return data;
+  }
+
+  /**
+   * 一个http请求访问此方法
+   */ 
+  async doHttpRequest () {
+    // http方法
+    const method = this.app.request.method;
+    // http get 参数
+    let params = this.app.request.query;
+    params = (params instanceof Object) ? JSON.parse(JSON.stringify(params)) : {};
+    // http post 参数
+    const body = this.app.request.body;
+
+    const httpInfo = {
+      method,
+      params,
+      body
+    }
+    console.log('httpInfo:', httpInfo);
+
+    if (!body.id) {
+      return false;
+    }
+    const dir = electronApp.getPath(body.id);
+    shell.openPath(dir);
+    
+    return true;
+  }  
 }
 
 module.exports = ExampleController;

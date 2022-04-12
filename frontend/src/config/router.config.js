@@ -62,9 +62,14 @@ export const constantRouterMap = [
             component: () => import('@/views/base/theme/Index')
           },                               
           {
-            path: '/base/software/open',
+            path: '/base/software/index',
             name: 'BaseSoftwareIndex',
             component: () => import('@/views/base/software/Index')
+          },
+          {
+            path: '/base/httpserver/index',
+            name: 'BaseHttpServerIndex',
+            component: () => import('@/views/base/httpserver/Index')
           },
           {
             path: '/base/system/index',
