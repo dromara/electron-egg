@@ -567,7 +567,20 @@ class ExampleController extends Controller {
     shell.openPath(dir);
     
     return true;
-  }  
+  } 
+ 
+  /**
+   * 一个socket io请求访问此方法
+   */ 
+  async doSocketRequest (args) {
+    if (!args.id) {
+      return false;
+    }
+    const dir = electronApp.getPath(args.id);
+    shell.openPath(dir);
+    
+    return true;
+  }    
 }
 
 module.exports = ExampleController;

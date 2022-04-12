@@ -26,7 +26,8 @@ const ipcApiRoute = {
   dbOperation: 'controller.example.dbOperation',
   uploadFile: 'controller.example.uploadFile',
   checkHttpServer: 'controller.example.checkHttpServer',
-  doHttpRequest: 'controller.example.doHttpRequest'
+  doHttpRequest: 'controller.example.doHttpRequest',
+  doSocketRequest: 'controller.example.doSocketRequest',
 }
 
 const specialIpcRoute = {

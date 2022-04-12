@@ -22,9 +22,9 @@ export const constantRouterMap = [
             component: () => import('@/views/base/file/Index')
           },
           {
-            path: '/base/socket/index',
-            name: 'BaseSocketIndex',
-            component: () => import('@/views/base/socket/Index')
+            path: '/base/socket/ipc',
+            name: 'BaseSocketIpc',
+            component: () => import('@/views/base/socket/Ipc')
           },
           {
             path: '/base/db/index',
@@ -67,10 +67,15 @@ export const constantRouterMap = [
             component: () => import('@/views/base/software/Index')
           },
           {
-            path: '/base/httpserver/index',
-            name: 'BaseHttpServerIndex',
-            component: () => import('@/views/base/httpserver/Index')
+            path: '/base/socket/httpserver',
+            name: 'BaseSocketHttpServer',
+            component: () => import('@/views/base/socket/HttpServer')
           },
+          {
+            path: '/base/socket/socketserver',
+            name: 'BaseSocketSocketServer',
+            component: () => import('@/views/base/socket/SocketServer')
+          },          
           {
             path: '/base/system/index',
             name: 'BaseSystemIndex',

@@ -12,10 +12,22 @@ export default {
 		'menu_300' : {
 			icon: 'profile',
 			title: '通信',
-			pageName: 'BaseSocketIndex',
+			pageName: 'BaseSocketIpc',
 			params: {}
 		},
 		'menu_301' : {
+			icon: 'profile',
+			title: 'http服务',
+			pageName: 'BaseSocketHttpServer',
+			params: {}
+		},
+		'menu_302' : {
+			icon: 'profile',
+			title: 'socket服务',
+			pageName: 'BaseSocketSocketServer',
+			params: {}
+		},    
+		'menu_310' : {
 			icon: 'profile',
 			title: '数据库',
 			pageName: 'BaseDBIndex',
@@ -68,13 +80,7 @@ export default {
 			title: '软件调用',
 			pageName: 'BaseSoftwareIndex',
 			params: {}
-		},
-		'menu_510' : {
-			icon: 'profile',
-			title: 'http服务',
-			pageName: 'BaseHttpServerIndex',
-			params: {}
-		},
+		},		
 		'menu_900' : {
 			icon: 'profile',
 			title: '测试',
