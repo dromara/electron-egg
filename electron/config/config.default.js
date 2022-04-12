@@ -87,7 +87,7 @@ module.exports = (appInfo) => {
     enable: false, // 是否启用
     port: 7071, // 默认端口（如果端口被使用，则随机获取一个）
     cors: {
-      origin: "*" // 更多参数: https://www.npmjs.com/package/koa2-cors
+      origin: "*" // 跨域
     }
   };
 
