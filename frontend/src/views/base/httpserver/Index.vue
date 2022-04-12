@@ -24,6 +24,7 @@
   </div>
 </template>
 <script>
+import storage from 'store2'
 import { ipcApiRoute, requestHttp } from '@/api/main'
 
 export default {
@@ -43,10 +44,16 @@ export default {
         if (r.enable) {
           self.currentStatus = '开启';
           self.servicAddress = r.server;
+          storage.set('httpServiceConfig', r);
         }
       })
     },
     sendRequest (id) {
+      if (this.currentStatus == '关闭') {
+        this.$message.error('http服务未开启');
+        return;
+      }
+
       const params = {
         id: id
       }

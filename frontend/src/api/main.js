@@ -1,3 +1,4 @@
+import storage from 'store2'
 import request from '@/utils/request'
 
 const ipcApiRoute = {
@@ -37,12 +38,17 @@ const specialIpcRoute = {
  */
 const requestHttp = (uri, parameter) => {
   // url转换
-  const url = uri.split('.').join('/');
+  const config = storage.get('httpServiceConfig');
+  const host = config.server || 'http://127.0.0.1:7071';
+  let url = uri.split('.').join('/');
+  url = host + '/' + url;
+  console.log('url:', url);
   return request({
     url: url,
     method: 'post', 
     data: parameter, // body
     params: {}, // URL 参数
+    timeout: 60000,
   })
 }
 
