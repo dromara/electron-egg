@@ -38,11 +38,14 @@ module.exports = {
   
     // 点击关闭，最小化到托盘
     mainWindow.on('close', (event) => {
+      if (eeApp.electron.extra.closeWindow == true) {
+        return;
+      }
       mainWindow.hide();
       //mainWindow.setSkipTaskbar(true); 
       event.preventDefault();
     });
-    mainWindow.show();
+    // mainWindow.show();
 
     // 测试发现：创建的Tray对象实例变量和app.whenReady()在同一模块中定义才行
     // 赋值给eeApp.electron.tray，已在框架ee-core包中定义
@@ -56,14 +59,14 @@ module.exports = {
     appTray.setContextMenu(contextMenu);
   
     // 监听 显示/隐藏
-    appTray.on('click', function(){
-      if (mainWindow.isVisible()) {
-        mainWindow.hide();
-        //mainWindow.setSkipTaskbar(true);
-      } else {
-        mainWindow.show();
-        //mainWindow.setSkipTaskbar(false);
-      }
-    });
+    // appTray.on('click', function(){
+    //   if (mainWindow.isVisible()) {
+    //     mainWindow.hide();
+    //     //mainWindow.setSkipTaskbar(true);
+    //   } else {
+    //     mainWindow.show();
+    //     //mainWindow.setSkipTaskbar(false);
+    //   }
+    // });
   }
 }
