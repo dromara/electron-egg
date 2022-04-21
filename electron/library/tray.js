@@ -42,10 +42,8 @@ module.exports = {
         return;
       }
       mainWindow.hide();
-      //mainWindow.setSkipTaskbar(true); 
       event.preventDefault();
     });
-    // mainWindow.show();
 
     // 测试发现：创建的Tray对象实例变量和app.whenReady()在同一模块中定义才行
     // 赋值给eeApp.electron.tray，已在框架ee-core包中定义
