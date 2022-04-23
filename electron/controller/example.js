@@ -11,6 +11,7 @@ const electronApp = require('electron').app;
 const {dialog, webContents, shell, BrowserWindow, BrowserView, 
   Notification, powerMonitor, screen, nativeTheme} = require('electron');
 const autoLaunchManager = require('../library/autoLaunch');
+const dayjs = require('dayjs');
 
 let myTimer = null;
 let browserViewObj = null;
@@ -29,7 +30,7 @@ class ExampleController extends Controller {
   /**
    * 所有方法接收两个参数
    * @param args 前端传的参数
-   * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
+   * @param event - ipc通信时才有值。invoke()方法时，event == IpcMainInvokeEvent; send()/sendSync()方法时，event == IpcMainEvent
    */
 
   /**
@@ -580,7 +581,32 @@ class ExampleController extends Controller {
     shell.openPath(dir);
     
     return true;
-  }    
+  }
+  
+  /**
+   * 异步消息类型
+   * @param args 前端传的参数
+   * @param event - IpcMainInvokeEvent 文档：https://www.electronjs.org/zh/docs/latest/api/structures/ipc-main-invoke-event
+   */ 
+   async ipcInvokeMsg (args, event) {
+    let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const data = args + ' - ' + timeNow;
+    
+    return data;
+  }  
+
+  /**
+   * 同步消息类型
+   * @param args 前端传的参数
+   * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
+   */ 
+  async ipcSendSyncMsg (args) {
+    let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const data = args + ' - ' + timeNow;
+    
+    return data;
+  }  
+
 }
 
 module.exports = ExampleController;

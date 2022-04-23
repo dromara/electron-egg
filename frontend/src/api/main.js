@@ -28,6 +28,8 @@ const ipcApiRoute = {
   checkHttpServer: 'controller.example.checkHttpServer',
   doHttpRequest: 'controller.example.doHttpRequest',
   doSocketRequest: 'controller.example.doSocketRequest',
+  ipcInvokeMsg: 'controller.example.ipcInvokeMsg',
+  ipcSendSyncMsg: 'controller.example.ipcSendSyncMsg',
 }
 
 const specialIpcRoute = {
