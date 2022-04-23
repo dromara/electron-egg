@@ -12,8 +12,8 @@ class StorageService extends Service {
 
   constructor (ctx) {
     super(ctx);
-    this.systemDB = Storage.JsonDB.connection('system').db;
-    this.demoDB = Storage.JsonDB.connection('demo').db;  
+    this.systemDB = Storage.JsonDB.connection('system');
+    this.demoDB = Storage.JsonDB.connection('demo');  
     this.systemDBKey = {
       cache: 'cache'
     };
@@ -28,11 +28,11 @@ class StorageService extends Service {
    */
   async addTestData(user) {
     const key = this.demoDBKey.test_data;
-    if (!this.demoDB.has(key).value()) {
-      this.demoDB.set(key, []).write();
+    if (!this.demoDB.db.has(key).value()) {
+      this.demoDB.db.set(key, []).write();
     }
     
-    const data = this.demoDB
+    const data = this.demoDB.db
     .get(key)
     .push(user)
     .write();
@@ -45,7 +45,7 @@ class StorageService extends Service {
    */
   async delTestData(name = '') {
     const key = this.demoDBKey.test_data;
-    const data = this.demoDB
+    const data = this.demoDB.db
     .get(key)
     .remove({name: name})
     .write();
@@ -58,7 +58,7 @@ class StorageService extends Service {
    */
   async updateTestData(name= '', age = 0) {
     const key = this.demoDBKey.test_data;
-    const data = this.demoDB
+    const data = this.demoDB.db
     .get(key)
     .find({name: name}) // 修改找到的第一个数据，貌似无法批量修改 todo
     .assign({age: age})
@@ -72,7 +72,7 @@ class StorageService extends Service {
    */
   async getTestData(age = 0) {
     const key = this.demoDBKey.test_data;
-    let data = this.demoDB
+    let data = this.demoDB.db
     .get(key)
     //.find({age: age}) 查找单个
     .filter(function(o) {
@@ -96,10 +96,10 @@ class StorageService extends Service {
    */
     async getAllTestData() {
       const key = this.demoDBKey.test_data;
-      if (!this.demoDB.has(key).value()) {
-        this.demoDB.set(key, []).write();
+      if (!this.demoDB.db.has(key).value()) {
+        this.demoDB.db.set(key, []).write();
       }
-      let data = this.demoDB
+      let data = this.demoDB.db
       .get(key)
       .value();
   

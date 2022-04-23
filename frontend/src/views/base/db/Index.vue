@@ -190,6 +190,7 @@ export default {
           self.userList = res.result;
         }
         if (res.all_list.length == 0) {
+          self.all_list = ['空'];
           return;
         }
         self.all_list = res.all_list;
