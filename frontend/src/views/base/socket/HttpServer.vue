@@ -40,7 +40,7 @@ export default {
   methods: {
     init () {
       const self = this;
-      this.$ipcCall(ipcApiRoute.checkHttpServer, {}).then(r => {
+      this.$ipcInvoke(ipcApiRoute.checkHttpServer, {}).then(r => {
         if (r.enable) {
           self.currentStatus = '开启';
           self.servicAddress = r.server;

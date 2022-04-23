@@ -89,13 +89,13 @@ export default {
   },
   methods: {
     openDirectry (id) {
-      this.$ipcCall(ipcApiRoute.openDirectory, {id: id}).then(res => {
+      this.$ipcInvoke(ipcApiRoute.openDirectory, {id: id}).then(res => {
         //console.log('res:', res)
       })      
     },
     selectDir() {
       const self = this;
-      self.$ipcCall(ipcApiRoute.selectFolder, '').then(r => {
+      self.$ipcInvoke(ipcApiRoute.selectFolder, '').then(r => {
         self.dir_path = r;
         self.$message.info(r);
       })      
@@ -103,14 +103,14 @@ export default {
 		messageShow(type) {
       const self = this;
       console.log('[messageShow] type:', type)
-      this.$ipcCall(ipcApiRoute.messageShow, '').then(r => {
+      this.$ipcInvoke(ipcApiRoute.messageShow, '').then(r => {
         self.$message.info(r);
       })
     },    
     messageShowConfirm(type) {
       const self = this;
       console.log('[messageShowConfirm] type:', type)
-      this.$ipcCall(ipcApiRoute.messageShowConfirm, '').then(r => {
+      this.$ipcInvoke(ipcApiRoute.messageShowConfirm, '').then(r => {
         self.$message.info(r);
       })
     },

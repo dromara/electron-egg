@@ -37,7 +37,7 @@ export default {
     init () {
       // todo .....
       const self = this;
-      self.$ipcCall(ipcApiRoute.autoLaunch, 'check').then(result => {
+      self.$ipcInvoke(ipcApiRoute.autoLaunch, 'check').then(result => {
         console.log('[ipcRenderer] [autoLaunch] result:', result)
         this.autoLaunchChecked = result.status;
       })      

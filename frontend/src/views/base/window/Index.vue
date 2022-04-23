@@ -42,7 +42,7 @@ export default {
   },
   methods: {
     createWindow (index) {
-      this.$ipcCall(ipcApiRoute.createWindow, this.views[index]).then(r => {
+      this.$ipcInvoke(ipcApiRoute.createWindow, this.views[index]).then(r => {
         console.log(r);
       })
     },

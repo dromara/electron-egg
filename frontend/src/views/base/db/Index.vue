@@ -156,7 +156,7 @@ export default {
       const params = {
         action: 'all',
       }
-      this.$ipcCall(ipcApiRoute.dbOperation, params).then(res => {
+      this.$ipcInvoke(ipcApiRoute.dbOperation, params).then(res => {
         console.log('res:', res);
         if (res.all_list.length == 0) {
           return false;
@@ -180,8 +180,7 @@ export default {
       if (ac == 'add' && this.name.length == 0) {
         self.$message.error(`请填写数据`);
       }
-
-      this.$ipcCall(ipcApiRoute.dbOperation, params).then(res => {
+      this.$ipcInvoke(ipcApiRoute.dbOperation, params).then(res => {
         console.log('res:', res);
         if (ac == 'get') {
           if (res.result.length == 0) {

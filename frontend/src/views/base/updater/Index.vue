@@ -54,7 +54,7 @@ export default {
       })
     },
     checkForUpdater () {
-      this.$ipcCall(ipcApiRoute.checkForUpdater).then(r => {
+      this.$ipcInvoke(ipcApiRoute.checkForUpdater).then(r => {
         console.log(r);
       })
     },
@@ -63,7 +63,7 @@ export default {
         this.$message.info('没有可用版本');
         return
       }
-      this.$ipcCall(ipcApiRoute.downloadApp).then(r => {
+      this.$ipcInvoke(ipcApiRoute.downloadApp).then(r => {
         console.log(r);
       })
     },
