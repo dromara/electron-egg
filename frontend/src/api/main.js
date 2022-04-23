@@ -7,10 +7,6 @@ const ipcApiRoute = {
   messageShowConfirm: 'controller.example.messageShowConfirm',
   selectFolder: 'controller.example.selectFolder',
   openDirectory: 'controller.example.openDirectory',
-  socketMessageStart: 'controller.example.socketMessageStart',
-  socketMessageStop: 'controller.example.socketMessageStop',
-  hello: 'controller.example.hello',
-  executeJS: 'controller.example.executeJS',
   loadViewContent: 'controller.example.loadViewContent',
   removeViewContent: 'controller.example.removeViewContent',
   createWindow: 'controller.example.createWindow',
@@ -30,6 +26,8 @@ const ipcApiRoute = {
   doSocketRequest: 'controller.example.doSocketRequest',
   ipcInvokeMsg: 'controller.example.ipcInvokeMsg',
   ipcSendSyncMsg: 'controller.example.ipcSendSyncMsg',
+  ipcSendMsg: 'controller.example.ipcSendMsg',
+  hello: 'controller.example.hello',
 }
 
 const specialIpcRoute = {

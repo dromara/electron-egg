@@ -81,17 +81,6 @@ class ExampleController extends Controller {
   }
 
   /**
-   * hello
-   */
-  hello (args) {
-    let newMsg = args + " +1";
-    let content = '';
-    content = '收到：' + args + '，返回：' + newMsg;
-
-    return content;
-  }
-
-  /**
    * 消息提示对话框
    */
   messageShow () {
@@ -148,40 +137,6 @@ class ExampleController extends Controller {
     const dir = electronApp.getPath(args.id);
     shell.openPath(dir);
     return true;
-  }
-
-  /**
-   * 长消息 - 开始
-   */
-  socketMessageStart (args, event) {
-    // 每隔1秒，向前端页面发送消息
-    // 用定时器模拟
-    
-    // 前端ipc频道 channel
-    const channel = 'controller.example.socketMessageStart';
-    myTimer = setInterval(function(e, c, msg) {
-      let timeNow = Date.now();
-      let data = msg + ':' + timeNow;
-      e.reply(`${c}`, data)
-    }, 1000, event, channel, args)
-
-    return '开始了'
-  }
-
-  /**
-   * 长消息 - 停止
-   */
-  socketMessageStop () {
-    clearInterval(myTimer);
-    return '停止了'
-  }
-
-  /**
-   * 执行js语句
-   */
-  executeJS (args) {
-    let jscode = `(()=>{alert('${args}');return 'fromJs:${args}';})()`;
-    return webContents.fromId(1).executeJavaScript(jscode);
   }
 
   /**
@@ -607,6 +562,39 @@ class ExampleController extends Controller {
     return data;
   }  
 
+  /**
+   * 双向异步通信
+   * @param args 前端传的参数
+   * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
+   */
+  ipcSendMsg (args, event) {
+    // 前端ipc频道 channel
+    const channel = 'controller.example.ipcSendMsg';
+
+    if (args.type == 'start') {
+      // 每隔1秒，向前端页面发送消息
+      // 用定时器模拟
+      myTimer = setInterval(function(e, c, msg) {
+        let timeNow = Date.now();
+        let data = msg + ':' + timeNow;
+        e.reply(`${c}`, data)
+      }, 1000, event, channel, args.content)
+
+      return '开始了'
+    } else if (args.type == 'end') {
+      clearInterval(myTimer);
+      return '停止了'    
+    } else {
+      return 'ohther'
+    }
+  }
+
+  /**
+   * 测试接口
+   */ 
+  hello (args) {
+    console.log('hello ', args);
+  }   
 }
 
 module.exports = ExampleController;
