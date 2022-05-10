@@ -70,6 +70,9 @@
 1. qq群：735532437 (备注：ee框架)
 2. 邮箱：530353222@qq.com
 
+## 程序员必备学习资料
+- [发现实用的GitHub项目](https://github.com/wallace5303/find-github)
+
 ## 关于pr
 请前往[GitHub项目](https://github.com/wallace5303/electron-egg)提pr（避免代码同步后，pr被覆盖掉），感谢！
 
