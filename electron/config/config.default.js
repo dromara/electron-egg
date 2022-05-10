@@ -34,8 +34,12 @@ module.exports = (appInfo) => {
   /* 开发者工具 */
   config.openDevTools = false;
 
-  /* 应用程序顶部菜单 */
-  config.openAppMenu = true;
+  /**
+   * 应用程序顶部菜单
+   * boolean | string
+   * true, false, 'dev-show'(dev环境显示，prod环境隐藏)
+   */
+  config.openAppMenu = 'dev-show';
 
   /* 加载loading页 */
   config.loadingPage = true;
