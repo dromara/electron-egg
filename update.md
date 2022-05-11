@@ -1,3 +1,12 @@
+## 2.1.2
+1. ipc通信增加 invoke/handle 模型
+2. ipcRender增加 invoke异步/sendSync同步方法
+3. 优化ee-core代码
+4. 优化storage demo
+5. 优化ipc通信 同步、异步、双向通信demo
+6. 替换所有前端ipcCall为ipcInvoke
+7. 修复ipc并发请求问题
+
 ## 2.1.1
 1. 修复托盘窗口关闭问题
 2. 修复ee-core窗口事件

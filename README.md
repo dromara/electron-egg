@@ -62,13 +62,16 @@
 - [安装文档](https://www.yuque.com/u34495/mivcfg/qo4uqg)
     
 ## 项目案例
-
-- [查看](https://www.yuque.com/u34495/mivcfg/ep4otg)
+- [GitHub阅读器](https://github.com/wallace5303/find-github)
+    ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/github-reader/gr-home.png)
+- [更多项目](https://www.yuque.com/u34495/mivcfg/ep4otg)
 
 ## 交流
 1. qq群：735532437 (备注：ee框架)
-2. qq: 530353222
-3. 邮箱：530353222@qq.com
+2. 邮箱：530353222@qq.com
+
+## 程序员必备学习资料
+- [发现实用的GitHub项目](https://github.com/wallace5303/find-github)
 
 ## 关于pr
 请前往[GitHub项目](https://github.com/wallace5303/electron-egg)提pr（避免代码同步后，pr被覆盖掉），感谢！
