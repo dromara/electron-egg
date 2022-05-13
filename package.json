@@ -1,11 +1,12 @@
 {
   "name": "ee",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
     "start": "electron . ",
     "dev": "electron . --env=local",
+    "hot": "nodemon",
     "test": "set DEBUG=* && electron . --env=local",
     "build-w": "electron-builder -w --ia32",
     "build-w-64": "electron-builder -w --x64",
@@ -15,6 +16,19 @@
     "rd": "node ./node_modules/ee-core/bin/tools rd --dist_dir=./frontend/dist",
     "compress": "node ./node_modules/ee-core/bin/tools compress",
     "restore": "node ./node_modules/ee-core/bin/tools restore"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "electron/",
+      "main.js"
+    ],
+    "ignore": [],
+    "ext": "js,json",
+    "verbose": true,
+    "exec": "electron . --env=local --hot-reload=1",
+    "restartable": "hr",
+    "colours": true,
+    "events": {}
   },
   "build": {
     "productName": "ee",
@@ -92,7 +106,8 @@
     "electron-builder": "22.10.4",
     "eslint": "^5.13.0",
     "eslint-config-egg": "^7.1.0",
-    "eslint-plugin-prettier": "^3.0.1"
+    "eslint-plugin-prettier": "^3.0.1",
+    "nodemon": "^2.0.16"
   },
   "dependencies": {
     "dayjs": "^1.10.7",
