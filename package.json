@@ -25,7 +25,7 @@
     "ignore": [],
     "ext": "js,json",
     "verbose": true,
-    "exec": "electron . --env=local --hot-reload=1",
+    "exec": "electron . --env=local",
     "restartable": "hr",
     "colours": true,
     "events": {}
