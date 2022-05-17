@@ -111,7 +111,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
-    "ee-core": "^1.2.3",
+    "ee-core": "^1.2.4",
     "electron-is": "^3.0.0",
     "lodash": "^4.17.21"
   }
