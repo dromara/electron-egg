@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron . ",
     "dev": "electron . --env=local",
-    "hot": "nodemon",
+    "reload": "nodemon",
     "test": "set DEBUG=* && electron . --env=local",
     "build-w": "electron-builder -w --ia32",
     "build-w-64": "electron-builder -w --x64",
@@ -25,7 +25,7 @@
     "ignore": [],
     "ext": "js,json",
     "verbose": true,
-    "exec": "electron . --env=local",
+    "exec": "electron . --env=local --hot-reload=1",
     "restartable": "hr",
     "colours": true,
     "events": {}

@@ -1,3 +1,7 @@
+## 2.1.3
+1. 增加开发环境代码热重载
+2. 增加菜单栏配置属性
+
 ## 2.1.2
 1. ipc通信增加 invoke/handle 模型
 2. ipcRender增加 invoke异步/sendSync同步方法
