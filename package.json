@@ -12,7 +12,7 @@
     "build-w-64": "electron-builder -w --x64",
     "build-m": "electron-builder -m",
     "build-m-arm64": "electron-builder -m --arm64",
-    "build-l": "electron-builder -l deb tar.xz",
+    "build-l": "electron-builder -l",
     "rd": "node ./node_modules/ee-core/bin/tools rd --dist_dir=./frontend/dist",
     "compress": "node ./node_modules/ee-core/bin/tools compress",
     "restore": "node ./node_modules/ee-core/bin/tools restore"
@@ -91,7 +91,8 @@
       "artifactName": "${productName}-linux-${version}.${ext}",
       "target": [
         "deb"
-      ]
+      ],
+      "category": "Utility"
     }
   },
   "repository": "https://github.com/wallace5303/ee.git",
@@ -103,7 +104,7 @@
   "devDependencies": {
     "debug": "^4.3.3",
     "electron": "^12.2.3",
-    "electron-builder": "22.10.4",
+    "electron-builder": "^23.0.3",
     "eslint": "^5.13.0",
     "eslint-config-egg": "^7.1.0",
     "eslint-plugin-prettier": "^3.0.1",
