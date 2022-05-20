@@ -87,7 +87,7 @@
       ]
     },
     "linux": {
-      "icon": "./build/icons/256x256.png",
+      "icon": "./build/icons/icon.icns",
       "artifactName": "${productName}-linux-${version}.${ext}",
       "target": [
         "deb"
