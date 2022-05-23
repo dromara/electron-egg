@@ -56,6 +56,8 @@ module.exports = (appInfo) => {
       nodeIntegration: true,
     },
     frame: true,
+    show: false, 
+    //backgroundColor: '#000000'
     //titleBarStyle: 'hidden'
   };
 
@@ -100,6 +102,11 @@ module.exports = (appInfo) => {
     host: '127.0.0.1',
     port: 7072, // 默认端口（如果端口被使用，则随机获取一个）
   }; 
+
+  /**
+   * 硬件加速
+   */
+  config.hardGpu = false;   
 
   /* 应用自动升级 (可选) */
   config.autoUpdate = {
