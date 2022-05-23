@@ -41,7 +41,10 @@ module.exports = (appInfo) => {
    */
   config.openAppMenu = 'dev-show';
 
-  /* 主窗口 */
+  /**
+   * 主窗口
+   * show {boolean} true:立即显示窗口，短暂白屏；false:延迟显示窗口，无白屏
+   */
   config.windowsOption = {
     width: 980,
     height: 650,
@@ -53,7 +56,7 @@ module.exports = (appInfo) => {
       nodeIntegration: true,
     },
     frame: true,
-    show: false, 
+    show: true,
     //backgroundColor: '#000000'
     //titleBarStyle: 'hidden'
   };
