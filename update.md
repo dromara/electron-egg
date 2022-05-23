@@ -7,7 +7,7 @@
 6. 升级electron-builder到23.0.3
 7. 升级ee-core到1.2.6
 8. 升级electron到13.6.9
-8. 移除loading页
+9. 移除loading页
 
 ## 2.1.2
 1. ipc通信增加 invoke/handle 模型
