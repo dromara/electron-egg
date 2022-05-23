@@ -41,9 +41,6 @@ module.exports = (appInfo) => {
    */
   config.openAppMenu = 'dev-show';
 
-  /* 加载loading页 */
-  config.loadingPage = true;
-
   /* 主窗口 */
   config.windowsOption = {
     width: 980,
