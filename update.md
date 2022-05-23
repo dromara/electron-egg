@@ -1,9 +1,12 @@
 ## 2.1.3
 1. 增加开发环境代码热重载
 2. 增加菜单栏配置属性
-3. 修复linux系统构建的deb包，安装后图标显示问题
-4. 升级electron-builder到23.0.3
-5. 升级ee-core到1.2.4
+3. 增加配置选项，开启/关闭硬件加速
+4. 优化启动
+5. 修复linux系统构建的deb包，安装后图标显示问题
+6. 升级electron-builder到23.0.3
+7. 升级ee-core到1.2.5
+8. 移除loading页
 
 ## 2.1.2
 1. ipc通信增加 invoke/handle 模型
