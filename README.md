@@ -62,7 +62,7 @@
 - [安装文档](https://www.yuque.com/u34495/mivcfg/qo4uqg)
     
 ## 项目案例
-- [GitHub阅读器](https://github.com/wallace5303/find-github)
+- GitHub阅读器
     ![](https://kaka996.coding.net/p/resource/d/tx-resource/git/raw/master/img/github-reader/gr-home.png)
 - [更多项目](https://www.yuque.com/u34495/mivcfg/ep4otg)
 
