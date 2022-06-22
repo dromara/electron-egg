@@ -2,7 +2,7 @@
 [![star](https://gitee.com/wallace5303/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/wallace5303/electron-egg/stargazers)
 
 <div align=center>
-<img src="http://img01.kaka996.com/images/electron-egg/logo.png" width="150" height="150" />
+<img src="https://wallace5303.gitee.io/ee/images/electron-egg/logo.png" width="150" height="150" />
 </div>
 
 👉 一个入门简单、跨平台的桌面软件开发框架。
@@ -15,7 +15,7 @@
 - 🍰 gitee：https://gitee.com/wallace5303/electron-egg
 - 🍨 github：https://github.com/wallace5303/electron-egg
 - 🏆 码云最有价值开源项目
-    ![](http://img01.kaka996.com/images/electron-egg/ee-zs.png)    
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
 ## 📚 文档
 - [教程文档](https://www.yuque.com/u34495/mivcfg)
@@ -36,27 +36,27 @@
 ### 1. 🚀 常规桌面软件
 - 🚖 windows平台
 
-    ![](http://img01.kaka996.com/images/electron-egg/home.png)
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/home.png)
 
 - 🚍 macOS平台    
-    ![](http://img01.kaka996.com/images/electron-egg/mac-socket.png)
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/mac-socket.png)
 
 - 🚔 linux平台 (ubuntu)
-    ![](http://img01.kaka996.com/images/electron-egg/ubuntu-db.png)
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/ubuntu-db.png)
 
 ### 🚐 2. vue、react、angular、web 转换成桌面软件
 - 🚙 vue-ant-design（本地）
 
-    ![](http://img01.kaka996.com/images/electron-egg/vue-antd.png)
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/vue-antd.png)
 
 - 🚙 禅道项目管理（web项目地址）
 
-    ![](http://img01.kaka996.com/images/electron-egg/ee-project-7.png)
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-project-7.png)
 
 ### 🚂 3. 游戏（h5相关技术开发）
 - 🚊 忍者100层
 
-    ![](http://img01.kaka996.com/images/electron-egg/ee_game_1.png)
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee_game_1.png)
 
 
 ## 📒 开始使用
@@ -65,7 +65,7 @@
     
 ## 🐶 项目案例
 - 🐸 英雄联盟助手
-    ![](http://img01.kaka996.com/images/electron-egg/serendipity/lol-zhanji.png)
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/serendipity/lol-zhanji.png)
 - [更多项目](https://www.yuque.com/u34495/mivcfg/ep4otg)
 - 免费服务，如果你想展示项目，请联系我（530353222）该案例文档是有一定流量的奥😄
 
