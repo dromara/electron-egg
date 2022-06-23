@@ -5,7 +5,7 @@
 <img src="https://wallace5303.gitee.io/ee/images/electron-egg/logo.png" width="150" height="150" />
 </div>
 
-👉 一个入门简单、跨平台的桌面软件开发框架。
+一个入门简单、跨平台的桌面软件开发框架。
 
 ❤️ 请帮忙点个⭐️star⭐️ 非常感谢！！！❤️
 
@@ -19,7 +19,7 @@
 
 ## 📚 文档
 - [教程文档](https://www.yuque.com/u34495/mivcfg)
-- 文档进行了重新编写，更加直观，一定要看！！！
+- [加入圈子](https://www.yuque.com/u34495/mivcfg/nigu4q)
 
 ## 📦 特性
 1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版
@@ -70,7 +70,7 @@
 - 免费服务，如果你想展示项目，请联系我（530353222）该案例文档是有一定流量的奥😄
 
 ## 💬 交流
-1. 邮箱：530353222@qq.com
+1. [加入圈子](https://www.yuque.com/u34495/mivcfg/nigu4q)
 
 ## 📌 关于pr
 请前往[GitHub项目](https://github.com/wallace5303/electron-egg)提pr（避免代码同步后，pr被覆盖掉），感谢！
