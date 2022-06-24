@@ -19,7 +19,6 @@
 
 ## 📚 文档
 - [教程文档](https://www.yuque.com/u34495/mivcfg)
-- [加入圈子](https://www.yuque.com/u34495/mivcfg/nigu4q)
 
 ## 📦 特性
 1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版
