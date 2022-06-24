@@ -13,9 +13,9 @@
     "build-m": "electron-builder -m",
     "build-m-arm64": "electron-builder -m --arm64",
     "build-l": "electron-builder -l",
-    "rd": "node ./node_modules/ee-core/bin/tools rd --dist_dir=./frontend/dist",
-    "compress": "node ./node_modules/ee-core/bin/tools compress",
-    "restore": "node ./node_modules/ee-core/bin/tools restore"
+    "rd": "ee-core rd --dist_dir=./frontend/dist",
+    "compress": "ee-core compress",
+    "restore": "ee-core restore"
   },
   "nodemonConfig": {
     "watch": [
