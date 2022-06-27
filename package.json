@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -13,9 +13,9 @@
     "build-m": "electron-builder -m",
     "build-m-arm64": "electron-builder -m --arm64",
     "build-l": "electron-builder -l",
-    "rd": "node ./node_modules/ee-core/bin/tools rd --dist_dir=./frontend/dist",
-    "compress": "node ./node_modules/ee-core/bin/tools compress",
-    "restore": "node ./node_modules/ee-core/bin/tools restore"
+    "rd": "ee-core rd --dist_dir=./frontend/dist",
+    "compress": "ee-core compress",
+    "restore": "ee-core restore"
   },
   "nodemonConfig": {
     "watch": [
@@ -112,7 +112,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
-    "ee-core": "^1.2.6",
+    "ee-core": "^1.2.7",
     "electron-is": "^3.0.0",
     "lodash": "^4.17.21"
   }
