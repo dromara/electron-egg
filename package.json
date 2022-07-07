@@ -15,7 +15,9 @@
     "build-l": "electron-builder -l",
     "rd": "ee-core rd --dist_dir=./frontend/dist",
     "compress": "ee-core compress",
-    "restore": "ee-core restore"
+    "restore": "ee-core restore",
+    "rebuild": "electron-rebuild",
+    "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
   "nodemonConfig": {
     "watch": [
@@ -105,6 +107,7 @@
     "debug": "^4.3.3",
     "electron": "^13.6.9",
     "electron-builder": "^23.0.3",
+    "electron-rebuild": "^3.2.7",
     "eslint": "^5.13.0",
     "eslint-config-egg": "^7.1.0",
     "eslint-plugin-prettier": "^3.0.1",
