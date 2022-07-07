@@ -81,6 +81,39 @@ class ExampleController extends Controller {
   }
 
   /**
+   * sqlite数据库操作 (测试功能，不要使用)
+   */   
+  async sqlitedbOperation(args) {
+    const { service } = this;
+    const paramsObj = args;
+    //console.log('eeeee paramsObj:', paramsObj);
+    const data = {
+      action: paramsObj.action,
+      result: null,
+      all_list: []
+    };
+    
+    switch (paramsObj.action) {
+      case 'add' :
+        data.result = await service.storage.addTestDataSqlite(paramsObj.info);;
+        break;
+      case 'del' :
+        data.result = await service.storage.delTestDataSqlite(paramsObj.delete_name);;
+        break;
+      case 'update' :
+        data.result = await service.storage.updateTestDataSqlite(paramsObj.update_name, paramsObj.update_age);
+        break;
+      case 'get' :
+        data.result = await service.storage.getTestDataSqlite(paramsObj.search_age);
+        break;
+    }
+
+    //data.all_list = await service.storage.getAllTestDataSqlite();
+
+    return data;
+  }
+
+  /**
    * 消息提示对话框
    */
   messageShow () {

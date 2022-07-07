@@ -33,6 +33,12 @@ export default {
 			pageName: 'BaseDBIndex',
 			params: {}
 		},
+		'menu_320' : {
+			icon: 'profile',
+			title: 'sqlite数据库',
+			pageName: 'BaseSqliteDBIndex',
+			params: {}
+		},
 		'menu_400' : {
 			icon: 'profile',
 			title: '视图',

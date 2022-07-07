@@ -12,6 +12,8 @@ class StorageService extends Service {
 
   constructor (ctx) {
     super(ctx);
+
+    // lowdb数据库
     this.systemDB = Storage.JsonDB.connection('system');
     this.demoDB = Storage.JsonDB.connection('demo');  
     this.systemDBKey = {
@@ -21,6 +23,9 @@ class StorageService extends Service {
       preferences: 'preferences',
       test_data: 'test_data'
     };
+
+    // sqlite数据库
+    this.demoSqliteDB = Storage.JsonDB.connection('demo.db', 'sqlite');
   }
 
   /*
@@ -94,21 +99,56 @@ class StorageService extends Service {
   /*
    * all Test data
    */
-    async getAllTestData() {
-      const key = this.demoDBKey.test_data;
-      if (!this.demoDB.db.has(key).value()) {
-        this.demoDB.db.set(key, []).write();
-      }
-      let data = this.demoDB.db
-      .get(key)
-      .value();
-  
-      if (_.isEmpty(data)) {
-        data = []
-      }
-  
-      return data;
+  async getAllTestData() {
+    const key = this.demoDBKey.test_data;
+    if (!this.demoDB.db.has(key).value()) {
+      this.demoDB.db.set(key, []).write();
     }
+    let data = this.demoDB.db
+    .get(key)
+    .value();
+
+    if (_.isEmpty(data)) {
+      data = []
+    }
+
+    return data;
+  }
+
+  /*
+   * 增 Test data (sqlite)
+   */
+  async addTestDataSqlite(user) {
+    console.log("user:", user);
+  }
+
+  /*
+   * 删 Test data (sqlite)
+   */
+  async delTestDataSqlite(name = '') {
+  
+  }
+
+  /*
+   * 改 Test data (sqlite)
+   */
+  async updateTestDataSqlite(name= '', age = 0) {
+
+  }  
+
+  /*
+   * 查 Test data (sqlite)
+   */
+  async getTestDataSqlite(age = 0) {
+
+  }  
+  
+  /*
+   * all Test data (sqlite)
+   */
+  async getAllTestDataSqlite() {
+
+  }  
 }
 
 module.exports = StorageService;

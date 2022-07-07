@@ -20,6 +20,7 @@ const ipcApiRoute = {
   checkForUpdater: 'controller.example.checkForUpdater',
   downloadApp: 'controller.example.downloadApp',
   dbOperation: 'controller.example.dbOperation',
+  sqlitedbOperation: 'controller.example.sqlitedbOperation',
   uploadFile: 'controller.example.uploadFile',
   checkHttpServer: 'controller.example.checkHttpServer',
   doHttpRequest: 'controller.example.doHttpRequest',
