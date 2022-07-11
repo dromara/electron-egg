@@ -538,7 +538,7 @@ class ExampleController extends Controller {
     const method = this.app.request.method;
     // http get 参数
     let params = this.app.request.query;
-    params = (params instanceof Object) ? JSON.parse(JSON.stringify(params)) : {};
+    params = (params instanceof Object) ? params : JSON.parse(JSON.stringify(params));
     // http post 参数
     const body = this.app.request.body;
 

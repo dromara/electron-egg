@@ -17,8 +17,8 @@ module.exports = {
     // 目前没有找到合适的解决方案
     // 启用热更新功能时，不加载该模块
     // 如果调试该模式，请使用dev模式
-    if (process.env.EE_SERVER_ENV == 'local' && process.env.HOT_RELOAD) return;
-
+    if (process.env.EE_SERVER_ENV == 'local' && process.env.HOT_RELOAD == 'true') return;
+    
     eeApp.logger.info('[preload] load tray module');
     const trayConfig = eeApp.config.tray;
     const mainWindow = eeApp.electron.mainWindow;
