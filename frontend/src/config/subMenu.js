@@ -29,7 +29,7 @@ export default {
 		},    
 		'menu_310' : {
 			icon: 'profile',
-			title: '数据库',
+			title: 'json数据库',
 			pageName: 'BaseDBIndex',
 			params: {}
 		},

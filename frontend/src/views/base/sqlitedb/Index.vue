@@ -2,13 +2,13 @@
   <div id="app-base-db">
     <div class="one-block-1">
       <span>
-        1. sqlite本地数据库 （测试功能，无法使用）
+        1. sqlite本地数据库
       </span>
     </div>  
     <div class="one-block-2">
       <a-row>
         <a-col :span="8">
-          • 大数据量存储
+          • 大数据量: 0-1024GB(单库)
         </a-col>
         <a-col :span="8">
           • 高性能
@@ -90,7 +90,7 @@
     <div class="one-block-2">
       <a-row>
         <a-col :span="6">
-          <a-input v-model="update_name" :value="update_name" addon-before="姓名" />
+          <a-input v-model="update_name" :value="update_name" addon-before="姓名(条件)" />
         </a-col>
         <a-col :span="3">
         </a-col>
@@ -123,7 +123,7 @@
         <a-col :span="3">
         </a-col>
         <a-col :span="6">
-          <a-button @click="dbOperation('del')">
+          <a-button @click="sqlitedbOperation('del')">
             删除
           </a-button>
         </a-col>

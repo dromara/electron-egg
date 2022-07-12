@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "2.1.5",
+  "version": "2.1.6",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -106,16 +106,17 @@
   "devDependencies": {
     "debug": "^4.3.3",
     "electron": "^13.6.9",
-    "electron-builder": "^23.0.3",
-    "electron-rebuild": "^3.2.7",
+    "electron-builder": "^23.1.0",
+    "electron-rebuild": "^3.2.8",
     "eslint": "^5.13.0",
     "eslint-config-egg": "^7.1.0",
     "eslint-plugin-prettier": "^3.0.1",
     "nodemon": "^2.0.16"
   },
   "dependencies": {
+    "better-sqlite3": "^7.6.0",
     "dayjs": "^1.10.7",
-    "ee-core": "^1.2.7",
+    "ee-core": "^1.2.8-beta.3",
     "electron-is": "^3.0.0",
     "lodash": "^4.17.21"
   }

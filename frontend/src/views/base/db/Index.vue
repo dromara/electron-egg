@@ -2,19 +2,19 @@
   <div id="app-base-db">
     <div class="one-block-1">
       <span>
-        1. 本地数据库
+        1. LowDB本地数据库
       </span>
     </div>  
     <div class="one-block-2">
       <a-row>
         <a-col :span="8">
-          • LowDB本地JSON数据库
+          • 小数据量: 0~100M(单库)
         </a-col>
         <a-col :span="8">
-          • 可使用lodash语法
+          • json数据库
         </a-col>
         <a-col :span="8">
-          
+          • 兼容lodash语法
         </a-col>
       </a-row>
     </div>

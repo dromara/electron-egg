@@ -31,11 +31,11 @@ export const constantRouterMap = [
             name: 'BaseDBIndex',
             component: () => import('@/views/base/db/Index')
           },
-          // {
-          //   path: '/base/sqlitedb/index',
-          //   name: 'BaseSqliteDBIndex',
-          //   component: () => import('@/views/base/sqlitedb/Index')
-          // },
+          {
+            path: '/base/sqlitedb/index',
+            name: 'BaseSqliteDBIndex',
+            component: () => import('@/views/base/sqlitedb/Index')
+          },
           {
             path: '/base/windowview/index',
             name: 'BaseWindowViewIndex',

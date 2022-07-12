@@ -1,3 +1,10 @@
+## 2.1.6
+1. 增加sqlite数据库
+2. 增加sqlite增删改查demo
+3. 增加http服务body，支持表单、文件等
+4. 修复热重启bug
+5. 升级ee-core到1.2.8
+
 ## 2.1.5
 1. 增加ee-core命令
 

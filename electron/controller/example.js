@@ -81,7 +81,7 @@ class ExampleController extends Controller {
   }
 
   /**
-   * sqlite数据库操作 (测试功能，不要使用)
+   * sqlite数据库操作
    */   
   async sqlitedbOperation(args) {
     const { service } = this;
@@ -108,7 +108,7 @@ class ExampleController extends Controller {
         break;
     }
 
-    //data.all_list = await service.storage.getAllTestDataSqlite();
+    data.all_list = await service.storage.getAllTestDataSqlite();
 
     return data;
   }
