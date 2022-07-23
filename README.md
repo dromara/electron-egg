@@ -60,7 +60,7 @@
 
 ## 📒 开始使用
 
-- ✒️ [安装文档](https://www.yuque.com/u34495/mivcfg/qo4uqg)
+- ✒️ [安装文档](https://www.yuque.com/u34495/mivcfg/ltgte9)
     
 ## 🐶 项目案例
 - 🐸 英雄联盟助手
