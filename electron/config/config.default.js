@@ -90,7 +90,12 @@ module.exports = (appInfo) => {
 
   /* 内置http服务 */
   config.httpServer = {
-    enable: false, // 是否启用
+    enable: true, // 是否启用
+    https: {
+      enable: false, 
+      key: '/public/ssl/localhost+1.key', // key文件
+      cert: '/public/ssl/localhost+1.pem' // cert文件
+    },
     port: 7071, // 默认端口（如果端口被使用，则随机获取一个）
     cors: {
       origin: "*" // 跨域
