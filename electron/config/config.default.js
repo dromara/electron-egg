@@ -90,7 +90,7 @@ module.exports = (appInfo) => {
 
   /* 内置http服务 */
   config.httpServer = {
-    enable: true, // 是否启用
+    enable: false, // 是否启用
     https: {
       enable: false, 
       key: '/public/ssl/localhost+1.key', // key文件
