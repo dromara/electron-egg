@@ -4,6 +4,7 @@ const dayjs = require('dayjs');
 
 /**
  * 默认配置
+ * @see https://www.yuque.com/u34495/mivcfg/guk1x0
  */
 module.exports = (appInfo) => {
   /**
@@ -43,7 +44,6 @@ module.exports = (appInfo) => {
 
   /**
    * 主窗口
-   * show {boolean} true:立即显示窗口，短暂白屏；false:延迟显示窗口，无白屏
    */
   config.windowsOption = {
     width: 980,
