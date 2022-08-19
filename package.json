@@ -16,6 +16,7 @@
     "rd": "ee-core rd --dist_dir=./frontend/dist",
     "compress": "ee-core compress",
     "restore": "ee-core restore",
+    "encrypt": "ee-core encrypt --type=confuse",
     "rebuild": "electron-rebuild",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
