@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "2.1.7",
+  "version": "2.1.8",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "rd": "ee-core rd --dist_dir=./frontend/dist",
     "compress": "ee-core compress",
     "restore": "ee-core restore",
-    "encrypt": "ee-core encrypt --type=confuse",
+    "encrypt": "ee-core encrypt --type=bytecode",
     "rebuild": "electron-rebuild",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
@@ -46,7 +46,8 @@
       "!frontend/",
       "!run/",
       "!logs/",
-      "!data/"
+      "!data/",
+      "!electron/"
     ],
     "extraResources": {
       "from": "./build/extraResources/",
@@ -116,7 +117,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
-    "ee-core": "^1.2.9",
+    "ee-core": "^1.2.10",
     "electron-is": "^3.0.0",
     "lodash": "^4.17.21"
   }
