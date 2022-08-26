@@ -228,4 +228,5 @@ class StorageService extends Service {
   }  
 }
 
+StorageService.toString = () => '[class StorageService]';
 module.exports = StorageService;

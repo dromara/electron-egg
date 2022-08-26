@@ -25,4 +25,5 @@ class ExampleService extends Service {
   }
 }
 
+ExampleService.toString = () => '[class ExampleService]';
 module.exports = ExampleService;
