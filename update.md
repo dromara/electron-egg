@@ -1,3 +1,11 @@
+## 2.1.8
+1. 安全性更新
+2. 支持bytecode字节码加密
+3. 优化压缩混淆加密
+4. 将废弃compress、restore命令，使用encrypt替代
+5. mainServer增加option支持
+6. 限制控制器业务必须为class文件
+
 ## 2.1.7
 1. 增加ssl，支持https
 2. 优化http服务的路由写法
