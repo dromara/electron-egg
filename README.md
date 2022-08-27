@@ -5,9 +5,10 @@
 <img src="https://wallace5303.gitee.io/ee/images/electron-egg/logo.png" width="150" height="150" />
 </div>
 
-一个入门简单、跨平台的桌面软件开发框架。
-
-❤️ 请帮忙点个⭐️star⭐️ 非常感谢！！！❤️
+<div align=center>
+<h3><strong>一个入门简单、跨平台的企业级桌面软件开发框架</strong></h3>
+</div>
+<br>
 
 - 🍩 为什么使用？桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
 - 🍉 简单：只需懂 JavaScript
@@ -17,16 +18,21 @@
 - 🏆 码云最有价值开源项目
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
+## ❤️支持
+### 如果对您有用的话，请帮忙点个⭐️，支持一下开发者，非常感谢
+<br>
+
 ## 📚 文档
 - [教程文档](https://www.yuque.com/u34495/mivcfg)
 
 ## 📦 特性
 1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版
-2. 🌰 简单高效：只需学习 js 语言，同时支持vue、react、html等前端技术
+2. 🌹  简单高效：只需学习 js 语言，同时支持vue、react、html等前端技术
 3. 🌱 前端独立：理论上支持任何前端技术，编写出精美的UI效果
 4. 🌴 工程化：可以用服务端的开发思维，来编写桌面软件
 5. 🍁 高性能：事件驱动、非阻塞式IO
 6. 🌷 功能丰富：前端、服务端的技术场景等
+7. 🌰 安全：支持字节码加密、压缩混淆加密
 7. 💐 功能demo：桌面软件常见功能，后续逐步集成或提供demo
 8. 🌻 更多功能请看文档
 
