@@ -20,7 +20,6 @@
 
 ## ❤️支持
 ### 如果对您有用的话，请帮忙点个⭐️，支持一下开发者，非常感谢
-<br>
 
 ## 📚 文档
 - [教程文档](https://www.yuque.com/u34495/mivcfg)
@@ -81,6 +80,11 @@
 请前往[GitHub项目](https://github.com/wallace5303/electron-egg)提pr（避免代码同步后，pr被覆盖掉），感谢！
 
 地址：https://github.com/wallace5303/electron-egg
+
+## 🌐 框架核心包 ee-core
+ee-core：[https://github.com/wallace5303/ee-core](https://github.com/wallace5303/ee-core)
+
+欢迎参与贡献
 
 
 
