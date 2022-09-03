@@ -13,12 +13,12 @@
 ## 🌏 English | [中文](https://www.yuque.com/u34495/mivcfg)
 
 ## 📋 Introduction
-- 🍩 Why? Desktop software (office direction, personal tools) will still be one of the needs of PC in the next decade to improve work efficiency
-- 🍉 Simple: just understand JavaScript
-- 🍑 Vision: all developers can learn desktop software development
-- 🍰 Gitee：https://gitee.com/wallace5303/electron-egg
-- 🍨 Github：https://github.com/wallace5303/electron-egg
-- 🏆 Gitee most valuable open source project
+- 🍩 **Why?** Desktop software (office direction, personal tools) will still be one of the needs of PC in the next decade to improve work efficiency
+- 🍉 **Simple：** just understand JavaScript
+- 🍑 **Vision：** all developers can learn desktop software development
+- 🍰 **Gitee：** https://gitee.com/wallace5303/electron-egg
+- 🍨 **Github：** https://github.com/wallace5303/electron-egg
+- 🏆 most valuable open source project
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
 ## ❤️ support 
