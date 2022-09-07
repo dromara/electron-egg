@@ -1,4 +1,4 @@
-const { ipcRenderer: ipc } = window.require && window.require('electron') || {}
+const { ipcRenderer: ipc } = (window.require && window.require('electron')) || window.electron || {}
 
 /**
  * （将废弃，请使用 $ipcInvoke 代替）异步调用主函数

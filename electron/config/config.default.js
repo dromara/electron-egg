@@ -1,6 +1,7 @@
 'use strict';
 
 const dayjs = require('dayjs');
+const path = require('path');
 
 /**
  * 默认配置
@@ -52,8 +53,9 @@ module.exports = (appInfo) => {
     minHeight: 650,
     webPreferences: {
       //webSecurity: false,
-      contextIsolation: false, // 设置此项为false后，才可在渲染进程中使用electron api
+      contextIsolation: false, // false->可在渲染进程中使用electronApi，true->需要bridge.js(contextBridge)
       nodeIntegration: true,
+      preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
     },
     frame: true,
     show: true,
