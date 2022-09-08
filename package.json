@@ -14,8 +14,6 @@
     "build-m-arm64": "electron-builder -m --arm64",
     "build-l": "electron-builder -l",
     "rd": "ee-core rd --dist_dir=./frontend/dist",
-    "compress": "ee-core compress",
-    "restore": "ee-core restore",
     "encrypt": "ee-core encrypt --type=bytecode",
     "rebuild": "electron-rebuild",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
@@ -117,6 +115,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
+    "better-sqlite3": "^7.6.0",
     "ee-core": "^1.2.10",
     "electron-is": "^3.0.0",
     "lodash": "^4.17.21"

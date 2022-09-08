@@ -1,23 +1,6 @@
 const { ipcRenderer: ipc } = (window.require && window.require('electron')) || window.electron || {}
 
 /**
- * （将废弃，请使用 $ipcInvoke 代替）异步调用主函数
- * @param ipc
- * @param channel
- * @param param
- * @returns {Promise<unknown>}
- */
-const call = (ipc, channel, param) => {
-  return new Promise((resolve) => {
-    ipc.once(channel, (event, result) => {
-      console.log('[ipcRenderer] [call] result:', result)
-      resolve(result)
-    })
-    ipc.send(channel, param)
-  })
-}
-
-/**
  * 发送异步消息（invoke/handle 模型）
  * @param channel
  * @param param
