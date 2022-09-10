@@ -10,11 +10,14 @@
 </div>
 <br>
 
-- 🍩 为什么使用？桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
-- 🍉 简单：只需懂 JavaScript
-- 🍑 愿景：所有开发者都能学会桌面软件研发
-- 🍰 gitee：https://gitee.com/wallace5303/electron-egg
-- 🍨 github：https://github.com/wallace5303/electron-egg
+## 🌏 [English](https://www.yuque.com/u34495/ee-doc) | [中文](https://www.yuque.com/u34495/mivcfg)
+
+## 📋 介绍
+- 🍩 **为什么使用？** 桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
+- 🍉 **简单：** 只需懂 JavaScript
+- 🍑 **愿景：** 所有开发者都能学会桌面软件研发
+- 🍰 **gitee：** https://gitee.com/wallace5303/electron-egg **1900+**
+- 🍨 **github：** https://github.com/wallace5303/electron-egg **400+**
 - 🏆 码云最有价值开源项目
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
