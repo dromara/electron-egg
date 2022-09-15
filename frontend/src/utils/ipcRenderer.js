@@ -25,7 +25,6 @@ const sendSync = (channel, param) => {
 export default {
   install(Vue) {
     Vue.prototype.$ipc = ipc // 全局注入ipc
-    Vue.prototype.$ipcCall = (channel, param) => call(ipc, channel, param)
     Vue.prototype.$ipcInvoke = invoke
     Vue.prototype.$ipcSendSync = sendSync
   }
