@@ -123,6 +123,17 @@ module.exports = (appInfo) => {
     enable: false
   };   
 
+  /**
+   * 加密配置
+   */
+  config.encrypt = {
+    type: 'bytecode', // bytecode | confusion
+    directory: [
+      'electron'
+    ],
+    fileExt: ['.js'],
+  };
+
   /* 应用自动升级 (可选) */
   config.autoUpdate = {
     windows: false, // windows平台
