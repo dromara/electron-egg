@@ -17,7 +17,7 @@
 - 🍉 **Simple：** just understand JavaScript
 - 🍑 **Vision：** all developers can learn how to develop desktop software
 - 🍰 **Gitee：** https://gitee.com/wallace5303/electron-egg **2000+**
-- 🍨 **Github：** https://github.com/wallace5303/electron-egg **400+**
+- 🍨 **Github：** https://github.com/wallace5303/electron-egg **500+**
 - 🏆 most valuable open source project
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
