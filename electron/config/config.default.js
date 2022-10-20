@@ -55,7 +55,7 @@ module.exports = (appInfo) => {
       //webSecurity: false,
       contextIsolation: false, // false->可在渲染进程中使用electronApi，true->需要bridge.js(contextBridge)
       nodeIntegration: true,
-      preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
+      //preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
     },
     frame: true,
     show: true,
