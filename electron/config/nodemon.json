@@ -1,0 +1,13 @@
+{
+  "watch": [
+    "electron/",
+    "main.js"
+  ],
+  "ignore": [],
+  "ext": "js,json",
+  "verbose": true,
+  "exec": "electron . --env=local --hot-reload=1",
+  "restartable": "hr",
+  "colours": true,
+  "events": {}
+}
