@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "2.3.0",
+  "version": "2.2.1",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -8,15 +8,81 @@
     "dev": "electron . --env=local",
     "reload": "nodemon --config ./electron/config/nodemon.json",
     "test": "set DEBUG=* && electron . --env=local",
-    "build-w": "electron-builder --config ./electron/config/builder.js -w --ia32",
-    "build-w-64": "electron-builder --config ./electron/config/builder.js -w --x64",
-    "build-m": "electron-builder --config ./electron/config/builder.js -m",
-    "build-m-arm64": "electron-builder --config ./electron/config/builder.js -m --arm64",
-    "build-l": "electron-builder --config ./electron/config/builder.js -l",
+    "build-w": "electron-builder -w --ia32",
+    "build-w-64": "electron-builder -w --x64",
+    "build-m": "electron-builder -m",
+    "build-m-arm64": "electron-builder -m --arm64",
+    "build-l": "electron-builder -l",
     "rd": "ee-core rd --dist_dir=./frontend/dist",
     "encrypt": "ee-core encrypt",
     "rebuild": "electron-rebuild",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
+  },
+  "build": {
+    "productName": "ee",
+    "appId": "com.electron.ee",
+    "copyright": "wallace5303",
+    "directories": {
+      "output": "out"
+    },
+    "asar": true,
+    "files": [
+      "**/*",
+      "!frontend/",
+      "!run/",
+      "!logs/",
+      "!data/",
+      "!electron/"
+    ],
+    "extraResources": {
+      "from": "./build/extraResources/",
+      "to": "extraResources"
+    },
+    "electronDownload": {
+      "mirror": "https://npmmirror.com/mirrors/electron/"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "./build/icons/icon.ico",
+      "uninstallerIcon": "./build/icons/icon.ico",
+      "installerHeaderIcon": "./build/icons/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "EE框架"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://github.com/wallace5303/electron-egg"
+      }
+    ],
+    "mac": {
+      "icon": "./build/icons/icon.icns",
+      "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "./build/icons/icon.ico",
+      "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
+      "target": [
+        {
+          "target": "nsis"
+        }
+      ]
+    },
+    "linux": {
+      "icon": "./build/icons/icon.icns",
+      "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
+      "target": [
+        "deb"
+      ],
+      "category": "Utility"
+    }
   },
   "repository": "https://github.com/wallace5303/ee.git",
   "keywords": [
