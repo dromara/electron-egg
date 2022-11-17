@@ -28,7 +28,6 @@ export default {
           subtitle: '副标题', // macOS系统专有属性
           body: '这是通知内容-默认',
           silent: true,
-          icon: '/asset/images/tray_logo.png',
         },
         {
           type: 'main',

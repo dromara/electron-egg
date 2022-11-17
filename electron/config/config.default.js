@@ -59,6 +59,7 @@ module.exports = (appInfo) => {
     },
     frame: true,
     show: true,
+    icon: path.join(appInfo.home, 'public', 'images', 'logo-32.png'),
     //backgroundColor: '#000000'
     //titleBarStyle: 'hidden'
   };
