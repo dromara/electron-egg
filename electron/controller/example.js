@@ -496,27 +496,6 @@ class ExampleController extends Controller {
   }
 
   /**
-   * 上传文件
-   */  
-  async uploadFile() {
-    // const self = this;
-    // const { ctx, service } = this;
-    // let tmpDir = Utils.getLogDir();
-    // const file = ctx.request.files[0];
-
-    // try {
-    //   let tmpFile = fs.readFileSync(file.filepath)
-    //   fs.writeFileSync(path.join(tmpDir, file.filename), tmpFile)
-    // } finally {
-    //   await fs.unlink(file.filepath, function(){});
-    // }
-    // const fileStream = fs.createReadStream(path.join(tmpDir, file.filename))
-    // const uploadRes = await service.example.uploadFileToSMMS(fileStream);
-
-    // return uploadRes;
-  }
-
-  /**
    * 检测http服务是否开启
    */ 
   async checkHttpServer () {
@@ -620,6 +599,27 @@ class ExampleController extends Controller {
     } else {
       return 'ohther'
     }
+  }
+
+  /**
+   * 上传文件
+   */  
+  async uploadFile() {
+    let tmpDir = Utils.getLogDir();
+    const files = this.app.request.files;
+    let file = files.file;
+    
+    let tmpFilePath = path.join(tmpDir, file.originalFilename);
+    try {
+      let tmpFile = fs.readFileSync(file.filepath);
+      fs.writeFileSync(tmpFilePath, tmpFile);
+    } finally {
+      await fs.unlink(file.filepath, function(){});
+    }
+    const fileStream = fs.createReadStream(tmpFilePath);
+    const uploadRes = await this.service.example.uploadFileToSMMS(fileStream);
+
+    return uploadRes;
   }
 
   /**

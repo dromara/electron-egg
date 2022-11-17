@@ -16,7 +16,7 @@
 - 🍩 **Why?** desktop software ( office direction , personal tools ), still Yes PC in the next ten years one of the requirements is to improve work efficiency
 - 🍉 **Simple：** just understand JavaScript
 - 🍑 **Vision：** all developers can learn how to develop desktop software
-- 🍰 **Gitee：** https://gitee.com/wallace5303/electron-egg **2000+**
+- 🍰 **Gitee：** https://gitee.com/wallace5303/electron-egg **2200+**
 - 🍨 **Github：** https://github.com/wallace5303/electron-egg **500+**
 - 🏆 most valuable open source project
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
