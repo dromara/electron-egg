@@ -210,15 +210,32 @@ class ExampleController extends Controller {
     let content = null;
     if (args.type == 'html') {
       content = path.join('file://', electronApp.getAppPath(), args.content)
-    } else {
+    } else if (args.type == 'web') {
       content = args.content;
+    } else if (args.type == 'vue') {
+      let addr = 'http://localhost:8080'
+      if (this.config.env == 'prod') {
+        const mainServer = this.app.config.mainServer;
+        addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
+      }
+
+      content = addr + args.content;
+    } else {
+      // some
     }
+
+    console.log('url:', content);
 
     let winObj = new BrowserWindow({
       x: 10,
       y: 10,
       width: 980, 
-      height: 650 
+      height: 650,
+      title: 'new window',
+      webPreferences: {
+        contextIsolation: false,
+        nodeIntegration: true,
+      },
     })
     winObj.loadURL(content);
 
