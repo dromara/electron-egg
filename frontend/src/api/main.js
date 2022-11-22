@@ -1,6 +1,9 @@
 import storage from 'store2'
 import request from '@/utils/request'
 
+/**
+ * 路由定义（主进程与渲染进程通信频道定义）
+ */
 const ipcApiRoute = {
   test: 'controller.example.test',
   messageShow: 'controller.example.messageShow',
@@ -28,11 +31,17 @@ const ipcApiRoute = {
   ipcInvokeMsg: 'controller.example.ipcInvokeMsg',
   ipcSendSyncMsg: 'controller.example.ipcSendSyncMsg',
   ipcSendMsg: 'controller.example.ipcSendMsg',
+  getWCid: 'controller.example.getWCid',
   hello: 'controller.example.hello',
 }
 
+/**
+ * 特殊的路由（频道）定义
+ */
 const specialIpcRoute = {
-  appUpdater: 'app.updater' // 此频道在后端也有相同定义
+  appUpdater: 'app.updater', // 此频道在后端也有相同定义
+  window1ToWindow2: 'window1-to-window2', // 窗口之间通信
+  window2ToWindow1: 'window2-to-window1', // 窗口之间通信
 }
 
 /**

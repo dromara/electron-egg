@@ -225,23 +225,33 @@ class ExampleController extends Controller {
     }
 
     console.log('url:', content);
+    const addonWindow = this.app.addon.window;
+    let opt = {
+      title: args.windowName || 'new window'
+    }
+    const name = args.windowName || 'window-1';
+    const win = addonWindow.create(name, opt);
+    const winContentsId = win.webContents.id;
 
-    let winObj = new BrowserWindow({
-      x: 10,
-      y: 10,
-      width: 980, 
-      height: 650,
-      title: 'new window',
-      webPreferences: {
-        contextIsolation: false,
-        nodeIntegration: true,
-      },
-    })
-    winObj.loadURL(content);
+    // load page
+    win.loadURL(content);
 
-    return winObj.id
+    return winContentsId
   }
   
+  /**
+   * 获取窗口contents id
+   */
+  getWCid (args) {
+    const addonWindow = this.app.addon.window;
+
+    // 主窗口的name默认是main，其它窗口name开发者自己定义
+    const name = args;
+    const id = addonWindow.getWCid(name);
+
+    return id;
+  }
+
   /**
    * 加载扩展程序
    */

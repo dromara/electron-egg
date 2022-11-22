@@ -127,7 +127,7 @@ export const constantRouterMap = [
       {
         path: 'subwindow',
         name: 'SpecialSubwindowIpc',
-        component: () => import('@/views/special/subwindow/Ipc')
+        component: () => import('@/views/base/subwindow/Ipc')
       }
     ]
   },
