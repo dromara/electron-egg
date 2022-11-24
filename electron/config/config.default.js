@@ -5,12 +5,11 @@ const path = require('path');
 
 /**
  * 默认配置
- * @see https://www.yuque.com/u34495/mivcfg/guk1x0
+ * https://www.yuque.com/u34495/mivcfg/guk1x0
  */
 module.exports = (appInfo) => {
   /**
    * built-in config
-   * @type {Ee.EeAppConfig}
    **/
   const config = {};
 
@@ -175,8 +174,8 @@ module.exports = (appInfo) => {
 
   /**
    * 插件功能
-   * @member window -> 官方内置插件
-   * @member test -> demo插件
+   * window 官方内置插件
+   * test demo插件
    */
   config.addons = {
     window: {
