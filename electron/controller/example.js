@@ -224,7 +224,6 @@ class ExampleController extends Controller {
       // some
     }
 
-    console.log('url:', content);
     const addonWindow = this.app.addon.window;
     let opt = {
       title: args.windowName || 'new window'
