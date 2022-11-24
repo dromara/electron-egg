@@ -49,7 +49,7 @@ export default {
         },
         {
           type: 'vue',
-          content: '/special/subwindow'
+          content: '/#/special/subwindow'
         },    
       ],
     };
