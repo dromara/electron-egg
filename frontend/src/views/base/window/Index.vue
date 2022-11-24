@@ -20,6 +20,16 @@
         <a-button @click="createWindow(1)">打开html页面</a-button>
       </a-space>
     </div>
+    <div class="one-block-1">
+      <span>
+        3. 新窗口中加载当前项目页面
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-space>
+        <a-button @click="createWindow(2)">打开vue页面</a-button>
+      </a-space>
+    </div>    
   </div>
 </template>
 <script>
@@ -36,7 +46,11 @@ export default {
         {
           type: 'html',
           content: '/public/html/view_example.html'
-        },        
+        },
+        {
+          type: 'vue',
+          content: '/special/subwindow'
+        },    
       ],
     };
   },

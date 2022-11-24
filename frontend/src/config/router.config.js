@@ -4,6 +4,11 @@
  */
 import {AppSider, Menu} from '@/layouts'
 
+const RouteView = {
+  name: 'RouteView',
+  render: h => h('router-view')
+}
+
 export const constantRouterMap = [
   {
     path: '/',
@@ -113,5 +118,17 @@ export const constantRouterMap = [
         ] 
       }
     ]
-  }
+  },
+  {
+    path: '/special',
+    component: RouteView,
+    //redirect: '/special/subwindow',
+    children: [
+      {
+        path: 'subwindow',
+        name: 'SpecialSubwindowIpc',
+        component: () => import('@/views/base/subwindow/Ipc')
+      }
+    ]
+  },
 ]

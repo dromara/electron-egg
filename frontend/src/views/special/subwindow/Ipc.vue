@@ -39,39 +39,18 @@
         <a-button @click="sendMsgStop">结束</a-button>
         结果：{{ messageString }}
       </a-space>
-    </div>
-    <div class="one-block-1">
-      <span>
-        4. 多窗口通信：子窗口与主进程通信，子窗口互相通信
-      </span>
     </div>  
-    <div class="one-block-2">
-      <a-space>
-        <a-button @click="createWindow(0)">打开新窗口2</a-button>
-        <a-button @click="sendTosubWindow()">向新窗口2发消息</a-button>
-      </a-space>
-    </div>      
   </div>
 </template>
 <script>
-import { ipcApiRoute, specialIpcRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main'
 export default {
   data() {
     return {
       messageString: '',
       message1: '',
       message2: '',
-      message3: '',
-      windowName: 'window-1',
-      newWcId: 0,
-      views: [
-        {
-          type: 'vue',
-          content: '/special/subwindow',
-          windowName: 'window-1',
-          windowTitle: 'new window'
-        },    
-      ],
+      message3: ''
     }
   },
   mounted () {
@@ -88,12 +67,6 @@ export default {
         self.messageString = result;
         // 调用后端的另一个接口
         event.sender.send(ipcApiRoute.hello, 'electron-egg');
-      })
-
-      // 监听 窗口2 发来的消息
-      this.$ipc.removeAllListeners(specialIpcRoute.window2ToWindow1);
-      this.$ipc.on(specialIpcRoute.window2ToWindow1, (event, arg) => {
-        this.$message.info(arg);
       })
     },
     sendMsgStart() {
@@ -125,16 +98,6 @@ export default {
     handleSendSync () {
       const msg = this.$ipcSendSync(ipcApiRoute.ipcSendSyncMsg, '同步');
       this.message3 = msg;
-    },
-    createWindow (index) {
-      this.$ipcInvoke(ipcApiRoute.createWindow, this.views[index]).then(id => {
-        console.log('[createWindow] id:', id);
-      })
-    },
-    async sendTosubWindow () {
-      // 新窗口id
-      this.newWcId = await this.$ipcInvoke(ipcApiRoute.getWCid, this.windowName);
-      this.$ipc.sendTo(this.newWcId, specialIpcRoute.window1ToWindow2, '窗口1通过 sendTo 给窗口2发送消息');
     },
   }
 }

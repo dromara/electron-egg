@@ -210,21 +210,48 @@ class ExampleController extends Controller {
     let content = null;
     if (args.type == 'html') {
       content = path.join('file://', electronApp.getAppPath(), args.content)
-    } else {
+    } else if (args.type == 'web') {
       content = args.content;
+    } else if (args.type == 'vue') {
+      let addr = 'http://localhost:8080'
+      if (this.config.env == 'prod') {
+        const mainServer = this.app.config.mainServer;
+        addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
+      }
+
+      content = addr + args.content;
+    } else {
+      // some
     }
 
-    let winObj = new BrowserWindow({
-      x: 10,
-      y: 10,
-      width: 980, 
-      height: 650 
-    })
-    winObj.loadURL(content);
+    console.log('url:', content);
+    const addonWindow = this.app.addon.window;
+    let opt = {
+      title: args.windowName || 'new window'
+    }
+    const name = args.windowName || 'window-1';
+    const win = addonWindow.create(name, opt);
+    const winContentsId = win.webContents.id;
 
-    return winObj.id
+    // load page
+    win.loadURL(content);
+
+    return winContentsId
   }
   
+  /**
+   * 获取窗口contents id
+   */
+  getWCid (args) {
+    const addonWindow = this.app.addon.window;
+
+    // 主窗口的name默认是main，其它窗口name开发者自己定义
+    const name = args;
+    const id = addonWindow.getWCid(name);
+
+    return id;
+  }
+
   /**
    * 加载扩展程序
    */
@@ -496,27 +523,6 @@ class ExampleController extends Controller {
   }
 
   /**
-   * 上传文件
-   */  
-  async uploadFile() {
-    // const self = this;
-    // const { ctx, service } = this;
-    // let tmpDir = Utils.getLogDir();
-    // const file = ctx.request.files[0];
-
-    // try {
-    //   let tmpFile = fs.readFileSync(file.filepath)
-    //   fs.writeFileSync(path.join(tmpDir, file.filename), tmpFile)
-    // } finally {
-    //   await fs.unlink(file.filepath, function(){});
-    // }
-    // const fileStream = fs.createReadStream(path.join(tmpDir, file.filename))
-    // const uploadRes = await service.example.uploadFileToSMMS(fileStream);
-
-    // return uploadRes;
-  }
-
-  /**
    * 检测http服务是否开启
    */ 
   async checkHttpServer () {
@@ -620,6 +626,27 @@ class ExampleController extends Controller {
     } else {
       return 'ohther'
     }
+  }
+
+  /**
+   * 上传文件
+   */  
+  async uploadFile() {
+    let tmpDir = Utils.getLogDir();
+    const files = this.app.request.files;
+    let file = files.file;
+    
+    let tmpFilePath = path.join(tmpDir, file.originalFilename);
+    try {
+      let tmpFile = fs.readFileSync(file.filepath);
+      fs.writeFileSync(tmpFilePath, tmpFile);
+    } finally {
+      await fs.unlink(file.filepath, function(){});
+    }
+    const fileStream = fs.createReadStream(tmpFilePath);
+    const uploadRes = await this.service.example.uploadFileToSMMS(fileStream);
+
+    return uploadRes;
   }
 
   /**

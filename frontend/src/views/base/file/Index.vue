@@ -1,13 +1,5 @@
 <template>
   <div id="app-base-file">
-    <div class="one-block-2">
-      <a-list v-if="image_info.length !== 0" size="small" bordered :data-source="image_info">
-        <a-list-item slot="renderItem" slot-scope="item" style="text-align:left;">
-          {{ item.id }}.&nbsp;{{ item.imageUrlText }}:&nbsp;
-          <a :href="item.url" target="_blank">{{ item.url }}</a>
-        </a-list-item>
-      </a-list>
-    </div>
     <div class="one-block-1">
       <span>
         1. 系统原生对话框
@@ -38,7 +30,7 @@
     </div>      
     <div class="one-block-1">
       <span>
-        4. 打开文件夹
+        3. 打开文件夹
       </span>
     </div>  
     <div class="one-block-2">
@@ -52,11 +44,35 @@
         </a-list-item>
       </a-list>
     </div>
+    <div class="one-block-1">
+      <span>
+        4. 上传文件到图床
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-upload-dragger
+        name="file"
+        :multiple="true"
+        :action="action_url"
+        @change="handleFileChange"
+      >
+        <p class="ant-upload-drag-icon">
+          <a-icon type="inbox" />
+        </p>
+        <p class="ant-upload-text">
+          点击 或 拖拽文件到这里
+        </p>
+        <p class="ant-upload-hint">
+          注意：请使用您自己的图床token
+        </p>
+      </a-upload-dragger>
+    </div>
     <div class="footer">
     </div>
   </div>
 </template>
 <script>
+import storage from 'store2'
 import { ipcApiRoute } from '@/api/main'
 
 const fileList = [
@@ -82,12 +98,33 @@ export default {
   data() {
     return {
       file_list: fileList,
+      action_url: '',
       image_info: [],
       num: 0,
+      servicAddress: '',
 			dir_path: "D:\\www\\ee",
     };
   },
+  mounted () {
+    this.getHost();
+  },
   methods: {
+    getHost () {
+      const self = this;
+      this.$ipcInvoke(ipcApiRoute.checkHttpServer, {}).then(r => {
+        if (r.enable) {
+          self.servicAddress = r.server;
+          storage.set('httpServiceConfig', r);
+
+          // url转换
+          const host = r.server || 'http://127.0.0.1:7071';
+          let uri = ipcApiRoute.uploadFile;
+          let url = uri.split('.').join('/');
+          this.action_url = host + '/' + url;
+        }
+        console.log('action_url:', this.action_url);
+      })
+    },
     openDirectry (id) {
       this.$ipcInvoke(ipcApiRoute.openDirectory, {id: id}).then(res => {
         //console.log('res:', res)
@@ -113,6 +150,33 @@ export default {
       this.$ipcInvoke(ipcApiRoute.messageShowConfirm, '').then(r => {
         self.$message.info(r);
       })
+    },
+    handleFileChange(info) {
+      console.log('handleFileChange-----');
+      if (this.action_url == '') {
+        this.$message.error('http服务未开启');
+        return;
+      }
+      const status = info.file.status;
+      if (status !== 'uploading') {
+        console.log(info.file);
+      }
+      if (status === 'done') {
+        const uploadRes = info.file.response;
+        console.log('uploadRes:', uploadRes)
+        if (uploadRes.code !== 'success') {
+          this.$message.error(`file upload failed ${uploadRes.code} .`);
+          return false;
+        }
+        this.num++;
+        const picInfo = uploadRes.data;
+        picInfo.id = this.num;
+        picInfo.imageUrlText = 'image url';
+        this.image_info.push(picInfo);
+        this.$message.success(`${info.file.name} file uploaded successfully.`);
+      } else if (status === 'error') {
+        this.$message.error(`${info.file.name} file upload failed.`);
+      }
     },
   }
 };
