@@ -67,7 +67,7 @@ export default {
       views: [
         {
           type: 'vue',
-          content: '/special/subwindow',
+          content: '/#/special/subwindow',
           windowName: 'window-1',
           windowTitle: 'new window'
         },    

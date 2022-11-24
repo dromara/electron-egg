@@ -1,5 +1,5 @@
 <template>
-  <div id="app-base-socket-ipc">
+  <div id="app-base-subwindow-ipc">
     <div class="one-block-1">
       <span>
         1. 发送异步消息
@@ -127,10 +127,12 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-#app-base-socket-ipc {
+#app-base-subwindow-ipc {
   padding: 0px 10px;
   text-align: left;
   width: 100%;
+  height: 100%;
+  background-color: #f0f2f5;
   .one-block-1 {
     font-size: 16px;
     padding-top: 10px;
