@@ -14,7 +14,9 @@ module.exports = (appInfo) => {
    **/
   const config = {};
 
-  /* 应用模式配置 */
+  /**
+   * 应用模式配置
+   */
   config.developmentMode = {
     default: 'vue',
     mode: {
@@ -33,7 +35,9 @@ module.exports = (appInfo) => {
     }
   };
 
-  /* 开发者工具 */
+  /**
+   * 开发者工具
+   */
   config.openDevTools = false;
 
   /**
@@ -61,23 +65,27 @@ module.exports = (appInfo) => {
     frame: true,
     show: true,
     icon: path.join(appInfo.home, 'public', 'images', 'logo-32.png'),
-    //backgroundColor: '#000000'
-    //titleBarStyle: 'hidden'
   };
 
-  /* ee框架日志 */
+  /**
+   * ee框架日志
+   */  
   config.logger = {
     appLogName: `ee-${dayjs().format('YYYY-MM-DD')}.log`, 
     errorLogName: `ee-error-${dayjs().format('YYYY-MM-DD')}.log` 
   }
 
-  /* 远程web地址 (可选) */
+  /**
+   * 远程web地址 (可选)
+   */    
   config.remoteUrl = {
     enable: false, // 是否启用
     url: 'https://discuz.chat/' // Any web url
   };
 
-  /* 内置socket服务 */
+  /**
+   * 内置socket服务
+   */   
   config.socketServer = {
     enable: false, // 是否启用
     port: 7070, // 默认端口（如果端口被使用，则随机获取一个）
@@ -92,7 +100,9 @@ module.exports = (appInfo) => {
     }
   };
 
-  /* 内置http服务 */
+  /**
+   * 内置http服务
+   */     
   config.httpServer = {
     enable: false, // 是否启用
     https: {
@@ -118,7 +128,9 @@ module.exports = (appInfo) => {
     }
   };
 
-  /* 主进程 */
+  /**
+   * 主进程
+   */     
   config.mainServer = {
     host: '127.0.0.1',
     port: 7072, // 默认端口（如果端口被使用，则随机获取一个）
@@ -131,7 +143,9 @@ module.exports = (appInfo) => {
     enable: false
   };
 
-  /* 应用自动升级 (可选) */
+  /**
+   * 应用自动升级 (可选)
+   */   
   config.autoUpdate = {
     windows: false, // windows平台
     macOS: false, // macOs 需要签名验证
@@ -143,17 +157,35 @@ module.exports = (appInfo) => {
     force: false, // 强制更新（运行软件时，检查新版本并后台下载安装）
   };
 
-  /* 被浏览器唤醒 (可选) */
+  /**
+   * 被浏览器唤醒 (可选)
+   */     
   config.awakeProtocol = {
     protocol: 'ee', // 自定义协议名（默认你的应用名称-英文）
     args: []
   };
 
-  /* 托盘 (可选)  */
+  /**
+   * 托盘 (可选)
+   */    
   config.tray = {
     title: 'EE程序', // 托盘显示标题
     icon: '/public/images/tray_logo.png' // 托盘图标
-  }
+  };
+
+  /**
+   * 插件功能
+   * @member window -> 官方内置插件
+   * @member test -> demo插件
+   */
+  config.addons = {
+    window: {
+      enable: true,
+    },
+    test: {
+      enable: true, 
+    }
+  };
 
   return {
     ...config
