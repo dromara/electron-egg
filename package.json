@@ -22,6 +22,8 @@
     "build-l-armv7l": "electron-builder -l=deb --armv7l",
     "build-lr-64": "electron-builder -l=rpm --x64",
     "build-lp-64": "electron-builder -l=pacman --x64",
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps",
     "rd": "ee-core rd --dist_dir=./frontend/dist",
     "encrypt": "ee-core encrypt",
     "rebuild": "electron-rebuild",
