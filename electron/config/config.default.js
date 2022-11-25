@@ -175,13 +175,13 @@ module.exports = (appInfo) => {
   /**
    * 插件功能
    * window 官方内置插件
-   * test demo插件
+   * example demo插件
    */
   config.addons = {
     window: {
       enable: true,
     },
-    test: {
+    example: {
       enable: true, 
     }
   };

@@ -1,15 +1,15 @@
 /**
- * test插件
+ * example插件
  * @class
  */
-class TestAddon {
+class ExampleAddon {
 
   constructor(app) {
     this.app = app;
   }
 
   /**
-   * 销毁窗口Contents id
+   * hello
    *
    * @function 
    * @since 1.0.0
@@ -19,5 +19,5 @@ class TestAddon {
   }  
 }
 
-TestAddon.toString = () => '[class TestAddon]';
-module.exports = TestAddon;
+ExampleAddon.toString = () => '[class ExampleAddon]';
+module.exports = ExampleAddon;
