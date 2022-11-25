@@ -28,7 +28,7 @@
 - [Tutorial document](https://www.yuque.com/u34495/ee-doc)
 
 ## 📦 Features
-1. 🍄 **Cross platform：** a set of code that can be packaged into windows, Mac, and Linux.
+1. 🍄 **Cross platform：** a set of code that can be packaged into windows, Mac, Linux and UOS、Deepin、KylinOS.
 2. 🌹  **Simple and efficient：** you only need to learn the js language and support front-end technologies such as vue, react, and html. 
 3. 🌱 **Frontend independence：**  theoretically supports any front-end technology to write exquisite UI effects. 
 4. 🌴 **Engineering：** you can use the development thinking of the server to write desktop software.
@@ -47,7 +47,10 @@
 - 🚍 macOS   
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/mac-socket.png)
 
-- 🚔 linux (ubuntu)
+- 🚔 linux - UOS、Deepin
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/uos-home.png)
+
+- 🚔 linux - ubuntu
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ubuntu-db.png)
 
 ### 🚐 2. Convert vue, react, angular, and web into desktop software 

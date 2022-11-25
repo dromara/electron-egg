@@ -42,7 +42,11 @@ class ExampleController extends Controller {
     let tmpDir = Utils.getLogDir();
     console.log('tmpDir:', tmpDir);
 
-    console.log('this.app.request:', this.app.request.query);
+    // console.log('this.app.request:', this.app.request.query);
+
+    // const exampleAddon = this.app.addon.example;
+    // const str = exampleAddon.hello();
+    // console.log('str:', str);
 
     return result;
   }

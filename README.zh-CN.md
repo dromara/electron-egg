@@ -28,7 +28,7 @@
 - [教程文档](https://www.yuque.com/u34495/mivcfg)
 
 ## 📦 特性
-1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版
+1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版、国产UOS、Deepin、麒麟等
 2. 🌹  简单高效：只需学习 js 语言，同时支持vue、react、html等前端技术
 3. 🌱 前端独立：理论上支持任何前端技术，编写出精美的UI效果
 4. 🌴 工程化：可以用服务端的开发思维，来编写桌面软件
@@ -48,7 +48,10 @@
 - 🚍 macOS平台    
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/mac-socket.png)
 
-- 🚔 linux平台 (ubuntu)
+- 🚔 linux平台 - 国产UOS、Deepin
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/uos-home.png)
+
+- 🚔 linux平台 - ubuntu
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ubuntu-db.png)
 
 ### 🚐 2. vue、react、angular、web 转换成桌面软件
