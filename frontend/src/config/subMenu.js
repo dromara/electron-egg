@@ -101,5 +101,11 @@ export default {
 			pageName: 'OtherTestIndex',
 			params: {}
 		},
-	}	
+		'menu_200' : {
+			icon: 'profile',
+			title: 'java',
+			pageName: 'OtherJavaIndex',
+			params: {}
+		},
+	}
 }
