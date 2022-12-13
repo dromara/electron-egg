@@ -83,6 +83,18 @@ module.exports = (appInfo) => {
   };
 
   /**
+   * 内置java服务 默认关闭
+   */
+  config.javaServer = {
+    enable: false,  // 是否启用，true时，启动程序时，会自动启动 build/extraResources/app.jar 下的 java程序
+    port: 18080,    // 端口，端口被占用时随机一个端口，并通知前端修改请求地址。
+    jreVersion: 'jre1.8.0_201', // build/extraResources/目录下 jre 文件夹名称
+    // java 启动参数，该参数可以根据自己需求自由发挥
+    opt: '-server -Xms512M -Xmx512M -Xss512k -Dspring.profiles.active=prod -Dserver.port=${port} -Dlogging.file.path="${path}" ',
+    name: 'app.jar' // build/extraResources/目录下 jar 名称
+  }
+
+  /**
    * 内置socket服务
    */   
   config.socketServer = {

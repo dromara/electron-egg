@@ -115,6 +115,11 @@ export const constantRouterMap = [
             name: 'OtherTestIndex',
             component: () => import('@/views/other/test/Index')
           },
+          {
+            path: '/other/java/index',
+            name: 'OtherJavaIndex',
+            component: () => import('@/views/other/java/Index')
+          }
         ] 
       }
     ]
