@@ -32,6 +32,8 @@ const ipcApiRoute = {
   ipcSendSyncMsg: 'controller.example.ipcSendSyncMsg',
   ipcSendMsg: 'controller.example.ipcSendMsg',
   getWCid: 'controller.example.getWCid',
+  startJavaServer: 'controller.example.startJavaServer',
+  closeJavaServer: 'controller.example.closeJavaServer',
   hello: 'controller.example.hello',
 }
 
@@ -40,7 +42,6 @@ const ipcApiRoute = {
  */
 const specialIpcRoute = {
   appUpdater: 'app.updater', // 此频道在后端也有相同定义
-  javaPort: 'app.javaPort', // 推送java端口
   window1ToWindow2: 'window1-to-window2', // 窗口之间通信
   window2ToWindow1: 'window2-to-window1', // 窗口之间通信
 }
@@ -64,26 +65,8 @@ const requestHttp = (uri, parameter) => {
   })
 }
 
-const httpConfig = {
-  baseURL: 'http://localhost:11111'
-}
-
-const requestJava = (uri, id) => {
-  // url转换
-  let url = httpConfig.baseURL + uri;
-  console.log('url:', url);
-  return request({
-    url: url,
-    method: 'get',
-    params: { id: id}, // URL 参数
-    timeout: 60000,
-  })
-}
-
 export {
   ipcApiRoute,
   specialIpcRoute,
   requestHttp,
-  requestJava,
-  httpConfig
 }

@@ -5,8 +5,6 @@
 </template>
 
 <script>
-import { specialIpcRoute, httpConfig } from '@/api/main';
-
 export default {
   name: 'App',
   components: {},
@@ -14,20 +12,7 @@ export default {
     return {};
   },
   watch: {},
-  mounted() {
-    this.init()
-  },
-  methods: {
-    init: ()=>{
-      var  { ipcRenderer: ipc }  = window.require && window.require('electron');
-      ipc.removeAllListeners(specialIpcRoute.javaPort);
-      ipc.on(specialIpcRoute.javaPort, (event, result) => {
-        if (result && result !== '') {
-          httpConfig.baseURL = result;
-        }
-      });
-    }
-  }
+  methods: {}
 }
 </script>
 <style>

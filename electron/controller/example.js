@@ -653,6 +653,51 @@ class ExampleController extends Controller {
   }
 
   /**
+   * 启动java项目
+   */ 
+  async startJavaServer () {
+    let data = {
+      code: 0,
+      msg: '',
+      server: ''
+    }
+    const javaCfg = this.app.config.addons.javaServer || {};
+    if (!javaCfg.enable) {
+      data.code = -1;
+      data.msg = 'addon not enabled!';
+      return data;
+    }
+
+    const javaServerAddon = this.app.addon.javaServer;
+    await javaServerAddon.createServer();
+
+    data.server = 'http://localhost:' + javaCfg.port;
+
+    return data;
+  }
+
+  /**
+   * 关闭java项目
+   */ 
+  async closeJavaServer () {
+    let data = {
+      code: 0,
+      msg: '',
+    }
+    const javaCfg = this.app.config.addons.javaServer || {};
+    if (!javaCfg.enable) {
+      data.code = -1;
+      data.msg = 'addon not enabled!';
+      return data;
+    }
+
+    const javaServerAddon = this.app.addon.javaServer;
+    await javaServerAddon.kill();
+
+    return data;
+  }
+
+  /**
    * 测试接口
    */ 
   hello (args) {

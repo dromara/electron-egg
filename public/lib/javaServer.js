@@ -5,7 +5,7 @@ const assert = require("assert");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { execSync } = require("child_process");
+const { execSync, exec } = require("child_process");
 const Utils = require("ee-core").Utils;
 const ps = require("./ps");
 
@@ -69,7 +69,7 @@ async function start(app) {
     // 命令行字符串 并 执行
     let cmdStr = `start ${jrePath} -jar ${JAVA_OPT} ${softwarePath}`;
     app.logger.info("[javaServer] cmdStr:", cmdStr);
-    await execSync(cmdStr);
+    exec(cmdStr);
   } else {
     // 不受信任请执行：  sudo spctl --master-disable
     let jrePath = path.join(
