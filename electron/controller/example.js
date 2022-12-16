@@ -3,14 +3,11 @@
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
-const is = require('electron-is');
 const { exec } = require('child_process');
-const Controller = require('ee-core').Controller;
-const Utils = require('ee-core').Utils;
+const { Controller, Utils } = require('ee-core');
 const electronApp = require('electron').app;
-const {dialog, webContents, shell, BrowserWindow, BrowserView, 
+const {dialog, shell, BrowserView, 
   Notification, powerMonitor, screen, nativeTheme} = require('electron');
-const autoLaunchManager = require('../library/autoLaunch');
 const dayjs = require('dayjs');
 
 let myTimer = null;
@@ -453,28 +450,6 @@ class ExampleController extends Controller {
   }  
 
   /**
-   * 开机启动-开启
-   */
-  autoLaunch (type) {
-    console.log('type:', type);
-    let res = {
-      type: type,
-      status: null
-    };
-    if (type == 'check') {
-      res.status = autoLaunchManager.isEnabled();
-    } else if (type == 'open') {
-      autoLaunchManager.enable();
-      res.status = true;
-    } else if (type == 'close') {
-      autoLaunchManager.disable();
-      res.status = false;
-    }
-
-    return res
-  }
-
-  /**
    * 获取系统主题
    */
   getTheme () {
@@ -503,12 +478,9 @@ class ExampleController extends Controller {
   /**
    * 检查是否有新版本
    */
-  checkForUpdater () {
-    const config = this.app.config.autoUpdate;
-    if ( (is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux) ) {
-      const autoUpdater = require('../library/autoUpdater');
-      autoUpdater.checkUpdate();
-    }    
+  checkForUpdater () { 
+    const autoUpdaterAddon = this.app.addon.autoUpdater;
+    autoUpdaterAddon.checkUpdate();  
 
     return;
   }
@@ -517,11 +489,8 @@ class ExampleController extends Controller {
    * 下载新版本
    */
   downloadApp () {
-    const config = this.app.config.autoUpdate;
-    if ( (is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux) ) {
-      const autoUpdater = require('../library/autoUpdater');
-      autoUpdater.download();
-    }  
+    const autoUpdaterAddon = this.app.addon.autoUpdater;
+    autoUpdaterAddon.download();
     return;
   }
 

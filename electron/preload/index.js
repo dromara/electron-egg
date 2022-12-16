@@ -1,13 +1,6 @@
-'use strict';
-
 /*************************************************
  ** preload为预加载模块，该文件将会在程序启动时加载 **
  *************************************************/
-
-const is = require('electron-is');
-const tray = require('../library/tray');
-const security = require('../library/security');
-const awaken = require('../library/awaken');
 
 /**
  * 预加载模块入口
@@ -16,29 +9,13 @@ const awaken = require('../library/awaken');
 module.exports = async (app) => {
 
   //已实现的功能模块，可选择性使用和修改
+  const trayAddon = app.addon.tray;
+  const securityAddon = app.addon.security;
+  const awakenAddon = app.addon.awaken;
+  const autoUpdaterAddon = app.addon.autoUpdater;
   
-  tray.install(app);
-
-  security.install(app);
-
-  awaken.install(app);
-  
-  loadUpdate(app);
-
-}
-
-/**
- * 加载自动升级模块
- */
-function loadUpdate (app) {
-  const config = app.config.autoUpdate;
-  if ( (is.windows() && config.windows) || (is.macOS() && config.macOS) || (is.linux() && config.linux) ) {
-    const autoUpdater = require('../library/autoUpdater');
-    autoUpdater.install(app);
-
-    // 是否检查更新
-    if (config.force) {
-      autoUpdater.checkUpdate();
-    }
-  }
+  trayAddon.create();
+  securityAddon.create();
+  awakenAddon.create();
+  autoUpdaterAddon.create();
 }

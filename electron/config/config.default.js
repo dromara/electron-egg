@@ -143,38 +143,13 @@ module.exports = (appInfo) => {
   };
 
   /**
-   * 应用自动升级 (可选)
-   */   
-  config.autoUpdate = {
-    windows: false, // windows平台
-    macOS: false, // macOs 需要签名验证
-    linux: false, // linux平台
-    options: {
-      provider: 'generic', // or github, s3, bintray
-      url: 'http://kodo.qiniu.com/' // resource dir, end with '/'
-    },
-    force: false, // 强制更新（运行软件时，检查新版本并后台下载安装）
-  };
-
-  /**
-   * 被浏览器唤醒 (可选)
-   */     
-  config.awakeProtocol = {
-    protocol: 'ee', // 自定义协议名（默认你的应用名称-英文）
-    args: []
-  };
-
-  /**
-   * 托盘 (可选)
-   */    
-  config.tray = {
-    title: 'EE程序', // 托盘显示标题
-    icon: '/public/images/tray_logo.png' // 托盘图标
-  };
-
-  /**
    * 插件功能
    * window 官方内置插件
+   * tray 托盘插件
+   * security 安全插件
+   * awaken 唤醒插件
+   * autoUpdater 自动升级插件
+   * javaServer java项目插件
    * example demo插件
    */
   config.addons = {
@@ -182,16 +157,44 @@ module.exports = (appInfo) => {
     window: {
       enable: true,
     },
+    // 托盘
+    tray: {
+      enable: true,
+      title: 'EE程序', // 托盘显示标题
+      icon: '/public/images/tray_logo.png' // 托盘图标
+    },
+    // 安全
+    security: {
+      enable: true,
+    },
+    // 唤醒
+    awaken: {
+      enable: true,
+      protocol: 'ee', // 自定义协议名（默认你的应用名称-英文）
+      args: []
+    },
+    // 自动升级
+    autoUpdater: {
+      enable: true,
+      windows: true, // windows平台
+      macOS: false, // macOs 需要签名验证
+      linux: false, // linux平台
+      options: {
+        provider: 'generic', // or github, s3, bintray
+        url: 'http://kodo.qiniu.com/' // resource dir, end with '/'
+      },
+      force: false, // 强制更新（运行软件时，检查新版本并后台下载安装）
+    },      
     // java服务
     javaServer: {
-      enable: true,  // 是否启用，true时，启动程序时，会自动启动 build/extraResources/java-app.jar 下的 java程序
-      port: 18080,    // 端口，端口被占用时随机一个端口，并通知前端修改请求地址。
-      jreVersion: 'jre1.8.0_201', // build/extraResources/目录下 jre 文件夹名称
+      enable: false,
+      port: 18080,    // 默认端口（如果端口被使用，则随机获取一个）
+      jreVersion: 'jre1.8.0_201', // 额外资源目录下 jre 文件夹名称
       opt: '-server -Xms512M -Xmx512M -Xss512k -Dspring.profiles.active=prod -Dserver.port=${port} -Dlogging.file.path="${path}" ',
-      name: 'java-app.jar' // build/extraResources/目录下 jar 名称
+      name: 'java-app.jar' // 额外资源目录下 jar 名称
     },
     example: {
-      enable: true, 
+      enable: true,
     },
   };
 
