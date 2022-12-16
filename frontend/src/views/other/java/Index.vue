@@ -43,7 +43,7 @@ export default {
         if (r.code != 0) {
           this.$message.error(r.msg);
         }
-        this.$message.info('服务已关闭');
+        this.$message.info('异步关闭');
         storage.remove('javaService');
       })
     },
