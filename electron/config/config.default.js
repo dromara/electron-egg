@@ -176,7 +176,7 @@ module.exports = (appInfo) => {
     // 自动升级
     autoUpdater: {
       enable: true,
-      windows: true, // windows平台
+      windows: false, // windows平台
       macOS: false, // macOs 需要签名验证
       linux: false, // linux平台
       options: {
@@ -187,7 +187,7 @@ module.exports = (appInfo) => {
     },      
     // java服务
     javaServer: {
-      enable: true,
+      enable: false,
       port: 18080,    // 默认端口（如果端口被使用，则随机获取一个）
       jreVersion: 'jre1.8.0_201', // 额外资源目录下 jre 文件夹名称
       opt: '-server -Xms512M -Xmx512M -Xss512k -Dspring.profiles.active=prod -Dserver.port=${port} -Dlogging.file.path="${path}" ',

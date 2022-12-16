@@ -39,22 +39,6 @@ class ExampleController extends Controller {
     let tmpDir = Utils.getLogDir();
     console.log('tmpDir:', tmpDir);
 
-    let obj = {
-      env: Utils.getEnv(),
-      getStorageDir: Utils.getStorageDir(),
-      getLogDir: Utils.getLogDir(),
-      getHomeDir: Utils.getHomeDir(),
-      getBaseDir: Utils.getBaseDir(),
-      getRootDir: Utils.getRootDir(),
-      getAppUserDataDir: Utils.getAppUserDataDir(),
-      getAppVersion: Utils.getAppVersion(),
-      getExecDir: Utils.getExecDir(),
-      getAddonConfig: Utils.getAddonConfig(),
-      getMainServerConfig: Utils.getMainServerConfig(),
-      getHttpServerConfig: Utils.getHttpServerConfig(),
-      getSocketServerConfig: Utils.getSocketServerConfig(),
-    }
-    console.log('obj:', obj);
     // console.log('this.app.request:', this.app.request.query);
 
     // const exampleAddon = this.app.addon.example;
