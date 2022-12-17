@@ -188,10 +188,10 @@ module.exports = (appInfo) => {
     // java服务
     javaServer: {
       enable: false,
-      port: 18080,    // 默认端口（如果端口被使用，则随机获取一个）
-      jreVersion: 'jre1.8.0_201', // 额外资源目录下 jre 文件夹名称
+      port: 18080,
+      jreVersion: 'jre1.8.0_201',
       opt: '-server -Xms512M -Xmx512M -Xss512k -Dspring.profiles.active=prod -Dserver.port=${port} -Dlogging.file.path="${path}" ',
-      name: 'java-app.jar' // 额外资源目录下 jar 名称
+      name: 'java-app.jar'
     },
     example: {
       enable: true,
