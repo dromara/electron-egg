@@ -5,12 +5,9 @@ const path = require('path');
 
 /**
  * 默认配置
- * https://www.yuque.com/u34495/mivcfg/guk1x0
  */
 module.exports = (appInfo) => {
-  /**
-   * built-in config
-   **/
+
   const config = {};
 
   /**
@@ -41,8 +38,6 @@ module.exports = (appInfo) => {
 
   /**
    * 应用程序顶部菜单
-   * boolean | string
-   * true, false, 'dev-show'(dev环境显示，prod环境隐藏)
    */
   config.openAppMenu = 'dev-show';
 
@@ -78,24 +73,24 @@ module.exports = (appInfo) => {
    * 远程模式-web地址
    */    
   config.remoteUrl = {
-    enable: false, // 是否启用
-    url: 'https://discuz.chat/' // Any web url
+    enable: false,
+    url: 'https://discuz.chat/'
   };
 
   /**
    * 内置socket服务
    */   
   config.socketServer = {
-    enable: false, // 是否启用
-    port: 7070, // 默认端口（如果端口被使用，则随机获取一个）
-    path: "/socket.io/", // 默认路径名称
-    connectTimeout: 45000, // 客户端连接超时时间
-    pingTimeout: 30000, // 心跳检测超时时间
-    pingInterval: 25000, // 心跳检测间隔
-    maxHttpBufferSize: 1e8, // 每条消息的数据最大值 1M
-    transports: ["polling", "websocket"], // http轮询和websocket
+    enable: false,
+    port: 7070,
+    path: "/socket.io/",
+    connectTimeout: 45000,
+    pingTimeout: 30000,
+    pingInterval: 25000,
+    maxHttpBufferSize: 1e8,
+    transports: ["polling", "websocket"],
     cors: {
-      origin: true, // http协议时，要设置允许跨域
+      origin: true,
     }
   };
 
@@ -103,15 +98,15 @@ module.exports = (appInfo) => {
    * 内置http服务
    */     
   config.httpServer = {
-    enable: false, // 是否启用
+    enable: false,
     https: {
       enable: false, 
-      key: '/public/ssl/localhost+1.key', // key文件
-      cert: '/public/ssl/localhost+1.pem' // cert文件
+      key: '/public/ssl/localhost+1.key',
+      cert: '/public/ssl/localhost+1.pem'
     },
-    port: 7071, // 默认端口（如果端口被使用，则随机获取一个）
+    port: 7071,
     cors: {
-      origin: "*" // 跨域
+      origin: "*"
     },
     body: {
       multipart: true,
@@ -123,7 +118,7 @@ module.exports = (appInfo) => {
       uris:  [
         'favicon.ico'
       ],
-      returnData: '' // 任何数据类型
+      returnData: ''
     }
   };
 
@@ -132,7 +127,7 @@ module.exports = (appInfo) => {
    */     
   config.mainServer = {
     host: '127.0.0.1',
-    port: 7072, // 默认端口（如果端口被使用，则随机获取一个）
+    port: 7072,
   }; 
 
   /**
@@ -144,48 +139,35 @@ module.exports = (appInfo) => {
 
   /**
    * 插件功能
-   * window 官方内置插件
-   * tray 托盘插件
-   * security 安全插件
-   * awaken 唤醒插件
-   * autoUpdater 自动升级插件
-   * javaServer java项目插件
-   * example demo插件
    */
   config.addons = {
-    // 多窗口
     window: {
       enable: true,
     },
-    // 托盘
     tray: {
       enable: true,
-      title: 'EE程序', // 托盘显示标题
-      icon: '/public/images/tray_logo.png' // 托盘图标
+      title: 'EE程序',
+      icon: '/public/images/tray_logo.png'
     },
-    // 安全
     security: {
       enable: true,
     },
-    // 唤醒
     awaken: {
       enable: true,
-      protocol: 'ee', // 自定义协议名（默认你的应用名称-英文）
+      protocol: 'ee',
       args: []
     },
-    // 自动升级
     autoUpdater: {
       enable: true,
-      windows: false, // windows平台
-      macOS: false, // macOs 需要签名验证
-      linux: false, // linux平台
+      windows: false, 
+      macOS: false, 
+      linux: false,
       options: {
-        provider: 'generic', // or github, s3, bintray
-        url: 'http://kodo.qiniu.com/' // resource dir, end with '/'
+        provider: 'generic', 
+        url: 'http://kodo.qiniu.com/'
       },
-      force: false, // 强制更新（运行软件时，检查新版本并后台下载安装）
-    },      
-    // java服务
+      force: false,
+    },
     javaServer: {
       enable: false,
       port: 18080,
