@@ -1,3 +1,14 @@
+## 2.4.0
+1. 增加混淆/bytecode加密配置opt,提升安全性
+2. 增加插件的方式重写托盘、唤醒、升级、安全、扩展等功能
+3. 增加java服务插件，感谢“zuihou”提供的PR
+4. 增加jave服务demo，jar等完整用例
+5. 增加Utils库函数：getEnv/getAppUserDataDir/getHomeDir/getBaseDir/
+    getRootDir/getAppVersion/getExecDir/getAddonConfig/
+    getMainServerConfig/getHttpServerConfig/getSocketServerConfig
+6. 移除多余代码
+7. 升级ee-core到1.4.1
+
 ## 2.3.0
 1. 增加addon插件模块，开发者可以自由扩展app对象
 2. 内置window插件，实现多窗口通信
