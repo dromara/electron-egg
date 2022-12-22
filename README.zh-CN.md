@@ -24,6 +24,7 @@
 ## ❤️支持
 ### 如果你觉得electron-egg不错，可以捐赠请维护者吃包辣条~，在此表示感谢^_^
 [Gitee上捐赠](https://gitee.com/dromara/electron-egg)
+
 [捐赠给Dromara组织](https://dromara.gitee.io/donate.html)
 
 ## 📚 文档
