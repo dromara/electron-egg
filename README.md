@@ -16,8 +16,8 @@
 - 🍩 **Why?** desktop software ( office direction , personal tools ), still Yes PC in the next ten years one of the requirements is to improve work efficiency
 - 🍉 **Simple：** just understand JavaScript
 - 🍑 **Vision：** all developers can learn how to develop desktop software
-- 🍰 **Gitee：** https://gitee.com/dromara/electron-egg **2300+**
-- 🍨 **Github：** https://github.com/dromara/electron-egg **500+**
+- 🍰 **Gitee：** https://gitee.com/dromara/electron-egg **2400+**
+- 🍨 **Github：** https://github.com/dromara/electron-egg **600+**
 - 🏆 most valuable open source project
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
@@ -76,6 +76,8 @@
 - ✒️ [Installation documentation](https://www.yuque.com/u34495/ee-doc/ltgte9)
     
 ## 🐶 Project case
+- 🐟 The EE framework has been applied to clients in medical, school, government affairs, stock trading, ERP, entertainment, video, enterprise and other fields
+
 - 🐸 LOL assistant
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/serendipity/lol-zhanji.png)
 - [more](https://www.yuque.com/u34495/ee-doc/ep4otg)
