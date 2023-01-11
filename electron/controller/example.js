@@ -107,6 +107,12 @@ class ExampleController extends Controller {
       case 'get' :
         data.result = await service.storage.getTestDataSqlite(paramsObj.search_age);
         break;
+      case 'getDataDir' :
+        data.result = await service.storage.getDataDir();
+        break;
+      case 'setDataDir' :
+        data.result = await service.storage.setCustomDataDir(paramsObj.data_dir);
+        break;            
     }
 
     data.all_list = await service.storage.getAllTestDataSqlite();

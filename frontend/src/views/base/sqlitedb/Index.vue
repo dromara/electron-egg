@@ -20,7 +20,24 @@
     </div>
     <div class="one-block-1">
       <span>
-        2. 测试数据
+        2. 数据目录
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-row>
+        <a-col :span="12">
+          <a-input v-model="data_dir" :value="data_dir" addon-before="数据目录" />
+        </a-col>
+        <a-col :span="12">
+          <a-button @click="selectDir">
+            修改目录
+          </a-button>
+        </a-col>
+      </a-row>
+    </div>     
+    <div class="one-block-1">
+      <span>
+        3. 测试数据
       </span>
     </div>  
     <div class="one-block-2">
@@ -32,7 +49,7 @@
     </div>    
     <div class="one-block-1">
       <span>
-        3. 添加数据
+        4. 添加数据
       </span>
     </div>  
     <div class="one-block-2">
@@ -144,24 +161,49 @@ export default {
       update_name: '李四',
       update_age: 31,
       delete_name: '李四',
-      all_list: ['空']
+      all_list: ['空'],
+      data_dir: ''
     };
   },
   mounted () {
+    this.init();
     this.getAllTestData();
   },
   methods: {
+    init() {
+      const params = {
+        action: 'getDataDir',
+      }
+      this.$ipcInvoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+        this.data_dir = res.result;
+      }) 
+    },
     getAllTestData () {
       const self = this;
       const params = {
         action: 'all',
       }
       this.$ipcInvoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
-        console.log('res:', res);
         if (res.all_list.length == 0) {
           return false;
         }
         self.all_list = res.all_list;
+      }) 
+    },
+    selectDir() {
+      this.$ipcInvoke(ipcApiRoute.selectFolder, '').then(r => {
+        this.data_dir = r;
+        // 修改数据目录
+        this.modifyDataDir(r);
+      })
+    },
+    modifyDataDir(dir) {
+      const params = {
+        action: 'setDataDir',
+        data_dir: dir
+      }
+      this.$ipcInvoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+        this.all_list = res.all_list;
       }) 
     },
     sqlitedbOperation (ac) {

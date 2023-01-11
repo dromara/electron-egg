@@ -3,6 +3,7 @@
 const Service = require('ee-core').Service;
 const Storage = require('ee-core').Storage;
 const _ = require('lodash');
+const path = require('path');
 
 /**
  * 数据存储
@@ -15,19 +16,17 @@ class StorageService extends Service {
 
     // lowdb数据库
     this.systemDB = Storage.JsonDB.connection('system');
+
     let lowdbOptions = {
       driver: 'lowdb'
     }
     this.demoDB = Storage.JsonDB.connection('demo', lowdbOptions);  
-    this.systemDBKey = {
-      cache: 'cache'
-    };
     this.demoDBKey = {
-      preferences: 'preferences',
       test_data: 'test_data'
     };
 
     // sqlite数据库
+    this.sqliteFile = 'sqlite-demo.db';
     let sqliteOptions = {
       driver: 'sqlite',
       default: {
@@ -35,7 +34,7 @@ class StorageService extends Service {
         verbose: console.log // 打印sql语法
       }
     }
-    this.demoSqliteDB = Storage.JsonDB.connection('sqlite-demo.db', sqliteOptions);
+    this.demoSqliteDB = Storage.JsonDB.connection(this.sqliteFile, sqliteOptions);
   }
 
   /*
@@ -225,7 +224,38 @@ class StorageService extends Service {
     const allUser =  selectAllUser.all();
     //console.log("select allUser:", allUser);
     return allUser;
-  }  
+  }
+  
+  /*
+   * get data dir (sqlite)
+   */
+  async getDataDir() {
+    const dir = this.demoSqliteDB.getStorageDir();    
+
+    return dir;
+  } 
+
+  /*
+   * set custom data dir (sqlite)
+   */
+  async setCustomDataDir(dir) {
+    if (_.isEmpty(dir)) {
+      return;
+    }
+
+    // the absolute path of the db file
+    const dbFile = path.join(dir, this.sqliteFile);
+    const sqliteOptions = {
+      driver: 'sqlite',
+      default: {
+        timeout: 6000,
+        verbose: console.log
+      }
+    }
+    this.demoSqliteDB = Storage.JsonDB.connection(dbFile, sqliteOptions);    
+
+    return;
+  }
 }
 
 StorageService.toString = () => '[class StorageService]';

@@ -55,9 +55,6 @@ class AutoUpdaterAddon {
   
     // 是否后台自动下载
     autoUpdater.autoDownload = updateConfig.force ? true : false;
-    // if (Utils.getEnv() == 'local') {
-    //   autoUpdater.updateConfigPath = path.join(__dirname, '../../out/dev-app-update.yml')
-    // }
   
     try {
       autoUpdater.setFeedURL(updateConfig.options);
