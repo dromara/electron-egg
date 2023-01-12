@@ -105,7 +105,6 @@
     "electron-builder": "^23.1.0",
     "electron-rebuild": "^3.2.8",
     "eslint": "^5.13.0",
-    "eslint-config-egg": "^7.1.0",
     "eslint-plugin-prettier": "^3.0.1",
     "nodemon": "^2.0.16"
   },
