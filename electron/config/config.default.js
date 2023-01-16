@@ -74,7 +74,7 @@ module.exports = (appInfo) => {
    */    
   config.remoteUrl = {
     enable: false,
-    url: 'https://discuz.chat/'
+    url: 'http://electron-egg.kaka996.com/'
   };
 
   /**
