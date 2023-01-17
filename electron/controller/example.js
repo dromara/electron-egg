@@ -174,7 +174,13 @@ class ExampleController extends Controller {
     if (!args.id) {
       return false;
     }
-    const dir = electronApp.getPath(args.id);
+    let dir = '';
+    if (path.isAbsolute(args.id)) {
+      dir = args.id;
+    } else {
+      dir = electronApp.getPath(args.id);
+    }
+
     shell.openPath(dir);
     return true;
   }
