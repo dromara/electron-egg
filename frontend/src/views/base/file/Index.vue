@@ -122,7 +122,6 @@ export default {
           let url = uri.split('.').join('/');
           this.action_url = host + '/' + url;
         }
-        console.log('action_url:', this.action_url);
       })
     },
     openDirectry (id) {
