@@ -28,11 +28,18 @@
         <a-col :span="12">
           <a-input v-model="data_dir" :value="data_dir" addon-before="数据目录" />
         </a-col>
-        <a-col :span="12">
+        <a-col :span="2">
+        </a-col>
+        <a-col :span="5">
           <a-button @click="selectDir">
             修改目录
           </a-button>
         </a-col>
+        <a-col :span="5">
+          <a-button @click="openDir">
+            打开目录
+          </a-button>
+        </a-col>        
       </a-row>
     </div>     
     <div class="one-block-1">
@@ -197,6 +204,12 @@ export default {
         this.modifyDataDir(r);
       })
     },
+    openDir() {
+      console.log('dd:', this.data_dir);
+      this.$ipcInvoke(ipcApiRoute.openDirectory, {id: this.data_dir}).then(res => {
+        //
+      })
+    },    
     modifyDataDir(dir) {
       const params = {
         action: 'setDataDir',
