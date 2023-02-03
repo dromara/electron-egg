@@ -5,9 +5,11 @@ const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
 const { Controller, Utils } = require('ee-core');
-const electronApp = require('electron').app;
-const {dialog, shell, BrowserView, 
-  Notification, powerMonitor, screen, nativeTheme} = require('electron');
+const {
+  app: electronApp,
+  dialog, shell, BrowserView, Notification, 
+  powerMonitor, screen, nativeTheme
+} = require('electron');
 const dayjs = require('dayjs');
 
 let myTimer = null;
