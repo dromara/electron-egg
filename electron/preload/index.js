@@ -7,7 +7,8 @@
 //   BrowserService
 // } = require('electron-re');
 const path = require('path');
-const { Utils, Jobs } = require('ee-core');
+const Jobs = require('ee-core/module/jobs');
+const Utils = require('ee-core/module/Utils');
 
 /**
  * 预加载模块入口

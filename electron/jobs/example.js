@@ -1,6 +1,7 @@
 //const test = require('./test');
 const path = require('path');
-const { Utils } = require('ee-core');
+// const { Utils } = require('ee-core');
+const Utils = require('ee-core/module/utils');
 
 // let helloRes = test.hello();
 
@@ -12,5 +13,5 @@ const { Utils } = require('ee-core');
 let tp = path.join(__dirname, 'example.js');
 console.log('[test] jobs file -------- ', tp);
 
-// let baseDir = Utils.getBaseDir();
-// console.log('[test] baseDir -------- ', baseDir);
+let baseDir = Utils.getBaseDir();
+console.log('[test] baseDir -------- ', baseDir);
