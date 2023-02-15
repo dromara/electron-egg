@@ -48,5 +48,5 @@ module.exports = async (app) => {
     }
   }
   let myJob = new Jobs();
-  myJob.create('example', opt);
+  myJob.create('exampleJob', opt);
 }
