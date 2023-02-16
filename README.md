@@ -10,14 +10,14 @@
 </div>
 <br>
 
-## 🌏 [English](https://www.yuque.com/u34495/ee-doc) | [中文](https://www.yuque.com/u34495/mivcfg)
+## 🌏[中文](https://www.yuque.com/u34495/mivcfg) | [English](https://www.yuque.com/u34495/ee-doc) 
 
 ## 📋 Introduction
 - 🍩 **Why?** desktop software ( office direction , personal tools ), still Yes PC in the next ten years one of the requirements is to improve work efficiency
 - 🍉 **Simple：** just understand JavaScript
 - 🍑 **Vision：** all developers can learn how to develop desktop software
-- 🍰 **Gitee：** https://gitee.com/dromara/electron-egg **2700+**
-- 🍨 **Github：** https://github.com/dromara/electron-egg **600+**
+- 🍰 **Gitee：** https://gitee.com/dromara/electron-egg **2900+**
+- 🍨 **Github：** https://github.com/dromara/electron-egg **700+**
 - 🏆 most valuable open source project
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
