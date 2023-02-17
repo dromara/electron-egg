@@ -9,6 +9,7 @@
 const path = require('path');
 const Jobs = require('ee-core/module/jobs');
 const Utils = require('ee-core/module/Utils');
+const { logger } = require('ee-core/module/log');
 
 /**
  * 预加载模块入口
@@ -33,7 +34,7 @@ module.exports = async (app) => {
   // const myService = new BrowserService('exampleJob', exampleFile);
   // await myService.connected();
 
-  // console.log("isDev: ", Utils.isDev());
+  // logger.info("[main] process: ", process);
   // console.log("isRenderer: ", Utils.isRenderer());
   // console.log("isMain: ", Utils.isMain());
   // console.log("isForkedChild: ", Utils.isForkedChild());
@@ -42,10 +43,12 @@ module.exports = async (app) => {
 
   let opt = {
     dev: true,
+    type: 'child', // renderer 
     path: 'example.js',
     winOptions: {
       show: true
-    }
+    },
+    childOptions: {}
   }
   let myJob = new Jobs();
   myJob.create('exampleJob', opt);
