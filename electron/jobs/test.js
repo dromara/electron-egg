@@ -1,8 +1,8 @@
 const path = require('path');
-const { logger } = require('ee-core/module/log');
+const Log = require('ee-core/module/log');
 
 exports.hello = function () {
-  logger.info('[test]  hello--------');
+  Log.info('[test]  hello--------');
 
   return 'hello';
 }

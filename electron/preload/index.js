@@ -9,7 +9,7 @@
 const path = require('path');
 const Jobs = require('ee-core/module/jobs');
 const Utils = require('ee-core/module/Utils');
-const { logger } = require('ee-core/module/log');
+const Log = require('ee-core/module/log');
 
 /**
  * 预加载模块入口
@@ -28,6 +28,14 @@ module.exports = async (app) => {
   awakenAddon.create();
   autoUpdaterAddon.create();
 
+  // Object.keys(Log.logger)
+  // let personKeys3 = []
+  // for (var prop in Log.logger) {
+  //   personKeys3.push(prop)
+  // }
+  // console.log('logger:', personKeys3);
+  Log.info('dddddddddd')
+
   // pm
   // ProcessManager.openWindow();
   // const exampleFile = path.join(app.config.baseDir, 'jobs', 'example.js');
@@ -41,15 +49,15 @@ module.exports = async (app) => {
   // let res = require('../jobs/example') 
   // console.log('res:', res);
 
-  let opt = {
-    dev: true,
-    type: 'child', // renderer 
-    path: 'example.js',
-    winOptions: {
-      show: true
-    },
-    childOptions: {}
-  }
-  let myJob = new Jobs();
-  myJob.create('exampleJob', opt);
+  // let opt = {
+  //   dev: true,
+  //   type: 'child', // renderer 
+  //   path: 'example.js',
+  //   winOptions: {
+  //     show: true
+  //   },
+  //   childOptions: {}
+  // }
+  // let myJob = new Jobs();
+  // myJob.create('exampleJob', opt);
 }
