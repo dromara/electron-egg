@@ -1,14 +1,11 @@
-
-const Utils = require('ee-core/module/utils');
 const Loader = require('ee-core/module/loader');
 const Log = require('ee-core/module/log');
-const test = Loader.requireModule('./test');
+const Utils = require('ee-core/module/utils');
+const test = Loader.requireJobsModule('./test');
 
 // logger.info("[renderer] process: ", process);
-Log.info("[child] process: ", process);
+Log.info("[child-process] process type: ", Utils.processType());
+Log.info("[child-process] process cwd: ", process.cwd());
 
-let baseDir = Utils.getBaseDir();
-Log.info('[example] baseDir -------- ', baseDir);
-
-let helloRes = test.hello();
-Log.info('[example] helloRes -------- ', helloRes);
+test.hello();
+test.utilsMod();

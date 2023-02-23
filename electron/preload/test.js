@@ -1,11 +1,13 @@
-const Utils = require('ee-core/module/utils');
 const Log = require('ee-core/module/log');
+const Utils = require('ee-core/module/utils');
 
-exports.hello = function () {
-  Log.info('[child-process] [jobs/test] hello -------- ');
+module.exports = async () => {
+
+  utilsMod();
+
 }
 
-exports.utilsMod = function () {
+function utilsMod() {
   let utilsApis = {
     getBaseDir: Utils.getBaseDir(),
     getEnv: Utils.getEnv(),
@@ -35,5 +37,5 @@ exports.utilsMod = function () {
     getSocketChannel: Utils.getSocketChannel(),
     getExtraResourcesDir: Utils.getExtraResourcesDir(),
   }
-  Log.info('[child-process] [jobs/test] Utils -------- ', utilsApis);
+  Log.info('[main] [test] utilsApis -------- ', utilsApis);
 }
