@@ -2,8 +2,9 @@
  ** preload为预加载模块，该文件将会在程序启动时加载 **
  *************************************************/
 
-const Jobs = require('ee-core/module/jobs');
-const Utils = require('ee-core/module/utils');
+const ChildJob = require('ee-core/module/jobs/child');
+// const OriginJob = require('ee-core/module/jobs/unification');
+const UtilsPs = require('ee-core/module/utils/ps');
 const Log = require('ee-core/module/log');
 const test = require('./test');
 
@@ -24,28 +25,23 @@ module.exports = async (app) => {
   awakenAddon.create();
   autoUpdaterAddon.create();
 
-  Log.info("[main] process type: ", Utils.processType());
+  Log.info("[main] process type: ", UtilsPs.processType());
   Log.info("[main] process cwd: ", process.cwd());
 
   test();
 
-  let opt1 = {
-    dev: true,
-    type: 'child', // renderer 
-    path: './jobs/example.js',
-    childOptions: {}
-  }
-  let myJob = new Jobs();
-  myJob.create('exampleJob', opt1);
+  let myJob = new ChildJob();
+  myJob.run('exampleJob', './jobs/example.js');
 
   // let opt2 = {
   //   dev: true,
-  //   type: 'renderer', // renderer 
-  //   path: 'example.js',
+  //   type: 'child', // renderer 
+  //   path: './jobs/example.js',
   //   winOptions: {
   //     show: true
   //   },
   //   childOptions: {}
   // }
-  // myJob.create('exampleJob', opt2);
+  // let myJob2 = new OriginJob();
+  // myJob2.create('exampleJob2', opt2);
 }

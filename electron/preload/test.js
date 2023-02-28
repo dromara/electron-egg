@@ -1,32 +1,33 @@
 const Log = require('ee-core/module/log');
 const Utils = require('ee-core/module/utils');
+const Ps = require('ee-core/module/utils/ps');
 
 module.exports = async () => {
 
-  utilsMod();
+  //utilsMod();
 
 }
 
 function utilsMod() {
   let utilsApis = {
-    getBaseDir: Utils.getBaseDir(),
-    getEnv: Utils.getEnv(),
-    isDev: Utils.isDev(),
-    isRenderer: Utils.isRenderer(),
-    isMain: Utils.isMain(),
-    isForkedChild: Utils.isForkedChild(),
-    getHomeDir: Utils.getHomeDir(),
-    getStorageDir: Utils.getStorageDir(),
-    getLogDir: Utils.getLogDir(),
-    getRootDir: Utils.getRootDir(),
-    getBaseDir: Utils.getBaseDir(),
-    getAppUserDataDir: Utils.getAppUserDataDir(),
-    getHomeDir: Utils.getHomeDir(),
-    getUserHomeDir: Utils.getUserHomeDir(),
-    getMainPort: Utils.getMainPort(),
-    getSocketPort: Utils.getSocketPort(),
-    getHttpPort: Utils.getHttpPort(),
-    getExecDir: Utils.getExecDir(),
+    getBaseDir: Ps.getBaseDir(),
+    getEnv: Ps.getEnv(),
+    isDev: Ps.isDev(),
+    isRenderer: Ps.isRenderer(),
+    isMain: Ps.isMain(),
+    isForkedChild: Ps.isForkedChild(),
+    getHomeDir: Ps.getHomeDir(),
+    getStorageDir: Ps.getStorageDir(),
+    getLogDir: Ps.getLogDir(),
+    getRootDir: Ps.getRootDir(),
+    getBaseDir: Ps.getBaseDir(),
+    getAppUserDataDir: Ps.getAppUserDataDir(),
+    getHomeDir: Ps.getHomeDir(),
+    getUserHomeDir: Ps.getUserHomeDir(),
+    getMainPort: Ps.getMainPort(),
+    getSocketPort: Ps.getSocketPort(),
+    getHttpPort: Ps.getHttpPort(),
+    getExecDir: Ps.getExecDir(),
     getPackage: Utils.getPackage(),
     getEeConfig: Utils.getEeConfig(),
     getAppVersion: Utils.getAppVersion(),
@@ -35,7 +36,7 @@ function utilsMod() {
     getHttpServerConfig: Utils.getHttpServerConfig(),
     getSocketServerConfig: Utils.getSocketServerConfig(),
     getSocketChannel: Utils.getSocketChannel(),
-    getExtraResourcesDir: Utils.getExtraResourcesDir(),
+    getExtraResourcesDir: Ps.getExtraResourcesDir(),
   }
   Log.info('[main] [test] utilsApis -------- ', utilsApis);
 }
