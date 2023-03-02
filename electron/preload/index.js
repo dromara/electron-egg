@@ -3,7 +3,7 @@
  *************************************************/
 
 const ChildJob = require('ee-core/module/jobs/child');
-const UtilsPs = require('ee-core/module/utils/ps');
+const Ps = require('ee-core/module/ps');
 const Log = require('ee-core/module/log');
 const test = require('./test');
 
@@ -24,14 +24,17 @@ module.exports = async (app) => {
   awakenAddon.create();
   autoUpdaterAddon.create();
 
-  Log.info("[main] process type: ", UtilsPs.processType());
+  Log.info("[main] process type: ", Ps.processType());
   Log.info("[main] process cwd: ", process.cwd());
 
   test();
 
   let myJob = new ChildJob();
-  //myJob.run('exampleJob', './jobs/example.js');
-  myJob.run('exampleJob', './jobs/hello.js');
+  myJob.exec('./jobs/example.js', {name: 'gsx1'});
+
+  setTimeout(function(){
+    myJob.exec('./jobs/example.js', {name: 'gsx2'});
+  }, 5000)
 
   // let opt2 = {
   //   dev: true,

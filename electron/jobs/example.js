@@ -1,9 +1,7 @@
-// const Exception = require('ee-core/module/exception');
-// Exception.start();
 const Job = require('ee-core/module/jobs/baseJobClass');
 const Loader = require('ee-core/module/loader');
 const Log = require('ee-core/module/log');
-const Ps = require('ee-core/module/utils/ps');
+const Ps = require('ee-core/module/ps');
 const test = Loader.requireJobsModule('./test');
 
 //tests.hello();
@@ -16,18 +14,28 @@ class ExampleJob extends Job {
 
   constructor(params) {
     super();
+    this.params = params;
   }
 
   /**
    * Execute the job
    */
   async handle () {
-    // logger.info("[renderer] process: ", process);
-    Log.info("[child-process] process type: ", Ps.processType());
-    Log.info("[child-process] process cwd: ", process.cwd());
+    Log.info("[child-process] job params: ", this.params);
+    // setInterval(function() {
+    //   console.log('ddddd')
+    // }, 1000);
 
-    tests.hello();
+    //test.hello();
     //test.utilsMod();
+
+    setTimeout(function(){
+      test.hello();
+    }, 3000)
+
+    setTimeout(function(){
+      Ps.exit(1);
+    }, 10000)
   }   
 }
 

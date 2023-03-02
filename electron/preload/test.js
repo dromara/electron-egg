@@ -1,6 +1,6 @@
 const Log = require('ee-core/module/log');
 const Utils = require('ee-core/module/utils');
-const Ps = require('ee-core/module/utils/ps');
+const Ps = require('ee-core/module/ps');
 
 module.exports = async () => {
 
