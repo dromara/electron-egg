@@ -117,7 +117,7 @@ export default {
           storage.set('httpServiceConfig', r);
 
           // url转换
-          const host = r.server || 'http://127.0.0.1:7071';
+          const host = r.server || 'http://localhost:7071';
           let uri = ipcApiRoute.uploadFile;
           let url = uri.split('.').join('/');
           this.action_url = host + '/' + url;

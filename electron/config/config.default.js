@@ -126,7 +126,7 @@ module.exports = (appInfo) => {
    * 主进程
    */     
   config.mainServer = {
-    host: '127.0.0.1',
+    host: 'localhost',
     port: 7072,
   }; 
 

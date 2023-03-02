@@ -3,7 +3,6 @@
  *************************************************/
 
 const ChildJob = require('ee-core/module/jobs/child');
-// const OriginJob = require('ee-core/module/jobs/unification');
 const UtilsPs = require('ee-core/module/utils/ps');
 const Log = require('ee-core/module/log');
 const test = require('./test');
@@ -31,7 +30,8 @@ module.exports = async (app) => {
   test();
 
   let myJob = new ChildJob();
-  myJob.run('exampleJob', './jobs/example.js');
+  //myJob.run('exampleJob', './jobs/example.js');
+  myJob.run('exampleJob', './jobs/hello.js');
 
   // let opt2 = {
   //   dev: true,

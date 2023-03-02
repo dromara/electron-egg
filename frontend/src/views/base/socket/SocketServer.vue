@@ -31,7 +31,7 @@ export default {
   data() {
     return {
       currentStatus: '关闭',
-      servicAddress: 'ws://127.0.0.1:7070'
+      servicAddress: 'ws://localhost:7070'
     };
   },
   mounted () {
