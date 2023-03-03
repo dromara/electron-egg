@@ -680,16 +680,23 @@ class ExampleController extends Controller {
   /**
    * 任务
    */ 
-  someJob (args) {
+  someJob (args, event) {
     let jobId = args.id;
     if (args.type == 'timer') {
       let myjob = new ChildJob();
       myjob.exec('./jobs/example/timer', {jobId});
   
-      myjob.on('job-timer', (data) => {
-        Log.info('from TimerJob data:', data);
+      // 监听任务进度
+      const channel = 'controller.example.timerJobProgress';
+      myjob.on('job-timer-progress', (data) => {
+        Log.info('[main-process] from TimerJob data:', data);
+
+        // 发送数据到渲染进程
+        event.reply(`${channel}`, data)
       })
     }
+    
+    return;
   }
 
   /**

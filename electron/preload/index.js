@@ -2,8 +2,6 @@
  ** preload为预加载模块，该文件将会在程序启动时加载 **
  *************************************************/
 
-const ChildJob = require('ee-core/module/jobs/child');
-
 /**
  * 预加载模块入口
  * @param {Object} app - 全局app对象
@@ -20,7 +18,4 @@ module.exports = async (app) => {
   securityAddon.create();
   awakenAddon.create();
   autoUpdaterAddon.create();
-
-  // let myjob = new ChildJob();
-  // myjob.exec('./jobs/example/index');
 }

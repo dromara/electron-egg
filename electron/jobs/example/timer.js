@@ -24,14 +24,13 @@ class TimerJob extends Job {
 
     // 模拟计时器任务，执行10秒
     let childMessage = Message.childMessage;
-    let eventName = 'job-timer';
+    let eventName = 'job-timer-progress';
     let number = 0;
     let jobId = this.params.jobId;
     setInterval(function() {
-      Log.info("[child-process] TimerJob number: ", number);
       Hello.welcome();
 
-      childMessage.sendToMain(eventName, {number, jobId});
+      childMessage.sendToMain(eventName, {jobId, number});
       number++;
     }, 1000);
 

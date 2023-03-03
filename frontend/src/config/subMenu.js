@@ -39,6 +39,12 @@ export default {
 			pageName: 'BaseSqliteDBIndex',
 			params: {}
 		},
+		'menu_330' : {
+			icon: 'profile',
+			title: '任务',
+			pageName: 'BaseJobsIndex',
+			params: {}
+		},				
 		'menu_400' : {
 			icon: 'profile',
 			title: '视图',
