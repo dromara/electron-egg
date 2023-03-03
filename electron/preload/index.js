@@ -21,6 +21,6 @@ module.exports = async (app) => {
   awakenAddon.create();
   autoUpdaterAddon.create();
 
-  let myjob = new ChildJob();
-  myjob.exec('./jobs/example/index');
+  // let myjob = new ChildJob();
+  // myjob.exec('./jobs/example/index');
 }

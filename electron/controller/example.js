@@ -678,6 +678,21 @@ class ExampleController extends Controller {
   }
 
   /**
+   * 任务
+   */ 
+  someJob (args) {
+    let jobId = args.id;
+    if (args.type == 'timer') {
+      let myjob = new ChildJob();
+      myjob.exec('./jobs/example/timer', {jobId});
+  
+      myjob.on('job-timer', (data) => {
+        Log.info('from TimerJob data:', data);
+      })
+    }
+  }
+
+  /**
    * 测试接口
    */ 
   hello (args) {

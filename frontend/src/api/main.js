@@ -34,6 +34,7 @@ const ipcApiRoute = {
   getWCid: 'controller.example.getWCid',
   startJavaServer: 'controller.example.startJavaServer',
   closeJavaServer: 'controller.example.closeJavaServer',
+  someJob: 'controller.example.someJob',
   hello: 'controller.example.hello',
 }
 
