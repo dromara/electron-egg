@@ -1,7 +1,7 @@
 'use strict';
 
-const Service = require('ee-core').Service;
-const Storage = require('ee-core').Storage;
+const { Service } = require('ee-core');
+const Storage = require('ee-core/module/storage');
 const _ = require('lodash');
 const path = require('path');
 
@@ -15,12 +15,12 @@ class StorageService extends Service {
     super(ctx);
 
     // lowdb数据库
-    this.systemDB = Storage.JsonDB.connection('system');
+    this.systemDB = Storage.connection('system');
 
     let lowdbOptions = {
       driver: 'lowdb'
     }
-    this.demoDB = Storage.JsonDB.connection('demo', lowdbOptions);  
+    this.demoDB = Storage.connection('demo', lowdbOptions);  
     this.demoDBKey = {
       test_data: 'test_data'
     };
@@ -34,7 +34,7 @@ class StorageService extends Service {
         verbose: console.log // 打印sql语法
       }
     }
-    this.demoSqliteDB = Storage.JsonDB.connection(this.sqliteFile, sqliteOptions);
+    this.demoSqliteDB = Storage.connection(this.sqliteFile, sqliteOptions);
   }
 
   /*
@@ -252,7 +252,7 @@ class StorageService extends Service {
         verbose: console.log
       }
     }
-    this.demoSqliteDB = Storage.JsonDB.connection(dbFile, sqliteOptions);    
+    this.demoSqliteDB = Storage.connection(dbFile, sqliteOptions);    
 
     return;
   }

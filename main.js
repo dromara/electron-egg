@@ -1,4 +1,4 @@
-const Appliaction = require('ee-core').Appliaction;
+const { Appliaction } = require('ee-core');
 
 class Main extends Appliaction {
 

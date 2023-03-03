@@ -1,6 +1,7 @@
 const getPort = require('get-port');
 const server = require("./server");
 const electronApp = require('electron').app;
+const Log = require('ee-core/module/log');
 
 /**
  * java server插件
@@ -28,7 +29,7 @@ class JavaServerAddon {
 
     // kill
     electronApp.on("before-quit", async () => {
-      this.app.logger.info("[addon:javaServer] before-quit: kill-----------");
+      Log.info("[addon:javaServer] before-quit: kill-----------");
       await this.javaServer.kill();
     });
 

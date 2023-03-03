@@ -1,6 +1,7 @@
 'use strict';
 
-const Service = require('ee-core').Service;
+const { Service } = require('ee-core');
+const Log = require('ee-core/module/log');
 
 /**
  * 示例服务
@@ -50,14 +51,14 @@ class ExampleService extends Service {
       });
       const result = response.data;
       if (this.app.config.env === 'local') {
-        this.app.logger.info('[ExampleService] [uploadFileToSMMS]: info result:%j', result);
+        Log.info('[ExampleService] [uploadFileToSMMS]: info result:%j', result);
       }
       if (result.code !== 'success') {
-        this.app.logger.error('[ExampleService] [uploadFileToSMMS]: res error result:%j', result);
+        Log.error('[ExampleService] [uploadFileToSMMS]: res error result:%j', result);
       }
       return result;
     } catch (e) {
-      this.app.logger.error('[ExampleService] [uploadFileToSMMS]:  ERROR ', e);
+      Log.error('[ExampleService] [uploadFileToSMMS]:  ERROR ', e);
     }
 
     return res;

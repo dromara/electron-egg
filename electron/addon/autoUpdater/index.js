@@ -1,6 +1,7 @@
 const { app } = require('electron');
 const { autoUpdater } = require("electron-updater");
 const is = require('electron-is');
+const Log = require('ee-core/module/log');
 
 /**
  * 自动升级插件
@@ -44,13 +45,13 @@ class AutoUpdaterAddon {
 
     const updateConfig = this.cfg;
     const version = app.getVersion();
-    this.app.logger.info('[addon:autoUpdater] current version: ', version);
+    Log.info('[addon:autoUpdater] current version: ', version);
   
     // 设置下载服务器地址
     let server = updateConfig.options.url;
     let lastChar = server.substring(server.length - 1);
     server = lastChar === '/' ? server : server + "/";
-    //this.app.logger.info('[addon:autoUpdater] server: ', server);
+    //Log.info('[addon:autoUpdater] server: ', server);
     updateConfig.options.url = server;
   
     // 是否后台自动下载
@@ -59,7 +60,7 @@ class AutoUpdaterAddon {
     try {
       autoUpdater.setFeedURL(updateConfig.options);
     } catch (error) {
-      this.app.logger.error('[addon:autoUpdater] setFeedURL error : ', error);
+      Log.error('[addon:autoUpdater] setFeedURL error : ', error);
     }
   
     autoUpdater.on('checking-for-update', () => {
@@ -96,7 +97,7 @@ class AutoUpdaterAddon {
         totalSize: totalSize,
         transferredSize: transferredSize
       }
-      this.app.logger.info('[addon:autoUpdater] progress: ', text);
+      Log.info('[addon:autoUpdater] progress: ', text);
       this.sendStatusToWindow(info);
     })
     autoUpdater.on('update-downloaded', (info) => {

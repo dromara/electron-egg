@@ -2,9 +2,7 @@ const Job = require('ee-core/module/jobs/baseJobClass');
 const Loader = require('ee-core/module/loader');
 const Log = require('ee-core/module/log');
 const Ps = require('ee-core/module/ps');
-const test = Loader.requireJobsModule('./test');
-
-//tests.hello();
+const test = Loader.requireJobsModule('./example/test');
 
 /**
  * 示例服务

@@ -1,4 +1,5 @@
 const electronApp = require('electron').app;
+const Log = require('ee-core/module/log');
 
 /**
  * 唤醒插件
@@ -59,7 +60,7 @@ class AwakenAddon {
       urlPath: pathname,
       urlParams: search && search.slice(1)
     }
-    this.app.logger.info('[addon:awaken] awakeUrlInfo:', awakeUrlInfo);
+    Log.info('[addon:awaken] awakeUrlInfo:', awakeUrlInfo);
   }
 }
 

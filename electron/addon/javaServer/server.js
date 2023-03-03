@@ -6,6 +6,7 @@ const path = require("path");
 const { exec, execSync } = require("child_process");
 const Utils = require("ee-core").Utils;
 const ps = require("./ps");
+const Log = require('ee-core/module/log');
 
 /**
  * java server
@@ -53,11 +54,11 @@ class JavaServer {
         // todo linux
       }
 
-      this.app.logger.info("[addon:javaServer] cmdStr:", cmdStr);
+      Log.info("[addon:javaServer] cmdStr:", cmdStr);
       exec(cmdStr);
 
     } catch (err) {
-      this.app.logger.error('[addon:javaServer] throw error:', err);
+      Log.error('[addon:javaServer] throw error:', err);
     }
   }
 
@@ -73,7 +74,7 @@ class JavaServer {
         arguments: jarName,
       });
   
-      //this.app.logger.info("[addon:javaServer] resultList:", resultList);
+      //Log.info("[addon:javaServer] resultList:", resultList);
       resultList.forEach((item) => {
         ps.kill(item.pid, "SIGKILL", (err) => {
           if (err) {
@@ -85,11 +86,11 @@ class JavaServer {
   
       //   const cmd = `for /f "tokens=1-5" %i in ('netstat -ano ^| findstr ":${port}"') do taskkill /F /T /PID %m`;
       //   const a = await execSync(cmd, {encoding: 'utf-8'});
-      //   app.logger.info("[javaServer] kill:", a);
+      //   Log.info("[javaServer] kill:", a);
     } else if (is.macOS()) {
       const cmd = `ps -ef | grep java | grep ${jarName} | grep -v grep | awk '{print $2}' | xargs kill -9`;
       const result = await execSync(cmd);
-      this.app.logger.info("[addon:javaServer] kill:", result != null ? result.toString(): '');
+      Log.info("[addon:javaServer] kill:", result != null ? result.toString(): '');
     } else {
       // todo linux
     }
