@@ -22,7 +22,7 @@ class TimerJob extends Job {
   async handle () {
     Log.info("[child-process] TimerJob params: ", this.params);
 
-    // 模拟计时器任务，执行10秒
+    // 计时器任务
     let childMessage = Message.childMessage;
     let eventName = 'job-timer-progress';
     let number = 0;
@@ -34,6 +34,7 @@ class TimerJob extends Job {
       number++;
     }, 1000);
 
+    // 用 setTimeout 模拟任务运行时长
     // 任务完成后，必须调用 Ps.exit() 方法，让进程退出，否则会常驻内存
     setTimeout(function(){
       Ps.exit(1);
