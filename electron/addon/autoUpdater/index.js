@@ -1,7 +1,7 @@
 const { app } = require('electron');
 const { autoUpdater } = require("electron-updater");
 const is = require('electron-is');
-const Log = require('ee-core/module/log');
+const Log = require('ee-core/log');
 
 /**
  * 自动升级插件

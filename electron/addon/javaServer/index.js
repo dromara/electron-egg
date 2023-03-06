@@ -1,7 +1,7 @@
 const getPort = require('get-port');
 const server = require("./server");
 const electronApp = require('electron').app;
-const Log = require('ee-core/module/log');
+const Log = require('ee-core/log');
 
 /**
  * java server插件

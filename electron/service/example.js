@@ -1,7 +1,7 @@
 'use strict';
 
 const { Service } = require('ee-core');
-const Log = require('ee-core/module/log');
+const Log = require('ee-core/log');
 
 /**
  * 示例服务

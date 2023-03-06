@@ -1,4 +1,4 @@
-const Log = require('ee-core/module/log');
+const Log = require('ee-core/log');
 
 /**
  * 安全插件

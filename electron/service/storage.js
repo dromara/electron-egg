@@ -1,7 +1,7 @@
 'use strict';
 
 const { Service } = require('ee-core');
-const Storage = require('ee-core/module/storage');
+const Storage = require('ee-core/storage');
 const _ = require('lodash');
 const path = require('path');
 

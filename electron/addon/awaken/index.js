@@ -1,5 +1,5 @@
 const electronApp = require('electron').app;
-const Log = require('ee-core/module/log');
+const Log = require('ee-core/log');
 
 /**
  * 唤醒插件

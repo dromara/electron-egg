@@ -11,9 +11,9 @@ const {
   powerMonitor, screen, nativeTheme
 } = require('electron');
 const dayjs = require('dayjs');
-const ChildJob = require('ee-core/module/jobs/child');
-const Ps = require('ee-core/module/ps');
-const Log = require('ee-core/module/log');
+const ChildJob = require('ee-core/jobs/child');
+const Ps = require('ee-core/ps');
+const Log = require('ee-core/log');
 
 let myTimer = null;
 let browserViewObj = null;

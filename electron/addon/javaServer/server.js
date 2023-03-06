@@ -6,7 +6,7 @@ const path = require("path");
 const { exec, execSync } = require("child_process");
 const Utils = require("ee-core").Utils;
 const ps = require("./ps");
-const Log = require('ee-core/module/log');
+const Log = require('ee-core/log');
 
 /**
  * java server

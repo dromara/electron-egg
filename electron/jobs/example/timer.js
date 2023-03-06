@@ -1,8 +1,8 @@
-const Job = require('ee-core/module/jobs/baseJobClass');
-const Loader = require('ee-core/module/loader');
-const Log = require('ee-core/module/log');
-const Ps = require('ee-core/module/ps');
-const Message = require('ee-core/module/message');
+const Job = require('ee-core/jobs/baseJobClass');
+const Loader = require('ee-core/loader');
+const Log = require('ee-core/log');
+const Ps = require('ee-core/ps');
+const Message = require('ee-core/message');
 const Hello = Loader.requireJobsModule('./example/hello');
 
 /**
