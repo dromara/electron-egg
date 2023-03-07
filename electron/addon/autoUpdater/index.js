@@ -1,10 +1,9 @@
-const { app } = require('electron');
+const { app: electronApp } = require('electron');
 const { autoUpdater } = require("electron-updater");
 const is = require('electron-is');
 const Log = require('ee-core/log');
 const Conf = require('ee-core/config');
 const Electron = require('ee-core/electron');
-const EE = require('ee-core/ee');
 
 /**
  * 自动升级插件
@@ -22,6 +21,7 @@ class AutoUpdaterAddon {
   create () {
     Log.info('[addon:autoUpdater] load');
 
+    const app = this.app;
     const cfg = Conf.getValue('addons.autoUpdater');
     if ((is.windows() && cfg.windows)
         || (is.macOS() && cfg.macOS)
@@ -45,7 +45,7 @@ class AutoUpdaterAddon {
       downloaded: 4,
     }
 
-    const version = app.getVersion();
+    const version = electronApp.getVersion();
     Log.info('[addon:autoUpdater] current version: ', version);
   
     // 设置下载服务器地址
@@ -106,7 +106,7 @@ class AutoUpdaterAddon {
       info.desc = '下载完成';
       this.sendStatusToWindow(info);
       // quit and update
-      EE.app.appQuit();
+      app.appQuit();
       autoUpdater.quitAndInstall();
     });
   }
