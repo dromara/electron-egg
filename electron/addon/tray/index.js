@@ -25,6 +25,7 @@ class TrayAddon {
     
     Log.info('[addon:tray] load');
 
+    const app = this.app;
     const cfg = Conf.getValue('addons.tray');
     const mainWindow = Electron.mainWindow;
 
@@ -32,7 +33,6 @@ class TrayAddon {
     let iconPath = path.join(Ps.getHomeDir(), cfg.icon);
   
     // 托盘菜单功能列表
-    const self = this;
     let trayMenuTemplate = [
       {
         label: '显示',
@@ -43,14 +43,14 @@ class TrayAddon {
       {
         label: '退出',
         click: function () {
-          self.app.appQuit();
+          app.appQuit();
         }
       }
     ]
   
     // 点击关闭，最小化到托盘
     mainWindow.on('close', (event) => {
-      const extraObj = this.app.electron.extra;
+      const extraObj = Electron.extra;
       if (extraObj.closeWindow == true) {
         return;
       }
@@ -60,7 +60,7 @@ class TrayAddon {
     
     // 实例化托盘
     this.tray = new Tray(iconPath);
-    this.tray.setToolTip(this.cfg.title);
+    this.tray.setToolTip(cfg.title);
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
     this.tray.setContextMenu(contextMenu);
   }
