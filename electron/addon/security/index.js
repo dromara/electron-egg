@@ -14,7 +14,7 @@ class SecurityAddon {
    * 创建
    */
   create () {
-    this.app.console.info('[addon:security] load');
+    Log.info('[addon:security] load');
     const runWithDebug = process.argv.find(function(e){
       let isHasDebug = e.includes("--inspect") || e.includes("--inspect-brk") || e.includes("--remote-debugging-port");
       return isHasDebug;

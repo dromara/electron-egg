@@ -2,6 +2,7 @@ const { app, session } = require('electron');
 const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
+const Log = require('ee-core/log');
 
 /**
  * 安全插件
@@ -17,7 +18,7 @@ class ChromeExtensionAddon {
    * 创建
    */
   async create () {
-    this.app.console.info('[addon:chromeExtension] load');
+    Log.info('[addon:chromeExtension] load');
 
     const extensionIds = this.getAllIds();
     for (let i = 0; i < extensionIds.length; i++) {
@@ -59,10 +60,10 @@ class ChromeExtensionAddon {
     
     try {
       const extensionPath = path.join(this.getDirectory(), extensionId);
-      console.log('[addon:chromeExtension] extensionPath:', extensionPath);
+      Log.info('[addon:chromeExtension] extensionPath:', extensionPath);
       await session.defaultSession.loadExtension(extensionPath, { allowFileAccess: true });
     } catch (e) {
-      console.log('[addon:chromeExtension] load extension error extensionId:%s, errorInfo:%s', extensionId, e.toString());
+      Log.info('[addon:chromeExtension] load extension error extensionId:%s, errorInfo:%s', extensionId, e.toString());
       return false
     }
   

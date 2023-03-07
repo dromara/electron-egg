@@ -1,4 +1,5 @@
 const { Appliaction } = require('ee-core');
+const EE = require('ee-core/ee');
 
 class Main extends Appliaction {
 
@@ -45,5 +46,6 @@ class Main extends Appliaction {
   }
 }
 
-new Main();
+// Instantiate an app object
+EE.app = new Main();
  

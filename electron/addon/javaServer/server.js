@@ -4,24 +4,25 @@ const fs = require("fs");
 const is = require('electron-is');
 const path = require("path");
 const { exec, execSync } = require("child_process");
-const Utils = require("ee-core").Utils;
 const ps = require("./ps");
 const Log = require('ee-core/log');
+const Conf = require('ee-core/config');
+const UtilsPs = require('ee-core/ps');
 
 /**
  * java server
  */
 class JavaServer {
-  constructor (app) {
-    this.app = app;
-    this.options = app.config.addons.javaServer;
+  constructor () {
+    this.options;
   }
 
   /**
    * 创建服务
    */
-  async create () {
-    if (!this.options.enable) {
+  async create (cfg) {
+    this.options = cfg;
+    if (this.options.enable == false) {
       return;
     }
   
@@ -30,17 +31,17 @@ class JavaServer {
   
     try {
       const jarName = this.options.name;
-      let softwarePath = path.join(Utils.getExtraResourcesDir(), jarName);
+      let softwarePath = path.join(UtilsPs.getExtraResourcesDir(), jarName);
       let javaOptStr = this.options.opt;
-      let jrePath = path.join(Utils.getExtraResourcesDir(), this.options.jreVersion);
+      let jrePath = path.join(UtilsPs.getExtraResourcesDir(), this.options.jreVersion);
       let cmdStr = '';
       
-      this.app.console.info("[addon:javaServer] jar file path:", softwarePath); 
+      Log.info("[addon:javaServer] jar file path:", softwarePath); 
       if (!fs.existsSync(softwarePath)) throw new Error('java program does not exist');
 
       // 替换opt参数
       javaOptStr = _.replace(javaOptStr, "${port}", port);
-      javaOptStr = _.replace(javaOptStr, "${path}", Utils.getLogDir());
+      javaOptStr = _.replace(javaOptStr, "${path}", UtilsPs.getLogDir());
 
       if (is.windows()) {
         jrePath = path.join(jrePath, "bin", "javaw.exe");
@@ -80,7 +81,7 @@ class JavaServer {
           if (err) {
             throw new Error(err);
           }
-          console.info("[addon:javaServer] java程序退出 pid: ", item.pid);
+          Log.info("[addon:javaServer] java程序退出 pid: ", item.pid);
         });
       });
   

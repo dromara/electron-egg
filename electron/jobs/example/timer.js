@@ -38,7 +38,7 @@ class TimerJob extends Job {
     // 任务完成后，必须调用 Ps.exit() 方法，让进程退出，否则会常驻内存
     setTimeout(function(){
       Ps.exit(1);
-    }, 15 * 1000)
+    }, 10 * 1000)
   }   
 }
 

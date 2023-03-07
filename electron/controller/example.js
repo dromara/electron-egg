@@ -11,7 +11,7 @@ const {
   powerMonitor, screen, nativeTheme
 } = require('electron');
 const dayjs = require('dayjs');
-const ChildJob = require('ee-core/jobs/child');
+const { ChildJob } = require('ee-core/jobs');
 const Ps = require('ee-core/ps');
 const Log = require('ee-core/log');
 
@@ -195,6 +195,7 @@ class ExampleController extends Controller {
       content = args.content;
     }
 
+    // electron实验性功能，慎用
     browserViewObj = new BrowserView();
     this.app.electron.mainWindow.setBrowserView(browserViewObj)
     browserViewObj.setBounds({
@@ -211,6 +212,7 @@ class ExampleController extends Controller {
    * 移除视图内容
    */
   removeViewContent () {
+    // removeBrowserView移除视图后，进程依然存在，估计是electron bug
     this.app.electron.mainWindow.removeBrowserView(browserViewObj);
     return true
   }  
