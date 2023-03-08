@@ -29,7 +29,7 @@ export default {
   },  
   methods: {
     startServer () {
-      this.$ipcInvoke(ipcApiRoute.startJavaServer, {}).then(r => {
+      this.$ipc.invoke(ipcApiRoute.startJavaServer, {}).then(r => {
         if (r.code != 0) {
           this.$message.error(r.msg);
         }
@@ -39,7 +39,7 @@ export default {
     },
 
     closeServer () {
-      this.$ipcInvoke(ipcApiRoute.closeJavaServer, {}).then(r => {
+      this.$ipc.invoke(ipcApiRoute.closeJavaServer, {}).then(r => {
         if (r.code != 0) {
           this.$message.error(r.msg);
         }

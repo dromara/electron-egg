@@ -1,3 +1,5 @@
+const Log = require('ee-core/log');
+
 /**
  * 安全插件
  * @class
@@ -12,7 +14,7 @@ class SecurityAddon {
    * 创建
    */
   create () {
-    this.app.console.info('[addon:security] load');
+    Log.info('[addon:security] load');
     const runWithDebug = process.argv.find(function(e){
       let isHasDebug = e.includes("--inspect") || e.includes("--inspect-brk") || e.includes("--remote-debugging-port");
       return isHasDebug;
@@ -20,7 +22,7 @@ class SecurityAddon {
   
     // 不允许远程调试
     if (runWithDebug) {
-      this.app.logger.error('[error] Remote debugging is not allowed,  runWithDebug:', runWithDebug);
+      Log.error('[error] Remote debugging is not allowed,  runWithDebug:', runWithDebug);
       this.app.appQuit();
     }
   }

@@ -1,4 +1,6 @@
-const electronApp = require('electron').app;
+const { app: electronApp } = require('electron');
+const Log = require('ee-core/log');
+const Conf = require('ee-core/config');
 
 /**
  * 唤醒插件
@@ -8,7 +10,6 @@ class AwakenAddon {
 
   constructor(app) {
     this.app = app;
-    this.cfg = app.config.addons.awaken;
     this.protocol = '';
   }
 
@@ -16,9 +17,10 @@ class AwakenAddon {
    * 创建
    */
   create () {
-    this.app.console.info('[addon:awaken] load');
+    Log.info('[addon:awaken] load');
 
-    this.protocol = this.cfg.protocol;
+    const cfg = Conf.getValue('addons.awaken');
+    this.protocol = cfg.protocol;
   
     electronApp.setAsDefaultProtocolClient(this.protocol);
   
@@ -59,7 +61,7 @@ class AwakenAddon {
       urlPath: pathname,
       urlParams: search && search.slice(1)
     }
-    this.app.logger.info('[addon:awaken] awakeUrlInfo:', awakeUrlInfo);
+    Log.info('[addon:awaken] awakeUrlInfo:', awakeUrlInfo);
   }
 }
 

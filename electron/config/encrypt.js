@@ -10,7 +10,7 @@ module.exports = {
   confusionOptions: {
     compact: true,      
     stringArray: true,
-    stringArrayEncoding: ['base64'],
+    stringArrayEncoding: ['none'],
     deadCodeInjection: false,
   }
 };

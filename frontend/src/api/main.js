@@ -34,6 +34,8 @@ const ipcApiRoute = {
   getWCid: 'controller.example.getWCid',
   startJavaServer: 'controller.example.startJavaServer',
   closeJavaServer: 'controller.example.closeJavaServer',
+  someJob: 'controller.example.someJob',
+  timerJobProgress: 'controller.example.timerJobProgress',
   hello: 'controller.example.hello',
 }
 
@@ -52,7 +54,7 @@ const specialIpcRoute = {
 const requestHttp = (uri, parameter) => {
   // url转换
   const config = storage.get('httpServiceConfig');
-  const host = config.server || 'http://127.0.0.1:7071';
+  const host = config.server || 'http://localhost:7071';
   let url = uri.split('.').join('/');
   url = host + '/' + url;
   console.log('url:', url);

@@ -4,11 +4,16 @@ const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
-const { Controller, Utils } = require('ee-core');
-const electronApp = require('electron').app;
-const {dialog, shell, BrowserView, 
-  Notification, powerMonitor, screen, nativeTheme} = require('electron');
+const { Controller } = require('ee-core');
+const {
+  app: electronApp,
+  dialog, shell, BrowserView, Notification, 
+  powerMonitor, screen, nativeTheme
+} = require('electron');
 const dayjs = require('dayjs');
+const { ChildJob } = require('ee-core/jobs');
+const Ps = require('ee-core/ps');
+const Log = require('ee-core/log');
 
 let myTimer = null;
 let browserViewObj = null;
@@ -36,14 +41,8 @@ class ExampleController extends Controller {
   async test () {
     const result = await this.service.example.test('electron');
 
-    let tmpDir = Utils.getLogDir();
-    console.log('tmpDir:', tmpDir);
-
-    // console.log('this.app.request:', this.app.request.query);
-
-    // const exampleAddon = this.app.addon.example;
-    // const str = exampleAddon.hello();
-    // console.log('str:', str);
+    let tmpDir = Ps.getLogDir();
+    Log.info('tmpDir:', tmpDir);
 
     return result;
   }
@@ -54,7 +53,7 @@ class ExampleController extends Controller {
   async dbOperation(args) {
     const { service } = this;
     const paramsObj = args;
-    //console.log('eeeee paramsObj:', paramsObj);
+    //Log.info('eeeee paramsObj:', paramsObj);
     const data = {
       action: paramsObj.action,
       result: null,
@@ -87,7 +86,7 @@ class ExampleController extends Controller {
   async sqlitedbOperation(args) {
     const { service } = this;
     const paramsObj = args;
-    //console.log('eeeee paramsObj:', paramsObj);
+    //Log.info('eeeee paramsObj:', paramsObj);
     const data = {
       action: paramsObj.action,
       result: null,
@@ -196,6 +195,7 @@ class ExampleController extends Controller {
       content = args.content;
     }
 
+    // electron实验性功能，慎用
     browserViewObj = new BrowserView();
     this.app.electron.mainWindow.setBrowserView(browserViewObj)
     browserViewObj.setBounds({
@@ -212,6 +212,7 @@ class ExampleController extends Controller {
    * 移除视图内容
    */
   removeViewContent () {
+    // removeBrowserView移除视图后，进程依然存在，估计是electron bug
     this.app.electron.mainWindow.removeBrowserView(browserViewObj);
     return true
   }  
@@ -276,9 +277,9 @@ class ExampleController extends Controller {
   //   const chromeExtensionDir = chromeExtension.getDirectory();
   //   const extensionDir = path.join(chromeExtensionDir, extensionId);
 
-  //   console.log("[api] [example] [loadExtension] extension id:", extensionId);
+  //   Log.info("[api] [example] [loadExtension] extension id:", extensionId);
   //   unzip(crxFile, extensionDir).then(() => {    
-  //     console.log("[api] [example] [loadExtension] unzip success!");
+  //     Log.info("[api] [example] [loadExtension] unzip success!");
   //     chromeExtension.load(extensionId);
   //   });
 
@@ -404,7 +405,7 @@ class ExampleController extends Controller {
       // 数组，只取一个吧
       res = resArr[0];
     }
-    // console.log('[electron] [ipc] [example] [getScreen] res:', res);
+    // Log.info('[electron] [ipc] [example] [getScreen] res:', res);
     data = [
       {
         title: '分辨率',
@@ -447,8 +448,8 @@ class ExampleController extends Controller {
       return false;
     }
 
-    let softwarePath = path.join(Utils.getExtraResourcesDir(), softName);
-    this.app.logger.info('[openSoftware] softwarePath:', softwarePath);
+    let softwarePath = path.join(Ps.getExtraResourcesDir(), softName);
+    Log.info('[openSoftware] softwarePath:', softwarePath);
 
     // 检查程序是否存在
     if (!fs.existsSync(softwarePath)) {
@@ -537,7 +538,7 @@ class ExampleController extends Controller {
       params,
       body
     }
-    console.log('httpInfo:', httpInfo);
+    Log.info('httpInfo:', httpInfo);
 
     if (!body.id) {
       return false;
@@ -616,7 +617,7 @@ class ExampleController extends Controller {
    * 上传文件
    */  
   async uploadFile() {
-    let tmpDir = Utils.getLogDir();
+    let tmpDir = Ps.getLogDir();
     const files = this.app.request.files;
     let file = files.file;
     
@@ -679,10 +680,32 @@ class ExampleController extends Controller {
   }
 
   /**
+   * 任务
+   */ 
+  someJob (args, event) {
+    let jobId = args.id;
+    if (args.type == 'timer') {
+      let myjob = new ChildJob();
+      myjob.exec('./jobs/example/timer', {jobId});
+  
+      // 监听任务进度
+      const channel = 'controller.example.timerJobProgress';
+      myjob.on('job-timer-progress', (data) => {
+        Log.info('[main-process] from TimerJob data:', data);
+
+        // 发送数据到渲染进程
+        event.reply(`${channel}`, data)
+      })
+    }
+    
+    return;
+  }
+
+  /**
    * 测试接口
    */ 
   hello (args) {
-    console.log('hello ', args);
+    Log.info('hello ', args);
   }   
 }
 

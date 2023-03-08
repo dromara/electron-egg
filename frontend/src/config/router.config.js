@@ -52,6 +52,11 @@ export const constantRouterMap = [
             component: () => import('@/views/base/window/Index')
           },
           {
+            path: '/base/jobs/index',
+            name: 'BaseJobsIndex',
+            component: () => import('@/views/base/jobs/Index')
+          },
+          {
             path: '/base/notification/index',
             name: 'BaseNotificationIndex',
             component: () => import('@/views/base/notification/Index')

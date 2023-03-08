@@ -1,6 +1,9 @@
-const { app } = require('electron');
+const { app: electronApp } = require('electron');
 const { autoUpdater } = require("electron-updater");
-const is = require('electron-is');
+const is = require('ee-core/utils/is');
+const Log = require('ee-core/log');
+const Conf = require('ee-core/config');
+const Electron = require('ee-core/electron');
 
 /**
  * 自动升级插件
@@ -10,19 +13,19 @@ class AutoUpdaterAddon {
 
   constructor(app) {
     this.app = app;
-    this.cfg = app.config.addons.autoUpdater;
-    this.mainWindow = app.electron.mainWindow;
   }
 
   /**
    * 创建
    */
   create () {
-    this.app.console.info('[addon:autoUpdater] load');
+    Log.info('[addon:autoUpdater] load');
 
-    if ((is.windows() && this.cfg.windows)
-        || (is.macOS() && this.cfg.macOS)
-        || (is.linux() && this.cfg.linux))
+    const app = this.app;
+    const cfg = Conf.getValue('addons.autoUpdater');
+    if ((is.windows() && cfg.windows)
+        || (is.macOS() && cfg.macOS)
+        || (is.linux() && cfg.linux))
     {
       // continue
     } else {
@@ -30,7 +33,7 @@ class AutoUpdaterAddon {
     }
 
     // 是否检查更新
-    if (this.cfg.force) {
+    if (cfg.force) {
       this.checkUpdate();
     }
 
@@ -42,24 +45,23 @@ class AutoUpdaterAddon {
       downloaded: 4,
     }
 
-    const updateConfig = this.cfg;
-    const version = app.getVersion();
-    this.app.logger.info('[addon:autoUpdater] current version: ', version);
+    const version = electronApp.getVersion();
+    Log.info('[addon:autoUpdater] current version: ', version);
   
     // 设置下载服务器地址
-    let server = updateConfig.options.url;
+    let server = cfg.options.url;
     let lastChar = server.substring(server.length - 1);
     server = lastChar === '/' ? server : server + "/";
-    //this.app.logger.info('[addon:autoUpdater] server: ', server);
-    updateConfig.options.url = server;
+    //Log.info('[addon:autoUpdater] server: ', server);
+    cfg.options.url = server;
   
     // 是否后台自动下载
-    autoUpdater.autoDownload = updateConfig.force ? true : false;
+    autoUpdater.autoDownload = cfg.force ? true : false;
   
     try {
-      autoUpdater.setFeedURL(updateConfig.options);
+      autoUpdater.setFeedURL(cfg.options);
     } catch (error) {
-      this.app.logger.error('[addon:autoUpdater] setFeedURL error : ', error);
+      Log.error('[addon:autoUpdater] setFeedURL error : ', error);
     }
   
     autoUpdater.on('checking-for-update', () => {
@@ -96,7 +98,7 @@ class AutoUpdaterAddon {
         totalSize: totalSize,
         transferredSize: transferredSize
       }
-      this.app.logger.info('[addon:autoUpdater] progress: ', text);
+      Log.info('[addon:autoUpdater] progress: ', text);
       this.sendStatusToWindow(info);
     })
     autoUpdater.on('update-downloaded', (info) => {
@@ -104,7 +106,7 @@ class AutoUpdaterAddon {
       info.desc = '下载完成';
       this.sendStatusToWindow(info);
       // quit and update
-      this.app.appQuit();
+      app.appQuit();
       autoUpdater.quitAndInstall();
     });
   }
@@ -129,7 +131,7 @@ class AutoUpdaterAddon {
   sendStatusToWindow(content = {}) {
     const textJson = JSON.stringify(content);
     const channel = 'app.updater';
-    this.mainWindow.webContents.send(channel, textJson);
+    Electron.mainWindow.webContents.send(channel, textJson);
   }
   
   /**

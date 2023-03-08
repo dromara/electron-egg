@@ -112,28 +112,28 @@ export default {
     },
     handleInvoke () {
       const self = this;
-      this.$ipcInvoke(ipcApiRoute.ipcInvokeMsg, '异步-回调').then(r => {
+      this.$ipc.invoke(ipcApiRoute.ipcInvokeMsg, '异步-回调').then(r => {
         console.log('r:', r);
         self.message1 = r;
       });
     },
     async handleInvoke2 () {
-      const msg = await this.$ipcInvoke(ipcApiRoute.ipcInvokeMsg, '异步');
+      const msg = await this.$ipc.invoke(ipcApiRoute.ipcInvokeMsg, '异步');
       console.log('msg:', msg);
       this.message2 = msg;
     },
     handleSendSync () {
-      const msg = this.$ipcSendSync(ipcApiRoute.ipcSendSyncMsg, '同步');
+      const msg = this.$ipc.sendSync(ipcApiRoute.ipcSendSyncMsg, '同步');
       this.message3 = msg;
     },
     createWindow (index) {
-      this.$ipcInvoke(ipcApiRoute.createWindow, this.views[index]).then(id => {
+      this.$ipc.invoke(ipcApiRoute.createWindow, this.views[index]).then(id => {
         console.log('[createWindow] id:', id);
       })
     },
     async sendTosubWindow () {
       // 新窗口id
-      this.newWcId = await this.$ipcInvoke(ipcApiRoute.getWCid, this.windowName);
+      this.newWcId = await this.$ipc.invoke(ipcApiRoute.getWCid, this.windowName);
       this.$ipc.sendTo(this.newWcId, specialIpcRoute.window1ToWindow2, '窗口1通过 sendTo 给窗口2发送消息');
     },
   }

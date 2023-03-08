@@ -1,6 +1,8 @@
 const getPort = require('get-port');
 const server = require("./server");
-const electronApp = require('electron').app;
+const { app: electronApp } = require('electron');
+const Log = require('ee-core/log');
+const Conf = require('ee-core/config');
 
 /**
  * java server插件
@@ -10,8 +12,8 @@ class JavaServerAddon {
 
   constructor(app) {
     this.app = app;
-    this.cfg = app.config.addons.javaServer;
-    this.javaServer = null;
+    this.cfg;
+    this.javaServer;
   }
 
   /**
@@ -21,14 +23,16 @@ class JavaServerAddon {
    * @since 1.0.0
    */
   async createServer () {
+
+    this.cfg = Conf.getValue('addons.javaServer');
     await this.createJavaPorts();
 
-    this.javaServer = new server(this.app);
-    await this.javaServer.create();
+    this.javaServer = new server();
+    await this.javaServer.create(this.cfg);
 
     // kill
     electronApp.on("before-quit", async () => {
-      this.app.logger.info("[addon:javaServer] before-quit: kill-----------");
+      Log.info("[addon:javaServer] before-quit: kill-----------");
       await this.javaServer.kill();
     });
 
@@ -60,7 +64,7 @@ class JavaServerAddon {
     this.cfg.port = javaPort;
 
     // 更新config配置
-    this.app.getCoreDB().setItem("config", this.app.config);
+    Conf.setValue('addons.javaServer', this.cfg);
   }
 
   /**

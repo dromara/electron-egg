@@ -32,7 +32,7 @@ export default {
     init () {
       const self = this;
       this.$ipc.removeAllListeners(ipcApiRoute.initPowerMonitor);
-      self.$ipc.on(ipcApiRoute.initPowerMonitor, (event, result) => {
+      this.$ipc.on(ipcApiRoute.initPowerMonitor, (event, result) => {
         if (Object.prototype.toString.call(result) == '[object Object]') {
           self.currentStatus = result.msg;
           self.$message.info(result.msg);
