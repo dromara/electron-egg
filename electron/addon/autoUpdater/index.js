@@ -1,6 +1,6 @@
 const { app: electronApp } = require('electron');
 const { autoUpdater } = require("electron-updater");
-const is = require('electron-is');
+const is = require('ee-core/utils/is');
 const Log = require('ee-core/log');
 const Conf = require('ee-core/config');
 const Electron = require('ee-core/electron');

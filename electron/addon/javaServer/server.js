@@ -1,12 +1,11 @@
 const _ = require("lodash");
 const assert = require("assert");
 const fs = require("fs");
-const is = require('electron-is');
 const path = require("path");
 const { exec, execSync } = require("child_process");
 const ps = require("./ps");
 const Log = require('ee-core/log');
-const Conf = require('ee-core/config');
+const is = require('ee-core/utils/is');
 const UtilsPs = require('ee-core/ps');
 
 /**
