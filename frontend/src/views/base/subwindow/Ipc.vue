@@ -102,23 +102,23 @@ export default {
     },
     handleInvoke () {
       const self = this;
-      this.$ipcInvoke(ipcApiRoute.ipcInvokeMsg, '异步-回调').then(r => {
+      this.$ipc.invoke(ipcApiRoute.ipcInvokeMsg, '异步-回调').then(r => {
         console.log('r:', r);
         self.message1 = r;
       });
     },
     async handleInvoke2 () {
-      const msg = await this.$ipcInvoke(ipcApiRoute.ipcInvokeMsg, '异步');
+      const msg = await this.$ipc.invoke(ipcApiRoute.ipcInvokeMsg, '异步');
       console.log('msg:', msg);
       this.message2 = msg;
     },
     handleSendSync () {
-      const msg = this.$ipcSendSync(ipcApiRoute.ipcSendSyncMsg, '同步');
+      const msg = this.$ipc.sendSync(ipcApiRoute.ipcSendSyncMsg, '同步');
       this.message3 = msg;
     },
     sendTosubWindow () {
       // 获取主窗口id
-      this.$ipcInvoke(ipcApiRoute.getWCid, 'main').then(id => {
+      this.$ipc.invoke(ipcApiRoute.getWCid, 'main').then(id => {
         this.mainWCid = id;
         this.$ipc.sendTo(this.mainWCid, specialIpcRoute.window2ToWindow1, '窗口2 通过 sendTo 给主窗口发送消息');
       });

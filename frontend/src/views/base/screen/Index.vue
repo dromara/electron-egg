@@ -40,7 +40,7 @@ export default {
   methods: {
     getScreen (index) {
       const self = this;
-      this.$ipcInvoke(ipcApiRoute.getScreen, index).then(result => {
+      this.$ipc.invoke(ipcApiRoute.getScreen, index).then(result => {
         self.data = result;
       })
     },

@@ -111,7 +111,7 @@ export default {
   methods: {
     getHost () {
       const self = this;
-      this.$ipcInvoke(ipcApiRoute.checkHttpServer, {}).then(r => {
+      this.$ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
         if (r.enable) {
           self.servicAddress = r.server;
           storage.set('httpServiceConfig', r);
@@ -125,13 +125,13 @@ export default {
       })
     },
     openDirectry (id) {
-      this.$ipcInvoke(ipcApiRoute.openDirectory, {id: id}).then(res => {
+      this.$ipc.invoke(ipcApiRoute.openDirectory, {id: id}).then(res => {
         //console.log('res:', res)
       })      
     },
     selectDir() {
       const self = this;
-      self.$ipcInvoke(ipcApiRoute.selectFolder, '').then(r => {
+      this.$ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
         self.dir_path = r;
         self.$message.info(r);
       })      
@@ -139,14 +139,14 @@ export default {
 		messageShow(type) {
       const self = this;
       console.log('[messageShow] type:', type)
-      this.$ipcInvoke(ipcApiRoute.messageShow, '').then(r => {
+      this.$ipc.invoke(ipcApiRoute.messageShow, '').then(r => {
         self.$message.info(r);
       })
     },    
     messageShowConfirm(type) {
       const self = this;
       console.log('[messageShowConfirm] type:', type)
-      this.$ipcInvoke(ipcApiRoute.messageShowConfirm, '').then(r => {
+      this.$ipc.invoke(ipcApiRoute.messageShowConfirm, '').then(r => {
         self.$message.info(r);
       })
     },

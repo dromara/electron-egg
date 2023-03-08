@@ -4,7 +4,7 @@ import 'ant-design-vue/dist/antd.less';
 import App from './App'
 import router from './router'
 import { VueAxios } from './utils/request'
-import IpcRenderer from '@/utils/ipcRenderer'
+import { ipc } from '@/utils/ipcRenderer'
 
 // 使用antd
 Vue.use(antd)
@@ -13,7 +13,7 @@ Vue.use(antd)
 Vue.use(VueAxios)
 
 // 全局注入IPC通信
-Vue.use(IpcRenderer)
+Vue.prototype.$ipc = ipc
 
 Vue.config.productionTip = false
 

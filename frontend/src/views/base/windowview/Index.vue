@@ -44,14 +44,12 @@ export default {
   },
   methods: {
     loadViewContent (index) {
-      const self = this;
-      self.$ipcInvoke(ipcApiRoute.loadViewContent, this.views[index]).then(r => {
+      this.$ipc.invoke(ipcApiRoute.loadViewContent, this.views[index]).then(r => {
         console.log(r);
       })
     },
     removeViewContent (index) {
-      const self = this;
-      self.$ipcInvoke(ipcApiRoute.removeViewContent, self.views[index]).then(r => {
+      this.$ipc.invoke(ipcApiRoute.removeViewContent, self.views[index]).then(r => {
         console.log(r);
       })
     },

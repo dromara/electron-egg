@@ -40,7 +40,7 @@ export default {
   methods: {
     openSoft (id) {
       const self = this;   
-      this.$ipcInvoke(ipcApiRoute.openSoftware, id).then(result => {
+      this.$ipc.invoke(ipcApiRoute.openSoftware, id).then(result => {
         if (!result) {
           self.$message.error('程序不存在');
         }
