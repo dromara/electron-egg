@@ -1,4 +1,4 @@
-# EE框架2.0 
+# EE框架 3.0
 [![star](https://gitee.com/dromara/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/dromara/electron-egg/stargazers)
 
 <div align=center>
@@ -7,6 +7,7 @@
 
 <div align=center>
 <h3><strong>一个入门简单、跨平台、企业级桌面软件开发框架</strong></h3>
+<h4>框架下载量突破10万+，新官网正在建设中...</h4>
 </div>
 <br>
 
@@ -16,7 +17,7 @@
 - 🍩 **为什么使用？** 桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
 - 🍉 **简单：** 只需懂 JavaScript
 - 🍑 **愿景：** 所有开发者都能学会桌面软件研发
-- 🍰 **gitee：** https://gitee.com/dromara/electron-egg **2900+**
+- 🍰 **gitee：** https://gitee.com/dromara/electron-egg **3000+**
 - 🍨 **github：** https://github.com/dromara/electron-egg **700+**
 - 🏆 码云最有价值开源项目
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
@@ -32,14 +33,14 @@
 
 ## 📦 特性
 1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版、国产UOS、Deepin、麒麟等
-2. 🌹  简单高效：只需学习 js 语言
-3. 🌱 前端独立：理论上支持任何前端技术，如：vue、react、html等等
-4. 🌴 工程化：可以用前端、服务端的开发思维，来编写桌面软件
-5. 🍁 高性能：事件驱动、非阻塞式IO
-6. 🌷 功能丰富：配置、通信、插件、数据库、升级、打包、工具... 应有尽有
-7. 🌰 安全：支持字节码加密、压缩混淆加密
-7. 💐 功能demo：桌面软件常见功能，框架集成或提供demo
-8. 🌻 更多功能请看文档
+2. 🌹  架构：单进程/模块化/多任务(进程，线程，渲染进程)，让开发大型项目变的简单。
+3. 🌱 简单高效：只需学习 js 语言
+4. 🌴 前端独立：理论上支持任何前端技术，如：vue、react、html等等
+5. 🍁 工程化：可以用前端、服务端的开发思维，来编写桌面软件
+6. 🌷 高性能：事件驱动、非阻塞式IO
+7. 🌰 功能丰富：配置、通信、插件、数据库、升级、打包、工具... 应有尽有
+8. 💐 安全：支持字节码加密、压缩混淆加密
+9. 🌻 功能demo：桌面软件常见功能，框架集成或提供demo
 
 ## ✈️ 使用场景
 

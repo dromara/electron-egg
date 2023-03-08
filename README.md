@@ -1,4 +1,4 @@
-# electron-egg framework 2.0 
+# EE框架 3.0
 [![star](https://gitee.com/dromara/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/dromara/electron-egg/stargazers)
 
 <div align=center>
@@ -6,90 +6,97 @@
 </div>
 
 <div align=center>
-<h3><strong>A simple, cross-platform, enterprise-level desktop software development framework</strong></h3>
+<h3><strong>一个入门简单、跨平台、企业级桌面软件开发框架</strong></h3>
+<h4>框架下载量突破10万+，新官网正在建设中...</h4>
 </div>
 <br>
 
-## 🌏[中文](https://www.yuque.com/u34495/mivcfg) | [English](https://www.yuque.com/u34495/ee-doc) 
+## 🌏 [English](https://www.yuque.com/u34495/ee-doc) | [中文](https://www.yuque.com/u34495/mivcfg)
 
-## 📋 Introduction
-- 🍩 **Why?** desktop software ( office direction , personal tools ), still Yes PC in the next ten years one of the requirements is to improve work efficiency
-- 🍉 **Simple：** just understand JavaScript
-- 🍑 **Vision：** all developers can learn how to develop desktop software
-- 🍰 **Gitee：** https://gitee.com/dromara/electron-egg **2900+**
-- 🍨 **Github：** https://github.com/dromara/electron-egg **700+**
-- 🏆 most valuable open source project
+## 📋 介绍
+- 🍩 **为什么使用？** 桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
+- 🍉 **简单：** 只需懂 JavaScript
+- 🍑 **愿景：** 所有开发者都能学会桌面软件研发
+- 🍰 **gitee：** https://gitee.com/dromara/electron-egg **3000+**
+- 🍨 **github：** https://github.com/dromara/electron-egg **700+**
+- 🏆 码云最有价值开源项目
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
-## ❤️ Support 
-### if it is useful to you, you can donate to invite the maintainer to eat the spicy food. Thank you 
-[Gitee donation](https://gitee.com/dromara/electron-egg)
+## ❤️支持
+### 如果你觉得electron-egg不错，可以捐赠请维护者吃包辣条~，在此表示感谢^_^
+[Gitee上捐赠](https://gitee.com/dromara/electron-egg)
 
-[Donation to Dromara](https://dromara.gitee.io/donate.html)
+[捐赠给Dromara组织](https://dromara.gitee.io/donate.html)
 
-## 📚 Document
-- [Tutorial document](https://www.yuque.com/u34495/ee-doc)
+## 📚 文档
+- [教程文档](https://www.yuque.com/u34495/mivcfg)
 
-## 📦 Features
-1. 🍄 **Cross platform：** a set of code that can be packaged into windows, Mac, Linux and UOS、Deepin、KylinOS.
-2. 🌹  **Simple and efficient：** you only need to learn the js language and support front-end technologies such as vue, react, and html. 
-3. 🌱 **Frontend independence：**  theoretically supports any front-end technology to write exquisite UI effects. 
-4. 🌴 **Engineering：** you can use the development thinking of the server to write desktop software.
-5. 🍁 **High performance：** Event-driven, non-blocking I/O.
-6. 🌷 **Features：** Front-end and server-side technical scenarios.
-7. 🌰 **Security：** supports bytecode encryption and compression obfuscation encryption. 
-7. 💐 **Demo：** common functions of desktop software, which will be gradually integrated or provided in the future. 
+## 📦 特性
+1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版、国产UOS、Deepin、麒麟等
+2. 🌹  架构：单进程/模块化/多任务(进程，线程，渲染进程)，让开发大型项目变的简单。
+3. 🌱 简单高效：只需学习 js 语言
+4. 🌴 前端独立：理论上支持任何前端技术，如：vue、react、html等等
+5. 🍁 工程化：可以用前端、服务端的开发思维，来编写桌面软件
+6. 🌷 高性能：事件驱动、非阻塞式IO
+7. 🌰 功能丰富：配置、通信、插件、数据库、升级、打包、工具... 应有尽有
+8. 💐 安全：支持字节码加密、压缩混淆加密
+9. 🌻 功能demo：桌面软件常见功能，框架集成或提供demo
 
-## ✈️ Usage scenario
+## ✈️ 使用场景
 
-### 1. 🚀 General desktop software
-- 🚖 windows
+### 1. 🚀 常规桌面软件
+- 🚖 windows平台
 
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/home.png)
 
-- 🚍 macOS   
+- 🚍 macOS平台    
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/mac-socket.png)
 
-- 🚔 linux - UOS、Deepin
+- 🚔 linux平台 - 国产UOS、Deepin
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/uos-home.png)
 
-- 🚔 linux - ubuntu
+- 🚔 linux平台 - ubuntu
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ubuntu-db.png)
 
-### 🚐 2. Convert vue, react, angular, and web into desktop software 
-- 🚙 vue-ant-design（local）
+### 🚐 2. vue、react、angular、web 转换成桌面软件
+- 🚙 vue-ant-design（本地）
 
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/vue-antd.png)
 
-- 🚙 ZenTao（web）
+- 🚙 禅道项目管理（web项目地址）
 
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-project-7.png)
 
-### 🚂 3. Games (h5 related technology development) 
-- 🚊 ninja layer 100
+### 🚂 3. 游戏（h5相关技术开发）
+- 🚊 忍者100层
 
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee_game_1.png)
 
 
-## 📒 Getting Started 
+## 📒 开始使用
 
-- ✒️ [Installation documentation](https://www.yuque.com/u34495/ee-doc/ltgte9)
+- ✒️ [安装文档](https://www.yuque.com/u34495/mivcfg/ltgte9)
     
-## 🐶 Project case
-- 🐟 The EE framework has been applied to clients in medical, school, government affairs, stock trading, ERP, entertainment, video, enterprise and other fields
+## 🐶 项目案例
+- 🐟 EE框架已经应用于医疗、学校、政务、股票交易、ERP、娱乐、视频、企业等领域客户端
 
-- 🐸 LOL assistant
+- 🐸 英雄联盟助手
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/serendipity/lol-zhanji.png)
-- [more](https://www.yuque.com/u34495/ee-doc/ep4otg)
-- if you want to show the project, please contact me (qq: 530353222) this case document has certain traffic
 
-## 💬 discussion
-1. [discussion](https://www.yuque.com/u34495/ee-doc/gg691g)
+- [更多项目](https://www.yuque.com/u34495/mivcfg/ep4otg)
 
-## 🌐 core package ee-core
+## 💬 交流
+1. [讨论](https://www.yuque.com/u34495/mivcfg/gg691g)
+
+## 📌 关于pr
+请前往[GitHub项目](https://github.com/dromara/electron-egg)提pr（避免代码同步后，pr被覆盖掉），感谢！
+
+地址：https://github.com/dromara/electron-egg
+
+## 📔 框架核心包 ee-core
 ee-core：[https://github.com/wallace5303/ee-core](https://github.com/wallace5303/ee-core)
 
-## 📚 Dromara member project
+## 📚 Dromara 成员项目
 
 <p align="center">
 <a href="https://gitee.com/dromara/TLog" target="_blank">
@@ -171,5 +178,3 @@ ee-core：[https://github.com/wallace5303/ee-core](https://github.com/wallace530
 <img src="https://oss.dev33.cn/sa-token/link/dromara.png" title="让每一位开源爱好者，体会到开源的快乐。" width="15%">
 </a>
 </p>
-
-

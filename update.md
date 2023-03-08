@@ -1,3 +1,29 @@
+## 3.0.0
+1. 框架核心ee-core重构,升级到2.0.0
+2. 整体架构由 单进程&大对象 模型 转变为：单进程&模块化&多任务。
+3. ee-core模块划分：
+4. addon：插件，不提供api
+5. bin：脚本，提供api
+6. config：配置，提供api
+7. const：常量，提供api
+8. controller：控制器类，提供api
+9. core：核心，不提供api
+10. ee：全局对象，提供api
+11. electron：electron功能，提供api
+12. exception：异常处理，提供api
+13. httpclient：curl请求，提供api
+14. jobs：任务，提供api
+15. loader：加载器，提供api
+16. log：日志，提供api
+17. message：消息，提供api
+18. oldUtils：旧的类库，提供api
+19. ps：进程，提供api
+20. service：服务层类，提供api
+21. socket：通信，提供api
+22. tools：工具，提供api
+23. utils：类库，提供api
+
+
 ## 2.5.0
 1. 增加开发模式自定义协议头
 2. 增加sqlite数据库db文件自定义目录
