@@ -2,7 +2,7 @@
  * 加密配置
  */
 module.exports = {
-  type: 'confusion',
+  type: 'bytecode',
   directory: [
     'electron'
   ],
