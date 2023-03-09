@@ -49,7 +49,7 @@ export default {
       })
     },
     removeViewContent (index) {
-      this.$ipc.invoke(ipcApiRoute.removeViewContent, self.views[index]).then(r => {
+      this.$ipc.invoke(ipcApiRoute.removeViewContent, this.views[index]).then(r => {
         console.log(r);
       })
     },
