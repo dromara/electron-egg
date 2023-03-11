@@ -1,7 +1,7 @@
-const { Appliaction } = require('ee-core');
+const { Application } = require('ee-core');
 const EE = require('ee-core/ee');
 
-class Main extends Appliaction {
+class Main extends Application {
 
   constructor() {
     super();
