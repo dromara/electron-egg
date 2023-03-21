@@ -81,7 +81,7 @@ module.exports = (appInfo) => {
    * 内置socket服务
    */   
   config.socketServer = {
-    enable: true,
+    enable: false,
     port: 7070,
     path: "/socket.io/",
     connectTimeout: 45000,
@@ -98,7 +98,7 @@ module.exports = (appInfo) => {
    * 内置http服务
    */     
   config.httpServer = {
-    enable: true,
+    enable: false,
     https: {
       enable: false, 
       key: '/public/ssl/localhost+1.key',
