@@ -702,6 +702,16 @@ class ExampleController extends Controller {
   }
 
   /**
+   * 创建任务池
+   */ 
+  createJobPool (args, event) {
+
+    
+    
+    return;
+  }  
+
+  /**
    * 测试接口
    */ 
   hello (args) {
