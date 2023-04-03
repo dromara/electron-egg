@@ -7,27 +7,27 @@
  */
 module.exports = async (app) => {
 
-  const { ChildPoolJob } = require('ee-core/jobs');
-  const pool = new ChildPoolJob();
-  //let pids = pool.create(4);
+  // const { ChildPoolJob } = require('ee-core/jobs');
+  // const pool = new ChildPoolJob();
+  // //let pids = pool.create(4);
 
   
-  setTimeout(()=>{
-    pool.create(3).then(pids => {
-      console.log('pids:', pids);
-    });
-  }, 1000)
+  // setTimeout(()=>{
+  //   pool.create(3).then(pids => {
+  //     console.log('pids:', pids);
+  //   });
+  // }, 1000)
 
-  setTimeout(()=>{
-    let myjob = pool.exec('./jobs/example/timer', {jobId});
+  // setTimeout(()=>{
+  //   let myjob = pool.exec('./jobs/example/timer', {jobId});
   
-    // 监听任务进度
-    const channel = 'controller.example.timerJobProgress';
-    myjob.on('job-timer-progress', (data) => {
-      Log.info('[main-process] from TimerJob data:', data);
+  //   // 监听任务进度
+  //   const channel = 'controller.example.timerJobProgress';
+  //   myjob.on('job-timer-progress', (data) => {
+  //     Log.info('[main-process] from TimerJob data:', data);
 
-    })
-  }, 5000)
+  //   })
+  // }, 5000)
 
 
 
