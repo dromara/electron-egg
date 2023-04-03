@@ -686,16 +686,24 @@ class ExampleController extends Controller {
     let jobId = args.id;
     if (args.type == 'timer') {
       let myjob = new ChildJob();
-      myjob.exec('./jobs/example/timer', {jobId});
-  
+      let timerTask = myjob.exec('./jobs/example/timer', {jobId});
+
       // 监听任务进度
       const channel = 'controller.example.timerJobProgress';
-      myjob.on('job-timer-progress', (data) => {
-        Log.info('[main-process] from TimerJob data:', data);
+
+      timerTask.emitter.on('job-timer-progress', (data) => {
+        Log.info('[main-process] timerTask, from TimerJob data:', data);
 
         // 发送数据到渲染进程
         event.reply(`${channel}`, data)
       })
+      
+      // myjob.on('job-timer-progress', (data) => {
+      //   Log.info('[main-process] myjob, from TimerJob data:', data);
+
+      //   // 发送数据到渲染进程
+      //   event.reply(`${channel}`, data)
+      // })
     }
     
     return;
@@ -706,7 +714,7 @@ class ExampleController extends Controller {
    */ 
   createJobPool (args, event) {
 
-    
+
     
     return;
   }  
