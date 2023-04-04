@@ -688,15 +688,15 @@ class ExampleController extends Controller {
       let myjob = new ChildJob();
       
       // 执行任务及监听进度
-      let timerTask = myjob.exec('./jobs/example/timer', {jobId});
       const channel = 'controller.example.timerJobProgress';
+      const timerTask = myjob.exec('./jobs/example/timer', {jobId});
       timerTask.emitter.on('job-timer-progress', (data) => {
         Log.info('[main-process] timerTask, from TimerJob data:', data);
 
         // 发送数据到渲染进程
         event.reply(`${channel}`, data)
       })
-      
+    
       // 执行任务及监听进度 异步
       // myjob.execPromise('./jobs/example/timer', {jobId}).then(task => {
       //   task.emitter.on('job-timer-progress', (data) => {

@@ -2,7 +2,7 @@ const Job = require('ee-core/jobs/baseJobClass');
 const Loader = require('ee-core/loader');
 const Log = require('ee-core/log');
 const Ps = require('ee-core/ps');
-const Message = require('ee-core/message');
+const { childMessage } = require('ee-core/message');
 const Hello = Loader.requireJobsModule('./example/hello');
 
 /**
@@ -23,14 +23,13 @@ class TimerJob extends Job {
     Log.info("[child-process] TimerJob params: ", this.params);
 
     // 计时器任务
-    let childMessage = Message.childMessage;
     let eventName = 'job-timer-progress';
     let number = 0;
     let jobId = this.params.jobId;
     setInterval(function() {
       Hello.welcome();
 
-      childMessage.sendToMain(eventName, {jobId, number});
+      childMessage.send(eventName, {jobId, number});
       number++;
     }, 1000);
 
