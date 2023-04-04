@@ -11,7 +11,6 @@ const {
   powerMonitor, screen, nativeTheme
 } = require('electron');
 const dayjs = require('dayjs');
-const { ChildJob } = require('ee-core/jobs');
 const Ps = require('ee-core/ps');
 const Log = require('ee-core/log');
 
@@ -684,29 +683,8 @@ class ExampleController extends Controller {
    */ 
   someJob (args, event) {
     let jobId = args.id;
-    if (args.type == 'timer') {
-      let myjob = new ChildJob();
-      
-      // 执行任务及监听进度
-      const channel = 'controller.example.timerJobProgress';
-      const timerTask = myjob.exec('./jobs/example/timer', {jobId});
-      timerTask.emitter.on('job-timer-progress', (data) => {
-        Log.info('[main-process] timerTask, from TimerJob data:', data);
-
-        // 发送数据到渲染进程
-        event.reply(`${channel}`, data)
-      })
-    
-      // 执行任务及监听进度 异步
-      // myjob.execPromise('./jobs/example/timer', {jobId}).then(task => {
-      //   task.emitter.on('job-timer-progress', (data) => {
-      //     Log.info('[main-process] timerTask, from TimerJob data:', data);
-
-      //     // 发送数据到渲染进程
-      //     event.reply(`${channel}`, data)
-      //   })
-      // });
-    }
+    let type = args.type;
+    this.service.example.doJob(jobId, type, event);
     
     return;
   }
@@ -714,12 +692,23 @@ class ExampleController extends Controller {
   /**
    * 创建任务池
    */ 
-  createJobPool (args, event) {
+  async createPool (args, event) {
+    let num = args.number;
+    this.service.example.doCreatePool(num, event);
 
+    return;
+  }
 
+  /**
+   * 通过进程池执行任务
+   */ 
+  someJobByPool (args, event) {
+    let jobId = args.id;
+    let type = args.type;
+    this.service.example.doJobByPool(jobId, type, event);
     
     return;
-  }  
+  }
 
   /**
    * 测试接口
