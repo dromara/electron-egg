@@ -35,8 +35,8 @@ class TimerJob extends Job {
 
     // 用 setTimeout 模拟任务运行时长
     // 任务完成后，必须调用 Ps.exit() 方法，让进程退出，否则会常驻内存
-    setTimeout(function(){
-      Ps.exit(1);
+    setTimeout(() => {
+      Ps.exitChildJob(1);
     }, 10 * 1000)
   }   
 }

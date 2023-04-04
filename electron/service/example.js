@@ -87,7 +87,18 @@ class ExampleService extends Service {
         event.reply(`${channel}`, data)
       })
     }
-  } 
+  }
+
+  /**
+   * test 
+   */ 
+  monitorJob() {
+    setInterval(() => {
+      let jobPids = this.myJobPool.getPids();
+      let jobPoolPids = this.myJobPool.getPids();
+      Log.info(`[main-process] [monitorJob] jobPids: ${jobPids}, jobPoolPids: ${jobPoolPids}`);
+    }, 5000)
+  }  
 
   /**
    * 上传到smms
