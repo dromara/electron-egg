@@ -26,7 +26,7 @@ class TimerJob extends Job {
     let eventName = 'job-timer-progress';
     let number = 0;
     let jobId = this.params.jobId;
-    setInterval(function() {
+    let timer = setInterval(function() {
       Hello.welcome();
 
       childMessage.send(eventName, {jobId, number});
@@ -34,10 +34,18 @@ class TimerJob extends Job {
     }, 1000);
 
     // 用 setTimeout 模拟任务运行时长
-    // 任务完成后，必须调用 Ps.exit() 方法，让进程退出，否则会常驻内存
     setTimeout(() => {
-      Ps.exitChildJob(1);
-    }, 10 * 1000)
+      // 关闭定时器
+      clearInterval(timer);
+
+      // 如果是childJob任务，必须调用 Ps.exit() 方法，让进程退出，否则会常驻内存
+      // 如果是childPoolJob任务，常驻内存，等待下一个任务
+      if (Ps.isChildJob()) {
+        childMessage.send(eventName, {jobId, number:0, pid:0});
+        Ps.exit();
+      }
+
+    }, 20 * 1000)
   }   
 }
 

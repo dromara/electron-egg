@@ -8,12 +8,12 @@
     <div class="one-block-2">
       <a-space>
         <a-button @click="runJob(1)">执行任务1</a-button>
-        进度：{{ progress1 }}
+        进度：{{ progress1 }} ， 进程pid：{{ progress1_pid }}
       </a-space>
       <p></p>
       <a-space>
         <a-button @click="runJob(2)">执行任务2</a-button>
-        进度：{{ progress2 }}
+        进度：{{ progress2 }} ， 进程pid：{{ progress2_pid }}
       </a-space>            
     </div>
     <div class="one-block-1">
@@ -45,9 +45,13 @@ export default {
   data() {
     return {
       progress1: 0,
+      progress1_pid: 0,
       progress2: 0,
+      progress2_pid: 0,
       progress3: 0,
+      progress3_pid: 0,
       progress4: 0,
+      progress4_pid: 0,
       processPids: '',
     }
   },
@@ -59,18 +63,17 @@ export default {
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
       this.$ipc.removeAllListeners(ipcApiRoute.timerJobProgress);
       this.$ipc.removeAllListeners(ipcApiRoute.createPoolNotice);
-      //this.$ipc.removeAllListeners(ipcApiRoute.timerJobProgressByPool);
 
       // 监听任务进度
       this.$ipc.on(ipcApiRoute.timerJobProgress, (event, result) => {
-        console.log('[ipcRenderer] [someJob] result:', result);
-
         switch (result.jobId) {
           case 1:
             this.progress1 = result.number;
+            this.progress1_pid = result.pid == 0 ? result.pid : this.progress1_pid;
             break;
           case 2:
             this.progress2 = result.number;
+            this.progress2_pid = result.pid == 0 ? result.pid : this.progress2_pid;
             break;
           case 3:
             this.progress3 = result.number;
@@ -83,31 +86,25 @@ export default {
 
       // 监听pool
       this.$ipc.on(ipcApiRoute.createPoolNotice, (event, result) => {
-        console.log('[ipcRenderer] [createPoolNotice] result:', result);
-
         let pidsStr = JSON.stringify(result);
         this.processPids = pidsStr;
-      })
-      // 监听任务进度 pool
-      // this.$ipc.on(ipcApiRoute.timerJobProgressByPool, (event, result) => {
-      //   console.log('[ipcRenderer] [someJobByPool] result:', result);
-
-      //   switch (result.jobId) {
-      //     case 1:
-      //       this.progress3 = result.number;
-      //       break;
-      //     case 2:
-      //       this.progress4 = result.number;
-      //       break;
-      //   }
-      // })    
+      })   
     },
     runJob(jobId) {
       let params = {
         id: jobId,
         type: 'timer'
       }
-      this.$ipc.send(ipcApiRoute.someJob, params)
+      this.$ipc.invoke(ipcApiRoute.someJob, params).then(data => {
+        switch (data.jobId) {
+          case 1:
+            this.progress1_pid = data.pid;
+            break;
+          case 2:
+            this.progress2_pid = data.pid;
+            break;
+        }
+      })
     },
     createPool() {
       let params = {

@@ -16,7 +16,6 @@ class ExampleService extends Service {
     // 在构造函数中初始化一些变量
     this.myJob = new ChildJob();
     this.myJobPool = new ChildPoolJob();
-    console.log('ddddddddddddddd');
   }
 
   /**
@@ -35,6 +34,7 @@ class ExampleService extends Service {
    * 执行任务
    */ 
   doJob(jobId, type, event) {
+    let pid = 0;
     if (type == 'timer') {
       
       // 执行任务及监听进度
@@ -44,7 +44,7 @@ class ExampleService extends Service {
         Log.info('[main-process] timerTask, from TimerJob data:', data);
 
         // 发送数据到渲染进程
-        event.reply(`${channel}`, data)
+        event.sender.send(`${channel}`, data)
       })
     
       // 执行任务及监听进度 异步
@@ -53,10 +53,14 @@ class ExampleService extends Service {
       //     Log.info('[main-process] timerTask, from TimerJob data:', data);
 
       //     // 发送数据到渲染进程
-      //     event.reply(`${channel}`, data)
+      //     event.sender.send(`${channel}`, data)
       //   })
       // });
+
+      pid = timerTask.pid; 
     }
+
+    return pid;
   }
 
   /**
@@ -94,7 +98,7 @@ class ExampleService extends Service {
    */ 
   monitorJob() {
     setInterval(() => {
-      let jobPids = this.myJobPool.getPids();
+      let jobPids = this.myJob.getPids();
       let jobPoolPids = this.myJobPool.getPids();
       Log.info(`[main-process] [monitorJob] jobPids: ${jobPids}, jobPoolPids: ${jobPoolPids}`);
     }, 5000)
