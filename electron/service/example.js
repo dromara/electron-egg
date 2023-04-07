@@ -35,16 +35,15 @@ class ExampleService extends Service {
   /**
    * 执行任务
    */ 
-  doJob(jobId, type, event) {
-    let pid = 0;
-    if (type == 'timer') {
-      
+  doJob(jobId, action, event) {
+    let res = {};
+    let oneTask;
+    const channel = 'controller.example.timerJobProgress';
+    if (action == 'create') {
       // 执行任务及监听进度
-      const channel = 'controller.example.timerJobProgress';
       const timerTask = this.myJob.exec('./jobs/example/timer', {jobId});
       timerTask.emitter.on('job-timer-progress', (data) => {
         Log.info('[main-process] timerTask, from TimerJob data:', data);
-
         // 发送数据到渲染进程
         event.sender.send(`${channel}`, data)
       })
@@ -53,29 +52,32 @@ class ExampleService extends Service {
       // myjob.execPromise('./jobs/example/timer', {jobId}).then(task => {
       //   task.emitter.on('job-timer-progress', (data) => {
       //     Log.info('[main-process] timerTask, from TimerJob data:', data);
-
       //     // 发送数据到渲染进程
       //     event.sender.send(`${channel}`, data)
       //   })
       // });
 
-      pid = timerTask.pid; 
+      res.pid = timerTask.pid; 
       this.taskForJob[jobId] = timerTask;
     }
-
-    return pid;
-  }
-
-  /**
-   * 关闭任务
-   */ 
-  closeJob(jobId, type, event) {
-    let oneTask = this.taskForJob[jobId];
-    if (type == 'timer') {
+    if (action == 'pause') {
+      oneTask = this.taskForJob[jobId];
+      // 不支持window平台
+      oneTask.sleep();
+    }
+    if (action == 'continue') {
+      oneTask = this.taskForJob[jobId];
+      // 不支持window平台
+      oneTask.wakeup();
+    }
+    if (action == 'close') {
+      oneTask = this.taskForJob[jobId];
       oneTask.kill();
       const channel = 'controller.example.timerJobProgress';
-      event.reply(`${channel}`, {jobId, number:0, pid:0})
-    }
+      event.reply(`${channel}`, {jobId, number:0, pid:0});
+    }    
+
+    return res;
   }
 
   /**

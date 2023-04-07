@@ -7,15 +7,19 @@
     </div>  
     <div class="one-block-2">
       <a-space>
-        <a-button @click="runJob(1)">执行任务1</a-button>
+        <a-button @click="runJob(1, 'create')">执行任务1</a-button>
         进度：{{ progress1 }} ， 进程pid：{{ progress1_pid }}
-        <a-button @click="closeJob(1)">关闭任务1</a-button>
+        <a-button @click="runJob(1, 'pause')">暂停</a-button>
+        <a-button @click="runJob(1, 'continue')">继续</a-button>
+        <a-button @click="runJob(1, 'close')">关闭</a-button>
       </a-space>
       <p></p>
       <a-space>
-        <a-button @click="runJob(2)">执行任务2</a-button>
+        <a-button @click="runJob(2, 'create')">执行任务2</a-button>
         进度：{{ progress2 }} ， 进程pid：{{ progress2_pid }}
-        <a-button @click="closeJob(2)">关闭任务2</a-button>
+        <a-button @click="runJob(2, 'pause')">暂停</a-button>
+        <a-button @click="runJob(2, 'continue')">继续</a-button>
+        <a-button @click="runJob(2, 'close')">关闭</a-button>
       </a-space>            
     </div>
     <div class="one-block-1">
@@ -32,13 +36,11 @@
       <a-space>
         <a-button @click="runJobByPool(3)">执行任务3</a-button>
         进度：{{ progress3 }} ， 进程pid：{{ progress3_pid }}
-        <a-button @click="closeJob(3)">关闭任务3</a-button>
       </a-space>
       <p></p>
       <a-space>
         <a-button @click="runJobByPool(4)">执行任务4</a-button>
         进度：{{ progress4 }} ， 进程pid：{{ progress4_pid }}
-        <a-button @click="closeJob(4)">关闭任务4</a-button>
       </a-space>            
     </div>            
   </div>
@@ -96,28 +98,26 @@ export default {
         this.processPids = pidsStr;
       })   
     },
-    runJob(jobId) {
+    runJob(jobId, operation) {
       let params = {
         id: jobId,
-        type: 'timer'
+        type: 'timer',
+        action: operation
       }
       this.$ipc.invoke(ipcApiRoute.someJob, params).then(data => {
         switch (data.jobId) {
           case 1:
-            this.progress1_pid = data.pid;
+            if (data.action == 'create') {
+              this.progress1_pid = data.result.pid;
+            }
             break;
           case 2:
-            this.progress2_pid = data.pid;
+            if (data.action == 'create') {
+              this.progress2_pid = data.result.pid;
+            }
             break;
         }
       })
-    },
-    closeJob(jobId) {
-      let params = {
-        id: jobId,
-        type: 'timer'
-      }
-      this.$ipc.send(ipcApiRoute.closeJob, params);
     },
     createPool() {
       let params = {

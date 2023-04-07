@@ -36,7 +36,6 @@ const ipcApiRoute = {
   closeJavaServer: 'controller.example.closeJavaServer',
   someJob: 'controller.example.someJob',
   timerJobProgress: 'controller.example.timerJobProgress',
-  closeJob: 'controller.example.closeJob',
   createPool: 'controller.example.createPool',
   createPoolNotice: 'controller.example.createPoolNotice',
   someJobByPool: 'controller.example.someJobByPool',

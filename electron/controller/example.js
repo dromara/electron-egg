@@ -683,26 +683,32 @@ class ExampleController extends Controller {
    */ 
   someJob (args, event) {
     let jobId = args.id;
-    let type = args.type;
-    let pid = this.service.example.doJob(jobId, type, event);
+    let action = args.action;
+    
+    let result;
+    switch (action) {
+      case 'create':
+        result = this.service.example.doJob(jobId, action, event);
+        break;
+      case 'pause':
+        this.service.example.doJob(jobId, action, event);
+        break;
+      case 'continue':
+        this.service.example.doJob(jobId, action, event);
+        break;        
+      case 'close':
+        this.service.example.doJob(jobId, action, event);
+        break;
+      default:  
+    }
     
     let data = {
       jobId,
-      pid
+      action,
+      result
     }
     return data;
   }
-
-  /**
-   * 关闭任务
-   */ 
-  closeJob (args, event) {
-    let jobId = args.id;
-    let type = args.type;
-    this.service.example.closeJob(jobId, type, event);
-    
-    return;
-  }  
 
   /**
    * 创建任务池
