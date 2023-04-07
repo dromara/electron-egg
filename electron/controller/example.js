@@ -694,6 +694,17 @@ class ExampleController extends Controller {
   }
 
   /**
+   * 关闭任务
+   */ 
+  closeJob (args, event) {
+    let jobId = args.id;
+    let type = args.type;
+    this.service.example.closeJob(jobId, type, event);
+    
+    return;
+  }  
+
+  /**
    * 创建任务池
    */ 
   async createPool (args, event) {
@@ -712,9 +723,13 @@ class ExampleController extends Controller {
   someJobByPool (args, event) {
     let jobId = args.id;
     let type = args.type;
-    this.service.example.doJobByPool(jobId, type, event);
+    let pid = this.service.example.doJobByPool(jobId, type, event);
     
-    return;
+    let data = {
+      jobId,
+      pid
+    }
+    return data;
   }
 
   /**

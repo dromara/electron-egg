@@ -16,6 +16,8 @@ class ExampleService extends Service {
     // 在构造函数中初始化一些变量
     this.myJob = new ChildJob();
     this.myJobPool = new ChildPoolJob();
+    this.taskForJob = {};
+    this.taskForJobPool = {};
   }
 
   /**
@@ -58,9 +60,22 @@ class ExampleService extends Service {
       // });
 
       pid = timerTask.pid; 
+      this.taskForJob[jobId] = timerTask;
     }
 
     return pid;
+  }
+
+  /**
+   * 关闭任务
+   */ 
+  closeJob(jobId, type, event) {
+    let oneTask = this.taskForJob[jobId];
+    if (type == 'timer') {
+      oneTask.kill();
+      const channel = 'controller.example.timerJobProgress';
+      event.reply(`${channel}`, {jobId, number:0, pid:0})
+    }
   }
 
   /**
@@ -79,6 +94,7 @@ class ExampleService extends Service {
    * 通过进程池执行任务
    */ 
   doJobByPool(jobId, type, event) {
+    let pid = 0;
     if (type == 'timer') {
 
       // 执行任务及监听进度
@@ -88,9 +104,11 @@ class ExampleService extends Service {
         Log.info('[main-process] [ChildPoolJob] timerTask, from TimerJob data:', data);
 
         // 发送数据到渲染进程
-        event.reply(`${channel}`, data)
+        event.sender.send(`${channel}`, data)
       })
+      pid = timerTask.pid; 
     }
+    return pid;
   }
 
   /**

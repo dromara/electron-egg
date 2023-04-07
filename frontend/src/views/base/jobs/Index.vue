@@ -9,11 +9,13 @@
       <a-space>
         <a-button @click="runJob(1)">执行任务1</a-button>
         进度：{{ progress1 }} ， 进程pid：{{ progress1_pid }}
+        <a-button @click="closeJob(1)">关闭任务1</a-button>
       </a-space>
       <p></p>
       <a-space>
         <a-button @click="runJob(2)">执行任务2</a-button>
         进度：{{ progress2 }} ， 进程pid：{{ progress2_pid }}
+        <a-button @click="closeJob(2)">关闭任务2</a-button>
       </a-space>            
     </div>
     <div class="one-block-1">
@@ -29,12 +31,14 @@
       <p></p>      
       <a-space>
         <a-button @click="runJobByPool(3)">执行任务3</a-button>
-        进度：{{ progress3 }}
+        进度：{{ progress3 }} ， 进程pid：{{ progress3_pid }}
+        <a-button @click="closeJob(3)">关闭任务3</a-button>
       </a-space>
       <p></p>
       <a-space>
         <a-button @click="runJobByPool(4)">执行任务4</a-button>
-        进度：{{ progress4 }}
+        进度：{{ progress4 }} ， 进程pid：{{ progress4_pid }}
+        <a-button @click="closeJob(4)">关闭任务4</a-button>
       </a-space>            
     </div>            
   </div>
@@ -77,9 +81,11 @@ export default {
             break;
           case 3:
             this.progress3 = result.number;
+            this.progress3_pid = result.pid == 0 ? result.pid : this.progress3_pid;
             break;
           case 4:
-            this.progress4 = result.number;            
+            this.progress4 = result.number;  
+            this.progress4_pid = result.pid == 0 ? result.pid : this.progress4_pid;          
             break;
         }
       })
@@ -106,6 +112,13 @@ export default {
         }
       })
     },
+    closeJob(jobId) {
+      let params = {
+        id: jobId,
+        type: 'timer'
+      }
+      this.$ipc.send(ipcApiRoute.closeJob, params);
+    },
     createPool() {
       let params = {
         number: 3,
@@ -117,7 +130,16 @@ export default {
         id: jobId,
         type: 'timer'
       }
-      this.$ipc.send(ipcApiRoute.someJobByPool, params)
+      this.$ipc.invoke(ipcApiRoute.someJobByPool, params).then(data => {
+        switch (data.jobId) {
+          case 3:
+            this.progress3_pid = data.pid;
+            break;
+          case 4:
+            this.progress4_pid = data.pid;
+            break;
+        }
+      })
     },
   }
 }

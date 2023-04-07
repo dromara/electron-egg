@@ -38,10 +38,12 @@ class TimerJob extends Job {
       // 关闭定时器
       clearInterval(timer);
 
+      // 任务结束，重置前端显示
+      childMessage.send(eventName, {jobId, number:0, pid:0});
+
       // 如果是childJob任务，必须调用 Ps.exit() 方法，让进程退出，否则会常驻内存
       // 如果是childPoolJob任务，常驻内存，等待下一个任务
       if (Ps.isChildJob()) {
-        childMessage.send(eventName, {jobId, number:0, pid:0});
         Ps.exit();
       }
 
