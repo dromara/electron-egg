@@ -132,9 +132,8 @@ export default {
       this.$ipc.invoke(ipcApiRoute.someJobByPool, params).then(data => {
         switch (data.jobId) {
           case 3:
-            this.progress3_pid = data.pid;
             if (data.action == 'run') {
-              this.progress1_pid = data.result.pid;
+              this.progress3_pid = data.result.pid;
             }
             break;
           case 4:

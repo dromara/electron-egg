@@ -86,7 +86,7 @@ class ExampleService extends Service {
     let res = {};
     let timerTask;
     const channel = 'controller.example.timerJobProgress';
-    if (action == 'create') {
+    if (action == 'run') {
 
       // 执行任务及监听进度
       timerTask = this.myJobPool.run('./jobs/example/timer', {jobId});
