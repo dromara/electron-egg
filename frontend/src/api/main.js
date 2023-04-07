@@ -39,7 +39,6 @@ const ipcApiRoute = {
   createPool: 'controller.example.createPool',
   createPoolNotice: 'controller.example.createPoolNotice',
   someJobByPool: 'controller.example.someJobByPool',
-  timerJobProgressByPool: 'controller.example.timerJobProgressByPool',
   hello: 'controller.example.hello',
 }
 

@@ -30,13 +30,13 @@
       </a-space>
       <p></p>      
       <a-space>
-        <a-button @click="runJobByPool(3, 'create')">执行任务3</a-button>
+        <a-button @click="runJobByPool(3, 'run')">执行任务3</a-button>
         进度：{{ progress3 }} ， 进程pid：{{ progress3_pid }}
         <a-button @click="runJob(3, 'close')">关闭</a-button>
       </a-space>
       <p></p>
       <a-space>
-        <a-button @click="runJobByPool(4, 'create')">执行任务4</a-button>
+        <a-button @click="runJobByPool(4, 'run')">执行任务4</a-button>
         进度：{{ progress4 }} ， 进程pid：{{ progress4_pid }}
         <a-button @click="runJob(4, 'close')">关闭</a-button>
       </a-space>            
@@ -133,9 +133,14 @@ export default {
         switch (data.jobId) {
           case 3:
             this.progress3_pid = data.pid;
+            if (data.action == 'run') {
+              this.progress1_pid = data.result.pid;
+            }
             break;
           case 4:
-            this.progress4_pid = data.pid;
+            if (data.action == 'run') {
+              this.progress4_pid = data.result.pid;
+            }
             break;
         }
       })

@@ -63,7 +63,7 @@ class ExampleService extends Service {
     if (action == 'close') {
       oneTask = this.taskForJob[jobId];
       oneTask.kill();
-      event.reply(`${channel}`, {jobId, number:0, pid:0});
+      event.sender.send(`${channel}`, {jobId, number:0, pid:0});
     }    
 
     return res;
@@ -74,8 +74,6 @@ class ExampleService extends Service {
    */ 
   doCreatePool(num, event) {
     const channel = 'controller.example.createPoolNotice';
-
-    // let pids = await myjobPool.create(num);
     this.myJobPool.create(num).then(pids => {
       event.reply(`${channel}`, pids);
     });    
@@ -84,22 +82,26 @@ class ExampleService extends Service {
   /**
    * 通过进程池执行任务
    */ 
-  doJobByPool(jobId, type, event) {
-    let pid = 0;
-    if (type == 'timer') {
+  doJobByPool(jobId, action, event) {
+    let res = {};
+    let timerTask;
+    const channel = 'controller.example.timerJobProgress';
+    if (action == 'create') {
 
       // 执行任务及监听进度
-      const channel = 'controller.example.timerJobProgress';
-      const timerTask = this.myJobPool.run('./jobs/example/timer', {jobId});
+      timerTask = this.myJobPool.run('./jobs/example/timer', {jobId});
       timerTask.emitter.on('job-timer-progress', (data) => {
         Log.info('[main-process] [ChildPoolJob] timerTask, from TimerJob data:', data);
 
         // 发送数据到渲染进程
         event.sender.send(`${channel}`, data)
       })
-      pid = timerTask.pid; 
+      res.pid = timerTask.pid; 
+
+      // ???
+      //this.taskForJobPool[jobId] = timerTask;
     }
-    return pid;
+    return res;
   }
 
   /**

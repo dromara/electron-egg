@@ -689,13 +689,7 @@ class ExampleController extends Controller {
     switch (action) {
       case 'create':
         result = this.service.example.doJob(jobId, action, event);
-        break;
-      case 'pause':
-        this.service.example.doJob(jobId, action, event);
-        break;
-      case 'continue':
-        this.service.example.doJob(jobId, action, event);
-        break;        
+        break;       
       case 'close':
         this.service.example.doJob(jobId, action, event);
         break;
@@ -728,12 +722,20 @@ class ExampleController extends Controller {
    */ 
   someJobByPool (args, event) {
     let jobId = args.id;
-    let type = args.type;
-    let pid = this.service.example.doJobByPool(jobId, type, event);
+    let action = args.action;
+    
+    let result;
+    switch (action) {
+      case 'run':
+        result = this.service.example.doJobByPool(jobId, action, event);
+        break;
+      default:  
+    }
     
     let data = {
       jobId,
-      pid
+      action,
+      result
     }
     return data;
   }
