@@ -9,16 +9,12 @@
       <a-space>
         <a-button @click="runJob(1, 'create')">执行任务1</a-button>
         进度：{{ progress1 }} ， 进程pid：{{ progress1_pid }}
-        <a-button @click="runJob(1, 'pause')">暂停</a-button>
-        <a-button @click="runJob(1, 'continue')">继续</a-button>
         <a-button @click="runJob(1, 'close')">关闭</a-button>
       </a-space>
       <p></p>
       <a-space>
         <a-button @click="runJob(2, 'create')">执行任务2</a-button>
         进度：{{ progress2 }} ， 进程pid：{{ progress2_pid }}
-        <a-button @click="runJob(2, 'pause')">暂停</a-button>
-        <a-button @click="runJob(2, 'continue')">继续</a-button>
         <a-button @click="runJob(2, 'close')">关闭</a-button>
       </a-space>            
     </div>
@@ -34,13 +30,15 @@
       </a-space>
       <p></p>      
       <a-space>
-        <a-button @click="runJobByPool(3)">执行任务3</a-button>
+        <a-button @click="runJobByPool(3, 'create')">执行任务3</a-button>
         进度：{{ progress3 }} ， 进程pid：{{ progress3_pid }}
+        <a-button @click="runJob(3, 'close')">关闭</a-button>
       </a-space>
       <p></p>
       <a-space>
-        <a-button @click="runJobByPool(4)">执行任务4</a-button>
+        <a-button @click="runJobByPool(4, 'create')">执行任务4</a-button>
         进度：{{ progress4 }} ， 进程pid：{{ progress4_pid }}
+        <a-button @click="runJob(4, 'close')">关闭</a-button>
       </a-space>            
     </div>            
   </div>
@@ -125,10 +123,11 @@ export default {
       }
       this.$ipc.send(ipcApiRoute.createPool, params);
     },
-    runJobByPool(jobId) {
+    runJobByPool(jobId, operation) {
       let params = {
         id: jobId,
-        type: 'timer'
+        type: 'timer',
+        action: operation
       }
       this.$ipc.invoke(ipcApiRoute.someJobByPool, params).then(data => {
         switch (data.jobId) {

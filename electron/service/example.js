@@ -60,20 +60,9 @@ class ExampleService extends Service {
       res.pid = timerTask.pid; 
       this.taskForJob[jobId] = timerTask;
     }
-    if (action == 'pause') {
-      oneTask = this.taskForJob[jobId];
-      // 不支持window平台
-      oneTask.sleep();
-    }
-    if (action == 'continue') {
-      oneTask = this.taskForJob[jobId];
-      // 不支持window平台
-      oneTask.wakeup();
-    }
     if (action == 'close') {
       oneTask = this.taskForJob[jobId];
       oneTask.kill();
-      const channel = 'controller.example.timerJobProgress';
       event.reply(`${channel}`, {jobId, number:0, pid:0});
     }    
 
