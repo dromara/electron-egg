@@ -711,7 +711,7 @@ class ExampleController extends Controller {
     let num = args.number;
     this.service.example.doCreatePool(num, event);
 
-    // monitor
+    // test monitor
     this.service.example.monitorJob();
 
     return;
