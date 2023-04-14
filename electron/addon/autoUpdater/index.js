@@ -21,7 +21,7 @@ class AutoUpdaterAddon {
   create () {
     Log.info('[addon:autoUpdater] load');
 
-    const app = this.app;
+    // const app = this.app;
     const cfg = Conf.getValue('addons.autoUpdater');
     if ((is.windows() && cfg.windows)
         || (is.macOS() && cfg.macOS)
@@ -106,7 +106,7 @@ class AutoUpdaterAddon {
       info.desc = '下载完成';
       this.sendStatusToWindow(info);
       // quit and update
-      app.appQuit();
+      // app.appQuit();
       autoUpdater.quitAndInstall();
     });
   }
