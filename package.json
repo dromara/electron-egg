@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -27,6 +27,7 @@
     "build-lp-64": "electron-builder -l=pacman --x64",
     "rd": "ee-core rd --dist_dir=./frontend/dist",
     "encrypt": "ee-core encrypt",
+    "clean": "ee-core clean",
     "rebuild": "electron-rebuild",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
