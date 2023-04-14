@@ -32,13 +32,11 @@
       <a-space>
         <a-button @click="runJobByPool(3, 'run')">执行任务3</a-button>
         进度：{{ progress3 }} ， 进程pid：{{ progress3_pid }}
-        <a-button @click="runJob(3, 'close')">关闭</a-button>
       </a-space>
       <p></p>
       <a-space>
         <a-button @click="runJobByPool(4, 'run')">执行任务4</a-button>
         进度：{{ progress4 }} ， 进程pid：{{ progress4_pid }}
-        <a-button @click="runJob(4, 'close')">关闭</a-button>
       </a-space>            
     </div>            
   </div>
