@@ -9,9 +9,6 @@ module.exports = {
     '!electron/config/encrypt.js',
     '!electron/config/nodemon.json'
   ],
-  cleanFiles: [
-    'electron',
-  ],
   fileExt: ['.js'],
   confusionOptions: {
     compact: true,      
