@@ -2,7 +2,7 @@
 [![star](https://gitee.com/dromara/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/dromara/electron-egg/stargazers)
 
 <div align=center>
-<h3>🎉🎉🎉 electron-egg v3 发布，框架下载量突破10万+，新官网正在建设中 🎉🎉🎉</h3>
+<h3>🎉🎉🎉 框架下载量突破10万+，新官网正在建设中 🎉🎉🎉</h3>
 </div>
 <br>
 
