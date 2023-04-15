@@ -2,12 +2,16 @@
 [![star](https://gitee.com/dromara/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/dromara/electron-egg/stargazers)
 
 <div align=center>
+<h3>🎉🎉🎉 electron-egg v3 发布，框架下载量突破10万+，新官网正在建设中 🎉🎉🎉</h3>
+</div>
+<br>
+
+<div align=center>
 <img src="https://wallace5303.gitee.io/ee/images/electron-egg/logo.png" width="150" height="150" />
 </div>
 
 <div align=center>
 <h3><strong>一个入门简单、跨平台、企业级桌面软件开发框架</strong></h3>
-<h4>框架下载量突破10万+，新官网正在建设中...</h4>
 </div>
 <br>
 
