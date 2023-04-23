@@ -1,8 +1,8 @@
-const getPort = require('get-port');
 const server = require("./server");
 const { app: electronApp } = require('electron');
 const Log = require('ee-core/log');
 const Conf = require('ee-core/config');
+const GetPort = require('ee-core/utils/get-port');
 
 /**
  * java server插件
@@ -59,7 +59,7 @@ class JavaServerAddon {
     if (!this.cfg.enable) {
       return;
     }
-    const javaPort = await getPort({ port: this.cfg.port });
+    const javaPort = await GetPort({ port: this.cfg.port });
     process.env.EE_JAVA_PORT = javaPort;
     this.cfg.port = javaPort;
 
