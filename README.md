@@ -2,7 +2,7 @@
 [![star](https://gitee.com/dromara/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/dromara/electron-egg/stargazers)
 
 <div align=center>
-<h3>🎉🎉🎉 框架下载量突破10万+，新官网正在建设中 🎉🎉🎉</h3>
+<h3>🎉🎉🎉 框架下载量突破10万+ 🎉🎉🎉</h3>
 </div>
 <br>
 
@@ -15,7 +15,7 @@
 </div>
 <br>
 
-## 🌏 [English](https://www.yuque.com/u34495/ee-doc) | [中文](https://www.yuque.com/u34495/mivcfg)
+## 🌏 [English](https://www.yuque.com/u34495/ee-doc) | [中文](https://www.kaka996.com/)
 
 ## 📋 介绍
 - 🍩 **为什么使用？** 桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
@@ -33,7 +33,7 @@
 [捐赠给Dromara组织](https://dromara.gitee.io/donate.html)
 
 ## 📚 文档
-- [教程文档](https://www.yuque.com/u34495/mivcfg)
+- [教程文档](https://www.kaka996.com/)
 
 ## 📦 特性
 1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版、国产UOS、Deepin、麒麟等
@@ -79,7 +79,7 @@
 
 ## 📒 开始使用
 
-- ✒️ [安装文档](https://www.yuque.com/u34495/mivcfg/ltgte9)
+- ✒️ [安装文档](https://www.kaka996.com/pages/e64ff6/)
     
 ## 🐶 项目案例
 - 🐟 EE框架已经应用于医疗、学校、政务、股票交易、ERP、娱乐、视频、企业等领域客户端
@@ -87,10 +87,10 @@
 - 🐸 英雄联盟助手
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/serendipity/lol-zhanji.png)
 
-- [更多项目](https://www.yuque.com/u34495/mivcfg/ep4otg)
+- [更多项目](https://www.kaka996.com/pages/eadf46/)
 
 ## 💬 交流
-1. [讨论](https://www.yuque.com/u34495/mivcfg/gg691g)
+1. [讨论](https://www.kaka996.com/pages/c2720e/)
 
 ## 📌 关于pr
 请前往[GitHub项目](https://github.com/dromara/electron-egg)提pr（避免代码同步后，pr被覆盖掉），感谢！

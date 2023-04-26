@@ -14,13 +14,13 @@ class StorageService extends Service {
   constructor (ctx) {
     super(ctx);
 
-    // lowdb数据库
+    // jsondb数据库
     this.systemDB = Storage.connection('system');
 
-    let lowdbOptions = {
-      driver: 'lowdb'
+    let jsondbOptions = {
+      driver: 'jsondb'
     }
-    this.demoDB = Storage.connection('demo', lowdbOptions);  
+    this.demoDB = Storage.connection('demo', jsondbOptions);  
     this.demoDBKey = {
       test_data: 'test_data'
     };
