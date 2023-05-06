@@ -1,6 +1,5 @@
 'use strict';
 
-const dayjs = require('dayjs');
 const path = require('path');
 
 /**
@@ -65,8 +64,15 @@ module.exports = (appInfo) => {
    * ee框架日志
    */  
   config.logger = {
-    appLogName: `ee-${dayjs().format('YYYY-MM-DD')}.log`, 
-    errorLogName: `ee-error-${dayjs().format('YYYY-MM-DD')}.log` 
+    encoding: 'utf8',
+    level: 'INFO',
+    outputJSON: false,
+    buffer: true,
+    enablePerformanceTimer: false,
+    rotator: 'day',
+    appLogName: 'ee.log',
+    coreLogName: 'ee-core.log',
+    errorLogName: 'ee-error.log' 
   }
 
   /**
