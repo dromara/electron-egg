@@ -26,12 +26,6 @@
 - 🏆 码云最有价值开源项目
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
-## ❤️支持
-### 如果你觉得electron-egg不错，可以捐赠请维护者吃包辣条~，在此表示感谢^_^
-[Gitee上捐赠](https://gitee.com/dromara/electron-egg)
-
-[捐赠给Dromara组织](https://dromara.gitee.io/donate.html)
-
 ## 📚 文档
 - [教程文档](https://www.kaka996.com/)
 
