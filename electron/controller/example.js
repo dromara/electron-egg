@@ -13,6 +13,7 @@ const {
 const dayjs = require('dayjs');
 const Ps = require('ee-core/ps');
 const Log = require('ee-core/log');
+const Utils = require('ee-core/utils');
 
 let myTimer = null;
 let browserViewObj = null;
@@ -40,8 +41,15 @@ class ExampleController extends Controller {
   async test () {
     const result = await this.service.example.test('electron');
 
-    let tmpDir = Ps.getLogDir();
-    Log.info('tmpDir:', tmpDir);
+    // let tmpDir = Ps.getLogDir();
+    // Log.info('tmpDir:', tmpDir);
+
+    let mid = await Utils.machineIdSync(true);
+    Log.info('mid 11111111:', mid);
+
+    Utils.machineId().then((id) => {
+      Log.info('mid 222222222:', id);
+    });
 
     return result;
   }
