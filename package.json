@@ -104,15 +104,15 @@
   "license": "Apache",
   "devDependencies": {
     "debug": "^4.3.3",
-    "electron": "^13.6.9",
-    "electron-builder": "^23.1.0",
+    "electron": "^18.3.15",
+    "electron-builder": "^23.6.0",
     "electron-rebuild": "^3.2.8",
     "eslint": "^5.13.0",
     "eslint-plugin-prettier": "^3.0.1",
     "nodemon": "^2.0.16"
   },
   "dependencies": {
-    "better-sqlite3": "^7.6.0",
+    "better-sqlite3": "^7.6.2",
     "dayjs": "^1.10.7",
     "ee-core": "^2.1.0",
     "electron-updater": "^5.3.0",
