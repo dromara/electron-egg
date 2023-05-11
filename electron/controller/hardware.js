@@ -3,7 +3,7 @@
 const { Controller } = require('ee-core');
 const path = require('path');
 const Ps = require('ee-core/ps');
-const { mainWindow } = require('ee-core/electron');
+const Electron = require('ee-core/electron');
 
 /**
  * 硬件设备 - 功能demo
@@ -21,7 +21,7 @@ class HardwareController extends Controller {
   getPrinterList () {
 
     //主线程获取打印机列表
-    const list = mainWindow.webContents.getPrinters();
+    const list = Electron.mainWindow.webContents.getPrinters();
 
     return list;
   }  

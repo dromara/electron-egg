@@ -68,8 +68,8 @@ export default {
         {
           type: 'vue',
           content: '/#/special/subwindow',
-          windowName: 'window-1',
-          windowTitle: 'new window'
+          windowName: 'window-ipc',
+          windowTitle: 'ipc window'
         },    
       ],
     }

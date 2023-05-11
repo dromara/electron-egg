@@ -138,6 +138,7 @@ class OsController extends Controller {
       // some
     }
 
+    console.log('contentUrl: ', contentUrl);
     const addonWindow = this.app.addon.window;
     let opt = {
       title: windowTitle
