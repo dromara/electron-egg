@@ -129,16 +129,16 @@ export const constantRouterMap = [
       }
     ]
   },
-  {
-    path: '/special',
-    component: RouteView,
-    //redirect: '/special/subwindow',
-    children: [
-      {
-        path: 'subwindow',
-        name: 'SpecialSubwindowIpc',
-        component: () => import('@/views/base/subwindow/Ipc')
-      }
-    ]
-  },
+  // {
+  //   path: '/special',
+  //   component: RouteView,
+  //   //redirect: '/special/subwindow',
+  //   children: [
+  //     {
+  //       path: 'subwindow',
+  //       name: 'SpecialSubwindowIpc',
+  //       component: () => import('@/views/base/subwindow/Ipc')
+  //     }
+  //   ]
+  // },
 ]

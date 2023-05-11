@@ -34,15 +34,27 @@ export default {
         'menu_1' : {
           icon: 'home',
           title: '框架',
-          pageName: 'Base',
+          pageName: 'Framework',
           params: {},
         },
         'menu_2' : {
           icon: 'desktop',
-          title: '其它',
-          pageName: 'Other',
+          title: '系统',
+          pageName: 'Os',
           params: {},
-        },              
+        },
+        'menu_3' : {
+          icon: 'control',
+          title: '硬件',
+          pageName: 'Hardware',
+          params: {},
+        },
+        'menu_4' : {
+          icon: 'bulb',
+          title: '特效',
+          pageName: 'Effect',
+          params: {},
+        },            
       }
     };
   },
