@@ -4,141 +4,147 @@
  */
 import {AppSider, Menu} from '@/layouts'
 
-const RouteView = {
-  name: 'RouteView',
-  render: h => h('router-view')
-}
-
 export const constantRouterMap = [
   {
     path: '/',
     component: AppSider,
     children: [
       {
-        path: '/base',
-        name: 'Base',
+        path: '/framework',
+        name: 'Framework',
         component: Menu,
-        props: { id: 'base' },
-        redirect: { name: 'BaseFileIndex' },
+        props: { id: 'framework' },
+        redirect: { name: 'FrameworkSocketIpc' },
         children: [
           {
-            path: '/base/file/index',
-            name: 'BaseFileIndex',
-            component: () => import('@/views/base/file/Index')
+            path: '/framework/socket/ipc',
+            name: 'FrameworkSocketIpc',
+            component: () => import('@/views/framework/socket/Ipc')
           },
           {
-            path: '/base/socket/ipc',
-            name: 'BaseSocketIpc',
-            component: () => import('@/views/base/socket/Ipc')
+            path: '/framework/socket/httpserver',
+            name: 'FrameworkSocketHttpServer',
+            component: () => import('@/views/framework/socket/HttpServer')
           },
           {
-            path: '/base/db/index',
-            name: 'BaseDBIndex',
-            component: () => import('@/views/base/db/Index')
+            path: '/framework/socket/socketserver',
+            name: 'FrameworkSocketSocketServer',
+            component: () => import('@/views/framework/socket/SocketServer')
+          }, 
+          {
+            path: '/framework/db/index',
+            name: 'FrameworkDBIndex',
+            component: () => import('@/views/framework/db/Index')
           },
           {
-            path: '/base/sqlitedb/index',
-            name: 'BaseSqliteDBIndex',
-            component: () => import('@/views/base/sqlitedb/Index')
+            path: '/framework/sqlitedb/index',
+            name: 'FrameworkSqliteDBIndex',
+            component: () => import('@/views/framework/sqlitedb/Index')
           },
           {
-            path: '/base/windowview/index',
-            name: 'BaseWindowViewIndex',
-            component: () => import('@/views/base/windowview/Index')
+            path: '/framework/jobs/index',
+            name: 'FrameworkJobsIndex',
+            component: () => import('@/views/framework/jobs/Index')
           },
           {
-            path: '/base/window/index',
-            name: 'BaseWindowIndex',
-            component: () => import('@/views/base/window/Index')
+            path: '/framework/updater/index',
+            name: 'FrameworkUpdaterIndex',
+            component: () => import('@/views/framework/updater/Index')
+          }, 
+          {
+            path: '/framework/software/index',
+            name: 'FrameworkSoftwareIndex',
+            component: () => import('@/views/framework/software/Index')
           },
           {
-            path: '/base/jobs/index',
-            name: 'BaseJobsIndex',
-            component: () => import('@/views/base/jobs/Index')
+            path: '/framework/java/index',
+            name: 'FrameworkJavaIndex',
+            component: () => import('@/views/framework/java/Index')
           },
           {
-            path: '/base/notification/index',
-            name: 'BaseNotificationIndex',
-            component: () => import('@/views/base/notification/Index')
+            path: '/framework/testapi/index',
+            name: 'FrameworkTestApiIndex',
+            component: () => import('@/views/framework/testapi/Index')
           },
-          {
-            path: '/base/powermonitor/index',
-            name: 'BasePowerMonitorIndex',
-            component: () => import('@/views/base/powermonitor/Index')
-          },
-          {
-            path: '/base/screen/index',
-            name: 'BaseScreenIndex',
-            component: () => import('@/views/base/screen/Index')
-          },
-          {
-            path: '/base/theme/index',
-            name: 'BaseThemeIndex',
-            component: () => import('@/views/base/theme/Index')
-          },                               
-          {
-            path: '/base/software/index',
-            name: 'BaseSoftwareIndex',
-            component: () => import('@/views/base/software/Index')
-          },
-          {
-            path: '/base/socket/httpserver',
-            name: 'BaseSocketHttpServer',
-            component: () => import('@/views/base/socket/HttpServer')
-          },
-          {
-            path: '/base/socket/socketserver',
-            name: 'BaseSocketSocketServer',
-            component: () => import('@/views/base/socket/SocketServer')
-          },          
-          {
-            path: '/base/system/index',
-            name: 'BaseSystemIndex',
-            component: () => import('@/views/base/system/Index')
-          },
-          {
-            path: '/base/testapi/index',
-            name: 'BaseTestApiIndex',
-            component: () => import('@/views/base/testapi/Index')
-          },
-          {
-            path: '/base/updater/index',
-            name: 'BaseUpdaterIndex',
-            component: () => import('@/views/base/updater/Index')
-          },  
         ]  
       },
       {
-        path: '/other',
-        name: 'Other',
+        path: '/os',
+        name: 'Os',
         component: Menu,
-        props: { id: 'other' },
-        redirect: { name: 'OtherTestIndex' },
+        props: { id: 'os' },
+        redirect: { name: 'OsFileIndex' },
         children: [
           {
-            path: '/other/test/index',
-            name: 'OtherTestIndex',
-            component: () => import('@/views/other/test/Index')
+            path: '/os/file/index',
+            name: 'OsFileIndex',
+            component: () => import('@/views/os/file/Index')
           },
           {
-            path: '/other/java/index',
-            name: 'OtherJavaIndex',
-            component: () => import('@/views/other/java/Index')
-          }
-        ] 
-      }
+            path: '/os/windowview/index',
+            name: 'OsWindowViewIndex',
+            component: () => import('@/views/os/windowview/Index')
+          },
+          {
+            path: '/os/window/index',
+            name: 'OsWindowIndex',
+            component: () => import('@/views/os/window/Index')
+          },
+          {
+            path: '/os/notification/index',
+            name: 'OsNotificationIndex',
+            component: () => import('@/views/os/notification/Index')
+          },
+          {
+            path: '/os/powermonitor/index',
+            name: 'OsPowerMonitorIndex',
+            component: () => import('@/views/os/powermonitor/Index')
+          },
+          {
+            path: '/os/screen/index',
+            name: 'OsScreenIndex',
+            component: () => import('@/views/os/screen/Index')
+          },
+          {
+            path: '/os/theme/index',
+            name: 'OsThemeIndex',
+            component: () => import('@/views/os/theme/Index')
+          },   
+          {
+            path: '/os/system/index',
+            name: 'OsSystemIndex',
+            component: () => import('@/views/os/system/Index')
+          },
+        ]  
+      },      
+      {
+        path: '/hardware',
+        name: 'Hardware',
+        component: Menu,
+        props: { id: 'hardware' },
+        redirect: { name: 'HardwarePrinterIndex' },
+        children: [
+          {
+            path: '/hardware/printer/index',
+            name: 'HardwarePrinterIndex',
+            component: () => import('@/views/hardware/printer/Index')
+          },
+        ]  
+      },
+      {
+        path: '/effect',
+        name: 'Effect',
+        component: Menu,
+        props: { id: 'effect' },
+        redirect: { name: 'EffectVideoIndex' },
+        children: [
+          {
+            path: '/effect/video/index',
+            name: 'EffectVideoIndex',
+            component: () => import('@/views/effect/video/Index')
+          },
+        ]  
+      }  
     ]
   },
-  // {
-  //   path: '/special',
-  //   component: RouteView,
-  //   //redirect: '/special/subwindow',
-  //   children: [
-  //     {
-  //       path: 'subwindow',
-  //       name: 'SpecialSubwindowIpc',
-  //       component: () => import('@/views/base/subwindow/Ipc')
-  //     }
-  //   ]
-  // },
 ]
