@@ -49,16 +49,15 @@ export default {
   },  
   methods: {
     init () {
-      const self = this;
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      this.$ipc.removeAllListeners(ipcApiRoute.hardware.printStatus);
-      this.$ipc.on(ipcApiRoute.hardware.printStatus, (event, result) => {
+      this.$ipc.removeAllListeners(ipcApiRoute.printStatus);
+      this.$ipc.on(ipcApiRoute.printStatus, (event, result) => {
         console.log('result', result);
-        self.$message.info('打印中...');
+        this.$message.info('打印中...');
       })
     },    
     getPrinter () {
-      this.$ipcInvoke(ipcApiRoute.hardware.getPrinterList, {}).then(res => {
+      this.$ipc.invoke(ipcApiRoute.getPrinterList, {}).then(res => {
         this.printerList = res;
       }) 
     },
@@ -68,8 +67,7 @@ export default {
         view: this.views[index],
         deviceName: this.defaultDeviceName
       };
-      this.$ipc.send(ipcApiRoute.hardware.print, params)
-
+      this.$ipc.send(ipcApiRoute.print, params)
     },
     defaultDevice (item) {
       let desc = "";

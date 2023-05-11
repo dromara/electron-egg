@@ -1,5 +1,7 @@
 'use strict';
 
+const { Controller } = require('ee-core');
+
 /**
  * 硬件设备 - 功能demo
  * @class

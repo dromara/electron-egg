@@ -65,43 +65,43 @@ export default {
 		},                                             
 	},	
   os: {
-		'menu_200' : {
+		'menu_100' : {
 			icon: 'profile',
 			title: '文件',
 			pageName: 'OsFileIndex',
 			params: {}
 		},
-		'menu_201' : {
+		'menu_101' : {
 			icon: 'profile',
 			title: '视图',
 			pageName: 'OsWindowViewIndex',
 			params: {}
 		},
-		'menu_202' : {
+		'menu_102' : {
 			icon: 'profile',
 			title: '窗口',
 			pageName: 'OsWindowIndex',
 			params: {}
 		},
-		'menu_203' : {
+		'menu_103' : {
 			icon: 'profile',
 			title: '桌面通知',
 			pageName: 'OsNotificationIndex',
 			params: {}
 		},
-		'menu_204' : {
+		'menu_104' : {
 			icon: 'profile',
 			title: '电源监控',
 			pageName: 'OsPowerMonitorIndex',
 			params: {}
 		},
-		'menu_205' : {
+		'menu_105' : {
 			icon: 'profile',
 			title: '屏幕信息',
 			pageName: 'OsScreenIndex',
 			params: {}
 		},
-		'menu_206' : {
+		'menu_106' : {
 			icon: 'profile',
 			title: '系统主题',
 			pageName: 'OsThemeIndex',
@@ -109,15 +109,15 @@ export default {
 		},   
 	},  
 	hardware: {
-		'menu_300' : {
-		  icon: 'profile',
-		  title: '打印机',
-		  pageName: 'HardwarePrinterIndex',
-		  params: {}
+		'menu_100' : {
+      icon: 'profile',
+      title: '打印机',
+      pageName: 'HardwarePrinterIndex',
+      params: {}
 		}                                               
   },
   effect: {
-    'menu_400' : {
+    'menu_100' : {
       icon: 'profile',
       title: '视频播放器',
       pageName: 'EffectVideoIndex',

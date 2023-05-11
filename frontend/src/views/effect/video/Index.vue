@@ -62,16 +62,14 @@ export default {
       this.p = new Player(this.op);
     },    
     selectFile () {
-      // todo
-      const self = this;
       const params = {}
-      this.$ipcInvoke(ipcApiRoute.effect.selectFile, params).then(res => {
+      this.$ipc.invoke(ipcApiRoute.selectFile, params).then(res => {
         console.log('res:', res)
         if (res) {
-          self.fileUrl = res;
+          this.fileUrl = res;
           this.p.start(self.fileUrl);
         } else {
-          self.$message.warning('请选择视频');
+          this.$message.warning('请选择视频');
         }
       }) 
     },

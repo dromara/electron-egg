@@ -9,7 +9,6 @@ const {
   powerMonitor, screen, nativeTheme
 } = require('electron');
 
-let myTimer = null;
 let browserViewObj = null;
 let notificationObj = null;
 

@@ -1,5 +1,6 @@
 'use strict';
 
+const { Controller } = require('ee-core');
 
 /**
  * 特效 - 功能demo
