@@ -41,15 +41,21 @@ export default {
       views: [
         {
           type: 'web',
-          content: 'https://www.bilibili.com/'
+          content: 'https://www.bilibili.com/',
+          windowName: 'window-web',
+          windowTitle: 'bilibili'
         },
         {
           type: 'html',
-          content: '/public/html/view_example.html'
+          content: '/public/html/view_example.html',
+          windowName: 'window-html',
+          windowTitle: 'html window'
         },
         {
           type: 'vue',
-          content: '/#/special/subwindow'
+          content: '/#/special/subwindow',
+          windowName: 'window-vue',
+          windowTitle: 'vue window'
         },    
       ],
     };

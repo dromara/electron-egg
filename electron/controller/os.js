@@ -4,13 +4,11 @@ const _ = require('lodash');
 const path = require('path');
 const { Controller } = require('ee-core');
 const {
-  app: electronApp,
-  dialog, shell, BrowserView, Notification, 
+  app: electronApp, dialog, shell, Notification, 
   powerMonitor, screen, nativeTheme
 } = require('electron');
-
-let browserViewObj = null;
-let notificationObj = null;
+const Conf = require('ee-core/config');
+const Ps = require('ee-core/ps');
 
 /**
  * 操作系统 - 功能demo
@@ -97,23 +95,14 @@ class OsController extends Controller {
    * 加载视图内容
    */
   loadViewContent (args) {
-    let content = null;
-    if (args.type == 'html') {
-      content = path.join('file://', electronApp.getAppPath(), args.content)
-    } else {
-      content = args.content;
+    const { type, content } = args;
+    let contentUrl = content;
+    if (type == 'html') {
+      contentUrl = path.join('file://', electronApp.getAppPath(), content);
     }
 
-    // electron实验性功能，慎用
-    browserViewObj = new BrowserView();
-    this.app.electron.mainWindow.setBrowserView(browserViewObj)
-    browserViewObj.setBounds({
-      x: 300,
-      y: 170,
-      width: 650,
-      height: 400
-    });
-    browserViewObj.webContents.loadURL(content);
+    this.service.os.createBrowserView(contentUrl);
+
     return true
   }
 
@@ -121,8 +110,9 @@ class OsController extends Controller {
    * 移除视图内容
    */
   removeViewContent () {
-    // removeBrowserView移除视图后，进程依然存在，估计是electron bug
-    this.app.electron.mainWindow.removeBrowserView(browserViewObj);
+   
+    this.service.os.removeBrowserView();
+
     return true
   }  
 
@@ -130,35 +120,35 @@ class OsController extends Controller {
    * 打开新窗口
    */
   createWindow (args) {
-    let content = null;
-    if (args.type == 'html') {
-      content = path.join('file://', electronApp.getAppPath(), args.content)
-    } else if (args.type == 'web') {
-      content = args.content;
-    } else if (args.type == 'vue') {
+    const { type, content, windowName, windowTitle } = args;
+    let contentUrl = null;
+    if (type == 'html') {
+      contentUrl = path.join('file://', electronApp.getAppPath(), content)
+    } else if (type == 'web') {
+      contentUrl = content;
+    } else if (type == 'vue') {
       let addr = 'http://localhost:8080'
-      if (this.config.env == 'prod') {
-        const mainServer = this.app.config.mainServer;
+      if (Ps.isProd()) {
+        const mainServer = Conf.getValue('mainServer');
         addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
       }
 
-      content = addr + args.content;
+      contentUrl = addr + content;
     } else {
       // some
     }
 
     const addonWindow = this.app.addon.window;
     let opt = {
-      title: args.windowName || 'new window'
+      title: windowTitle
     }
-    const name = args.windowName || 'window-1';
-    const win = addonWindow.create(name, opt);
+    const win = addonWindow.create(windowName, opt);
     const winContentsId = win.webContents.id;
 
     // load page
-    win.loadURL(content);
+    win.loadURL(contentUrl);
 
-    return winContentsId
+    return winContentsId;
   }
   
   /**
@@ -198,49 +188,28 @@ class OsController extends Controller {
   /**
    * 创建系统通知
    */
-  sendNotification (arg, event) {
-    const channel = 'controller.example.sendNotification';
+  sendNotification (args, event) {
+    const { title, subtitle, body, silent, clickEvent, closeEvent} = args;
+
     if (!Notification.isSupported()) {
       return '当前系统不支持通知';
     }
 
     let options = {};
-    if (!_.isEmpty(arg.title)) {
-      options.title = arg.title;
+    if (!_.isEmpty(title)) {
+      options.title = title;
     }
-    if (!_.isEmpty(arg.subtitle)) {
-      options.subtitle = arg.subtitle;
+    if (!_.isEmpty(subtitle)) {
+      options.subtitle = subtitle;
     }
-    if (!_.isEmpty(arg.body)) {
-      options.body = arg.body;
+    if (!_.isEmpty(body)) {
+      options.body = body;
     }
-    if (!_.isEmpty(arg.silent)) {
-      options.silent = arg.silent;
-    }
-
-    notificationObj = new Notification(options);
-
-    if (arg.clickEvent) {
-      notificationObj.on('click', (e) => {
-        let data = {
-          type: 'click',
-          msg: '您点击了通知消息'
-        }
-        event.reply(`${channel}`, data)
-      });
+    if (!_.isEmpty(silent)) {
+      options.silent = silent;
     }
 
-    if (arg.closeEvent) {
-      notificationObj.on('close', (e) => {
-        let data = {
-          type: 'close',
-          msg: '您关闭了通知消息'
-        }
-        event.reply(`${channel}`, data)
-      });
-    }
-
-    notificationObj.show();
+    this.service.os.createNotification(clickEvent, closeEvent, event);
 
     return true
   }  
@@ -248,8 +217,8 @@ class OsController extends Controller {
   /**
    * 电源监控
    */
-  initPowerMonitor (arg, event) {
-    const channel = 'controller.example.initPowerMonitor';
+  initPowerMonitor (args, event) {
+    const channel = 'controller.os.initPowerMonitor';
     powerMonitor.on('on-ac', (e) => {
       let data = {
         type: 'on-ac',
@@ -288,10 +257,10 @@ class OsController extends Controller {
   /**
    * 获取屏幕信息
    */
-  getScreen (arg) {
+  getScreen (args) {
     let data = [];
     let res = {};
-    if (arg == 0) {
+    if (args == 0) {
       let res = screen.getCursorScreenPoint();
       data = [
         {
@@ -306,10 +275,10 @@ class OsController extends Controller {
       
       return data;
     }
-    if (arg == 1) {
+    if (args == 1) {
       res = screen.getPrimaryDisplay();
     }
-    if (arg == 2) {
+    if (args == 2) {
       let resArr = screen.getAllDisplays();
       // 数组，只取一个吧
       res = resArr[0];

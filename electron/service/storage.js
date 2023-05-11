@@ -15,12 +15,7 @@ class StorageService extends Service {
     super(ctx);
 
     // jsondb数据库
-    this.systemDB = Storage.connection('system');
-
-    let jsondbOptions = {
-      driver: 'jsondb'
-    }
-    this.demoDB = Storage.connection('demo', jsondbOptions);  
+    this.demoDB = Storage.connection('demo');  
     this.demoDBKey = {
       test_data: 'test_data'
     };

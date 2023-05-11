@@ -58,12 +58,11 @@ export default {
   },
   methods: {
     init () {
-      const self = this;
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
       this.$ipc.removeAllListeners(ipcApiRoute.sendNotification);
       this.$ipc.on(ipcApiRoute.sendNotification, (event, result) => {
         if (Object.prototype.toString.call(result) == '[object Object]') {
-          self.$message.info(result.msg);
+          this.$message.info(result.msg);
         }  
       })
     },

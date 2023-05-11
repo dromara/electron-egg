@@ -9,8 +9,7 @@ const dayjs = require('dayjs');
 const Ps = require('ee-core/ps');
 const Log = require('ee-core/log');
 const Utils = require('ee-core/utils');
-
-let myTimer = null;
+const Conf = require('ee-core/config');
 
 /**
  * electron-egg framework - 功能demo
@@ -32,7 +31,7 @@ class FrameworkController extends Controller {
    * test
    */
   async test() {
-    const result = await this.service.example.test('electron');
+    const result = await this.service.framework.test('electron');
 
     // let tmpDir = Ps.getLogDir();
     // Log.info('tmpDir:', tmpDir);
@@ -164,7 +163,7 @@ class FrameworkController extends Controller {
    * 检测http服务是否开启
    */ 
   async checkHttpServer() {
-    const httpServerConfig = this.app.config.httpServer;
+    const httpServerConfig = Conf.getValue('httpServer');
     const url = httpServerConfig.protocol + httpServerConfig.host + ':' + httpServerConfig.port;
 
     const data = {
@@ -217,8 +216,6 @@ class FrameworkController extends Controller {
   
   /**
    * 异步消息类型
-   * @param args 前端传的参数
-   * @param event - IpcMainInvokeEvent 文档：https://www.electronjs.org/zh/docs/latest/api/structures/ipc-main-invoke-event
    */ 
    async ipcInvokeMsg(args, event) {
     let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
@@ -229,8 +226,6 @@ class FrameworkController extends Controller {
 
   /**
    * 同步消息类型
-   * @param args 前端传的参数
-   * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
    */ 
   async ipcSendSyncMsg(args) {
     let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
@@ -241,29 +236,12 @@ class FrameworkController extends Controller {
 
   /**
    * 双向异步通信
-   * @param args 前端传的参数
-   * @param event - IpcMainEvent 文档：https://www.electronjs.org/docs/latest/api/structures/ipc-main-event
    */
-  ipcSendMsg(args, event) {
-    // 前端ipc频道 channel
-    const channel = 'controller.example.ipcSendMsg';
+  async ipcSendMsg(args, event) {
+    const { type, content } = args;
+    const data = await this.service.framework.bothWayMessage(type, content, event);
 
-    if (args.type == 'start') {
-      // 每隔1秒，向前端页面发送消息
-      // 用定时器模拟
-      myTimer = setInterval(function(e, c, msg) {
-        let timeNow = Date.now();
-        let data = msg + ':' + timeNow;
-        e.reply(`${c}`, data)
-      }, 1000, event, channel, args.content)
-
-      return '开始了'
-    } else if (args.type == 'end') {
-      clearInterval(myTimer);
-      return '停止了'    
-    } else {
-      return 'ohther'
-    }
+    return data;
   }
 
   /**
@@ -282,7 +260,7 @@ class FrameworkController extends Controller {
       await fs.unlink(file.filepath, function(){});
     }
     const fileStream = fs.createReadStream(tmpFilePath);
-    const uploadRes = await this.service.example.uploadFileToSMMS(fileStream);
+    const uploadRes = await this.service.framework.uploadFileToSMMS(fileStream);
 
     return uploadRes;
   }
@@ -296,7 +274,7 @@ class FrameworkController extends Controller {
       msg: '',
       server: ''
     }
-    const javaCfg = this.app.config.addons.javaServer || {};
+    const javaCfg = Conf.getValue('addons.javaServer') || {};
     if (!javaCfg.enable) {
       data.code = -1;
       data.msg = 'addon not enabled!';
@@ -319,7 +297,7 @@ class FrameworkController extends Controller {
       code: 0,
       msg: '',
     }
-    const javaCfg = this.app.config.addons.javaServer || {};
+    const javaCfg = Conf.getValue('addons.javaServer') || {};
     if (!javaCfg.enable) {
       data.code = -1;
       data.msg = 'addon not enabled!';
@@ -342,10 +320,10 @@ class FrameworkController extends Controller {
     let result;
     switch (action) {
       case 'create':
-        result = this.service.example.doJob(jobId, action, event);
+        result = this.service.framework.doJob(jobId, action, event);
         break;       
       case 'close':
-        this.service.example.doJob(jobId, action, event);
+        this.service.framework.doJob(jobId, action, event);
         break;
       default:  
     }
@@ -363,10 +341,10 @@ class FrameworkController extends Controller {
    */ 
   async createPool(args, event) {
     let num = args.number;
-    this.service.example.doCreatePool(num, event);
+    this.service.framework.doCreatePool(num, event);
 
     // test monitor
-    this.service.example.monitorJob();
+    this.service.framework.monitorJob();
 
     return;
   }
@@ -381,7 +359,7 @@ class FrameworkController extends Controller {
     let result;
     switch (action) {
       case 'run':
-        result = this.service.example.doJobByPool(jobId, action, event);
+        result = this.service.framework.doJobByPool(jobId, action, event);
         break;
       default:  
     }
