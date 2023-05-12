@@ -32,9 +32,10 @@ export default {
       this.$ipc.invoke(ipcApiRoute.startJavaServer, {}).then(r => {
         if (r.code != 0) {
           this.$message.error(r.msg);
+        } else {
+          this.$message.info('异步启动');
+          storage.set('javaService', r.server);
         }
-        this.$message.info('异步启动');
-        storage.set('javaService', r.server);
       })
     },
 

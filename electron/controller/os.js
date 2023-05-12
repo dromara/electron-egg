@@ -190,7 +190,7 @@ class OsController extends Controller {
    * 创建系统通知
    */
   sendNotification (args, event) {
-    const { title, subtitle, body, silent, clickEvent, closeEvent} = args;
+    const { title, subtitle, body, silent} = args;
 
     if (!Notification.isSupported()) {
       return '当前系统不支持通知';
@@ -210,7 +210,7 @@ class OsController extends Controller {
       options.silent = silent;
     }
 
-    this.service.os.createNotification(clickEvent, closeEvent, event);
+    this.service.os.createNotification(options, event);
 
     return true
   }  

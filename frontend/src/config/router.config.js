@@ -155,7 +155,6 @@ export const constantRouterMap = [
   {
     path: '/special',
     component: RouteView,
-    //redirect: '/special/subwindow',
     children: [
       {
         path: 'subwindow',

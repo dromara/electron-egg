@@ -24,7 +24,7 @@ class OsService extends Service {
     // electron 实验性功能，慎用
     this.myBrowserView = new BrowserView();
     Electron.mainWindow.setBrowserView(this.myBrowserView);
-    myBrowserView.setBounds({
+    this.myBrowserView.setBounds({
       x: 300,
       y: 170,
       width: 650,
@@ -45,11 +45,11 @@ class OsService extends Service {
   /**
    * createNotification
    */
-  createNotification(clickEvent, closeEvent, event) {
+  createNotification(options, event) {
     const channel = 'controller.os.sendNotification';
     this.myNotification = new Notification(options);
 
-    if (clickEvent) {
+    if (options.clickEvent) {
       this.myNotification.on('click', (e) => {
         let data = {
           type: 'click',
@@ -59,7 +59,7 @@ class OsService extends Service {
       });
     }
 
-    if (closeEvent) {
+    if (options.closeEvent) {
       this.myNotification.on('close', (e) => {
         let data = {
           type: 'close',

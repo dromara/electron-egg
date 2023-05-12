@@ -60,7 +60,7 @@ export default {
     'menu_109' : {
 			icon: 'profile',
 			title: '测试',
-			pageName: 'BaseTestApiIndex',
+			pageName: 'FrameworkTestApiIndex',
 			params: {}
 		},                                             
 	},	

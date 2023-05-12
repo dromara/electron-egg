@@ -62,7 +62,7 @@ export default {
       message1: '',
       message2: '',
       message3: '',
-      windowName: 'window-1',
+      windowName: 'window-ipc',
       newWcId: 0,
       views: [
         {
