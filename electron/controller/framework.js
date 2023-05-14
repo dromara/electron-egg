@@ -217,7 +217,7 @@ class FrameworkController extends Controller {
   /**
    * 异步消息类型
    */ 
-   async ipcInvokeMsg(args, event) {
+  async ipcInvokeMsg(args, event) {
     let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
     const data = args + ' - ' + timeNow;
     

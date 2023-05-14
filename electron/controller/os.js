@@ -29,7 +29,7 @@ class OsController extends Controller {
   /**
    * 消息提示对话框
    */
-  messageShow () {
+  messageShow() {
     dialog.showMessageBoxSync({
       type: 'info', // "none", "info", "error", "question" 或者 "warning"
       title: '自定义标题-message',
@@ -43,7 +43,7 @@ class OsController extends Controller {
   /**
    * 消息提示与确认对话框
    */
-  messageShowConfirm () {
+  messageShowConfirm() {
     const res = dialog.showMessageBoxSync({
       type: 'info',
       title: '自定义标题-message',
@@ -61,7 +61,7 @@ class OsController extends Controller {
   /**
    * 选择目录
    */
-  selectFolder () {
+  selectFolder() {
     const filePaths = dialog.showOpenDialogSync({
       properties: ['openDirectory', 'createDirectory']
     });
@@ -76,7 +76,7 @@ class OsController extends Controller {
   /**
    * 打开目录
    */
-  openDirectory (args) {
+  openDirectory(args) {
     if (!args.id) {
       return false;
     }
@@ -94,7 +94,7 @@ class OsController extends Controller {
   /**
    * 加载视图内容
    */
-  loadViewContent (args) {
+  loadViewContent(args) {
     const { type, content } = args;
     let contentUrl = content;
     if (type == 'html') {
@@ -109,7 +109,7 @@ class OsController extends Controller {
   /**
    * 移除视图内容
    */
-  removeViewContent () {
+  removeViewContent() {
    
     this.service.os.removeBrowserView();
 
@@ -119,7 +119,7 @@ class OsController extends Controller {
   /**
    * 打开新窗口
    */
-  createWindow (args) {
+  createWindow(args) {
     const { type, content, windowName, windowTitle } = args;
     let contentUrl = null;
     if (type == 'html') {
@@ -155,7 +155,7 @@ class OsController extends Controller {
   /**
    * 获取窗口contents id
    */
-  getWCid (args) {
+  getWCid(args) {
     const addonWindow = this.app.addon.window;
 
     // 主窗口的name默认是main，其它窗口name开发者自己定义
@@ -189,7 +189,7 @@ class OsController extends Controller {
   /**
    * 创建系统通知
    */
-  sendNotification (args, event) {
+  sendNotification(args, event) {
     const { title, subtitle, body, silent} = args;
 
     if (!Notification.isSupported()) {
@@ -218,7 +218,7 @@ class OsController extends Controller {
   /**
    * 电源监控
    */
-  initPowerMonitor (args, event) {
+  initPowerMonitor(args, event) {
     const channel = 'controller.os.initPowerMonitor';
     powerMonitor.on('on-ac', (e) => {
       let data = {
@@ -258,7 +258,7 @@ class OsController extends Controller {
   /**
    * 获取屏幕信息
    */
-  getScreen (args) {
+  getScreen(args) {
     let data = [];
     let res = {};
     if (args == 0) {
@@ -322,7 +322,7 @@ class OsController extends Controller {
   /**
    * 获取系统主题
    */
-  getTheme () {
+  getTheme() {
     let theme = 'system';
     if (nativeTheme.shouldUseHighContrastColors) {
       theme = 'light';
@@ -336,7 +336,7 @@ class OsController extends Controller {
   /**
    * 设置系统主题
    */
-  setTheme (args) {
+  setTheme(args) {
 
     // TODO 好像没有什么明显效果
     nativeTheme.themeSource = args;
