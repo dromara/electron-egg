@@ -7,8 +7,8 @@
     </div>  
     <div class="one-block-2">
       <a-space>
-        <a-button @click="messageShow('ipc')">消息提示(ipc)</a-button>
-        <a-button @click="messageShowConfirm('ipc')">消息提示与确认(ipc)</a-button>
+        <a-button @click="messageShow()">消息提示(ipc)</a-button>
+        <a-button @click="messageShowConfirm()">消息提示与确认(ipc)</a-button>
       </a-space>
     </div>
     <div class="one-block-1">
@@ -110,10 +110,9 @@ export default {
   },
   methods: {
     getHost () {
-      const self = this;
       this.$ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
         if (r.enable) {
-          self.servicAddress = r.server;
+          this.servicAddress = r.server;
           storage.set('httpServiceConfig', r);
 
           // url转换
@@ -130,24 +129,19 @@ export default {
       })      
     },
     selectDir() {
-      const self = this;
       this.$ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
-        self.dir_path = r;
-        self.$message.info(r);
+        this.dir_path = r;
+        this.$message.info(r);
       })      
     },
-		messageShow(type) {
-      const self = this;
-      console.log('[messageShow] type:', type)
+		messageShow() {
       this.$ipc.invoke(ipcApiRoute.messageShow, '').then(r => {
-        self.$message.info(r);
+        this.$message.info(r);
       })
     },    
-    messageShowConfirm(type) {
-      const self = this;
-      console.log('[messageShowConfirm] type:', type)
+    messageShowConfirm() {
       this.$ipc.invoke(ipcApiRoute.messageShowConfirm, '').then(r => {
-        self.$message.info(r);
+        this.$message.info(r);
       })
     },
     handleFileChange(info) {

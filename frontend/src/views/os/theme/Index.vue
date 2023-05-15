@@ -49,20 +49,18 @@ export default {
   },
   methods: {
     setTheme (e) {
-      const self = this;
       this.currentThemeMode = e.target.value;
       console.log('setTheme currentThemeMode:', this.currentThemeMode)
 
       this.$ipc.invoke(ipcApiRoute.setTheme, this.currentThemeMode).then(result => {
         console.log('result:', result)
-        self.currentThemeMode = result;
+        this.currentThemeMode = result;
       })      
     },
     getTheme () {
-      const self = this;
       this.$ipc.invoke(ipcApiRoute.getTheme).then(result => {
         console.log('result:', result)
-        self.currentThemeMode = result;
+        this.currentThemeMode = result;
       })  
     },
   }
