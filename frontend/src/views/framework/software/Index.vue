@@ -38,11 +38,10 @@ export default {
     };
   },
   methods: {
-    openSoft (id) {
-      const self = this;   
+    openSoft (id) { 
       this.$ipc.invoke(ipcApiRoute.openSoftware, id).then(result => {
         if (!result) {
-          self.$message.error('程序不存在');
+          this.$message.error('程序不存在');
         }
       })       
     },

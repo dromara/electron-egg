@@ -39,11 +39,10 @@ export default {
   },
   methods: {
     init () {
-      const self = this;
       this.$ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
         if (r.enable) {
-          self.currentStatus = '开启';
-          self.servicAddress = r.server;
+          this.currentStatus = '开启';
+          this.servicAddress = r.server;
           storage.set('httpServiceConfig', r);
         }
       })

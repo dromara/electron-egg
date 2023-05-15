@@ -25,7 +25,7 @@
 </template>
 <script>
 import { io } from 'socket.io-client'
-import { ipcApiRoute, requestHttp } from '@/api/main'
+import { ipcApiRoute } from '@/api/main'
 
 export default {
   data() {
@@ -39,11 +39,10 @@ export default {
   },
   methods: {
     init () {
-      const self = this;
       this.socket = io(this.servicAddress);
       this.socket.on('connect', () => {
         console.log('connect!!!!!!!!');
-        self.currentStatus = '开启';
+        this.currentStatus = '开启';
       });
     },
     sendRequest (id) {

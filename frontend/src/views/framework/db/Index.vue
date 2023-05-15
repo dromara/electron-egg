@@ -2,7 +2,7 @@
   <div id="app-base-db">
     <div class="one-block-1">
       <span>
-        1. LowDB本地数据库
+        1. jsondb本地数据库
       </span>
     </div>  
     <div class="one-block-2">
@@ -152,7 +152,6 @@ export default {
   },
   methods: {
     getAllTestData () {
-      const self = this;
       const params = {
         action: 'all',
       }
@@ -161,11 +160,10 @@ export default {
         if (res.all_list.length == 0) {
           return false;
         }
-        self.all_list = res.all_list;
+        this.all_list = res.all_list;
       }) 
     },
     dbOperation (ac) {
-      const self = this;
       const params = {
         action: ac,
         info: {
@@ -178,23 +176,23 @@ export default {
         delete_name: this.delete_name,
       }
       if (ac == 'add' && this.name.length == 0) {
-        self.$message.error(`请填写数据`);
+        this.$message.error(`请填写数据`);
       }
       this.$ipc.invoke(ipcApiRoute.dbOperation, params).then(res => {
         console.log('res:', res);
         if (ac == 'get') {
           if (res.result.length == 0) {
-            self.$message.error(`没有数据`);
+            this.$message.error(`没有数据`);
             return;
           }
-          self.userList = res.result;
+          this.userList = res.result;
         }
         if (res.all_list.length == 0) {
-          self.all_list = ['空'];
+          this.all_list = ['空'];
           return;
         }
-        self.all_list = res.all_list;
-        self.$message.success(`success`);
+        this.all_list = res.all_list;
+        this.$message.success(`success`);
       }) 
     },
   }

@@ -40,16 +40,15 @@ export default {
   },
   methods: {
     init () {
-      const self = this;
       this.$ipc.removeAllListeners(specialIpcRoute.appUpdater);
       this.$ipc.on(specialIpcRoute.appUpdater, (event, result) => {
         result = JSON.parse(result);
-        self.status = result.status;
+        this.status = result.status;
         if (result.status == 3) {
-          self.progress = result.desc;
-          self.percentNumber = result.percentNumber;
+          this.progress = result.desc;
+          this.percentNumber = result.percentNumber;
         } else {
-          self.$message.info(result.desc);
+          this.$message.info(result.desc);
         }
       })
     },

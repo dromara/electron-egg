@@ -220,7 +220,6 @@ export default {
       }) 
     },
     sqlitedbOperation (ac) {
-      const self = this;
       const params = {
         action: ac,
         info: {
@@ -233,23 +232,23 @@ export default {
         delete_name: this.delete_name,
       }
       if (ac == 'add' && this.name.length == 0) {
-        self.$message.error(`请填写数据`);
+        this.$message.error(`请填写数据`);
       }
       this.$ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
         console.log('res:', res);
         if (ac == 'get') {
           if (res.result.length == 0) {
-            self.$message.error(`没有数据`);
+            this.$message.error(`没有数据`);
             return;
           }
-          self.userList = res.result;
+          this.userList = res.result;
         }
         if (res.all_list.length == 0) {
-          self.all_list = ['空'];
+          this.all_list = ['空'];
           return;
         }
-        self.all_list = res.all_list;
-        self.$message.success(`success`);
+        this.all_list = res.all_list;
+        this.$message.success(`success`);
       }) 
     },
   }
