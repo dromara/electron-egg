@@ -6,3 +6,4 @@ run/
 data/
 .vscode/launch.json
 public/electron/
+package-lock.json
