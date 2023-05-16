@@ -107,13 +107,9 @@
     "electron": "^13.6.9",
     "electron-builder": "^23.6.0",
     "electron-rebuild": "^3.2.8",
-    "eslint": "^5.13.0",
-    "eslint-plugin-prettier": "^3.0.1",
     "nodemon": "^2.0.16"
   },
   "dependencies": {
-    "better-sqlite3": "^7.6.2",
-    "dayjs": "^1.10.7",
     "ee-core": "^2.1.1",
     "electron-updater": "^5.3.0",
     "lodash": "^4.17.21"
