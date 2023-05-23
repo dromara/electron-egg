@@ -3,6 +3,8 @@
 const { Service } = require('ee-core');
 const Log = require('ee-core/log');
 const { ChildJob, ChildPoolJob } = require('ee-core/jobs');
+const HttpClient = require('ee-core/httpclient');
+const Ps = require('ee-core/ps');
 
 /**
  * framework
@@ -28,7 +30,7 @@ class FrameworkService extends Service {
       status:'ok',
       params: args
     }
-
+    Log.info('FrameworkService obj:', obj);
     return obj;
   }
 
@@ -151,7 +153,8 @@ class FrameworkService extends Service {
         'Authorization': 'aaaaaaaaaaaaa' // 请修改这个token，用你自己的账号token
       };
       const url = 'https://sm.ms/api/v2/upload';
-      const response = await this.app.curl(url, {
+      const hc = new HttpClient();
+      const response = await hc.request(url, {
         method: 'POST',
         headers: headersObj,
         files: {
@@ -161,7 +164,7 @@ class FrameworkService extends Service {
         timeout: 15000,
       });
       const result = response.data;
-      if (this.app.config.env === 'local') {
+      if (Ps.isDev()) {
         Log.info('[FrameworkService] [uploadFileToSMMS]: info result:%j', result);
       }
       if (result.code !== 'success') {

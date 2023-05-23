@@ -9,6 +9,8 @@ const {
 } = require('electron');
 const Conf = require('ee-core/config');
 const Ps = require('ee-core/ps');
+const Services = require('ee-core/services');
+const Addon = require('ee-core/addon');
 
 /**
  * 操作系统 - 功能demo
@@ -101,7 +103,7 @@ class OsController extends Controller {
       contentUrl = path.join('file://', electronApp.getAppPath(), content);
     }
 
-    this.service.os.createBrowserView(contentUrl);
+    Services.get('os').createBrowserView(contentUrl);
 
     return true
   }
@@ -110,9 +112,7 @@ class OsController extends Controller {
    * 移除视图内容
    */
   removeViewContent() {
-   
-    this.service.os.removeBrowserView();
-
+    Services.get('os').removeBrowserView();
     return true
   }  
 
@@ -139,11 +139,10 @@ class OsController extends Controller {
     }
 
     console.log('contentUrl: ', contentUrl);
-    const addonWindow = this.app.addon.window;
     let opt = {
       title: windowTitle
     }
-    const win = addonWindow.create(windowName, opt);
+    const win = Addon.get('window').create(windowName, opt);
     const winContentsId = win.webContents.id;
 
     // load page
@@ -156,11 +155,9 @@ class OsController extends Controller {
    * 获取窗口contents id
    */
   getWCid(args) {
-    const addonWindow = this.app.addon.window;
-
     // 主窗口的name默认是main，其它窗口name开发者自己定义
     const name = args;
-    const id = addonWindow.getWCid(name);
+    const id = Addon.get('window').getWCid(name);
 
     return id;
   }
@@ -210,7 +207,7 @@ class OsController extends Controller {
       options.silent = silent;
     }
 
-    this.service.os.createNotification(options, event);
+    Services.get('os').createNotification(options, event);
 
     return true
   }  
@@ -346,4 +343,4 @@ class OsController extends Controller {
 }
 
 OsController.toString = () => '[class OsController]';
-module.exports = OsController;  
+module.exports = OsController;

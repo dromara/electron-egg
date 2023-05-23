@@ -10,8 +10,7 @@ const GetPort = require('ee-core/utils/get-port');
  */
 class JavaServerAddon {
 
-  constructor(app) {
-    this.app = app;
+  constructor() {
     this.cfg;
     this.javaServer;
   }

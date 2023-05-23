@@ -1,6 +1,8 @@
 'use strict';
 
 const { Service } = require('ee-core');
+const Services = require('ee-core/services');
+const Log = require('ee-core/log');
 
 /**
  * 示例服务（service层为单例）
@@ -20,6 +22,10 @@ class ExampleService extends Service {
       status:'ok',
       params: args
     }
+
+    Log.info('ExampleService obj:', obj);
+
+    Services.get('framework').test('egg');
 
     return obj;
   }

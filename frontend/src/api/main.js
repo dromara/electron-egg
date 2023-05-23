@@ -6,7 +6,7 @@ import request from '@/utils/request'
  */
 const ipcApiRoute = {
   // framework
-  test: 'controller.framework.test',
+  test: 'controller.example.test',
   checkForUpdater: 'controller.framework.checkForUpdater',
   downloadApp: 'controller.framework.downloadApp',
   dbOperation: 'controller.framework.dbOperation',

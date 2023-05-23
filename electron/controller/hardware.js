@@ -3,7 +3,8 @@
 const { Controller } = require('ee-core');
 const path = require('path');
 const Ps = require('ee-core/ps');
-const Electron = require('ee-core/electron');
+const CoreWindow = require('ee-core/electron/window');
+const Addon = require('ee-core/addon');
 
 /**
  * 硬件设备 - 功能demo
@@ -21,7 +22,8 @@ class HardwareController extends Controller {
   getPrinterList () {
 
     //主线程获取打印机列表
-    const list = Electron.mainWindow.webContents.getPrinters();
+    const win = CoreWindow.getMainWindow();
+    const list = win.webContents.getPrinters();
 
     return list;
   }  
@@ -38,7 +40,6 @@ class HardwareController extends Controller {
       content = view.content;
     }
 
-    const addonWindow = this.app.addon.window;
     let opt = {
       title: 'printer window',
       x: 10,
@@ -47,7 +48,7 @@ class HardwareController extends Controller {
       height: 650 
     }
     const name = 'window-printer';
-    const printWindow = addonWindow.create(name, opt);
+    const printWindow = Addon.get('window').create(name, opt);
 
     printWindow.loadURL(content);
     printWindow.webContents.once('did-finish-load', () => {

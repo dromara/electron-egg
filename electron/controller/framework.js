@@ -8,8 +8,10 @@ const { app: electronApp, shell } = require('electron');
 const dayjs = require('dayjs');
 const Ps = require('ee-core/ps');
 const Log = require('ee-core/log');
-const Utils = require('ee-core/utils');
+const Services = require('ee-core/services');
 const Conf = require('ee-core/config');
+const Addon = require('ee-core/addon');
+const EE = require('ee-core/ee');
 
 /**
  * electron-egg framework - 功能demo
@@ -28,29 +30,9 @@ class FrameworkController extends Controller {
    */
 
   /**
-   * test
-   */
-  async test() {
-    const result = await this.service.framework.test('electron');
-
-    // let tmpDir = Ps.getLogDir();
-    // Log.info('tmpDir:', tmpDir);
-
-    let mid = await Utils.machineIdSync(true);
-    Log.info('mid 11111111:', mid);
-
-    Utils.machineId().then((id) => {
-      Log.info('mid 222222222:', id);
-    });
-
-    return result;
-  }
-
-  /**
    * json数据库操作
    */   
   async dbOperation(args) {
-    const { service } = this;
     const paramsObj = args;
     //Log.info('eeeee paramsObj:', paramsObj);
     const data = {
@@ -61,20 +43,20 @@ class FrameworkController extends Controller {
     
     switch (paramsObj.action) {
       case 'add' :
-        data.result = await service.storage.addTestData(paramsObj.info);;
+        data.result = await Services.get('storage').addTestData(paramsObj.info);;
         break;
       case 'del' :
-        data.result = await service.storage.delTestData(paramsObj.delete_name);;
+        data.result = await Services.get('storage').delTestData(paramsObj.delete_name);;
         break;
       case 'update' :
-        data.result = await service.storage.updateTestData(paramsObj.update_name, paramsObj.update_age);
+        data.result = await Services.get('storage').updateTestData(paramsObj.update_name, paramsObj.update_age);
         break;
       case 'get' :
-        data.result = await service.storage.getTestData(paramsObj.search_age);
+        data.result = await Services.get('storage').getTestData(paramsObj.search_age);
         break;
     }
 
-    data.all_list = await service.storage.getAllTestData();
+    data.all_list = await Services.get('storage').getAllTestData();
 
     return data;
   }
@@ -83,7 +65,6 @@ class FrameworkController extends Controller {
    * sqlite数据库操作
    */   
   async sqlitedbOperation(args) {
-    const { service } = this;
     const paramsObj = args;
     //Log.info('eeeee paramsObj:', paramsObj);
     const data = {
@@ -94,26 +75,26 @@ class FrameworkController extends Controller {
     
     switch (paramsObj.action) {
       case 'add' :
-        data.result = await service.storage.addTestDataSqlite(paramsObj.info);;
+        data.result = await Services.get('storage').addTestDataSqlite(paramsObj.info);;
         break;
       case 'del' :
-        data.result = await service.storage.delTestDataSqlite(paramsObj.delete_name);;
+        data.result = await Services.get('storage').delTestDataSqlite(paramsObj.delete_name);;
         break;
       case 'update' :
-        data.result = await service.storage.updateTestDataSqlite(paramsObj.update_name, paramsObj.update_age);
+        data.result = await Services.get('storage').updateTestDataSqlite(paramsObj.update_name, paramsObj.update_age);
         break;
       case 'get' :
-        data.result = await service.storage.getTestDataSqlite(paramsObj.search_age);
+        data.result = await Services.get('storage').getTestDataSqlite(paramsObj.search_age);
         break;
       case 'getDataDir' :
-        data.result = await service.storage.getDataDir();
+        data.result = await Services.get('storage').getDataDir();
         break;
       case 'setDataDir' :
-        data.result = await service.storage.setCustomDataDir(paramsObj.data_dir);
+        data.result = await Services.get('storage').setCustomDataDir(paramsObj.data_dir);
         break;            
     }
 
-    data.all_list = await service.storage.getAllTestDataSqlite();
+    data.all_list = await Services.get('storage').getAllTestDataSqlite();
 
     return data;
   }  
@@ -144,9 +125,7 @@ class FrameworkController extends Controller {
    * 检查是否有新版本
    */
   checkForUpdater() { 
-    const autoUpdaterAddon = this.app.addon.autoUpdater;
-    autoUpdaterAddon.checkUpdate();  
-
+    Addon.get('autoUpdater').checkUpdate();
     return;
   }
 
@@ -154,8 +133,7 @@ class FrameworkController extends Controller {
    * 下载新版本
    */
   downloadApp() {
-    const autoUpdaterAddon = this.app.addon.autoUpdater;
-    autoUpdaterAddon.download();
+    Addon.get('autoUpdater').download();
     return;
   }
 
@@ -177,13 +155,14 @@ class FrameworkController extends Controller {
    * 一个http请求访问此方法
    */ 
   async doHttpRequest() {
+    const { CoreApp } = EE;
     // http方法
-    const method = this.app.request.method;
+    const method = CoreApp.request.method;
     // http get 参数
-    let params = this.app.request.query;
+    let params = CoreApp.request.query;
     params = (params instanceof Object) ? params : JSON.parse(JSON.stringify(params));
     // http post 参数
-    const body = this.app.request.body;
+    const body = CoreApp.request.body;
 
     const httpInfo = {
       method,
@@ -239,7 +218,7 @@ class FrameworkController extends Controller {
    */
   async ipcSendMsg(args, event) {
     const { type, content } = args;
-    const data = await this.service.framework.bothWayMessage(type, content, event);
+    const data = await Services.get('framework').bothWayMessage(type, content, event);
 
     return data;
   }
@@ -248,8 +227,9 @@ class FrameworkController extends Controller {
    * 上传文件
    */  
   async uploadFile() {
+    const { CoreApp } = EE;
     let tmpDir = Ps.getLogDir();
-    const files = this.app.request.files;
+    const files = CoreApp.request.files;
     let file = files.file;
     
     let tmpFilePath = path.join(tmpDir, file.originalFilename);
@@ -260,7 +240,7 @@ class FrameworkController extends Controller {
       await fs.unlink(file.filepath, function(){});
     }
     const fileStream = fs.createReadStream(tmpFilePath);
-    const uploadRes = await this.service.framework.uploadFileToSMMS(fileStream);
+    const uploadRes = await Services.get('framework').uploadFileToSMMS(fileStream);
 
     return uploadRes;
   }
@@ -281,8 +261,7 @@ class FrameworkController extends Controller {
       return data;
     }
 
-    const javaServerAddon = this.app.addon.javaServer;
-    await javaServerAddon.createServer();
+    await Addon.get('javaServer').createServer();
 
     data.server = 'http://localhost:' + javaCfg.port;
 
@@ -304,8 +283,7 @@ class FrameworkController extends Controller {
       return data;
     }
 
-    const javaServerAddon = this.app.addon.javaServer;
-    await javaServerAddon.kill();
+    await Addon.get('javaServer').kill();
 
     return data;
   }
@@ -320,10 +298,10 @@ class FrameworkController extends Controller {
     let result;
     switch (action) {
       case 'create':
-        result = this.service.framework.doJob(jobId, action, event);
+        result = Services.get('framework').doJob(jobId, action, event);
         break;       
       case 'close':
-        this.service.framework.doJob(jobId, action, event);
+        Services.get('framework').doJob(jobId, action, event);
         break;
       default:  
     }
@@ -341,10 +319,10 @@ class FrameworkController extends Controller {
    */ 
   async createPool(args, event) {
     let num = args.number;
-    this.service.framework.doCreatePool(num, event);
+    Services.get('framework').doCreatePool(num, event);
 
     // test monitor
-    this.service.framework.monitorJob();
+    Services.get('framework').monitorJob();
 
     return;
   }
@@ -359,7 +337,7 @@ class FrameworkController extends Controller {
     let result;
     switch (action) {
       case 'run':
-        result = this.service.framework.doJobByPool(jobId, action, event);
+        result = Services.get('framework').doJobByPool(jobId, action, event);
         break;
       default:  
     }

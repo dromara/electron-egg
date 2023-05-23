@@ -5,13 +5,12 @@ const path = require('path');
 const Log = require('ee-core/log');
 
 /**
- * 安全插件
+ * 扩展插件 （electron自身对该功能并不完全支持，官方也不建议使用）
  * @class
  */
 class ChromeExtensionAddon {
 
-  constructor(app) {
-    this.app = app;
+  constructor() {
   }
 
   /**

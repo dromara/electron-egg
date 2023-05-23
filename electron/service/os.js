@@ -2,7 +2,7 @@
 
 const { Service } = require('ee-core');
 const { BrowserView, Notification } = require('electron');
-const Electron = require('ee-core/electron');
+const CoreWindow = require('ee-core/electron/window');
 
 /**
  * os（service层为单例）
@@ -22,8 +22,9 @@ class OsService extends Service {
   createBrowserView(contentUrl) {
 
     // electron 实验性功能，慎用
+    const win = CoreWindow.getMainWindow();
     this.myBrowserView = new BrowserView();
-    Electron.mainWindow.setBrowserView(this.myBrowserView);
+    win.setBrowserView(this.myBrowserView);
     this.myBrowserView.setBounds({
       x: 300,
       y: 170,
@@ -39,7 +40,8 @@ class OsService extends Service {
   removeBrowserView() {
 
     // removeBrowserView移除视图后，进程依然存在，估计是electron bug
-    Electron.mainWindow.removeBrowserView(this.myBrowserView);
+    const win = CoreWindow.getMainWindow();
+    win.removeBrowserView(this.myBrowserView);
   }
 
   /**

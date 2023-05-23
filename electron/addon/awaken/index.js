@@ -8,8 +8,7 @@ const Conf = require('ee-core/config');
  */
 class AwakenAddon {
 
-  constructor(app) {
-    this.app = app;
+  constructor() {
     this.protocol = '';
   }
 
@@ -24,17 +23,16 @@ class AwakenAddon {
   
     electronApp.setAsDefaultProtocolClient(this.protocol);
   
-    const self = this;
     this.handleArgv(process.argv);
     electronApp.on('second-instance', (event, argv) => {
       if (process.platform === 'win32') {
-        self.handleArgv(argv)
+        this.handleArgv(argv)
       }
     })
   
     // 仅用于macOS
     electronApp.on('open-url', (event, urlStr) => {
-      self.handleUrl(urlStr)
+      this.handleUrl(urlStr)
     })
   }
 
