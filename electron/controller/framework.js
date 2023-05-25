@@ -43,10 +43,10 @@ class FrameworkController extends Controller {
     
     switch (paramsObj.action) {
       case 'add' :
-        data.result = await Services.get('storage').addTestData(paramsObj.info);;
+        data.result = await Services.get('storage').addTestData(paramsObj.info);
         break;
       case 'del' :
-        data.result = await Services.get('storage').delTestData(paramsObj.delete_name);;
+        data.result = await Services.get('storage').delTestData(paramsObj.delete_name);
         break;
       case 'update' :
         data.result = await Services.get('storage').updateTestData(paramsObj.update_name, paramsObj.update_age);
