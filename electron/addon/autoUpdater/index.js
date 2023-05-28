@@ -3,7 +3,7 @@ const { autoUpdater } = require("electron-updater");
 const is = require('ee-core/utils/is');
 const Log = require('ee-core/log');
 const Conf = require('ee-core/config');
-const Electron = require('ee-core/electron');
+const CoreWindow = require('ee-core/electron/window');
 
 /**
  * 自动升级插件
@@ -11,8 +11,7 @@ const Electron = require('ee-core/electron');
  */
 class AutoUpdaterAddon {
 
-  constructor(app) {
-    this.app = app;
+  constructor() {
   }
 
   /**
@@ -20,8 +19,6 @@ class AutoUpdaterAddon {
    */
   create () {
     Log.info('[addon:autoUpdater] load');
-
-    // const app = this.app;
     const cfg = Conf.getValue('addons.autoUpdater');
     if ((is.windows() && cfg.windows)
         || (is.macOS() && cfg.macOS)
@@ -131,7 +128,8 @@ class AutoUpdaterAddon {
   sendStatusToWindow(content = {}) {
     const textJson = JSON.stringify(content);
     const channel = 'app.updater';
-    Electron.mainWindow.webContents.send(channel, textJson);
+    const win = CoreWindow.getMainWindow();
+    win.webContents.send(channel, textJson);
   }
   
   /**

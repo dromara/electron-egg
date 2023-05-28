@@ -2,6 +2,7 @@
 
 const { Controller } = require('ee-core');
 const Log = require('ee-core/log');
+const Services = require('ee-core/services');
 
 /**
  * example
@@ -24,12 +25,10 @@ class ExampleController extends Controller {
    * test
    */
   async test () {
-    const result = await this.service.example.test('electron');
+    const result = await Services.get('example').test('electron');
+    Log.info('service result:', result);
 
-    let tmpDir = Ps.getLogDir();
-    Log.info('tmpDir:', tmpDir);
-
-    return result;
+    return 'hello electron-egg';
   }
 }
 

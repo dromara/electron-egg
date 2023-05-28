@@ -1,9 +1,11 @@
-const { Tray, Menu, shell } = require('electron');
+const { Tray, Menu } = require('electron');
 const path = require('path');
 const Ps = require('ee-core/ps');
 const Log = require('ee-core/log');
 const Electron = require('ee-core/electron');
+const CoreWindow = require('ee-core/electron/window');
 const Conf = require('ee-core/config');
+const EE = require('ee-core/ee');
 
 /**
  * 托盘插件
@@ -11,8 +13,7 @@ const Conf = require('ee-core/config');
  */
 class TrayAddon {
 
-  constructor(app) {
-    this.app = app;
+  constructor() {
     this.tray = null;
   }
 
@@ -24,10 +25,9 @@ class TrayAddon {
     if (Ps.isDev() && Ps.isHotReload()) return;
     
     Log.info('[addon:tray] load');
-
-    const app = this.app;
+    const { CoreApp } = EE;
     const cfg = Conf.getValue('addons.tray');
-    const { mainWindow } = Electron;
+    const mainWindow = CoreWindow.getMainWindow();
 
     // 托盘图标
     let iconPath = path.join(Ps.getHomeDir(), cfg.icon);
@@ -43,15 +43,14 @@ class TrayAddon {
       {
         label: '退出',
         click: function () {
-          app.appQuit();
+          CoreApp.appQuit();
         }
       }
     ]
   
     // 点击关闭，最小化到托盘
     mainWindow.on('close', (event) => {
-      const extraObj = Electron.extra;
-      if (extraObj.closeWindow == true) {
+      if (Electron.extra.closeWindow == true) {
         return;
       }
       mainWindow.hide();
@@ -63,12 +62,6 @@ class TrayAddon {
     this.tray.setToolTip(cfg.title);
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
     this.tray.setContextMenu(contextMenu);
-
-    // 使用默认浏览器打开链接
-    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-      shell.openExternal(url);
-      return { action: 'deny' }
-    })
   }
 }
 
