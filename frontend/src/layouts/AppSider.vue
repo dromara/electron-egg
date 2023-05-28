@@ -80,7 +80,7 @@ export default {
     }
   }
   .layout-content {
-    //background-color: #fff;
+    background-color: #fff;
   }
 }
 </style>

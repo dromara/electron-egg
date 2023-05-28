@@ -1,4 +1,4 @@
-const { Tray, Menu } = require('electron');
+const { Tray, Menu, shell } = require('electron');
 const path = require('path');
 const Ps = require('ee-core/ps');
 const Log = require('ee-core/log');
@@ -62,6 +62,12 @@ class TrayAddon {
     this.tray.setToolTip(cfg.title);
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
     this.tray.setContextMenu(contextMenu);
+
+    // 使用默认浏览器打开链接
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+      shell.openExternal(url);
+      return { action: 'deny' }
+    })    
   }
 }
 
