@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "3.3.1",
+  "version": "3.4.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -8,113 +8,48 @@
     "dev": "electron . --env=local",
     "reload": "nodemon --config ./electron/config/nodemon.json",
     "test": "set DEBUG=* && electron . --env=local",
-    "build-w": "electron-builder -w=nsis --x64",
-    "build-w-32": "electron-builder -w=nsis --ia32",
-    "build-w-64": "electron-builder -w=nsis --x64",
-    "build-w-arm64": "electron-builder -w=nsis --arm64",
-    "build-wz": "electron-builder -w=7z --x64",
-    "build-wz-32": "electron-builder -w=7z --ia32",
-    "build-wz-64": "electron-builder -w=7z --x64",
-    "build-wz-arm64": "electron-builder -w=7z --arm64",
-    "build-m": "electron-builder -m",
-    "build-m-arm64": "electron-builder -m --arm64",
-    "build-l": "electron-builder -l=deb --x64",
-    "build-l-32": "electron-builder -l=deb --ia32",
-    "build-l-64": "electron-builder -l=deb --x64",
-    "build-l-arm64": "electron-builder -l=deb --arm64",
-    "build-l-armv7l": "electron-builder -l=deb --armv7l",
-    "build-lr-64": "electron-builder -l=rpm --x64",
-    "build-lp-64": "electron-builder -l=pacman --x64",
+    "build-w": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
+    "build-w-32": "electron-builder --config=./electron/config/builder.json -w=nsis --ia32",
+    "build-w-64": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
+    "build-w-arm64": "electron-builder --config=./electron/config/builder.json -w=nsis --arm64",
+    "build-wz": "electron-builder --config=./electron/config/builder.json -w=7z --x64",
+    "build-wz-32": "electron-builder --config=./electron/config/builder.json -w=7z --ia32",
+    "build-wz-64": "electron-builder --config=./electron/config/builder.json -w=7z --x64",
+    "build-wz-arm64": "electron-builder --config=./electron/config/builder.json -w=7z --arm64",
+    "build-m": "electron-builder --config=./electron/config/builder.json -m",
+    "build-m-arm64": "electron-builder --config=./electron/config/builder.json -m --arm64",
+    "build-l": "electron-builder --config=./electron/config/builder.json -l=deb --x64",
+    "build-l-32": "electron-builder --config=./electron/config/builder.json -l=deb --ia32",
+    "build-l-64": "electron-builder --config=./electron/config/builder.json -l=deb --x64",
+    "build-l-arm64": "electron-builder --config=./electron/config/builder.json -l=deb --arm64",
+    "build-l-armv7l": "electron-builder --config=./electron/config/builder.json -l=deb --armv7l",
+    "build-lr-64": "electron-builder --config=./electron/config/builder.json -l=rpm --x64",
+    "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64",
     "rd": "ee-core rd --dist_dir=./frontend/dist",
     "encrypt": "ee-core encrypt",
     "clean": "ee-core clean",
     "rebuild": "electron-rebuild",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
-  "build": {
-    "productName": "ee",
-    "appId": "com.electron.ee",
-    "copyright": "wallace5303",
-    "directories": {
-      "output": "out"
-    },
-    "asar": true,
-    "files": [
-      "**/*",
-      "!frontend/",
-      "!run/",
-      "!logs/",
-      "!data/"
-    ],
-    "extraResources": {
-      "from": "./build/extraResources/",
-      "to": "extraResources"
-    },
-    "electronDownload": {
-      "mirror": "https://npmmirror.com/mirrors/electron/"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "./build/icons/icon.ico",
-      "uninstallerIcon": "./build/icons/icon.ico",
-      "installerHeaderIcon": "./build/icons/icon.ico",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "EE框架"
-    },
-    "publish": [
-      {
-        "provider": "generic",
-        "url": "https://github.com/wallace5303/electron-egg"
-      }
-    ],
-    "mac": {
-      "icon": "./build/icons/icon.icns",
-      "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
-      "target": [
-        "dmg",
-        "zip"
-      ]
-    },
-    "win": {
-      "icon": "./build/icons/icon.ico",
-      "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
-      "target": [
-        {
-          "target": "nsis"
-        }
-      ]
-    },
-    "linux": {
-      "icon": "./build/icons/icon.icns",
-      "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
-      "target": [
-        "deb"
-      ],
-      "category": "Utility"
-    }
-  },
-  "repository": "https://github.com/wallace5303/ee.git",
+  "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
-    "Electron"
+    "Electron",
+    "electron-egg"
   ],
-  "author": "wallace5303, Inc <530353222@qq.com>",
+  "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
     "debug": "^4.3.3",
-    "electron": "^13.6.9",
+    "electron": "^21.4.4",
     "electron-builder": "^23.6.0",
-    "electron-rebuild": "^3.2.8",
+    "@electron/rebuild": "^3.2.13",
     "eslint": "^5.13.0",
     "eslint-plugin-prettier": "^3.0.1",
     "nodemon": "^2.0.16"
   },
   "dependencies": {
-    "better-sqlite3": "^7.6.2",
     "dayjs": "^1.10.7",
-    "ee-core": "^2.2.2",
+    "ee-core": "^2.2.3",
     "electron-updater": "^5.3.0",
     "lodash": "^4.17.21"
   }
