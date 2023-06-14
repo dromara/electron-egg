@@ -42,7 +42,7 @@
     "debug": "^4.3.3",
     "electron": "^21.4.4",
     "electron-builder": "^23.6.0",
-    "electron-rebuild": "^3.2.8",
+    "@electron/rebuild": "^3.2.13",
     "eslint": "^5.13.0",
     "eslint-plugin-prettier": "^3.0.1",
     "nodemon": "^2.0.16"
