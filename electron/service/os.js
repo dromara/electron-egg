@@ -38,10 +38,7 @@ class OsService extends Service {
    * removeBrowserView
    */
   removeBrowserView() {
-
-    // removeBrowserView移除视图后，进程依然存在，估计是electron bug
-    const win = CoreWindow.getMainWindow();
-    win.removeBrowserView(this.myBrowserView);
+    this.myBrowserView.webContents.destroy();
   }
 
   /**
