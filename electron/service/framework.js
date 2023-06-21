@@ -68,8 +68,9 @@ class FrameworkService extends Service {
     const channel = 'controller.framework.timerJobProgress';
     if (action == 'create') {
       // 执行任务及监听进度
+      let eventName = 'job-timer-progress-' + jobId;
       const timerTask = this.myJob.exec('./jobs/example/timer', {jobId});
-      timerTask.emitter.on('job-timer-progress', (data) => {
+      timerTask.emitter.on(eventName, (data) => {
         Log.info('[main-process] timerTask, from TimerJob data:', data);
         // 发送数据到渲染进程
         event.sender.send(`${channel}`, data)
@@ -77,7 +78,7 @@ class FrameworkService extends Service {
     
       // 执行任务及监听进度 异步
       // myjob.execPromise('./jobs/example/timer', {jobId}).then(task => {
-      //   task.emitter.on('job-timer-progress', (data) => {
+      //   task.emitter.on(eventName, (data) => {
       //     Log.info('[main-process] timerTask, from TimerJob data:', data);
       //     // 发送数据到渲染进程
       //     event.sender.send(`${channel}`, data)
@@ -115,12 +116,22 @@ class FrameworkService extends Service {
     if (action == 'run') {
       // 异步-执行任务及监听进度
       this.myJobPool.runPromise('./jobs/example/timer', {jobId}).then(task => {
-        task.emitter.on('job-timer-progress', (data) => {
+
+        // 监听器名称唯一，否则会出现重复监听。
+        // 任务完成时，需要移除监听器，防止内存泄漏
+        let eventName = 'job-timer-progress-' + jobId;
+        task.emitter.on(eventName, (data) => {
           Log.info('[main-process] [ChildPoolJob] timerTask, from TimerJob data:', data);
   
           // 发送数据到渲染进程
           event.sender.send(`${channel}`, data)
-        })
+
+          // 如果收到任务完成的消息，移除监听器
+          if (data.end) {
+            task.emitter.removeAllListeners(eventName);
+          }
+        });
+
         res.pid = task.pid; 
       });
     }

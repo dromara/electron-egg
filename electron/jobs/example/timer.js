@@ -23,13 +23,14 @@ class TimerJob extends Job {
     Log.info("[child-process] TimerJob params: ", this.params);
 
     // 计时器任务
-    let eventName = 'job-timer-progress';
+    
     let number = 0;
     let jobId = this.params.jobId;
+    let eventName = 'job-timer-progress-' + jobId;
     let timer = setInterval(function() {
       Hello.welcome();
 
-      childMessage.send(eventName, {jobId, number});
+      childMessage.send(eventName, {jobId, number, end: false});
       number++;
     }, 1000);
 
@@ -39,7 +40,7 @@ class TimerJob extends Job {
       clearInterval(timer);
 
       // 任务结束，重置前端显示
-      childMessage.send(eventName, {jobId, number:0, pid:0});
+      childMessage.send(eventName, {jobId, number:0, pid:0, end: true});
 
       // 如果是childJob任务，必须调用 Ps.exit() 方法，让进程退出，否则会常驻内存
       // 如果是childPoolJob任务，常驻内存，等待下一个业务

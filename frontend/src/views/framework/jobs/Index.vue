@@ -31,30 +31,44 @@
       <p></p>      
       <a-space>
         <a-button @click="runJobByPool(3, 'run')">执行任务3</a-button>
-        进度：{{ progress3 }} ， 进程pid：{{ progress3_pid }}
+        进度：{{ progress3 }} ，进程pid：{{ progress3_pid }}
       </a-space>
       <p></p>
       <a-space>
         <a-button @click="runJobByPool(4, 'run')">执行任务4</a-button>
-        进度：{{ progress4 }} ， 进程pid：{{ progress4_pid }}
-      </a-space>            
+        进度：{{ progress4 }} ，进程pid：{{ progress4_pid }}
+      </a-space> 
+      <p></p> 
+      <a-space>
+        <a-button @click="runJobByPool(5, 'run')">执行任务5</a-button>
+        进度：{{ progress5 }} ，进程pid：{{ progress5_pid }}
+      </a-space>
+      <p></p>
+      <a-space>
+        <a-button @click="runJobByPool(6, 'run')">执行任务6</a-button>
+        进度：{{ progress6 }} ，进程pid：{{ progress6_pid }}
+      </a-space>  
     </div>            
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
 export default {
   data() {
     return {
-      progress1: 0,
-      progress1_pid: 0,
-      progress2: 0,
-      progress2_pid: 0,
-      progress3: 0,
-      progress3_pid: 0,
-      progress4: 0,
-      progress4_pid: 0,
       processPids: '',
+      progress1: 0,
+      progress2: 0,
+      progress3: 0,
+      progress4: 0,
+      progress5: 0,
+      progress6: 0,
+      progress1_pid: 0,
+      progress2_pid: 0,
+      progress3_pid: 0,
+      progress4_pid: 0,
+      progress5_pid: 0,
+      progress6_pid: 0,
     }
   },
   mounted () {
@@ -85,6 +99,14 @@ export default {
             this.progress4 = result.number;  
             this.progress4_pid = result.pid == 0 ? result.pid : this.progress4_pid;          
             break;
+          case 5:
+            this.progress5 = result.number;
+            this.progress5_pid = result.pid == 0 ? result.pid : this.progress5_pid;
+            break;
+          case 6:
+            this.progress6 = result.number;  
+            this.progress6_pid = result.pid == 0 ? result.pid : this.progress6_pid;          
+            break;  
         }
       })
 
@@ -103,14 +125,10 @@ export default {
       this.$ipc.invoke(ipcApiRoute.someJob, params).then(data => {
         switch (data.jobId) {
           case 1:
-            if (data.action == 'create') {
-              this.progress1_pid = data.result.pid;
-            }
+            this.progress1_pid = data.result.pid;
             break;
           case 2:
-            if (data.action == 'create') {
-              this.progress2_pid = data.result.pid;
-            }
+            this.progress2_pid = data.result.pid;
             break;
         }
       })
@@ -130,15 +148,17 @@ export default {
       this.$ipc.invoke(ipcApiRoute.someJobByPool, params).then(data => {
         switch (data.jobId) {
           case 3:
-            if (data.action == 'run') {
-              this.progress3_pid = data.result.pid;
-            }
+            this.progress3_pid = data.result.pid;
             break;
           case 4:
-            if (data.action == 'run') {
-              this.progress4_pid = data.result.pid;
-            }
+            this.progress4_pid = data.result.pid;
             break;
+          case 5:
+            this.progress5_pid = data.result.pid;
+            break;
+          case 6:
+            this.progress6_pid = data.result.pid;
+            break;  
         }
       })
     },
