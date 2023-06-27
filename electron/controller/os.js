@@ -130,7 +130,11 @@ class OsController extends Controller {
       let addr = 'http://localhost:8080'
       if (Ps.isProd()) {
         const mainServer = Conf.getValue('mainServer');
-        addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
+        if (Conf.isFileProtocol(mainServer)) {
+          addr = path.join(Ps.getHomeDir(), mainServer.indexPath);
+        } else {
+          addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
+        }
       }
 
       contentUrl = addr + content;

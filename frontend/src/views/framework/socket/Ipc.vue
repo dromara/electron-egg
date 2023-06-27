@@ -54,7 +54,7 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute, specialIpcRoute } from '@/api/main'
+import { ipcApiRoute, specialIpcRoute } from '@/api/main';
 export default {
   data() {
     return {
@@ -67,7 +67,7 @@ export default {
       views: [
         {
           type: 'vue',
-          content: '/#/special/subwindow',
+          content: '#/special/subwindow',
           windowName: 'window-ipc',
           windowTitle: 'ipc window'
         },    

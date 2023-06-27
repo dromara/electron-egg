@@ -33,7 +33,7 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
 
 export default {
   data() {
@@ -53,7 +53,7 @@ export default {
         },
         {
           type: 'vue',
-          content: '/#/special/subwindow',
+          content: '#/special/subwindow',
           windowName: 'window-vue',
           windowTitle: 'vue window'
         },    

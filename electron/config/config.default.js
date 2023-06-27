@@ -38,7 +38,7 @@ module.exports = (appInfo) => {
   /**
    * 应用程序顶部菜单
    */
-  config.openAppMenu = 'dev-show';
+  config.openAppMenu = true;
 
   /**
    * 主窗口
@@ -132,7 +132,7 @@ module.exports = (appInfo) => {
    * 主进程
    */     
   config.mainServer = {
-    protocol: 'http://',
+    protocol: 'file://',
     indexPath: '/public/dist/index.html',
     host: 'localhost',
     port: 7072,
