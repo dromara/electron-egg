@@ -131,7 +131,7 @@ class OsController extends Controller {
       if (Ps.isProd()) {
         const mainServer = Conf.getValue('mainServer');
         if (Conf.isFileProtocol(mainServer)) {
-          addr = path.join(Ps.getHomeDir(), mainServer.indexPath);
+          addr = mainServer.protocol + path.join(Ps.getHomeDir(), mainServer.indexPath);
         } else {
           addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
         }
