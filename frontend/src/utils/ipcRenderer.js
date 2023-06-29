@@ -1,4 +1,4 @@
-const { ipcRenderer: ipc } = (window.require && window.require('electron')) || window.electron || {};
+const Renderer = (window.require && window.require('electron')) || window.electron || {};
 
 /**
  * ipc
@@ -18,11 +18,16 @@ const { ipcRenderer: ipc } = (window.require && window.require('electron')) || w
  */
 
 /**
+ * ipc
+ */
+const ipc = Renderer.ipcRenderer || undefined;
+
+/**
  * 是否为EE环境
  */
 const isEE = ipc ? true : false;
 
-export {
-  ipc,
-  isEE
+export default {
+  Renderer, ipc, isEE
 }
+
