@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
-    "ee-core": "^2.3.0",
+    "ee-core": "^2.3.1",
     "electron-updater": "^5.3.0",
     "lodash": "^4.17.21"
   }
