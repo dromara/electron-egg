@@ -57,7 +57,7 @@ module.exports = (appInfo) => {
     },
     frame: true,
     show: false,
-    icon: path.join(appInfo.home, 'public', 'images', 'logo_32.png'),
+    icon: path.join(appInfo.home, 'public', 'images', 'logo-32.png'),
   };
 
   /**
@@ -164,7 +164,7 @@ module.exports = (appInfo) => {
     tray: {
       enable: true,
       title: 'EE程序',
-      icon: '/public/images/tray_logo.png'
+      icon: '/public/images/tray.png'
     },
     security: {
       enable: true,
