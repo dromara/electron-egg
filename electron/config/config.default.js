@@ -57,7 +57,7 @@ module.exports = (appInfo) => {
     },
     frame: true,
     show: false,
-    icon: path.join(appInfo.home, 'public', 'images', 'logo-32.png'),
+    icon: path.join(appInfo.home, 'public', 'images', 'logo_32.png'),
   };
 
   /**
