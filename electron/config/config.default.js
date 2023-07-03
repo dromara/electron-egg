@@ -132,7 +132,7 @@ module.exports = (appInfo) => {
    * 主进程
    */     
   config.mainServer = {
-    protocol: 'http://',
+    protocol: 'file://',
     indexPath: '/public/dist/index.html',
     host: 'localhost',
     port: 7072,
@@ -164,7 +164,7 @@ module.exports = (appInfo) => {
     tray: {
       enable: true,
       title: 'EE程序',
-      icon: '/public/images/tray_logo.png'
+      icon: '/public/images/tray.png'
     },
     security: {
       enable: true,
