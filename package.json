@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -35,7 +35,8 @@
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
     "Electron",
-    "electron-egg"
+    "electron-egg",
+    "ElectronEgg"
   ],
   "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
@@ -51,7 +52,7 @@
   "dependencies": {
     "better-sqlite3": "^8.4.0",
     "dayjs": "^1.10.7",
-    "ee-core": "^2.3.0-beta.1",
+    "ee-core": "^2.3.0",
     "electron-updater": "^5.3.0",
     "lodash": "^4.17.21"
   }
