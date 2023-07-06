@@ -1,10 +1,10 @@
-import Vue from 'vue'
-import antd from 'ant-design-vue'
+import antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.less';
-import App from './App'
-import router from './router'
-import { VueAxios } from './utils/request'
-import { ipc } from '@/utils/ipcRenderer'
+import Vue from 'vue';
+import App from './App';
+import router from './router';
+import { ipc } from './utils/ipcRenderer';
+import { VueAxios } from './utils/request';
 
 // 使用antd
 Vue.use(antd)
