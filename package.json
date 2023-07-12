@@ -25,12 +25,12 @@
     "build-l-armv7l": "electron-builder --config=./electron/config/builder.json -l=deb --armv7l",
     "build-lr-64": "electron-builder --config=./electron/config/builder.json -l=rpm --x64",
     "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64",
-    "rd": "ee-core rd --dist_dir=./frontend/dist",
-    "encrypt": "ee-core encrypt",
-    "clean": "ee-core clean",
+    "rd": "ee-bin rd",
+    "encrypt": "ee-bin encrypt",
+    "clean": "ee-bin clean",
+    "icon": "ee-bin icon -i /public/images/logo.png -o /build/icons/",
     "rebuild": "electron-rebuild",
-    "re-sqlite": "electron-rebuild -f -w better-sqlite3",
-    "icon": "ee-core icon -i /public/images/logo.png -o /build/icons/"
+    "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
@@ -52,7 +52,7 @@
   "dependencies": {
     "better-sqlite3": "^8.4.0",
     "dayjs": "^1.10.7",
-    "ee-core": "file:.yalc/ee-core",
+    "ee-core": "^2.3.1",
     "electron-updater": "^5.3.0",
     "lodash": "^4.17.21"
   }
