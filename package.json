@@ -50,9 +50,8 @@
     "nodemon": "^2.0.16"
   },
   "dependencies": {
-    "better-sqlite3": "^8.4.0",
     "dayjs": "^1.10.7",
-    "ee-core": "file:.yalc/ee-core",
+    "ee-core": "^2.3.1",
     "electron-updater": "^5.3.0",
     "lodash": "^4.17.21"
   }
