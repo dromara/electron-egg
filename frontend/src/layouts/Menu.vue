@@ -4,7 +4,11 @@
       theme="light"
       class="layout-sider"
     >
-      <a-menu theme="light" mode="inline" :default-selected-keys="[default_key]" :selected-keys="[current]" @click="menuClick">
+      <a-menu 
+        theme="light" 
+        mode="inline" 
+        :selectedKeys="state.selectedKeys"
+        @click="handleClick">
         <a-menu-item v-for="(menuInfo, subIndex) in menu" :key="subIndex">
           <router-link :to="{ name: menuInfo.pageName, params: menuInfo.params}">
             <span>{{ menuInfo.title }}</span>
@@ -20,9 +24,25 @@
   </a-layout>
 </template>
 <script>
-import subMenu from '@/config/subMenu'
+import { reactive } from 'vue';
+// :default-selected-keys="[default_key]" 
+import subMenu from '@/config/subMenu';
 
 export default {
+  setup() {
+    const state = reactive({
+      selectedKeys: ['menu_100'],
+    });
+    
+    const handleClick = e => {
+      state.selectedKeys = [e.key];
+    };
+
+    return {
+      state,
+      handleClick,
+    };
+  },
   props: {
     id: {
       type: String,
@@ -32,8 +52,7 @@ export default {
   data() {
     return {
       menu:{},
-      default_key: 'menu_100',
-      current: '',
+      current: 'menu_100',
       keys: []
     };
   },
@@ -49,21 +68,13 @@ export default {
   },
   methods: {
     menuHandle () {
-      this.current = this.default_key;
+      // 该组件优先被加载了，所以没拿到参数
+      //console.log('params:', this.$route);
+    
+      console.log('menu ------ id:', this.id);
       this.menu = subMenu[this.id];
-      // switch (this.id) {
-      //   case 'base' :
-      //     this.menu = subMenu.base;
-      //     break;
-      //   case 'other' :
-      //     this.menu = subMenu.other;
-      //     break;                                    
-      // }
       const linkInfo = this.menu[this.current];
       this.$router.push({ name: linkInfo.pageName, params: linkInfo.params});
-    },
-    menuClick(e) {
-      this.current = e.key;
     },
   }
 };

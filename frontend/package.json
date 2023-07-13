@@ -2,7 +2,7 @@
   "name": "ee",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite --host --port 3000",
+    "dev": "vite --host --port 8080",
     "build-staging": "vite build --mode staging",
     "build": "vite build",
     "serve": "vite preview"

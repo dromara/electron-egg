@@ -4,11 +4,18 @@
       v-model="collapsed"
       theme="light"
       class="layout-sider"
+      width="80"
     >
       <div class="logo">
         <img class="pic-logo" src="~@/assets/logo.png">
       </div>
-      <a-menu class="menu-item" theme="light" mode="inline" :default-selected-keys="[default_key]" @click="menuHandle">
+      <a-menu 
+        class="menu-item" 
+        theme="light" 
+        mode="inline"
+        :selectedKeys="state.selectedKeys"
+        @click="handleClick"
+      >
         <a-menu-item v-for="(menuInfo, index) in menu" :key="index">
           <!-- <a-icon :type="menuInfo.icon" /> -->
           {{ menuInfo.title }}
@@ -23,19 +30,43 @@
   </a-layout>
 </template>
 <script>
+import { reactive } from 'vue';
+// import { useRoute, useRouter } from 'vue-router'
+
+// const Router = useRouter()
+// const Route = useRoute()
+// :default-selected-keys="[current]"
+
 export default {
   name: 'AppSider',
+  setup() {
+    const state = reactive({
+      selectedKeys: ['menu_1'],
+    });
+    
+    const handleClick = e => {
+      state.selectedKeys = [e.key];
+      console.log('state.selectedKeys:', state.selectedKeys)
+      //menuHandle ()
+    };
+
+    return {
+      state,
+      handleClick,
+    };
+  },
   data() {
     return {
       collapsed: true,
-      default_key: 'menu_1',
-      current: '',
+      current: 'menu_1',
       menu: {
         'menu_1' : {
           icon: 'home',
           title: '框架',
           pageName: 'Framework',
-          params: {},
+          params: {
+            // test: 'hello'
+          },
         },
         'menu_2' : {
           icon: 'desktop',
@@ -64,10 +95,9 @@ export default {
     this.menuHandle()
   },
   methods: {
-    menuHandle (e) {
-      this.current = e ? e.key : this.default_key;
+    menuHandle () {
       const linkInfo = this.menu[this.current]
-      console.log('[home] load page:', linkInfo.pageName);
+      console.log('[home] load linkInfo:', linkInfo);
       this.$router.push({ name: linkInfo.pageName, params: linkInfo.params})
     },
   },

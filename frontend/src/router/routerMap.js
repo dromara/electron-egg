@@ -18,6 +18,7 @@ const constantRouterMap = [
         name: 'Framework',
         component: () => import('@/layouts/Menu.vue'),
         props: { id: 'framework' },
+        //props: true,
         redirect: { name: 'FrameworkSocketIpc' },
         children: [
           {

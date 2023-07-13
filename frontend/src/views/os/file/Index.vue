@@ -57,7 +57,7 @@
         @change="handleFileChange"
       >
         <p class="ant-upload-drag-icon">
-          <a-icon type="inbox" />
+          <!-- <icon-font type="inbox" /> -->
         </p>
         <p class="ant-upload-text">
           点击 或 拖拽文件到这里
