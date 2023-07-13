@@ -132,7 +132,8 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
 
 export default {
   data() {
@@ -155,7 +156,7 @@ export default {
       const params = {
         action: 'all',
       }
-      this.$ipc.invoke(ipcApiRoute.dbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.dbOperation, params).then(res => {
         console.log('res:', res);
         if (res.all_list.length == 0) {
           return false;
@@ -178,7 +179,7 @@ export default {
       if (ac == 'add' && this.name.length == 0) {
         this.$message.error(`请填写数据`);
       }
-      this.$ipc.invoke(ipcApiRoute.dbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.dbOperation, params).then(res => {
         console.log('res:', res);
         if (ac == 'get') {
           if (res.result.length == 0) {

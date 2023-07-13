@@ -14,8 +14,9 @@
   </div>
 </template>
 <script>
-import Player from 'xgplayer'
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+import Player from 'xgplayer';
 
 export default {
   data() {
@@ -63,7 +64,7 @@ export default {
     },    
     selectFile () {
       const params = {}
-      this.$ipc.invoke(ipcApiRoute.selectFile, params).then(res => {
+      ipc.invoke(ipcApiRoute.selectFile, params).then(res => {
         console.log('res:', res)
         if (res) {
           this.fileUrl = res;

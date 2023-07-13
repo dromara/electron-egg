@@ -15,8 +15,9 @@
   </div>
 </template>
 <script>
-import storage from 'store2'
 import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+import storage from 'store2';
 
 export default {
   data() {
@@ -29,7 +30,7 @@ export default {
   },  
   methods: {
     startServer () {
-      this.$ipc.invoke(ipcApiRoute.startJavaServer, {}).then(r => {
+      ipc.invoke(ipcApiRoute.startJavaServer, {}).then(r => {
         if (r.code != 0) {
           this.$message.error(r.msg);
         } else {
@@ -40,7 +41,7 @@ export default {
     },
 
     closeServer () {
-      this.$ipc.invoke(ipcApiRoute.closeJavaServer, {}).then(r => {
+      ipc.invoke(ipcApiRoute.closeJavaServer, {}).then(r => {
         if (r.code != 0) {
           this.$message.error(r.msg);
         }

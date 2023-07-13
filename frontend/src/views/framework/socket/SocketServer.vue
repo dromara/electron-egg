@@ -24,8 +24,8 @@
   </div>
 </template>
 <script>
-import { io } from 'socket.io-client'
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { io } from 'socket.io-client';
 
 export default {
   data() {

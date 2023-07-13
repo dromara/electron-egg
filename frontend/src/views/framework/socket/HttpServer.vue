@@ -24,8 +24,9 @@
   </div>
 </template>
 <script>
-import storage from 'store2'
-import { ipcApiRoute, requestHttp } from '@/api/main'
+import { ipcApiRoute, requestHttp } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+import storage from 'store2';
 
 export default {
   data() {
@@ -39,7 +40,7 @@ export default {
   },
   methods: {
     init () {
-      this.$ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
+      ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
         if (r.enable) {
           this.currentStatus = '开启';
           this.servicAddress = r.server;

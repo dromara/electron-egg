@@ -29,7 +29,8 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
 
 export default {
   data() {
@@ -50,14 +51,14 @@ export default {
   methods: {
     init () {
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      this.$ipc.removeAllListeners(ipcApiRoute.printStatus);
-      this.$ipc.on(ipcApiRoute.printStatus, (event, result) => {
+      ipc.removeAllListeners(ipcApiRoute.printStatus);
+      ipc.on(ipcApiRoute.printStatus, (event, result) => {
         console.log('result', result);
         this.$message.info('打印中...');
       })
     },    
     getPrinter () {
-      this.$ipc.invoke(ipcApiRoute.getPrinterList, {}).then(res => {
+      ipc.invoke(ipcApiRoute.getPrinterList, {}).then(res => {
         this.printerList = res;
       }) 
     },
@@ -67,7 +68,7 @@ export default {
         view: this.views[index],
         deviceName: this.defaultDeviceName
       };
-      this.$ipc.send(ipcApiRoute.print, params)
+      ipc.send(ipcApiRoute.print, params)
     },
     defaultDevice (item) {
       let desc = "";

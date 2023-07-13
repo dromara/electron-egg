@@ -10,7 +10,7 @@
       </div>
       <a-menu class="menu-item" theme="light" mode="inline" :default-selected-keys="[default_key]" @click="menuHandle">
         <a-menu-item v-for="(menuInfo, index) in menu" :key="index">
-          <a-icon :type="menuInfo.icon" />
+          <!-- <a-icon :type="menuInfo.icon" /> -->
           {{ menuInfo.title }}
         </a-menu-item>
       </a-menu>

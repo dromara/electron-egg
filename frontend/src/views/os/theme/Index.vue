@@ -32,7 +32,7 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
 
 export default {
   data() {
@@ -52,13 +52,13 @@ export default {
       this.currentThemeMode = e.target.value;
       console.log('setTheme currentThemeMode:', this.currentThemeMode)
 
-      this.$ipc.invoke(ipcApiRoute.setTheme, this.currentThemeMode).then(result => {
+      ipc.invoke(ipcApiRoute.setTheme, this.currentThemeMode).then(result => {
         console.log('result:', result)
         this.currentThemeMode = result;
       })      
     },
     getTheme () {
-      this.$ipc.invoke(ipcApiRoute.getTheme).then(result => {
+      ipc.invoke(ipcApiRoute.getTheme).then(result => {
         console.log('result:', result)
         this.currentThemeMode = result;
       })  

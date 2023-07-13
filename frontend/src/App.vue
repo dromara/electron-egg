@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="application">
     <router-view/>
   </div>
 </template>
@@ -16,7 +16,7 @@ export default {
 }
 </script>
 <style>
-#app {
+#application {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

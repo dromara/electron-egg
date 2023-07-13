@@ -72,8 +72,9 @@
   </div>
 </template>
 <script>
-import storage from 'store2'
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+import storage from 'store2';
 
 const fileList = [
   {
@@ -110,7 +111,7 @@ export default {
   },
   methods: {
     getHost () {
-      this.$ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
+      ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
         if (r.enable) {
           this.servicAddress = r.server;
           storage.set('httpServiceConfig', r);
@@ -124,23 +125,23 @@ export default {
       })
     },
     openDirectry (id) {
-      this.$ipc.invoke(ipcApiRoute.openDirectory, {id: id}).then(res => {
+      ipc.invoke(ipcApiRoute.openDirectory, {id: id}).then(res => {
         //console.log('res:', res)
       })      
     },
     selectDir() {
-      this.$ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
+      ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
         this.dir_path = r;
         this.$message.info(r);
       })      
     },
 		messageShow() {
-      this.$ipc.invoke(ipcApiRoute.messageShow, '').then(r => {
+      ipc.invoke(ipcApiRoute.messageShow, '').then(r => {
         this.$message.info(r);
       })
     },    
     messageShowConfirm() {
-      this.$ipc.invoke(ipcApiRoute.messageShowConfirm, '').then(r => {
+      ipc.invoke(ipcApiRoute.messageShowConfirm, '').then(r => {
         this.$message.info(r);
       })
     },

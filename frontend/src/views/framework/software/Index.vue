@@ -22,7 +22,8 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
 
 const data = [
   {
@@ -39,7 +40,7 @@ export default {
   },
   methods: {
     openSoft (id) { 
-      this.$ipc.invoke(ipcApiRoute.openSoftware, id).then(result => {
+      ipc.invoke(ipcApiRoute.openSoftware, id).then(result => {
         if (!result) {
           this.$message.error('程序不存在');
         }

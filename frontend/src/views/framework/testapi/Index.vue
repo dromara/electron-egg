@@ -14,7 +14,8 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute, requestHttp } from '@/api/main'
+import { ipcApiRoute, requestHttp } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
 
 export default {
   data() {
@@ -27,7 +28,7 @@ export default {
       const params = {
         id: id
       }
-      this.$ipc.invoke(ipcApiRoute.test, params).then(res => {
+      ipc.invoke(ipcApiRoute.test, params).then(res => {
         console.log('res:', res)
       }) 
     },

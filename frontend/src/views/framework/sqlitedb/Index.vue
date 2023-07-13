@@ -156,7 +156,8 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
 
 export default {
   data() {
@@ -181,7 +182,7 @@ export default {
       const params = {
         action: 'getDataDir',
       }
-      this.$ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
         this.data_dir = res.result;
       }) 
     },
@@ -190,7 +191,7 @@ export default {
       const params = {
         action: 'all',
       }
-      this.$ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
         if (res.all_list.length == 0) {
           return false;
         }
@@ -198,7 +199,7 @@ export default {
       }) 
     },
     selectDir() {
-      this.$ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
+      ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
         this.data_dir = r;
         // 修改数据目录
         this.modifyDataDir(r);
@@ -206,7 +207,7 @@ export default {
     },
     openDir() {
       console.log('dd:', this.data_dir);
-      this.$ipc.invoke(ipcApiRoute.openDirectory, {id: this.data_dir}).then(res => {
+      ipc.invoke(ipcApiRoute.openDirectory, {id: this.data_dir}).then(res => {
         //
       })
     },    
@@ -215,7 +216,7 @@ export default {
         action: 'setDataDir',
         data_dir: dir
       }
-      this.$ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
         this.all_list = res.all_list;
       }) 
     },
@@ -234,7 +235,7 @@ export default {
       if (ac == 'add' && this.name.length == 0) {
         this.$message.error(`请填写数据`);
       }
-      this.$ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
         console.log('res:', res);
         if (ac == 'get') {
           if (res.result.length == 0) {
