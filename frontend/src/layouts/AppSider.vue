@@ -13,8 +13,8 @@
         class="menu-item" 
         theme="light" 
         mode="inline"
-        :selectedKeys="state.selectedKeys"
-        @click="handleClick"
+        :selectedKeys="[current]"
+        @click="menuHandle"
       >
         <a-menu-item v-for="(menuInfo, index) in menu" :key="index">
           <!-- <a-icon :type="menuInfo.icon" /> -->
@@ -30,7 +30,7 @@
   </a-layout>
 </template>
 <script>
-import { reactive } from 'vue';
+// import { reactive } from 'vue';
 // import { useRoute, useRouter } from 'vue-router'
 
 // const Router = useRouter()
@@ -39,22 +39,22 @@ import { reactive } from 'vue';
 
 export default {
   name: 'AppSider',
-  setup() {
-    const state = reactive({
-      selectedKeys: ['menu_1'],
-    });
+  // setup() {
+  //   const state = reactive({
+  //     selectedKeys: ['menu_1'],
+  //   });
     
-    const handleClick = e => {
-      state.selectedKeys = [e.key];
-      console.log('state.selectedKeys:', state.selectedKeys)
-      //menuHandle ()
-    };
+  //   const handleClick = e => {
+  //     state.selectedKeys = [e.key];
+  //     console.log('state.selectedKeys:', state.selectedKeys)
+  //     //menuHandle ()
+  //   };
 
-    return {
-      state,
-      handleClick,
-    };
-  },
+  //   return {
+  //     state,
+  //     handleClick,
+  //   };
+  // },
   data() {
     return {
       collapsed: true,
@@ -95,11 +95,19 @@ export default {
     this.menuHandle()
   },
   methods: {
-    menuHandle () {
+    menuHandle (e) {
+      console.log('sider menu e:', e);
+      this.current = e ? e.key : this.current;
+      console.log('sider menu current:', this.current);
+
       const linkInfo = this.menu[this.current]
       console.log('[home] load linkInfo:', linkInfo);
       this.$router.push({ name: linkInfo.pageName, params: linkInfo.params})
     },
+    changeMenu(e) {
+      console.log('sider menu e:', e);
+      //this.current = e.key;
+    }
   },
 };
 </script>

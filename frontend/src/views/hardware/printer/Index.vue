@@ -10,12 +10,14 @@
     </div>
     <div class="one-block-2">
       <a-list size="small" bordered :data-source="printerList">
-        <a-list-item slot="renderItem" slot-scope="item">
-          {{ item.displayName }} {{ defaultDevice(item) }}
-        </a-list-item>
-        <div slot="header">
-          设备列表
-        </div>
+        <template #renderItem="{ item }">
+          <a-list-item>
+            {{ item.displayName }} {{ defaultDevice(item) }}
+          </a-list-item>
+        </template>
+        <template #header>
+          <div>设备列表</div>
+        </template>
       </a-list>
     </div>
     <div class="one-block-1">

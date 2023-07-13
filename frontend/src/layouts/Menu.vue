@@ -7,8 +7,8 @@
       <a-menu 
         theme="light" 
         mode="inline" 
-        :selectedKeys="state.selectedKeys"
-        @click="handleClick">
+        :selectedKeys="[current]"
+        @click="changeMenu">
         <a-menu-item v-for="(menuInfo, subIndex) in menu" :key="subIndex">
           <router-link :to="{ name: menuInfo.pageName, params: menuInfo.params}">
             <span>{{ menuInfo.title }}</span>
@@ -24,25 +24,25 @@
   </a-layout>
 </template>
 <script>
-import { reactive } from 'vue';
+// import { reactive } from 'vue';
 // :default-selected-keys="[default_key]" 
 import subMenu from '@/config/subMenu';
 
 export default {
-  setup() {
-    const state = reactive({
-      selectedKeys: ['menu_100'],
-    });
+  // setup() {
+  //   const state = reactive({
+  //     selectedKeys: ['menu_100'],
+  //   });
     
-    const handleClick = e => {
-      state.selectedKeys = [e.key];
-    };
+  //   const handleClick = e => {
+  //     state.selectedKeys = [e.key];
+  //   };
 
-    return {
-      state,
-      handleClick,
-    };
-  },
+  //   return {
+  //     state,
+  //     handleClick,
+  //   };
+  // },
   props: {
     id: {
       type: String,
@@ -52,12 +52,15 @@ export default {
   data() {
     return {
       menu:{},
+      //selectedKeys: ['menu_100'],
       current: 'menu_100',
       keys: []
     };
   },
   watch: {
     id: function () {
+      console.log('watch id ----- ', this.id);
+      this.current = 'menu_100';
       this.menuHandle();
     },
   },
@@ -76,6 +79,10 @@ export default {
       const linkInfo = this.menu[this.current];
       this.$router.push({ name: linkInfo.pageName, params: linkInfo.params});
     },
+    changeMenu(e) {
+      console.log('changeMenu e:', e);
+      this.current = e.key;
+    }
   }
 };
 </script>
