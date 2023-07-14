@@ -175,7 +175,7 @@ export default {
   },
   mounted () {
     this.init();
-    this.getAllTestData();
+    
   },
   methods: {
     init() {
@@ -183,7 +183,13 @@ export default {
         action: 'getDataDir',
       }
       ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+        if (res.code == -1) {
+          this.$message.error('请检查sqlite数据库是否');
+          return
+        }
+
         this.data_dir = res.result;
+        this.getAllTestData();
       }) 
     },
     getAllTestData () {

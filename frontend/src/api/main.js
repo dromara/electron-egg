@@ -1,5 +1,5 @@
-import storage from 'store2'
 import request from '@/utils/request'
+import storage from 'store2'
 
 /**
  * 路由定义（主进程与渲染进程通信频道定义）
@@ -9,7 +9,7 @@ const ipcApiRoute = {
   test: 'controller.example.test',
   checkForUpdater: 'controller.framework.checkForUpdater',
   downloadApp: 'controller.framework.downloadApp',
-  dbOperation: 'controller.framework.dbOperation',
+  jsondbOperation: 'controller.framework.jsondbOperation',
   sqlitedbOperation: 'controller.framework.sqlitedbOperation',
   uploadFile: 'controller.framework.uploadFile',
   checkHttpServer: 'controller.framework.checkHttpServer',
@@ -82,7 +82,6 @@ const requestHttp = (uri, parameter) => {
 }
 
 export {
-  ipcApiRoute,
-  specialIpcRoute,
-  requestHttp,
+  ipcApiRoute, requestHttp, specialIpcRoute
 }
+

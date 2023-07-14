@@ -24,7 +24,7 @@ export default {
 		'menu_103' : {
 			icon: 'profile',
 			title: 'json数据库',
-			pageName: 'FrameworkDBIndex',
+			pageName: 'FrameworkJsonDBIndex',
 			params: {}
 		},
 		'menu_104' : {
