@@ -3,10 +3,13 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import Router from './router/index';
 // import './styles/nprogress.less'
-// import './styles/global.less' // 全局样式
-import * as AntIcon from '@ant-design/icons-vue'; // 全局图标
+import * as AntIcon from '@ant-design/icons-vue';
 import Antd from 'ant-design-vue';
-import 'ant-design-vue/dist/antd.less'; // 引入官方提供的 less 样式入口文件
+import './assets/global.less';
+//import 'ant-design-vue/dist/antd.less';
+//import 'ant-design-vue/dist/antd.css';
+
+import './assets/theme.less'; // ant 主题Y样式
 import { ipc } from './utils/ipcRenderer';
 
 const app = createApp(App)

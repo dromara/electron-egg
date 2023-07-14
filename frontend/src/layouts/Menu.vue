@@ -26,7 +26,7 @@
 <script>
 // import { reactive } from 'vue';
 // :default-selected-keys="[default_key]" 
-import subMenu from '@/config/subMenu';
+import subMenu from '@/router/subMenu';
 
 export default {
   // setup() {
