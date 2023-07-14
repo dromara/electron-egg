@@ -24,10 +24,7 @@ export default {
     return {
       server: '',
     };
-  },
-  mounted() {
-
-  },  
+  }, 
   methods: {
     startServer () {
       ipc.invoke(ipcApiRoute.startJavaServer, {}).then(r => {

@@ -125,6 +125,7 @@ export default {
         action: operation
       }
       ipc.invoke(ipcApiRoute.someJob, params).then(data => {
+        if (operation == 'close') return;
         switch (data.jobId) {
           case 1:
             this.progress1_pid = data.result.pid;
