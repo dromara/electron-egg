@@ -6,10 +6,7 @@ import Router from './router/index';
 import * as AntIcon from '@ant-design/icons-vue';
 import Antd from 'ant-design-vue';
 import './assets/global.less';
-//import 'ant-design-vue/dist/antd.less';
-//import 'ant-design-vue/dist/antd.css';
-
-import './assets/theme.less'; // ant 主题Y样式
+import './assets/theme.less';
 import { ipc } from './utils/ipcRenderer';
 
 const app = createApp(App)

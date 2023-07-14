@@ -54,6 +54,8 @@
 </template>
 <script>
 import { ipcApiRoute, specialIpcRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+
 export default {
   data() {
     return {
@@ -69,13 +71,12 @@ export default {
   },
   methods: {
     init () {
-      const self = this;
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
       ipc.removeAllListeners(ipcApiRoute.ipcSendMsg);
       ipc.on(ipcApiRoute.ipcSendMsg, (event, result) => {
         console.log('[ipcRenderer] [socketMsgStart] result:', result);
 
-        self.messageString = result;
+        this.messageString = result;
         // 调用后端的另一个接口
         event.sender.send(ipcApiRoute.hello, 'electron-egg');
       })
@@ -101,10 +102,9 @@ export default {
       ipc.send(ipcApiRoute.ipcSendMsg, params)
     },
     handleInvoke () {
-      const self = this;
       ipc.invoke(ipcApiRoute.ipcInvokeMsg, '异步-回调').then(r => {
         console.log('r:', r);
-        self.message1 = r;
+        this.message1 = r;
       });
     },
     async handleInvoke2 () {

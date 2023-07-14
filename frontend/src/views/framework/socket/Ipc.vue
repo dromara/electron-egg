@@ -56,6 +56,7 @@
 <script>
 import { ipcApiRoute, specialIpcRoute } from '@/api/main';
 import { ipc } from '@/utils/ipcRenderer';
+import { toRaw } from 'vue';
 
 export default {
   data() {
@@ -127,7 +128,7 @@ export default {
       this.message3 = msg;
     },
     createWindow(index) {
-      ipc.invoke(ipcApiRoute.createWindow, this.views[index]).then(id => {
+      ipc.invoke(ipcApiRoute.createWindow, toRaw(this.views[index])).then(id => {
         console.log('[createWindow] id:', id);
       })
     },

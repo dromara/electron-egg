@@ -152,17 +152,17 @@ const constantRouterMap = [
       },
     ]
   },
-//   {
-//     path: '/special',
-//     component: RouteView,
-//     children: [
-//       {
-//         path: 'subwindow',
-//         name: 'SpecialSubwindowIpc',
-//         component: () => import('@/views/os/subwindow/Ipc')
-//       }
-//     ]
-//   },
+  {
+    path: '/special',
+    //component: RouteView,
+    children: [
+      {
+        path: 'subwindow',
+        name: 'SpecialSubwindowIpc',
+        component: () => import('@/views/os/subwindow/Ipc.vue')
+      }
+    ]
+  },
 ]
 
 export default constantRouterMap
