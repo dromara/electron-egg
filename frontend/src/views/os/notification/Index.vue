@@ -18,6 +18,7 @@
 <script>
 import { ipcApiRoute } from '@/api/main';
 import { ipc } from '@/utils/ipcRenderer';
+import { toRaw } from 'vue';
 
 export default {
   data() {
@@ -68,7 +69,7 @@ export default {
       })
     },
     sendNotification (index) {
-      ipc.send(ipcApiRoute.sendNotification, this.views[index]);
+      ipc.send(ipcApiRoute.sendNotification, toRaw(this.views[index]));
     },
   }
 };

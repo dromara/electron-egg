@@ -14,7 +14,7 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute, requestHttp } from '@/api/main';
+import { ipcApiRoute } from '@/api/main';
 import { ipc } from '@/utils/ipcRenderer';
 
 export default {
@@ -33,12 +33,7 @@ export default {
       }) 
     },
     exec2 (id) {
-      const params = {
-        id: id
-      }
-      requestHttp(ipcApiRoute.test, params).then(res => {
-        console.log('res2:', res)
-      }) 
+      //
     },    
   }
 };

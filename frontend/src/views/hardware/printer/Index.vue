@@ -33,6 +33,7 @@
 <script>
 import { ipcApiRoute } from '@/api/main';
 import { ipc } from '@/utils/ipcRenderer';
+import { toRaw } from 'vue';
 
 export default {
   data() {
@@ -67,7 +68,7 @@ export default {
     doPrint (index) {
       console.log('defaultDeviceName:', this.defaultDeviceName)
       const params = {
-        view: this.views[index],
+        view: toRaw(this.views[index]),
         deviceName: this.defaultDeviceName
       };
       ipc.send(ipcApiRoute.print, params)

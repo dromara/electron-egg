@@ -36,8 +36,6 @@ export default {
       data: [],
     };
   },
-  mounted () {
-  },
   methods: {
     getScreen (index) {
       ipc.invoke(ipcApiRoute.getScreen, index).then(result => {

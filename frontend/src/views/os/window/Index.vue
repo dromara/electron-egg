@@ -34,6 +34,8 @@
 </template>
 <script>
 import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+import { toRaw } from 'vue';
 
 export default {
   data() {
@@ -62,7 +64,7 @@ export default {
   },
   methods: {
     createWindow (index) {
-      ipc.invoke(ipcApiRoute.createWindow, this.views[index]).then(r => {
+      ipc.invoke(ipcApiRoute.createWindow, toRaw(this.views[index])).then(r => {
         console.log(r);
       })
     },

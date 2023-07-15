@@ -35,13 +35,22 @@
     </div>  
     <div class="one-block-2">
       <a-list :grid="{ gutter: 16, column: 4 }" :data-source="file_list">
-        <a-list-item slot="renderItem" slot-scope="item" @click="openDirectry(item.id)">
+        <template #renderItem="{ item }">
+          <a-list-item @click="openDirectry(item.id)">
+            <a-card :title="item.content">
+              <a-button type="link">
+                打开
+              </a-button>
+            </a-card>
+          </a-list-item>
+        </template>
+        <!-- <a-list-item slot="renderItem" slot-scope="item" @click="openDirectry(item.id)">
           <a-card :title="item.content">
             <a-button type="link">
               打开
             </a-button>
           </a-card>
-        </a-list-item>
+        </a-list-item> -->
       </a-list>
     </div>
     <div class="one-block-1">
@@ -57,7 +66,6 @@
         @change="handleFileChange"
       >
         <p class="ant-upload-drag-icon">
-          <!-- <icon-font type="inbox" /> -->
         </p>
         <p class="ant-upload-text">
           点击 或 拖拽文件到这里
