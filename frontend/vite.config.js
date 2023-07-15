@@ -31,24 +31,6 @@ export default defineConfig(({ command, mode }) => {
         '@': path.resolve(__dirname, 'src'),
       },
     },
-    // 代理服务配置
-    // server: {
-    //   host: 'https://api.wrdan.com',  
-    //   port: 9527,
-    //   https: false,
-    //   open: true,
-    //   proxy: {
-    //     '/toutiao/index': {
-    //       target: 'http://v.juhe.cn/',
-    //       changeOrigin: true,
-    //       rewrite: path => path.replace(/\/toutiao\/index/, ''),
-    //     },
-    //     '/ip': {
-    //         changeOrigin: true,
-    //         rewrite: path => path.replace(/\/ip/, ''),
-    //       },
-    //   },
-    // },
     css: {
       preprocessorOptions: {
         less: {

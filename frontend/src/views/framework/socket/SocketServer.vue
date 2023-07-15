@@ -2,7 +2,7 @@
   <div id="app-base-httpserver">
     <div class="one-block-1">
       <span>
-        1. 内置socket-io server服务
+        1. 使用socket与主进程通信
       </span>
     </div>
     <div class="one-block-2">

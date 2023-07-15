@@ -4,7 +4,7 @@
       v-model="collapsed"
       theme="light"
       class="layout-sider"
-      width="80"
+      width="100"
     >
       <div class="logo">
         <img class="pic-logo" src="~@/assets/logo.png">
@@ -17,8 +17,8 @@
         @click="menuHandle"
       >
         <a-menu-item v-for="(menuInfo, index) in menu" :key="index">
-          <!-- <a-icon :type="menuInfo.icon" /> -->
-          {{ menuInfo.title }}
+          <icon-font :type="menuInfo.icon" />
+          {{ menuInfo.title }} 
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -30,38 +30,16 @@
   </a-layout>
 </template>
 <script>
-// import { reactive } from 'vue';
-// import { useRoute, useRouter } from 'vue-router'
-
-// const Router = useRouter()
-// const Route = useRoute()
-// :default-selected-keys="[current]"
 
 export default {
   name: 'AppSider',
-  // setup() {
-  //   const state = reactive({
-  //     selectedKeys: ['menu_1'],
-  //   });
-    
-  //   const handleClick = e => {
-  //     state.selectedKeys = [e.key];
-  //     console.log('state.selectedKeys:', state.selectedKeys)
-  //     //menuHandle ()
-  //   };
-
-  //   return {
-  //     state,
-  //     handleClick,
-  //   };
-  // },
   data() {
     return {
       collapsed: true,
       current: 'menu_1',
       menu: {
         'menu_1' : {
-          icon: 'home',
+          icon: 'icon-fengche',
           title: '框架',
           pageName: 'Framework',
           params: {
@@ -69,19 +47,19 @@ export default {
           },
         },
         'menu_2' : {
-          icon: 'desktop',
+          icon: 'icon-niudan',
           title: '系统',
           pageName: 'Os',
           params: {},
         },
         'menu_3' : {
-          icon: 'control',
+          icon: 'icon-xiangji',
           title: '硬件',
           pageName: 'Hardware',
           params: {},
         },
         'menu_4' : {
-          icon: 'bulb',
+          icon: 'icon-liuxing',
           title: '特效',
           pageName: 'Effect',
           params: {},

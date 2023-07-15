@@ -3,11 +3,6 @@
  * @type { *[] }
  */
 
-// const RouteView = {
-//   name: 'RouteView',
-//   render: h => h('router-view')
-// }
-
 const constantRouterMap = [
   {
     path: '/',
@@ -154,7 +149,6 @@ const constantRouterMap = [
   },
   {
     path: '/special',
-    //component: RouteView,
     children: [
       {
         path: 'subwindow',

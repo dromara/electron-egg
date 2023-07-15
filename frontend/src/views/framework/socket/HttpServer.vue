@@ -2,7 +2,7 @@
   <div id="app-base-httpserver">
     <div class="one-block-1">
       <span>
-        1. 内置http server服务
+        1. 使用http与主进程通信
       </span>
     </div>
     <div class="one-block-2">
@@ -24,8 +24,9 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute, requestHttp } from '@/api/main';
+import { ipcApiRoute } from '@/api/main';
 import { ipc } from '@/utils/ipcRenderer';
+import axios from 'axios';
 import storage from 'store2';
 
 export default {
@@ -54,13 +55,28 @@ export default {
         return;
       }
 
-      const params = {
-        id: id
-      }
-      requestHttp(ipcApiRoute.doHttpRequest, params).then(res => {
+      this.requestHttp(ipcApiRoute.doHttpRequest, {id}).then(res => {
         //console.log('res:', res)
-      }) 
-    },  
+      })
+    },
+
+    /**
+     * Accessing built-in HTTP services
+     */
+    requestHttp(uri, parameter) {
+      // URL conversion
+      const config = storage.get('httpServiceConfig');
+      const host = config.server || 'http://localhost:7071';
+      let url = uri.split('.').join('/');
+      url = host + '/' + url;
+      console.log('url:', url);
+      return axios({
+        url: url,
+        method: 'post', 
+        data: parameter,
+        timeout: 60000,
+      })
+    }
   }
 };
 </script>
