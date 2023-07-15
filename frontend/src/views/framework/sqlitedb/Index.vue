@@ -184,7 +184,7 @@ export default {
       }
       ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
         if (res.code == -1) {
-          this.$message.error('请检查sqlite数据库是否');
+          this.$message.error('请检查sqlite是否正确安装', 5);
           return
         }
 

@@ -2,7 +2,7 @@ import { createFromIconfontCN } from '@ant-design/icons-vue'
 import { h } from 'vue'
 
 const IconFont = createFromIconfontCN({
-  scriptUrl: '//at.alicdn.com/t/font_2456157_4ovzopz659q.js',
+  scriptUrl: 'https://at.alicdn.com/t/font_2456157_4ovzopz659q.js',
   extraCommonProps: {
     type: 'icon-fengche',
     style: {

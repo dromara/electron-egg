@@ -16,6 +16,7 @@
 <script>
 import { ipcApiRoute } from '@/api/main';
 import { ipc } from '@/utils/ipcRenderer';
+import { toRaw } from 'vue';
 import Player from 'xgplayer';
 
 export default {
@@ -59,8 +60,7 @@ export default {
   },    
   methods: {
     init () {
-      //require('E:/video/nos_mp4_2021_05_30_sga9a3cj7_shd.mp4')
-      this.p = new Player(this.op);
+      this.p = new Player(toRaw(this.op));
     },    
     selectFile () {
       const params = {}
