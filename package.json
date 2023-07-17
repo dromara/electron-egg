@@ -28,7 +28,7 @@
     "rd": "ee-bin rd",
     "encrypt": "ee-bin encrypt",
     "clean": "ee-bin clean",
-    "icon": "ee-bin icon -i /public/images/logo.png -o /build/icons/",
+    "icon": "ee-bin icon",
     "rebuild": "electron-rebuild",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
