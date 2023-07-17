@@ -16,7 +16,7 @@
 export default {
   data() {
     return {
-      action_url: '',
+      test: '',
     };
   },
   methods: {
@@ -32,8 +32,9 @@ section {
 }
 
 #hero {
-  padding: 96px 32px;
+  padding: 150px 32px;
   text-align: center;
+  height: 100%;
 }
 
 .tagline {

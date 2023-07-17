@@ -30,3 +30,4 @@ const isEE = ipc ? true : false;
 export {
   Renderer, ipc, isEE
 };
+
