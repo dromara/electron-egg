@@ -2,6 +2,7 @@
   <div id="app-base-extension">
     <div class="one-block-1">
       <span>
+        <!-- electron的扩展功能不完整，官方也不建议使用 -->
         1. 上传扩展程序（crx文件格式）
       </span>
     </div>
@@ -37,15 +38,10 @@
 export default {
   data() {
     return {
-      action_url: process.env.VUE_APP_API_BASE_URL + '/api/example/uploadExtension',
+      action_url: 'localhost:xxxx/api/example/uploadExtension',
     };
   },
-  mounted () {
-    this.init();
-  },
   methods: {
-    init () {
-    },
 		handleChange(info) {
       const status = info.file.status;
       if (status !== 'uploading') {

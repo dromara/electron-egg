@@ -19,11 +19,11 @@ class HardwareController extends Controller {
   /**
    * 获取打印机列表
    */
-  getPrinterList () {
+  async getPrinterList () {
 
     //主线程获取打印机列表
     const win = CoreWindow.getMainWindow();
-    const list = win.webContents.getPrinters();
+    const list = await win.webContents.getPrintersAsync();
 
     return list;
   }  

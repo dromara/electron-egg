@@ -17,7 +17,8 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
 
 export default {
   data() {
@@ -30,14 +31,14 @@ export default {
   },
   methods: {
     init () {
-      this.$ipc.removeAllListeners(ipcApiRoute.initPowerMonitor);
-      this.$ipc.on(ipcApiRoute.initPowerMonitor, (event, result) => {
+      ipc.removeAllListeners(ipcApiRoute.initPowerMonitor);
+      ipc.on(ipcApiRoute.initPowerMonitor, (event, result) => {
         if (Object.prototype.toString.call(result) == '[object Object]') {
           this.currentStatus = result.msg;
           this.$message.info(result.msg);
         }
       })
-      this.$ipc.send(ipcApiRoute.initPowerMonitor, '');
+      ipc.send(ipcApiRoute.initPowerMonitor, '');
     }
   }
 };

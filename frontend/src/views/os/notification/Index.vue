@@ -16,7 +16,9 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+import { toRaw } from 'vue';
 
 export default {
   data() {
@@ -59,15 +61,15 @@ export default {
   methods: {
     init () {
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      this.$ipc.removeAllListeners(ipcApiRoute.sendNotification);
-      this.$ipc.on(ipcApiRoute.sendNotification, (event, result) => {
+      ipc.removeAllListeners(ipcApiRoute.sendNotification);
+      ipc.on(ipcApiRoute.sendNotification, (event, result) => {
         if (Object.prototype.toString.call(result) == '[object Object]') {
           this.$message.info(result.msg);
         }  
       })
     },
     sendNotification (index) {
-      this.$ipc.send(ipcApiRoute.sendNotification, this.views[index]);
+      ipc.send(ipcApiRoute.sendNotification, toRaw(this.views[index]));
     },
   }
 };

@@ -25,7 +25,8 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute, specialIpcRoute } from '@/api/main'
+import { ipcApiRoute, specialIpcRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
 
 export default {
   data() {
@@ -40,8 +41,8 @@ export default {
   },
   methods: {
     init () {
-      this.$ipc.removeAllListeners(specialIpcRoute.appUpdater);
-      this.$ipc.on(specialIpcRoute.appUpdater, (event, result) => {
+      ipc.removeAllListeners(specialIpcRoute.appUpdater);
+      ipc.on(specialIpcRoute.appUpdater, (event, result) => {
         result = JSON.parse(result);
         this.status = result.status;
         if (result.status == 3) {
@@ -53,7 +54,7 @@ export default {
       })
     },
     checkForUpdater () {
-      this.$ipc.invoke(ipcApiRoute.checkForUpdater).then(r => {
+      ipc.invoke(ipcApiRoute.checkForUpdater).then(r => {
         console.log(r);
       })
     },
@@ -62,7 +63,7 @@ export default {
         this.$message.info('没有可用版本');
         return
       }
-      this.$ipc.invoke(ipcApiRoute.downloadApp).then(r => {
+      ipc.invoke(ipcApiRoute.downloadApp).then(r => {
         console.log(r);
       })
     },

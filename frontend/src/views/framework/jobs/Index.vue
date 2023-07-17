@@ -53,6 +53,8 @@
 </template>
 <script>
 import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+
 export default {
   data() {
     return {
@@ -77,11 +79,11 @@ export default {
   methods: {
     init () {
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      this.$ipc.removeAllListeners(ipcApiRoute.timerJobProgress);
-      this.$ipc.removeAllListeners(ipcApiRoute.createPoolNotice);
+      ipc.removeAllListeners(ipcApiRoute.timerJobProgress);
+      ipc.removeAllListeners(ipcApiRoute.createPoolNotice);
 
       // 监听任务进度
-      this.$ipc.on(ipcApiRoute.timerJobProgress, (event, result) => {
+      ipc.on(ipcApiRoute.timerJobProgress, (event, result) => {
         switch (result.jobId) {
           case 1:
             this.progress1 = result.number;
@@ -111,7 +113,7 @@ export default {
       })
 
       // 监听pool
-      this.$ipc.on(ipcApiRoute.createPoolNotice, (event, result) => {
+      ipc.on(ipcApiRoute.createPoolNotice, (event, result) => {
         let pidsStr = JSON.stringify(result);
         this.processPids = pidsStr;
       })   
@@ -122,7 +124,8 @@ export default {
         type: 'timer',
         action: operation
       }
-      this.$ipc.invoke(ipcApiRoute.someJob, params).then(data => {
+      ipc.invoke(ipcApiRoute.someJob, params).then(data => {
+        if (operation == 'close') return;
         switch (data.jobId) {
           case 1:
             this.progress1_pid = data.result.pid;
@@ -137,7 +140,7 @@ export default {
       let params = {
         number: 3,
       }
-      this.$ipc.send(ipcApiRoute.createPool, params);
+      ipc.send(ipcApiRoute.createPool, params);
     },
     runJobByPool(jobId, operation) {
       let params = {
@@ -145,7 +148,7 @@ export default {
         type: 'timer',
         action: operation
       }
-      this.$ipc.invoke(ipcApiRoute.someJobByPool, params).then(data => {
+      ipc.invoke(ipcApiRoute.someJobByPool, params).then(data => {
         switch (data.jobId) {
           case 3:
             this.progress3_pid = data.result.pid;

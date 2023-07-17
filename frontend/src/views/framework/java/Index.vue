@@ -15,21 +15,20 @@
   </div>
 </template>
 <script>
-import storage from 'store2'
 import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+import axios from 'axios';
+import storage from 'store2';
 
 export default {
   data() {
     return {
       server: '',
     };
-  },
-  mounted() {
-
-  },  
+  }, 
   methods: {
     startServer () {
-      this.$ipc.invoke(ipcApiRoute.startJavaServer, {}).then(r => {
+      ipc.invoke(ipcApiRoute.startJavaServer, {}).then(r => {
         if (r.code != 0) {
           this.$message.error(r.msg);
         } else {
@@ -40,7 +39,7 @@ export default {
     },
 
     closeServer () {
-      this.$ipc.invoke(ipcApiRoute.closeJavaServer, {}).then(r => {
+      ipc.invoke(ipcApiRoute.closeJavaServer, {}).then(r => {
         if (r.code != 0) {
           this.$message.error(r.msg);
         }
@@ -55,15 +54,16 @@ export default {
         this.$message.error('服务未开启 或 正在启动中');
         return
       }
-      let testApi = server + '/test1/get';
-      let params = {
-        url: testApi,
+      const testApi = server + '/test1/get';
+      const cfg = {
         method: 'get',
+        url: testApi,
         params: { id: '1111111'},
         timeout: 60000,
       }
-      this.$http(params).then(res => {
-        this.$message.info(`java服务返回: ${res}`, );
+      axios(cfg).then(res => {
+        const data = res.data || null;
+        this.$message.info(`java服务返回: ${data}`, );
       })
     },
   }

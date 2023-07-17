@@ -11,35 +11,36 @@
     </div>  
     <div class="one-block-2">
       <a-list bordered :data-source="data">
-        <a-list-item slot="renderItem" slot-scope="item" @click="openSoft(item.id)">
-          {{ item.content }}
-          <a-button type="link">
-            执行
-          </a-button>
-        </a-list-item>
+        <template #renderItem="{ item }">
+          <a-list-item @click="openSoft(item.id)">
+            {{ item.content }}
+            <a-button type="link">
+              执行
+            </a-button>
+          </a-list-item>
+        </template>
       </a-list>
     </div>
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
-
-const data = [
-  {
-    content: 'powershell.exe',
-    id: 'powershell.exe'
-  }
-];
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
 
 export default {
   data() {
     return {
-      data,
+      data: [
+        {
+          content: 'powershell.exe',
+          id: 'powershell.exe'
+        }
+      ],
     };
   },
   methods: {
-    openSoft (id) { 
-      this.$ipc.invoke(ipcApiRoute.openSoftware, id).then(result => {
+    openSoft(id) { 
+      ipc.invoke(ipcApiRoute.openSoftware, id).then(result => {
         if (!result) {
           this.$message.error('程序不存在');
         }

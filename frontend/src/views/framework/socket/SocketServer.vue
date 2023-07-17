@@ -2,7 +2,7 @@
   <div id="app-base-httpserver">
     <div class="one-block-1">
       <span>
-        1. 内置socket-io server服务
+        1. 使用socket与主进程通信
       </span>
     </div>
     <div class="one-block-2">
@@ -24,8 +24,8 @@
   </div>
 </template>
 <script>
-import { io } from 'socket.io-client'
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { io } from 'socket.io-client';
 
 export default {
   data() {

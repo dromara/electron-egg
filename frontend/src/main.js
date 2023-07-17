@@ -1,23 +1,26 @@
-import antd from 'ant-design-vue';
-import 'ant-design-vue/dist/antd.less';
-import Vue from 'vue';
-import App from './App';
-import router from './router';
-import { ipc } from './utils/ipcRenderer';
-import { VueAxios } from './utils/request';
+import * as AntIcon from '@ant-design/icons-vue';
+import Antd from 'ant-design-vue';
+import { createApp } from 'vue';
+import App from './App.vue';
+import './assets/global.less';
+import './assets/theme.less';
+import components from './components/global';
+import Router from './router/index';
 
-// 使用antd
-Vue.use(antd)
+const app = createApp(App)
+app.config.productionTip = false
 
-// mount axios to `Vue.$http` and `this.$http`
-Vue.use(VueAxios)
+// components
+for (const i in components) {
+  app.component(i, components[i])
+}
 
-// 全局注入IPC通信
-Vue.prototype.$ipc = ipc
+// icon
+for (const i in AntIcon) {
+  const whiteList = ['createFromIconfontCN', 'getTwoToneColor', 'setTwoToneColor', 'default']
+  if (!whiteList.includes(i)) {
+    app.component(i, AntIcon[i])
+  }
+}
 
-Vue.config.productionTip = false
-
-new Vue({
-  router,
-  render: h => h(App)
-}).$mount('#app')
+app.use(Antd).use(Router).mount('#app')

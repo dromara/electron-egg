@@ -32,31 +32,31 @@ class FrameworkController extends Controller {
   /**
    * json数据库操作
    */   
-  async dbOperation(args) {
-    const paramsObj = args;
-    //Log.info('eeeee paramsObj:', paramsObj);
+  async jsondbOperation(args) {
+    const { action, info, delete_name, update_name, update_age, search_age } = args;
+
     const data = {
-      action: paramsObj.action,
+      action,
       result: null,
       all_list: []
     };
     
-    switch (paramsObj.action) {
+    switch (action) {
       case 'add' :
-        data.result = await Services.get('storage').addTestData(paramsObj.info);
+        data.result = await Services.get('database.jsondb').addTestData(info);
         break;
       case 'del' :
-        data.result = await Services.get('storage').delTestData(paramsObj.delete_name);
+        data.result = await Services.get('database.jsondb').delTestData(delete_name);
         break;
       case 'update' :
-        data.result = await Services.get('storage').updateTestData(paramsObj.update_name, paramsObj.update_age);
+        data.result = await Services.get('database.jsondb').updateTestData(update_name, update_age);
         break;
       case 'get' :
-        data.result = await Services.get('storage').getTestData(paramsObj.search_age);
+        data.result = await Services.get('database.jsondb').getTestData(search_age);
         break;
     }
 
-    data.all_list = await Services.get('storage').getAllTestData();
+    data.all_list = await Services.get('database.jsondb').getAllTestData();
 
     return data;
   }
@@ -65,36 +65,46 @@ class FrameworkController extends Controller {
    * sqlite数据库操作
    */   
   async sqlitedbOperation(args) {
-    const paramsObj = args;
-    //Log.info('eeeee paramsObj:', paramsObj);
+    const { action, info, delete_name, update_name, update_age, search_age } = args;
+
     const data = {
-      action: paramsObj.action,
+      action,
       result: null,
-      all_list: []
+      all_list: [],
+      code: 0
     };
-    
-    switch (paramsObj.action) {
+
+    try {
+      // test
+      Services.get('database.sqlitedb').getDataDir();
+    } catch (err) {
+      console.log(err);
+      data.code = -1;
+      return data;
+    }
+
+    switch (action) {
       case 'add' :
-        data.result = await Services.get('storage').addTestDataSqlite(paramsObj.info);;
+        data.result = await Services.get('database.sqlitedb').addTestDataSqlite(info);;
         break;
       case 'del' :
-        data.result = await Services.get('storage').delTestDataSqlite(paramsObj.delete_name);;
+        data.result = await Services.get('database.sqlitedb').delTestDataSqlite(delete_name);;
         break;
       case 'update' :
-        data.result = await Services.get('storage').updateTestDataSqlite(paramsObj.update_name, paramsObj.update_age);
+        data.result = await Services.get('database.sqlitedb').updateTestDataSqlite(update_name, update_age);
         break;
       case 'get' :
-        data.result = await Services.get('storage').getTestDataSqlite(paramsObj.search_age);
+        data.result = await Services.get('database.sqlitedb').getTestDataSqlite(search_age);
         break;
       case 'getDataDir' :
-        data.result = await Services.get('storage').getDataDir();
+        data.result = await Services.get('database.sqlitedb').getDataDir();
         break;
       case 'setDataDir' :
-        data.result = await Services.get('storage').setCustomDataDir(paramsObj.data_dir);
+        data.result = await Services.get('database.sqlitedb').setCustomDataDir(data_dir);
         break;            
     }
 
-    data.all_list = await Services.get('storage').getAllTestDataSqlite();
+    data.all_list = await Services.get('database.sqlitedb').getAllTestDataSqlite();
 
     return data;
   }  

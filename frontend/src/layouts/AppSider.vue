@@ -4,14 +4,21 @@
       v-model="collapsed"
       theme="light"
       class="layout-sider"
+      width="100"
     >
       <div class="logo">
         <img class="pic-logo" src="~@/assets/logo.png">
       </div>
-      <a-menu class="menu-item" theme="light" mode="inline" :default-selected-keys="[default_key]" @click="menuHandle">
+      <a-menu 
+        class="menu-item" 
+        theme="light" 
+        mode="inline"
+        :selectedKeys="[current]"
+        @click="menuHandle"
+      >
         <a-menu-item v-for="(menuInfo, index) in menu" :key="index">
-          <a-icon :type="menuInfo.icon" />
-          {{ menuInfo.title }}
+          <icon-font :type="menuInfo.icon" />
+          {{ menuInfo.title }} 
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -23,34 +30,36 @@
   </a-layout>
 </template>
 <script>
+
 export default {
   name: 'AppSider',
   data() {
     return {
       collapsed: true,
-      default_key: 'menu_1',
-      current: '',
+      current: 'menu_1',
       menu: {
         'menu_1' : {
-          icon: 'home',
+          icon: 'icon-fengche',
           title: '框架',
           pageName: 'Framework',
-          params: {},
+          params: {
+            // test: 'hello'
+          },
         },
         'menu_2' : {
-          icon: 'desktop',
+          icon: 'icon-niudan',
           title: '系统',
           pageName: 'Os',
           params: {},
         },
         'menu_3' : {
-          icon: 'control',
+          icon: 'icon-xiangji',
           title: '硬件',
           pageName: 'Hardware',
           params: {},
         },
         'menu_4' : {
-          icon: 'bulb',
+          icon: 'icon-liuxing',
           title: '特效',
           pageName: 'Effect',
           params: {},
@@ -65,11 +74,18 @@ export default {
   },
   methods: {
     menuHandle (e) {
-      this.current = e ? e.key : this.default_key;
+      console.log('sider menu e:', e);
+      this.current = e ? e.key : this.current;
+      console.log('sider menu current:', this.current);
+
       const linkInfo = this.menu[this.current]
-      console.log('[home] load page:', linkInfo.pageName);
+      console.log('[home] load linkInfo:', linkInfo);
       this.$router.push({ name: linkInfo.pageName, params: linkInfo.params})
     },
+    changeMenu(e) {
+      console.log('sider menu e:', e);
+      //this.current = e.key;
+    }
   },
 };
 </script>

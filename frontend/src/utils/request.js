@@ -1,12 +1,11 @@
+import notification from 'ant-design-vue/es/notification'
 import axios from 'axios'
 import storage from 'store2'
-import notification from 'ant-design-vue/es/notification'
-import { VueAxios } from './axios'
 
 // 创建 axios 实例
 const request = axios.create({
   // API 请求的默认前缀
-  baseURL: process.env.VUE_APP_API_BASE_URL,
+  baseURL: '',
   timeout: 60000, // 请求超时时间
   //headers: {'Content-Type': 'multipart/form-data'}
 })
@@ -47,16 +46,9 @@ request.interceptors.response.use((response) => {
   return response.data
 }, errorHandler)
 
-const installer = {
-  vm: {},
-  install (Vue) {
-    Vue.use(VueAxios, request)
-  }
-}
-
 export default request
 
 export {
-  installer as VueAxios,
   request as axios
 }
+

@@ -22,7 +22,8 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
 
 export default {
   data () {
@@ -36,7 +37,7 @@ export default {
   methods: {
     init () {
       // todo .....
-      this.$ipc.invoke(ipcApiRoute.autoLaunch, 'check').then(result => {
+      ipc.invoke(ipcApiRoute.autoLaunch, 'check').then(result => {
         console.log('[ipcRenderer] [autoLaunch] result:', result)
         this.autoLaunchChecked = result.status;
       })      

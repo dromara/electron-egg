@@ -10,16 +10,28 @@
         <a-button @click="exec(1)"> 点击 </a-button>
         <a-button @click="exec2(1)"> 点击2 </a-button>
       </a-space>
+      <!-- <a-space>
+        <a-list size="small" bordered :data-source="iconData">
+        <template #renderItem="{ item }">
+          <a-list-item>
+            <icon-font :type="item.type" style="font-size: 36px" />
+          </a-list-item>
+        </template>
+      </a-list>
+      </a-space> -->
     </div>
   </div>
 </template>
 <script>
-import { ipcApiRoute, requestHttp } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import iconList from '@/utils/iconList';
+import { ipc } from '@/utils/ipcRenderer';
 
 export default {
   data() {
     return {
       type: 1,
+      iconData: iconList
     };
   },
   methods: {
@@ -27,17 +39,12 @@ export default {
       const params = {
         id: id
       }
-      this.$ipc.invoke(ipcApiRoute.test, params).then(res => {
+      ipc.invoke(ipcApiRoute.test, params).then(res => {
         console.log('res:', res)
       }) 
     },
     exec2 (id) {
-      const params = {
-        id: id
-      }
-      requestHttp(ipcApiRoute.test, params).then(res => {
-        console.log('res2:', res)
-      }) 
+      //
     },    
   }
 };

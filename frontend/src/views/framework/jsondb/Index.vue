@@ -2,49 +2,25 @@
   <div id="app-base-db">
     <div class="one-block-1">
       <span>
-        1. sqlite本地数据库
+        1. jsondb本地数据库
       </span>
     </div>  
     <div class="one-block-2">
       <a-row>
         <a-col :span="8">
-          • 大数据量: 0-1024GB(单库)
+          • 小数据量: 0~100M(单库)
         </a-col>
         <a-col :span="8">
-          • 高性能
+          • json数据库
         </a-col>
         <a-col :span="8">
-          • 类mysql语法
+          • 兼容lodash语法
         </a-col>
       </a-row>
     </div>
     <div class="one-block-1">
       <span>
-        2. 数据目录
-      </span>
-    </div>  
-    <div class="one-block-2">
-      <a-row>
-        <a-col :span="12">
-          <a-input v-model="data_dir" :value="data_dir" addon-before="数据目录" />
-        </a-col>
-        <a-col :span="2">
-        </a-col>
-        <a-col :span="5">
-          <a-button @click="selectDir">
-            修改目录
-          </a-button>
-        </a-col>
-        <a-col :span="5">
-          <a-button @click="openDir">
-            打开目录
-          </a-button>
-        </a-col>        
-      </a-row>
-    </div>     
-    <div class="one-block-1">
-      <span>
-        3. 测试数据
+        2. 测试数据
       </span>
     </div>  
     <div class="one-block-2">
@@ -56,7 +32,7 @@
     </div>    
     <div class="one-block-1">
       <span>
-        4. 添加数据
+        3. 添加数据
       </span>
     </div>  
     <div class="one-block-2">
@@ -72,7 +48,7 @@
         <a-col :span="3">
         </a-col>
         <a-col :span="6">
-          <a-button @click="sqlitedbOperation('add')">
+          <a-button @click="dbOperation('add')">
             添加
           </a-button>
         </a-col>
@@ -95,7 +71,7 @@
         <a-col :span="3">
         </a-col>
         <a-col :span="6">
-          <a-button @click="sqlitedbOperation('get')">
+          <a-button @click="dbOperation('get')">
             查找
           </a-button>
         </a-col>
@@ -114,7 +90,7 @@
     <div class="one-block-2">
       <a-row>
         <a-col :span="6">
-          <a-input v-model="update_name" :value="update_name" addon-before="姓名(条件)" />
+          <a-input v-model="update_name" :value="update_name" addon-before="姓名" />
         </a-col>
         <a-col :span="3">
         </a-col>
@@ -124,7 +100,7 @@
         <a-col :span="3">
         </a-col>
         <a-col :span="6">
-          <a-button @click="sqlitedbOperation('update')">
+          <a-button @click="dbOperation('update')">
             更新
           </a-button>
         </a-col>
@@ -147,7 +123,7 @@
         <a-col :span="3">
         </a-col>
         <a-col :span="6">
-          <a-button @click="sqlitedbOperation('del')">
+          <a-button @click="dbOperation('del')">
             删除
           </a-button>
         </a-col>
@@ -162,71 +138,33 @@ import { ipc } from '@/utils/ipcRenderer';
 export default {
   data() {
     return {
-      name: '李四',
-      age: 20,
+      name: '张三',
+      age: 10,
       userList: ['空'],
-      search_age: 20,
-      update_name: '李四',
-      update_age: 31,
-      delete_name: '李四',
-      all_list: ['空'],
-      data_dir: ''
+      search_age: 10,
+      update_name: '张三',
+      update_age: 21,
+      delete_name: '张三',
+      all_list: ['空']
     };
   },
   mounted () {
-    this.init();
-    
+    this.getAllTestData();
   },
   methods: {
-    init() {
-      const params = {
-        action: 'getDataDir',
-      }
-      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
-        if (res.code == -1) {
-          this.$message.error('请检查sqlite是否正确安装', 5);
-          return
-        }
-
-        this.data_dir = res.result;
-        this.getAllTestData();
-      }) 
-    },
     getAllTestData () {
-      const self = this;
       const params = {
         action: 'all',
       }
-      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.jsondbOperation, params).then(res => {
+        console.log('res:', res);
         if (res.all_list.length == 0) {
           return false;
         }
-        self.all_list = res.all_list;
-      }) 
-    },
-    selectDir() {
-      ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
-        this.data_dir = r;
-        // 修改数据目录
-        this.modifyDataDir(r);
-      })
-    },
-    openDir() {
-      console.log('dd:', this.data_dir);
-      ipc.invoke(ipcApiRoute.openDirectory, {id: this.data_dir}).then(res => {
-        //
-      })
-    },    
-    modifyDataDir(dir) {
-      const params = {
-        action: 'setDataDir',
-        data_dir: dir
-      }
-      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
         this.all_list = res.all_list;
       }) 
     },
-    sqlitedbOperation (ac) {
+    dbOperation (ac) {
       const params = {
         action: ac,
         info: {
@@ -241,7 +179,7 @@ export default {
       if (ac == 'add' && this.name.length == 0) {
         this.$message.error(`请填写数据`);
       }
-      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.jsondbOperation, params).then(res => {
         console.log('res:', res);
         if (ac == 'get') {
           if (res.result.length == 0) {

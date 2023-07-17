@@ -35,13 +35,22 @@
     </div>  
     <div class="one-block-2">
       <a-list :grid="{ gutter: 16, column: 4 }" :data-source="file_list">
-        <a-list-item slot="renderItem" slot-scope="item" @click="openDirectry(item.id)">
+        <template #renderItem="{ item }">
+          <a-list-item @click="openDirectry(item.id)">
+            <a-card :title="item.content">
+              <a-button type="link">
+                打开
+              </a-button>
+            </a-card>
+          </a-list-item>
+        </template>
+        <!-- <a-list-item slot="renderItem" slot-scope="item" @click="openDirectry(item.id)">
           <a-card :title="item.content">
             <a-button type="link">
               打开
             </a-button>
           </a-card>
-        </a-list-item>
+        </a-list-item> -->
       </a-list>
     </div>
     <div class="one-block-1">
@@ -57,7 +66,6 @@
         @change="handleFileChange"
       >
         <p class="ant-upload-drag-icon">
-          <a-icon type="inbox" />
         </p>
         <p class="ant-upload-text">
           点击 或 拖拽文件到这里
@@ -72,8 +80,9 @@
   </div>
 </template>
 <script>
-import storage from 'store2'
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+import storage from 'store2';
 
 const fileList = [
   {
@@ -110,7 +119,7 @@ export default {
   },
   methods: {
     getHost () {
-      this.$ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
+      ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
         if (r.enable) {
           this.servicAddress = r.server;
           storage.set('httpServiceConfig', r);
@@ -124,23 +133,23 @@ export default {
       })
     },
     openDirectry (id) {
-      this.$ipc.invoke(ipcApiRoute.openDirectory, {id: id}).then(res => {
+      ipc.invoke(ipcApiRoute.openDirectory, {id: id}).then(res => {
         //console.log('res:', res)
       })      
     },
     selectDir() {
-      this.$ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
+      ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
         this.dir_path = r;
         this.$message.info(r);
       })      
     },
 		messageShow() {
-      this.$ipc.invoke(ipcApiRoute.messageShow, '').then(r => {
+      ipc.invoke(ipcApiRoute.messageShow, '').then(r => {
         this.$message.info(r);
       })
     },    
     messageShowConfirm() {
-      this.$ipc.invoke(ipcApiRoute.messageShowConfirm, '').then(r => {
+      ipc.invoke(ipcApiRoute.messageShowConfirm, '').then(r => {
         this.$message.info(r);
       })
     },

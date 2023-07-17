@@ -25,7 +25,9 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main'
+import { ipcApiRoute } from '@/api/main';
+import { ipc } from '@/utils/ipcRenderer';
+import { toRaw } from 'vue';
 
 export default {
   data() {
@@ -44,12 +46,12 @@ export default {
   },
   methods: {
     loadViewContent (index) {
-      this.$ipc.invoke(ipcApiRoute.loadViewContent, this.views[index]).then(r => {
+      ipc.invoke(ipcApiRoute.loadViewContent, toRaw(this.views[index])).then(r => {
         console.log(r);
       })
     },
     removeViewContent (index) {
-      this.$ipc.invoke(ipcApiRoute.removeViewContent, this.views[index]).then(r => {
+      ipc.invoke(ipcApiRoute.removeViewContent, toRaw(this.views[index])).then(r => {
         console.log(r);
       })
     },
