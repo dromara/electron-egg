@@ -6,20 +6,22 @@
       </span>
     </div>
     <div class="one-block-2">
-      <a-space>
-        <p>* 状态：{{ currentStatus }}</p>
-      </a-space>
+      <p>* 状态：{{ currentStatus }}</p>
       <p>* 地址：{{ servicAddress }}</p>
+      <p>* 发送请求：
+        <a-button @click="sendRequest('pictures')"> 打开【我的图片】 </a-button>
+      </p>
     </div>
     <div class="one-block-1">
       <span>
-        2. 发送请求
+        2. 使用http与服务端通信
       </span>
     </div>    
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="sendRequest('pictures')"> 打开【我的图片】 </a-button>
-      </a-space>
+      <p>
+        <a-button @click="backendRequest()"> 发送请求 </a-button>
+        （请自行创建服务）
+      </p>
     </div>
   </div>
 </template>
@@ -76,7 +78,25 @@ export default {
         data: parameter,
         timeout: 60000,
       })
-    }
+    },
+
+    /**
+     * Send back-end requests
+     */
+    backendRequest() {
+      console.log('GO_URL:', import.meta.env.VITE_GO_URL);
+      const cfg = {
+        baseURL: import.meta.env.VITE_GO_URL,
+        method: 'get',
+        url: '/hello',
+        timeout: 60000,
+      }
+      axios(cfg).then(res => {
+        console.log('res:', res);
+        const data = res.data || null;
+        this.$message.info(`go服务返回: ${data}`, );
+      })
+    }    
   }
 };
 </script>

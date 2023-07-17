@@ -52,7 +52,7 @@ export default defineConfig(({ command, mode }) => {
       terserOptions: {
         compress: {
           // 生产环境去除console及debug
-          drop_console: true,
+          drop_console: false,
           drop_debugger: true,
         },
       },
