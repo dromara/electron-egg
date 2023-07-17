@@ -48,6 +48,7 @@ export default defineConfig(({ command, mode }) => {
       cssCodeSplit: true,
       brotliSize: false,
       sourcemap: false,
+      minify: 'terser',
       terserOptions: {
         compress: {
           // 生产环境去除console及debug
