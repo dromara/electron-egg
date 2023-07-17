@@ -16,6 +16,7 @@
     "@vue/compiler-sfc": "^3.2.33",
     "less": "^4.1.2",
     "less-loader": "^10.2.0",
+    "terser": "^5.19.1",
     "vite": "^4.4.4",
     "vite-plugin-compression": "^0.5.1"
   }
