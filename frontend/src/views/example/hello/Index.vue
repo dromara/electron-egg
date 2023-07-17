@@ -4,7 +4,7 @@
       <span class="accent">Electron-Egg</span>
     </h1>
     <p class="description">
-      A fast, desktop software development framework.
+      A fast, desktop software development framework
     </p>
     <p class="actions">
       <a class="setup" href="https://www.kaka996.com/" target="_blank">Get Started</a>
@@ -40,7 +40,7 @@ section {
 .tagline {
   font-size: 52px;
   line-height: 1.25;
-  font-weight: 900;
+  font-weight: bold;
   letter-spacing: -1.5px;
   max-width: 960px;
   margin: 0px auto;
@@ -69,6 +69,7 @@ html:not(.dark) .accent,
   font-weight: 500;
   border-radius: 8px;
   transition: background-color 0.5s, color 0.5s;
+  text-decoration:none;
 }
 .actions .setup {
   color: var(--vt-c-text-code);

@@ -1,5 +1,4 @@
 import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
 import { defineConfig } from 'vite'
 import viteCompression from 'vite-plugin-compression'
 
@@ -10,7 +9,6 @@ export default defineConfig(({ command, mode }) => {
     // 项目插件
     plugins: [
       vue(),
-      vueJsx(),
       viteCompression({
         verbose: true,
         disable: false,
