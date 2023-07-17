@@ -24,8 +24,7 @@
   </a-layout>
 </template>
 <script>
-// import { reactive } from 'vue';
-// :default-selected-keys="[default_key]" 
+// import { reactive } from 'vue'; 
 import subMenu from '@/router/subMenu';
 
 export default {

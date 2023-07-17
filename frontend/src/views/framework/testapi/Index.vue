@@ -10,7 +10,7 @@
         <a-button @click="exec(1)"> 点击 </a-button>
         <a-button @click="exec2(1)"> 点击2 </a-button>
       </a-space>
-      <a-space>
+      <!-- <a-space>
         <a-list size="small" bordered :data-source="iconData">
         <template #renderItem="{ item }">
           <a-list-item>
@@ -18,7 +18,7 @@
           </a-list-item>
         </template>
       </a-list>
-      </a-space>
+      </a-space> -->
     </div>
   </div>
 </template>
