@@ -1,7 +1,5 @@
 import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
 import { defineConfig } from 'vite'
-import ViteComponents, { AntDesignVueResolver } from 'vite-plugin-components'
 import viteCompression from 'vite-plugin-compression'
 
 import path from 'path'
@@ -11,10 +9,6 @@ export default defineConfig(({ command, mode }) => {
     // 项目插件
     plugins: [
       vue(),
-      vueJsx(),
-      ViteComponents({
-        customComponentResolvers: [AntDesignVueResolver()],
-      }),
       viteCompression({
         verbose: true,
         disable: false,
