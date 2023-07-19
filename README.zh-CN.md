@@ -27,7 +27,8 @@
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
 
 ## 📚 文档
-- [教程文档](https://www.kaka996.com/)
+- 快速体验：[教程文档](https://www.kaka996.com/)
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/v3-home.png) 
 
 ## 📦 特性
 1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版、国产UOS、Deepin、麒麟等
