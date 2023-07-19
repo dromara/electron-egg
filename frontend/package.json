@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "vite --host --port 8080",
+    "serve": "vite --host --port 8080",
     "build-staging": "vite build --mode staging",
     "build": "vite build",
-    "serve": "vite preview"
+    "preview": "vite preview"
   },
   "dependencies": {
     "vue": "^3.2.33",
@@ -17,7 +18,6 @@
     "less": "^4.1.2",
     "less-loader": "^10.2.0",
     "terser": "^5.19.1",
-    "vite": "^4.4.4",
-    "vite-plugin-compression": "^0.5.1"
+    "vite": "^4.4.4"
   }
 }
