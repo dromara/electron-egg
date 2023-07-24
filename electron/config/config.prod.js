@@ -1,8 +1,22 @@
 'use strict';
 
-/*
- * test
+/**
+ * 生产环境配置，覆盖 config.default.js
  */
-exports.testConfig = {
-  login: 'http://prod.com/api/login',
+module.exports = (appInfo) => {
+  const config = {};
+
+  /**
+   * 开发者工具
+   */
+  config.openDevTools = false;
+
+  /**
+   * 应用程序顶部菜单
+   */
+  config.openAppMenu = false;
+
+  return {
+    ...config
+  };
 };
