@@ -148,6 +148,11 @@ const constantRouterMap = [
             name: 'EffectVideoIndex',
             component: () => import('@/views/effect/video/Index.vue')
           },
+          {
+            path: '/effect/login/index',
+            name: 'EffectLoginIndex',
+            component: () => import('@/views/effect/login/Index.vue')
+          }
         ]  
       },
     ]
@@ -159,7 +164,12 @@ const constantRouterMap = [
         path: 'subwindow',
         name: 'SpecialSubwindowIpc',
         component: () => import('@/views/os/subwindow/Ipc.vue')
-      }
+      },
+      {
+        path: '/login',
+        name: 'SpecialLoginWindow',
+        component: () => import('@/views/effect/login/Window.vue')
+      },
     ]
   },
 ]

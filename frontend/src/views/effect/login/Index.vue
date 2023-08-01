@@ -1,19 +1,14 @@
 <template>
-  <div id="os-file-pic">
+  <div id="effect-login-index">
     <div class="one-block-1">
       <span>
-          1. 加载本机图片
+          1. 登录
       </span>
     </div>  
     <div class="one-block-2">
       <a-space>
-          <a-button @click="selectPic(0)">选择图片</a-button>
+        <a-button @click="loginWindow()">切换为登录窗口</a-button>
       </a-space>
-      <p></p>
-      <a-image
-        :width="500"
-        :src=picPath
-      />
     </div>
   </div>
 </template>
@@ -24,20 +19,20 @@ import { ipc } from '@/utils/ipcRenderer';
 export default {
   data() {
     return {
-      picPath: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png'
     };
   },
   methods: {
-    selectPic () {
-      ipc.invoke(ipcApiRoute.selectPic, {}).then(r => {      
-        this.picPath = r;
+    loginWindow () {
+      this.$router.push({ name: 'SpecialLoginWindow', params: {}});
+      ipc.invoke(ipcApiRoute.loginWindow, {width: 400, height: 300}).then(r => {      
+        // 
       })
     },
   }
 };
 </script>
 <style lang="less" scoped>
-#os-file-pic {
+#effect-login-index {
   padding: 0px 10px;
   text-align: left;
   width: 100%;
