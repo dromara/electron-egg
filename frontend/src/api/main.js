@@ -31,6 +31,7 @@ const ipcApiRoute = {
   messageShow: 'controller.os.messageShow',
   messageShowConfirm: 'controller.os.messageShowConfirm',
   selectFolder: 'controller.os.selectFolder',
+  selectPic: 'controller.os.selectPic',
   openDirectory: 'controller.os.openDirectory',
   loadViewContent: 'controller.os.loadViewContent',
   removeViewContent: 'controller.os.removeViewContent',

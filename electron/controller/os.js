@@ -94,6 +94,24 @@ class OsController extends Controller {
   }
 
   /**
+   * 选择图片
+   */
+  selectPic() {
+    const filePaths = dialog.showOpenDialogSync({
+      title: 'select pic',
+      properties: ['openFile'],
+      filters: [
+        { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
+      ]
+    });
+    if (_.isEmpty(filePaths)) {
+      return null
+    }
+
+    return filePaths[0];
+  }   
+
+  /**
    * 加载视图内容
    */
   loadViewContent(args) {

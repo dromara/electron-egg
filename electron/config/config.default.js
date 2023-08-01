@@ -50,7 +50,7 @@ module.exports = (appInfo) => {
     minWidth: 800,
     minHeight: 650,
     webPreferences: {
-      //webSecurity: false, // 跨域问题 -> 打开注释
+      webSecurity: false,
       contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
       nodeIntegration: true,
       //preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),

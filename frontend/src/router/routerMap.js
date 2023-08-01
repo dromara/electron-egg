@@ -81,6 +81,11 @@ const constantRouterMap = [
             component: () => import('@/views/os/file/Index.vue')
           },
           {
+            path: '/os/file/pic',
+            name: 'OsFilePic',
+            component: () => import('@/views/os/file/Pic.vue')
+          },
+          {
             path: '/os/windowview/index',
             name: 'OsWindowViewIndex',
             component: () => import('@/views/os/windowview/Index.vue')
