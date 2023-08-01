@@ -299,6 +299,22 @@ class FrameworkController extends Controller {
   }
 
   /**
+   * java运行状态
+   */ 
+  async runStatus() {
+    let data = {
+      code: 0,
+      msg: '',
+      flag: false
+    }
+    const flag =  await Addon.get('javaServer').check();
+    //Log.info("[FrameworkController:runStatus] flag-----------"+flag);
+    data.flag = flag;
+    
+    return data;
+  }  
+
+  /**
    * 任务
    */ 
   someJob(args, event) {

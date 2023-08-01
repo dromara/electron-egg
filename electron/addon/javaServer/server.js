@@ -95,6 +95,32 @@ class JavaServer {
       // todo linux
     }
   }
+
+  /**
+   * 服务是否运行中
+   */
+  async isRun(cfg){
+    const jarName = cfg.name;
+    if (is.windows()) {
+      const resultList = ps.lookup({
+        command: "java",
+        where: 'caption="javaw.exe"',
+        arguments: jarName,
+      });
+  
+      Log.info("[addon:javaServer] resultList:", resultList);
+      return resultList.length>0;
+    } else if (is.macOS()) {
+      const cmd = `ps -ef | grep java | grep ${jarName} | grep -v grep | awk '{print $2}' `;
+      Log.info("[addon:javaServer:isRun] cmdStr:", cmd);
+      const result = execSync(cmd);
+      Log.info('[addon:javaServer:isRun] result:', result.toString());
+      //不等于空说明正在运行
+      return result.toString()!==""
+    } else {
+      // todo linux
+    }
+  }  
 }
 
 module.exports = JavaServer;
