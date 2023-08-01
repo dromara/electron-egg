@@ -102,9 +102,12 @@ class AutoUpdaterAddon {
       info.status = status.downloaded;
       info.desc = '下载完成';
       this.sendStatusToWindow(info);
-      // quit and update
-      // app.appQuit();
       autoUpdater.quitAndInstall();
+      // const mainWindow = CoreWindow.getMainWindow();
+      // if (mainWindow) {
+      //   mainWindow.destroy()
+      // }
+      // electronApp.appQuit()
     });
   }
 
