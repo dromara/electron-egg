@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
@@ -11,6 +11,12 @@
     "start": "electron . ",
     "reload": "nodemon --config ./electron/config/nodemon.json",
     "test": "set DEBUG=* && electron . --env=local",
+    "rd": "ee-bin rd",
+    "encrypt": "ee-bin encrypt",
+    "clean": "ee-bin clean",
+    "icon": "ee-bin icon",
+    "rebuild": "electron-rebuild",
+    "re-sqlite": "electron-rebuild -f -w better-sqlite3",
     "build-w": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
     "build-w-32": "electron-builder --config=./electron/config/builder.json -w=nsis --ia32",
     "build-w-64": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
@@ -27,13 +33,7 @@
     "build-l-arm64": "electron-builder --config=./electron/config/builder.json -l=deb --arm64",
     "build-l-armv7l": "electron-builder --config=./electron/config/builder.json -l=deb --armv7l",
     "build-lr-64": "electron-builder --config=./electron/config/builder.json -l=rpm --x64",
-    "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64",
-    "rd": "ee-bin rd",
-    "encrypt": "ee-bin encrypt",
-    "clean": "ee-bin clean",
-    "icon": "ee-bin icon",
-    "rebuild": "electron-rebuild",
-    "re-sqlite": "electron-rebuild -f -w better-sqlite3"
+    "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
