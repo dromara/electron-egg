@@ -1,27 +1,32 @@
 /**
- * ee-bin 配置
- * 主要用于：开发环境、构建前端资源、加密等
- * @param 
+ * ee-bin config
+ * 仅适用于开发环境
  */
 module.exports = {
+  /**
+   * 前端服务 - dev
+   */
 	frontend: {
 		directory: './frontend',
-		cmd: 'vite',
-		args: '--host --port 8080',
+		devCommond: 'npm run dev',
+    buildCommond: 'npm run build',
 		protocol: 'http://',
 		hostname: 'localhost',
 		port: 8080,
 	},
+
+  /**
+   * 主进程服务 - dev
+   */  
   main: {
     directory: './',
 		cmd: 'electron',
-		args: '. --env=local',
+    args: ['.', '--env=local'],
   },
-	build: {
-		directory: './frontend',
-		cmd: 'vite',
-		args: 'build',
-	},
+
+  /**
+   * 加密
+   */  
   encrypt: {
     type: 'confusion',
     files: [
