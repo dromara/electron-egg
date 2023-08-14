@@ -21,7 +21,7 @@
 - 🍩 **为什么使用？** 桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
 - 🍉 **简单：** 只需懂 JavaScript
 - 🍑 **愿景：** 所有开发者都能学会桌面软件研发
-- 🍰 **gitee：** https://gitee.com/dromara/electron-egg **3500+**
+- 🍰 **gitee：** https://gitee.com/dromara/electron-egg **3600+**
 - 🍨 **github：** https://github.com/dromara/electron-egg **1000+**
 - 🏆 码云最有价值开源项目
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
@@ -78,6 +78,9 @@
     
 ## 🐶 项目案例
 - 🐟 EE框架已经应用于医疗、学校、政务、股票交易、ERP、娱乐、视频、企业等领域客户端
+
+- 🐸 壁纸
+    ![](https://wallace5303.gitee.io/ee/images/electron-egg/aw/aw-3.png)
 
 - 🐸 英雄联盟助手
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/serendipity/lol-zhanji.png)
