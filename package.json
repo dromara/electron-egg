@@ -6,6 +6,7 @@
   "scripts": {
     "bin-dev": "ee-bin dev",
     "bin-build": "ee-bin build",
+    "bin-start": "ee-bin start",
     "dev": "electron . --env=local",
     "start": "electron . ",
     "reload": "nodemon --config ./electron/config/nodemon.json",

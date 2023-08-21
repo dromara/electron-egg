@@ -5,8 +5,9 @@
 module.exports = {
   /**
    * 同时启动 "frontend" "electron"
+   * ee-bin dev
    */
-	dev: {
+  dev: {
     frontend: {
       directory: './frontend',
       cmd: 'npm run dev',
@@ -19,15 +20,26 @@ module.exports = {
       cmd: 'electron',
       args: ['.', '--env=local'],
     }
-	},
+  },
 
   /**
    * 前端构建
+   * ee-bin build
    */
-	build: {
-		directory: './frontend',
-		cmd: 'npm run build'
-	},
+  build: {
+    directory: './frontend',
+    cmd: 'npm run build'
+  },
+
+  /**
+   * 预发布模式（prod）
+   * ee-bin start
+   */
+  start: {
+    directory: './',
+    cmd: 'electron',
+    args: ['.', '--env=prod']
+  },
 
   /**
    * 加密
