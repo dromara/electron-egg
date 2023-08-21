@@ -9,11 +9,12 @@ module.exports = {
    */
   dev: {
     frontend: {
+      protocol: 'http://',
       directory: './frontend',
       cmd: 'npm run dev',
-      protocol: 'http://',
       hostname: 'localhost',
       port: 8080,
+      indexPath: 'view_example.html'
     },
     electron: {
       directory: './',

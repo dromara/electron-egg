@@ -10,27 +10,6 @@ module.exports = (appInfo) => {
   const config = {};
 
   /**
-   * 应用模式配置
-   */
-  config.developmentMode = {
-    default: 'vue',
-    mode: {
-      vue: {
-        hostname: 'localhost',
-        port: 8080
-      },
-      react: {
-        hostname: 'localhost',
-        port: 3000
-      },
-      html: {
-        hostname: 'localhost',
-        indexPage: 'index.html'
-      },
-    }
-  };
-
-  /**
    * 开发者工具
    */
   config.openDevTools = true;
@@ -132,9 +111,9 @@ module.exports = (appInfo) => {
    * 主进程
    */     
   config.mainServer = {
-    protocol: 'file://',
+    protocol: 'http://',
     indexPath: '/public/dist/index.html',
-    host: 'localhost',
+    host: '127.0.0.1',
     port: 7072,
   }; 
 
