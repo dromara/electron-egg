@@ -1,28 +1,33 @@
 /**
- * ee-bin config
+ * ee-bin 配置
  * 仅适用于开发环境
  */
 module.exports = {
   /**
-   * 前端服务 - dev
+   * 同时启动 "frontend" "electron"
    */
-	frontend: {
-		directory: './frontend',
-		devCommond: 'npm run dev',
-    buildCommond: 'npm run build',
-		protocol: 'http://',
-		hostname: 'localhost',
-		port: 8080,
+	dev: {
+    frontend: {
+      directory: './frontend',
+      cmd: 'npm run dev',
+      protocol: 'http://',
+      hostname: 'localhost',
+      port: 8080,
+    },
+    electron: {
+      directory: './',
+      cmd: 'electron',
+      args: ['.', '--env=local'],
+    }
 	},
 
   /**
-   * 主进程服务 - dev
-   */  
-  main: {
-    directory: './',
-		cmd: 'electron',
-    args: ['.', '--env=local'],
-  },
+   * 前端构建
+   */
+	build: {
+		directory: './frontend',
+		cmd: 'npm run build'
+	},
 
   /**
    * 加密
