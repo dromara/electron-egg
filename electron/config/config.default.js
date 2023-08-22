@@ -89,6 +89,7 @@ module.exports = (appInfo) => {
       key: '/public/ssl/localhost+1.key',
       cert: '/public/ssl/localhost+1.pem'
     },
+    host: '127.0.0.1',
     port: 7071,
     cors: {
       origin: "*"

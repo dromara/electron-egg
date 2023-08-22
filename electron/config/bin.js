@@ -14,7 +14,7 @@ module.exports = {
       cmd: 'npm run dev',
       hostname: 'localhost',
       port: 8080,
-      indexPath: 'view_example.html'
+      indexPath: 'index.html'
     },
     electron: {
       directory: './',
@@ -30,6 +30,15 @@ module.exports = {
   build: {
     directory: './frontend',
     cmd: 'npm run build'
+  },
+
+  /**
+   * 移动资源
+   * ee-bin rd
+   */
+  rd: {
+    dist: './frontend/dist',
+    target: './public/dist'
   },
 
   /**
