@@ -3,6 +3,7 @@
 const { Service } = require('ee-core');
 const Storage = require('ee-core/storage');
 const _ = require('lodash');
+const path = require('path');
 
 /**
  * json数据存储
@@ -14,7 +15,8 @@ class JsondbService extends Service {
     super(ctx);
 
     // jsondb数据库
-    this.demoDB = Storage.connection('demo');  
+    this.jsonFile = 'demo';
+    this.demoDB = Storage.connection(this.jsonFile);  
     this.demoDBKey = {
       test_data: 'test_data'
     };
@@ -106,6 +108,30 @@ class JsondbService extends Service {
 
     return data;
   }
+
+  /*
+   * get data dir (sqlite)
+   */
+  async getDataDir() {
+    const dir = this.demoDB.getStorageDir();    
+
+    return dir;
+  } 
+
+  /*
+   * set custom data dir (sqlite)
+   */
+  async setCustomDataDir(dir) {
+    if (_.isEmpty(dir)) {
+      return;
+    }
+
+    // the absolute path of the db file
+    const dbFile = path.join(dir, this.jsonFile);
+    this.demoDB = Storage.connection(dbFile);    
+
+    return;
+  }  
 }
 
 JsondbService.toString = () => '[class JsondbService]';

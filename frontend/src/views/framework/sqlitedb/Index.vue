@@ -175,7 +175,6 @@ export default {
   },
   mounted () {
     this.init();
-    
   },
   methods: {
     init() {
@@ -193,7 +192,6 @@ export default {
       }) 
     },
     getAllTestData () {
-      const self = this;
       const params = {
         action: 'all',
       }
@@ -201,7 +199,7 @@ export default {
         if (res.all_list.length == 0) {
           return false;
         }
-        self.all_list = res.all_list;
+        this.all_list = res.all_list;
       }) 
     },
     selectDir() {

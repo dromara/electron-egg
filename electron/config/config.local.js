@@ -10,7 +10,7 @@ module.exports = (appInfo) => {
    * 开发者工具
    */
   config.openDevTools = {
-    mode: 'bottom'
+    mode: 'undocked'
   };
 
   /**
