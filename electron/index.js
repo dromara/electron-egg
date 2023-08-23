@@ -32,6 +32,7 @@ class Index extends Application {
       const win = this.electron.mainWindow;
       win.once('ready-to-show', () => {
         win.show();
+        win.focus();
       })
     }
   }
