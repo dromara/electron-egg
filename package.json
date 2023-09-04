@@ -4,13 +4,12 @@
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
-    "bin-dev": "ee-bin dev",
-    "bin-build": "ee-bin build",
-    "bin-start": "ee-bin start",
-    "dev": "electron . --env=local",
-    "start": "electron . ",
+    "dev": "ee-bin dev",
+    "dev-frontend": "ee-bin dev --serve=frontend",
+    "dev-electron": "ee-bin dev --serve=electron",
+    "build-frontend": "ee-bin build",
+    "start": "ee-bin start",
     "reload": "nodemon --config ./electron/config/nodemon.json",
-    "test": "set DEBUG=* && electron . --env=local",
     "rd": "ee-bin rd",
     "encrypt": "ee-bin encrypt",
     "clean": "ee-bin clean",
@@ -33,7 +32,8 @@
     "build-l-arm64": "electron-builder --config=./electron/config/builder.json -l=deb --arm64",
     "build-l-armv7l": "electron-builder --config=./electron/config/builder.json -l=deb --armv7l",
     "build-lr-64": "electron-builder --config=./electron/config/builder.json -l=rpm --x64",
-    "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64"
+    "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64",
+    "test": "set DEBUG=* && electron . --env=local"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
