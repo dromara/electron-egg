@@ -4,14 +4,15 @@
  */
 module.exports = {
   /**
-   * 同时启动 "frontend" "electron"
+   * development serve ("frontend" "electron" )
    * ee-bin dev
    */
   dev: {
     frontend: {
-      protocol: 'http://',
       directory: './frontend',
-      cmd: 'npm run dev',
+      cmd: 'npm',
+      args: ['run', 'dev'],
+      protocol: 'http://',
       hostname: 'localhost',
       port: 8080,
       indexPath: 'index.html'
@@ -29,7 +30,8 @@ module.exports = {
    */
   build: {
     directory: './frontend',
-    cmd: 'npm run build'
+    cmd: 'npm',
+    args: ['run', 'build'],
   },
 
   /**
