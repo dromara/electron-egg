@@ -1,16 +1,13 @@
 <template>
-    <router-view/>
+  <router-view/>
 </template>
 
 <script>
 export default {
-  name: 'App',
-  components: {},
-  data() {
-    return {};
-  },
-  watch: {},
-  methods: {}
+name: 'App',
+setup() {
+  document.getElementById('loadingPage').remove()
+}
 }
 </script>
 <style lang="less"></style>
