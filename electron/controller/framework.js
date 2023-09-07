@@ -33,7 +33,7 @@ class FrameworkController extends Controller {
    * json数据库操作
    */   
   async jsondbOperation(args) {
-    const { action, info, delete_name, update_name, update_age, search_age } = args;
+    const { action, info, delete_name, update_name, update_age, search_age, data_dir } = args;
 
     const data = {
       action,
@@ -54,6 +54,12 @@ class FrameworkController extends Controller {
       case 'get' :
         data.result = await Services.get('database.jsondb').getTestData(search_age);
         break;
+      case 'getDataDir' :
+        data.result = await Services.get('database.jsondb').getDataDir();
+        break;
+      case 'setDataDir' :
+        data.result = await Services.get('database.jsondb').setCustomDataDir(data_dir);
+        break;          
     }
 
     data.all_list = await Services.get('database.jsondb').getAllTestData();
@@ -65,7 +71,7 @@ class FrameworkController extends Controller {
    * sqlite数据库操作
    */   
   async sqlitedbOperation(args) {
-    const { action, info, delete_name, update_name, update_age, search_age } = args;
+    const { action, info, delete_name, update_name, update_age, search_age, data_dir } = args;
 
     const data = {
       action,
@@ -297,6 +303,22 @@ class FrameworkController extends Controller {
 
     return data;
   }
+
+  /**
+   * java运行状态
+   */ 
+  async runStatus() {
+    let data = {
+      code: 0,
+      msg: '',
+      flag: false
+    }
+    const flag =  await Addon.get('javaServer').check();
+    //Log.info("[FrameworkController:runStatus] flag-----------"+flag);
+    data.flag = flag;
+    
+    return data;
+  }  
 
   /**
    * 任务

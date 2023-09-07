@@ -1,13 +1,21 @@
 {
   "name": "ee",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
-    "start": "electron . ",
-    "dev": "electron . --env=local",
+    "dev": "ee-bin dev",
+    "dev-frontend": "ee-bin dev --serve=frontend",
+    "dev-electron": "ee-bin dev --serve=electron",
+    "build-frontend": "ee-bin build",
+    "start": "ee-bin start",
+    "rd": "ee-bin rd",
+    "encrypt": "ee-bin encrypt",
+    "clean": "ee-bin clean",
+    "icon": "ee-bin icon",
     "reload": "nodemon --config ./electron/config/nodemon.json",
-    "test": "set DEBUG=* && electron . --env=local",
+    "rebuild": "electron-rebuild",
+    "re-sqlite": "electron-rebuild -f -w better-sqlite3",
     "build-w": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
     "build-w-32": "electron-builder --config=./electron/config/builder.json -w=nsis --ia32",
     "build-w-64": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
@@ -25,12 +33,7 @@
     "build-l-armv7l": "electron-builder --config=./electron/config/builder.json -l=deb --armv7l",
     "build-lr-64": "electron-builder --config=./electron/config/builder.json -l=rpm --x64",
     "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64",
-    "rd": "ee-bin rd",
-    "encrypt": "ee-bin encrypt",
-    "clean": "ee-bin clean",
-    "icon": "ee-bin icon",
-    "rebuild": "electron-rebuild",
-    "re-sqlite": "electron-rebuild -f -w better-sqlite3"
+    "test": "set DEBUG=* && electron . --env=local"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
@@ -43,7 +46,7 @@
   "devDependencies": {
     "@electron/rebuild": "^3.2.13",
     "debug": "^4.3.3",
-    "ee-bin": "^1.1.0",
+    "ee-bin": "^1.2.0-beta.5",
     "electron": "^21.4.4",
     "electron-builder": "^23.6.0",
     "eslint": "^5.13.0",
@@ -52,7 +55,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
-    "ee-core": "^2.4.0",
+    "ee-core": "^2.5.0-beta.3",
     "electron-updater": "^5.3.0",
     "lodash": "^4.17.21"
   }

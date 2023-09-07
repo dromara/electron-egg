@@ -5,12 +5,9 @@
 <script>
 export default {
   name: 'App',
-  components: {},
-  data() {
-    return {};
-  },
-  watch: {},
-  methods: {}
+  setup() {
+    document.getElementById('loadingPage').remove()
+  }
 }
 </script>
 <style lang="less"></style>

@@ -20,7 +20,31 @@
     </div>
     <div class="one-block-1">
       <span>
-        2. 测试数据
+        2. 数据目录
+      </span>
+    </div>  
+    <div class="one-block-2">
+      <a-row>
+        <a-col :span="12">
+          <a-input v-model="data_dir" :value="data_dir" addon-before="数据目录" />
+        </a-col>
+        <a-col :span="2">
+        </a-col>
+        <a-col :span="5">
+          <a-button @click="selectDir">
+            修改目录
+          </a-button>
+        </a-col>
+        <a-col :span="5">
+          <a-button @click="openDir">
+            打开目录
+          </a-button>
+        </a-col>        
+      </a-row>
+    </div>       
+    <div class="one-block-1">
+      <span>
+        3. 测试数据
       </span>
     </div>  
     <div class="one-block-2">
@@ -32,7 +56,7 @@
     </div>    
     <div class="one-block-1">
       <span>
-        3. 添加数据
+        4. 添加数据
       </span>
     </div>  
     <div class="one-block-2">
@@ -56,7 +80,7 @@
     </div>
     <div class="one-block-1">
       <span>
-        4. 获取数据
+        5. 获取数据
       </span>
     </div>  
     <div class="one-block-2">
@@ -84,7 +108,7 @@
     </div>
     <div class="one-block-1">
       <span>
-        5. 修改数据
+        6. 修改数据
       </span>
     </div>  
     <div class="one-block-2">
@@ -108,7 +132,7 @@
     </div>
     <div class="one-block-1">
       <span>
-        6. 删除数据
+        7. 删除数据
       </span>
     </div>  
     <div class="one-block-2">
@@ -145,13 +169,23 @@ export default {
       update_name: '张三',
       update_age: 21,
       delete_name: '张三',
-      all_list: ['空']
+      all_list: ['空'],
+      data_dir: ''
     };
   },
   mounted () {
-    this.getAllTestData();
+    this.init();
   },
   methods: {
+    init() {
+      const params = {
+        action: 'getDataDir',
+      }
+      ipc.invoke(ipcApiRoute.jsondbOperation, params).then(res => {
+        this.data_dir = res.result;
+        this.getAllTestData();
+      }) 
+    },    
     getAllTestData () {
       const params = {
         action: 'all',
@@ -164,6 +198,28 @@ export default {
         this.all_list = res.all_list;
       }) 
     },
+    selectDir() {
+      ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
+        this.data_dir = r;
+        // 修改数据目录
+        this.modifyDataDir(r);
+      })
+    },
+    openDir() {
+      // console.log('data_dir:', this.data_dir);
+      ipc.invoke(ipcApiRoute.openDirectory, {id: this.data_dir}).then(res => {
+        //
+      })
+    },    
+    modifyDataDir(dir) {
+      const params = {
+        action: 'setDataDir',
+        data_dir: dir
+      }
+      ipc.invoke(ipcApiRoute.jsondbOperation, params).then(res => {
+        this.all_list = res.all_list;
+      }) 
+    },    
     dbOperation (ac) {
       const params = {
         action: ac,

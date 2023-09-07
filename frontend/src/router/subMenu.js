@@ -106,7 +106,13 @@ export default {
 			title: '系统主题',
 			pageName: 'OsThemeIndex',
 			params: {}
-		},   
+		},
+		'menu_110' : {
+			icon: 'profile',
+			title: '图片',
+			pageName: 'OsFilePic',
+			params: {}
+		}, 
 	},  
 	hardware: {
 		'menu_100' : {
@@ -122,6 +128,12 @@ export default {
       title: '视频播放器',
       pageName: 'EffectVideoIndex',
       params: {}
-    }                                                 
+    },
+    'menu_110' : {
+      icon: 'profile',
+      title: '登录',
+      pageName: 'EffectLoginIndex',
+      params: {}
+    }                                                
   } 	
 }

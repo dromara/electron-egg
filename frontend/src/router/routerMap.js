@@ -81,6 +81,11 @@ const constantRouterMap = [
             component: () => import('@/views/os/file/Index.vue')
           },
           {
+            path: '/os/file/pic',
+            name: 'OsFilePic',
+            component: () => import('@/views/os/file/Pic.vue')
+          },
+          {
             path: '/os/windowview/index',
             name: 'OsWindowViewIndex',
             component: () => import('@/views/os/windowview/Index.vue')
@@ -143,6 +148,11 @@ const constantRouterMap = [
             name: 'EffectVideoIndex',
             component: () => import('@/views/effect/video/Index.vue')
           },
+          {
+            path: '/effect/login/index',
+            name: 'EffectLoginIndex',
+            component: () => import('@/views/effect/login/Index.vue')
+          }
         ]  
       },
     ]
@@ -154,7 +164,12 @@ const constantRouterMap = [
         path: 'subwindow',
         name: 'SpecialSubwindowIpc',
         component: () => import('@/views/os/subwindow/Ipc.vue')
-      }
+      },
+      {
+        path: '/login',
+        name: 'SpecialLoginWindow',
+        component: () => import('@/views/effect/login/Window.vue')
+      },
     ]
   },
 ]

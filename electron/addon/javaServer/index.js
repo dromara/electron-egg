@@ -45,7 +45,16 @@ class JavaServerAddon {
    * @since 1.0.0
    */
   async check () {
+    Log.info("进入-----检查服务是否启动------"+this.javaServer);
+    if(this.javaServer == undefined){
+      Log.info("[addon:javaServer:check] status-----------"+false);
+      return false;
+    }
     
+    const flag = await this.javaServer.isRun(Conf.getValue('addons.javaServer'));
+    Log.info("[addon:javaServer:check] status-----------"+flag);
+
+    return flag;    
   }
 
   /**
