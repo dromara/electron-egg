@@ -10,27 +10,6 @@ module.exports = (appInfo) => {
   const config = {};
 
   /**
-   * 应用模式配置
-   */
-  config.developmentMode = {
-    default: 'vue',
-    mode: {
-      vue: {
-        hostname: 'localhost',
-        port: 8080
-      },
-      react: {
-        hostname: 'localhost',
-        port: 3000
-      },
-      html: {
-        hostname: 'localhost',
-        indexPage: 'index.html'
-      },
-    }
-  };
-
-  /**
    * 开发者工具
    */
   config.openDevTools = false;
@@ -38,7 +17,7 @@ module.exports = (appInfo) => {
   /**
    * 应用程序顶部菜单
    */
-  config.openAppMenu = 'dev-show';
+  config.openAppMenu = true;
 
   /**
    * 主窗口
@@ -50,7 +29,7 @@ module.exports = (appInfo) => {
     minWidth: 800,
     minHeight: 650,
     webPreferences: {
-      //webSecurity: false, // 跨域问题 -> 打开注释
+      webSecurity: false,
       contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
       nodeIntegration: true,
       //preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
