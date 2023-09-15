@@ -1,8 +1,7 @@
-# EE框架 v3
 [![star](https://gitee.com/dromara/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/dromara/electron-egg/stargazers)
 
 <div align=center>
-<h3>🎉🎉🎉 V3.7.0已发布！！！ 🎉🎉🎉</h3>
+<h3>🎉🎉🎉 ElectronEgg V3.7.0已发布! 🎉🎉🎉</h3>
 </div>
 <br>
 
@@ -18,7 +17,7 @@
 <!-- ## 🌏 [English](https://www.yuque.com/u34495/ee-doc) | [中文](https://www.kaka996.com/) -->
 
 ## 📋 介绍
-框架已经广泛应用于记账、医疗、学校、政务、股票交易、ERP、娱乐、视频、企业等领域客户端，请放心使用！
+#### 框架已经广泛应用于记账、政务、企业、医疗、学校、股票交易、ERP、娱乐、视频等领域客户端，请放心使用！
 
 - 🍩 **为什么使用？** 桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
 - 🍉 **简单：** 只需懂 JavaScript
