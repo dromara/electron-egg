@@ -1,4 +1,6 @@
-package eboot
+package boot
+
+import "fmt"
 
 const (
 	Version = "0.1.0"
@@ -6,12 +8,13 @@ const (
 
 var (
 	ENV          = "dev" // 'dev' 'prod'
-	progressBar  float64 // 0~100
-	progressDesc string  // Description
+	progressBar  float64 // 0 ~ 100
+	progressDesc string  // description
 	HttpServer   = false
 )
 
 func Run() {
-	elog.NewLogger()
-	elog.GetLogger().Info("hconf example success tttt")
+	fmt.Println("result:")
+	// elog.NewLogger()
+	// elog.GetLogger().Info("hconf example success tttt")
 }

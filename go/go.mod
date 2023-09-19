@@ -1,4 +1,4 @@
-module egg
+module electron-egg
 
 go 1.20
 

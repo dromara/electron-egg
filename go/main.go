@@ -1,5 +1,9 @@
 package main
 
+import (
+	"electron-egg/boot"
+)
+
 func main() {
-	eboot.Run()
+	boot.Run()
 }
