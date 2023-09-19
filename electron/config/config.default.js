@@ -17,7 +17,7 @@ module.exports = (appInfo) => {
   /**
    * 应用程序顶部菜单
    */
-  config.openAppMenu = 'dev-show';
+  config.openAppMenu = true;
 
   /**
    * 主窗口

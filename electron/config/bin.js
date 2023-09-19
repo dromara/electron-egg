@@ -72,5 +72,17 @@ module.exports = {
       stringArrayEncoding: ['none'],
       deadCodeInjection: false,
     }
-  }
+  },
+
+  /**
+   * 执行自定义命令
+   * ee-bin exec
+   */
+  exec: {
+    go: {
+      directory: './go',
+      cmd: 'go',
+      args: ['run', '-tags=fts5', './main.go', '--wd=../', '--env=dev', '--port=6789'],
+    },
+  },  
 };
