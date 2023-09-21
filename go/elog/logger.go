@@ -3,7 +3,7 @@ package elog
 import (
 	"fmt"
 	"os"
-	"time"
+	"path/filepath"
 
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
@@ -14,6 +14,7 @@ var (
 	zlogger *zap.Logger
 	logger  *zap.SugaredLogger
 	LogPath string
+	LogName = "ee-go.log"
 )
 
 type LogConfig struct {
@@ -25,7 +26,12 @@ type LogConfig struct {
 }
 
 func init() {
-	LogPath = 
+	Mode := "dev"
+	if Mode == "dev" {
+		LogPath = filepath.Join(WorkingDir, "logs", LogName)
+	} else {
+		LogPath = filepath.Join(TempDir, LogName)
+	}
 }
 
 // 负责设置 encoding 的日志格式

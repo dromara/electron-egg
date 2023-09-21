@@ -1,9 +1,9 @@
 package main
 
 import (
-	"electron-egg/eboot"
+	"electron-egg/eapp"
 )
 
 func main() {
-	eboot.Run()
+	eapp.Run()
 }
