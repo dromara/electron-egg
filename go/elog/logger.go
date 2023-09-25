@@ -2,6 +2,7 @@ package elog
 
 import (
 	"fmt"
+	stdlog "log"
 	"os"
 	"path/filepath"
 
@@ -11,10 +12,11 @@ import (
 )
 
 var (
+	LogDir  string // electron-egg logs directory
+	LogName = "ee-go.log"
+	LogPath string
 	zlogger *zap.Logger
 	logger  *zap.SugaredLogger
-	LogPath string
-	LogName = "ee-go.log"
 )
 
 type LogConfig struct {
@@ -26,12 +28,17 @@ type LogConfig struct {
 }
 
 func init() {
-	Mode := "dev"
-	if Mode == "dev" {
-		LogPath = filepath.Join(WorkingDir, "logs", LogName)
-	} else {
-		LogPath = filepath.Join(TempDir, LogName)
+	dir, err := os.Getwd()
+	if err != nil {
+		stdlog.Printf("get current directory failed: %s", err)
+		dir = "./"
 	}
+	LogDir = dir
+	LogPath = filepath.Join(LogDir, LogName)
+}
+
+func SetLogPath(path string) {
+	LogPath = path
 }
 
 // 负责设置 encoding 的日志格式

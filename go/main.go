@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	eapp.Run()
+	eapp.New()
 }

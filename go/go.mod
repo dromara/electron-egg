@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil/v3 v3.23.8
 	go.uber.org/zap v1.26.0
 )
