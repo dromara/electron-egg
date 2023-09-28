@@ -7,6 +7,7 @@ require ee-go v1.0.0
 replace ee-go => D:\www\bilibili\gofile\src\ee-core\ee-go
 
 require (
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
