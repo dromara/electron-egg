@@ -8,6 +8,7 @@
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
     "dev-go": "ee-bin exec --command=go",
+    "dev-cmd": "ee-bin exec --command=node_version,npm_version",
     "build-frontend": "ee-bin build",
     "start": "ee-bin start",
     "rd": "ee-bin rd",

@@ -132,6 +132,13 @@ module.exports = (appInfo) => {
     mainExit: false,
     childExit: true,
     rendererExit: true,
+  };
+
+  /**
+   * jobs
+   */
+  config.jobs = {
+    messageLog: true
   };  
 
   /**

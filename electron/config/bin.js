@@ -84,5 +84,15 @@ module.exports = {
       cmd: 'go',
       args: ['run', './main.go', '--env=dev'],
     },
+    node_version: {
+      directory: './',
+      cmd: 'node',
+      args: ['-v'],
+    },
+    npm_version: {
+      directory: './',
+      cmd: 'npm',
+      args: ['-v'],
+    },
   },  
 };
