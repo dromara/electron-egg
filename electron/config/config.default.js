@@ -26,8 +26,8 @@ module.exports = (appInfo) => {
     title: 'EE框架',
     width: 980,
     height: 650,
-    minWidth: 800,
-    minHeight: 650,
+    minWidth: 400,
+    minHeight: 300,
     webPreferences: {
       webSecurity: false,
       contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
@@ -89,6 +89,7 @@ module.exports = (appInfo) => {
       key: '/public/ssl/localhost+1.key',
       cert: '/public/ssl/localhost+1.pem'
     },
+    host: '127.0.0.1',
     port: 7071,
     cors: {
       origin: "*"
@@ -113,7 +114,7 @@ module.exports = (appInfo) => {
   config.mainServer = {
     protocol: 'file://',
     indexPath: '/public/dist/index.html',
-    host: 'localhost',
+    host: '127.0.0.1',
     port: 7072,
   }; 
 
@@ -131,6 +132,13 @@ module.exports = (appInfo) => {
     mainExit: false,
     childExit: true,
     rendererExit: true,
+  };
+
+  /**
+   * jobs
+   */
+  config.jobs = {
+    messageLog: true
   };  
 
   /**
