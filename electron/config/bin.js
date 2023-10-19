@@ -72,5 +72,27 @@ module.exports = {
       stringArrayEncoding: ['none'],
       deadCodeInjection: false,
     }
-  }
+  },
+
+  /**
+   * 执行自定义命令
+   * ee-bin exec
+   */
+  exec: {
+    go: {
+      directory: './go',
+      cmd: 'go',
+      args: ['run', './main.go', '--env=dev'],
+    },
+    node_version: {
+      directory: './',
+      cmd: 'node',
+      args: ['-v'],
+    },
+    npm_version: {
+      directory: './',
+      cmd: 'npm',
+      args: ['-v'],
+    },
+  },  
 };

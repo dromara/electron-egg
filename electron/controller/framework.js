@@ -241,6 +241,8 @@ class FrameworkController extends Controller {
 
   /**
    * 上传文件
+   * 不建议使用，请使用electron的api来获取文件的本机路径，然后读取并上传
+   * 使用http的files属性，实际上多余拷贝一次文件
    */  
   async uploadFile() {
     const { CoreApp } = EE;

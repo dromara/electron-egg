@@ -18,6 +18,13 @@ module.exports = (appInfo) => {
    */
   config.openAppMenu = true;
 
+  /**
+   * jobs
+   */
+  config.jobs = {
+    messageLog: true
+  };   
+
   return {
     ...config
   };
