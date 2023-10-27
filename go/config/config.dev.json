@@ -1,0 +1,9 @@
+{
+    "logger": {
+        "outputJSON": false,
+        "level":      "info",
+		"fileName":   "ee-go.log",
+		"maxSize":    1024,
+		"maxAge":     30
+    }
+}

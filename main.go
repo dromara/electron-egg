@@ -1,9 +1,9 @@
 package main
 
 import (
-	"ee-go/eapp"
+	"ee-go/eboot"
 )
 
 func main() {
-	eapp.Run()
+	eboot.Run()
 }

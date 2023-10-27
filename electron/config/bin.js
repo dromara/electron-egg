@@ -80,7 +80,7 @@ module.exports = {
    */
   exec: {
     go: {
-      directory: './go',
+      directory: './',
       cmd: 'go',
       args: ['run', './main.go', '--env=dev'],
     },
