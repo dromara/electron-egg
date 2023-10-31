@@ -1,0 +1,6 @@
+{
+    "logger": {
+        "outputjson": false,
+		"maxage":     20
+    }
+}

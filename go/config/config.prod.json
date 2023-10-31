@@ -1,9 +1,10 @@
 {
     "logger": {
-        "outputJSON": true,
-        "level":      "info",
-		"fileName":   "ee-go.log",
-		"maxSize":    1024,
-		"maxAge":     30
+        "outputjson": true,
+        "maxage":     30
+    },
+    "url":     {
+        "host": "kaka3",
+        "age": 9003
     }
 }
