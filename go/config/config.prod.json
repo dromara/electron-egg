@@ -1,7 +1,7 @@
 {
     "logger": {
-        "outputjson": true,
-        "maxage":     30
+        "output_json": true,
+        "max_age":     30
     },
     "url":     {
         "host": "kaka3",

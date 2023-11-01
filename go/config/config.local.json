@@ -1,6 +1,6 @@
 {
     "logger": {
-        "outputjson": false,
-		"maxage":     20
+        "output_json": false,
+		"max_age":     20
     }
 }

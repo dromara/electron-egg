@@ -38,7 +38,17 @@ class OsService extends Service {
    * removeBrowserView
    */
   removeBrowserView() {
-    this.myBrowserView.webContents.destroy();
+    // one
+    this.myBrowserView.webContents.loadURL('about:blank')
+
+    // two - electron 11 remove destroy()
+    // this.myBrowserView.webContents.destroy();
+
+    // three
+    // this.myBrowserView.webContents.forcefullyCrashRenderer()
+
+    // fore
+    // this.myBrowserView.webContents.close
   }
 
   /**
