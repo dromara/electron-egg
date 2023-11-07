@@ -1,12 +1,21 @@
-package api
+package router
 
 import (
 	"electron-egg/api"
 
-	"github.com/gin-gonic/gin"
+	"ee-go/eserver"
 )
 
-func ServeAPI(ginServer *gin.Engine) {
-	ginServer.Handle("GET", "/api/user/getName", api.GetName)
-	ginServer.Handle("GET", "/api/user/getAge", api.GetAge)
+func Load() {
+	// userContr := controller.UserController{}
+	// eserver.Gin.GET("/api/user/getName", userContr.GetName)
+
+	eserver.Router.Handle("GET", "/api/user/getName", api.GetName)
+	eserver.Router.Handle("GET", "/api/user/exit", api.Exit)
 }
+
+// func InitFunc() {
+// 	return func(g *gin.Engine) {
+// 		eserver.Gin.Handle("GET", "/api/user/getName", api.GetName)
+// 	}
+// }
