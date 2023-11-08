@@ -2,14 +2,17 @@ package main
 
 import (
 	"ee-go/eboot"
-	"fmt"
 
 	"electron-egg/router"
 )
 
 func main() {
+	// Initialize ee-go
 	eboot.Init()
-	fmt.Println("dd")
+
+	// User business logic
 	router.Load()
+
+	// ee-go runtime
 	eboot.Run()
 }
