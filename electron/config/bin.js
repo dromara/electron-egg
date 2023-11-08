@@ -79,20 +79,25 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
-    go: {
+    go_dev: {
       directory: './go',
       cmd: 'go',
       args: ['run', './main.go', '--env=dev'],
     },
-    node_version: {
-      directory: './',
-      cmd: 'node',
-      args: ['-v'],
+    go_build_w: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o', '../build/extraResources/core.exe'],
     },
-    npm_version: {
-      directory: './',
-      cmd: 'npm',
-      args: ['-v'],
+    go_build_m: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o core', '--env=prod'],
     },
+    go_build_l: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o core', '--env=prod'],
+    }
   },  
 };
