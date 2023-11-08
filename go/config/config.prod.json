@@ -1,10 +1,17 @@
 {
     "logger": {
         "output_json": true,
-        "max_age":     30
+        "level":      "info",
+		"filename":   "ee-go.log",
+		"max_size":    1024,
+		"max_age":     30
     },
-    "url":     {
-        "host": "kaka3",
-        "age": 9003
+    "http":     {
+        "enable": true,
+        "protocol": "http://",
+        "hostname": "127.0.0.1",
+        "port": 7073,
+        "indexPath": "",
+        "network": false
     }
 }

@@ -6,9 +6,12 @@
 		"max_size":    1024,
 		"max_age":     10
     },
-    "url":     {
-        "host": "kaka1",
-        "age": 9000,
-        "other": 100
+    "http":     {
+        "enable": true,
+        "protocol": "http://",
+        "hostname": "127.0.0.1",
+        "port": 7073,
+        "indexPath": "",
+        "network": false
     }
 }
