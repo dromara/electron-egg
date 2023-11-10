@@ -1,12 +1,11 @@
 package router
 
 import (
-	"electron-egg/api"
-
 	"ee-go/eserver"
+	"electron-egg/api"
 )
 
-func Load() {
-	eserver.Router.Handle("GET", "/api/user/getName", api.GetName)
-	eserver.Router.Handle("GET", "/api/user/exit", api.Exit)
+func Api() {
+	eserver.Router.Handle("GET", "/api/test", api.GetName)
+	eserver.Router.Handle("GET", "/api/exit", api.Exit)
 }
