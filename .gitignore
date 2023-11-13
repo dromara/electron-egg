@@ -10,3 +10,4 @@ public/electron/
 pnpm-lock.yaml
 .yalc/
 yalc.lock
+go/public/

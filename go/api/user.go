@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"ee-go/eruntime"
+	"ee-go/eapp"
 	"ee-go/eserver"
 
 	"github.com/gin-gonic/gin"
@@ -18,5 +18,5 @@ func Exit(ctx *gin.Context) {
 	ret := eserver.NewJson()
 	defer ctx.JSON(http.StatusOK, ret)
 
-	eruntime.Close()
+	eapp.Close()
 }

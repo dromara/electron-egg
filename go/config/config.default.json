@@ -17,6 +17,7 @@
     },
     "static": {
         "enable": true,
+        "package": "public/package.json",
         "config": "public/config",
         "dist": "public/dist",
         "html": "public/html",
