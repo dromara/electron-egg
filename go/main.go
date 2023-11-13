@@ -14,8 +14,8 @@ var (
 )
 
 func main() {
-	// Initialize ee-go
-	eboot.Init(staticFS)
+	// Initialize new ee-go
+	eboot.New(staticFS)
 
 	// User business logic
 	router.Init()
