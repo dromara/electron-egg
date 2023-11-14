@@ -14,7 +14,7 @@ var (
 )
 
 func main() {
-	// Initialize new ee-go
+	// Initialize ee-go
 	eboot.New(staticFS)
 
 	// User business logic

@@ -13,5 +13,13 @@
         "port": 7073,
         "indexPath": "",
         "network": false
+    },
+    "static": {
+        "enable": true,
+        "package": "public/package.json",
+        "config": "public/config",
+        "dist": "public/dist",
+        "html": "public/html",
+        "ssl": "public/ssl"
     }
 }
