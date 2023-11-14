@@ -36,12 +36,26 @@ module.exports = {
 
   /**
    * 移动资源
-   * ee-bin rd
+   * ee-bin move 
    */
-  rd: {
-    dist: './frontend/dist',
-    target: './public/dist'
-  },
+  move: {
+    frontend_dist: {
+      dist: './frontend/dist',
+      target: './public/dist'
+    },
+    go_static: {
+      dist: './frontend/dist',
+      target: './go/public/dist'
+    },
+    go_config: {
+      dist: './go/config',
+      target: './go/public/config'
+    },
+    go_package: {
+      dist: './package.json',
+      target: './go/public/package.json'
+    }
+  },  
 
   /**
    * 预发布模式（prod）
