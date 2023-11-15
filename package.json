@@ -13,7 +13,7 @@
     "build-go-m": "ee-bin exec --command=go_build_m",
     "build-go-l": "ee-bin exec --command=go_build_l",
     "start": "ee-bin start",
-    "move": "ee-bin move --flag=go_static,go_config,go_package",
+    "move": "ee-bin move --flag=go_static,go_config,go_package,go_images",
     "rd": "ee-bin move --flag=frontend_dist",
     "encrypt": "ee-bin encrypt",
     "clean": "ee-bin clean",

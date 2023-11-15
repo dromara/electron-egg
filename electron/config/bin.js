@@ -54,6 +54,10 @@ module.exports = {
     go_package: {
       dist: './package.json',
       target: './go/public/package.json'
+    },
+    go_images: {
+      dist: './public/images',
+      target: './go/public/images'
     }
   },  
 
