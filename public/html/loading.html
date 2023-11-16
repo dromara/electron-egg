@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0" />
+    <style>
+      #loadingPage {
+        background-color: #dedede;
+        font-size: 12px;
+      }
+      .base {
+        left: 50%;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .desc {
+        margin: 0, 0, 20px, 0;
+      }
+      .loading,
+      .loading > div {
+        position: relative;
+        box-sizing: border-box;
+      }
+      .loading {
+        display: block;
+        font-size: 0;
+        color: #06b359;
+      }
+      .loading.la-dark {
+        color: #07C160;
+      }
+      .loading > div {
+        display: inline-block;
+        float: none;
+        background-color: currentColor;
+        border: 0 solid currentColor;
+      }
+      .loading {
+        width: 92px;
+        height: 92px;
+      }
+      .loading > div {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        background: transparent;
+        border-style: solid;
+        border-width: 2px;
+        border-radius: 100%;
+        animation: ball-clip-rotate-multiple-rotate 1s ease-in-out infinite;
+      }
+      .loading > div:first-child {
+        position: absolute;
+        width: 92px;
+        height: 92px;
+        border-right-color: transparent;
+        border-left-color: transparent;
+      }
+      .loading > div:last-child {
+        width: 16px;
+        height: 16px;
+        border-top-color: transparent;
+        border-bottom-color: transparent;
+        animation-duration: 0.5s;
+        animation-direction: reverse;
+      }
+      @keyframes ball-clip-rotate-multiple-rotate {
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+
+        50% {
+          transform: translate(-50%, -50%) rotate(180deg);
+        }
+
+        100% {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="boot">
+      <div class='base'>
+        <div class="loading">
+          <div></div>
+          <div></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

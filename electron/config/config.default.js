@@ -116,7 +116,21 @@ module.exports = (appInfo) => {
     indexPath: '/public/dist/index.html',
     host: '127.0.0.1',
     port: 7072,
+    loadingPage: '/public/html/loading.html'
   }; 
+
+  /**
+   * Cross-language service
+   * 跨语言服务
+   */
+  config.cross = {
+    go: {
+      auto: false,
+      name: 'goapp',
+      args: ['--env=dev'],
+      port: 7073,
+    }
+  };   
 
   /**
    * 硬件加速

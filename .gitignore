@@ -12,3 +12,4 @@ pnpm-lock.yaml
 yalc.lock
 go/public/
 build/extraResources/core.exe
+build/extraResources/goapp.exe

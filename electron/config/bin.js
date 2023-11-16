@@ -105,17 +105,17 @@ module.exports = {
     go_build_w: {
       directory: './go',
       cmd: 'go',
-      args: ['build', '-o', '../build/extraResources/core.exe'],
+      args: ['build', '-o', '../build/extraResources/goapp.exe'],
     },
     go_build_m: {
       directory: './go',
       cmd: 'go',
-      args: ['build', '-o core', '--env=prod'],
+      args: ['build', '-o goapp', '--env=prod'],
     },
     go_build_l: {
       directory: './go',
       cmd: 'go',
-      args: ['build', '-o core', '--env=prod'],
+      args: ['build', '-o goapp', '--env=prod'],
     }
   },  
 };

@@ -25,6 +25,19 @@ module.exports = (appInfo) => {
     messageLog: true
   };   
 
+  /**
+   * Cross-language service
+   * 跨语言服务
+   */
+  config.cross = {
+    go: {
+      auto: true,
+      name: 'goapp',
+      args: ['--env=dev'],
+      port: 7073,
+    }
+  }; 
+
   return {
     ...config
   };
