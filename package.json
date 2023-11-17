@@ -7,7 +7,7 @@
     "dev": "ee-bin dev",
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
-    "dev-go": "ee-bin exec --command=go_dev",
+    "dev-go": "ee-bin dev --serve=go",
     "build-frontend": "ee-bin build",
     "build-go-w": "ee-bin exec --command=go_build_w",
     "build-go-m": "ee-bin exec --command=go_build_m",

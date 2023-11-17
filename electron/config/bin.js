@@ -21,7 +21,12 @@ module.exports = {
       directory: './',
       cmd: 'electron',
       args: ['.', '--env=local'],
-    }
+    },
+    go: {
+      directory: './go',
+      cmd: 'go',
+      args: ['run', './main.go', '--env=dev', '--basedir=../'],
+    },
   },
 
   /**
@@ -97,11 +102,6 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
-    go_dev: {
-      directory: './go',
-      cmd: 'go',
-      args: ['run', './main.go', '--env=dev', '--basedir=../'],
-    },
     go_build_w: {
       directory: './go',
       cmd: 'go',
