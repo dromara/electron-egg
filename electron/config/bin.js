@@ -100,7 +100,7 @@ module.exports = {
     go_dev: {
       directory: './go',
       cmd: 'go',
-      args: ['run', './main.go', '--env=dev'],
+      args: ['run', './main.go', '--env=dev', '--basedir=../'],
     },
     go_build_w: {
       directory: './go',
