@@ -12,8 +12,7 @@
         "hostname": "127.0.0.1",
         "port": 7073,
         "index_path": "",
-        "network": false,
-        "static_dir": true
+        "network": false
     },
     "static": {
         "enable": true,

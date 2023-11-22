@@ -25,18 +25,35 @@ module.exports = {
     go: {
       directory: './go',
       cmd: 'go',
-      args: ['run', './main.go', '--env=dev', '--basedir=../'],
+      args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073', '--ssl=false', '--url=http://127.0.0.1:7073'],
     },
   },
 
   /**
-   * 前端构建
+   * 构建
    * ee-bin build
    */
   build: {
-    directory: './frontend',
-    cmd: 'npm',
-    args: ['run', 'build'],
+    frontend: {
+      directory: './frontend',
+      cmd: 'npm',
+      args: ['run', 'build'],
+    },
+    go_build_w: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o', '../build/extraResources/goapp.exe'],
+    },
+    go_build_m: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o', '../build/extraResources/goapp'],
+    },
+    go_build_l: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o', '../build/extraResources/goapp'],
+    }
   },
 
   /**
@@ -102,20 +119,20 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
-    go_build_w: {
+    go: {
       directory: './go',
       cmd: 'go',
-      args: ['build', '-o', '../build/extraResources/goapp.exe'],
+      args: ['run', './main.go', '--env=dev'],
     },
-    go_build_m: {
-      directory: './go',
-      cmd: 'go',
-      args: ['build', '-o goapp', '--env=prod'],
+    node_v: {
+      directory: './',
+      cmd: 'node',
+      args: ['-v'],
     },
-    go_build_l: {
-      directory: './go',
-      cmd: 'go',
-      args: ['build', '-o goapp', '--env=prod'],
-    }
+    npm_v: {
+      directory: './',
+      cmd: 'npm',
+      args: ['-v'],
+    },
   },  
 };
