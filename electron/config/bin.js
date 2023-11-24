@@ -21,27 +21,67 @@ module.exports = {
       directory: './',
       cmd: 'electron',
       args: ['.', '--env=local'],
+    },
+    go: {
+      directory: './go',
+      cmd: 'go',
+      args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
+    },
+  },
+
+  /**
+   * 构建
+   * ee-bin build
+   */
+  build: {
+    frontend: {
+      directory: './frontend',
+      cmd: 'npm',
+      args: ['run', 'build'],
+    },
+    go_build_w: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o', '../build/extraResources/goapp.exe'],
+    },
+    go_build_m: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o', '../build/extraResources/goapp'],
+    },
+    go_build_l: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o', '../build/extraResources/goapp'],
     }
   },
 
   /**
-   * 前端构建
-   * ee-bin build
-   */
-  build: {
-    directory: './frontend',
-    cmd: 'npm',
-    args: ['run', 'build'],
-  },
-
-  /**
    * 移动资源
-   * ee-bin rd
+   * ee-bin move 
    */
-  rd: {
-    dist: './frontend/dist',
-    target: './public/dist'
-  },
+  move: {
+    frontend_dist: {
+      dist: './frontend/dist',
+      target: './public/dist'
+    },
+    go_static: {
+      dist: './frontend/dist',
+      target: './go/public/dist'
+    },
+    go_config: {
+      dist: './go/config',
+      target: './go/public/config'
+    },
+    go_package: {
+      dist: './package.json',
+      target: './go/public/package.json'
+    },
+    go_images: {
+      dist: './public/images',
+      target: './go/public/images'
+    }
+  },  
 
   /**
    * 预发布模式（prod）
@@ -79,25 +119,20 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
-    go_dev: {
+    go_test: {
       directory: './go',
       cmd: 'go',
-      args: ['run', './main.go', '--env=dev'],
+      args: ['run', './main.go', '--env=prod','--basedir=../', '--port=7073', '--debug=true'],
     },
-    go_build_w: {
-      directory: './go',
-      cmd: 'go',
-      args: ['build', '-o', '../build/extraResources/core.exe'],
+    node_v: {
+      directory: './',
+      cmd: 'node',
+      args: ['-v'],
     },
-    go_build_m: {
-      directory: './go',
-      cmd: 'go',
-      args: ['build', '-o core', '--env=prod'],
+    npm_v: {
+      directory: './',
+      cmd: 'npm',
+      args: ['-v'],
     },
-    go_build_l: {
-      directory: './go',
-      cmd: 'go',
-      args: ['build', '-o core', '--env=prod'],
-    }
   },  
 };

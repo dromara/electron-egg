@@ -6,7 +6,7 @@
 		"max_size":    1024,
 		"max_age":     20
     },
-    "http":     {
+    "http": {
         "enable": true,
         "protocol": "http://",
         "hostname": "127.0.0.1",

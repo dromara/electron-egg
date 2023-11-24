@@ -3,10 +3,15 @@ package router
 import (
 	"electron-egg/api"
 
-	"ee-go/eserver"
+	eRouter "github.com/wallace5303/ee-go/ehttp/router"
 )
 
-func Load() {
-	eserver.Router.Handle("GET", "/api/user/getName", api.GetName)
-	eserver.Router.Handle("GET", "/api/user/exit", api.Exit)
+func Api() {
+
+	// 注册路由
+	eRouter.Handle("GET", "/api/hello", api.Hello)
+	eRouter.Handle("GET", "/api/exit", api.Exit)
+
+	// 使用 gin 注册路由
+	eRouter.GinRouter.GET("/api/info", api.Info)
 }

@@ -1,18 +1,25 @@
 package main
 
 import (
-	"ee-go/eboot"
+	"embed"
+
+	"github.com/wallace5303/ee-go/eboot"
 
 	"electron-egg/router"
 )
 
+var (
+	//go:embed public/**
+	staticFS embed.FS
+)
+
 func main() {
 	// Initialize ee-go
-	eboot.Init()
+	ego := eboot.New(staticFS)
 
 	// User business logic
-	router.Load()
+	router.Api()
 
 	// ee-go runtime
-	eboot.Run()
+	ego.Run()
 }

@@ -2,10 +2,7 @@ module electron-egg
 
 go 1.20
 
-//ee-go v1.0.0
 require github.com/gin-gonic/gin v1.9.1
-
-// replace ee-go => D:\www\bilibili\gofile\src\ee-core\ee-go
 
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect

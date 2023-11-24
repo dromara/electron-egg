@@ -6,12 +6,27 @@
 		"max_size":    1024,
 		"max_age":     10
     },
-    "http":     {
+    "core_logger": {
+        "output_json": false,
+        "level":      "info",
+		"filename":   "ee-go-core.log",
+		"max_size":    1024,
+		"max_age":     10
+    },
+    "http": {
         "enable": true,
         "protocol": "http://",
         "hostname": "127.0.0.1",
         "port": 7073,
-        "indexPath": "",
+        "index_path": "",
         "network": false
+    },
+    "static": {
+        "enable": true,
+        "package": "public/package.json",
+        "config": "public/config",
+        "dist": "public/dist",
+        "html": "public/html",
+        "ssl": "public/ssl"
     }
 }

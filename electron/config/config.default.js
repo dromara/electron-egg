@@ -29,7 +29,7 @@ module.exports = (appInfo) => {
     minWidth: 400,
     minHeight: 300,
     webPreferences: {
-      webSecurity: false,
+      //webSecurity: false,
       contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
       nodeIntegration: true,
       //preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
@@ -116,7 +116,22 @@ module.exports = (appInfo) => {
     indexPath: '/public/dist/index.html',
     host: '127.0.0.1',
     port: 7072,
+    loadingPage: '/public/html/loading.html',
+    takeover: 'go'
   }; 
+
+  /**
+   * Cross-language service
+   * 跨语言服务
+   * 例如：执行go的二进制程序
+   */
+  config.cross = {
+    go: {
+      enable: false,
+      name: 'goapp',
+      args: ['--env=dev', '--port=7073'],
+    }
+  };   
 
   /**
    * 硬件加速
