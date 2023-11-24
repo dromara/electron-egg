@@ -2,7 +2,6 @@ package api
 
 import (
 	"net/http"
-	"time"
 
 	"ee-go/eapp"
 	"ee-go/ehelper"
@@ -19,7 +18,6 @@ func Hello(c *router.Ctx) {
 
 	ret.Data = "hello electron-egg"
 	elog.Logger.Info(" print Hello ")
-	time.Sleep(5 * time.Second)
 }
 
 // 使用 gin Context

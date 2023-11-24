@@ -119,6 +119,11 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
+    go_test: {
+      directory: './go',
+      cmd: 'go',
+      args: ['run', './main.go', '--env=prod','--basedir=../', '--port=7073', '--debug=true'],
+    },
     node_v: {
       directory: './',
       cmd: 'node',

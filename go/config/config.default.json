@@ -7,7 +7,7 @@
 		"max_age":     10
     },
     "core_logger": {
-        "output_json": true,
+        "output_json": false,
         "level":      "info",
 		"filename":   "ee-go-core.log",
 		"max_size":    1024,
