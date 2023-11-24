@@ -1,8 +1,9 @@
 package router
 
 import (
-	eRouter "ee-go/ehttp/router"
 	"electron-egg/api"
+
+	eRouter "github.com/wallace5303/ee-go/ehttp/router"
 )
 
 func Api() {

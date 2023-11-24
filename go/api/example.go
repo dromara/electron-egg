@@ -3,10 +3,10 @@ package api
 import (
 	"net/http"
 
-	"ee-go/eapp"
-	"ee-go/ehelper"
-	"ee-go/ehttp/router"
-	"ee-go/elog"
+	"github.com/wallace5303/ee-go/eapp"
+	"github.com/wallace5303/ee-go/ehelper"
+	"github.com/wallace5303/ee-go/ehttp/router"
+	"github.com/wallace5303/ee-go/elog"
 
 	"github.com/gin-gonic/gin"
 )

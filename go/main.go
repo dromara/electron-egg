@@ -3,7 +3,7 @@ package main
 import (
 	"embed"
 
-	"ee-go/eboot"
+	"github.com/wallace5303/ee-go/eboot"
 
 	"electron-egg/router"
 )
