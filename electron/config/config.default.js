@@ -127,9 +127,9 @@ module.exports = (appInfo) => {
    */
   config.cross = {
     go: {
-      enable: true,
+      enable: false,
       name: 'goapp',
-      args: ['--env=dev', '--port=7073', '--ssl=false', '--url=http://127.0.0.1:7073'],
+      args: ['--env=dev', '--port=7073'],
     }
   };   
 

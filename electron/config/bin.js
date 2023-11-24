@@ -25,7 +25,7 @@ module.exports = {
     go: {
       directory: './go',
       cmd: 'go',
-      args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073', '--ssl=false', '--url=http://127.0.0.1:7073'],
+      args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
     },
   },
 
@@ -119,11 +119,6 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
-    go: {
-      directory: './go',
-      cmd: 'go',
-      args: ['run', './main.go', '--env=dev'],
-    },
     node_v: {
       directory: './',
       cmd: 'node',

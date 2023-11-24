@@ -15,11 +15,11 @@ var (
 
 func main() {
 	// Initialize ee-go
-	eboot.New(staticFS)
+	ego := eboot.New(staticFS)
 
 	// User business logic
-	router.Init()
+	router.Api()
 
 	// ee-go runtime
-	eboot.Run()
+	ego.Run()
 }
