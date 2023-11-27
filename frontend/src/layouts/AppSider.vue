@@ -63,7 +63,13 @@ export default {
           title: '特效',
           pageName: 'Effect',
           params: {},
-        },            
+        },   
+        'menu_5' : {
+          icon: 'icon-gouwu',
+          title: 'cross',
+          pageName: 'Cross',
+          params: {},
+        },          
       }
     };
   },

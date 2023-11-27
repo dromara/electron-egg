@@ -135,5 +135,13 @@ export default {
       pageName: 'EffectLoginIndex',
       params: {}
     }                                                
-  } 	
+  },
+  cross: {
+    'menu_100' : {
+      icon: 'profile',
+      title: 'go服务',
+      pageName: 'CrossGoIndex',
+      params: {}
+    }                                               
+  },
 }

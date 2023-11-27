@@ -53,6 +53,9 @@ const ipcApiRoute = {
   selectFile: 'controller.effect.selectFile',
   loginWindow: 'controller.effect.loginWindow',
   restoreWindow: 'controller.effect.restoreWindow',
+
+  // cross
+  requestGoApi: 'controller.cross.requestGoApi',
 }
 
 /**
