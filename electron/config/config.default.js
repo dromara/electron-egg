@@ -116,8 +116,8 @@ module.exports = (appInfo) => {
     indexPath: '/public/dist/index.html',
     host: '127.0.0.1',
     port: 7072,
-    loadingPage: '/public/html/loading.html',
-    takeover: 'go'
+    //loadingPage: '/public/html/loading.html',
+    //takeover: 'go'
   }; 
 
   /**
@@ -127,7 +127,7 @@ module.exports = (appInfo) => {
    */
   config.cross = {
     go: {
-      enable: false,
+      enable: true,
       name: 'goapp',
       args: ['--env=dev', '--port=7073'],
     }
