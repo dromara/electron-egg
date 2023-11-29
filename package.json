@@ -51,7 +51,7 @@
   "devDependencies": {
     "@electron/rebuild": "^3.2.13",
     "debug": "^4.3.3",
-    "ee-bin": "^1.2.0-beta.5",
+    "ee-bin": "^1.4.0-beta.1",
     "electron": "^21.4.4",
     "electron-builder": "^23.6.0",
     "eslint": "^5.13.0",
@@ -61,7 +61,7 @@
   "dependencies": {
     "better-sqlite3": "^8.4.0",
     "dayjs": "^1.10.7",
-    "ee-core": "^2.5.0-beta.3",
+    "ee-core": "^2.7.0-beta.7",
     "electron-updater": "^5.3.0",
     "lodash": "^4.17.21"
   }
