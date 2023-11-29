@@ -129,7 +129,7 @@ module.exports = (appInfo) => {
     go: {
       enable: true,
       name: 'goapp',
-      args: ['--env=dev', '--port=7073'],
+      args: ['--port=7073'],
       appExit: false,
     }
   };   
