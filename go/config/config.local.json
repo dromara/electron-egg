@@ -5,17 +5,5 @@
 		"filename":   "ee-go.log",
 		"max_size":    1024,
 		"max_age":     20
-    },
-    "core_logger": {
-        "output_json": false,
-        "level":      "info",
-		"filename":   "ee-go-core.log",
-		"max_size":    1024,
-		"max_age":     10
-    },
-    "http": {
-        "enable": true,
-        "port": 7073,
-        "network": false
     }
 }

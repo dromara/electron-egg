@@ -43,17 +43,17 @@ module.exports = {
     go_build_w: {
       directory: './go',
       cmd: 'go',
-      args: ['build', '-o', '../build/extraResources/goapp.exe'],
+      args: ['build', '-o=../build/extraResources/goapp.exe'],
     },
     go_build_m: {
       directory: './go',
       cmd: 'go',
-      args: ['build', '-o', '../build/extraResources/goapp'],
+      args: ['build', '-o=../build/extraResources/goapp'],
     },
     go_build_l: {
       directory: './go',
       cmd: 'go',
-      args: ['build', '-o', '../build/extraResources/goapp'],
+      args: ['build', '-o=../build/extraResources/goapp'],
     }
   },
 
@@ -120,11 +120,6 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
-    go_test: {
-      directory: './go',
-      cmd: 'go',
-      args: ['run', './main.go', '--env=prod','--basedir=../', '--port=7073', '--debug=true'],
-    },
     node_v: {
       directory: './',
       cmd: 'node',
