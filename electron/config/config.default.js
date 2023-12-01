@@ -114,10 +114,6 @@ module.exports = (appInfo) => {
   config.mainServer = {
     protocol: 'file://',
     indexPath: '/public/dist/index.html',
-    host: '127.0.0.1',
-    port: 7072,
-    //loadingPage: '/public/html/loading.html',
-    //takeover: 'go'
   }; 
 
   /**
@@ -130,7 +126,7 @@ module.exports = (appInfo) => {
       enable: true,
       name: 'goapp',
       args: ['--port=7073'],
-      appExit: false,
+      appExit: true,
     }
   };   
 
