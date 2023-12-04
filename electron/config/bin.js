@@ -25,23 +25,27 @@ module.exports = {
   },
 
   /**
-   * 前端构建
+   * 构建
    * ee-bin build
    */
   build: {
-    directory: './frontend',
-    cmd: 'npm',
-    args: ['run', 'build'],
+    frontend: {
+      directory: './frontend',
+      cmd: 'npm',
+      args: ['run', 'build'],
+    }
   },
 
   /**
    * 移动资源
-   * ee-bin rd
+   * ee-bin move 
    */
-  rd: {
-    dist: './frontend/dist',
-    target: './public/dist'
-  },
+  move: {
+    frontend_dist: {
+      dist: './frontend/dist',
+      target: './public/dist'
+    }
+  },  
 
   /**
    * 预发布模式（prod）
@@ -79,20 +83,15 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
-    go: {
-      directory: './go',
-      cmd: 'go',
-      args: ['run', './main.go', '--env=dev'],
-    },
-    node_version: {
+    node_v: {
       directory: './',
       cmd: 'node',
       args: ['-v'],
     },
-    npm_version: {
+    npm_v: {
       directory: './',
       cmd: 'npm',
       args: ['-v'],
     },
-  },  
+  },   
 };
