@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/gin-gonic/gin v1.9.1
-	github.com/wallace5303/ee-go v0.3.2
+	github.com/wallace5303/ee-go v1.0.0
 )
 
 require (
