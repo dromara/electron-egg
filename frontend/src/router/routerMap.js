@@ -155,6 +155,20 @@ const constantRouterMap = [
           }
         ]  
       },
+      {
+        path: '/cross',
+        name: 'Cross',
+        component: () => import('@/layouts/Menu.vue'),
+        props: { id: 'cross' },
+        redirect: { name: 'CrossGoIndex' },
+        children: [
+          {
+            path: '/cross/go/index',
+            name: 'CrossGoIndex',
+            component: () => import('@/views/cross/go/Index.vue')
+          }
+        ]  
+      },
     ]
   },
   {
