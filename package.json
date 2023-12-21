@@ -20,6 +20,7 @@
     "build-w-32": "electron-builder --config=./electron/config/builder.json -w=nsis --ia32",
     "build-w-64": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
     "build-w-arm64": "electron-builder --config=./electron/config/builder.json -w=nsis --arm64",
+    "build-we": "electron-builder --config=./electron/config/builder.json -w=portable --x64",
     "build-wz": "electron-builder --config=./electron/config/builder.json -w=7z --x64",
     "build-wz-32": "electron-builder --config=./electron/config/builder.json -w=7z --ia32",
     "build-wz-64": "electron-builder --config=./electron/config/builder.json -w=7z --x64",
