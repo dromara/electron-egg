@@ -4,6 +4,7 @@ const { Controller } = require('ee-core');
 const Log = require('ee-core/log');
 const Services = require('ee-core/services');
 const Addon = require('ee-core/addon');
+const Cross = require('ee-core/cross');
 
 /**
  * example
@@ -26,11 +27,16 @@ class ExampleController extends Controller {
    * test
    */
   async test () {
+    const pids = Cross.getPids();
+    Log.info('cross pids:', pids);
 
-    const result1 = await Services.get('example').test('electron');
-    Log.info('service result1:', result1);
+    const goEntity = Cross.getProcByName('goapp');
+    Log.info('goEntity name:', goEntity.name);
 
-    Services.get('framework').test('electron');
+    // const result1 = await Services.get('example').test('electron');
+    // Log.info('service result1:', result1);
+
+    // Services.get('framework').test('electron');
 
     return 'hello electron-egg';
   }
