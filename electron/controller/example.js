@@ -33,6 +33,10 @@ class ExampleController extends Controller {
     const goEntity = Cross.getProcByName('goapp');
     Log.info('goEntity name:', goEntity.name);
 
+    Log.info('goEntity config:', goEntity.config);
+
+    Log.info('goEntity args:', goEntity.getArgsObj());
+
     // const result1 = await Services.get('example').test('electron');
     // Log.info('service result1:', result1);
 
