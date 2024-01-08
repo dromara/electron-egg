@@ -2,31 +2,31 @@
     <div id="app-cross-go">
       <div class="one-block-1">
         <span>
-          1. go服务
+          1. 基础控制
         </span>
       </div>  
       <div class="one-block-2">
         <a-space>
           <a-button @click="getUrl()"> 获取地址 </a-button>
-          <a-button @click="kill('go')"> kill </a-button>
-          <a-button @click="run('go')"> 启动 </a-button>
-          <a-button @click="test()"> test </a-button>
+          <a-button @click="kill()"> kill </a-button>
+          <a-button @click="create()"> 启动 </a-button>
+          <a-button @click="info()"> 查看 </a-button>
         </a-space>
       </div>
       <div class="one-block-1">
         <span>
-          2. 向go服务发送http请求
+          2. 发送http请求
         </span>
       </div>  
       <div class="one-block-2">
         <a-space>
-          <a-button @click="request(1)"> 前端请求 </a-button>
-          <a-button @click="request(2)"> 主进程请求 </a-button>
+          <a-button @click="request(1)"> 前端发送 </a-button>
+          <a-button @click="request(2)"> 主进程发送 </a-button>
         </a-space>
       </div>
       <div class="one-block-1">
         <span>
-          3. 多个go服务
+          3. 多个服务
         </span>
       </div>  
       <div class="one-block-2">
@@ -50,10 +50,9 @@
       };
     },
     methods: {
-      test() {
-        ipc.invoke(ipcApiRoute.crossTest, {}).then(res => {
+      info() {
+        ipc.invoke(ipcApiRoute.crossInfo, {}).then(res => {
           console.log('res:', res);
-
         }) 
       },
       getUrl() {
@@ -63,10 +62,14 @@
         }) 
       },
       kill() {
-        ipc.invoke(ipcApiRoute.killCrossServer, {name: 'goapp'})
+        // name参数是 进程对象上的name，这里仅作为参照
+        ipc.invoke(ipcApiRoute.killCrossServer, {type: 'one', name: 'goapp'})
+      },
+      killAll() {
+        ipc.invoke(ipcApiRoute.killCrossServer, {type: 'all', name: 'goapp'})
       },
       create() {
-        ipc.invoke(ipcApiRoute.createCrossServer, {name: 'goapp'})
+        ipc.invoke(ipcApiRoute.createCrossServer, {service: 'go'})
       },
       request(type) {
         if (type == 1 && this.serverUrl == "") {

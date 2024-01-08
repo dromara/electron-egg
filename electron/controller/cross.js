@@ -16,25 +16,26 @@ class CrossController extends Controller {
   }
 
   /**
-   * 所有方法接收两个参数
-   * @param args 前端传的参数
-   * @param event - ipc通信时才有值。详情见：控制器文档
+   * View process service information
    */
-
-  async test() {
+  info() {
     const pids = Cross.getPids();
     Log.info('cross pids:', pids);
 
+    let num = 1;
     pids.forEach(pid => {
       let entity = Cross.getProc(pid);
-      Log.info('server name:', entity.name);
-      Log.info('server config:', entity.config);
-      Log.info('server args:', entity.getArgsObj());
+      Log.info(`server-${num} name:${entity.name}`);
+      Log.info(`server-${num} config:`, entity.config);
+      num++;
     })
 
     return 'hello electron-egg';
   }
 
+  /**
+   * Get service url
+   */  
   async getUrl(args) {
     const { name } = args;
     const goUrl = Cross.getUrl(name);
@@ -48,26 +49,33 @@ class CrossController extends Controller {
     return goUrl;
   }
 
+  /**
+   * kill service
+   * By default (modifiable), killing the process will exit the electron application.
+   */  
   async killServer(args) {
-    const { name } = args;
-    Cross.killByName(name);
+    const { type, name } = args;
+    if (type == 'all') {
+      Cross.killAll();
+    } else {
+      Cross.killByName(name);
+    }
 
     return;
   }
 
+  /**
+   * create service
+   * In the default configuration, services can be started with applications. 
+   * Developers can turn off the configuration and create it manually.
+   */   
   async createServer(args) {
-    const { name } = args;
-    const entity = Cross.run(name);
+    const { service } = args;
+    const entity = await Cross.run(service);
     Log.info('server name:', entity.name);
     Log.info('server config:', entity.config);
-    Log.info('server args:', entity.getArgsObj());
-    Log.info('server url:', Cross.getUrl(name));
+    Log.info('server url:', Cross.getUrl(entity.name));
 
-    return;
-  }
-
-  async killAllServer() {
-    Cross.killAll();
     return;
   }
 
