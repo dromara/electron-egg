@@ -28,10 +28,11 @@ module.exports = (appInfo) => {
   /**
    * Cross-language service
    * 跨语言服务
-   * 如果有cmd参数，则执行该命令，directory也是必须的
+   * 如果有cmd参数，则执行该命令且需要指定 directory
    */
   config.cross = {
     go: {
+      // 应用运行时启动
       enable: true,
       name: 'goapp',
       cmd: 'go',
