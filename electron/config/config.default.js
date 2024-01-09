@@ -123,7 +123,7 @@ module.exports = (appInfo) => {
    */
   config.cross = {
     go: {
-      enable: false,
+      enable: true,
       name: 'goapp',
       args: ['--port=7073'],
       appExit: false,
