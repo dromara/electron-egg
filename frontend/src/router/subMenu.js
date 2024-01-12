@@ -142,6 +142,12 @@ export default {
       title: 'go服务',
       pageName: 'CrossGoIndex',
       params: {}
-    }                                               
+    },
+    'menu_110' : {
+      icon: 'profile',
+      title: 'java服务',
+      pageName: 'CrossJavaIndex',
+      params: {}
+    },                                             
   },
 }
