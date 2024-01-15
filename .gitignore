@@ -11,6 +11,4 @@ pnpm-lock.yaml
 .yalc/
 yalc.lock
 go/public/
-build/extraResources/goapp
-build/extraResources/goapp.exe
 go/go.sum

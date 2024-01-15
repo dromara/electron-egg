@@ -119,7 +119,7 @@ module.exports = (appInfo) => {
   /**
    * Cross-language service
    * 跨语言服务
-   * 例如：执行go的二进制程序
+   * 生产环境：执行go的二进制程序
    */
   config.cross = {
     go: {
@@ -127,14 +127,14 @@ module.exports = (appInfo) => {
       name: 'goapp',
       args: ['--port=7073'],
       appExit: true,
-    }
+    },
   };   
 
   /**
    * 硬件加速
    */
   config.hardGpu = {
-    enable: false
+    enable: true
   };
 
   /**
@@ -183,13 +183,6 @@ module.exports = (appInfo) => {
         url: 'http://kodo.qiniu.com/'
       },
       force: false,
-    },
-    javaServer: {
-      enable: false,
-      port: 18080,
-      jreVersion: 'jre1.8.0_201',
-      opt: '-server -Xms512M -Xmx512M -Xss512k -Dspring.profiles.active=prod -Dserver.port=${port} -Dlogging.file.path="${path}" ',
-      name: 'java-app.jar'
     }
   };
 

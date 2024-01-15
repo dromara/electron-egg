@@ -55,7 +55,12 @@ const ipcApiRoute = {
   restoreWindow: 'controller.effect.restoreWindow',
 
   // cross
-  requestGoApi: 'controller.cross.requestGoApi',
+  crossInfo: 'controller.cross.info',
+  getCrossUrl: 'controller.cross.getUrl',
+  killCrossServer: 'controller.cross.killServer',
+  createCrossServer: 'controller.cross.createServer',
+  createJavaServer: 'controller.cross.createJavaServer',
+  requestApi: 'controller.cross.requestApi',
 }
 
 /**

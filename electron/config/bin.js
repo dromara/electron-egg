@@ -22,12 +22,7 @@ module.exports = {
       cmd: 'electron',
       args: ['.', '--env=local'],
       loadingPage: '/public/html/loading.html',
-    },
-    // go: {
-    //   directory: './go',
-    //   cmd: 'go',
-    //   args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
-    // },
+    }
   },
 
   /**
