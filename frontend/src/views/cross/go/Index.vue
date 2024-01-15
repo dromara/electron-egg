@@ -7,9 +7,9 @@
       </div>  
       <div class="one-block-2">
         <a-space>
+          <a-button @click="create()"> 启动 </a-button>
           <a-button @click="getUrl()"> 获取地址 </a-button>
           <a-button @click="kill()"> kill </a-button>
-          <a-button @click="create()"> 启动 </a-button>
           <a-button @click="info()"> test </a-button>
         </a-space>
       </div>

@@ -134,7 +134,7 @@ module.exports = (appInfo) => {
    * 硬件加速
    */
   config.hardGpu = {
-    enable: false
+    enable: true
   };
 
   /**
@@ -184,13 +184,6 @@ module.exports = (appInfo) => {
       },
       force: false,
     },
-    javaServer: {
-      enable: true,
-      port: 18080,
-      jreVersion: 'jre1.8.0_201',
-      opt: '-server -Xms512M -Xmx512M -Xss512k -Dspring.profiles.active=prod -Dserver.port=${port} -Dlogging.file.path="${path}" ',
-      name: 'java-app.jar'
-    }
   };
 
   return {
