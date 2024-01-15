@@ -41,15 +41,7 @@ module.exports = (appInfo) => {
       directory: './go',
       args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
       appExit: true,
-    },
-    // java: {
-    //   enable: true,
-    //   name: 'goapp',
-    //   cmd: 'go',
-    //   directory: './go',
-    //   args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
-    //   appExit: true,
-    // }
+    }
   };   
 
   return {
