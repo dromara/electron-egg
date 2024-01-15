@@ -51,12 +51,6 @@ export default {
 			pageName: 'FrameworkSoftwareIndex',
 			params: {}
 		},		
-    'menu_108' : {
-			icon: 'profile',
-			title: 'java',
-			pageName: 'FrameworkJavaIndex',
-			params: {}
-		},
     'menu_109' : {
 			icon: 'profile',
 			title: '测试',
