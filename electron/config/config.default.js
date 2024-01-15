@@ -126,8 +126,8 @@ module.exports = (appInfo) => {
       enable: true,
       name: 'goapp',
       args: ['--port=7073'],
-      appExit: false,
-    }
+      appExit: true,
+    },
   };   
 
   /**
@@ -185,7 +185,7 @@ module.exports = (appInfo) => {
       force: false,
     },
     javaServer: {
-      enable: false,
+      enable: true,
       port: 18080,
       jreVersion: 'jre1.8.0_201',
       opt: '-server -Xms512M -Xmx512M -Xss512k -Dspring.profiles.active=prod -Dserver.port=${port} -Dlogging.file.path="${path}" ',

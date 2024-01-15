@@ -2,7 +2,7 @@
   <div id="app-other">
     <div class="one-block-1">
       <span>
-        请求java服务接口
+        请求java服务接口(废弃，请使用跨语言服务)
       </span>
     </div>  
     <div class="one-block-2">

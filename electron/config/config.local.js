@@ -33,13 +33,23 @@ module.exports = (appInfo) => {
   config.cross = {
     go: {
       // 应用运行时启动
-      enable: true,
+      enable: false,
+      // 程序名
       name: 'goapp',
+      // 可执行程序
       cmd: 'go',
       directory: './go',
       args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
       appExit: true,
-    }
+    },
+    // java: {
+    //   enable: true,
+    //   name: 'goapp',
+    //   cmd: 'go',
+    //   directory: './go',
+    //   args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
+    //   appExit: true,
+    // }
   };   
 
   return {

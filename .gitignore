@@ -11,6 +11,7 @@ pnpm-lock.yaml
 .yalc/
 yalc.lock
 go/public/
-build/extraResources/core.exe
 build/extraResources/goapp.exe
 go/go.sum
+build/extraResources/java-app.jar
+build/extraResources/jre1.8.0_201/

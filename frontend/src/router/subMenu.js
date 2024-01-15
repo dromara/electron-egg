@@ -51,12 +51,6 @@ export default {
 			pageName: 'FrameworkSoftwareIndex',
 			params: {}
 		},		
-    'menu_108' : {
-			icon: 'profile',
-			title: 'java',
-			pageName: 'FrameworkJavaIndex',
-			params: {}
-		},
     'menu_109' : {
 			icon: 'profile',
 			title: '测试',
@@ -142,6 +136,12 @@ export default {
       title: 'go服务',
       pageName: 'CrossGoIndex',
       params: {}
-    }                                               
+    },
+    'menu_110' : {
+      icon: 'profile',
+      title: 'java服务',
+      pageName: 'CrossJavaIndex',
+      params: {}
+    },                                             
   },
 }
