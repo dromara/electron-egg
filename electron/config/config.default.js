@@ -171,13 +171,6 @@ module.exports = (appInfo) => {
         url: 'http://kodo.qiniu.com/'
       },
       force: false,
-    },
-    javaServer: {
-      enable: false,
-      port: 18080,
-      jreVersion: 'jre1.8.0_201',
-      opt: '-server -Xms512M -Xmx512M -Xss512k -Dspring.profiles.active=prod -Dserver.port=${port} -Dlogging.file.path="${path}" ',
-      name: 'java-app.jar'
     }
   };
 
