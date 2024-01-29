@@ -174,7 +174,7 @@ module.exports = (appInfo) => {
       args: []
     },
     autoUpdater: {
-      enable: true,
+      enable: false,
       windows: false, 
       macOS: false, 
       linux: false,
