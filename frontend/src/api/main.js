@@ -59,7 +59,6 @@ const ipcApiRoute = {
   getCrossUrl: 'controller.cross.getUrl',
   killCrossServer: 'controller.cross.killServer',
   createCrossServer: 'controller.cross.createServer',
-  createJavaServer: 'controller.cross.createJavaServer',
   requestApi: 'controller.cross.requestApi',
 }
 
