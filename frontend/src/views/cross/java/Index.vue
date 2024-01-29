@@ -7,9 +7,9 @@
       </div>  
       <div class="one-block-2">
         <a-space>
+          <a-button @click="create()"> 启动 </a-button>
           <a-button @click="getUrl()"> 获取地址 </a-button>
           <a-button @click="kill()"> kill </a-button>
-          <a-button @click="create()"> 启动 </a-button>
           <a-button @click="info()"> 查看 </a-button>
         </a-space>
       </div>
@@ -69,7 +69,7 @@
         ipc.invoke(ipcApiRoute.killCrossServer, {type: 'all', name: 'javaapp'})
       },
       create() {
-        ipc.invoke(ipcApiRoute.createJavaServer)
+        ipc.invoke(ipcApiRoute.createCrossServer, { program: 'java' })
       },
       request(type) {
         if (type == 1 && this.serverUrl == "") {
