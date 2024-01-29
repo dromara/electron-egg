@@ -69,7 +69,7 @@
         ipc.invoke(ipcApiRoute.killCrossServer, {type: 'all', name: 'javaapp'})
       },
       create() {
-        ipc.invoke(ipcApiRoute.createJavaServer)
+        ipc.invoke(ipcApiRoute.createCrossServer, { program: 'java' })
       },
       request(type) {
         if (type == 1 && this.serverUrl == "") {

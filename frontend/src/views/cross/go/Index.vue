@@ -69,7 +69,7 @@
         ipc.invoke(ipcApiRoute.killCrossServer, {type: 'all', name: 'goapp'})
       },
       create() {
-        ipc.invoke(ipcApiRoute.createCrossServer)
+        ipc.invoke(ipcApiRoute.createCrossServer, { program: 'go' })
       },
       request(type) {
         if (type == 1 && this.serverUrl == "") {
