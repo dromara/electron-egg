@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "dayjs": "^1.10.7",
-    "ee-core": "^2.8.0",
+    "ee-core": "^2.8.1",
     "electron-updater": "^5.3.0",
     "lodash": "^4.17.21"
   }
