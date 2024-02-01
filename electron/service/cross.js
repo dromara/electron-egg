@@ -30,12 +30,15 @@ class CrossService extends Service {
     const serviceName = "go";
     const opt = {
       name: 'goapp',
-      appExit: false,
+      cmd: path.join(Ps.getExtraResourcesDir(), 'goapp'),
+      directory: Ps.getExtraResourcesDir(),
+      args: ['--port=7073'],
+      appExit: true,
     }
     const entity = await Cross.run(serviceName, opt);
     Log.info('server name:', entity.name);
     Log.info('server config:', entity.config);
-    Log.info('server url:', Cross.getUrl(entity.name));
+    Log.info('server url:', entity.getUrl());
 
     return;
   }
