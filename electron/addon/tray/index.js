@@ -62,6 +62,9 @@ class TrayAddon {
     this.tray.setToolTip(cfg.title);
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
     this.tray.setContextMenu(contextMenu);
+    this.tray.on('double-click', () => {
+      mainWindow.show()
+    })
   }
 }
 
