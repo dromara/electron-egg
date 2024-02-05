@@ -62,6 +62,10 @@ class TrayAddon {
     this.tray.setToolTip(cfg.title);
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
     this.tray.setContextMenu(contextMenu);
+    // 左键双击的时候能够显示主窗口
+    this.tray.on('double-click', () => {
+      mainWindow.show()
+    })
   }
 }
 

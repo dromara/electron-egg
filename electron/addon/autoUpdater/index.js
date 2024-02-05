@@ -4,6 +4,7 @@ const is = require('ee-core/utils/is');
 const Log = require('ee-core/log');
 const Conf = require('ee-core/config');
 const CoreWindow = require('ee-core/electron/window');
+const Electron = require('ee-core/electron');
 
 /**
  * 自动升级插件
@@ -102,6 +103,10 @@ class AutoUpdaterAddon {
       info.status = status.downloaded;
       info.desc = '下载完成';
       this.sendStatusToWindow(info);
+
+      // 托盘插件默认会阻止窗口关闭，这里设置允许关闭窗口
+      Electron.extra.closeWindow = true;
+      
       autoUpdater.quitAndInstall();
       // const mainWindow = CoreWindow.getMainWindow();
       // if (mainWindow) {
