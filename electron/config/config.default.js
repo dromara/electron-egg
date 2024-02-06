@@ -128,6 +128,12 @@ module.exports = (appInfo) => {
       args: ['--port=7073'],
       appExit: true,
     },
+    python: {
+      enable: false,
+      name: 'pyapp',
+      args: ['--port=7074'],
+      appExit: true,
+    },
   };   
 
   /**

@@ -42,6 +42,15 @@ module.exports = (appInfo) => {
       args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
       appExit: true,
     },
+    python: {
+      enable: true,
+      name: 'pyapp',
+      cmd: 'python',
+      directory: './python',
+      args: ['./main.py', '--port=7074'],
+      stdio: "ignore",
+      appExit: true,
+    },
   };   
 
   return {

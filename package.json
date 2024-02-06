@@ -8,6 +8,7 @@
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
     "dev-go": "ee-bin dev --serve=go",
+    "dev-py": "ee-bin exec --cmds=py",
     "build-frontend": "ee-bin build --cmds=frontend && ee-bin move --flag=frontend_dist",
     "build-go-w": "ee-bin build --cmds=go_build_w",
     "build-go-m": "ee-bin build --cmds=go_build_m",

@@ -1,7 +1,13 @@
+import argparse
 import uvicorn
 from fastapi import FastAPI
 
 app = FastAPI()
+
+# argparse
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--port', type=int, default=7074, help='The port number.')
+args = parser.parse_args()
 
 @app.get("/")
 async def index():
@@ -24,4 +30,4 @@ async def info():
     }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=args.port)
