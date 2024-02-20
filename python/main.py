@@ -1,4 +1,8 @@
 import argparse
+import asyncio
+from hypercorn.config import Config
+from hypercorn.asyncio import serve
+
 import uvicorn
 from fastapi import FastAPI
 
@@ -31,3 +35,12 @@ async def info():
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=args.port)
+    # Handler = http.server.SimpleHTTPRequestHandler
+    # with socketserver.TCPServer(("127.0.0.1", args.port), Handler) as httpd:
+    #     print("Serving at port", args.port)
+    #     httpd.serve_forever()
+    # config = Config()
+    # config.bind = ["127.0.0.1:" + str(args.port)]  # As an example configuration setting
+    # asyncio.run(serve(app, config))
+
+print("Serving at port", args.port)
