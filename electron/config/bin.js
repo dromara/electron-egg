@@ -125,7 +125,7 @@ module.exports = {
       cmd: 'npm',
       args: ['-v'],
     },
-    py: {
+    python: {
       directory: './python',
       cmd: 'python',
       args: ['./main.py', '--port=7074'],
