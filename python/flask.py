@@ -15,7 +15,7 @@ def index():
     return jsonify({'message': f'Hello, {name}!'}), 200
 
 
-@app.route('/hello', methods=['GET'])
+@app.route('/api/hello', methods=['GET'])
 def hello():
     name = request.args.get('name', 'World')
     return jsonify({'message': f'Hello, {name}!'}), 200

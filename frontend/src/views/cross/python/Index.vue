@@ -81,19 +81,19 @@
           const cfg = {
             method: 'get',
             url: testApi,
-            params: { id: '1111111'},
+            params: { id: '111'},
             timeout: 1000,
           }
           axios(cfg).then(res => {
             console.log('res:', res);
-            const data = res.data.data || null;
-            this.$message.info(`服务返回: ${data}`);
+            const data = res.data || null;
+            this.$message.info(`服务返回: ${JSON.stringify(data)}`);
           })
         } else {
           ipc.invoke(ipcApiRoute.requestApi, {name: 'pyapp', urlPath: '/api/hello'}).then(res => {
             console.log('res:', res);
-            const data = res.data || null;
-            this.$message.info(`服务返回: ${data}`);
+            const data = res || null;
+            this.$message.info(`服务返回: ${JSON.stringify(data)}`);
           }) 
         }
       }    

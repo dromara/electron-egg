@@ -13,7 +13,7 @@ args = parser.parse_args()
 async def index():
     return {"message": "Hello World"}
 
-@app.get("/hello")
+@app.get("/api/hello")
 async def hello():
     return {
         "app_name": "FastAPI框架学习",
