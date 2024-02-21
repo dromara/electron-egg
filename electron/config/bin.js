@@ -35,21 +35,26 @@ module.exports = {
       cmd: 'npm',
       args: ['run', 'build'],
     },
-    go_build_w: {
+    go_w: {
       directory: './go',
       cmd: 'go',
       args: ['build', '-o=../build/extraResources/goapp.exe'],
     },
-    go_build_m: {
+    go_m: {
       directory: './go',
       cmd: 'go',
       args: ['build', '-o=../build/extraResources/goapp'],
     },
-    go_build_l: {
+    go_l: {
       directory: './go',
       cmd: 'go',
       args: ['build', '-o=../build/extraResources/goapp'],
-    }
+    },
+    python_w: {
+      directory: './python',
+      cmd: 'pyinstaller',
+      args: ['-n=pyapp', '-F', './main.py'],
+    },
   },
 
   /**
@@ -76,7 +81,11 @@ module.exports = {
     go_images: {
       dist: './public/images',
       target: './go/public/images'
-    }
+    },
+    python_dist: {
+      dist: './python/dist',
+      target: './build/extraResources/py'
+    },
   },  
 
   /**
@@ -129,7 +138,6 @@ module.exports = {
       directory: './python',
       cmd: 'python',
       args: ['./main.py', '--port=7074'],
-      stdio: 'ignore',
     },
   },  
 };

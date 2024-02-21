@@ -11,19 +11,10 @@ args = parser.parse_args()
 
 @app.get("/")
 async def index():
-    """
-    注册一个根路径
-    :return:
-    """
     return {"message": "Hello World"}
 
-
-@app.get("/info")
-async def info():
-    """
-    项目信息
-    :return:
-    """
+@app.get("/hello")
+async def hello():
     return {
         "app_name": "FastAPI框架学习",
         "app_version": "v0.0.1"
@@ -33,4 +24,4 @@ if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=args.port)
 
 # 控制台默认关闭输出信息，如果想要查看控制台输出，请单独启动服务 npm run dev-python
-print("Serving at port", args.port)
+print("python server is running at port:", args.port)
