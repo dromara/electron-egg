@@ -67,6 +67,8 @@ class CrossController extends Controller {
       Services.get('cross').createGoServer();
     } else if (program == 'java') {
       Services.get('cross').createJavaServer();
+    } else if (program == 'python') {
+      Services.get('cross').createPythonServer();
     }
 
     return;

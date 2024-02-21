@@ -171,7 +171,12 @@ const constantRouterMap = [
             path: '/cross/java/index',
             name: 'CrossJavaIndex',
             component: () => import('@/views/cross/java/Index.vue')
-          }
+          },
+          {
+            path: '/cross/python/index',
+            name: 'CrossPythonIndex',
+            component: () => import('@/views/cross/python/Index.vue')
+          },
         ]  
       },
     ]

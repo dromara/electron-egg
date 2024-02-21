@@ -43,7 +43,7 @@ module.exports = (appInfo) => {
       appExit: true,
     },
     python: {
-      enable: true,
+      enable: false,
       name: 'pyapp',
       cmd: 'python',
       directory: './python',

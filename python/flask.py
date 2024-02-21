@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify
 import argparse
 
-print("__name__: ", __name__)
-
 # argparse
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--port', type=int, default=7074, help='The port number.')
