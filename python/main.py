@@ -21,6 +21,7 @@ async def hello():
     }
 
 if __name__ == "__main__":
+    # uvicorn会多创建一个进程，并且stdio独立于控制台，如果（开发时）出现进程没有关闭，可尝试关闭终端
     uvicorn.run(app, host="127.0.0.1", port=args.port)
 
 # 控制台默认关闭输出信息，如果想要查看控制台输出，请单独启动服务 npm run dev-python
