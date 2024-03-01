@@ -55,6 +55,11 @@ module.exports = {
       cmd: 'pyinstaller',
       args: ['-n=pyapp', '-F', './main.py'],
     },
+    python_m: {
+      directory: './python',
+      cmd: 'pyinstaller',
+      args: ['-n=pyapp', '-F', './main.py'],
+    },
   },
 
   /**
