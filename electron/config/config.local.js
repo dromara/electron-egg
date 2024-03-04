@@ -43,12 +43,12 @@ module.exports = (appInfo) => {
       appExit: true,
     },
     python: {
-      enable: false,
+      enable: true,
       name: 'pyapp',
       cmd: 'python',
       directory: './python',
       args: ['./main.py', '--port=7074'],
-      stdio: "ignore",
+      stdio: "ignore", // ignore、inherit
       appExit: true,
     },
   };   
