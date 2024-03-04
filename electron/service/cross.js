@@ -30,12 +30,15 @@ class CrossService extends Service {
     const serviceName = "go";
     const opt = {
       name: 'goapp',
-      appExit: false,
+      cmd: path.join(Ps.getExtraResourcesDir(), 'goapp'),
+      directory: Ps.getExtraResourcesDir(),
+      args: ['--port=7073'],
+      appExit: true,
     }
     const entity = await Cross.run(serviceName, opt);
     Log.info('server name:', entity.name);
     Log.info('server config:', entity.config);
-    Log.info('server url:', Cross.getUrl(entity.name));
+    Log.info('server url:', entity.getUrl());
 
     return;
   }
@@ -65,6 +68,33 @@ class CrossService extends Service {
     Log.info('server name:', entity.name);
     Log.info('server config:', entity.config);
     Log.info('server url:', Cross.getUrl(entity.name));
+
+    return;
+  }  
+
+  /**
+   * create python service
+   * In the default configuration, services can be started with applications. 
+   * Developers can turn off the configuration and create it manually.
+   */   
+  async createPythonServer() {
+    // method 1: Use the default Settings
+    //const entity = await Cross.run(serviceName);
+
+    // method 2: Use custom configuration
+    const serviceName = "python";
+    const opt = {
+      name: 'pyapp',
+      cmd: path.join(Ps.getExtraResourcesDir(), 'py', 'pyapp'),
+      directory: path.join(Ps.getExtraResourcesDir(), 'py'),
+      args: ['--port=7074'],
+      windowsExtname: true,
+      appExit: true,
+    }
+    const entity = await Cross.run(serviceName, opt);
+    Log.info('server name:', entity.name);
+    Log.info('server config:', entity.config);
+    Log.info('server url:', entity.getUrl());
 
     return;
   }  

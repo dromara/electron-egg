@@ -119,13 +119,21 @@ module.exports = (appInfo) => {
   /**
    * Cross-language service
    * 跨语言服务
-   * 例如：执行go的二进制程序
+   * 例如：执行go的二进制程序，默认目录为 ./extraResources/
    */
   config.cross = {
     go: {
       enable: false,
       name: 'goapp',
       args: ['--port=7073'],
+      appExit: true,
+    },
+    python: {
+      enable: false,
+      name: 'pyapp',
+      cmd: './py/pyapp',
+      directory: './py',
+      args: ['--port=7074'],
       appExit: true,
     },
   };   
