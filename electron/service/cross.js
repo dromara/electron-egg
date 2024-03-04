@@ -97,7 +97,7 @@ class CrossService extends Service {
     Log.info('server url:', entity.getUrl());
 
     return;
-  }  
+  }
 }
 
 CrossService.toString = () => '[class CrossService]';

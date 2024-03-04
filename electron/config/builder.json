@@ -12,6 +12,7 @@
     "!run/",
     "!logs/",
     "!go/",
+    "!python/",
     "!data/"
   ],
   "extraResources": {
