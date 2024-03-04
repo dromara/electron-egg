@@ -23,6 +23,7 @@ def hello():
     return jsonify({'message': f'Hello, {name}!'}), 200
 
 if __name__ == '__main__':
+    # 以api方式启动服务会出现警告，请忽略
     app.run(port=args.port)
 
 # 控制台默认关闭输出信息，如果想要查看控制台输出，请单独启动服务 npm run dev-python
