@@ -49,17 +49,7 @@ module.exports = {
       directory: './go',
       cmd: 'go',
       args: ['build', '-o=../build/extraResources/goapp'],
-    },
-    python_w: {
-      directory: './python',
-      cmd: 'pyinstaller',
-      args: ['-n=pyapp', '-F', './main.py'],
-    },
-    python_m: {
-      directory: './python',
-      cmd: 'pyinstaller',
-      args: ['-n=pyapp', '-F', './main.py'],
-    },
+    }
   },
 
   /**
@@ -86,10 +76,6 @@ module.exports = {
     go_images: {
       dist: './public/images',
       target: './go/public/images'
-    },
-    python_dist: {
-      dist: './python/dist',
-      target: './build/extraResources/py'
     },
   },  
 
@@ -138,12 +124,6 @@ module.exports = {
       directory: './',
       cmd: 'npm',
       args: ['-v'],
-    },
-    python: {
-      directory: './python',
-      cmd: 'python',
-      args: ['./main.py', '--port=7074'],
-      stdio: "inherit", // ignore
-    },
+    }
   },  
 };
