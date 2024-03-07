@@ -114,15 +114,13 @@ module.exports = (appInfo) => {
   config.mainServer = {
     protocol: 'file://',
     indexPath: '/public/dist/index.html',
-    host: '127.0.0.1',
-    port: 7072,
   }; 
 
   /**
    * 硬件加速
    */
   config.hardGpu = {
-    enable: false
+    enable: true
   };
 
   /**

@@ -21,6 +21,7 @@ module.exports = {
       directory: './',
       cmd: 'electron',
       args: ['.', '--env=local'],
+      loadingPage: '/public/html/loading.html',
     }
   },
 
