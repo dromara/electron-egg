@@ -127,7 +127,15 @@ module.exports = (appInfo) => {
       name: 'goapp',
       args: ['--port=7073'],
       appExit: true,
-    }
+    },
+    python: {
+      enable: false,
+      name: 'pyapp',
+      cmd: './py/pyapp',
+      directory: './py',
+      args: ['--port=7074'],
+      appExit: true,
+    },
   };   
 
   /**
