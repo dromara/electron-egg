@@ -52,8 +52,8 @@ module.exports = {
     },
     python_w: {
       directory: './python',
-      cmd: 'pyinstaller',
-      args: ['-n=pyapp', '-F', './main.py'],
+      cmd: 'python',
+      args: ['./setup.py', 'build'],
     },
     python_m: {
       directory: './python',
