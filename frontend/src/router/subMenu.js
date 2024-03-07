@@ -142,6 +142,12 @@ export default {
       title: 'java服务',
       pageName: 'CrossJavaIndex',
       params: {}
-    },                                             
+    },
+	'menu_120' : {
+		icon: 'profile',
+		title: 'python服务',
+		pageName: 'CrossPythonIndex',
+		params: {}
+	  },                                            
   },
 }

@@ -15,7 +15,7 @@ module.exports = {
       protocol: 'http://',
       hostname: 'localhost',
       port: 8080,
-      indexPath: 'index.html'
+      indexPath: 'index.html',
     },
     electron: {
       directory: './',
@@ -35,21 +35,26 @@ module.exports = {
       cmd: 'npm',
       args: ['run', 'build'],
     },
-    go_build_w: {
+    go_w: {
       directory: './go',
       cmd: 'go',
       args: ['build', '-o=../build/extraResources/goapp.exe'],
     },
-    go_build_m: {
+    go_m: {
       directory: './go',
       cmd: 'go',
       args: ['build', '-o=../build/extraResources/goapp'],
     },
-    go_build_l: {
+    go_l: {
       directory: './go',
       cmd: 'go',
       args: ['build', '-o=../build/extraResources/goapp'],
-    }
+    },
+    python: {
+      directory: './python',
+      cmd: 'python',
+      args: ['./setup.py', 'build'],
+    },
   },
 
   /**
@@ -76,7 +81,11 @@ module.exports = {
     go_images: {
       dist: './public/images',
       target: './go/public/images'
-    }
+    },
+    python_dist: {
+      dist: './python/dist',
+      target: './build/extraResources/py'
+    },
   },  
 
   /**
@@ -124,6 +133,12 @@ module.exports = {
       directory: './',
       cmd: 'npm',
       args: ['-v'],
+    },
+    python: {
+      directory: './python',
+      cmd: 'python',
+      args: ['./main.py', '--port=7074'],
+      stdio: "inherit", // ignore
     },
   },  
 };
