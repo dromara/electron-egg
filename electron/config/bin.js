@@ -50,15 +50,10 @@ module.exports = {
       cmd: 'go',
       args: ['build', '-o=../build/extraResources/goapp'],
     },
-    python_w: {
+    python: {
       directory: './python',
       cmd: 'python',
       args: ['./setup.py', 'build'],
-    },
-    python_m: {
-      directory: './python',
-      cmd: 'pyinstaller',
-      args: ['-n=pyapp', '-F', './main.py'],
     },
   },
 
