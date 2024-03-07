@@ -49,7 +49,7 @@ module.exports = (appInfo) => {
       cmd: 'python',
       directory: './python',
       args: ['./main.py', '--port=7074'],
-      stdio: "inherit",
+      stdio: "ignore",
       appExit: true,
     },
   };   
