@@ -17,7 +17,15 @@
 <!-- ## 🌏 [English](https://www.yuque.com/u34495/ee-doc) | [中文](https://www.kaka996.com/) -->
 
 ## 📋 介绍
-#### 框架已经广泛应用于记账、政务、企业、医疗、学校、股票交易、ERP、娱乐、视频等领域客户端，请放心使用！
+
+> 框架已经广泛应用于记账、政务、企业、医疗、学校、股票交易、ERP、娱乐、视频等领域客户端，请放心使用！
+
+## 👦 谁可以使用
+
+项目已经有 5 个交流群，覆盖`前端`、`java`、`go`、`python`、`php` 等开发者。
+
+如果你有桌面软件需求，尝试一下吧，入门非常简单。
+
 
 - 🍩 **为什么使用？** 桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
 - 🍉 **简单：** 只需懂 JavaScript
@@ -47,10 +55,10 @@
 ### 1. 🚀 常规桌面软件
 - 🚖 windows平台
 
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/home.png)
+    ![](https://wallace5303.gitee.io/ee/images/ee-v3/ee-win-home.png)
 
 - 🚍 macOS平台    
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/mac-socket.png)
+    ![](https://wallace5303.gitee.io/ee/images/ee-v3/ee-mac-home.png)
 
 - 🚔 linux平台 - 国产UOS、Deepin
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/uos-home.png)
