@@ -15,15 +15,8 @@
 
 export default {
   data() {
-    return {
-      test: '',
-    };
+    return {};
   },
-  methods: {
-    test () {
-      // 
-    },
-  }
 };
 </script>
 <style scoped>
