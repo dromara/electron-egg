@@ -20,7 +20,7 @@ module.exports = {
     electron: {
       directory: './',
       cmd: 'electron',
-      args: ['.', '--env=local'],
+      args: ['.', '--env=local', '--color=always'],
     }
   },
 
