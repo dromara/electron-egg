@@ -89,6 +89,10 @@
 ## 🐶 项目案例
 - 🐟 框架已经应用于医疗、学校、政务、股票交易、ERP、娱乐、视频、企业等领域客户端
 
+- 🐸 远控
+    ![](https://wallace5303.gitee.io/ee/images/ee-v3/rq/rq-1.png)
+    ![](https://wallace5303.gitee.io/ee/images/ee-v3/rq/rq-2.png)
+
 - 🐸 壁纸
     ![](https://wallace5303.gitee.io/ee/images/electron-egg/aw/aw-3.png)
 
