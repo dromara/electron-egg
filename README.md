@@ -94,27 +94,32 @@
 
 ### 🐸 远控
 
+- RQ Center
 ![](https://wallace5303.gitee.io/ee/images/ee-v3/rq/rq-1.png)
 ![](https://wallace5303.gitee.io/ee/images/ee-v3/rq/rq-2.png)
 
 ### 🐸 云盘
 
+- FM Cloud
 ![](https://wallace5303.gitee.io/ee/images/ee-v3/fm/fm-p2.png)
 ![](https://wallace5303.gitee.io/ee/images/ee-v3/fm/fm-p1.png)
 ![](https://wallace5303.gitee.io/ee/images/ee-v3/fm/fm-p4.png)
 
 ### 🐸 IM
 
+- Cede IM
 ![](https://wallace5303.gitee.io/ee/images/ee-v3/im1/im-p1.png)
 ![](https://wallace5303.gitee.io/ee/images/ee-v3/im1/im-p5.png)
 ![](https://wallace5303.gitee.io/ee/images/ee-v3/im2/im-p1.png)
 
 ### 🐸 壁纸
 
+- warpar
 ![](https://wallace5303.gitee.io/ee/images/electron-egg/aw/aw-3.png)
 
 ### 🐸 英雄联盟助手
 
+- Serendlplty
 ![](https://wallace5303.gitee.io/ee/images/electron-egg/serendipity/lol-zhanji.png)
 
 ### 🐸 更多
