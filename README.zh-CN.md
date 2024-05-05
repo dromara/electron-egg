@@ -6,7 +6,7 @@
 <br>
 
 <div align=center>
-<img src="https://img01.kaka996.com/ee/images/electron-egg/logo.png" width="150" height="150" />
+<img src="./public/images/example/logo.png" width="150" height="150" />
 </div>
 
 <div align=center>
@@ -37,11 +37,11 @@
 - 🍰 **gitee：** https://gitee.com/dromara/electron-egg **4600+**
 - 🍨 **github：** https://github.com/dromara/electron-egg **1500+**
 - 🏆 码云最有价值开源项目
-    ![](https://img01.kaka996.com/ee/images/electron-egg/ee-zs.png)    
+    ![](./public/images/example/ee-zs.png)    
 
 ## 📚 文档
 - 快速体验：[教程文档](https://www.kaka996.com/)
-    ![](https://img01.kaka996.com/ee/images/electron-egg/v3-home.png) 
+    ![](./public/images/example/v3-home.png) 
 
 ## 📦 特性
 1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版、国产UOS、Deepin、麒麟等
@@ -59,30 +59,30 @@
 ### 1. 🚀 常规桌面软件
 - 🚖 windows平台
 
-    ![](https://img01.kaka996.com/ee/images/ee-v3/ee-win-home.png)
+    ![](./public/images/example/ee-win-home.png)
 
 - 🚍 macOS平台    
-    ![](https://img01.kaka996.com/ee/images/ee-v3/ee-mac-home.png)
+    ![](./public/images/example/ee-mac-home.png)
 
 - 🚔 linux平台 - 国产UOS、Deepin
-    ![](https://img01.kaka996.com/ee/images/electron-egg/uos-home.png)
+    ![](./public/images/example/uos-home.png)
 
 - 🚔 linux平台 - ubuntu
-    ![](https://img01.kaka996.com/ee/images/electron-egg/ubuntu-db.png)
+    ![](./public/images/example/ubuntu-db.png)
 
 ### 🚐 2. vue、react、angular、web 转换成桌面软件
 - 🚙 vue-ant-design（本地）
 
-    ![](https://img01.kaka996.com/ee/images/electron-egg/vue-antd.png)
+    ![](./public/images/example/vue-antd.png)
 
 - 🚙 禅道项目管理（web项目地址）
 
-    ![](https://img01.kaka996.com/ee/images/electron-egg/ee-project-7.png)
+    ![](./public/images/example/ee-project-7.png)
 
 ### 🚂 3. 游戏（h5相关技术开发）
 - 🚊 忍者100层
 
-    ![](https://img01.kaka996.com/ee/images/electron-egg/ee_game_1.png)
+    ![](./public/images/example/ee_game_1.png)
 
 
 ## 📒 开始使用
@@ -95,32 +95,32 @@
 ### 🐸 远控
 
 - RQ Center
-![](https://img01.kaka996.com/ee/images/ee-v3/rq/rq-1.png)
-![](https://img01.kaka996.com/ee/images/ee-v3/rq/rq-2.png)
+![](./public/images/example/rq-1.png)
+![](./public/images/example/rq-2.png)
 
 ### 🐸 云盘
 
 - FM Cloud
-![](https://img01.kaka996.com/ee/images/ee-v3/fm/fm-p2.png)
-![](https://img01.kaka996.com/ee/images/ee-v3/fm/fm-p1.png)
-![](https://img01.kaka996.com/ee/images/ee-v3/fm/fm-p4.png)
+![](./public/images/example/fm-p2.png)
+![](./public/images/example/fm-p1.png)
+![](./public/images/example/fm-p4.png)
 
 ### 🐸 IM
 
 - Cede IM
-![](https://img01.kaka996.com/ee/images/ee-v3/im1/im-p1.png)
-![](https://img01.kaka996.com/ee/images/ee-v3/im1/im-p5.png)
-![](https://img01.kaka996.com/ee/images/ee-v3/im2/im-p1.png)
+![](./public/images/example/im-p1.png)
+![](./public/images/example/im-p5.png)
+![](./public/images/example/im-p1.png)
 
 ### 🐸 壁纸
 
 - warpar
-![](https://img01.kaka996.com/ee/images/electron-egg/aw/aw-3.png)
+![](./public/images/example/aw-3.png)
 
 ### 🐸 英雄联盟助手
 
 - Serendlplty
-![](https://img01.kaka996.com/ee/images/electron-egg/serendipity/lol-zhanji.png)
+![](./public/images/example/lol-zhanji.png)
 
 ### 🐸 更多
 
