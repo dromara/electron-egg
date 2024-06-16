@@ -5,6 +5,7 @@
  */
 const ipcApiRoute = {
   test: 'controller.example.test',
+  requestApi: 'controller.cross.requestApi',
 }
 
 export {

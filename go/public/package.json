@@ -63,7 +63,6 @@
     "dayjs": "^1.10.7",
     "ee-core": "^2.9.2",
     "electron-updater": "^5.3.0",
-    "element-ui": "^2.15.14",
     "lodash": "^4.17.21"
   }
 }

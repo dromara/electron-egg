@@ -1,7 +1,7 @@
 {
-  "productName": "ee",
-  "appId": "com.electron.ee",
-  "copyright": "© 2023 哆啦好梦 Technology Co., Ltd.",
+  "productName": "agi7",
+  "appId": "com.agi7,ai",
+  "copyright": "© 2024 AGI7 Technology Co., Ltd.",
   "directories": {
     "output": "out"
   },
@@ -11,6 +11,7 @@
     "!frontend/",
     "!run/",
     "!logs/",
+    "!go/",
     "!data/"
   ],
   "extraResources": {
@@ -26,7 +27,7 @@
     "installerHeaderIcon": "build/icons/icon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "EE框架"
+    "shortcutName": "AGI7"
   },
   "mac": {
     "icon": "build/icons/icon.icns",

@@ -23,7 +23,7 @@ module.exports = (appInfo) => {
    * 主窗口
    */
   config.windowsOption = {
-    title: 'EE框架',
+    title: 'AGI7',
     width: 980,
     height: 650,
     minWidth: 400,
@@ -59,7 +59,7 @@ module.exports = (appInfo) => {
    */    
   config.remoteUrl = {
     enable: false,
-    url: 'http://electron-egg.kaka996.com/'
+    url: ''
   };
 
   /**
@@ -86,8 +86,6 @@ module.exports = (appInfo) => {
     enable: false,
     https: {
       enable: false, 
-      key: '/public/ssl/localhost+1.key',
-      cert: '/public/ssl/localhost+1.pem'
     },
     host: '127.0.0.1',
     port: 7071,
@@ -115,6 +113,20 @@ module.exports = (appInfo) => {
     protocol: 'file://',
     indexPath: '/public/dist/index.html',
   }; 
+
+    /**
+   * Cross-language service
+   * 跨语言服务
+   * 例如：执行go的二进制程序，默认目录为 ./extraResources/
+   */
+  config.cross = {
+    go: {
+      enable: true,
+      name: 'goapp',
+      args: ['--port=7075'],
+      appExit: true,
+    }
+  };   
 
   /**
    * 硬件加速
@@ -148,7 +160,7 @@ module.exports = (appInfo) => {
     },
     tray: {
       enable: true,
-      title: 'EE程序',
+      title: 'AGI7',
       icon: '/public/images/tray.png'
     },
     security: {
@@ -160,7 +172,7 @@ module.exports = (appInfo) => {
       args: []
     },
     autoUpdater: {
-      enable: true,
+      enable: false,
       windows: false, 
       macOS: false, 
       linux: false,

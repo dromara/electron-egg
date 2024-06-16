@@ -12,7 +12,7 @@ const constantRouterMap = [
       {
         path: '/example',
         name: 'ExampleHelloIndex',
-        component: () => import('@/views/example/hello/Index.vue')
+        component: () => import('@/views/Index.vue')
       },
     ]
   },

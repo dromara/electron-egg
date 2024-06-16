@@ -33,6 +33,21 @@ module.exports = {
       directory: './frontend',
       cmd: 'npm',
       args: ['run', 'build'],
+    },
+    go_w: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o=../build/extraResources/goapp.exe'],
+    },
+    go_m: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o=../build/extraResources/goapp'],
+    },
+    go_l: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o=../build/extraResources/goapp'],
     }
   },
 
@@ -44,6 +59,22 @@ module.exports = {
     frontend_dist: {
       dist: './frontend/dist',
       target: './public/dist'
+    },
+    go_static: {
+      dist: './frontend/dist',
+      target: './go/public/dist'
+    },
+    go_config: {
+      dist: './go/config',
+      target: './go/public/config'
+    },
+    go_package: {
+      dist: './package.json',
+      target: './go/public/package.json'
+    },
+    go_images: {
+      dist: './public/images',
+      target: './go/public/images'
     }
   },  
 
