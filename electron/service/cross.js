@@ -58,7 +58,7 @@ class CrossService extends Service {
     }
     if (Is.macOS()) {
       // Setup Java program
-      opt.cmd = path.join(Ps.getExtraResourcesDir(), 'jre1.8.0_201/Contents/Home/bin/java');
+      opt.cmd = path.join(Ps.getExtraResourcesDir(), 'jre1.8.0_201.jre/Contents/Home/bin/java');
     }
     if (Is.linux()) {
       // Setup Java program
