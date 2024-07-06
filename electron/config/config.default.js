@@ -76,7 +76,8 @@ module.exports = (appInfo) => {
     transports: ["polling", "websocket"],
     cors: {
       origin: true,
-    }
+    },
+    channel: 'c1'
   };
 
   /**
