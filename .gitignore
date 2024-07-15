@@ -18,3 +18,4 @@ python/.venv/
 python/*.spec
 python/build/
 python/dist/
+*DS_Store
