@@ -134,6 +134,18 @@ module.exports = {
       cmd: 'npm',
       args: ['-v'],
     },
+    // 单独调试，air 实现 go 热重载
+    go: {
+      directory: './go',
+      cmd: 'air',
+      args: ['-c=config/.air.toml' ],
+    },
+    // 单独调试，以基础方式启动 go
+    go2: {
+      directory: './go',
+      cmd: 'go',
+      args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
+    },    
     python: {
       directory: './python',
       cmd: 'python',

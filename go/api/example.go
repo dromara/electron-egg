@@ -9,6 +9,8 @@ import (
 	"github.com/wallace5303/ee-go/elog"
 
 	"github.com/gin-gonic/gin"
+
+	"electron-egg/demo/sql/sqlitelib"
 )
 
 // 使用 router Ctx
@@ -33,4 +35,33 @@ func Exit(c *router.Ctx) {
 	defer c.JSON(ret)
 
 	eapp.Close()
+}
+
+func SetValue(c *router.Ctx) {
+	ret := ehelper.GetJson()
+	defer c.JSON(ret)
+
+	arg, ok := c.ArgJson()
+	if !ok {
+		return
+	}
+
+	keyName := arg["key"].(string)
+	vallue := arg["value"]
+
+	sqlitelib.SetStatData(keyName, vallue)
+}
+
+func GetValue(c *router.Ctx) {
+	ret := ehelper.GetJson()
+	defer c.JSON(ret)
+
+	arg, ok := c.ArgJson()
+	if !ok {
+		return
+	}
+
+	keyName := arg["key"].(string)
+
+	ret.Data = sqlitelib.GetStat(keyName)
 }
