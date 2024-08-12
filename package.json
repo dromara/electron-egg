@@ -1,13 +1,13 @@
 {
   "name": "ee",
-  "version": "3.11.0",
+  "version": "3.13.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
   "scripts": {
     "dev": "ee-bin dev",
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
-    "dev-go": "ee-bin dev --serve=go",
+    "dev-go": "ee-bin exec --cmds=go",
     "dev-python": "ee-bin exec --cmds=python",
     "build-frontend": "ee-bin build --cmds=frontend && ee-bin move --flag=frontend_dist",
     "build-go-w": "ee-bin move --flag=go_static,go_config,go_package,go_images && ee-bin build --cmds=go_w",

@@ -5,6 +5,7 @@ import (
 
 	"github.com/wallace5303/ee-go/eboot"
 
+	"electron-egg/demo"
 	"electron-egg/router"
 )
 
@@ -19,6 +20,9 @@ func main() {
 
 	// User business logic
 	router.Api()
+
+	// demo
+	demo.Index()
 
 	// ee-go runtime
 	ego.Run()
