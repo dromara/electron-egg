@@ -140,6 +140,12 @@ module.exports = {
       cmd: 'air',
       args: ['-c=config/.air.toml' ],
     },
+    // windows 单独调试，air 实现 go 热重载 
+    go_w: {
+      directory: './go',
+      cmd: 'air',
+      args: ['-c=config/.air.windows.toml' ],
+    },    
     // 单独调试，以基础方式启动 go
     go2: {
       directory: './go',
