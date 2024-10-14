@@ -10,10 +10,6 @@ const Log = require('ee-core/log');
  */
 class ExampleService extends Service {
 
-  constructor(ctx) {
-    super(ctx);
-  }
-
   /**
    * test
    */
@@ -25,7 +21,7 @@ class ExampleService extends Service {
 
     Log.info('ExampleService obj:', obj);
 
-    Services.get('framework').test('egg');
+    //Services.get('framework').test('egg');
 
     return obj;
   }
