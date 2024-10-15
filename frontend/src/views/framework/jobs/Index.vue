@@ -9,12 +9,16 @@
       <a-space>
         <a-button @click="runJob(1, 'create')">执行任务1</a-button>
         进度：{{ progress1 }} ， 进程pid：{{ progress1_pid }}
+        <a-button @click="runJob(1, 'pause')">暂停</a-button>
+        <a-button @click="runJob(1, 'resume')">恢复</a-button>
         <a-button @click="runJob(1, 'close')">关闭</a-button>
       </a-space>
       <p></p>
       <a-space>
         <a-button @click="runJob(2, 'create')">执行任务2</a-button>
         进度：{{ progress2 }} ， 进程pid：{{ progress2_pid }}
+        <a-button @click="runJob(2, 'pause')">暂停</a-button>
+        <a-button @click="runJob(2, 'resume')">恢复</a-button>
         <a-button @click="runJob(2, 'close')">关闭</a-button>
       </a-space>            
     </div>
@@ -125,7 +129,7 @@ export default {
         action: operation
       }
       ipc.invoke(ipcApiRoute.someJob, params).then(data => {
-        if (operation == 'close') return;
+        if (operation != 'create') return;
         switch (data.jobId) {
           case 1:
             this.progress1_pid = data.result.pid;

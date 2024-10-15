@@ -264,6 +264,7 @@ class FrameworkController extends Controller {
   }
 
   /**
+   * 废弃，请使用 cross 模块
    * 启动java项目
    */ 
   async startJavaServer() {
@@ -287,6 +288,7 @@ class FrameworkController extends Controller {
   }
 
   /**
+   * 废弃，请使用 cross 模块
    * 关闭java项目
    */ 
   async closeJavaServer() {
@@ -307,6 +309,7 @@ class FrameworkController extends Controller {
   }
 
   /**
+   * 废弃，请使用 cross 模块
    * java运行状态
    */ 
   async runStatus() {
@@ -337,6 +340,12 @@ class FrameworkController extends Controller {
       case 'close':
         Services.get('framework').doJob(jobId, action, event);
         break;
+      case 'pause':
+        Services.get('framework').doJob(jobId, action, event);
+        break;  
+      case 'resume':
+        Services.get('framework').doJob(jobId, action, event);
+        break;   
       default:  
     }
     

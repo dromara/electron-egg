@@ -92,10 +92,20 @@ class FrameworkService extends Service {
       oneTask = this.taskForJob[jobId];
       oneTask.kill();
       event.sender.send(`${channel}`, {jobId, number:0, pid:0});
-    }    
+    }
+    if (action == 'pause') {
+      oneTask = this.taskForJob[jobId];
+      oneTask.callFunc('./jobs/example/timer', 'pause', jobId);
+    }
+    if (action == 'resume') {
+      oneTask = this.taskForJob[jobId];
+      oneTask.callFunc('./jobs/example/timer', 'resume', jobId, oneTask.pid);
+    }
 
     return res;
   }
+
+
 
   /**
    * 创建pool
@@ -139,7 +149,7 @@ class FrameworkService extends Service {
   }
 
   /**
-   * test 
+   * 获取正在运行的 job 进程 
    */ 
   monitorJob() {
     setInterval(() => {

@@ -9,10 +9,6 @@ const Log = require('ee-core/log');
  */
 class EffectService extends Service {
 
-  constructor(ctx) {
-    super(ctx);
-  }
-
   /**
    * hello
    */

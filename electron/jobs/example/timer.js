@@ -3,8 +3,8 @@ const Loader = require('ee-core/loader');
 const Log = require('ee-core/log');
 const Ps = require('ee-core/ps');
 const { childMessage } = require('ee-core/message');
-const Hello = Loader.requireJobsModule('./example/hello');
-const EffectService = require('../../service/effect');
+const Hello = Loader.requireModule('./jobs/example/hello');
+const EffectService = Loader.requireModule('./service/effect');
 
 /**
  * example - TimerJob
@@ -15,6 +15,10 @@ class TimerJob extends Job {
   constructor(params) {
     super();
     this.params = params;
+    this.timer = undefined;
+    this.timeoutTimer = undefined;
+    this.number = 0;
+    this.countdown = 10; // 倒计时
   }
 
   /**
@@ -22,6 +26,7 @@ class TimerJob extends Job {
    */
   async handle () {
     Log.info("[child-process] TimerJob params: ", this.params);
+    const { jobId } = this.params;
 
     // 子进程中使用service
     // 1. 需要重新实例化，因为子进程中没有ee的上下文
@@ -29,21 +34,45 @@ class TimerJob extends Job {
     const effectService = new EffectService();
     effectService.hello('job');
 
-    // 计时器任务
-    let number = 0;
-    let jobId = this.params.jobId;
+    // 执行任务
+    this.doTimer(jobId);
+  }
+  
+  /**
+   * 暂停任务运行
+   */
+  async pause(jobId) {
+    Log.info("[child-process] Pause timerJob, jobId: ", jobId);
+    clearInterval(this.timer);
+    clearInterval(this.timeoutTimer);
+  }
+
+  /**
+   * 恢复任务运行
+   */
+  async resume(jobId, pid) {
+    Log.info("[child-process] Resume timerJob, jobId: ", jobId, ", pid: ", pid);
+    this.doTimer(jobId);
+  }  
+
+  /**
+   * 运行任务
+   */
+  async doTimer(jobId) {
+    // 计时器模拟任务
     let eventName = 'job-timer-progress-' + jobId;
-    let timer = setInterval(function() {
+    this.timer = setInterval(() => {
       Hello.welcome();
 
-      childMessage.send(eventName, {jobId, number, end: false});
-      number++;
+      childMessage.send(eventName, {jobId, number: this.number, end: false});
+      this.number++;
+      this.countdown--;
     }, 1000);
 
     // 用 setTimeout 模拟任务运行时长
-    setTimeout(() => {
-      // 关闭定时器
-      clearInterval(timer);
+    this.timeoutTimer = setTimeout(() => {
+      // 关闭计时器模拟任务
+      clearInterval(this.timer);
 
       // 任务结束，重置前端显示
       childMessage.send(eventName, {jobId, number:0, pid:0, end: true});
@@ -53,8 +82,8 @@ class TimerJob extends Job {
       if (Ps.isChildJob()) {
         Ps.exit();
       }
-    }, 10 * 1000)
-  }   
+    }, this.countdown * 1000)
+  }
 }
 
 TimerJob.toString = () => '[class TimerJob]';
