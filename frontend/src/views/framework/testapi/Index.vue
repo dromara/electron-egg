@@ -36,7 +36,6 @@ export default {
   },
   methods: {
     exec (id) {
-      console.log('process:', process)
       const params = {
         id: id
       }

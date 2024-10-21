@@ -11,11 +11,6 @@ const Addon = require('ee-core/addon');
  */
 class ExampleController extends Controller {
 
-  constructor(ctx) {
-    super(ctx);
-  }
-
-
   /**
    * 所有方法接收两个参数
    * @param args 前端传的参数
@@ -30,7 +25,7 @@ class ExampleController extends Controller {
     // const result1 = await Services.get('example').test('electron');
     // Log.info('service result1:', result1);
 
-    // Services.get('framework').test('electron');
+    Services.get('example').test('electron');
 
     return 'hello electron-egg';
   }

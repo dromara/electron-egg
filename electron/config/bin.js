@@ -151,7 +151,7 @@ module.exports = {
       directory: './go',
       cmd: 'go',
       args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
-    },    
+    },     
     python: {
       directory: './python',
       cmd: 'python',
