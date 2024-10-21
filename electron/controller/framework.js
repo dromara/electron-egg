@@ -130,9 +130,12 @@ class FrameworkController extends Controller {
     if (!fs.existsSync(softwarePath)) {
       return false;
     }
-    // 命令行字符串 并 执行
-    let cmdStr = 'start ' + softwarePath;
+    // 命令行字符串 并 执行, start 命令后面的路径要加双引号
+    let cmdStr = `start "${softwarePath}"`;
     exec(cmdStr);
+
+    // 方法二
+    // 推荐使用cross模块
 
     return true;
   }  

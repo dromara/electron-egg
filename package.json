@@ -41,6 +41,7 @@
     "build-l-arm64": "electron-builder --config=./electron/config/builder.json -l=deb --arm64",
     "build-l-armv7l": "electron-builder --config=./electron/config/builder.json -l=deb --armv7l",
     "build-lr-64": "electron-builder --config=./electron/config/builder.json -l=rpm --x64",
+    "build-lr-arm64": "electron-builder --config=./electron/config/builder.json -l=rpm --arm64",
     "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64",
     "test": "set DEBUG=* && electron . --env=local"
   },

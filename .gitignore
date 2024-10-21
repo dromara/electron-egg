@@ -13,9 +13,11 @@ yalc.lock
 go/public/
 build/extraResources/goapp.exe
 go/go.sum
+go/tmp/
 build/extraResources/java-app.jar
 build/extraResources/jre1.8.0_201/
 python/.venv/
 python/*.spec
 python/build/
 python/dist/
+*DS_Store

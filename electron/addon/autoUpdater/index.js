@@ -135,7 +135,7 @@ class AutoUpdaterAddon {
    */
   sendStatusToWindow(content = {}) {
     const textJson = JSON.stringify(content);
-    const channel = 'app.updater';
+    const channel = 'custom.app.updater';
     const win = CoreWindow.getMainWindow();
     win.webContents.send(channel, textJson);
   }
