@@ -108,7 +108,7 @@ module.exports = {
       '!electron/config/encrypt.js',
       '!electron/config/nodemon.json',
       '!electron/config/builder.json',
-      '!electron/config/bin.json',
+      '!electron/config/bin.js',
     ],
     fileExt: ['.js'],
     confusionOptions: {
