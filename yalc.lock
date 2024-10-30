@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "packages": {
+    "ee-bin": {
+      "signature": "dd33cae35af6caa5e70c3e99d8c51c76",
+      "file": true
+    },
+    "ee-core-ts": {
+      "signature": "556107531437d14a4573ce4b4ccba727",
+      "file": true
+    }
+  }
+}

@@ -1,7 +1,7 @@
 [![star](https://gitee.com/dromara/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/dromara/electron-egg/stargazers)
 
 <div align=center>
-<h3>🎉🎉🎉 ElectronEgg V3.14.0已发布! 🎉🎉🎉</h3>
+<h3>🎉🎉🎉 ElectronEgg V4 已发布! 🎉🎉🎉</h3>
 </div>
 <br>
 

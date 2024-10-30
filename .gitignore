@@ -8,3 +8,4 @@ data/
 .vscode/launch.json
 public/electron/
 pnpm-lock.yaml
+.yalc/
