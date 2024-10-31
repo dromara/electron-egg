@@ -2,12 +2,18 @@
   "version": "v1",
   "packages": {
     "ee-bin": {
-      "signature": "dd33cae35af6caa5e70c3e99d8c51c76",
-      "file": true
+      "signature": "ba8bd39ed9fbd591f23cfd4d8eb8493a",
+      "file": true,
+      "replaced": "^1.8.1"
     },
     "ee-core-ts": {
-      "signature": "b77b3af17f3f349eea27d20773dd6119",
+      "signature": "07b5951274692ee4c5dc9acf819de0f7",
       "file": true
+    },
+    "ee-bin-ts": {
+      "signature": "f6707d1560f57694c4cbf3f5f6456e34",
+      "file": true,
+      "replaced": "^0.1.0-beta.3"
     }
   }
 }

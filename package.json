@@ -3,10 +3,11 @@
   "version": "4.0.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "dev": "ee-bin dev",
     "dev-frontend": "ee-bin dev --serve=frontend",
-    "dev-electron": "ee-bin dev --serve=electron",
+    "dev-electron": "ee-bin-m dev --serve=electron",
     "build-frontend": "ee-bin build --cmds=frontend && ee-bin move --flag=frontend_dist",
     "start": "ee-bin start",
     "rd": "ee-bin move --flag=frontend_dist",
@@ -45,7 +46,8 @@
   "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
-    "ee-bin": "file:.yalc/ee-bin",
+    "ee-bin": "^2.0.0-beta.2",
+    "ee-bin-ts": "file:.yalc/ee-bin-ts",
     "electron": "^29.4.0",
     "electron-builder": "^25.1.8",
     "eslint": "^9.13.0",

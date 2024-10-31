@@ -1,6 +1,6 @@
 // const { ElectronEgg } = require('ee-core');
 // new ElectronEgg();
 
-import ElectronEgg from 'ee-core-ts/main'
+import ElectronEgg from 'ee-core-ts/dist/main'
 
-const b = new ElectronEgg("");
+new ElectronEgg("");
