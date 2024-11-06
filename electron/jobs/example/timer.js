@@ -4,7 +4,8 @@ const Log = require('ee-core/log');
 const Ps = require('ee-core/ps');
 const { childMessage } = require('ee-core/message');
 const Hello = Loader.requireModule('./jobs/example/hello');
-const EffectService = Loader.requireModule('./service/effect');
+//const EffectService = Loader.requireModule('./service/effect');
+const EffectService = require('../../service/effect');
 
 /**
  * example - TimerJob
