@@ -11,6 +11,11 @@
     "!frontend/",
     "!run/",
     "!logs/",
+<<<<<<< HEAD
+=======
+    "!go/",
+    "!python/",
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
     "!data/"
   ],
   "extraResources": {
@@ -50,7 +55,11 @@
     ]
   },
   "linux": {
+<<<<<<< HEAD
     "icon": "build/icons/icon.icns",
+=======
+    "icon": "build/icons",
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
     "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
     "target": [
       "deb"

@@ -15,12 +15,21 @@ module.exports = {
       protocol: 'http://',
       hostname: 'localhost',
       port: 8080,
+<<<<<<< HEAD
       indexPath: 'index.html'
+=======
+      indexPath: 'index.html',
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
     },
     electron: {
       directory: './',
       cmd: 'electron',
+<<<<<<< HEAD
       args: ['.', '--env=local', '--color=always'],
+=======
+      args: ['.', '--env=local'],
+      loadingPage: '/public/html/loading.html',
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
     }
   },
 
@@ -33,7 +42,31 @@ module.exports = {
       directory: './frontend',
       cmd: 'npm',
       args: ['run', 'build'],
+<<<<<<< HEAD
     }
+=======
+    },
+    go_w: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o=../build/extraResources/goapp.exe'],
+    },
+    go_m: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o=../build/extraResources/goapp'],
+    },
+    go_l: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o=../build/extraResources/goapp'],
+    },
+    python: {
+      directory: './python',
+      cmd: 'python',
+      args: ['./setup.py', 'build'],
+    },
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
   },
 
   /**
@@ -44,7 +77,31 @@ module.exports = {
     frontend_dist: {
       dist: './frontend/dist',
       target: './public/dist'
+<<<<<<< HEAD
     }
+=======
+    },
+    go_static: {
+      dist: './frontend/dist',
+      target: './go/public/dist'
+    },
+    go_config: {
+      dist: './go/config',
+      target: './go/public/config'
+    },
+    go_package: {
+      dist: './package.json',
+      target: './go/public/package.json'
+    },
+    go_images: {
+      dist: './public/images',
+      target: './go/public/images'
+    },
+    python_dist: {
+      dist: './python/dist',
+      target: './build/extraResources/py'
+    },
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
   },  
 
   /**
@@ -67,7 +124,11 @@ module.exports = {
       '!electron/config/encrypt.js',
       '!electron/config/nodemon.json',
       '!electron/config/builder.json',
+<<<<<<< HEAD
       '!electron/config/bin.json',
+=======
+      '!electron/config/bin.js',
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
     ],
     fileExt: ['.js'],
     confusionOptions: {
@@ -93,5 +154,34 @@ module.exports = {
       cmd: 'npm',
       args: ['-v'],
     },
+<<<<<<< HEAD
   },   
 };
+=======
+    // 单独调试，air 实现 go 热重载
+    go: {
+      directory: './go',
+      cmd: 'air',
+      args: ['-c=config/.air.toml' ],
+    },
+    // windows 单独调试，air 实现 go 热重载 
+    go_w: {
+      directory: './go',
+      cmd: 'air',
+      args: ['-c=config/.air.windows.toml' ],
+    },    
+    // 单独调试，以基础方式启动 go
+    go2: {
+      directory: './go',
+      cmd: 'go',
+      args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
+    },     
+    python: {
+      directory: './python',
+      cmd: 'python',
+      args: ['./main.py', '--port=7074'],
+      stdio: "inherit", // ignore
+    },
+  },  
+};
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c

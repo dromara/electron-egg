@@ -12,7 +12,7 @@ module.exports = (appInfo) => {
   /**
    * 开发者工具
    */
-  config.openDevTools = false;
+  config.openDevTools = true;
 
   /**
    * 应用程序顶部菜单
@@ -116,6 +116,28 @@ module.exports = (appInfo) => {
     protocol: 'file://',
     indexPath: '/public/dist/index.html',
   }; 
+
+  /**
+   * Cross-language service
+   * 跨语言服务
+   * 例如：执行go的二进制程序，默认目录为 ./extraResources/
+   */
+  config.cross = {
+    go: {
+      enable: false,
+      name: 'goapp',
+      args: ['--port=7073'],
+      appExit: true,
+    },
+    python: {
+      enable: false,
+      name: 'pyapp',
+      cmd: './py/pyapp',
+      directory: './py',
+      args: ['--port=7074'],
+      appExit: true,
+    },
+  };   
 
   /**
    * 硬件加速

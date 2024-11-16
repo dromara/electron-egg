@@ -9,15 +9,35 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "vue": "^3.2.33",
     "vue-router": "^4.0.14"
+=======
+    "@ant-design/icons-vue": "^6.1.0",
+    "ant-design-vue": "2.2.6",
+    "axios": "^0.21.1",
+    "socket.io-client": "^4.4.1",
+    "store2": "^2.13.2",
+    "vue": "^3.2.33",
+    "vue-router": "^4.0.14",
+    "vuex": "^4.0.2",
+    "xgplayer": "^2.31.6"
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/compiler-sfc": "^3.2.33",
     "less": "^4.1.2",
     "less-loader": "^10.2.0",
+<<<<<<< HEAD
     "terser": "^5.19.1",
     "vite": "^4.4.4"
+=======
+    "postcss": "^8.4.13",
+    "postcss-pxtorem": "^6.0.0",
+    "terser": "^5.19.1",
+    "vite": "^4.4.4",
+    "vite-plugin-compression": "^0.5.1"
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
   }
 }

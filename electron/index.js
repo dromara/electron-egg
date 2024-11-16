@@ -1,4 +1,8 @@
 const { Application } = require('ee-core');
+<<<<<<< HEAD
+=======
+const { app: electronApp } = require("electron");
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
 
 class Index extends Application {
 
@@ -12,6 +16,11 @@ class Index extends Application {
    */
   async ready () {
     // do some things
+<<<<<<< HEAD
+=======
+    electronApp.commandLine.appendSwitch('enable-webgl');
+    electronApp.commandLine.appendSwitch("disable-web-security");
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
   }
 
   /**

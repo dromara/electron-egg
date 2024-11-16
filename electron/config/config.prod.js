@@ -9,7 +9,13 @@ module.exports = (appInfo) => {
   /**
    * 开发者工具
    */
+<<<<<<< HEAD
   config.openDevTools = false;
+=======
+  config.openDevTools = {
+    mode: 'undocked'
+  };
+>>>>>>> afb34d7396377e691502cb3912eb4d629066071c
 
   /**
    * 应用程序顶部菜单
