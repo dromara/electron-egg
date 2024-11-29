@@ -2,9 +2,9 @@
   "version": "v1",
   "packages": {
     "ee-bin": {
-      "signature": "ba8bd39ed9fbd591f23cfd4d8eb8493a",
+      "signature": "cda60055b7c55152c809ad6a009e9d7c",
       "file": true,
-      "replaced": "^1.8.1"
+      "replaced": "^2.0.0-beta.2"
     },
     "ee-core-ts": {
       "signature": "07b5951274692ee4c5dc9acf819de0f7",
@@ -14,6 +14,10 @@
       "signature": "f6707d1560f57694c4cbf3f5f6456e34",
       "file": true,
       "replaced": "^0.1.0-beta.3"
+    },
+    "ee-core": {
+      "signature": "57540b8148aa2a549e018df2e7af36e5",
+      "file": true
     }
   }
 }

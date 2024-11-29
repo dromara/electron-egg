@@ -1,3 +1,3 @@
-import ElectronEgg from 'ee-core-ts/esm/main'
+const { ElectronEgg } = require('ee-core');
 
 new ElectronEgg();

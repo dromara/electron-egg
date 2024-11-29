@@ -46,7 +46,7 @@
   "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
-    "ee-bin": "^2.0.0-beta.2",
+    "ee-bin": "file:.yalc/ee-bin",
     "ee-bin-ts": "file:.yalc/ee-bin-ts",
     "electron": "^29.4.0",
     "electron-builder": "^25.1.8",
@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "dayjs": "^1.11.13",
+    "ee-core": "file:.yalc/ee-core",
     "ee-core-ts": "file:.yalc/ee-core-ts",
     "electron-updater": "^6.3.8"
   }
