@@ -1,6 +1,6 @@
-const { Application } = require('ee-core');
+'use strict';
 
-class Index extends Application {
+class Index {
 
   constructor() {
     super();

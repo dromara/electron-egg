@@ -3,11 +3,10 @@
   "version": "4.0.0",
   "description": "A fast, desktop software development framework",
   "main": "main.js",
-  "type": "module",
   "scripts": {
     "dev": "ee-bin dev",
     "dev-frontend": "ee-bin dev --serve=frontend",
-    "dev-electron": "ee-bin-m dev --serve=electron",
+    "dev-electron": "ee-bin dev --serve=electron",
     "build-frontend": "ee-bin build --cmds=frontend && ee-bin move --flag=frontend_dist",
     "start": "ee-bin start",
     "rd": "ee-bin move --flag=frontend_dist",
@@ -35,7 +34,7 @@
     "build-l-armv7l": "electron-builder --config=./electron/config/builder.json -l=deb --armv7l",
     "build-lr-64": "electron-builder --config=./electron/config/builder.json -l=rpm --x64",
     "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64",
-    "test": "set DEBUG=* && electron . --env=local"
+    "test": "cross-env DEBUG=* ee-bin dev --serve=electron"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
@@ -46,6 +45,8 @@
   "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
+    "cross-env": "^7.0.3",
+    "debug": "^4.3.7",
     "ee-bin": "file:.yalc/ee-bin",
     "ee-bin-ts": "file:.yalc/ee-bin-ts",
     "electron": "^29.4.0",
