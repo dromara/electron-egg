@@ -1,10 +1,8 @@
 const Job = require('ee-core/jobs/baseJobClass');
-const Loader = require('ee-core/loader');
 const Log = require('ee-core/log');
 const Ps = require('ee-core/ps');
 const { childMessage } = require('ee-core/message');
-const Hello = Loader.requireModule('./jobs/example/hello');
-//const UserService = Loader.requireModule('./service/job/user');
+const Hello = require('./hello');
 const UserService = require('../../service/job/user');
 
 /**
