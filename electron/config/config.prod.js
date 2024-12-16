@@ -1,15 +1,17 @@
 'use strict';
 
 /**
- * 生产环境配置，覆盖 config.default.js
+ * 开发环境配置，覆盖 config.default.js
  */
-module.exports = (appInfo) => {
+module.exports = () => {
   const config = {};
 
   /**
    * 开发者工具
    */
-  config.openDevTools = false;
+  config.openDevTools = {
+    mode: 'undocked'
+  };
 
   /**
    * 应用程序顶部菜单
@@ -17,11 +19,22 @@ module.exports = (appInfo) => {
   config.openAppMenu = false;
 
   /**
-   * jobs
-   */
-  config.jobs = {
-    messageLog: false
-  }; 
+   * 内置socket服务
+   */   
+  config.socketServer = {
+    enable: false,
+    port: 7071,
+    path: "/socket.io/",
+    connectTimeout: 45000,
+    pingTimeout: 30000,
+    pingInterval: 25000,
+    maxHttpBufferSize: 1e8,
+    transports: ["polling", "websocket"],
+    cors: {
+      origin: false,
+    },
+    channel: 'c1'
+  };
 
   return {
     ...config

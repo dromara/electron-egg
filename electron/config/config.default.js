@@ -6,7 +6,7 @@ const path = require('path');
  * 默认配置
  */
 module.exports = (appInfo) => {
-
+  console.log("appInfo:", appInfo);
   const config = {};
 
   /**
@@ -32,11 +32,11 @@ module.exports = (appInfo) => {
       //webSecurity: false,
       contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
       nodeIntegration: true,
-      //preload: path.join(appInfo.baseDir, 'preload', 'bridge.js'),
+      //preload: path.join('preload', 'bridge.js'),
     },
     frame: true,
     show: false,
-    icon: path.join(appInfo.home, 'public', 'images', 'logo-32.png'),
+    icon: path.join('public', 'images', 'logo-32.png'),
   };
 
   /**
@@ -139,39 +139,6 @@ module.exports = (appInfo) => {
   config.jobs = {
     messageLog: true
   };  
-
-  /**
-   * 插件功能
-   */
-  config.addons = {
-    window: {
-      enable: true,
-    },
-    tray: {
-      enable: true,
-      title: 'EE程序',
-      icon: '/public/images/tray.png'
-    },
-    security: {
-      enable: true,
-    },
-    awaken: {
-      enable: true,
-      protocol: 'ee',
-      args: []
-    },
-    autoUpdater: {
-      enable: true,
-      windows: false, 
-      macOS: false, 
-      linux: false,
-      options: {
-        provider: 'generic', 
-        url: 'http://kodo.qiniu.com/'
-      },
-      force: false,
-    }
-  };
 
   return {
     ...config
