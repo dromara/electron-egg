@@ -1,10 +1,9 @@
 const Job = require('ee-core/jobs/baseJobClass');
-const Loader = require('ee-core/loader');
 const Log = require('ee-core/log');
 const Ps = require('ee-core/ps');
 const { childMessage } = require('ee-core/message');
-const Hello = Loader.requireModule('./jobs/example/hello');
-const EffectService = Loader.requireModule('./service/effect');
+const Hello = require('./hello');
+const UserService = require('../../service/job/user');
 
 /**
  * example - TimerJob
@@ -30,9 +29,9 @@ class TimerJob extends Job {
 
     // 子进程中使用service
     // 1. 需要重新实例化，因为子进程中没有ee的上下文
-    // 2. service 中不能使用 electron 的 api，electron不支持
-    const effectService = new EffectService();
-    effectService.hello('job');
+    // 2. 确保引入的 service 中不能有electron 的 api或依赖， electron 不支持
+    const userService = new UserService();
+    userService.hello('job');
 
     // 执行任务
     this.doTimer(jobId);
