@@ -2,7 +2,7 @@
   "name": "ee-next",
   "version": "4.0.0",
   "description": "A fast, desktop software development framework",
-  "main": "main.js",
+  "main": "./electron/main.js",
   "scripts": {
     "dev": "ee-bin dev",
     "dev-frontend": "ee-bin dev --serve=frontend",
@@ -50,9 +50,7 @@
     "ee-bin": "file:.yalc/ee-bin",
     "ee-bin-ts": "file:.yalc/ee-bin-ts",
     "electron": "^29.4.0",
-    "electron-builder": "^25.1.8",
-    "eslint": "^9.13.0",
-    "nodemon": "^3.1.7"
+    "electron-builder": "^25.1.8"
   },
   "dependencies": {
     "dayjs": "^1.11.13",

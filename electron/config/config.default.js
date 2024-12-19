@@ -6,18 +6,12 @@ const path = require('path');
  * 默认配置
  */
 module.exports = (appInfo) => {
-  console.log("appInfo:", appInfo);
   const config = {};
 
   /**
    * 开发者工具
    */
   config.openDevTools = false;
-
-  /**
-   * 应用程序顶部菜单
-   */
-  config.openAppMenu = true;
 
   /**
    * 主窗口

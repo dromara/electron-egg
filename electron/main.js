@@ -1,3 +1,5 @@
 const { ElectronEgg } = require('ee-core');
 
-new ElectronEgg();
+const app = new ElectronEgg();
+
+app.run();

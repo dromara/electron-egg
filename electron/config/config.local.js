@@ -14,11 +14,6 @@ module.exports = () => {
   };
 
   /**
-   * 应用程序顶部菜单
-   */
-  config.openAppMenu = false;
-
-  /**
    * 内置socket服务
    */   
   config.socketServer = {
