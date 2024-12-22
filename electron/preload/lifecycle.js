@@ -1,10 +1,9 @@
 'use strict';
 
-class Index {
+class Lifecycle {
 
   constructor() {
-    super();
-    // this === eeApp;
+
   }
 
   /**
@@ -46,5 +45,5 @@ class Index {
   }
 }
 
-Index.toString = () => '[class Index]';
-module.exports = Index;
+Lifecycle.toString = () => '[class Lifecycle]';
+module.exports = Lifecycle;

@@ -46,7 +46,7 @@
   "license": "Apache",
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "debug": "^4.3.7",
+    "debug": "^4.4.0",
     "ee-bin": "file:.yalc/ee-bin",
     "ee-bin-ts": "file:.yalc/ee-bin-ts",
     "electron": "^29.4.0",
@@ -55,7 +55,6 @@
   "dependencies": {
     "dayjs": "^1.11.13",
     "ee-core": "file:.yalc/ee-core",
-    "ee-core-ts": "file:.yalc/ee-core-ts",
     "electron-updater": "^6.3.8"
   }
 }
