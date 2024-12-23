@@ -8,8 +8,9 @@ const path = require('path');
 module.exports = (appInfo) => {
   return {
     openDevTools: false,
+    singleLock: true,
     windowsOption: {
-      title: 'electron-egg1',
+      title: 'electron-egg',
       width: 980,
       height: 650,
       minWidth: 400,
@@ -21,7 +22,7 @@ module.exports = (appInfo) => {
         //preload: path.join(appInfo.electronDir, 'preload', 'bridge.js'),
       },
       frame: true,
-      show: false,
+      show: true,
       icon: path.join(appInfo.baseDir, 'public', 'images', 'logo-32.png'),
     },
     logger: {
@@ -31,7 +32,7 @@ module.exports = (appInfo) => {
       coreLogName: 'ee-core.log',
       errorLogName: 'ee-error.log' 
     },
-    remoteUrl: {
+    remote: {
       enable: false,
       url: 'http://electron-egg.kaka996.com/'
     },
