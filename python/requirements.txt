@@ -1,0 +1,2 @@
+Flask==3.0.2
+Flask_Cors==4.0.0

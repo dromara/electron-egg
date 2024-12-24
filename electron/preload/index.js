@@ -9,5 +9,5 @@
 module.exports = async () => {
 
   // 示例功能模块，可选择性使用和修改
-
+  console.log('preload/index.js');
 }

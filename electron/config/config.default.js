@@ -1,11 +1,12 @@
 'use strict';
 
 const path = require('path');
+const { getBaseDir } = require('ee-core/ps');
 
 /**
  * 默认配置
  */
-module.exports = (appInfo) => {
+module.exports = () => {
   return {
     openDevTools: false,
     singleLock: true,
@@ -19,11 +20,11 @@ module.exports = (appInfo) => {
         //webSecurity: false,
         contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
         nodeIntegration: true,
-        //preload: path.join(appInfo.electronDir, 'preload', 'bridge.js'),
+        //preload: path.join(getElectronDir(), 'preload', 'bridge.js'),
       },
       frame: true,
       show: true,
-      icon: path.join(appInfo.baseDir, 'public', 'images', 'logo-32.png'),
+      icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
     logger: {
       level: 'INFO',
@@ -52,6 +53,7 @@ module.exports = (appInfo) => {
     },
     httpServer: {
       enable: false,
+      prefix: 'api',
       https: {
         enable: false, 
         key: '/public/ssl/localhost+1.key',
@@ -64,7 +66,6 @@ module.exports = (appInfo) => {
       }
     },
     mainServer: {
-      protocol: 'file://',
       indexPath: '/public/dist/index.html',
     },
   }
