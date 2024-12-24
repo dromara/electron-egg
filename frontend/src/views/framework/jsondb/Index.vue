@@ -156,7 +156,7 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main';
+import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 
 export default {

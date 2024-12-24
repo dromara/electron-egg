@@ -10,14 +10,14 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
-    "ant-design-vue": "2.2.6",
+    "ant-design-vue": "^3.2.20",
     "axios": "^0.21.1",
+    "pinia": "^2.2.6",
     "socket.io-client": "^4.4.1",
     "store2": "^2.13.2",
-    "vue": "^3.2.33",
+    "vue": "^3.5.12",
     "vue-router": "^4.0.14",
-    "vuex": "^4.0.2",
-    "xgplayer": "^2.31.6"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",

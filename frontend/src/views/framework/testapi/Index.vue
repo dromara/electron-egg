@@ -23,7 +23,7 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main';
+import { ipcApiRoute } from '@/api';
 import iconList from '@/utils/iconList';
 import { ipc } from '@/utils/ipcRenderer';
 

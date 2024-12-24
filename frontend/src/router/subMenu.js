@@ -119,12 +119,6 @@ export default {
   effect: {
     'menu_100' : {
       icon: 'profile',
-      title: '视频播放器',
-      pageName: 'EffectVideoIndex',
-      params: {}
-    },
-    'menu_110' : {
-      icon: 'profile',
       title: '登录',
       pageName: 'EffectLoginIndex',
       params: {}

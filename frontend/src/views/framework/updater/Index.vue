@@ -25,7 +25,7 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute, specialIpcRoute } from '@/api/main';
+import { ipcApiRoute, specialIpcRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 
 export default {

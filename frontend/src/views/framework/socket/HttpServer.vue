@@ -26,7 +26,7 @@
   </div>
 </template>
 <script>
-import { ipcApiRoute } from '@/api/main';
+import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import axios from 'axios';
 import storage from 'store2';

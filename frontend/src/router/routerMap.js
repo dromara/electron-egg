@@ -141,13 +141,8 @@ const constantRouterMap = [
         name: 'Effect',
         component: () => import('@/layouts/Menu.vue'),
         props: { id: 'effect' },
-        redirect: { name: 'EffectVideoIndex' },
+        redirect: { name: 'EffectLoginIndex' },
         children: [
-          {
-            path: '/effect/video/index',
-            name: 'EffectVideoIndex',
-            component: () => import('@/views/effect/video/Index.vue')
-          },
           {
             path: '/effect/login/index',
             name: 'EffectLoginIndex',
