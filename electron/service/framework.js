@@ -2,7 +2,6 @@
 
 const { logger } = require('ee-core/log');
 const { ChildJob, ChildPoolJob } = require('ee-core/jobs');
-const Ps = require('ee-core/ps');
 
 /**
  * framework

@@ -8,6 +8,7 @@ const { app: electronApp, shell } = require('electron');
 const { getExtraResourcesDir } = require('ee-core/ps');
 const { logger } = require('ee-core/log');
 const { getConfig } = require('ee-core/config');
+const { frameworkService } = require('../service/framework');
 
 /**
  * framework - demo
@@ -191,9 +192,9 @@ class FrameworkController {
   /**
    * 双向异步通信
    */
-  async ipcSendMsg(args, event) {
+  ipcSendMsg(args, event) {
     const { type, content } = args;
-    const data = await Services.get('framework').bothWayMessage(type, content, event);
+    const data = frameworkService.bothWayMessage(type, content, event);
 
     return data;
   }
