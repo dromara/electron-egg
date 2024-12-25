@@ -4,9 +4,11 @@ const _ = require('lodash');
 const path = require('path');
 const {
   app: electronApp, dialog, shell, Notification, 
-  powerMonitor, screen, nativeTheme
+  powerMonitor, screen, nativeTheme, BrowserWindow
 } = require('electron');
 const { isProd, getBaseDir } = require('ee-core/ps');
+const { getConfig } = require('ee-core/config');
+const { isFileProtocol } = require('ee-core/utils/is');
 
 /**
  * example
@@ -132,36 +134,7 @@ class OsController {
    */
   createWindow(args) {
     const { type, content, windowName, windowTitle } = args;
-    let contentUrl = null;
-    if (type == 'html') {
-      contentUrl = path.join('file://', electronApp.getAppPath(), content)
-    } else if (type == 'web') {
-      contentUrl = content;
-    } else if (type == 'vue') {
-      let addr = 'http://localhost:8080'
-      if (isProd()) {
-        const mainServer = Conf.getValue('mainServer');
-        if (Conf.isFileProtocol(mainServer)) {
-          addr = mainServer.protocol + path.join(Ps.getHomeDir(), mainServer.indexPath);
-        } else {
-          addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
-        }
-      }
 
-      contentUrl = addr + content;
-    } else {
-      // some
-    }
-
-    console.log('contentUrl: ', contentUrl);
-    let opt = {
-      title: windowTitle
-    }
-    const win = Addon.get('window').create(windowName, opt);
-    const winContentsId = win.webContents.id;
-
-    // load page
-    win.loadURL(contentUrl);
 
     return winContentsId;
   }

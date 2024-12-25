@@ -53,13 +53,13 @@ export default {
       this.currentThemeMode = e.target.value;
       console.log('setTheme currentThemeMode:', this.currentThemeMode)
 
-      ipc.invoke(ipcApiRoute.setTheme, this.currentThemeMode).then(result => {
+      ipc.invoke(ipcApiRoute.os.setTheme, this.currentThemeMode).then(result => {
         console.log('result:', result)
         this.currentThemeMode = result;
       })      
     },
     getTheme () {
-      ipc.invoke(ipcApiRoute.getTheme).then(result => {
+      ipc.invoke(ipcApiRoute.os.getTheme).then(result => {
         console.log('result:', result)
         this.currentThemeMode = result;
       })  

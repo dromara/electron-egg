@@ -51,7 +51,7 @@ export default {
         return;
       }
 
-      const method = ipcApiRoute.doSocketRequest; 
+      const method = ipcApiRoute.framework.doSocketRequest; 
       this.socket.emit('c1', { cmd: method, args: {id: id} }, (response) => {
         // response为返回值
         console.log('response:', response)

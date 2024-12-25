@@ -46,12 +46,12 @@ export default {
   },
   methods: {
     loadViewContent (index) {
-      ipc.invoke(ipcApiRoute.loadViewContent, toRaw(this.views[index])).then(r => {
+      ipc.invoke(ipcApiRoute.os.loadViewContent, toRaw(this.views[index])).then(r => {
         console.log(r);
       })
     },
     removeViewContent (index) {
-      ipc.invoke(ipcApiRoute.removeViewContent, toRaw(this.views[index])).then(r => {
+      ipc.invoke(ipcApiRoute.os.removeViewContent, toRaw(this.views[index])).then(r => {
         console.log(r);
       })
     },

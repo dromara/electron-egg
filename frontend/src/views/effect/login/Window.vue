@@ -26,7 +26,7 @@ export default {
       this.loading = true;
       setTimeout(() => {
         this.$router.push({ name: 'Framework', params: {}});
-        ipc.invoke(ipcApiRoute.restoreWindow, {width: 980, height: 650}).then(r => {      
+        ipc.invoke(ipcApiRoute.effect.restoreWindow, {width: 980, height: 650}).then(r => {      
           // 
         })
       }, 2000);

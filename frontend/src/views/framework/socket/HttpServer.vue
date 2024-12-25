@@ -43,7 +43,7 @@ export default {
   },
   methods: {
     init () {
-      ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
+      ipc.invoke(ipcApiRoute.framework.checkHttpServer, {}).then(r => {
         if (r.enable) {
           this.currentStatus = '开启';
           this.servicAddress = r.server;
@@ -57,7 +57,7 @@ export default {
         return;
       }
 
-      this.requestHttp(ipcApiRoute.doHttpRequest, {id}).then(res => {
+      this.requestHttp(ipcApiRoute.framework.doHttpRequest, {id}).then(res => {
         //console.log('res:', res)
       })
     },

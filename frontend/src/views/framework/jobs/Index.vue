@@ -83,11 +83,11 @@ export default {
   methods: {
     init () {
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      ipc.removeAllListeners(ipcApiRoute.timerJobProgress);
-      ipc.removeAllListeners(ipcApiRoute.createPoolNotice);
+      ipc.removeAllListeners(ipcApiRoute.framework.timerJobProgress);
+      ipc.removeAllListeners(ipcApiRoute.framework.createPoolNotice);
 
       // 监听任务进度
-      ipc.on(ipcApiRoute.timerJobProgress, (event, result) => {
+      ipc.on(ipcApiRoute.framework.timerJobProgress, (event, result) => {
         switch (result.jobId) {
           case 1:
             this.progress1 = result.number;
@@ -117,7 +117,7 @@ export default {
       })
 
       // 监听pool
-      ipc.on(ipcApiRoute.createPoolNotice, (event, result) => {
+      ipc.on(ipcApiRoute.framework.createPoolNotice, (event, result) => {
         let pidsStr = JSON.stringify(result);
         this.processPids = pidsStr;
       })   
@@ -128,7 +128,7 @@ export default {
         type: 'timer',
         action: operation
       }
-      ipc.invoke(ipcApiRoute.someJob, params).then(data => {
+      ipc.invoke(ipcApiRoute.framework.someJob, params).then(data => {
         if (operation != 'create') return;
         switch (data.jobId) {
           case 1:
@@ -144,7 +144,7 @@ export default {
       let params = {
         number: 3,
       }
-      ipc.send(ipcApiRoute.createPool, params);
+      ipc.send(ipcApiRoute.framework.createPool, params);
     },
     runJobByPool(jobId, operation) {
       let params = {
@@ -152,7 +152,7 @@ export default {
         type: 'timer',
         action: operation
       }
-      ipc.invoke(ipcApiRoute.someJobByPool, params).then(data => {
+      ipc.invoke(ipcApiRoute.framework.someJobByPool, params).then(data => {
         switch (data.jobId) {
           case 3:
             this.progress3_pid = data.result.pid;

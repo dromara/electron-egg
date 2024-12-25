@@ -181,7 +181,7 @@ export default {
       const params = {
         action: 'getDataDir',
       }
-      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
         if (res.code == -1) {
           this.$message.error('请检查sqlite是否正确安装', 5);
           return
@@ -195,7 +195,7 @@ export default {
       const params = {
         action: 'all',
       }
-      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
         if (res.all_list.length == 0) {
           return false;
         }
@@ -203,7 +203,7 @@ export default {
       }) 
     },
     selectDir() {
-      ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
+      ipc.invoke(ipcApiRoute.os.selectFolder, '').then(r => {
         this.data_dir = r;
         // 修改数据目录
         this.modifyDataDir(r);
@@ -211,7 +211,7 @@ export default {
     },
     openDir() {
       console.log('dd:', this.data_dir);
-      ipc.invoke(ipcApiRoute.openDirectory, {id: this.data_dir}).then(res => {
+      ipc.invoke(ipcApiRoute.os.openDirectory, {id: this.data_dir}).then(res => {
         //
       })
     },    
@@ -220,7 +220,7 @@ export default {
         action: 'setDataDir',
         data_dir: dir
       }
-      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
         this.all_list = res.all_list;
       }) 
     },
@@ -239,7 +239,7 @@ export default {
       if (ac == 'add' && this.name.length == 0) {
         this.$message.error(`请填写数据`);
       }
-      ipc.invoke(ipcApiRoute.sqlitedbOperation, params).then(res => {
+      ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
         console.log('res:', res);
         if (ac == 'get') {
           if (res.result.length == 0) {

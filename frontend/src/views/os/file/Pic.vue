@@ -29,7 +29,7 @@ export default {
   },
   methods: {
     selectPic () {
-      ipc.invoke(ipcApiRoute.selectPic, {}).then(r => {      
+      ipc.invoke(ipcApiRoute.os.selectPic, {}).then(r => {      
         this.picPath = r;
       })
     },

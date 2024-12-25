@@ -61,15 +61,15 @@ export default {
   methods: {
     init () {
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      ipc.removeAllListeners(ipcApiRoute.sendNotification);
-      ipc.on(ipcApiRoute.sendNotification, (event, result) => {
+      ipc.removeAllListeners(ipcApiRoute.os.sendNotification);
+      ipc.on(ipcApiRoute.os.sendNotification, (event, result) => {
         if (Object.prototype.toString.call(result) == '[object Object]') {
           this.$message.info(result.msg);
         }  
       })
     },
     sendNotification (index) {
-      ipc.send(ipcApiRoute.sendNotification, toRaw(this.views[index]));
+      ipc.send(ipcApiRoute.os.sendNotification, toRaw(this.views[index]));
     },
   }
 };

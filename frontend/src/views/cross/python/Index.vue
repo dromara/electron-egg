@@ -51,25 +51,25 @@
     },
     methods: {
       info() {
-        ipc.invoke(ipcApiRoute.crossInfo, {}).then(res => {
+        ipc.invoke(ipcApiRoute.cross.crossInfo, {}).then(res => {
           console.log('res:', res);
         }) 
       },
       getUrl() {
-        ipc.invoke(ipcApiRoute.getCrossUrl, {name: 'pyapp'}).then(url => {
+        ipc.invoke(ipcApiRoute.cross.getCrossUrl, {name: 'pyapp'}).then(url => {
           this.serverUrl = url;
           this.$message.info(`服务地址: ${url}`);
         }) 
       },
       kill() {
         // name参数是 进程对象上的name，这里仅作为参照
-        ipc.invoke(ipcApiRoute.killCrossServer, {type: 'one', name: 'pyapp'})
+        ipc.invoke(ipcApiRoute.cross.killCrossServer, {type: 'one', name: 'pyapp'})
       },
       killAll() {
-        ipc.invoke(ipcApiRoute.killCrossServer, {type: 'all', name: 'pyapp'})
+        ipc.invoke(ipcApiRoute.cross.killCrossServer, {type: 'all', name: 'pyapp'})
       },
       create() {
-        ipc.invoke(ipcApiRoute.createCrossServer, { program: 'python' })
+        ipc.invoke(ipcApiRoute.cross.createCrossServer, { program: 'python' })
       },
       request(type) {
         if (type == 1 && this.serverUrl == "") {
@@ -90,7 +90,7 @@
             this.$message.info(`服务返回: ${JSON.stringify(data)}`);
           })
         } else {
-          ipc.invoke(ipcApiRoute.requestApi, {name: 'pyapp', urlPath: '/api/hello'}).then(res => {
+          ipc.invoke(ipcApiRoute.cross.requestApi, {name: 'pyapp', urlPath: '/api/hello'}).then(res => {
             console.log('res:', res);
             const data = res || null;
             this.$message.info(`服务返回: ${JSON.stringify(data)}`);

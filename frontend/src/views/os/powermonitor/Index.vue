@@ -31,14 +31,14 @@ export default {
   },
   methods: {
     init () {
-      ipc.removeAllListeners(ipcApiRoute.initPowerMonitor);
-      ipc.on(ipcApiRoute.initPowerMonitor, (event, result) => {
+      ipc.removeAllListeners(ipcApiRoute.os.initPowerMonitor);
+      ipc.on(ipcApiRoute.os.initPowerMonitor, (event, result) => {
         if (Object.prototype.toString.call(result) == '[object Object]') {
           this.currentStatus = result.msg;
           this.$message.info(result.msg);
         }
       })
-      ipc.send(ipcApiRoute.initPowerMonitor, '');
+      ipc.send(ipcApiRoute.os.initPowerMonitor, '');
     }
   }
 };

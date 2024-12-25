@@ -53,28 +53,6 @@
         </a-list-item> -->
       </a-list>
     </div>
-    <div class="one-block-1">
-      <span>
-        4. 上传文件到图床
-      </span>
-    </div>  
-    <div class="one-block-2">
-      <a-upload-dragger
-        name="file"
-        :multiple="true"
-        :action="action_url"
-        @change="handleFileChange"
-      >
-        <p class="ant-upload-drag-icon">
-        </p>
-        <p class="ant-upload-text">
-          点击 或 拖拽文件到这里
-        </p>
-        <p class="ant-upload-hint">
-          注意：请使用您自己的图床token
-        </p>
-      </a-upload-dragger>
-    </div>
     <div class="footer">
     </div>
   </div>
@@ -107,7 +85,6 @@ export default {
   data() {
     return {
       file_list: fileList,
-      action_url: '',
       image_info: [],
       num: 0,
       servicAddress: '',
@@ -119,66 +96,39 @@ export default {
   },
   methods: {
     getHost () {
-      ipc.invoke(ipcApiRoute.checkHttpServer, {}).then(r => {
+      ipc.invoke(ipcApiRoute.framework.checkHttpServer, {}).then(r => {
         if (r.enable) {
           this.servicAddress = r.server;
           storage.set('httpServiceConfig', r);
 
           // url转换
           const host = r.server || 'http://localhost:7071';
-          let uri = ipcApiRoute.uploadFile;
+          let uri = ipcApiRoute.framework.uploadFile;
           let url = uri.split('.').join('/');
           this.action_url = host + '/' + url;
         }
       })
     },
     openDirectry (id) {
-      ipc.invoke(ipcApiRoute.openDirectory, {id: id}).then(res => {
+      ipc.invoke(ipcApiRoute.os.openDirectory, {id: id}).then(res => {
         //console.log('res:', res)
       })      
     },
     selectDir() {
-      ipc.invoke(ipcApiRoute.selectFolder, '').then(r => {
+      ipc.invoke(ipcApiRoute.os.selectFolder, '').then(r => {
         this.dir_path = r;
         this.$message.info(r);
       })      
     },
 		messageShow() {
-      ipc.invoke(ipcApiRoute.messageShow, '').then(r => {
+      ipc.invoke(ipcApiRoute.os.messageShow, '').then(r => {
         this.$message.info(r);
       })
     },    
     messageShowConfirm() {
-      ipc.invoke(ipcApiRoute.messageShowConfirm, '').then(r => {
+      ipc.invoke(ipcApiRoute.os.messageShowConfirm, '').then(r => {
         this.$message.info(r);
       })
-    },
-    handleFileChange(info) {
-      console.log('handleFileChange-----');
-      if (this.action_url == '') {
-        this.$message.error('http服务未开启');
-        return;
-      }
-      const status = info.file.status;
-      if (status !== 'uploading') {
-        console.log(info.file);
-      }
-      if (status === 'done') {
-        const uploadRes = info.file.response;
-        console.log('uploadRes:', uploadRes)
-        if (uploadRes.code !== 'success') {
-          this.$message.error(`file upload failed ${uploadRes.code} .`);
-          return false;
-        }
-        this.num++;
-        const picInfo = uploadRes.data;
-        picInfo.id = this.num;
-        picInfo.imageUrlText = 'image url';
-        this.image_info.push(picInfo);
-        this.$message.success(`${info.file.name} file uploaded successfully.`);
-      } else if (status === 'error') {
-        this.$message.error(`${info.file.name} file upload failed.`);
-      }
     },
   }
 };

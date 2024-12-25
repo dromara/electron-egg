@@ -64,7 +64,7 @@ export default {
   },
   methods: {
     createWindow (index) {
-      ipc.invoke(ipcApiRoute.createWindow, toRaw(this.views[index])).then(r => {
+      ipc.invoke(ipcApiRoute.os.createWindow, toRaw(this.views[index])).then(r => {
         console.log(r);
       })
     },

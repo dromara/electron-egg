@@ -39,7 +39,7 @@ export default {
       const params = {
         id: id
       }
-      ipc.invoke(ipcApiRoute.test, params).then(res => {
+      ipc.invoke(ipcApiRoute.example.test, params).then(res => {
         console.log('res:', res)
       }) 
     },

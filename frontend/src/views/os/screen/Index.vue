@@ -38,7 +38,7 @@ export default {
   },
   methods: {
     getScreen (index) {
-      ipc.invoke(ipcApiRoute.getScreen, index).then(result => {
+      ipc.invoke(ipcApiRoute.os.getScreen, index).then(result => {
         this.data = result;
       })
     },

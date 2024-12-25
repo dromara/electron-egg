@@ -271,7 +271,7 @@ class FrameworkController {
    * 测试接口
    */ 
   hello(args) {
-    Log.info('hello ', args);
+    logger.info('hello ', args);
   }   
 }
 

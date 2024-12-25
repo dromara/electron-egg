@@ -54,14 +54,14 @@ export default {
   methods: {
     init () {
       // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      ipc.removeAllListeners(ipcApiRoute.printStatus);
-      ipc.on(ipcApiRoute.printStatus, (event, result) => {
+      ipc.removeAllListeners(ipcApiRoute.hardware.printStatus);
+      ipc.on(ipcApiRoute.hardware.printStatus, (event, result) => {
         console.log('result', result);
         this.$message.info('打印中...');
       })
     },    
     getPrinter () {
-      ipc.invoke(ipcApiRoute.getPrinterList, {}).then(res => {
+      ipc.invoke(ipcApiRoute.hardware.getPrinterList, {}).then(res => {
         this.printerList = res;
       }) 
     },
@@ -71,7 +71,7 @@ export default {
         view: toRaw(this.views[index]),
         deviceName: this.defaultDeviceName
       };
-      ipc.send(ipcApiRoute.print, params)
+      ipc.send(ipcApiRoute.hardware.print, params)
     },
     defaultDevice (item) {
       let desc = "";
