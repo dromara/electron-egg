@@ -4,11 +4,12 @@ const _ = require('lodash');
 const path = require('path');
 const {
   app: electronApp, dialog, shell, Notification, 
-  powerMonitor, screen, nativeTheme, BrowserWindow
+  powerMonitor, screen, nativeTheme
 } = require('electron');
-const { isProd, getBaseDir } = require('ee-core/ps');
-const { getConfig } = require('ee-core/config');
-const { isFileProtocol } = require('ee-core/utils/is');
+// const { isProd, getBaseDir } = require('ee-core/ps');
+// const { getConfig } = require('ee-core/config');
+// const { isFileProtocol } = require('ee-core/utils/is');
+const { windowService } = require('../service/os/window');
 
 /**
  * example
@@ -133,21 +134,32 @@ class OsController {
    * 打开新窗口
    */
   createWindow(args) {
-    const { type, content, windowName, windowTitle } = args;
-
-
-    return winContentsId;
+    const wcid = windowService.createWindow(args);
+    return wcid;
   }
   
   /**
-   * 获取窗口contents id
+   * Get Window contents id
    */
   getWCid(args) {
-    // 主窗口的name默认是main，其它窗口name开发者自己定义
-    const name = args;
-    const id = Addon.get('window').getWCid(name);
+    const wcid = windowService.getWCid(args);
+    return wcid;
+  }
 
-    return id;
+  /**
+   * Realize communication between two windows through the transfer of the main process
+   */
+  window1ToWindow2(args, event) {
+    windowService.communicate(args, event);
+    return;
+  }
+
+  /**
+   * Realize communication between two windows through the transfer of the main process
+   */
+  window2ToWindow1(args, event) {
+    windowService.communicate(args, event);
+    return;
   }
 
   /**

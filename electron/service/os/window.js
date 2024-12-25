@@ -1,7 +1,10 @@
 'use strict';
 
-const { BrowserView, Notification } = require('electron');
+const path = require('path');
+const { app: electronApp } = require('electron');
+const { BrowserWindow, BrowserView, Notification } = require('electron');
 const { getMainWindow } = require('ee-core/electron/window');
+const { isProd, getBaseDir } = require('ee-core/ps');
 
 /**
  * Window
@@ -12,16 +15,17 @@ class WindowService {
   constructor() {
     this.myBrowserView = null;
     this.myNotification = null;
+    this.windows = {}
   }
 
   /**
-   * createWindow
+   * Create a new window
    */
   createWindow(args) {
     const { type, content, windowName, windowTitle } = args;
     let contentUrl = null;
     if (type == 'html') {
-      contentUrl = path.join('file://', electronApp.getAppPath(), content)
+      contentUrl = path.join('file://', getBaseDir(), content)
     } else if (type == 'web') {
       contentUrl = content;
     } else if (type == 'vue') {
@@ -54,9 +58,9 @@ class WindowService {
     }
     const win = new BrowserWindow(opt);
     const winContentsId = win.webContents.id;
-
-    // load page
     win.loadURL(contentUrl);
+    win.webContents.openDevTools();
+    this.windows[windowName] = win;
 
     return winContentsId;
   }
@@ -65,12 +69,30 @@ class WindowService {
    * 获取窗口contents id
    */
   getWCid(args) {
-    // 主窗口的name默认是main，其它窗口name开发者自己定义
-    const name = args;
-    const id = Addon.get('window').getWCid(name);
-
-    return id;
+    const { windowName } = args;
+    let win;
+    if (windowName == 'main') {
+      win = getMainWindow();
+    } else {
+      win = this.windows[windowName];
+    }
+    
+    return win.webContents.id;
   }
+
+  /**
+   * Realize communication between two windows through the transfer of the main process
+   */
+  communicate(args) {
+    const { receiver, content } = args;
+    if (receiver == 'main') {
+      const win = getMainWindow();
+      win.webContents.send('controller.os.window2ToWindow1', content);
+    } else if (receiver == 'window2') {
+      const win = this.windows[receiver];
+      win.webContents.send('controller.os.window1ToWindow2', content);
+    }
+  }  
 
 }
 

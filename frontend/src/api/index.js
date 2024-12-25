@@ -1,7 +1,7 @@
 
 /**
- * 主进程与渲染进程通信频道定义
- * 格式：控制器.文件名.方法
+ * Definition of communication channel between main process and rendering process
+ * format：controller.filename.method
  * Definition of communication channels between main process and rendering process
  */
 const ipcApiRoute = {
@@ -48,6 +48,8 @@ const ipcApiRoute = {
     autoLaunch: 'controller.os.autoLaunch',
     setTheme: 'controller.os.setTheme',
     getTheme: 'controller.os.getTheme',
+    window1ToWindow2: 'controller.os.window1ToWindow2',
+    window2ToWindow1: 'controller.os.window2ToWindow1',
   },
 
   // hardware
@@ -75,14 +77,11 @@ const ipcApiRoute = {
 }
 
 /**
- * 自定义频道
- * 格式：自定义（推荐添加一个前缀）
- * custom chennel
+ * Customize Channel
+ * Format: Custom (recommended to add a prefix)
  */
 const specialIpcRoute = {
   appUpdater: 'custom.app.updater', // updater channel
-  window1ToWindow2: 'custom.window1-to-window2', // windows channel
-  window2ToWindow1: 'custom.window2-to-window1', // windows channel
 }
 
 export {

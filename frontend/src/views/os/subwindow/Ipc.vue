@@ -52,78 +52,77 @@
     </div>       
   </div>
 </template>
-<script>
-import { ipcApiRoute, specialIpcRoute } from '@/api';
+<script setup>
+import { ref, onMounted } from 'vue';
+import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
+import { message } from 'ant-design-vue';
 
-export default {
-  data() {
-    return {
-      messageString: '',
-      message1: '',
-      message2: '',
-      message3: '',
-      mainWCid: 0,
-    }
-  },
-  mounted () {
-    this.init();
-  },
-  methods: {
-    init () {
-      // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
-      ipc.removeAllListeners(ipcApiRoute.framework.ipcSendMsg);
-      ipc.on(ipcApiRoute.framework.ipcSendMsg, (event, result) => {
-        console.log('[ipcRenderer] [socketMsgStart] result:', result);
+const messageString = ref('');
+const message1 = ref('');
+const message2 = ref('');
+const message3 = ref('');
 
-        this.messageString = result;
-        // 调用后端的另一个接口
-        event.sender.send(ipcApiRoute.framework.hello, 'electron-egg');
-      })
+onMounted(() => {
+  init()
+})
 
-      // 监听主窗口发来的消息
-      ipc.removeAllListeners(specialIpcRoute.window1ToWindow2);
-      ipc.on(specialIpcRoute.window1ToWindow2, (event, arg) => {
-          this.$message.info(arg);
-      })
-    },
-    sendMsgStart() {
-      const params = {
-        type: 'start',
-        content: '开始'
-      }
-      ipc.send(ipcApiRoute.framework.ipcSendMsg, params)
-    },
-    sendMsgStop() {
-      const params = {
-        type: 'end',
-        content: ''
-      }
-      ipc.send(ipcApiRoute.framework.ipcSendMsg, params)
-    },
-    handleInvoke () {
-      ipc.invoke(ipcApiRoute.framework.ipcInvokeMsg, '异步-回调').then(r => {
-        console.log('r:', r);
-        this.message1 = r;
-      });
-    },
-    async handleInvoke2 () {
-      const msg = await ipc.invoke(ipcApiRoute.framework.ipcInvokeMsg, '异步');
-      console.log('msg:', msg);
-      this.message2 = msg;
-    },
-    handleSendSync () {
-      const msg = ipc.sendSync(ipcApiRoute.framework.ipcSendSyncMsg, '同步');
-      this.message3 = msg;
-    },
-    sendTosubWindow () {
-      // 获取主窗口id
-      ipc.invoke(ipcApiRoute.os.getWCid, 'main').then(id => {
-        this.mainWCid = id;
-        ipc.sendTo(this.mainWCid, specialIpcRoute.window2ToWindow1, '窗口2 通过 sendTo 给主窗口发送消息');
-      });
-    },
+function init() {
+  ipc.on(ipcApiRoute.framework.ipcSendMsg, (event, result) => {
+    console.log('[ipcRenderer] [socketMsgStart] result:', result);
+
+    messageString.value = result;
+    // 调用后端的另一个接口
+    event.sender.send(ipcApiRoute.framework.hello, 'electron-egg');
+  })
+
+  // 监听主窗口发来的消息
+  ipc.removeAllListeners(ipcApiRoute.os.window1ToWindow2);
+  ipc.on(ipcApiRoute.os.window1ToWindow2, (event, arg) => {
+      message.info(arg);
+  })  
+}
+
+function sendMsgStart() {
+  const params = {
+    type: 'start',
+    content: '开始'
   }
+  ipc.send(ipcApiRoute.framework.ipcSendMsg, params)
+}
+
+function sendMsgStop() {
+  const params = {
+    type: 'end',
+    content: ''
+  }
+  ipc.send(ipcApiRoute.framework.ipcSendMsg, params)
+}
+
+function handleInvoke () {
+  ipc.invoke(ipcApiRoute.framework.ipcInvokeMsg, '异步-回调').then(r => {
+    console.log('r:', r);
+    message1.value = r;
+  });
+}
+
+async function handleInvoke2 () {
+  const msg = await ipc.invoke(ipcApiRoute.framework.ipcInvokeMsg, '异步');
+  console.log('msg:', msg);
+  message2.value = msg;
+}
+
+function handleSendSync () {
+  const msg = ipc.sendSync(ipcApiRoute.framework.ipcSendSyncMsg, '同步');
+  message3.value = msg;
+}
+
+function sendTosubWindow () {
+  const params = {
+    receiver: 'main',
+    content: '窗口2给主窗口发送消息'
+  }
+  ipc.invoke(ipcApiRoute.os.window1ToWindow2, params)
 }
 </script>
 <style lang="less" scoped>
