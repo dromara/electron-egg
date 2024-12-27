@@ -32,11 +32,6 @@ const constantRouterMap = [
             component: () => import('@/views/framework/socket/SocketServer.vue')
           }, 
           {
-            path: '/framework/jsondb/index',
-            name: 'FrameworkJsonDBIndex',
-            component: () => import('@/views/framework/jsondb/Index.vue')
-          },
-          {
             path: '/framework/sqlitedb/index',
             name: 'FrameworkSqliteDBIndex',
             component: () => import('@/views/framework/sqlitedb/Index.vue')

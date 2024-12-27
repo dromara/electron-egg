@@ -9,6 +9,7 @@ const { getExtraResourcesDir } = require('ee-core/ps');
 const { logger } = require('ee-core/log');
 const { getConfig } = require('ee-core/config');
 const { frameworkService } = require('../service/framework');
+const { getHttpServer } = require('ee-core/socket');
 
 /**
  * framework - demo
@@ -116,40 +117,35 @@ class FrameworkController {
    * 检测http服务是否开启
    */ 
   async checkHttpServer() {
-    const { httpServer } = getConfig;
-    const url = httpServer.protocol + httpServer.host + ':' + httpServer.port;
-
+    const { enable, protocol, host, port } = getConfig().httpServer;
+    const url = protocol + host + ':' + port;
+    console.log('[checkHttpServer] url:', url);
     const data = {
-      enable: httpServer.enable,
+      enable: enable,
       server: url
     }
     return data;
   }
 
   /**
-   * [todo] 一个http请求访问此方法
+   * 一个 http 请求
+   * args 是 前端传的参数
+   * ctx 是 koa 的 ctx 对象
    */ 
-  async doHttpRequest() {
-    const { CoreApp } = EE;
-    // http方法
-    const method = CoreApp.request.method;
-    // http get 参数
-    let params = CoreApp.request.query;
-    params = (params instanceof Object) ? params : JSON.parse(JSON.stringify(params));
-    // http post 参数
-    const body = CoreApp.request.body;
-
+  async doHttpRequest(args, ctx) {
     const httpInfo = {
-      method,
-      params,
-      body
+      args,
+      method: ctx.request.method,
+      query: ctx.request.query,
+      body: ctx.request.body
     }
-    Log.info('httpInfo:', httpInfo);
+    logger.info('httpInfo:', httpInfo);
 
-    if (!body.id) {
+    const { id } = args;
+    if (!id) {
       return false;
     }
-    const dir = electronApp.getPath(body.id);
+    const dir = electronApp.getPath(id);
     shell.openPath(dir);
     
     return true;

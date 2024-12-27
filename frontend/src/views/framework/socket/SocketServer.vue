@@ -1,5 +1,5 @@
 <template>
-  <div id="app-base-httpserver">
+  <div id="app-socket-server">
     <div class="one-block-1">
       <span>
         1. 使用socket与主进程通信
@@ -23,45 +23,45 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { ipcApiRoute } from '@/api';
 import { io } from 'socket.io-client';
+import { ref, onMounted } from 'vue';
+import { message } from 'ant-design-vue';
 
-export default {
-  data() {
-    return {
-      currentStatus: '关闭',
-      servicAddress: 'ws://localhost:7070'
-    };
-  },
-  mounted () {
-    this.init();
-  },
-  methods: {
-    init () {
-      this.socket = io(this.servicAddress);
-      this.socket.on('connect', () => {
-        console.log('connect!!!!!!!!');
-        this.currentStatus = '开启';
-      });
-    },
-    sendRequest (id) {
-      if (this.currentStatus == '关闭') {
-        this.$message.error('socketio服务未开启');
-        return;
-      }
-
-      const method = ipcApiRoute.framework.doSocketRequest; 
-      this.socket.emit('c1', { cmd: method, args: {id: id} }, (response) => {
-        // response为返回值
-        console.log('response:', response)
-      });
-    },  
-  }
+const currentStatus = ref('关闭');
+const servicAddress = ref('ws://localhost:7070');
+const client = {
+  socket: null
 };
+
+onMounted(() => {
+  init()
+})
+
+function init() {
+  client.socket = io(servicAddress.value);
+  client.socket.on('connect', () => {
+    console.log('connect!!!!!!!!');
+    currentStatus.value = '开启';
+  });
+}
+
+function sendRequest(id) {
+  if (currentStatus.value == '关闭') {
+    message.error('socketio服务未开启');
+    return;
+  }
+
+  const method = ipcApiRoute.framework.doSocketRequest; 
+  client.socket.emit('c1', { cmd: method, args: {id} }, (response) => {
+    // response为返回值
+    console.log('response:', response)
+  });
+} 
 </script>
 <style lang="less" scoped>
-#app-base-httpserver {
+#app-socket-server {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

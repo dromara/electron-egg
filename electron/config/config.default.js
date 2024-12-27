@@ -39,7 +39,7 @@ module.exports = () => {
     },
     socketServer: {
       enable: false,
-      port: 8080,
+      port: 7070,
       path: "/socket.io/",
       connectTimeout: 45000,
       pingTimeout: 30000,
@@ -47,13 +47,12 @@ module.exports = () => {
       maxHttpBufferSize: 1e8,
       transports: ["polling", "websocket"],
       cors: {
-        origin: false,
+        origin: true,
       },
       channel: 'c1'
     },
     httpServer: {
       enable: false,
-      prefix: 'api',
       https: {
         enable: false, 
         key: '/public/ssl/localhost+1.key',
@@ -61,9 +60,6 @@ module.exports = () => {
       },
       host: '127.0.0.1',
       port: 7071,
-      cors: {
-        origin: "*"
-      }
     },
     mainServer: {
       indexPath: '/public/dist/index.html',

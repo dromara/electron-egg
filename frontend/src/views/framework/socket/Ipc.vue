@@ -1,5 +1,5 @@
 <template>
-  <div id="app-base-socket-ipc">
+  <div id="app-socket-ipc">
     <div class="one-block-1">
       <span>
         1. 发送异步消息
@@ -142,7 +142,7 @@ async function sendTosubWindow() {
 }
 </script>
 <style lang="less" scoped>
-#app-base-socket-ipc {
+#app-socket-ipc {
   padding: 0px 10px;
   text-align: left;
   width: 100%;
