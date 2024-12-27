@@ -1,5 +1,5 @@
 <template>
-  <div id="app-base-db">
+  <div id="app-sqlite-db">
     <div class="one-block-1">
       <span>
         1. sqlite本地数据库
@@ -260,7 +260,7 @@ export default {
 };
 </script>
 <style lang="less" scoped>
-#app-base-db {
+#app-sqlite-db {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

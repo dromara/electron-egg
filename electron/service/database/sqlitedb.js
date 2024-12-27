@@ -1,5 +1,6 @@
 'use strict';
 
+const { BasedbService } = require('./basedb');
 const Storage = require('ee-core/storage');
 const _ = require('lodash');
 const path = require('path');
@@ -8,45 +9,35 @@ const path = require('path');
  * sqlite数据存储
  * @class
  */
-class SqlitedbService {
+class SqlitedbService extends BasedbService {
 
   constructor () {
-    this.sqliteFile = 'sqlite-demo.db';
-    let sqliteOptions = {
-      driver: 'sqlite',
-      default: {
-        timeout: 6000,
-        verbose: console.log // 打印sql语法
-      }
+    const options = {
+      dbname:'sqlite-demo.db',
     }
-    this.demoSqliteDB = Storage.connection(this.sqliteFile, sqliteOptions);
+    super(options);
+    this._initTable();
   }
 
   /*
-   * 检查并创建表 (sqlite)
+   * 初始化表
    */
-  async checkAndCreateTableSqlite(tableName = '') {
-    if (_.isEmpty(tableName)) {
-      throw new Error(`table name is required`);
-    }
+  _initTable() {
     // 检查表是否存在
-    const userTable = this.demoSqliteDB.db.prepare('SELECT * FROM sqlite_master WHERE type=? AND name = ?');
-    const result = userTable.get('table', tableName);
-    //console.log('result:', result);
-    if (result) {
-      return;
+    const userTableName = 'user';
+    const masterStmt = this.db.prepare('SELECT * FROM sqlite_master WHERE type=? AND name = ?');
+    let tableExists = masterStmt.get('table', userTableName);
+    if (!tableExists) {
+      // 创建表
+      const create_user_table_sql =
+      `CREATE TABLE ${userTableName}
+      (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         name CHAR(50) NOT NULL,
+         age INT
+      );`
+      this.db.exec(create_user_table_sql);
     }
-
-    // 创建表
-    const create_table_user =
-    `CREATE TABLE ${tableName}
-     (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name CHAR(50) NOT NULL,
-        age INT
-     );`
-    this.demoSqliteDB.db.exec(create_table_user);
-
   }
 
   /*

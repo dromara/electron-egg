@@ -9,7 +9,7 @@ const { getExtraResourcesDir } = require('ee-core/ps');
 const { logger } = require('ee-core/log');
 const { getConfig } = require('ee-core/config');
 const { frameworkService } = require('../service/framework');
-const { getHttpServer } = require('ee-core/socket');
+const { frameworkService } = require('../service/database/sqlitedb');
 
 /**
  * framework - demo
