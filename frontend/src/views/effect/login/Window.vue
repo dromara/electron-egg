@@ -10,29 +10,23 @@
     </div>  
   </div>
 </template>
-<script>
+<script setup>
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const loading = ref(false);
+const loginText = ref('正在登陆......');
   
-export default {
-  data() {
-    return {
-      loading: false, 
-      loginText: '正在登陆......'
-    };
-  },
-  methods: {
-    login() {
-      this.loading = true;
-      setTimeout(() => {
-        this.$router.push({ name: 'Framework', params: {}});
-        ipc.invoke(ipcApiRoute.effect.restoreWindow, {width: 980, height: 650}).then(r => {      
-          // 
-        })
-      }, 2000);
-    }
-  }
-};
+const login = () => {
+  loading.value = true;
+  setTimeout(() => {
+    router.push({ name: 'Framework'});
+    ipc.invoke(ipcApiRoute.effect.restoreWindow, {width: 980, height: 650})
+  }, 2000);
+}
 </script>
 <style lang="less" scoped>
 #effect-login-window {

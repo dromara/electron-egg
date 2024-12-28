@@ -28,20 +28,6 @@
 import subMenu from '@/router/subMenu';
 
 export default {
-  // setup() {
-  //   const state = reactive({
-  //     selectedKeys: ['menu_100'],
-  //   });
-    
-  //   const handleClick = e => {
-  //     state.selectedKeys = [e.key];
-  //   };
-
-  //   return {
-  //     state,
-  //     handleClick,
-  //   };
-  // },
   props: {
     id: {
       type: String,

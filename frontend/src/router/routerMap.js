@@ -94,28 +94,9 @@ const constantRouterMap = [
             path: '/os/theme/index',
             name: 'OsThemeIndex',
             component: () => import('@/views/os/theme/Index.vue')
-          },   
-          {
-            path: '/os/system/index',
-            name: 'OsSystemIndex',
-            component: () => import('@/views/os/system/Index.vue')
-          },
+          },  
         ]  
       },      
-      {
-        path: '/hardware',
-        name: 'Hardware',
-        component: () => import('@/layouts/Menu.vue'),
-        props: { id: 'hardware' },
-        redirect: { name: 'HardwarePrinterIndex' },
-        children: [
-          {
-            path: '/hardware/printer/index',
-            name: 'HardwarePrinterIndex',
-            component: () => import('@/views/hardware/printer/Index.vue')
-          },
-        ]  
-      },
       {
         path: '/effect',
         name: 'Effect',

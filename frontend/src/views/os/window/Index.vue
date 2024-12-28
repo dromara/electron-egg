@@ -1,5 +1,5 @@
 <template>
-  <div id="app-base-window">
+  <div id="app-os-window">
     <div class="one-block-1">
       <span>
         1. 新窗口中加载web内容
@@ -32,47 +32,37 @@
     </div>    
   </div>
 </template>
-<script>
+<script setup>
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
-import { toRaw } from 'vue';
 
-export default {
-  data() {
-    return {
-      views: [
-        {
-          type: 'web',
-          content: 'https://www.bilibili.com/',
-          windowName: 'window-web',
-          windowTitle: 'bilibili'
-        },
-        {
-          type: 'html',
-          content: '/public/html/view_example.html',
-          windowName: 'window-html',
-          windowTitle: 'html window'
-        },
-        {
-          type: 'vue',
-          content: '#/special/subwindow',
-          windowName: 'window-vue',
-          windowTitle: 'vue window'
-        },    
-      ],
-    };
+const views = [
+  {
+    type: 'web',
+    content: 'https://www.bilibili.com/',
+    windowName: 'window-web',
+    windowTitle: 'bilibili'
   },
-  methods: {
-    createWindow (index) {
-      ipc.invoke(ipcApiRoute.os.createWindow, toRaw(this.views[index])).then(r => {
-        console.log(r);
-      })
-    },
-  }
-};
+  {
+    type: 'html',
+    content: '/public/html/view_example.html',
+    windowName: 'window-html',
+    windowTitle: 'html window'
+  },
+  {
+    type: 'vue',
+    content: '#/special/subwindow',
+    windowName: 'window-vue',
+    windowTitle: 'vue window'
+  }, 
+];
+
+function createWindow(index) {
+  ipc.invoke(ipcApiRoute.os.createWindow, views[index])
+}
 </script>
 <style lang="less" scoped>
-#app-base-window {
+#app-os-window {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

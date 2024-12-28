@@ -12,24 +12,17 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
+import { useRouter } from 'vue-router';
 
-export default {
-  data() {
-    return {
-    };
-  },
-  methods: {
-    loginWindow () {
-      this.$router.push({ name: 'SpecialLoginWindow', params: {}});
-      ipc.invoke(ipcApiRoute.effect.loginWindow, {width: 400, height: 300}).then(r => {      
-        // 
-      })
-    },
-  }
-};
+const router = useRouter();
+
+function loginWindow() {
+  router.push({ name: 'SpecialLoginWindow'});
+  ipc.invoke(ipcApiRoute.effect.loginWindow, {width: 400, height: 300});
+}
 </script>
 <style lang="less" scoped>
 #effect-login-index {

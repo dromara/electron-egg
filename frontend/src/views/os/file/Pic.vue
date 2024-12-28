@@ -17,24 +17,18 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
+import { ref } from 'vue';
 
-export default {
-  data() {
-    return {
-      picPath: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png'
-    };
-  },
-  methods: {
-    selectPic () {
-      ipc.invoke(ipcApiRoute.os.selectPic, {}).then(r => {      
-        this.picPath = r;
-      })
-    },
-  }
-};
+const picPath = ref('https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png');
+
+function selectPic() {
+  ipc.invoke(ipcApiRoute.os.selectPic).then(r => { 
+    picPath.value = r;
+  })
+}
 </script>
 <style lang="less" scoped>
 #os-file-pic {

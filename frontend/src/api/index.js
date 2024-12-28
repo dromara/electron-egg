@@ -52,13 +52,6 @@ const ipcApiRoute = {
     window2ToWindow1: 'controller.os.window2ToWindow1',
   },
 
-  // hardware
-  hardware: {
-    getPrinterList: 'controller.hardware.getPrinterList',
-    print: 'controller.hardware.print',
-    printStatus: 'controller.hardware.printStatus',
-  },
-
   // effect
   effect: {
     selectFile: 'controller.effect.selectFile',

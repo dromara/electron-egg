@@ -2,7 +2,7 @@
 
 const path = require('path');
 const { app: electronApp } = require('electron');
-const { BrowserWindow, BrowserView, Notification } = require('electron');
+const { BrowserWindow, Notification } = require('electron');
 const { getMainWindow } = require('ee-core/electron/window');
 const { isProd, getBaseDir } = require('ee-core/ps');
 
@@ -13,7 +13,6 @@ const { isProd, getBaseDir } = require('ee-core/ps');
 class WindowService {
 
   constructor() {
-    this.myBrowserView = null;
     this.myNotification = null;
     this.windows = {}
   }
@@ -66,7 +65,7 @@ class WindowService {
   }
   
   /**
-   * 获取窗口contents id
+   * Get window contents id
    */
   getWCid(args) {
     const { windowName } = args;
@@ -93,6 +92,36 @@ class WindowService {
       win.webContents.send('controller.os.window1ToWindow2', content);
     }
   }  
+
+  /**
+   * createNotification
+   */
+  createNotification(options, event) {
+    const channel = 'controller.os.sendNotification';
+    this.myNotification = new Notification(options);
+
+    if (options.clickEvent) {
+      this.myNotification.on('click', (e) => {
+        let data = {
+          type: 'click',
+          msg: '您点击了通知消息'
+        }
+        event.reply(`${channel}`, data)
+      });
+    }
+
+    if (options.closeEvent) {
+      this.myNotification.on('close', (e) => {
+        let data = {
+          type: 'close',
+          msg: '您关闭了通知消息'
+        }
+        event.reply(`${channel}`, data)
+      });
+    }
+
+    this.myNotification.show();
+  }
 
 }
 

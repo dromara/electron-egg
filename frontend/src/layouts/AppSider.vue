@@ -53,18 +53,12 @@ export default {
           params: {},
         },
         'menu_3' : {
-          icon: 'icon-xiangji',
-          title: '硬件',
-          pageName: 'Hardware',
-          params: {},
-        },
-        'menu_4' : {
           icon: 'icon-liuxing',
           title: '特效',
           pageName: 'Effect',
           params: {},
         },   
-        'menu_5' : {
+        'menu_4' : {
           icon: 'icon-gouwu',
           title: 'cross',
           pageName: 'Cross',

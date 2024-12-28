@@ -1,5 +1,5 @@
 <template>
-  <div id="app-base-subwindow-ipc">
+  <div id="app-os-subwindow-ipc">
     <div class="one-block-1">
       <span>
         1. 发送异步消息
@@ -126,7 +126,7 @@ function sendTosubWindow () {
 }
 </script>
 <style lang="less" scoped>
-#app-base-subwindow-ipc {
+#app-os-subwindow-ipc {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

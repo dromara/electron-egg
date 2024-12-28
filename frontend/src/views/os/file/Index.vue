@@ -1,5 +1,5 @@
 <template>
-  <div id="app-base-file">
+  <div id="app-os-file">
     <div class="one-block-1">
       <span>
         1. 系统原生对话框
@@ -34,7 +34,7 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-list :grid="{ gutter: 16, column: 4 }" :data-source="file_list">
+      <a-list :grid="{ gutter: 16, column: 4 }" :data-source="fileList">
         <template #renderItem="{ item }">
           <a-list-item @click="openDirectry(item.id)">
             <a-card :title="item.content">
@@ -44,23 +44,19 @@
             </a-card>
           </a-list-item>
         </template>
-        <!-- <a-list-item slot="renderItem" slot-scope="item" @click="openDirectry(item.id)">
-          <a-card :title="item.content">
-            <a-button type="link">
-              打开
-            </a-button>
-          </a-card>
-        </a-list-item> -->
       </a-list>
     </div>
     <div class="footer">
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import storage from 'store2';
+
+import { ref, onMounted } from 'vue';
+import { message } from 'ant-design-vue';
 
 const fileList = [
   {
@@ -81,60 +77,33 @@ const fileList = [
   }
 ];
 
-export default {
-  data() {
-    return {
-      file_list: fileList,
-      image_info: [],
-      num: 0,
-      servicAddress: '',
-			dir_path: "D:\\www\\ee",
-    };
-  },
-  mounted () {
-    this.getHost();
-  },
-  methods: {
-    getHost () {
-      ipc.invoke(ipcApiRoute.framework.checkHttpServer, {}).then(r => {
-        if (r.enable) {
-          this.servicAddress = r.server;
-          storage.set('httpServiceConfig', r);
+const dir_path = ref('D:\\www\\ee');
 
-          // url转换
-          const host = r.server || 'http://localhost:7071';
-          let uri = ipcApiRoute.framework.uploadFile;
-          let url = uri.split('.').join('/');
-          this.action_url = host + '/' + url;
-        }
-      })
-    },
-    openDirectry (id) {
-      ipc.invoke(ipcApiRoute.os.openDirectory, {id: id}).then(res => {
-        //console.log('res:', res)
-      })      
-    },
-    selectDir() {
-      ipc.invoke(ipcApiRoute.os.selectFolder, '').then(r => {
-        this.dir_path = r;
-        this.$message.info(r);
-      })      
-    },
-		messageShow() {
-      ipc.invoke(ipcApiRoute.os.messageShow, '').then(r => {
-        this.$message.info(r);
-      })
-    },    
-    messageShowConfirm() {
-      ipc.invoke(ipcApiRoute.os.messageShowConfirm, '').then(r => {
-        this.$message.info(r);
-      })
-    },
-  }
-};
+function openDirectry (id) {
+  ipc.invoke(ipcApiRoute.os.openDirectory, {id: id})     
+}
+
+function selectDir() {
+  ipc.invoke(ipcApiRoute.os.selectFolder).then(r => {
+    dir_path.value = r;
+    message.info(r);
+  })      
+}
+
+function messageShow() {
+  ipc.invoke(ipcApiRoute.os.messageShow).then(r => {
+    message.info(r);
+  })
+}
+
+function messageShowConfirm() {
+  ipc.invoke(ipcApiRoute.os.messageShowConfirm).then(r => {
+    message.info(r);
+  })
+}
 </script>
 <style lang="less" scoped>
-#app-base-file {
+#app-os-file {
   padding: 0px 10px;
   text-align: left;
   width: 100%;
