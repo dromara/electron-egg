@@ -36,13 +36,7 @@ export default {
 			title: '软件调用',
 			pageName: 'FrameworkSoftwareIndex',
 			params: {}
-		},		
-        'menu_109' : {
-			icon: 'profile',
-			title: '测试',
-			pageName: 'FrameworkTestApiIndex',
-			params: {}
-		},                                             
+		},		                                           
 	},	
     os: {
         'menu_100' : {

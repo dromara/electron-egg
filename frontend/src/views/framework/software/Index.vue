@@ -1,56 +1,40 @@
 <template>
-  <div id="app-base-software-open">
+  <div id="app-software">
     <div class="one-block-1">
       <span>
-        1. 调用其它软件（exe、bash等可执行程序）
+        1. 调用其它软件 (exe、bash等可执行程序)
       </span>
       <p/>
       <span class="sub-content">
-        注：请先将【powershell.exe】复制到【electron-egg/build/extraResources】目录中
+        注: 请先将【powershell.exe】复制到【electron-egg/build/extraResources】目录中
       </span>
     </div>  
     <div class="one-block-2">
-      <a-list bordered :data-source="data">
-        <template #renderItem="{ item }">
-          <a-list-item @click="openSoft(item.id)">
-            {{ item.content }}
-            <a-button type="link">
-              执行
-            </a-button>
-          </a-list-item>
-        </template>
-      </a-list>
+      <a-space>
+        {{ soft }}
+        <a-button @click="openSoft">执行</a-button>
+      </a-space>
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
+import { ref } from 'vue';
+import { message } from 'ant-design-vue';
 
-export default {
-  data() {
-    return {
-      data: [
-        {
-          content: 'powershell.exe',
-          id: 'powershell.exe'
-        }
-      ],
-    };
-  },
-  methods: {
-    openSoft(id) { 
-      ipc.invoke(ipcApiRoute.framework.openSoftware, id).then(result => {
-        if (!result) {
-          this.$message.error('程序不存在');
-        }
-      })       
-    },
-  }
-};
+const soft = ref('powershell.exe');
+
+function openSoft() { 
+  ipc.invoke(ipcApiRoute.framework.openSoftware, {softName: soft.value}).then(result => {
+    if (!result) {
+      message.error('程序不存在');
+    }
+  })       
+}
 </script>
 <style lang="less" scoped>
-#app-base-software-open {
+#app-software {
   padding: 0px 10px;
   text-align: left;
   width: 100%;

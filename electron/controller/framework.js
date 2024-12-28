@@ -75,12 +75,9 @@ class FrameworkController {
    * 调用其它程序（exe、bash等可执行程序）
    * 
    */
-  openSoftware(softName) {
-    if (!softName) {
-      return false;
-    }
-
-    let softwarePath = path.join(getExtraResourcesDir(), softName);
+  openSoftware(args) {
+    const { softName } = args;
+    const softwarePath = path.join(getExtraResourcesDir(), softName);
     logger.info('[openSoftware] softwarePath:', softwarePath);
 
     // 检查程序是否存在
@@ -88,7 +85,7 @@ class FrameworkController {
       return false;
     }
     // 命令行字符串 并 执行, start 命令后面的路径要加双引号
-    let cmdStr = `start "${softwarePath}"`;
+    const cmdStr = `start "${softwarePath}"`;
     exec(cmdStr);
 
     // 方法二
@@ -96,22 +93,6 @@ class FrameworkController {
 
     return true;
   }  
-  
-  /**
-   * 检查是否有新版本
-   */
-  checkForUpdater() { 
-    Addon.get('autoUpdater').checkUpdate();
-    return;
-  }
-
-  /**
-   * 下载新版本
-   */
-  downloadApp() {
-    Addon.get('autoUpdater').download();
-    return;
-  }
 
   /**
    * 检测http服务是否开启
