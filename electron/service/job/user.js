@@ -2,11 +2,7 @@
 
 const { logger } = require('ee-core/log');
 
-/**
- * job 中使用的 service 不要继承 const { Service } = require('ee-core')
- * 因为 Service 中会依赖 electron 的 api 导致错误
- * @class
- */
+// The service used in the job should not rely on Electron's API, as it may cause errors
 class UserService {
 
   /**
@@ -25,4 +21,6 @@ class UserService {
 }
 
 UserService.toString = () => '[class UserService]';
-module.exports = UserService;  
+module.exports = {
+  UserService
+};  

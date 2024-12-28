@@ -9,7 +9,7 @@ module.exports = () => {
       mode: 'undocked'
     },
     jobs: {
-      messageLog: false
+      messageLog: true
     }
   };
 };

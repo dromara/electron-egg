@@ -92,7 +92,7 @@ class FrameworkController {
     exec(cmdStr);
 
     // 方法二
-    // 推荐使用cross模块
+    // 使用cross模块
 
     return true;
   }  
@@ -199,22 +199,21 @@ class FrameworkController {
    * 任务
    */ 
   someJob(args, event) {
-    let jobId = args.id;
-    let action = args.action;
-    
+    const { jobId, action} = args;
     let result;
+
     switch (action) {
       case 'create':
-        result = Services.get('framework').doJob(jobId, action, event);
+        result = frameworkService.doJob(jobId, action, event);
         break;       
       case 'close':
-        Services.get('framework').doJob(jobId, action, event);
+        frameworkService.doJob(jobId, action, event);
         break;
       case 'pause':
-        Services.get('framework').doJob(jobId, action, event);
+        frameworkService.doJob(jobId, action, event);
         break;  
       case 'resume':
-        Services.get('framework').doJob(jobId, action, event);
+        frameworkService.doJob(jobId, action, event);
         break;   
       default:  
     }
@@ -232,10 +231,10 @@ class FrameworkController {
    */ 
   async createPool(args, event) {
     let num = args.number;
-    Services.get('framework').doCreatePool(num, event);
+    frameworkService.doCreatePool(num, event);
 
     // test monitor
-    Services.get('framework').monitorJob();
+    frameworkService.monitorJob();
 
     return;
   }
@@ -244,13 +243,11 @@ class FrameworkController {
    * 通过进程池执行任务
    */ 
   someJobByPool(args, event) {
-    let jobId = args.id;
-    let action = args.action;
-    
+    const { jobId, action } = args;
     let result;
     switch (action) {
       case 'run':
-        result = Services.get('framework').doJobByPool(jobId, action, event);
+        result = frameworkService.doJobByPool(jobId, action, event);
         break;
       default:  
     }
