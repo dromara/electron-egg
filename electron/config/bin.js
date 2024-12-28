@@ -15,12 +15,13 @@ module.exports = {
       protocol: 'http://',
       hostname: 'localhost',
       port: 8080,
-      indexPath: 'index.html'
+      indexPath: 'index.html',
     },
     electron: {
       directory: './',
       cmd: 'electron',
-      args: ['.', '--env=local', '--color=always'],
+      args: ['.', '--env=local'],
+      loadingPage: '/public/html/loading.html',
     }
   },
 
@@ -33,7 +34,27 @@ module.exports = {
       directory: './frontend',
       cmd: 'npm',
       args: ['run', 'build'],
-    }
+    },
+    go_w: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o=../build/extraResources/goapp.exe'],
+    },
+    go_m: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o=../build/extraResources/goapp'],
+    },
+    go_l: {
+      directory: './go',
+      cmd: 'go',
+      args: ['build', '-o=../build/extraResources/goapp'],
+    },
+    python: {
+      directory: './python',
+      cmd: 'python',
+      args: ['./setup.py', 'build'],
+    },
   },
 
   /**
@@ -44,7 +65,27 @@ module.exports = {
     frontend_dist: {
       dist: './frontend/dist',
       target: './public/dist'
-    }
+    },
+    go_static: {
+      dist: './frontend/dist',
+      target: './go/public/dist'
+    },
+    go_config: {
+      dist: './go/config',
+      target: './go/public/config'
+    },
+    go_package: {
+      dist: './package.json',
+      target: './go/public/package.json'
+    },
+    go_images: {
+      dist: './public/images',
+      target: './go/public/images'
+    },
+    python_dist: {
+      dist: './python/dist',
+      target: './build/extraResources/py'
+    },
   },  
 
   /**
@@ -67,7 +108,7 @@ module.exports = {
       '!electron/config/encrypt.js',
       '!electron/config/nodemon.json',
       '!electron/config/builder.json',
-      '!electron/config/bin.json',
+      '!electron/config/bin.js',
     ],
     fileExt: ['.js'],
     confusionOptions: {
@@ -83,15 +124,29 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
-    node_v: {
-      directory: './',
-      cmd: 'node',
-      args: ['-v'],
+    // 单独调试，air 实现 go 热重载
+    go: {
+      directory: './go',
+      cmd: 'air',
+      args: ['-c=config/.air.toml' ],
     },
-    npm_v: {
-      directory: './',
-      cmd: 'npm',
-      args: ['-v'],
+    // windows 单独调试，air 实现 go 热重载 
+    go_w: {
+      directory: './go',
+      cmd: 'air',
+      args: ['-c=config/.air.windows.toml' ],
+    },    
+    // 单独调试，以基础方式启动 go
+    go2: {
+      directory: './go',
+      cmd: 'go',
+      args: ['run', './main.go', '--env=dev','--basedir=../', '--port=7073'],
+    },     
+    python: {
+      directory: './python',
+      cmd: 'python',
+      args: ['./main.py', '--port=7074'],
+      stdio: "inherit", // ignore
     },
-  },   
+  },  
 };

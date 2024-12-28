@@ -66,11 +66,6 @@ const constantRouterMap = [
             component: () => import('@/views/os/file/Pic.vue')
           },
           {
-            path: '/os/windowview/index',
-            name: 'OsWindowViewIndex',
-            component: () => import('@/views/os/windowview/Index.vue')
-          },
-          {
             path: '/os/window/index',
             name: 'OsWindowIndex',
             component: () => import('@/views/os/window/Index.vue')
@@ -79,22 +74,7 @@ const constantRouterMap = [
             path: '/os/notification/index',
             name: 'OsNotificationIndex',
             component: () => import('@/views/os/notification/Index.vue')
-          },
-          {
-            path: '/os/powermonitor/index',
-            name: 'OsPowerMonitorIndex',
-            component: () => import('@/views/os/powermonitor/Index.vue')
-          },
-          {
-            path: '/os/screen/index',
-            name: 'OsScreenIndex',
-            component: () => import('@/views/os/screen/Index.vue')
-          },
-          {
-            path: '/os/theme/index',
-            name: 'OsThemeIndex',
-            component: () => import('@/views/os/theme/Index.vue')
-          },  
+          }
         ]  
       },      
       {

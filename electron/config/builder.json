@@ -1,7 +1,7 @@
 {
   "productName": "ee",
   "appId": "com.electron.ee",
-  "copyright": "© 2023 哆啦好梦 Technology Co., Ltd.",
+  "copyright": "© 2025 哆啦好梦 Technology Co., Ltd.",
   "directories": {
     "output": "out"
   },
@@ -11,6 +11,8 @@
     "!frontend/",
     "!run/",
     "!logs/",
+    "!go/",
+    "!python/",
     "!data/"
   ],
   "extraResources": {
@@ -26,7 +28,7 @@
     "installerHeaderIcon": "build/icons/icon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "EE框架"
+    "shortcutName": "electron-egg"
   },
   "publish": [
     {
@@ -50,7 +52,7 @@
     ]
   },
   "linux": {
-    "icon": "build/icons/icon.icns",
+    "icon": "build/icons",
     "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
     "target": [
       "deb"

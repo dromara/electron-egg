@@ -17,7 +17,7 @@ class OsController {
   /**
    * All methods receive two parameters
    * @param args Parameters transmitted by the frontend
-   * @param event - Values are only available during IPC communication. For details, please refer to the controller documentation
+   * @param event - Event are only available during IPC communication. For details, please refer to the controller documentation
    */
 
   /**
