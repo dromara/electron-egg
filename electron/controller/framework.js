@@ -9,7 +9,7 @@ const { getExtraResourcesDir } = require('ee-core/ps');
 const { logger } = require('ee-core/log');
 const { getConfig } = require('ee-core/config');
 const { frameworkService } = require('../service/framework');
-const { frameworkService } = require('../service/database/sqlitedb');
+const { sqlitedbService } = require('../service/database/sqlitedb');
 
 /**
  * framework - demo
@@ -38,7 +38,7 @@ class FrameworkController {
 
     try {
       // test
-      Services.get('database.sqlitedb').getDataDir();
+      sqlitedbService.getDataDir();
     } catch (err) {
       console.log(err);
       data.code = -1;
@@ -47,26 +47,26 @@ class FrameworkController {
 
     switch (action) {
       case 'add' :
-        data.result = await Services.get('database.sqlitedb').addTestDataSqlite(info);;
+        data.result = await sqlitedbService.addTestDataSqlite(info);;
         break;
       case 'del' :
-        data.result = await Services.get('database.sqlitedb').delTestDataSqlite(delete_name);;
+        data.result = await sqlitedbService.delTestDataSqlite(delete_name);;
         break;
       case 'update' :
-        data.result = await Services.get('database.sqlitedb').updateTestDataSqlite(update_name, update_age);
+        data.result = await sqlitedbService.updateTestDataSqlite(update_name, update_age);
         break;
       case 'get' :
-        data.result = await Services.get('database.sqlitedb').getTestDataSqlite(search_age);
+        data.result = await sqlitedbService.getTestDataSqlite(search_age);
         break;
       case 'getDataDir' :
-        data.result = await Services.get('database.sqlitedb').getDataDir();
+        data.result = await sqlitedbService.getDataDir();
         break;
       case 'setDataDir' :
-        data.result = await Services.get('database.sqlitedb').setCustomDataDir(data_dir);
+        data.result = await sqlitedbService.setCustomDataDir(data_dir);
         break;            
     }
 
-    data.all_list = await Services.get('database.sqlitedb').getAllTestDataSqlite();
+    data.all_list = await sqlitedbService.getAllTestDataSqlite();
 
     return data;
   }  
@@ -168,7 +168,7 @@ class FrameworkController {
   /**
    * 异步消息类型
    */ 
-  async ipcInvokeMsg(args, event) {
+  async ipcInvokeMsg(args) {
     let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
     const data = args + ' - ' + timeNow;
     

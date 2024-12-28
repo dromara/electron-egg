@@ -11,8 +11,6 @@ const path = require('path');
 class BasedbService {
 
   constructor(options) {
-    super();
-
     const { dbname } = options;
     this.dbname = dbname;
     this.db = undefined;
@@ -26,14 +24,25 @@ class BasedbService {
     // 定义数据文件
     const dbFile = path.join(getStorageDir(), "db", this.dbname);
     const sqliteOptions = {
-      driver: 'sqlite',
-      default: {
-        timeout: 6000,
-        verbose: null // 打印sql语法 console.log
-      }
+      timeout: 6000,
+      verbose: console.log
     }
-    const storage = new SqliteStorage(dbFile, sqliteOptions);
-    this.db = storage.db;
+    this.storage = new SqliteStorage(dbFile, sqliteOptions);
+    this.db = this.storage.db;
+  }
+
+  /*
+   * change data dir (sqlite)
+   */
+  changeDataDir(dir) {
+    // the absolute path of the db file
+    const dbFile = path.join(dir, this.dbname);
+    const sqliteOptions = {
+      timeout: 6000,
+      verbose: console.log
+    }
+    this.storage = new SqliteStorage(dbFile, sqliteOptions);
+    this.db = this.storage.db;   
   }
 }  
 

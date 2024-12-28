@@ -52,11 +52,6 @@ const constantRouterMap = [
             component: () => import('@/views/framework/software/Index.vue')
           },
           {
-            path: '/framework/java/index',
-            name: 'FrameworkJavaIndex',
-            component: () => import('@/views/framework/java/Index.vue')
-          },
-          {
             path: '/framework/testapi/index',
             name: 'FrameworkTestApiIndex',
             component: () => import('@/views/framework/testapi/Index.vue')

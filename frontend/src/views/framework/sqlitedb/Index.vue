@@ -31,12 +31,12 @@
         <a-col :span="2">
         </a-col>
         <a-col :span="5">
-          <a-button @click="selectDir">
+          <a-button @click="selectDir()">
             修改目录
           </a-button>
         </a-col>
         <a-col :span="5">
-          <a-button @click="openDir">
+          <a-button @click="openDir()">
             打开目录
           </a-button>
         </a-col>        
@@ -86,7 +86,8 @@
     <div class="one-block-2">
       <a-row>
         <a-col :span="6">
-          <a-input v-model="search_age" :value="search_age" addon-before="年龄" />
+          <!-- eslint-disable-next-line vue/no-v-model-argument -->
+          <a-input v-model:value="search_age" addon-before="年龄" />
         </a-col>
         <a-col :span="3">
         </a-col>
@@ -114,12 +115,14 @@
     <div class="one-block-2">
       <a-row>
         <a-col :span="6">
-          <a-input v-model="update_name" :value="update_name" addon-before="姓名(条件)" />
+          <!-- eslint-disable-next-line vue/no-v-model-argument -->
+          <a-input v-model:value="update_name" addon-before="姓名(条件)" />
         </a-col>
         <a-col :span="3">
         </a-col>
         <a-col :span="6">
-          <a-input v-model="update_age" :value="update_age" addon-before="年龄" />
+          <!-- eslint-disable-next-line vue/no-v-model-argument -->
+          <a-input v-model:value="update_age" addon-before="年龄" />
         </a-col>
         <a-col :span="3">
         </a-col>
@@ -138,7 +141,8 @@
     <div class="one-block-2">
       <a-row>
         <a-col :span="6">
-          <a-input v-model="delete_name" :value="delete_name" addon-before="姓名" />
+          <!-- eslint-disable-next-line vue/no-v-model-argument -->
+          <a-input v-model:value="delete_name" addon-before="姓名" />
         </a-col>
         <a-col :span="3">
         </a-col>
@@ -155,109 +159,108 @@
     </div>       
   </div>
 </template>
-<script>
+<script setup>
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
+import { ref, onMounted } from 'vue';
+import { message } from 'ant-design-vue';
 
-export default {
-  data() {
-    return {
-      name: '李四',
-      age: 20,
-      userList: ['空'],
-      search_age: 20,
-      update_name: '李四',
-      update_age: 31,
-      delete_name: '李四',
-      all_list: ['空'],
-      data_dir: ''
-    };
-  },
-  mounted () {
-    this.init();
-  },
-  methods: {
-    init() {
-      const params = {
-        action: 'getDataDir',
-      }
-      ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-        if (res.code == -1) {
-          this.$message.error('请检查sqlite是否正确安装', 5);
-          return
-        }
+const name = ref('李四');
+const age = ref(20);
+const userList = ref(['空']);
+const search_age = ref(20);
+const update_name = ref('李四');
+const update_age = ref(31);
+const delete_name = ref('李四');
+const all_list = ref(['空']);
+const data_dir = ref('');
 
-        this.data_dir = res.result;
-        this.getAllTestData();
-      }) 
-    },
-    getAllTestData () {
-      const params = {
-        action: 'all',
-      }
-      ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-        if (res.all_list.length == 0) {
-          return false;
-        }
-        this.all_list = res.all_list;
-      }) 
-    },
-    selectDir() {
-      ipc.invoke(ipcApiRoute.os.selectFolder, '').then(r => {
-        this.data_dir = r;
-        // 修改数据目录
-        this.modifyDataDir(r);
-      })
-    },
-    openDir() {
-      console.log('dd:', this.data_dir);
-      ipc.invoke(ipcApiRoute.os.openDirectory, {id: this.data_dir}).then(res => {
-        //
-      })
-    },    
-    modifyDataDir(dir) {
-      const params = {
-        action: 'setDataDir',
-        data_dir: dir
-      }
-      ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-        this.all_list = res.all_list;
-      }) 
-    },
-    sqlitedbOperation (ac) {
-      const params = {
-        action: ac,
-        info: {
-          name: this.name,
-          age: parseInt(this.age)
-        },
-        search_age: parseInt(this.search_age),
-        update_name: this.update_name,
-        update_age: parseInt(this.update_age),
-        delete_name: this.delete_name,
-      }
-      if (ac == 'add' && this.name.length == 0) {
-        this.$message.error(`请填写数据`);
-      }
-      ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-        console.log('res:', res);
-        if (ac == 'get') {
-          if (res.result.length == 0) {
-            this.$message.error(`没有数据`);
-            return;
-          }
-          this.userList = res.result;
-        }
-        if (res.all_list.length == 0) {
-          this.all_list = ['空'];
-          return;
-        }
-        this.all_list = res.all_list;
-        this.$message.success(`success`);
-      }) 
-    },
+onMounted(() => {
+  init()
+})
+
+function init() {
+  const params = {
+    action: 'getDataDir',
   }
-};
+  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+    if (res.code == -1) {
+      message.error('请检查sqlite是否正确安装', 5);
+      return
+    }
+
+    data_dir.value = res.result;
+    getAllTestData();
+  }) 
+}
+
+function getAllTestData () {
+  const params = {
+    action: 'all',
+  }
+  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+    if (res.all_list.length == 0) {
+      return false;
+    }
+    all_list.value = res.all_list;
+  }) 
+}
+
+function selectDir() {
+  ipc.invoke(ipcApiRoute.os.selectFolder, '').then(r => {
+    data_dir.value = r;
+    // 修改数据目录
+    modifyDataDir(r);
+  })
+}
+
+function openDir() {
+  console.log('data_dir:', data_dir.value);
+  ipc.invoke(ipcApiRoute.os.openDirectory, {id: data_dir.value})
+}
+
+function modifyDataDir(dir) {
+  const params = {
+    action: 'setDataDir',
+    data_dir: dir
+  }
+  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+    all_list.value = res.all_list;
+  }) 
+}
+
+function sqlitedbOperation (ac) {
+  const params = {
+    action: ac,
+    info: {
+      name: name.value,
+      age: parseInt(age.value)
+    },
+    search_age: parseInt(search_age.value),
+    update_name: update_name.value,
+    update_age: parseInt(update_age.value),
+    delete_name: delete_name.value,
+  }
+  if (ac == 'add' && name.value.length == 0) {
+    message.error(`请填写数据`);
+  }
+  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+    console.log('res:', res);
+    if (ac == 'get') {
+      if (res.result.length == 0) {
+        message.error(`没有数据`);
+        return;
+      }
+      userList.value = res.result;
+    }
+    if (res.all_list.length == 0) {
+      all_list.value = ['空'];
+      return;
+    }
+    all_list.value = res.all_list;
+    message.success(`success`);
+  }) 
+}
 </script>
 <style lang="less" scoped>
 #app-sqlite-db {

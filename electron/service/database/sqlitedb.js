@@ -1,9 +1,7 @@
 'use strict';
 
 const { BasedbService } = require('./basedb');
-const Storage = require('ee-core/storage');
 const _ = require('lodash');
-const path = require('path');
 
 /**
  * sqlite数据存储
@@ -13,9 +11,10 @@ class SqlitedbService extends BasedbService {
 
   constructor () {
     const options = {
-      dbname:'sqlite-demo.db',
+      dbname: 'sqlite-demo.db',
     }
     super(options);
+    this.userTableName = 'user';
     this._initTable();
   }
 
@@ -24,13 +23,12 @@ class SqlitedbService extends BasedbService {
    */
   _initTable() {
     // 检查表是否存在
-    const userTableName = 'user';
     const masterStmt = this.db.prepare('SELECT * FROM sqlite_master WHERE type=? AND name = ?');
-    let tableExists = masterStmt.get('table', userTableName);
+    let tableExists = masterStmt.get('table', this.userTableName);
     if (!tableExists) {
       // 创建表
       const create_user_table_sql =
-      `CREATE TABLE ${userTableName}
+      `CREATE TABLE ${this.userTableName}
       (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          name CHAR(50) NOT NULL,
@@ -44,14 +42,8 @@ class SqlitedbService extends BasedbService {
    * 增 Test data (sqlite)
    */
   async addTestDataSqlite(data) {
-    //console.log("add data:", data);
-
-    let table = 'user';
-    await this.checkAndCreateTableSqlite(table);
-
-    const insert = this.demoSqliteDB.db.prepare(`INSERT INTO ${table} (name, age) VALUES (@name, @age)`);
+    const insert = this.db.prepare(`INSERT INTO ${this.userTableName} (name, age) VALUES (@name, @age)`);
     insert.run(data);
-
     return true;
   }
 
@@ -59,14 +51,8 @@ class SqlitedbService extends BasedbService {
    * 删 Test data (sqlite)
    */
   async delTestDataSqlite(name = '') {
-    //console.log("delete name:", name);
-
-    let table = 'user';
-    await this.checkAndCreateTableSqlite(table);
-
-    const delUser = this.demoSqliteDB.db.prepare(`DELETE FROM ${table} WHERE name = ?`);
+    const delUser = this.db.prepare(`DELETE FROM ${this.userTableName} WHERE name = ?`);
     delUser.run(name);
-
     return true;
   }
 
@@ -74,14 +60,8 @@ class SqlitedbService extends BasedbService {
    * 改 Test data (sqlite)
    */
   async updateTestDataSqlite(name= '', age = 0) {
-    //console.log("update :", {name, age});
-
-    let table = 'user';
-    await this.checkAndCreateTableSqlite(table);
-
-    const updateUser = this.demoSqliteDB.db.prepare(`UPDATE ${table} SET age = ? WHERE name = ?`);
+    const updateUser = this.db.prepare(`UPDATE ${this.userTableName} SET age = ? WHERE name = ?`);
     updateUser.run(age, name);
-
     return true;
   }  
 
@@ -89,14 +69,8 @@ class SqlitedbService extends BasedbService {
    * 查 Test data (sqlite)
    */
   async getTestDataSqlite(age = 0) {
-    //console.log("select :", {age});
-
-    let table = 'user';
-    await this.checkAndCreateTableSqlite(table);
-
-    const selectUser = this.demoSqliteDB.db.prepare(`SELECT * FROM ${table} WHERE age = @age`);
+    const selectUser = this.db.prepare(`SELECT * FROM ${this.userTableName} WHERE age = @age`);
     const users = selectUser.all({age: age});
-    //console.log("select users:", users);
     return users;
   }  
   
@@ -104,14 +78,8 @@ class SqlitedbService extends BasedbService {
    * all Test data (sqlite)
    */
   async getAllTestDataSqlite() {
-    //console.log("select all user");
-
-    let table = 'user';
-    await this.checkAndCreateTableSqlite(table);
-
-    const selectAllUser = this.demoSqliteDB.db.prepare(`SELECT * FROM ${table} `);
+    const selectAllUser = this.db.prepare(`SELECT * FROM ${this.userTableName} `);
     const allUser =  selectAllUser.all();
-    //console.log("select allUser:", allUser);
     return allUser;
   }
   
@@ -119,8 +87,7 @@ class SqlitedbService extends BasedbService {
    * get data dir (sqlite)
    */
   async getDataDir() {
-    const dir = this.demoSqliteDB.getStorageDir();    
-
+    const dir = this.storage.getStorageDir();    
     return dir;
   } 
 
@@ -132,17 +99,8 @@ class SqlitedbService extends BasedbService {
       return;
     }
 
-    // the absolute path of the db file
-    const dbFile = path.join(dir, this.sqliteFile);
-    const sqliteOptions = {
-      driver: 'sqlite',
-      default: {
-        timeout: 6000,
-        verbose: console.log
-      }
-    }
-    this.demoSqliteDB = Storage.connection(dbFile, sqliteOptions);    
-
+    this.changeDataDir(dir);
+    this._initTable();
     return;
   }
 }
