@@ -42,11 +42,6 @@ const constantRouterMap = [
             component: () => import('@/views/framework/jobs/Index.vue')
           },
           {
-            path: '/framework/updater/index',
-            name: 'FrameworkUpdaterIndex',
-            component: () => import('@/views/framework/updater/Index.vue')
-          }, 
-          {
             path: '/framework/software/index',
             name: 'FrameworkSoftwareIndex',
             component: () => import('@/views/framework/software/Index.vue')

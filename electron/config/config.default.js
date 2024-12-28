@@ -64,5 +64,15 @@ module.exports = () => {
     mainServer: {
       indexPath: '/public/dist/index.html',
     },
+    customize: {
+      tray: {
+        title: 'EE程序',
+        icon: '/public/images/tray.png'
+      },
+      awaken: {
+        protocol: 'ee',
+        args: []
+      }
+    },
   }
 }

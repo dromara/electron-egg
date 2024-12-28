@@ -30,13 +30,7 @@ export default {
 			title: '任务',
 			pageName: 'FrameworkJobsIndex',
 			params: {}
-		},				
-		'menu_106' : {
-			icon: 'profile',
-			title: '自动更新',
-			pageName: 'FrameworkUpdaterIndex',
-			params: {}
-		},    
+		},				  
 		'menu_107' : {
 			icon: 'profile',
 			title: '软件调用',
