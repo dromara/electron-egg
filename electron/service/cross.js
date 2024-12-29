@@ -3,13 +3,43 @@
 const { logger } = require('ee-core/log');
 const { getExtraResourcesDir } = require('ee-core/ps');
 const path = require("path");
-const Is = require('ee-core/utils/is');
+const axios = require('axios');
+const { is } = require('ee-core/utils');
+const { cross } = require('ee-core/cross');
 
 /**
  * cross
  * @class
  */
 class CrossService {
+
+  info() {
+    const pids = cross.getPids();
+    logger.info('cross pids:', pids);
+
+    let num = 1;
+    pids.forEach(pid => {
+      let entity = cross.getProc(pid);
+      logger.info(`server-${num} name:${entity.name}`);
+      logger.info(`server-${num} config:`, entity.config);
+      num++;
+    })
+
+    return 'hello electron-egg';
+  }
+
+  getUrl(name) {
+    const serverUrl = cross.getUrl(name);
+    return serverUrl;
+  }
+
+  killServer(type, name) {
+    if (type == 'all') {
+      cross.killAll();
+    } else {
+      cross.killByName(name);
+    }
+  }  
 
   /**
    * create go service
@@ -18,7 +48,7 @@ class CrossService {
    */   
   async createGoServer() {
     // method 1: Use the default Settings
-    //const entity = await Cross.run(serviceName);
+    //const entity = await cross.run(serviceName);
 
     // method 2: Use custom configuration
     const serviceName = "go";
@@ -29,7 +59,7 @@ class CrossService {
       args: ['--port=7073'],
       appExit: true,
     }
-    const entity = await Cross.run(serviceName, opt);
+    const entity = await cross.run(serviceName, opt);
     logger.info('server name:', entity.name);
     logger.info('server config:', entity.config);
     logger.info('server url:', entity.getUrl());
@@ -50,18 +80,18 @@ class CrossService {
       args: ['-jar', '-server', '-Xms512M', '-Xmx512M', '-Xss512k', '-Dspring.profiles.active=prod', `-Dserver.port=18080`, `-Dlogging.file.path=${Ps.getLogDir()}`, `${jarPath}`],
       appExit: false,
     }
-    if (Is.macOS()) {
+    if (is.macOS()) {
       // Setup Java program
-      opt.cmd = path.join(Ps.getExtraResourcesDir(), 'jre1.8.0_201.jre/Contents/Home/bin/java');
+      opt.cmd = path.join(getExtraResourcesDir(), 'jre1.8.0_201.jre/Contents/Home/bin/java');
     }
-    if (Is.linux()) {
+    if (is.linux()) {
       // Setup Java program
     }
 
-    const entity = await Cross.run(serviceName, opt);
+    const entity = await cross.run(serviceName, opt);
     logger.info('server name:', entity.name);
     logger.info('server config:', entity.config);
-    logger.info('server url:', Cross.getUrl(entity.name));
+    logger.info('server url:', cross.getUrl(entity.name));
 
     return;
   }  
@@ -73,7 +103,7 @@ class CrossService {
    */   
   async createPythonServer() {
     // method 1: Use the default Settings
-    //const entity = await Cross.run(serviceName);
+    //const entity = await cross.run(serviceName);
 
     // method 2: Use custom configuration
     const serviceName = "python";
@@ -85,13 +115,33 @@ class CrossService {
       windowsExtname: true,
       appExit: true,
     }
-    const entity = await Cross.run(serviceName, opt);
+    const entity = await cross.run(serviceName, opt);
     logger.info('server name:', entity.name);
     logger.info('server config:', entity.config);
     logger.info('server url:', entity.getUrl());
 
     return;
   }
+
+  async requestApi(name, urlPath, params) {
+    const serverUrl = cross.getUrl(name);
+    const apiHello = serverUrl + urlPath;
+    console.log('Server Url:', serverUrl);
+
+    const response = await axios({
+      method: 'get',
+      url: apiHello,
+      timeout: 1000,
+      params,
+      proxy: false,
+    });
+    if (response.status == 200) {
+      const { data } = response;
+      return data;
+    }
+
+    return null;
+  }  
 }
 
 CrossService.toString = () => '[class CrossService]';

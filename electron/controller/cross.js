@@ -1,5 +1,7 @@
 'use strict';
 
+const { crossService } = require('../service/cross');
+
 /**
  * Cross
  * @class
@@ -10,17 +12,7 @@ class CrossController {
    * View process service information
    */
   info() {
-    const pids = Cross.getPids();
-    Log.info('cross pids:', pids);
-
-    let num = 1;
-    pids.forEach(pid => {
-      let entity = Cross.getProc(pid);
-      Log.info(`server-${num} name:${entity.name}`);
-      Log.info(`server-${num} config:`, entity.config);
-      num++;
-    })
-
+    crossService.info();
     return 'hello electron-egg';
   }
 
@@ -29,7 +21,7 @@ class CrossController {
    */  
   async getUrl(args) {
     const { name } = args;
-    const serverUrl = Cross.getUrl(name);
+    const serverUrl = crossService.getUrl(name);
     return serverUrl;
   }
 
@@ -39,12 +31,7 @@ class CrossController {
    */  
   async killServer(args) {
     const { type, name } = args;
-    if (type == 'all') {
-      Cross.killAll();
-    } else {
-      Cross.killByName(name);
-    }
-
+    crossService.killServer(type, name);
     return;
   }
 
@@ -54,11 +41,11 @@ class CrossController {
   async createServer(args) {
     const { program } = args;
     if (program == 'go') {
-      Services.get('cross').createGoServer();
+      crossService.createGoServer();
     } else if (program == 'java') {
-      Services.get('cross').createJavaServer();
+      crossService.createJavaServer();
     } else if (program == 'python') {
-      Services.get('cross').createPythonServer();
+      crossService.createPythonServer();
     }
 
     return;
@@ -69,20 +56,8 @@ class CrossController {
    */
   async requestApi(args) {
     const { name, urlPath, params} = args;
-    const hc = new HttpClient();
-    const serverUrl = Cross.getUrl(name);
-    console.log('Server Url:', serverUrl);
-
-    const apiHello = serverUrl + urlPath;
-    const options = {
-      method: 'GET',
-      data: params || {},
-      dataType: 'json',
-      timeout: 1000,  
-    };
-    const result = await hc.request(apiHello, options);
-
-    return result.data;
+    const data = await crossService.requestApi(name, urlPath, params);
+    return data;
   }
 }
 

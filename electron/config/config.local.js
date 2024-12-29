@@ -6,7 +6,7 @@
 module.exports = () => {
   return {
     openDevTools: {
-      mode: 'undocked'
+      mode: 'bottom'
     },
     jobs: {
       messageLog: true

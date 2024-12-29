@@ -1,7 +1,7 @@
 'use strict';
 
 const { SqliteStorage } = require('ee-core/storage');
-const { getStorageDir } = require('ee-core/ps');
+const { getDataDir } = require('ee-core/ps');
 const path = require('path');
 
 /**
@@ -22,7 +22,7 @@ class BasedbService {
    */
   _init() {
     // 定义数据文件
-    const dbFile = path.join(getStorageDir(), "db", this.dbname);
+    const dbFile = path.join(getDataDir(), "db", this.dbname);
     const sqliteOptions = {
       timeout: 6000,
       verbose: console.log

@@ -2,12 +2,14 @@
  ** preload为预加载模块，该文件将会在程序启动时加载 **
  *************************************************/
 
+function preload() {
+  // 示例功能模块，可选择性使用和修改
+  console.log('preload/index.js');
+}
 
 /**
 * 预加载模块入口
 */
-module.exports = async () => {
-
-  // 示例功能模块，可选择性使用和修改
-  console.log('preload/index.js');
+module.exports = {
+  preload
 }
