@@ -53,9 +53,8 @@
 <script setup>
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
-import storage from 'store2';
 
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { message } from 'ant-design-vue';
 
 const fileList = [

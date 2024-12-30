@@ -29,65 +29,56 @@
     </a-layout>
   </a-layout>
 </template>
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-export default {
-  name: 'AppSider',
-  data() {
-    return {
-      collapsed: true,
-      current: 'menu_1',
-      menu: {
-        'menu_1' : {
-          icon: 'icon-fengche',
-          title: '框架',
-          pageName: 'Framework',
-          params: {
-            // test: 'hello'
-          },
-        },
-        'menu_2' : {
-          icon: 'icon-niudan',
-          title: '系统',
-          pageName: 'Os',
-          params: {},
-        },
-        'menu_3' : {
-          icon: 'icon-liuxing',
-          title: '特效',
-          pageName: 'Effect',
-          params: {},
-        },   
-        'menu_4' : {
-          icon: 'icon-gouwu',
-          title: 'cross',
-          pageName: 'Cross',
-          params: {},
-        },          
-      }
-    };
-  },
-  created () {
-  },
-  mounted () {
-    this.menuHandle()
-  },
-  methods: {
-    menuHandle (e) {
-      console.log('sider menu e:', e);
-      this.current = e ? e.key : this.current;
-      console.log('sider menu current:', this.current);
+const router = useRouter();
 
-      const linkInfo = this.menu[this.current]
-      console.log('[home] load linkInfo:', linkInfo);
-      this.$router.push({ name: linkInfo.pageName, params: linkInfo.params})
-    },
-    changeMenu(e) {
-      console.log('sider menu e:', e);
-      //this.current = e.key;
-    }
+const collapsed = ref(true);
+const current = ref('menu_1');
+const menu = ref({
+  'menu_1': {
+    icon: 'icon-fengche',
+    title: '框架',
+    pageName: 'Framework',
+    params: {}
   },
-};
+  'menu_2': {
+    icon: 'icon-niudan',
+    title: '系统',
+    pageName: 'Os',
+    params: {}
+  },
+  'menu_3': {
+    icon: 'icon-liuxing',
+    title: '特效',
+    pageName: 'Effect',
+    params: {}
+  },
+  'menu_4': {
+    icon: 'icon-gouwu',
+    title: 'cross',
+    pageName: 'Cross',
+    params: {}
+  }
+});
+
+onMounted(() => {
+  menuHandle();
+});
+
+function menuHandle(e) {
+  console.log('sider menu e:', e);
+  if (e) {
+    current.value = e.key;
+  }
+  console.log('sider menu current:', current.value);
+
+  const linkInfo = menu.value[current.value];
+  console.log('[home] load linkInfo:', linkInfo);
+  router.push({ name: linkInfo.pageName, params: linkInfo.params });
+}
 </script>
 <style lang="less" scoped>
 // 嵌套

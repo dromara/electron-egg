@@ -23,53 +23,43 @@
     </a-layout>
   </a-layout>
 </template>
-<script>
-// import { reactive } from 'vue'; 
+<script setup>
+import { ref, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import subMenu from '@/router/subMenu';
 
-export default {
-  props: {
-    id: {
-      type: String,
-      default: ''
-    }
-  },
-  data() {
-    return {
-      menu:{},
-      //selectedKeys: ['menu_100'],
-      current: 'menu_100',
-      keys: []
-    };
-  },
-  watch: {
-    id: function () {
-      console.log('watch id ----- ', this.id);
-      this.current = 'menu_100';
-      this.menuHandle();
-    },
-  },
-  created () {
-  },
-  mounted () {
-    this.menuHandle();
-  },
-  methods: {
-    menuHandle () {
-      // 该组件优先被加载了，所以没拿到参数
-      //console.log('params:', this.$route);
-    
-      console.log('menu ------ id:', this.id);
-      this.menu = subMenu[this.id];
-      const linkInfo = this.menu[this.current];
-      this.$router.push({ name: linkInfo.pageName, params: linkInfo.params});
-    },
-    changeMenu(e) {
-      console.log('changeMenu e:', e);
-      this.current = e.key;
-    }
+const props = defineProps({
+  id: {
+    type: String,
+    default: ''
   }
-};
+});
+
+const router = useRouter();
+const current = ref('menu_100');
+const menu = ref({});
+
+watch(() => props.id, (newValue) => {
+  console.log('watch menu id ', newValue);
+  // 切换 appSider 时，重置 current
+  current.value = "menu_100"
+  menuHandle();
+});
+
+onMounted(() => {
+  menuHandle();
+});
+
+function menuHandle() {
+  console.log('handle menu id:', props.id);
+  menu.value = subMenu[props.id];
+  const linkInfo = menu.value[current.value];
+  router.push({ name: linkInfo.pageName, params: linkInfo.params });
+}
+
+function changeMenu(e) {
+  current.value = e.key;
+}
 </script>
 <style lang="less" scoped>
 #app-menu {

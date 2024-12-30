@@ -1,13 +1,14 @@
 <template>
     <router-view/>
 </template>
+<script setup>
+import { onMounted } from 'vue';
 
-<script>
-export default {
-  name: 'App',
-  setup() {
-    document.getElementById('loadingPage').remove()
+onMounted(() => {
+  const loadingElement = document.getElementById('loadingPage');
+  if (loadingElement) {
+    loadingElement.remove();
   }
-}
+});
 </script>
 <style lang="less"></style>
