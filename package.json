@@ -54,7 +54,6 @@
   "license": "Apache",
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
-    "@types/electron": "^1.4.38",
     "@types/node": "^22.10.2",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",

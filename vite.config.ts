@@ -10,7 +10,7 @@ export default defineConfig({
       entry: resolve(__dirname, './src/electron/main.ts'),
       formats: ['cjs']
     },
-    outDir: "runtime",
+    outDir: "elets",
   },
   plugins: [dts({rollupTypes: true}),
   ],

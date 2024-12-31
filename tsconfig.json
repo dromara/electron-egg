@@ -3,7 +3,7 @@
     "target": "esnext",
     "module": "esnext",
     "useDefineForClassFields": true,
-    "sourceMap": true,
+    // "sourceMap": true,
     "skipLibCheck": true,
     "types": ["node"],
     "esModuleInterop": true,
@@ -12,7 +12,7 @@
     // "checkJs": true,
 
     /* Bundler mode */
-    "moduleResolution": "bundler", // node
+    "moduleResolution": "node", // node
     "resolveJsonModule": true,
     "isolatedModules": true,
     //"noEmit": true,
