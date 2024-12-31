@@ -1,10 +1,11 @@
-'use strict';
+interface AppConfig {
+  openDevTools: boolean;
+}
 
-/**
- *  coverage config.default.js
- */
-module.exports = () => {
+const config: () => AppConfig = () => {
   return {
     openDevTools: false,
   };
 };
+
+export default config;

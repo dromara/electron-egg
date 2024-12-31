@@ -1,18 +1,17 @@
-'use strict';
-
 /**
- * example
- * @class
+ * ExampleController class
  */
 class ExampleController {
-
   /**
-   * test
+   * Test method
    */
-  async test () {
+  async test(): Promise<string> {
     return 'hello electron-egg';
   }
 }
 
+// 设置类的toString方法，虽然在TypeScript中不常见
 ExampleController.toString = () => '[class ExampleController]';
-module.exports = ExampleController;  
+
+// 默认导出类
+export default ExampleController;

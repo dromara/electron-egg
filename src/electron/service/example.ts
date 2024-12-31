@@ -1,32 +1,28 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
+import { logger } from 'ee-core/log';
 
 /**
- * 示例服务
- * @class
+ * ExampleService class for demonstration purposes
  */
 class ExampleService {
-
   /**
-   * test
+   * Test method
+   * @param args The arguments passed to the method
    */
-  async test(args) {
+  async test(args: any): Promise<{ status: string; params: any }> {
     let obj = {
-      status:'ok',
-      params: args
-    }
+      status: 'ok',
+      params: args,
+    };
 
     logger.info('ExampleService obj:', obj);
 
-    //Services.get('framework').test('egg');
+    // Services.get('framework').test('egg'); // This line is commented out and would need proper typing if used
 
     return obj;
   }
 }
 
+// Setting the class toString method, which is not common in TypeScript
 ExampleService.toString = () => '[class ExampleService]';
-module.exports = {
-  ExampleService,
-  exampleService: new ExampleService()
-};
+
+export { ExampleService, exampleService: new ExampleService() };

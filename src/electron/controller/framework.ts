@@ -1,15 +1,12 @@
-'use strict';
-
-const dayjs = require('dayjs');
-const path = require('path');
-const fs = require('fs');
-const { exec } = require('child_process');
-const { app: electronApp, shell } = require('electron');
-const { getExtraResourcesDir } = require('ee-core/ps');
-const { logger } = require('ee-core/log');
-const { getConfig } = require('ee-core/config');
-const { frameworkService } = require('../service/framework');
-const { sqlitedbService } = require('../service/database/sqlitedb');
+import path from 'path';
+import fs from 'fs';
+import { exec } from 'child_process';
+import { app as electronApp, shell } from 'electron';
+import { getExtraResourcesDir } from 'ee-core/ps';
+import { logger } from 'ee-core/log';
+import { getConfig } from 'ee-core/config';
+import { frameworkService } from '../service/framework';
+import { sqlitedbService } from '../service/database/sqlitedb';
 
 /**
  * framework - demo
@@ -250,4 +247,4 @@ class FrameworkController {
 }
 
 FrameworkController.toString = () => '[class FrameworkController]';
-module.exports = FrameworkController;  
+export default FrameworkController;  

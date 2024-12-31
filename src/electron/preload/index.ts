@@ -1,15 +1,12 @@
-/*************************************************
- ** preload为预加载模块，该文件将会在程序启动时加载 **
- *************************************************/
-
-function preload() {
-  // 示例功能模块，可选择性使用和修改
+/**
+ * Preload module, this file will be loaded when the program starts.
+ */
+function preload(): void {
+  // Example feature module, optional to use and modify
   console.log('preload/index.js');
 }
 
 /**
-* 预加载模块入口
-*/
-module.exports = {
-  preload
-}
+ * Entry point of the preload module
+ */
+export { preload };

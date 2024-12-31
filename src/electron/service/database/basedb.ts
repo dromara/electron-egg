@@ -1,52 +1,50 @@
-'use strict';
-
-const { SqliteStorage } = require('ee-core/storage');
-const { getDataDir } = require('ee-core/ps');
-const path = require('path');
+import { SqliteStorage } from 'ee-core/storage';
+import { getDataDir } from 'ee-core/ps';
+import path from 'path';
 
 /**
- * sqlite数据存储
- * @class
+ * BasedbService class for sqlite data storage
  */
 class BasedbService {
+  dbname: string;
+  db: any; // Replace 'any' with the actual type if known
+  storage: SqliteStorage;
 
-  constructor(options) {
-    const { dbname } = options;
-    this.dbname = dbname;
-    this.db = undefined;
+  constructor(options: { dbname: string }) {
+    this.dbname = options.dbname;
     this._init();
   }
 
-  /*
-   * 初始化
+  /**
+   * Initializes the sqlite database
    */
-  _init() {
-    // 定义数据文件
+  private _init(): void {
+    // Define the data file
     const dbFile = path.join(getDataDir(), "db", this.dbname);
     const sqliteOptions = {
       timeout: 6000,
       verbose: console.log
-    }
+    };
     this.storage = new SqliteStorage(dbFile, sqliteOptions);
     this.db = this.storage.db;
   }
 
-  /*
-   * change data dir (sqlite)
+  /**
+   * Changes the data directory for the sqlite database
    */
-  changeDataDir(dir) {
-    // the absolute path of the db file
+  changeDataDir(dir: string): void {
+    // The absolute path of the db file
     const dbFile = path.join(dir, this.dbname);
     const sqliteOptions = {
       timeout: 6000,
       verbose: console.log
-    }
+    };
     this.storage = new SqliteStorage(dbFile, sqliteOptions);
-    this.db = this.storage.db;   
+    this.db = this.storage.db;
   }
-}  
+}
 
+// Setting the class toString method, which is not common in TypeScript
 BasedbService.toString = () => '[class BasedbService]';
-module.exports = {
-  BasedbService,
-};
+
+export { BasedbService };

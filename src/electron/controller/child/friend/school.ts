@@ -1,18 +1,14 @@
-'use strict';
-
 /**
- * school
- * @class
+ * SchoolController class
  */
 class SchoolController {
-
   /**
-   * test
+   * Test method
    */
-  async test () {
+  async test(): Promise<string> {
     return 'hello electron-egg';
   }
 }
 
 SchoolController.toString = () => '[class SchoolController]';
-module.exports = SchoolController;  
+export default SchoolController;

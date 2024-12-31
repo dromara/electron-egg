@@ -1,112 +1,112 @@
-'use strict';
-
-const { BasedbService } = require('./basedb');
-const _ = require('lodash');
+import { BasedbService } from './basedb';
+import _ from 'lodash';
+import { SqliteStorage } from 'ee-core/storage';
 
 /**
- * sqlite数据存储
- * @class
+ * SqlitedbService class for sqlite data storage
  */
 class SqlitedbService extends BasedbService {
+  userTableName: string;
+  storage: SqliteStorage;
 
-  constructor () {
+  constructor() {
     const options = {
       dbname: 'sqlite-demo.db',
-    }
+    };
     super(options);
     this.userTableName = 'user';
     this._initTable();
   }
 
-  /*
-   * 初始化表
+  /**
+   * Initializes the table
    */
-  _initTable() {
-    // 检查表是否存在
+  private _initTable(): void {
+    // Check if the table exists
     const masterStmt = this.db.prepare('SELECT * FROM sqlite_master WHERE type=? AND name = ?');
     let tableExists = masterStmt.get('table', this.userTableName);
     if (!tableExists) {
-      // 创建表
+      // Create the table
       const create_user_table_sql =
-      `CREATE TABLE ${this.userTableName}
-      (
-         id INTEGER PRIMARY KEY AUTOINCREMENT,
-         name CHAR(50) NOT NULL,
-         age INT
-      );`
+        `CREATE TABLE ${this.userTableName} (
+           id INTEGER PRIMARY KEY AUTOINCREMENT,
+           name CHAR(50) NOT NULL,
+           age INT
+        );`
       this.db.exec(create_user_table_sql);
     }
   }
 
-  /*
-   * 增 Test data (sqlite)
+  /**
+   * Adds test data to sqlite
    */
-  async addTestDataSqlite(data) {
+  async addTestDataSqlite(data: { name: string; age: number }): Promise<boolean> {
     const insert = this.db.prepare(`INSERT INTO ${this.userTableName} (name, age) VALUES (@name, @age)`);
     insert.run(data);
     return true;
   }
 
-  /*
-   * 删 Test data (sqlite)
+  /**
+   * Deletes test data from sqlite
    */
-  async delTestDataSqlite(name = '') {
+  async delTestDataSqlite(name: string = ''): Promise<boolean> {
     const delUser = this.db.prepare(`DELETE FROM ${this.userTableName} WHERE name = ?`);
     delUser.run(name);
     return true;
   }
 
-  /*
-   * 改 Test data (sqlite)
+  /**
+   * Updates test data in sqlite
    */
-  async updateTestDataSqlite(name= '', age = 0) {
+  async updateTestDataSqlite(name: string = '', age: number = 0): Promise<boolean> {
     const updateUser = this.db.prepare(`UPDATE ${this.userTableName} SET age = ? WHERE name = ?`);
     updateUser.run(age, name);
     return true;
-  }  
+  }
 
-  /*
-   * 查 Test data (sqlite)
+  /**
+   * Retrieves test data from sqlite
    */
-  async getTestDataSqlite(age = 0) {
+  async getTestDataSqlite(age: number = 0): Promise<any[]> {
     const selectUser = this.db.prepare(`SELECT * FROM ${this.userTableName} WHERE age = @age`);
-    const users = selectUser.all({age: age});
+    const users = selectUser.all({ age: age });
     return users;
-  }  
-  
-  /*
-   * all Test data (sqlite)
+  }
+
+  /**
+   * Retrieves all test data from sqlite
    */
-  async getAllTestDataSqlite() {
+  async getAllTestDataSqlite(): Promise<any[]> {
     const selectAllUser = this.db.prepare(`SELECT * FROM ${this.userTableName} `);
-    const allUser =  selectAllUser.all();
+    const allUser = selectAllUser.all();
     return allUser;
   }
-  
-  /*
-   * get data dir (sqlite)
-   */
-  async getDataDir() {
-    const dir = this.storage.getStorageDir();    
-    return dir;
-  } 
 
-  /*
-   * set custom data dir (sqlite)
+  /**
+   * Gets the data directory for sqlite
    */
-  async setCustomDataDir(dir) {
+  async getDataDir(): Promise<string> {
+    const dir = this.storage.getStorageDir();
+    return dir;
+  }
+
+  /**
+   * Sets a custom data directory for sqlite
+   */
+  async setCustomDataDir(dir: string): Promise<void> {
     if (_.isEmpty(dir)) {
       return;
     }
 
     this.changeDataDir(dir);
     this._initTable();
-    return;
   }
 }
 
+// Setting the class toString method, which is not common in TypeScript
 SqlitedbService.toString = () => '[class SqlitedbService]';
-module.exports = {
-  SqlitedbService,
+
+export { 
+  SqlitedbService,  
   sqlitedbService: new SqlitedbService()
 };

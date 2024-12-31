@@ -4,6 +4,7 @@
   "description": "A fast, desktop software development framework",
   "main": "./electron/main.js",
   "scripts": {
+    "vite-test": "tsc && vite build",
     "dev": "ee-bin dev",
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
@@ -53,11 +54,16 @@
   "license": "Apache",
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
+    "@types/electron": "^1.4.38",
+    "@types/node": "^22.10.2",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
     "ee-bin": "file:.yalc/ee-bin",
     "electron": "^31.7.6",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.4.2",
+    "vite": "^6.0.6",
+    "vite-plugin-dts": "^4.4.0"
   },
   "dependencies": {
     "axios": "^1.7.9",

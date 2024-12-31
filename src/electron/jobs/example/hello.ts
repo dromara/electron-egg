@@ -1,11 +1,7 @@
-'use strict';
+import { logger } from 'ee-core/log';
 
-const { logger } = require('ee-core/log');
-
-function welcome() {
+function welcome(): void {
   logger.info('[child-process] [jobs/example/hello] welcome ! ');
 }
 
-module.exports = {
-  welcome
-};
+export { welcome };

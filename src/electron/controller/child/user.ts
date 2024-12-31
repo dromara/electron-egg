@@ -1,18 +1,14 @@
-'use strict';
-
 /**
- * user
- * @class
+ * UserController class
  */
 class UserController {
-
   /**
-   * test
+   * Test method
    */
-  async test () {
+  async test(): Promise<string> {
     return 'hello electron-egg';
   }
 }
 
 UserController.toString = () => '[class UserController]';
-module.exports = UserController;  
+export default UserController;

@@ -1,18 +1,14 @@
-'use strict';
-
 /**
- * tool
- * @class
+ * ToolController class
  */
 class ToolController {
-
   /**
-   * test
+   * Test method
    */
-  async test () {
+  async test(): Promise<string> {
     return 'hello electron-egg';
   }
 }
 
 ToolController.toString = () => '[class ToolController]';
-module.exports = ToolController;  
+export default ToolController;

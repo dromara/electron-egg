@@ -1,12 +1,88 @@
-'use strict';
+import path from 'path';
+import { getBaseDir } from 'ee-core/ps';
 
-const path = require('path');
-const { getBaseDir } = require('ee-core/ps');
+interface WindowOption {
+  title: string;
+  width: number;
+  height: number;
+  minWidth: number;
+  minHeight: number;
+  webPreferences: {
+    contextIsolation: boolean;
+    nodeIntegration: boolean;
+  };
+  frame: boolean;
+  show: boolean;
+  icon: string;
+}
 
-/**
- * 默认配置
- */
-module.exports = () => {
+interface Logger {
+  level: 'INFO' | 'DEBUG' | 'WARN' | 'ERROR';
+  outputJSON: boolean;
+  appLogName: string;
+  coreLogName: string;
+  errorLogName: string;
+}
+
+interface Remote {
+  enable: boolean;
+  url: string;
+}
+
+interface SocketServer {
+  enable: boolean;
+  port: number;
+  path: string;
+  connectTimeout: number;
+  pingTimeout: number;
+  pingInterval: number;
+  maxHttpBufferSize: number;
+  transports: ('polling' | 'websocket')[];
+  cors: {
+    origin: boolean | string | ((origin: string, callback: (err: any, allow: boolean) => void) => void);
+  };
+  channel: string;
+}
+
+interface HttpServer {
+  enable: boolean;
+  https: {
+    enable: boolean;
+    key: string;
+    cert: string;
+  };
+  host: string;
+  port: number;
+}
+
+interface MainServer {
+  indexPath: string;
+}
+
+interface Customize {
+  tray: {
+    title: string;
+    icon: string;
+  };
+  awaken: {
+    protocol: string;
+    args: any[];
+  };
+}
+
+interface AppConfig {
+  openDevTools: boolean;
+  singleLock: boolean;
+  windowsOption: WindowOption;
+  logger: Logger;
+  remote: Remote;
+  socketServer: SocketServer;
+  httpServer: HttpServer;
+  mainServer: MainServer;
+  customize: Customize;
+}
+
+const config: () => AppConfig = () => {
   return {
     openDevTools: false,
     singleLock: true,
@@ -17,10 +93,8 @@ module.exports = () => {
       minWidth: 400,
       minHeight: 300,
       webPreferences: {
-        //webSecurity: false,
-        contextIsolation: false, // false -> 可在渲染进程中使用electron的api，true->需要bridge.js(contextBridge)
+        contextIsolation: false,
         nodeIntegration: true,
-        //preload: path.join(getElectronDir(), 'preload', 'bridge.js'),
       },
       frame: true,
       show: true,
@@ -31,11 +105,11 @@ module.exports = () => {
       outputJSON: false,
       appLogName: 'ee.log',
       coreLogName: 'ee-core.log',
-      errorLogName: 'ee-error.log' 
+      errorLogName: 'ee-error.log',
     },
     remote: {
       enable: false,
-      url: 'http://electron-egg.kaka996.com/'
+      url: 'http://electron-egg.kaka996.com/',
     },
     socketServer: {
       enable: false,
@@ -49,14 +123,14 @@ module.exports = () => {
       cors: {
         origin: true,
       },
-      channel: 'c1'
+      channel: 'c1',
     },
     httpServer: {
       enable: false,
       https: {
-        enable: false, 
+        enable: false,
         key: '/public/ssl/localhost+1.key',
-        cert: '/public/ssl/localhost+1.pem'
+        cert: '/public/ssl/localhost+1.pem',
       },
       host: '127.0.0.1',
       port: 7071,
@@ -67,12 +141,14 @@ module.exports = () => {
     customize: {
       tray: {
         title: 'EE程序',
-        icon: '/public/images/tray.png'
+        icon: '/public/images/tray.png',
       },
       awaken: {
         protocol: 'ee',
-        args: []
-      }
+        args: [],
+      },
     },
-  }
-}
+  };
+};
+
+export default config;

@@ -1,9 +1,17 @@
-'use strict';
+interface OpenDevTools {
+  mode: string;
+}
 
-/**
- * Development environment configuration, coverage config.default.js
- */
-module.exports = () => {
+interface Jobs {
+  messageLog: boolean;
+}
+
+interface AppConfig {
+  openDevTools: OpenDevTools;
+  jobs: Jobs;
+}
+
+const config: () => AppConfig = () => {
   return {
     openDevTools: {
       mode: 'bottom'
@@ -13,3 +21,5 @@ module.exports = () => {
     }
   };
 };
+
+export default config;

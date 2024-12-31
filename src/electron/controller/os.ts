@@ -1,76 +1,67 @@
-'use strict';
-
-const _ = require('lodash');
-const fs = require('fs');
-const path = require('path');
-const {
-  app: electronApp, dialog, shell, Notification, 
-} = require('electron');
-const { windowService } = require('../service/os/window');
+import _ from 'lodash';
+import fs from 'fs';
+import path from 'path';
+import {
+  app as electronApp, dialog, shell, Notification,
+} from 'electron';
+import { windowService } from '../service/os/window';
 
 /**
- * example
- * @class
+ * OsController class
  */
 class OsController {
 
   /**
-   * All methods receive two parameters
-   * @param args Parameters transmitted by the frontend
-   * @param event - Event are only available during IPC communication. For details, please refer to the controller documentation
-   */
-
-  /**
    * Message prompt dialog box
    */
-  messageShow() {
+  messageShow(): string {
     dialog.showMessageBoxSync({
-      type: 'info', // "none", "info", "error", "question" 或者 "warning"
+      type: 'info',
       title: 'Custom Title',
       message: 'Customize message content',
-      detail: 'Other additional information'
-    })
-  
+      detail: 'Other additional information',
+    });
+
     return 'Opened the message box';
   }
 
   /**
    * Message prompt and confirmation dialog box
    */
-  messageShowConfirm() {
+  messageShowConfirm(): string {
     const res = dialog.showMessageBoxSync({
       type: 'info',
       title: 'Custom Title',
       message: 'Customize message content',
       detail: 'Other additional information',
-      cancelId: 1, // Index of buttons used to cancel dialog boxes
-      defaultId: 0, // Set default selected button
-      buttons: ['confirm', 'cancel'], 
-    })
+      cancelId: 1,
+      defaultId: 0,
+      buttons: ['confirm', 'cancel'],
+    });
     let data = (res === 0) ? 'click the confirm button' : 'click the cancel button';
-  
+
     return data;
   }
 
   /**
    * Select Directory
    */
-  selectFolder() {
+  selectFolder(): string | null {
     const filePaths = dialog.showOpenDialogSync({
       properties: ['openDirectory', 'createDirectory']
     });
 
     if (_.isEmpty(filePaths)) {
-      return null
+      return null;
     }
 
     return filePaths[0];
-  } 
+  }
 
   /**
-   * open directory
+   * Open directory
    */
-  openDirectory(args) {
+  openDirectory(args: { id: string }): boolean {
     const { id } = args;
     if (!id) {
       return false;
@@ -89,7 +80,7 @@ class OsController {
   /**
    * Select Picture
    */
-  selectPic() {
+  selectPic(): string | null {
     const filePaths = dialog.showOpenDialogSync({
       title: 'select pic',
       properties: ['openFile'],
@@ -98,31 +89,31 @@ class OsController {
       ]
     });
     if (_.isEmpty(filePaths)) {
-      return null
+      return null;
     }
-    
+
     try {
       const data = fs.readFileSync(filePaths[0]);
-      const pic =  'data:image/jpeg;base64,' + data.toString('base64');
+      const pic = 'data:image/jpeg;base64,' + data.toString('base64');
       return pic;
     } catch (err) {
       console.error(err);
       return null;
     }
-  }   
+  }
 
   /**
    * Open a new window
    */
-  createWindow(args) {
+  createWindow(args: any): string {
     const wcid = windowService.createWindow(args);
     return wcid;
   }
-  
+
   /**
    * Get Window contents id
    */
-  getWCid(args) {
+  getWCid(args: any): string | null {
     const wcid = windowService.getWCid(args);
     return wcid;
   }
@@ -130,47 +121,46 @@ class OsController {
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window1ToWindow2(args, event) {
+  window1ToWindow2(args: any, event: any): void {
     windowService.communicate(args, event);
-    return;
   }
 
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window2ToWindow1(args, event) {
+  window2ToWindow1(args: any, event: any): void {
     windowService.communicate(args, event);
-    return;
   }
 
   /**
    * Create system notifications
    */
-  sendNotification(args, event) {
-    const { title, subtitle, body, silent} = args;
-
+  sendNotification(args: { title?: string; subtitle?: string; body?: string; silent?: boolean }, event: any): boolean {
     if (!Notification.isSupported()) {
-      return '当前系统不支持通知';
+      return false;
     }
 
     let options = {};
-    if (!_.isEmpty(title)) {
-      options.title = title;
+    if (!_.isEmpty(args.title)) {
+      options.title = args.title;
     }
-    if (!_.isEmpty(subtitle)) {
-      options.subtitle = subtitle;
+    if (!_.isEmpty(args.subtitle)) {
+      options.subtitle = args.subtitle;
     }
-    if (!_.isEmpty(body)) {
-      options.body = body;
+    if (!_.isEmpty(args.body)) {
+      options.body = args.body;
     }
-    if (!_.isEmpty(silent)) {
-      options.silent = silent;
+    if (!_.isEmpty(args.silent)) {
+      options.silent = args.silent;
     }
     windowService.createNotification(options, event);
 
-    return true
-  }   
+    return true;
+  }
 }
 
+// 设置类的toString方法，虽然在TypeScript中不常见
 OsController.toString = () => '[class OsController]';
-module.exports = OsController;  
+
+// 默认导出类
+export default OsController;

@@ -1,51 +1,49 @@
-'use strict';
-
-const { getConfig } = require('ee-core/config');
-const { getMainWindow } = require('ee-core/electron');
+import { getConfig, Config } from 'ee-core/config';
+import { getMainWindow } from 'ee-core/electron';
 
 class Lifecycle {
-
   /**
-   * core app have been loaded
+   * Core app has been loaded
    */
-  async ready() {
-    // do some things
+  async ready(): Promise<void> {
+    // Do some things
     console.log('[lifecycle] ready');
   }
 
   /**
-   * electron app ready
+   * Electron app is ready
    */
-  async electronAppReady() {
-    // do some things
+  async electronAppReady(): Promise<void> {
+    // Do some things
     console.log('[lifecycle] electron-app-ready');
   }
 
   /**
-   * main window have been loaded
+   * Main window has been loaded
    */
-  async windowReady() {
+  async windowReady(): Promise<void> {
     console.log('[lifecycle] window-ready');
-    // 延迟加载，无白屏
-    const { windowsOption } = getConfig();
-    if (windowsOption.show == false) {
+    // Delay loading, no white screen
+    const config: Config = getConfig();
+    const { windowsOption } = config;
+    if (windowsOption.show === false) {
       const win = getMainWindow();
       win.once('ready-to-show', () => {
         win.show();
         win.focus();
-      })
+      });
     }
   }
 
   /**
-   * before app close
-   */  
-  async beforeClose() {
+   * Before app close
+   */
+  async beforeClose(): Promise<void> {
     console.log('[lifecycle] before-close');
   }
 }
 
+// 设置类的toString方法，虽然在TypeScript中不常见
 Lifecycle.toString = () => '[class Lifecycle]';
-module.exports = {
-  Lifecycle
-};
+
+export { Lifecycle };

@@ -1,66 +1,65 @@
-'use strict';
-
-const { dialog } = require('electron');
-const _ = require('lodash');
-const { getMainWindow } = require('ee-core/electron/window');
+import { dialog } from 'electron';
+import _ from 'lodash';
+import { getMainWindow } from 'ee-core/electron/window';
 
 /**
- * effect - demo
- * @class
+ * EffectController class
  */
 class EffectController {
-
   /**
-   * select file
+   * Select file
    */
-  selectFile() {
+  selectFile(): string | null {
     const filePaths = dialog.showOpenDialogSync({
       properties: ['openFile']
     });
 
     if (_.isEmpty(filePaths)) {
-      return null
+      return null;
     }
 
     return filePaths[0];
   }
 
   /**
-   * login window
+   * Login window
    */
-  loginWindow(args) {
+  loginWindow(args: { width?: number; height?: number }): void {
     const { width, height } = args;
     const win = getMainWindow();
-    
+
     const size = {
       width: width || 400,
       height: height || 300
-    }
+    };
     win.setSize(size.width, size.height);
     win.setResizable(true);
     win.center();
     win.show();
     win.focus();
   }
-  
+
   /**
-   * restore window
+   * Restore window
    */
-  restoreWindow(args) {
+  restoreWindow(args: { width?: number; height?: number }): void {
     const { width, height } = args;
     const win = getMainWindow();
 
     const size = {
       width: width || 980,
       height: height || 650
-    }
+    };
     win.setSize(size.width, size.height);
     win.setResizable(true);
     win.center();
     win.show();
     win.focus();
-  }   
+  }
 }
 
+// 设置类的toString方法，虽然在TypeScript中不常见
 EffectController.toString = () => '[class EffectController]';
-module.exports = EffectController;  
+
+// 默认导出类
+export default EffectController;
