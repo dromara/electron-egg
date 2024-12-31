@@ -111,6 +111,8 @@ module.exports = {
       '!electron/config/bin.js',
     ],
     fileExt: ['.js'],
+    cleanFiles: ['./public/electron'],
+    specificFiles: ['electron/preload/bridge.js'],
     confusionOptions: {
       compact: true,      
       stringArray: true,
