@@ -63,28 +63,28 @@ module.exports = {
    */
   move: {
     frontend_dist: {
-      dist: './frontend/dist',
-      target: './public/ui'
+      src: './frontend/dist',
+      dest: './public/dist'
     },
     go_static: {
-      dist: './frontend/dist',
-      target: './go/public/dist'
+      src: './frontend/dist',
+      dest: './go/public/dist'
     },
     go_config: {
-      dist: './go/config',
-      target: './go/public/config'
+      src: './go/config',
+      dest: './go/public/config'
     },
     go_package: {
-      dist: './package.json',
-      target: './go/public/package.json'
+      src: './package.json',
+      dest: './go/public/package.json'
     },
     go_images: {
-      dist: './public/images',
-      target: './go/public/images'
+      src: './public/images',
+      dest: './go/public/images'
     },
     python_dist: {
-      dist: './python/dist',
-      target: './build/extraResources/py'
+      src: './python/dist',
+      dest: './build/extraResources/py'
     },
   },  
 
@@ -124,16 +124,6 @@ module.exports = {
    * ee-bin exec
    */
   exec: {
-    node_v: {
-      directory: './',
-      cmd: 'node',
-      args: ['-v'],
-    },
-    npm_v: {
-      directory: './',
-      cmd: 'npm',
-      args: ['-v'],
-    },
     // 单独调试，air 实现 go 热重载
     go: {
       directory: './go',

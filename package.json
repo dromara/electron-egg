@@ -19,6 +19,7 @@
     "encrypt": "ee-bin encrypt",
     "clean": "ee-bin clean",
     "icon": "ee-bin icon",
+    "move": "ee-bin move --flag=frontend_dist",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3",
     "build-w": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
     "build-w-32": "electron-builder --config=./electron/config/builder.json -w=nsis --ia32",
