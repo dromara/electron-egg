@@ -1,32 +1,5 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "useDefineForClassFields": true,
-    // "sourceMap": true,
-    "skipLibCheck": true,
-    "types": ["node"],
-    "esModuleInterop": true,
-
-    // "allowJs": true,
-    // "checkJs": true,
-
-    /* Bundler mode */
-    "moduleResolution": "node", // node
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    //"noEmit": true,
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitAny": false,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": [
-    "src/**/*"
-  ]
+  "files": [],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
   

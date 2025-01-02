@@ -4,7 +4,11 @@
   "description": "A fast, desktop software development framework",
   "main": "./electron/main.js",
   "scripts": {
-    "vite-test": "tsc && vite build",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "vite-dev": "electron-vite dev",
+    "vite-build": "npm run typecheck && electron-vite build",
     "dev": "ee-bin dev",
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
@@ -53,6 +57,7 @@
   "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
+    "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/rebuild": "^3.7.1",
     "@types/node": "^22.10.2",
     "cross-env": "^7.0.3",
@@ -60,6 +65,7 @@
     "ee-bin": "file:.yalc/ee-bin",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8",
+    "electron-vite": "file:.yalc/electron-vite",
     "typescript": "^5.4.2",
     "vite": "^6.0.6",
     "vite-plugin-dts": "^4.4.0"
