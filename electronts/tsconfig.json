@@ -3,7 +3,6 @@
     "target": "esnext",
     "module": "esnext",
     "useDefineForClassFields": true,
-    // "sourceMap": true,
     "skipLibCheck": true,
     "types": ["node"],
     "esModuleInterop": true,
@@ -23,10 +22,14 @@
     "noUnusedParameters": true,
     "noImplicitAny": false,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "outDir": "../public/electron"
   },
   "include": [
-    "src/**/*"
-  ]
+    "**/*"
+  ],
+  "exclude": [
+    "tsconfig.json"
+  ],
 }
   

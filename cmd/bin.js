@@ -105,10 +105,7 @@ module.exports = {
     type: 'confusion',
     files: [
       'electron/**/*.(js|json)',
-      '!electron/config/encrypt.js',
       '!electron/config/nodemon.json',
-      '!electron/config/builder.json',
-      '!electron/config/bin.js',
     ],
     fileExt: ['.js'],
     cleanFiles: ['./public/electron'],
