@@ -24,13 +24,9 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
-    //"outDir": "../outttt/electron"
   },
   "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "tsconfig.json"
-  ],
+    "./electronts/**/*"
+  ]
 }
   
