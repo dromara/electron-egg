@@ -17,6 +17,16 @@ module.exports = {
       port: 8080,
       indexPath: 'index.html',
     },
+    bundler: {
+      directory: './', // ./node_modules/.bin/
+      cmd: 'esbuild',
+      args: ['./electron/**/*.js', '--platform=node', '--minify', '--outdir=runtime', '--watch', '--packages=external'], // '--config==./cmd/esbuild.config.js'
+    },
+    bundlerts: {
+      directory: './', // ./node_modules/.bin/
+      cmd: 'esbuild',
+      args: ['./electronts/**/*.ts', '--platform=node', '--minify', '--format=cjs', '--outdir=runtime', '--tsconfig=./electronts/tsconfig.json', '--packages=external'], // '--config==./cmd/esbuild.config.js'
+    },
     electron: {
       directory: './',
       cmd: 'electron',

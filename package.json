@@ -4,10 +4,9 @@
   "description": "A fast, desktop software development framework",
   "main": "./electron/main.js",
   "scripts": {
-    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
-    "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
-    "typecheck": "npm run typecheck:node",
-    "ts-dev": "tsc --watch -p ./ts/tsconfig.json",
+    "typecheck": "tsc --noEmit -p ./ts/tsconfig.json --composite false",
+    "ts-dev": "tsc -p ./electronts/tsconfig.json",
+    "dev-esbuild": "ee-bin dev --serve=bundlerts",
     "dev": "ee-bin dev",
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
@@ -64,6 +63,7 @@
     "ee-bin": "file:.yalc/ee-bin",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8",
+    "esbuild": "0.24.2",
     "typescript": "^5.4.2",
     "vite": "^6.0.6",
     "vite-plugin-dts": "^4.4.0"

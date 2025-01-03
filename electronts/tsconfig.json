@@ -23,8 +23,8 @@
     "noImplicitAny": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true
-    //"outDir": "../public/electron"
+    "forceConsistentCasingInFileNames": true,
+    //"outDir": "../outttt/electron"
   },
   "include": [
     "**/*"
