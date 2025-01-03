@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+    "target": "es6",
+    "module": "commonjs",
     "useDefineForClassFields": true,
     "skipLibCheck": true,
     "types": ["node"],
@@ -23,7 +23,8 @@
     "noImplicitAny": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "outDir": "../public/electron"
+    "forceConsistentCasingInFileNames": true
+    //"outDir": "../public/electron"
   },
   "include": [
     "**/*"
