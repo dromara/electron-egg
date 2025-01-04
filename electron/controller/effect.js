@@ -2,7 +2,7 @@
 
 const { dialog } = require('electron');
 const _ = require('lodash');
-const { getMainWindow } = require('ee-core/electron/window');
+const { getMainWindow } = require('ee-core/electron');
 
 /**
  * effect - demo

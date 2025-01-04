@@ -3,13 +3,13 @@ const { autoUpdater } = require("electron-updater");
 const { is } = require('ee-core/utils');
 const { logger } = require('ee-core/log');
 const { getConfig } = require('ee-core/config');
-const { getMainWindow, setCloseAndQuit } = require('ee-core/electron/window');
+const { getMainWindow, setCloseAndQuit } = require('ee-core/electron');
 
 /**
  * 自动升级
  * @class
  */
-class AutoUpdater {
+class AutoUpdaterService {
 
   /**
    * 创建
@@ -157,7 +157,7 @@ class AutoUpdater {
   }  
 }
 
-AutoUpdater.toString = () => '[class AutoUpdater]';
+AutoUpdaterService.toString = () => '[class AutoUpdaterService]';
 module.exports = {
-  autoUpdater: new AutoUpdater()
+  autoUpdaterService: new AutoUpdaterService()
 };

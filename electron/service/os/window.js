@@ -1,9 +1,8 @@
 'use strict';
 
 const path = require('path');
-const { app: electronApp } = require('electron');
 const { BrowserWindow, Notification } = require('electron');
-const { getMainWindow } = require('ee-core/electron/window');
+const { getMainWindow } = require('ee-core/electron');
 const { isProd, getBaseDir } = require('ee-core/ps');
 
 /**
