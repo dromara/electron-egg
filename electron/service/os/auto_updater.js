@@ -11,9 +11,6 @@ const { getMainWindow, setCloseAndQuit } = require('ee-core/electron/window');
  */
 class AutoUpdater {
 
-  constructor() {
-  }
-
   /**
    * 创建
    */
@@ -43,7 +40,7 @@ class AutoUpdater {
     }
 
     const version = electronApp.getVersion();
-    logger.info('[addon:autoUpdater] current version: ', version);
+    logger.info('[autoUpdater] current version: ', version);
   
     // 设置下载服务器地址
     let server = cfg.options.url;
@@ -57,7 +54,7 @@ class AutoUpdater {
     try {
       autoUpdater.setFeedURL(cfg.options);
     } catch (error) {
-      logger.error('[addon:autoUpdater] setFeedURL error : ', error);
+      logger.error('[autoUpdater] setFeedURL error : ', error);
     }
   
     autoUpdater.on('checking-for-update', () => {

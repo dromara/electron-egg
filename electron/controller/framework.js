@@ -10,6 +10,7 @@ const { logger } = require('ee-core/log');
 const { getConfig } = require('ee-core/config');
 const { frameworkService } = require('../service/framework');
 const { sqlitedbService } = require('../service/database/sqlitedb');
+const { autoUpdater } = require('../service/os/auto_updater');
 
 /**
  * framework - demo
@@ -239,6 +240,22 @@ class FrameworkController {
       result
     }
     return data;
+  }
+
+  /**
+   * 检查是否有新版本
+   */
+  checkForUpdater() { 
+    autoUpdater.checkUpdate();
+    return;
+  }
+
+  /**
+   * 下载新版本
+   */
+  downloadApp() {
+    autoUpdater.download();
+    return;
   }
 
   /**
