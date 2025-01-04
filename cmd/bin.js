@@ -31,6 +31,13 @@ module.exports = {
       cmd: 'npm',
       args: ['run', 'build'],
     },
+    electron: {
+      language: 'javascript',
+      javascript: {
+        entryPoints: ['./electron/**/*.js'],
+        bundle: false,
+      },
+    }, 
     go_w: {
       directory: './go',
       cmd: 'go',
@@ -98,14 +105,13 @@ module.exports = {
    * 加密
    */  
   encrypt: {
-    type: 'confusion',
+    type: 'confusion', // none | confusion | bytecode | all
     files: [
-      'electron/**/*.(js|json)',
-      '!electron/config/nodemon.json',
+      './public/electron/**/*.(js|json)',
     ],
     fileExt: ['.js'],
     cleanFiles: ['./public/electron'],
-    specificFiles: ['electron/preload/bridge.js'],
+    specificFiles: ['./public/electron/preload/bridge.js'],
     confusionOptions: {
       compact: true,      
       stringArray: true,
