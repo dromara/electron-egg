@@ -37,36 +37,30 @@ module.exports = {
         entryPoints: ['./electron/**/*.js'],
       },
     },
-    win32: {
-      cmd: 'electron-builder',
-      args: ['--config=./cmd/builder.json', '-w=nsis', '--ia32'],
-    },
     win64: {
       cmd: 'electron-builder',
+      directory: './',
       args: ['--config=./cmd/builder.json', '-w=nsis', '--x64'],
     },
+    win32: {
+      args: ['--config=./cmd/builder.json', '-w=nsis', '--ia32'],
+    },
     win_e: {
-      cmd: 'electron-builder',
       args: ['--config=./cmd/builder.json', '-w=portable', '--x64'],
     },
     win_7z: {
-      cmd: 'electron-builder',
       args: ['--config=./cmd/builder.json', '-w=7z', '--x64'],
     },
     mac: {
-      cmd: 'electron-builder',
       args: ['--config=./cmd/builder-mac.json', '-m'],
     },
     mac_arm64: {
-      cmd: 'electron-builder',
       args: ['--config=./cmd/builder-mac-arm64.json', '-m', '--arm64'],
     },
     linux: {
-      cmd: 'electron-builder',
       args: ['--config=./cmd/builder-linux.json', '-l=deb', '--x64'],
     },
     linux_arm64: {
-      cmd: 'electron-builder',
       args: ['--config=./cmd/builder-linux.json', '-l=deb', '--arm64'],
     },
     go_w: {
@@ -136,7 +130,7 @@ module.exports = {
    * 加密
    */  
   encrypt: {
-    type: 'confusion', // none | confusion | bytecode | all
+    type: 'confusion', // none | confusion | bytecode | strict
     files: [
       './public/electron/**/*.(js|json)',
     ],
