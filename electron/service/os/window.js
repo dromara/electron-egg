@@ -4,6 +4,7 @@ const path = require('path');
 const { BrowserWindow, Notification } = require('electron');
 const { getMainWindow } = require('ee-core/electron');
 const { isProd, getBaseDir } = require('ee-core/ps');
+const { getConfig } = require('ee-core/config');
 
 /**
  * Window
