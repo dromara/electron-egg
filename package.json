@@ -42,7 +42,6 @@
     "build-lr-64": "electron-builder --config=./cmd/builder.json -l=rpm --x64",
     "build-lr-arm64": "electron-builder --config=./cmd/builder.json -l=rpm --arm64",
     "build-lp-64": "electron-builder --config=./cmd/builder.json -l=pacman --x64",
-    "debug": "cross-env DEBUG=ee-core* ee-bin dev --serve=electron",
     "test-encrypt": "ee-bin encrypt",
     "test-move": "ee-bin move --flag=frontend_dist"
   },
