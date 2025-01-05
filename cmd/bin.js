@@ -35,9 +35,40 @@ module.exports = {
       language: 'javascript',
       javascript: {
         entryPoints: ['./electron/**/*.js'],
-        bundle: false,
       },
-    }, 
+    },
+    win32: {
+      cmd: 'electron-builder',
+      args: ['--config=./cmd/builder.json', '-w=nsis', '--ia32'],
+    },
+    win64: {
+      cmd: 'electron-builder',
+      args: ['--config=./cmd/builder.json', '-w=nsis', '--x64'],
+    },
+    win_e: {
+      cmd: 'electron-builder',
+      args: ['--config=./cmd/builder.json', '-w=portable', '--x64'],
+    },
+    win_7z: {
+      cmd: 'electron-builder',
+      args: ['--config=./cmd/builder.json', '-w=7z', '--x64'],
+    },
+    mac: {
+      cmd: 'electron-builder',
+      args: ['--config=./cmd/builder-mac.json', '-m'],
+    },
+    mac_arm64: {
+      cmd: 'electron-builder',
+      args: ['--config=./cmd/builder-mac-arm64.json', '-m', '--arm64'],
+    },
+    linux: {
+      cmd: 'electron-builder',
+      args: ['--config=./cmd/builder-linux.json', '-l=deb', '--x64'],
+    },
+    linux_arm64: {
+      cmd: 'electron-builder',
+      args: ['--config=./cmd/builder-linux.json', '-l=deb', '--arm64'],
+    },
     go_w: {
       directory: './go',
       cmd: 'go',
