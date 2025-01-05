@@ -15,7 +15,7 @@ class AutoUpdaterService {
    * 创建
    */
   create () {
-    logger.info('[addon:autoUpdater] load');
+    logger.info('[autoUpdater] load');
     const cfg = getConfig().customize.autoUpdater;
     if ((is.windows() && cfg.windows)
         || (is.macOS() && cfg.macOS)
@@ -24,11 +24,6 @@ class AutoUpdaterService {
       // continue
     } else {
       return
-    }
-
-    // 是否检查更新
-    if (cfg.force) {
-      this.checkUpdate();
     }
 
     const status = {

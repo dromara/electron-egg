@@ -87,7 +87,7 @@ class SqlitedbService extends BasedbService {
    * get data dir (sqlite)
    */
   async getDataDir() {
-    const dir = this.storage.getStorageDir();    
+    const dir = this.storage.getDbDir();    
     return dir;
   } 
 

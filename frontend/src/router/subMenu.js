@@ -31,12 +31,18 @@ export default {
 			pageName: 'FrameworkJobsIndex',
 			params: {}
 		},				  
-		'menu_107' : {
+		'menu_106' : {
 			icon: 'profile',
 			title: '软件调用',
 			pageName: 'FrameworkSoftwareIndex',
 			params: {}
-		},		                                           
+		},	
+    'menu_107' : {
+			icon: 'profile',
+			title: '自动更新',
+			pageName: 'FrameworkUpdaterIndex',
+			params: {}
+		},    	                                           
 	},	
   os: {
     'menu_100' : {

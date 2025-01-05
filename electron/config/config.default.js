@@ -72,6 +72,15 @@ module.exports = () => {
       awaken: {
         protocol: 'ee',
         args: []
+      },
+      autoUpdater: {
+        windows: false, 
+        macOS: false, 
+        linux: false,
+        options: {
+          provider: 'generic', 
+          url: 'http://kodo.qiniu.com/'
+        },
       }
     },
   }
