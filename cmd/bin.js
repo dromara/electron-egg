@@ -32,10 +32,7 @@ module.exports = {
       args: ['run', 'build'],
     },
     electron: {
-      language: 'javascript',
-      javascript: {
-        entryPoints: ['./electron/**/*.js'],
-      },
+      type: 'copy',
     },
     win64: {
       cmd: 'electron-builder',
