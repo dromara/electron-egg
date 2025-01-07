@@ -32,7 +32,10 @@ module.exports = {
       args: ['run', 'build'],
     },
     electron: {
-      type: 'copy',
+      type: 'typescript',
+      typescript: {
+        sourcemap: true,
+      }
     },
     win64: {
       cmd: 'electron-builder',

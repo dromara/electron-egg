@@ -11,6 +11,6 @@ type ElectronApi = {
 };
 
 const ele: ElectronApi = {
-    ipcRenderer: ipcRenderer,
+    ipcRenderer,
 };
 contextBridge.exposeInMainWorld('electron', ele);
