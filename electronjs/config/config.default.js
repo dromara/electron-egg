@@ -63,25 +63,6 @@ module.exports = () => {
     },
     mainServer: {
       indexPath: '/public/dist/index.html',
-    },
-    customize: {
-      tray: {
-        title: 'EE程序',
-        icon: '/public/images/tray.png'
-      },
-      awaken: {
-        protocol: 'ee',
-        args: []
-      },
-      autoUpdater: {
-        windows: false, 
-        macOS: false, 
-        linux: false,
-        options: {
-          provider: 'generic', 
-          url: 'http://kodo.qiniu.com/'
-        },
-      }
-    },
+    }
   }
 }

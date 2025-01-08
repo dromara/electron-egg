@@ -1,29 +1,34 @@
-const { Tray, Menu } = require('electron');
-const path = require('path');
-const { isDev, getBaseDir } = require('ee-core/ps');
-const { logger } = require('ee-core/log');
-const { app: electronApp } = require('electron');
-const { getMainWindow, getCloseAndQuit, setCloseAndQuit } = require('ee-core/electron');
+import { Tray, Menu } from 'electron';
+import path from 'path';
+import { isDev, getBaseDir } from 'ee-core/ps';
+import { logger } from 'ee-core/log';
+import { app as electronApp } from 'electron';
+import { getMainWindow, getCloseAndQuit, setCloseAndQuit } from 'ee-core/electron';
 
 /**
  * 托盘
  * @class
  */
 class TrayService {
+  tray: Tray | null;
+  config: {
+    title: string;
+    icon: string;
+  }
 
   constructor() {
     this.tray = null;
     this.config = {
       title: 'EE程序',
-      icon: '/public/images/tray.png'
+      icon: '/public/images/tray.png',
     }
   }
 
   /**
-   * 创建托盘
+   * Create the tray icon
    */
   create () {
-    // todo 开发环境，代码热更新开启时，会导致托盘中有残影
+    // todo In development mode, code hot reloading can cause tray icon artifacts
     if (isDev()) return;
     logger.info('[tray] load');
 
@@ -33,7 +38,7 @@ class TrayService {
     // tray icon
     const iconPath = path.join(getBaseDir(), cfg.icon);
   
-    // 托盘菜单功能列表
+    // Tray menu items
     const trayMenuTemplate = [
       {
         label: '显示',
@@ -49,9 +54,9 @@ class TrayService {
       }
     ]
   
-    // 设置一个标识，点击关闭，最小化到托盘
+    // Set a flag to minimize to tray instead of closing
     setCloseAndQuit(false);
-    mainWindow.on('close', (event) => {
+    mainWindow.on('close', (event: any) => {
       if (getCloseAndQuit()) {
         return;
       }
@@ -59,19 +64,20 @@ class TrayService {
       event.preventDefault();
     });
     
-    // 实例化托盘
+    // Initialize the tray
     this.tray = new Tray(iconPath);
     this.tray.setToolTip(cfg.title);
     const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
     this.tray.setContextMenu(contextMenu);
-    // 左键单击的时候能够显示主窗口
+    // Show the main window when the tray icon is clicked
     this.tray.on('click', () => {
       mainWindow.show()
     })
   }
 }
 TrayService.toString = () => '[class TrayService]';
+const trayService = new TrayService();
 
-module.exports = {
-  trayService: new TrayService()
-};
+export {
+  trayService
+}

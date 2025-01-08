@@ -1,6 +1,4 @@
-interface AppConfig {
-  openDevTools: boolean;
-}
+import { type AppConfig } from 'ee-core/config';
 
 const config: () => AppConfig = () => {
   return {

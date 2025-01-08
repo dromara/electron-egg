@@ -7,14 +7,10 @@
     "types": ["node"],
     "esModuleInterop": true,
 
-    // "allowJs": true,
-    // "checkJs": true,
-
     /* Bundler mode */
     "moduleResolution": "node", // node
     "resolveJsonModule": true,
     "isolatedModules": true,
-    //"noEmit": true,
 
     /* Linting */
     "strict": true,

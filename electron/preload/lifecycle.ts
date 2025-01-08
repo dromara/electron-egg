@@ -1,4 +1,4 @@
-import { getConfig } from 'ee-core/config';
+import { type AppConfig, getConfig } from 'ee-core/config';
 import { getMainWindow } from 'ee-core/electron';
 
 class Lifecycle {
@@ -6,7 +6,6 @@ class Lifecycle {
    * Core app has been loaded
    */
   async ready(): Promise<void> {
-    // Do some things
     console.log('[lifecycle] ready');
   }
 
@@ -14,7 +13,6 @@ class Lifecycle {
    * Electron app is ready
    */
   async electronAppReady(): Promise<void> {
-    // Do some things
     console.log('[lifecycle] electron-app-ready');
   }
 
@@ -24,9 +22,9 @@ class Lifecycle {
   async windowReady(): Promise<void> {
     console.log('[lifecycle] window-ready');
     // Delay loading, no white screen
-    const config = getConfig();
+    const config:AppConfig = getConfig();
     const { windowsOption } = config;
-    if (windowsOption.show === false) {
+    if (windowsOption?.show === false) {
       const win = getMainWindow();
       win.once('ready-to-show', () => {
         win.show();

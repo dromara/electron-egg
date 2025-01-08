@@ -1,17 +1,17 @@
-'use strict';
-
-const path = require('path');
-const { BrowserWindow, Notification } = require('electron');
-const { getMainWindow } = require('ee-core/electron');
-const { isProd, getBaseDir } = require('ee-core/ps');
-const { getConfig } = require('ee-core/config');
-const { isFileProtocol } = require('ee-core/utils');
+import path from 'path';
+import { BrowserWindow, Notification } from 'electron';
+import { getMainWindow } from 'ee-core/electron';
+import { isProd, getBaseDir } from 'ee-core/ps';
+import { getConfig } from 'ee-core/config';
+import { isFileProtocol } from 'ee-core/utils';
 
 /**
  * Window
  * @class
  */
 class WindowService {
+  myNotification: Notification | null;
+  windows: { [key: string]: BrowserWindow };
 
   constructor() {
     this.myNotification = null;
@@ -21,9 +21,9 @@ class WindowService {
   /**
    * Create a new window
    */
-  createWindow(args) {
+  createWindow(args: { type: string; content: string; windowName: string; windowTitle: string }): number {
     const { type, content, windowName, windowTitle } = args;
-    let contentUrl = null;
+    let contentUrl: string = '';
     if (type == 'html') {
       contentUrl = path.join('file://', getBaseDir(), content)
     } else if (type == 'web') {
@@ -32,7 +32,7 @@ class WindowService {
       let addr = 'http://localhost:8080'
       if (isProd()) {
         const { mainServer } = getConfig();
-        if (isFileProtocol(mainServer)) {
+        if (isFileProtocol(mainServer.protocol)) {
           addr = mainServer.protocol + path.join(getBaseDir(), mainServer.indexPath);
         } else {
           addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;

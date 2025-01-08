@@ -1,86 +1,6 @@
 import path from 'path';
 import { getBaseDir } from 'ee-core/ps';
-
-interface WindowOption {
-  title: string;
-  width: number;
-  height: number;
-  minWidth: number;
-  minHeight: number;
-  webPreferences: {
-    contextIsolation: boolean;
-    nodeIntegration: boolean;
-  };
-  frame: boolean;
-  show: boolean;
-  icon: string;
-}
-
-interface Logger {
-  level: 'INFO' | 'DEBUG' | 'WARN' | 'ERROR';
-  outputJSON: boolean;
-  appLogName: string;
-  coreLogName: string;
-  errorLogName: string;
-}
-
-interface Remote {
-  enable: boolean;
-  url: string;
-}
-
-interface SocketServer {
-  enable: boolean;
-  port: number;
-  path: string;
-  connectTimeout: number;
-  pingTimeout: number;
-  pingInterval: number;
-  maxHttpBufferSize: number;
-  transports: ('polling' | 'websocket')[];
-  cors: {
-    origin: boolean | string | ((origin: string, callback: (err: any, allow: boolean) => void) => void);
-  };
-  channel: string;
-}
-
-interface HttpServer {
-  enable: boolean;
-  https: {
-    enable: boolean;
-    key: string;
-    cert: string;
-  };
-  host: string;
-  port: number;
-}
-
-interface MainServer {
-  indexPath: string;
-}
-
-interface Customize {
-  tray: {
-    title: string;
-    icon: string;
-  };
-  awaken: {
-    protocol: string;
-    args: any[];
-  };
-}
-
-interface AppConfig {
-  openDevTools: boolean;
-  singleLock: boolean;
-  windowsOption: WindowOption;
-  logger: Logger;
-  remote: Remote;
-  socketServer: SocketServer;
-  httpServer: HttpServer;
-  mainServer: MainServer;
-  customize: Customize;
-}
+import { type AppConfig } from 'ee-core/config';
 
 const config: () => AppConfig = () => {
   return {
@@ -137,17 +57,7 @@ const config: () => AppConfig = () => {
     },
     mainServer: {
       indexPath: '/public/dist/index.html',
-    },
-    customize: {
-      tray: {
-        title: 'EE程序',
-        icon: '/public/images/tray.png',
-      },
-      awaken: {
-        protocol: 'ee',
-        args: [],
-      },
-    },
+    }
   };
 };
 

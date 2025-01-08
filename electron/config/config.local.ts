@@ -1,15 +1,4 @@
-interface OpenDevTools {
-  mode: string;
-}
-
-interface Jobs {
-  messageLog: boolean;
-}
-
-interface AppConfig {
-  openDevTools: OpenDevTools;
-  jobs: Jobs;
-}
+import { type AppConfig } from 'ee-core/config';
 
 const config: () => AppConfig = () => {
   return {

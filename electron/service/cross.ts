@@ -1,11 +1,9 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
-const { getExtraResourcesDir, getLogDir } = require('ee-core/ps');
-const path = require("path");
-const axios = require('axios');
-const { is } = require('ee-core/utils');
-const { cross } = require('ee-core/cross');
+import { logger } from 'ee-core/log';
+import { getExtraResourcesDir, getLogDir } from 'ee-core/ps';
+import path from 'path';
+import axios from 'axios';
+import { is } from 'ee-core/utils';
+import { cross } from 'ee-core/cross';
 
 /**
  * cross
@@ -13,7 +11,7 @@ const { cross } = require('ee-core/cross');
  */
 class CrossService {
 
-  info() {
+  info(): string {
     const pids = cross.getPids();
     logger.info('cross pids:', pids);
 
@@ -28,12 +26,12 @@ class CrossService {
     return 'hello electron-egg';
   }
 
-  getUrl(name) {
+  getUrl(name: string): string {
     const serverUrl = cross.getUrl(name);
     return serverUrl;
   }
 
-  killServer(type, name) {
+  killServer(type: string, name: string): void {
     if (type == 'all') {
       cross.killAll();
     } else {
@@ -46,7 +44,7 @@ class CrossService {
    * In the default configuration, services can be started with applications. 
    * Developers can turn off the configuration and create it manually.
    */   
-  async createGoServer() {
+  async createGoServer(): Promise<void> {
     // method 1: Use the default Settings
     //const entity = await cross.run(serviceName);
 
@@ -63,14 +61,12 @@ class CrossService {
     logger.info('server name:', entity.name);
     logger.info('server config:', entity.config);
     logger.info('server url:', entity.getUrl());
-
-    return;
   }
 
   /**
    * create java server
    */
-  async createJavaServer() {
+  async createJavaServer(): Promise<void> {
     const serviceName = "java";
     const jarPath = path.join(getExtraResourcesDir(), 'java-app.jar');
     const opt = {
@@ -92,8 +88,6 @@ class CrossService {
     logger.info('server name:', entity.name);
     logger.info('server config:', entity.config);
     logger.info('server url:', cross.getUrl(entity.name));
-
-    return;
   }  
 
   /**
@@ -101,7 +95,7 @@ class CrossService {
    * In the default configuration, services can be started with applications. 
    * Developers can turn off the configuration and create it manually.
    */   
-  async createPythonServer() {
+  async createPythonServer(): Promise<void> {
     // method 1: Use the default Settings
     //const entity = await cross.run(serviceName);
 
@@ -119,11 +113,9 @@ class CrossService {
     logger.info('server name:', entity.name);
     logger.info('server config:', entity.config);
     logger.info('server url:', entity.getUrl());
-
-    return;
   }
 
-  async requestApi(name, urlPath, params) {
+  async requestApi(name: string, urlPath: string, params: any): Promise<any> {
     const serverUrl = cross.getUrl(name);
     const apiHello = serverUrl + urlPath;
     console.log('Server Url:', serverUrl);
@@ -143,9 +135,10 @@ class CrossService {
     return null;
   }  
 }
-
 CrossService.toString = () => '[class CrossService]';
-module.exports = {
-  CrossService,
-  crossService: new CrossService()
-};  
+const crossService = new CrossService();
+
+export {
+  CrossService, 
+  crossService 
+}; 

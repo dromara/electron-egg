@@ -42,6 +42,7 @@
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/rebuild": "^3.7.1",
+    "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.10.2",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
