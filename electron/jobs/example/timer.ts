@@ -1,18 +1,21 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
-const { isChildJob, exit } = require('ee-core/ps');
-const { childMessage } = require('ee-core/message');
-const { welcome } = require('./hello');
-const { UserService } = require('../../service/job/user');
+import { logger } from 'ee-core/log';
+import { isChildJob, exit } from 'ee-core/ps';
+import { childMessage } from 'ee-core/message';
+import { welcome } from './hello';
+import { UserService } from '../../service/job/user';
 
 /**
  * example - TimerJob
  * @class
  */
 class TimerJob {
+  params: any;
+  timer: NodeJS.Timeout | undefined;
+  timeoutTimer: NodeJS.Timeout | undefined;
+  number: number;
+  countdown: number;
 
-  constructor(params) {
+  constructor(params: any) {
     this.params = params;
     this.timer = undefined;
     this.timeoutTimer = undefined;
@@ -21,43 +24,43 @@ class TimerJob {
   }
 
   /**
-   * handle()方法是必要的，且会被自动调用
+   * handle() method is necessary and will be automatically called
    */
-  async handle () {
+  async handle(): Promise<void> {
     logger.info("[child-process] TimerJob params: ", this.params);
     const { jobId } = this.params;
 
-    // 子进程中使用service
-    // 1. 确保引入的 service 中不能有electron 的 api或依赖， electron 不支持
+    // Use service in child process
+    // 1. Ensure that the service does not have Electron's API or dependencies, as Electron does not support them
     const userService = new UserService();
     userService.hello('job');
 
-    // 执行任务
+    // Execute the task
     this.doTimer(jobId);
   }
   
   /**
-   * 暂停任务运行
+   * Pause the job
    */
-  async pause(jobId) {
+  async pause(jobId: string): Promise<void> {
     logger.info("[child-process] Pause timerJob, jobId: ", jobId);
     clearInterval(this.timer);
     clearInterval(this.timeoutTimer);
   }
 
   /**
-   * 恢复任务运行
+   * Resume the job
    */
-  async resume(jobId, pid) {
+  async resume(jobId: string, pid: number): Promise<void> {
     logger.info("[child-process] Resume timerJob, jobId: ", jobId, ", pid: ", pid);
     this.doTimer(jobId);
   }  
 
   /**
-   * 运行任务
+   * Run the task
    */
   async doTimer(jobId) {
-    // 计时器模拟任务
+    //  Timer to simulate the task
     const eventName = 'job-timer-progress-' + jobId;
     this.timer = setInterval(() => {
       welcome();
@@ -67,22 +70,22 @@ class TimerJob {
       this.countdown--;
     }, 1000);
 
-    // 用 setTimeout 模拟任务运行时长
+    // Use setTimeout to simulate the task duration
     this.timeoutTimer = setTimeout(() => {
-      // 关闭计时器模拟任务
+      // Stop the timer to simulate the task
       clearInterval(this.timer);
 
-      // 任务结束，重置前端显示
+      // Task completed, reset the front-end display
       childMessage.send(eventName, {jobId, number:0, pid:0, end: true});
 
-      // 如果是childJob任务，必须调用 exit() 方法，让进程退出，否则会常驻内存
-      // 如果是childPoolJob任务，常驻内存，等待下一个业务
+      // If it is a childJob task, call exit() to exit the process, otherwise it will stay in memory
+      // If it is a childPoolJob task, stay in memory and wait for the next business
       if (isChildJob()) {
         exit();
       }
     }, this.countdown * 1000)
   }
 }
-
 TimerJob.toString = () => '[class TimerJob]';
-module.exports = TimerJob;
+
+export default TimerJob;

@@ -32,16 +32,12 @@ class WindowService {
       let addr = 'http://localhost:8080'
       if (isProd()) {
         const { mainServer } = getConfig();
-        if (isFileProtocol(mainServer.protocol)) {
+        if (mainServer.protocol && isFileProtocol(mainServer.protocol)) {
           addr = mainServer.protocol + path.join(getBaseDir(), mainServer.indexPath);
-        } else {
-          addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
         }
       }
 
       contentUrl = addr + content;
-    } else {
-      // some
     }
 
     console.log('contentUrl: ', contentUrl);
@@ -68,9 +64,9 @@ class WindowService {
   /**
    * Get window contents id
    */
-  getWCid(args) {
+  getWCid(args: { windowName: string }): number {
     const { windowName } = args;
-    let win;
+    let win: BrowserWindow;
     if (windowName == 'main') {
       win = getMainWindow();
     } else {
@@ -83,7 +79,7 @@ class WindowService {
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  communicate(args) {
+  communicate(args: { receiver: string; content: any }): void {
     const { receiver, content } = args;
     if (receiver == 'main') {
       const win = getMainWindow();
@@ -97,12 +93,12 @@ class WindowService {
   /**
    * createNotification
    */
-  createNotification(options, event) {
+  createNotification(options: any, event: any): void {
     const channel = 'controller.os.sendNotification';
     this.myNotification = new Notification(options);
 
     if (options.clickEvent) {
-      this.myNotification.on('click', (e) => {
+      this.myNotification.on('click', () => {
         let data = {
           type: 'click',
           msg: '您点击了通知消息'
@@ -112,7 +108,7 @@ class WindowService {
     }
 
     if (options.closeEvent) {
-      this.myNotification.on('close', (e) => {
+      this.myNotification.on('close', () => {
         let data = {
           type: 'close',
           msg: '您关闭了通知消息'
@@ -125,9 +121,10 @@ class WindowService {
   }
 
 }
-
 WindowService.toString = () => '[class WindowService]';
-module.exports = {
+const windowService = new WindowService();
+
+export {
   WindowService,
-  windowService: new WindowService()
-};  
+  windowService
+} 
