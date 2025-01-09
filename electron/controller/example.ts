@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * example
  * @class
@@ -9,10 +7,10 @@ class ExampleController {
   /**
    * test
    */
-  async test () {
+  async test(): Promise<string> {
     return 'hello electron-egg';
   }
 }
-
 ExampleController.toString = () => '[class ExampleController]';
-module.exports = ExampleController;  
+
+export default ExampleController;

@@ -1,12 +1,8 @@
-'use strict';
-
-const _ = require('lodash');
-const fs = require('fs');
-const path = require('path');
-const {
-  app: electronApp, dialog, shell, Notification, 
-} = require('electron');
-const { windowService } = require('../service/os/window');
+import fs from 'fs';
+import path from 'path';
+import { app as electronApp, dialog, shell } from 'electron';
+import { windowService } from '../service/os/window';
+import exp from 'constants';
 
 /**
  * example
@@ -23,7 +19,7 @@ class OsController {
   /**
    * Message prompt dialog box
    */
-  messageShow() {
+  messageShow(): string {
     dialog.showMessageBoxSync({
       type: 'info', // "none", "info", "error", "question" 或者 "warning"
       title: 'Custom Title',
@@ -37,7 +33,7 @@ class OsController {
   /**
    * Message prompt and confirmation dialog box
    */
-  messageShowConfirm() {
+  messageShowConfirm(): string {
     const res = dialog.showMessageBoxSync({
       type: 'info',
       title: 'Custom Title',
@@ -60,8 +56,8 @@ class OsController {
       properties: ['openDirectory', 'createDirectory']
     });
 
-    if (_.isEmpty(filePaths)) {
-      return null
+    if (!filePaths) {
+      return ""
     }
 
     return filePaths[0];
@@ -70,7 +66,7 @@ class OsController {
   /**
    * open directory
    */
-  openDirectory(args) {
+  openDirectory(args: { id: any }): boolean {
     const { id } = args;
     if (!id) {
       return false;
@@ -89,7 +85,7 @@ class OsController {
   /**
    * Select Picture
    */
-  selectPic() {
+  selectPic(): string | null {
     const filePaths = dialog.showOpenDialogSync({
       title: 'select pic',
       properties: ['openFile'],
@@ -97,7 +93,7 @@ class OsController {
         { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
       ]
     });
-    if (_.isEmpty(filePaths)) {
+    if (!filePaths) {
       return null
     }
     
@@ -114,7 +110,7 @@ class OsController {
   /**
    * Open a new window
    */
-  createWindow(args) {
+  createWindow(args: any): any {
     const wcid = windowService.createWindow(args);
     return wcid;
   }
@@ -122,7 +118,7 @@ class OsController {
   /**
    * Get Window contents id
    */
-  getWCid(args) {
+  getWCid(args: any): any {
     const wcid = windowService.getWCid(args);
     return wcid;
   }
@@ -130,40 +126,36 @@ class OsController {
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window1ToWindow2(args, event) {
-    windowService.communicate(args, event);
+  window1ToWindow2(args: any): void {
+    windowService.communicate(args);
     return;
   }
 
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window2ToWindow1(args, event) {
-    windowService.communicate(args, event);
+  window2ToWindow1(args: any): void {
+    windowService.communicate(args);
     return;
   }
 
   /**
    * Create system notifications
    */
-  sendNotification(args, event) {
+  sendNotification(args: { title?: string; subtitle?: string; body?: string; silent?: boolean }, event: any): boolean {
     const { title, subtitle, body, silent} = args;
 
-    if (!Notification.isSupported()) {
-      return '当前系统不支持通知';
-    }
-
-    let options = {};
-    if (!_.isEmpty(title)) {
+    const options: any = {};
+    if (title) {
       options.title = title;
     }
-    if (!_.isEmpty(subtitle)) {
+    if (subtitle) {
       options.subtitle = subtitle;
     }
-    if (!_.isEmpty(body)) {
+    if (body) {
       options.body = body;
     }
-    if (!_.isEmpty(silent)) {
+    if (silent !== undefined) {
       options.silent = silent;
     }
     windowService.createNotification(options, event);
@@ -171,6 +163,6 @@ class OsController {
     return true
   }   
 }
-
 OsController.toString = () => '[class OsController]';
-module.exports = OsController;  
+
+export default OsController;
