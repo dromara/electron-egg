@@ -8,12 +8,14 @@
   "asar": true,
   "files": [
     "**/*",
-    "!frontend/",
+    "!cmd/",
+    "!data/",
     "!electron/",
+    "!frontend/",
     "!logs/",
+    "!out/",
     "!go/",
-    "!python/",
-    "!data/"
+    "!python/"
   ],
   "extraResources": {
     "from": "build/extraResources/",

@@ -33,9 +33,6 @@ module.exports = {
     },
     electron: {
       type: 'typescript',
-      typescript: {
-        sourcemap: true,
-      }
     },
     win64: {
       cmd: 'electron-builder',

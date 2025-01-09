@@ -8,11 +8,14 @@
   "asar": true,
   "files": [
     "**/*",
+    "!cmd/",
+    "!data/",
     "!electron/",
     "!frontend/",
     "!logs/",
+    "!out/",
     "!go/",
-    "!data/"
+    "!python/"
   ],
   "extraResources": [
     {
