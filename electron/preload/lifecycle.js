@@ -1,5 +1,6 @@
 'use strict';
 
+const { logger } = require('ee-core/log');
 const { getConfig } = require('ee-core/config');
 const { getMainWindow } = require('ee-core/electron');
 
@@ -9,23 +10,21 @@ class Lifecycle {
    * core app have been loaded
    */
   async ready() {
-    // do some things
-    console.log('[lifecycle] ready');
+    logger.info('[lifecycle] ready');
   }
 
   /**
    * electron app ready
    */
   async electronAppReady() {
-    // do some things
-    console.log('[lifecycle] electron-app-ready');
+    logger.info('[lifecycle] electron-app-ready');
   }
 
   /**
    * main window have been loaded
    */
   async windowReady() {
-    console.log('[lifecycle] window-ready');
+    logger.info('[lifecycle] window-ready');
     // 延迟加载，无白屏
     const { windowsOption } = getConfig();
     if (windowsOption.show == false) {
@@ -41,11 +40,11 @@ class Lifecycle {
    * before app close
    */  
   async beforeClose() {
-    console.log('[lifecycle] before-close');
+    logger.info('[lifecycle] before-close');
   }
 }
-
 Lifecycle.toString = () => '[class Lifecycle]';
+
 module.exports = {
   Lifecycle
 };
