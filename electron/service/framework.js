@@ -34,7 +34,7 @@ class FrameworkService {
    */
   bothWayMessage(type, content, event) {
     // 前端ipc频道 channel
-    const channel = 'controller.framework.ipcSendMsg';
+    const channel = 'controller/framework/ipcSendMsg';
 
     if (type == 'start') {
       // 每隔1秒，向前端页面发送消息
@@ -60,7 +60,7 @@ class FrameworkService {
   doJob(jobId, action, event) {
     let res = {};
     let oneTask;
-    const channel = 'controller.framework.timerJobProgress';
+    const channel = 'controller/framework/timerJobProgress';
     if (action == 'create') {
       // 执行任务及监听进度
       let eventName = 'job-timer-progress-' + jobId;
@@ -106,7 +106,7 @@ class FrameworkService {
    * 创建pool
    */ 
   doCreatePool(num, event) {
-    const channel = 'controller.framework.createPoolNotice';
+    const channel = 'controller/framework/createPoolNotice';
     this.myJobPool.create(num).then(pids => {
       event.reply(`${channel}`, pids);
     });
@@ -117,7 +117,7 @@ class FrameworkService {
    */ 
   doJobByPool(jobId, action, event) {
     let res = {};
-    const channel = 'controller.framework.timerJobProgress';
+    const channel = 'controller/framework/timerJobProgress';
     if (action == 'run') {
       // 异步-执行任务及监听进度
       this.myJobPool.runPromise('./jobs/example/timer', {jobId}).then(task => {

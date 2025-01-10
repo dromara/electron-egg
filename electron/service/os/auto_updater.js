@@ -131,7 +131,7 @@ class AutoUpdaterService {
    */
   sendStatusToWindow(content = {}) {
     const textJson = JSON.stringify(content);
-    const channel = 'custom.app.updater';
+    const channel = 'custom/app/updater';
     const win = getMainWindow();
     win.webContents.send(channel, textJson);
   }

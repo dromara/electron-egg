@@ -87,10 +87,10 @@ class WindowService {
     const { receiver, content } = args;
     if (receiver == 'main') {
       const win = getMainWindow();
-      win.webContents.send('controller.os.window2ToWindow1', content);
+      win.webContents.send('controller/os/window2ToWindow1', content);
     } else if (receiver == 'window2') {
       const win = this.windows[receiver];
-      win.webContents.send('controller.os.window1ToWindow2', content);
+      win.webContents.send('controller/os/window1ToWindow2', content);
     }
   }  
 
@@ -98,7 +98,7 @@ class WindowService {
    * createNotification
    */
   createNotification(options, event) {
-    const channel = 'controller.os.sendNotification';
+    const channel = 'controller/os/sendNotification';
     this.myNotification = new Notification(options);
 
     if (options.clickEvent) {
