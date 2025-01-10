@@ -52,7 +52,7 @@
     </div>       
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';

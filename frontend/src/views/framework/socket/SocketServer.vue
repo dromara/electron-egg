@@ -23,7 +23,7 @@
     </div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ipcApiRoute } from '@/api';
 import { io } from 'socket.io-client';
 import { ref, onMounted } from 'vue';

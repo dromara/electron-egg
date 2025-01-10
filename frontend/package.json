@@ -20,6 +20,7 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@types/node": "^20.16.0",
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/compiler-sfc": "^3.2.33",
     "less": "^4.1.2",
@@ -27,6 +28,7 @@
     "postcss": "^8.4.13",
     "postcss-pxtorem": "^6.0.0",
     "terser": "^5.19.1",
+    "typescript": "^5.4.2",
     "vite": "^4.4.4",
     "vite-plugin-compression": "^0.5.1"
   }

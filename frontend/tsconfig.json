@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "jsx": "preserve",
+
+    "strict": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    // 定义一个变量就必须给它一个初始值
+		"strictPropertyInitialization": false,
+		// 允许使用obj[key]访问对象属性
+		//"suppressImplicitAnyIndexErrors": true,
+    "allowJs": true,
+    "sourceMap": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+    }
+  },
+  "include":["src/**/*.ts", "src/**/*.vue", "src/**/*.tsx", "src/**/*.d.ts", "*.d.ts"],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

@@ -26,7 +26,7 @@
     </div>
   </div>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import axios from 'axios';
