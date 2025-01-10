@@ -70,7 +70,7 @@ function requestHttp(uri, parameter) {
   const host = config.server || 'http://localhost:7071';
   //let url = uri.split('.').join('/');
   // url = host + '/' + url;
-  url = host + '/' + uri;
+  let url = host + '/' + uri;
   console.log('url:', url);
   return axios({
     url: url,
