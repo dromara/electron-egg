@@ -9,7 +9,7 @@ const { autoUpdaterService } = require('../service/os/auto_updater');
 
 function preload() {
   // 示例功能模块，可选择性使用和修改
-  logger.info('[preload] load');
+  logger.info('[preload] load 5');
   trayService.create();
   securityService.create();
   autoUpdaterService.create();

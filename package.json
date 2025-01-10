@@ -4,14 +4,11 @@
   "description": "A fast, desktop software development framework",
   "main": "./public/electron/main.js",
   "scripts": {
-    "typecheck": "tsc --noEmit -p ./ts/tsconfig.json --composite false",
-    "ts-dev": "tsc -p ./electronts/tsconfig.json",
-    "dev-esbuild": "ee-bin dev --serve=bundlerts",
     "dev": "ee-bin dev",
-    "start": "ee-bin start",
     "build": "npm run build-frontend && ee-bin encrypt",
-    "dev-frontend": "cross-env DEBUG=ee-* ee-bin dev --serve=frontend",
-    "dev-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",
+    "start": "ee-bin start",
+    "dev-frontend": "ee-bin dev --serve=frontend",
+    "dev-electron": "ee-bin dev --serve=electron",
     "dev-go": "ee-bin exec --cmds=go",
     "dev-go-w": "ee-bin exec --cmds=go_w",
     "dev-python": "ee-bin exec --cmds=python",
@@ -28,8 +25,9 @@
     "build-m": "ee-bin build --cmds=mac",
     "build-m-arm64": "ee-bin build --cmds=mac_arm64",
     "build-l": "ee-bin build --cmds=linux",
-    "test-encrypt": "ee-bin encrypt",
-    "test-move": "ee-bin move --flag=frontend_dist"
+    "debug-encrypt": "ee-bin encrypt",
+    "debug-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",
+    "debug-move": "ee-bin move --flag=frontend_dist"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
@@ -44,6 +42,7 @@
     "@electron/rebuild": "^3.7.1",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.10.2",
+    "chokidar": "^4.0.3",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
     "ee-bin": "file:.yalc/ee-bin",
