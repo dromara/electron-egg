@@ -1,4 +1,5 @@
-import { type AppConfig, getConfig } from 'ee-core/config';
+import { logger } from 'ee-core/log';
+import { getConfig } from 'ee-core/config';
 import { getMainWindow } from 'ee-core/electron';
 
 class Lifecycle {
@@ -6,23 +7,23 @@ class Lifecycle {
    * Core app has been loaded
    */
   async ready(): Promise<void> {
-    console.log('[lifecycle] ready');
+    logger.info('[lifecycle] ready');
   }
 
   /**
    * Electron app is ready
    */
   async electronAppReady(): Promise<void> {
-    console.log('[lifecycle] electron-app-ready');
+    logger.info('[lifecycle] electron-app-ready');
   }
 
   /**
    * Main window has been loaded
    */
   async windowReady(): Promise<void> {
-    console.log('[lifecycle] window-ready');
+    logger.info('[lifecycle] window-ready');
     // Delay loading, no white screen
-    const config:AppConfig = getConfig();
+    const config = getConfig();
     const { windowsOption } = config;
     if (windowsOption?.show === false) {
       const win = getMainWindow();
@@ -37,11 +38,9 @@ class Lifecycle {
    * Before app close
    */
   async beforeClose(): Promise<void> {
-    console.log('[lifecycle] before-close');
+    logger.info('[lifecycle] before-close');
   }
 }
-
-// 设置类的toString方法，虽然在TypeScript中不常见
 Lifecycle.toString = () => '[class Lifecycle]';
 
 export { Lifecycle };

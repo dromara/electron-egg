@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { app as electronApp, dialog, shell } from 'electron';
 import { windowService } from '../service/os/window';
-import exp from 'constants';
 
 /**
  * example

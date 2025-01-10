@@ -32,7 +32,7 @@ const config: () => AppConfig = () => {
       url: 'http://electron-egg.kaka996.com/',
     },
     socketServer: {
-      enable: false,
+      enable: true,
       port: 7070,
       path: "/socket.io/",
       connectTimeout: 45000,
@@ -43,10 +43,10 @@ const config: () => AppConfig = () => {
       cors: {
         origin: true,
       },
-      channel: 'c1',
+      channel: 'socket-channel',
     },
     httpServer: {
-      enable: false,
+      enable: true,
       https: {
         enable: false,
         key: '/public/ssl/localhost+1.key',
