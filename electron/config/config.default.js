@@ -49,7 +49,7 @@ module.exports = () => {
       cors: {
         origin: true,
       },
-      channel: 'c1'
+      channel: 'socket-channel'
     },
     httpServer: {
       enable: false,
