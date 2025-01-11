@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ee-bin dev",
     "build": "npm run build-frontend && ee-bin encrypt",
-    "start": "ee-bin encrypt && ee-bin start",
+    "start": "ee-bin start",
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
     "dev-go": "ee-bin exec --cmds=go",
