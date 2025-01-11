@@ -41,7 +41,7 @@ onMounted(() => {
 })
 
 function init() {
-  ipc.invoke(ipcApiRoute.framework.checkHttpServer, {}).then(r => {
+  ipc.invoke(ipcApiRoute.framework.checkHttpServer, {}).then((r: any) => {
     if (r.enable) {
       currentStatus.value = '开启';
       servicAddress.value = r.server;
@@ -50,21 +50,19 @@ function init() {
   })
 }
 
-function sendRequest(id) {
+function sendRequest(id: string) {
   if (currentStatus.value == '关闭') {
     message.error('http服务未开启');
     return;
   }
 
-  requestHttp(ipcApiRoute.framework.doHttpRequest, {id}).then(res => {
-    //console.log('res:', res)
-  })
+  requestHttp(ipcApiRoute.framework.doHttpRequest, {id})
 }
 
 /**
  * Accessing built-in HTTP services
  */
-function requestHttp(uri, parameter) {
+function requestHttp(uri: string, parameter: any) {
   // URL conversion
   const config = storage.get('httpServiceConfig');
   const host = config.server || 'http://localhost:7071';
@@ -84,7 +82,7 @@ function requestHttp(uri, parameter) {
  */
 function backendRequest() {
   console.log('GO_URL:', import.meta.env.VITE_GO_URL);
-  const cfg = {
+  const cfg: Record<string, any> = {
     baseURL: import.meta.env.VITE_GO_URL,
     method: 'get',
     url: '/hello',
@@ -93,7 +91,7 @@ function backendRequest() {
   axios(cfg).then(res => {
     console.log('res:', res);
     const data = res.data || null;
-    this.$message.info(`go服务返回: ${data}`, );
+    message.info(`go服务返回: ${data}`, );
   })
 }    
 </script>

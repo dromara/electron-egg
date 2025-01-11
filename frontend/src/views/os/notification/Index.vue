@@ -59,14 +59,14 @@ onMounted(() => {
 function init() {
   // Avoid duplicate monitoring, or write the on function to a unified place and load it only once
   ipc.removeAllListeners(ipcApiRoute.os.sendNotification);
-  ipc.on(ipcApiRoute.os.sendNotification, (event, result) => {
+  ipc.on(ipcApiRoute.os.sendNotification, (event: any, result: any) => {
     if (Object.prototype.toString.call(result) == '[object Object]') {
       message.info(result.msg);
     }  
   })
 }
 
-function sendNotification (index) {
+function sendNotification (index: number) {
   ipc.send(ipcApiRoute.os.sendNotification, views[index]);
 }
 </script>

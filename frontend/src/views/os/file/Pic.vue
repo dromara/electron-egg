@@ -7,7 +7,7 @@
     </div>  
     <div class="one-block-2">
       <a-space>
-          <a-button @click="selectPic(0)">选择图片</a-button>
+          <a-button @click="selectPic()">选择图片</a-button>
       </a-space>
       <p></p>
       <a-image
@@ -25,8 +25,8 @@ import { ref } from 'vue';
 const picPath = ref('https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png');
 
 function selectPic() {
-  ipc.invoke(ipcApiRoute.os.selectPic).then(r => { 
-    picPath.value = r;
+  ipc.invoke(ipcApiRoute.os.selectPic).then((res: any) => { 
+    picPath.value = res;
   })
 }
 </script>

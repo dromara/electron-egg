@@ -78,7 +78,7 @@ onMounted(() => {
 function init() {
   // 避免重复监听，或者将 on 功能写到一个统一的地方，只加载一次
   ipc.removeAllListeners(ipcApiRoute.framework.ipcSendMsg);
-  ipc.on(ipcApiRoute.framework.ipcSendMsg, (event, result) => {
+  ipc.on(ipcApiRoute.framework.ipcSendMsg, (event: any, result: string) => {
     console.log('[ipcRenderer] [socketMsgStart] result:', result);
 
     messageString.value = result;
@@ -88,7 +88,7 @@ function init() {
 
   // 监听 窗口2 发来的消息
   ipc.removeAllListeners(ipcApiRoute.os.window2ToWindow1);
-  ipc.on(ipcApiRoute.os.window2ToWindow1, (event, arg) => {
+  ipc.on(ipcApiRoute.os.window2ToWindow1, (event: any, arg: any) => {
     message.info(arg);
   })  
 }
@@ -110,7 +110,7 @@ function sendMsgStop() {
 }
 
 function handleInvoke() {
-  ipc.invoke(ipcApiRoute.framework.ipcInvokeMsg, '异步-回调').then(r => {
+  ipc.invoke(ipcApiRoute.framework.ipcInvokeMsg, '异步-回调').then((r: any) => {
     console.log('r:', r);
     message1.value = r;
   });
@@ -128,7 +128,7 @@ function handleSendSync() {
 }
 
 function createWindow() {
-  ipc.invoke(ipcApiRoute.os.createWindow, vueItem).then(wcid => {
+  ipc.invoke(ipcApiRoute.os.createWindow, vueItem).then((wcid: number | string) => {
     console.log('[createWindow] wcid:', wcid);
   })
 }

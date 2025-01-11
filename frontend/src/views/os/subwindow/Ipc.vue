@@ -68,7 +68,7 @@ onMounted(() => {
 })
 
 function init() {
-  ipc.on(ipcApiRoute.framework.ipcSendMsg, (event, result) => {
+  ipc.on(ipcApiRoute.framework.ipcSendMsg, (event: any, result: any) => {
     console.log('[ipcRenderer] [socketMsgStart] result:', result);
 
     messageString.value = result;
@@ -78,7 +78,7 @@ function init() {
 
   // 监听主窗口发来的消息
   ipc.removeAllListeners(ipcApiRoute.os.window1ToWindow2);
-  ipc.on(ipcApiRoute.os.window1ToWindow2, (event, arg) => {
+  ipc.on(ipcApiRoute.os.window1ToWindow2, (event: any, arg: any) => {
       message.info(arg);
   })  
 }
@@ -100,9 +100,9 @@ function sendMsgStop() {
 }
 
 function handleInvoke () {
-  ipc.invoke(ipcApiRoute.framework.ipcInvokeMsg, '异步-回调').then(r => {
-    console.log('r:', r);
-    message1.value = r;
+  ipc.invoke(ipcApiRoute.framework.ipcInvokeMsg, '异步-回调').then((res: any) => {
+    console.log('r:', res);
+    message1.value = res;
   });
 }
 

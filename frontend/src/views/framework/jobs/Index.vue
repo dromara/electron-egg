@@ -84,7 +84,7 @@ function init() {
   ipc.removeAllListeners(ipcApiRoute.framework.createPoolNotice);
 
   // 监听任务进度
-  ipc.on(ipcApiRoute.framework.timerJobProgress, (event, result) => {
+  ipc.on(ipcApiRoute.framework.timerJobProgress, (event: any, result: Record<string, any>) => {
     const { jobId, pid, number} = result;
     switch (jobId) {
       case 1:
@@ -115,18 +115,18 @@ function init() {
   })
 
   // 监听pool
-  ipc.on(ipcApiRoute.framework.createPoolNotice, (event, result) => {
+  ipc.on(ipcApiRoute.framework.createPoolNotice, (event: any, result: any) => {
     processPids.value = JSON.stringify(result);
   })   
 }
 
-function runJob(jobId, operation) {
+function runJob(jobId: number, operation: string) {
   const params = {
     jobId,
     type: 'timer',
     action: operation
   }
-  ipc.invoke(ipcApiRoute.framework.someJob, params).then(data => {
+  ipc.invoke(ipcApiRoute.framework.someJob, params).then((data: any) => {
     if (operation != 'create') return;
     switch (data.jobId) {
       case 1:
@@ -146,13 +146,13 @@ function createPool() {
   ipc.send(ipcApiRoute.framework.createPool, params);
 }
 
-function runJobByPool(jobId, operation) {
+function runJobByPool(jobId: number, operation: string) {
   const params = {
     jobId,
     type: 'timer',
     action: operation
   }
-  ipc.invoke(ipcApiRoute.framework.someJobByPool, params).then(data => {
+  ipc.invoke(ipcApiRoute.framework.someJobByPool, params).then((data: any) => {
     const { jobId, result} = data;
     switch (jobId) {
       case 3:

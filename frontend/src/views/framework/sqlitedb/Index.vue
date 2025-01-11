@@ -183,7 +183,7 @@ function init() {
   const params = {
     action: 'getDataDir',
   }
-  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then((res: any) => {
     if (res.code == -1) {
       message.error('请检查sqlite是否正确安装', 5);
       return
@@ -198,7 +198,7 @@ function getAllTestData () {
   const params = {
     action: 'all',
   }
-  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then((res: any) => {
     if (res.all_list.length == 0) {
       return false;
     }
@@ -207,10 +207,10 @@ function getAllTestData () {
 }
 
 function selectDir() {
-  ipc.invoke(ipcApiRoute.os.selectFolder, '').then(r => {
-    data_dir.value = r;
+  ipc.invoke(ipcApiRoute.os.selectFolder, '').then((res: any) => {
+    data_dir.value = res;
     // 修改数据目录
-    modifyDataDir(r);
+    modifyDataDir(res);
   })
 }
 
@@ -219,32 +219,32 @@ function openDir() {
   ipc.invoke(ipcApiRoute.os.openDirectory, {id: data_dir.value})
 }
 
-function modifyDataDir(dir) {
+function modifyDataDir(dir: string) {
   const params = {
     action: 'setDataDir',
     data_dir: dir
   }
-  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then((res: any) => {
     all_list.value = res.all_list;
   }) 
 }
 
-function sqlitedbOperation (ac) {
+function sqlitedbOperation (ac: string) {
   const params = {
     action: ac,
     info: {
       name: name.value,
-      age: parseInt(age.value)
+      age: age.value
     },
-    search_age: parseInt(search_age.value),
+    search_age: search_age.value,
     update_name: update_name.value,
-    update_age: parseInt(update_age.value),
+    update_age: update_age.value,
     delete_name: delete_name.value,
   }
   if (ac == 'add' && name.value.length == 0) {
     message.error(`请填写数据`);
   }
-  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then((res: any) => {
     console.log('res:', res);
     if (ac == 'get') {
       if (res.result.length == 0) {

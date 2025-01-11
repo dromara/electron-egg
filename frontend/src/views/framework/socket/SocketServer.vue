@@ -32,7 +32,7 @@ import { message } from 'ant-design-vue';
 const currentStatus = ref('关闭');
 const servicAddress = ref('ws://localhost:7070');
 const client = {
-  socket: null
+  socket: null as any,
 };
 
 onMounted(() => {
@@ -47,14 +47,14 @@ function init() {
   });
 }
 
-function sendRequest(id) {
+function sendRequest(id: string) {
   if (currentStatus.value == '关闭') {
     message.error('socketio服务未开启');
     return;
   }
 
   const method = ipcApiRoute.framework.doSocketRequest; 
-  client.socket.emit('c1', { cmd: method, args: {id} }, (response) => {
+  client.socket.emit('c1', { cmd: method, args: {id} }, (response: any) => {
     // response为返回值
     console.log('response:', response)
   });

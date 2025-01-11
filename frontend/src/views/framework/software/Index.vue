@@ -26,7 +26,7 @@ import { message } from 'ant-design-vue';
 const soft = ref('powershell.exe');
 
 function openSoft() { 
-  ipc.invoke(ipcApiRoute.framework.openSoftware, {softName: soft.value}).then(result => {
+  ipc.invoke(ipcApiRoute.framework.openSoftware, {softName: soft.value}).then((result: any) => {
     if (!result) {
       message.error('程序不存在');
     }

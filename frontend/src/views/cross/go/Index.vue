@@ -36,13 +36,13 @@ import { message } from 'ant-design-vue';
 const serverUrl = ref('');
 
 function info() {
-  ipc.invoke(ipcApiRoute.cross.crossInfo, {}).then(res => {
+  ipc.invoke(ipcApiRoute.cross.crossInfo, {}).then((res: any) => {
     console.log('res:', res);
   }) 
 }
 
 function getUrl() {
-  ipc.invoke(ipcApiRoute.cross.getCrossUrl, {name: 'goapp'}).then(url => {
+  ipc.invoke(ipcApiRoute.cross.getCrossUrl, {name: 'goapp'}).then((url: string) => {
     serverUrl.value = url;
     message.info(`服务地址: ${url}`);
   }) 
@@ -57,14 +57,14 @@ function create() {
   ipc.invoke(ipcApiRoute.cross.createCrossServer, { program: 'go' })
 }
 
-function request(type) {
+function request(type: number) {
   if (type == 1 && serverUrl.value == "") {
     message.info("请先获取服务地址");
     return
   }
   if (type == 1) {
     const testApi = serverUrl.value + '/api/hello';
-    const cfg = {
+    const cfg: Record<string, any> = {
       method: 'get',
       url: testApi,
       params: { id: '111'},
@@ -76,7 +76,7 @@ function request(type) {
       message.info(`服务返回: ${data}`);
     })
   } else {
-    ipc.invoke(ipcApiRoute.cross.requestApi, {name: 'goapp', urlPath: '/api/hello'}).then(res => {
+    ipc.invoke(ipcApiRoute.cross.requestApi, {name: 'goapp', urlPath: '/api/hello'}).then((res: any) => {
       console.log('res:', res);
       if (res) {
         const { data} = res;

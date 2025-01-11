@@ -57,7 +57,7 @@ const views = [
   }, 
 ];
 
-function createWindow(index) {
+function createWindow(index: number) {
   ipc.invoke(ipcApiRoute.os.createWindow, views[index])
 }
 </script>

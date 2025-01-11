@@ -78,26 +78,26 @@ const fileList = [
 
 const dir_path = ref('D:\\www\\ee');
 
-function openDirectry (id) {
+function openDirectry (id: string) {
   ipc.invoke(ipcApiRoute.os.openDirectory, {id: id})     
 }
 
 function selectDir() {
-  ipc.invoke(ipcApiRoute.os.selectFolder).then(r => {
-    dir_path.value = r;
-    message.info(r);
+  ipc.invoke(ipcApiRoute.os.selectFolder).then((res: any) => {
+    dir_path.value = res;
+    message.info(res);
   })      
 }
 
 function messageShow() {
-  ipc.invoke(ipcApiRoute.os.messageShow).then(r => {
-    message.info(r);
+  ipc.invoke(ipcApiRoute.os.messageShow).then((res: any) => {
+    message.info(res);
   })
 }
 
 function messageShowConfirm() {
-  ipc.invoke(ipcApiRoute.os.messageShowConfirm).then(r => {
-    message.info(r);
+  ipc.invoke(ipcApiRoute.os.messageShowConfirm).then((res: any) => {
+    message.info(res);
   })
 }
 </script>

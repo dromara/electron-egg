@@ -40,7 +40,7 @@ onMounted(() => {
 
 function init() {
   ipc.removeAllListeners(specialIpcRoute.appUpdater);
-  ipc.on(specialIpcRoute.appUpdater, (event, result) => {
+  ipc.on(specialIpcRoute.appUpdater, (event: any, result: any) => {
     result = JSON.parse(result);
     status.value = result.status;
     if (result.status == 3) {
@@ -53,8 +53,8 @@ function init() {
 }
 
 function checkForUpdater () {
-  ipc.invoke(ipcApiRoute.framework.checkForUpdater).then(r => {
-    console.log(r);
+  ipc.invoke(ipcApiRoute.framework.checkForUpdater).then((res: any) => {
+    console.log(res);
   })
 }
 
@@ -63,8 +63,8 @@ function download () {
     message.info('没有可用版本');
     return
   }
-  ipc.invoke(ipcApiRoute.framework.downloadApp).then(r => {
-    console.log(r);
+  ipc.invoke(ipcApiRoute.framework.downloadApp).then((res: any) => {
+    console.log(res);
   })
 }
 </script>
