@@ -19,7 +19,7 @@ class TrayService {
   constructor() {
     this.tray = null;
     this.config = {
-      title: 'EE程序',
+      title: 'electron-egg',
       icon: '/public/images/tray.png',
     }
   }
@@ -28,8 +28,6 @@ class TrayService {
    * Create the tray icon
    */
   create () {
-    // todo In development mode, code hot reloading can cause tray icon artifacts
-    if (isDev()) return;
     logger.info('[tray] load');
 
     const cfg = this.config;
