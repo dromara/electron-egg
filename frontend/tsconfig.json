@@ -12,6 +12,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
+    "resolveJsonModule": true,
+    
     // 定义一个变量就必须给它一个初始值
 		"strictPropertyInitialization": false,
 		// 允许使用obj[key]访问对象属性

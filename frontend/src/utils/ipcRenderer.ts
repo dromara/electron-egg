@@ -1,3 +1,9 @@
+declare global {
+	interface Window {
+	  electron?: any;
+	}
+}
+
 const Renderer = (window.require && window.require('electron')) || window.electron || {};
 
 /**

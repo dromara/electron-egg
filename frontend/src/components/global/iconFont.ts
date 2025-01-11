@@ -1,5 +1,5 @@
 import { createFromIconfontCN } from '@ant-design/icons-vue'
-import { h } from 'vue'
+import { h, VNode } from 'vue'
 
 const IconFont = createFromIconfontCN({
   scriptUrl: 'https://at.alicdn.com/t/font_2456157_4ovzopz659q.js',
@@ -11,7 +11,11 @@ const IconFont = createFromIconfontCN({
   },
 })
 
-const DynamicIconFont = props => {
+interface Props {
+  type?: string;
+}
+
+const DynamicIconFont = (props: Props): VNode => {
   return h(IconFont, { type: props.type || 'icon-fengche' })
 }
 

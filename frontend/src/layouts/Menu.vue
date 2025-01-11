@@ -23,10 +23,10 @@
     </a-layout>
   </a-layout>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import subMenu from '@/router/subMenu';
+import { MenuCategory, MenuStructure, subMenu } from '@/router/subMenu';
 
 const props = defineProps({
   id: {
@@ -36,10 +36,10 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const current = ref('menu_100');
-const menu = ref({});
+const current = ref<string>('menu_100');
+const menu = ref<MenuCategory>();
 
-watch(() => props.id, (newValue) => {
+watch(() => props.id, (newValue: string) => {
   console.log('watch menu id ', newValue);
   // 切换 appSider 时，重置 current
   current.value = "menu_100"
@@ -52,12 +52,13 @@ onMounted(() => {
 
 function menuHandle() {
   console.log('handle menu id:', props.id);
-  menu.value = subMenu[props.id];
+  const key: keyof MenuStructure = props.id as keyof MenuStructure;
+  menu.value = subMenu[key];
   const linkInfo = menu.value[current.value];
   router.push({ name: linkInfo.pageName, params: linkInfo.params });
 }
 
-function changeMenu(e) {
+function changeMenu(e: any) {
   current.value = e.key;
 }
 </script>

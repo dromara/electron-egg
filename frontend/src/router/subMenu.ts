@@ -1,5 +1,24 @@
 // 子菜单
-export default {
+
+export interface MenuItem {
+  icon: string;
+  title: string;
+  pageName: string;
+  params: Record<string, any>;
+}
+
+export interface MenuCategory {
+  [key: string]: MenuItem;
+}
+
+export interface MenuStructure {
+  framework: MenuCategory;
+  os: MenuCategory;
+  effect: MenuCategory;
+  cross: MenuCategory;
+}
+
+export const subMenu: MenuStructure = {
 	framework: {
 		'menu_100' : {
 			icon: 'profile',

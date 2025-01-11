@@ -1,7 +1,7 @@
 import iconFont from './iconFont';
 
 // Use import.meta.globEager to dynamically import all .vue files in the directory
-const modules = import.meta.globEager('./*.vue');
+const modules: { [key: string]: { default: any } } = import.meta.glob('./*.vue', { eager: true });
 
 // Create a map of component names to their default exports
 const map: { [key: string]: any } = {};

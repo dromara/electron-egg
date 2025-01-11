@@ -9,16 +9,21 @@ import Router from './router/index';
 
 const app = createApp(App)
 
-// Register global components
-Object.keys(components).forEach((key) => {
-  app.component(key, components[key]);
-});
+// components
+type ComponentsType = typeof components;
+for (const componentName in components) {
+  if (Object.prototype.hasOwnProperty.call(components, componentName)) {
+    const component = components[componentName as keyof ComponentsType];
+    app.component(componentName, component);
+  }
+}
 
-// Register Ant Design Vue icons
-Object.keys(AntIcon).forEach((key) => {
-  const whiteList = ['createFromIconfontCN', 'getTwoToneColor', 'setTwoToneColor', 'default'];
-  if (!whiteList.includes(key)) {
-    app.component(key, AntIcon[key]);
+// icon
+const whiteList = ['createFromIconfontCN', 'getTwoToneColor', 'setTwoToneColor', 'default']
+const iconKeys = Object.keys(AntIcon) as Array<keyof typeof AntIcon>;
+iconKeys.forEach(key => {
+  if (!whiteList.includes(key as typeof whiteList[number])) {
+    app.component(key.toString(), AntIcon[key]);
   }
 });
 

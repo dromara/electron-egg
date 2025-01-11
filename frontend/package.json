@@ -29,7 +29,7 @@
     "postcss-pxtorem": "^6.0.0",
     "terser": "^5.19.1",
     "typescript": "^5.4.2",
-    "vite": "^4.4.4",
+    "vite": "^6.0.7",
     "vite-plugin-compression": "^0.5.1"
   }
 }

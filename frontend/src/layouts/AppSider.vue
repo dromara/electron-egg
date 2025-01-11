@@ -29,15 +29,28 @@
     </a-layout>
   </a-layout>
 </template>
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
+// 定义菜单项的类型
+interface MenuItem {
+  icon: string;
+  title: string;
+  pageName: string;
+  params: Record<string, any>;
+}
+
+// 定义菜单的类型
+interface Menu {
+  [key: string]: MenuItem;
+}
+
 const router = useRouter();
 
-const collapsed = ref(true);
-const current = ref('menu_1');
-const menu = ref({
+const collapsed = ref<boolean>(true);
+const current = ref<string>('menu_1');
+const menu = ref<Menu>({
   'menu_1': {
     icon: 'icon-fengche',
     title: '框架',
@@ -65,10 +78,10 @@ const menu = ref({
 });
 
 onMounted(() => {
-  menuHandle();
+  menuHandle(null);
 });
 
-function menuHandle(e) {
+function menuHandle(e: any): void {
   console.log('sider menu e:', e);
   if (e) {
     current.value = e.key;
