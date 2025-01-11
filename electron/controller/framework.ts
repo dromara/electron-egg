@@ -115,7 +115,7 @@ class FrameworkController {
       return { enable: false, server: '' };
     }
     const { enable, protocol, host, port } = httpConfig;
-    const url = `${protocol}://${host}:${port}`;
+    const url = `${protocol}${host}:${port}`;
     console.log('[checkHttpServer] url:', url);
     const data = {
       enable: enable,

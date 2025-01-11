@@ -54,7 +54,7 @@ function sendRequest(id: string) {
   }
 
   const method = ipcApiRoute.framework.doSocketRequest; 
-  client.socket.emit('c1', { cmd: method, args: {id} }, (response: any) => {
+  client.socket.emit('socket-channel', { cmd: method, args: {id} }, (response: any) => {
     // response为返回值
     console.log('response:', response)
   });

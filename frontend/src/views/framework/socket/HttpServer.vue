@@ -66,8 +66,9 @@ function requestHttp(uri: string, parameter: any) {
   // URL conversion
   const config = storage.get('httpServiceConfig');
   const host = config.server || 'http://localhost:7071';
-  let url = uri.split('.').join('/');
-  url = host + '/' + url;
+  // let url = uri.split('.').join('/');
+  // url = host + '/' + url;
+  const url = host + '/' + uri;
   console.log('url:', url);
   return axios({
     url: url,

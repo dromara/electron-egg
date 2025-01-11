@@ -23,11 +23,11 @@
     "baseUrl": "./",
     "paths": {
       "@/*": [
-        "./src/*"
+        "src/*"
       ],
     }
   },
-  "include":["./src/**/*.ts", "./src/**/*.vue", "./src/**/*.tsx", "./src/**/*.d.ts", "*.d.ts"],
+  "include":["src/**/*.ts", "src/**/*.vue", "src/**/*.tsx", "src/**/*.d.ts", "*.d.ts"],
   "exclude": [
     "node_modules",
     "dist"
