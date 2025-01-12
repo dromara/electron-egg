@@ -94,7 +94,7 @@ function backendRequest() {
   axios(cfg).then(res => {
     console.log('res:', res);
     const data = res.data || null;
-    this.$message.info(`go服务返回: ${data}`, );
+    message.info(`go服务返回: ${data}`, );
   })
 }    
 </script>

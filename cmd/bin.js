@@ -129,21 +129,53 @@ module.exports = {
    * 加密
    */  
   encrypt: {
-    type: 'confusion', // none | confusion | bytecode | strict
-    files: [
-      './public/electron/**/*.(js|json)',
-    ],
-    fileExt: ['.js'],
-    cleanFiles: ['./public/electron'],
-    specificFiles: ['./public/electron/preload/bridge.js'],
-    confusionOptions: {
-      compact: true,      
-      stringArray: true,
-      stringArrayEncoding: ['rc4'],
-      deadCodeInjection: false,
-      stringArrayCallsTransform: true,
-      numbersToExpressions: true,
+    frontend: {
+      type: 'confusion',
+      files: [
+        './public/dist/**/*.(js|json)',
+      ],
+      cleanFiles: ['./public/dist'],
+      confusionOptions: {
+        compact: true,      
+        stringArray: true,
+        stringArrayEncoding: ['none'],
+        deadCodeInjection: false,
+        stringArrayCallsTransform: true,
+        numbersToExpressions: true,
+        target: 'browser',
+      }
+    },
+    electron: {
+      type: 'confusion',
+      files: [
+        './public/electron/**/*.(js|json)',
+      ],
+      cleanFiles: ['./public/electron'],
+      confusionOptions: {
+        compact: true,      
+        stringArray: true,
+        stringArrayEncoding: ['rc4'],
+        deadCodeInjection: false,
+        stringArrayCallsTransform: true,
+        numbersToExpressions: true,
+        target: 'node',
+      }
     }
+    // type: 'confusion', // none | confusion | bytecode | strict
+    // files: [
+    //   './public/electron/**/*.(js|json)',
+    // ],
+    // fileExt: ['.js'],
+    // cleanFiles: ['./public/electron'],
+    // specificFiles: ['./public/electron/preload/bridge.js'],
+    // confusionOptions: {
+    //   compact: true,      
+    //   stringArray: true,
+    //   stringArrayEncoding: ['rc4'],
+    //   deadCodeInjection: false,
+    //   stringArrayCallsTransform: true,
+    //   numbersToExpressions: true,
+    // }
   },
 
   /**
