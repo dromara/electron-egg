@@ -130,7 +130,7 @@ module.exports = {
    */  
   encrypt: {
     frontend: {
-      type: 'confusion',
+      type: 'none',
       files: [
         './public/dist/**/*.(js|json)',
       ],
@@ -140,13 +140,13 @@ module.exports = {
         stringArray: true,
         stringArrayEncoding: ['none'],
         deadCodeInjection: false,
-        stringArrayCallsTransform: true,
-        numbersToExpressions: true,
+        stringArrayCallsTransform: false,
+        numbersToExpressions: false,
         target: 'browser',
       }
     },
     electron: {
-      type: 'confusion',
+      type: 'none',
       files: [
         './public/electron/**/*.(js|json)',
       ],
