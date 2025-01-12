@@ -60,6 +60,6 @@ class CrossController {
     return data;
   }
 }
-
 CrossController.toString = () => '[class CrossController]';
+
 module.exports = CrossController;  

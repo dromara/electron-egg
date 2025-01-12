@@ -22,8 +22,8 @@ class EffectService {
   }
 
 }
-
 EffectService.toString = () => '[class EffectService]';
+
 module.exports = {
   EffectService,
   effectService: new EffectService()

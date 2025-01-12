@@ -1,7 +1,6 @@
 'use strict';
 
 const { dialog } = require('electron');
-const _ = require('lodash');
 const { getMainWindow } = require('ee-core/electron');
 
 /**
@@ -18,7 +17,7 @@ class EffectController {
       properties: ['openFile']
     });
 
-    if (_.isEmpty(filePaths)) {
+    if (!filePaths) {
       return null
     }
 
@@ -61,6 +60,6 @@ class EffectController {
     win.focus();
   }   
 }
-
 EffectController.toString = () => '[class EffectController]';
+
 module.exports = EffectController;  

@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
 const {
@@ -60,7 +59,7 @@ class OsController {
       properties: ['openDirectory', 'createDirectory']
     });
 
-    if (_.isEmpty(filePaths)) {
+    if (!filePaths) {
       return null
     }
 
@@ -97,7 +96,7 @@ class OsController {
         { name: 'Images', extensions: ['jpg', 'png', 'gif'] },
       ]
     });
-    if (_.isEmpty(filePaths)) {
+    if (!filePaths) {
       return null
     }
     
@@ -154,16 +153,16 @@ class OsController {
     }
 
     let options = {};
-    if (!_.isEmpty(title)) {
+    if (!title) {
       options.title = title;
     }
-    if (!_.isEmpty(subtitle)) {
+    if (!subtitle) {
       options.subtitle = subtitle;
     }
-    if (!_.isEmpty(body)) {
+    if (!body) {
       options.body = body;
     }
-    if (!_.isEmpty(silent)) {
+    if (!silent) {
       options.silent = silent;
     }
     windowService.createNotification(options, event);
@@ -171,6 +170,6 @@ class OsController {
     return true
   }   
 }
-
 OsController.toString = () => '[class OsController]';
+
 module.exports = OsController;  

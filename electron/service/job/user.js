@@ -19,8 +19,8 @@ class UserService {
   }
 
 }
-
 UserService.toString = () => '[class UserService]';
+
 module.exports = {
   UserService
 };  

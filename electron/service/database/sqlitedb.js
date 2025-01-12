@@ -1,7 +1,6 @@
 'use strict';
 
 const { BasedbService } = require('./basedb');
-const _ = require('lodash');
 
 /**
  * sqlite数据存储
@@ -95,7 +94,7 @@ class SqlitedbService extends BasedbService {
    * set custom data dir (sqlite)
    */
   async setCustomDataDir(dir) {
-    if (_.isEmpty(dir)) {
+    if (!dir) {
       return;
     }
 
@@ -104,8 +103,8 @@ class SqlitedbService extends BasedbService {
     return;
   }
 }
-
 SqlitedbService.toString = () => '[class SqlitedbService]';
+
 module.exports = {
   SqlitedbService,
   sqlitedbService: new SqlitedbService()

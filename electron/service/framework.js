@@ -155,8 +155,8 @@ class FrameworkService {
   }
 
 }
-
 FrameworkService.toString = () => '[class FrameworkService]';
+
 module.exports = {
   FrameworkService,
   frameworkService: new FrameworkService()

@@ -18,6 +18,7 @@ module.exports = {
       directory: './',
       cmd: 'electron',
       args: ['.', '--env=local'],
+      watch: true,
     }
   },
 
@@ -138,8 +139,10 @@ module.exports = {
     confusionOptions: {
       compact: true,      
       stringArray: true,
-      stringArrayEncoding: ['none'],
+      stringArrayEncoding: ['rc4'],
       deadCodeInjection: false,
+      stringArrayCallsTransform: true,
+      numbersToExpressions: true,
     }
   },
 

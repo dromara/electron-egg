@@ -19,13 +19,11 @@ class ExampleService {
 
     logger.info('ExampleService obj:', obj);
 
-    //Services.get('framework').test('egg');
-
     return obj;
   }
 }
-
 ExampleService.toString = () => '[class ExampleService]';
+
 module.exports = {
   ExampleService,
   exampleService: new ExampleService()
