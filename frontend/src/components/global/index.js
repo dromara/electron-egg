@@ -1,5 +1,5 @@
 import iconFont from './iconFont'
-const modules = import.meta.globEager('./*.vue')
+const modules = import.meta.glob('./*.vue', { eager: true })
 const map = {}
 Object.keys(modules).forEach(file => {
   const modulesName = file.replace('./', '').replace('.vue', '')

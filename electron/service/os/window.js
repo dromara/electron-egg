@@ -6,6 +6,7 @@ const { getMainWindow } = require('ee-core/electron');
 const { isProd, getBaseDir } = require('ee-core/ps');
 const { getConfig } = require('ee-core/config');
 const { isFileProtocol } = require('ee-core/utils');
+const { logger } = require('ee-core/log');
 
 /**
  * Window
@@ -32,7 +33,7 @@ class WindowService {
       let addr = 'http://localhost:8080'
       if (isProd()) {
         const { mainServer } = getConfig();
-        if (isFileProtocol(mainServer)) {
+        if (isFileProtocol(mainServer.protocol)) {
           addr = mainServer.protocol + path.join(getBaseDir(), mainServer.indexPath);
         } else {
           addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
@@ -44,7 +45,7 @@ class WindowService {
       // some
     }
 
-    console.log('contentUrl: ', contentUrl);
+    logger.info('[createWindow] url: ', contentUrl);
     const opt = {
       title: windowTitle,
       x: 10,

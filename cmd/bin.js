@@ -130,7 +130,7 @@ module.exports = {
    */  
   encrypt: {
     frontend: {
-      type: 'none',
+      type: 'confusion',
       files: [
         './public/dist/**/*.(js|json)',
       ],
@@ -139,14 +139,13 @@ module.exports = {
         compact: true,      
         stringArray: true,
         stringArrayEncoding: ['none'],
-        deadCodeInjection: false,
-        stringArrayCallsTransform: false,
-        numbersToExpressions: false,
+        stringArrayCallsTransform: true,
+        numbersToExpressions: true,
         target: 'browser',
       }
     },
     electron: {
-      type: 'none',
+      type: 'confusion',
       files: [
         './public/electron/**/*.(js|json)',
       ],
@@ -161,21 +160,6 @@ module.exports = {
         target: 'node',
       }
     }
-    // type: 'confusion', // none | confusion | bytecode | strict
-    // files: [
-    //   './public/electron/**/*.(js|json)',
-    // ],
-    // fileExt: ['.js'],
-    // cleanFiles: ['./public/electron'],
-    // specificFiles: ['./public/electron/preload/bridge.js'],
-    // confusionOptions: {
-    //   compact: true,      
-    //   stringArray: true,
-    //   stringArrayEncoding: ['rc4'],
-    //   deadCodeInjection: false,
-    //   stringArrayCallsTransform: true,
-    //   numbersToExpressions: true,
-    // }
   },
 
   /**
