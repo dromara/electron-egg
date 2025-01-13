@@ -4,6 +4,7 @@ import { getMainWindow } from 'ee-core/electron';
 import { isProd, getBaseDir } from 'ee-core/ps';
 import { getConfig } from 'ee-core/config';
 import { isFileProtocol } from 'ee-core/utils';
+import { logger } from 'ee-core/log';
 
 /**
  * Window
@@ -40,7 +41,7 @@ class WindowService {
       contentUrl = addr + content;
     }
 
-    console.log('contentUrl: ', contentUrl);
+    logger.info('[createWindow] url: ', contentUrl);
     const opt = {
       title: windowTitle,
       x: 10,

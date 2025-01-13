@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "1.0.0",
+  "version": "4.0.0",
   "scripts": {
     "dev": "vite --host --port 8080",
     "serve": "vite --host --port 8080",
