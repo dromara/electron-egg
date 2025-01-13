@@ -1,6 +1,6 @@
 const { Tray, Menu } = require('electron');
 const path = require('path');
-const { isDev, getBaseDir } = require('ee-core/ps');
+const { getBaseDir } = require('ee-core/ps');
 const { logger } = require('ee-core/log');
 const { app: electronApp } = require('electron');
 const { getMainWindow, getCloseAndQuit, setCloseAndQuit } = require('ee-core/electron');
@@ -14,7 +14,7 @@ class TrayService {
   constructor() {
     this.tray = null;
     this.config = {
-      title: 'EE程序',
+      title: 'electron-egg',
       icon: '/public/images/tray.png'
     }
   }
@@ -23,8 +23,6 @@ class TrayService {
    * 创建托盘
    */
   create () {
-    // todo 开发环境，代码热更新开启时，会导致托盘中有残影
-    if (isDev()) return;
     logger.info('[tray] load');
 
     const cfg = this.config;

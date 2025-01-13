@@ -9,7 +9,7 @@ module.exports = () => {
       mode: 'bottom'
     },
     jobs: {
-      messageLog: true
+      messageLog: false
     }
   };
 };
