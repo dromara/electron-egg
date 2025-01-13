@@ -19,7 +19,6 @@
     "build-go-l": "ee-bin move --flag=go_static,go_config,go_package,go_images && ee-bin build --cmds=go_l",
     "build-python": "ee-bin build --cmds=python && ee-bin move --flag=python_dist",
     "encrypt": "ee-bin encrypt",
-    "clean": "ee-bin clean",
     "icon": "ee-bin icon",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3",
     "build-w": "ee-bin build --cmds=win64",

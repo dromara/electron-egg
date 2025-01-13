@@ -130,7 +130,7 @@ module.exports = {
    */  
   encrypt: {
     frontend: {
-      type: 'confusion',
+      type: 'none',
       files: [
         './public/dist/**/*.(js|json)',
       ],
