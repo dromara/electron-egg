@@ -6,7 +6,7 @@ const config: () => AppConfig = () => {
       mode: 'bottom'
     },
     jobs: {
-      messageLog: true
+      messageLog: false
     }
   };
 };
