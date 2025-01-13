@@ -1,5 +1,5 @@
 {
-  "name": "ee-next",
+  "name": "ee",
   "version": "4.0.0",
   "description": "A fast, desktop software development framework",
   "main": "./public/electron/main.js",
@@ -47,7 +47,7 @@
     "chokidar": "^4.0.3",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
-    "ee-bin": "file:.yalc/ee-bin",
+    "ee-bin": "^4.0.0",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8",
     "esbuild": "0.24.2",
@@ -57,7 +57,7 @@
     "axios": "^1.7.9",
     "better-sqlite3": "^11.7.0",
     "dayjs": "^1.11.13",
-    "ee-core": "file:.yalc/ee-core",
+    "ee-core": "^4.0.0",
     "electron-updater": "^6.3.8"
   }
 }
