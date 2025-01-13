@@ -40,17 +40,14 @@
   "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
-    "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/rebuild": "^3.7.1",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^20.16.0",
-    "chokidar": "^4.0.3",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
     "ee-bin": "^4.0.0",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8",
-    "esbuild": "0.24.2",
     "typescript": "^5.4.2"
   },
   "dependencies": {
