@@ -1,8 +1,13 @@
-# EE框架 v3
 [![star](https://gitee.com/dromara/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/dromara/electron-egg/stargazers)
 
 <div align=center>
 <img src="https://wallace5303.gitee.io/ee/images/electron-egg/logo.png" width="150" height="150" />
+<h3>🎉🎉🎉 ElectronEgg V4 已发布! 🎉🎉🎉</h3>
+</div>
+<br>
+
+<div align=center>
+<img src="./public/images/example/logo.png" width="150" height="150" />
 </div>
 
 <div align=center>
@@ -10,19 +15,34 @@
 </div>
 <br>
 
-## 🌏 [English](https://www.yuque.com/u34495/ee-doc) | [中文](https://www.kaka996.com/)
+<!-- ## 🌏 [English](https://www.yuque.com/u34495/ee-doc) | [中文](https://www.kaka996.com/) -->
 
 ## 📋 介绍
+
+> 框架已经广泛应用于记账、政务、企业、医疗、学校、股票交易、ERP、娱乐、视频等领域客户端，请放心使用！
+
+## 👦 谁可以使用
+
+项目已经有 5 个交流群，覆盖`前端`、`java`、`go`、`python`、`php` 等开发者。
+
+无论你是前端、服务端、运维、游戏、客户端等，都可以很快入门，
+
+## 🐶 精彩案例
+
+- [**点击查看**](#项目案例)
+
+## 📺 特点
 - 🍩 **为什么使用？** 桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
 - 🍉 **简单：** 只需懂 JavaScript
 - 🍑 **愿景：** 所有开发者都能学会桌面软件研发
 - 🍰 **gitee：** https://gitee.com/dromara/electron-egg **5100+**
 - 🍨 **github：** https://github.com/dromara/electron-egg **1800+**
 - 🏆 码云最有价值开源项目
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-zs.png)    
+    ![](./public/images/example/ee-zs.png)    
 
 ## 📚 文档
-- [教程文档](https://www.kaka996.com/)
+- 快速体验：[教程文档](https://www.kaka996.com/)
+    ![](./public/images/example/v3-home.png) 
 
 ## 📦 特性
 1. 🍄 跨平台：一套代码，可以打包成windows版、Mac版、Linux版、国产UOS、Deepin、麒麟等
@@ -40,43 +60,72 @@
 ### 1. 🚀 常规桌面软件
 - 🚖 windows平台
 
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/home.png)
+    ![](./public/images/example/ee-win-home.png)
 
 - 🚍 macOS平台    
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/mac-socket.png)
+    ![](./public/images/example/ee-mac-home.png)
 
 - 🚔 linux平台 - 国产UOS、Deepin
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/uos-home.png)
+    ![](./public/images/example/uos-home.png)
 
 - 🚔 linux平台 - ubuntu
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/ubuntu-db.png)
+    ![](./public/images/example/ubuntu-db.png)
 
 ### 🚐 2. vue、react、angular、web 转换成桌面软件
 - 🚙 vue-ant-design（本地）
 
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/vue-antd.png)
+    ![](./public/images/example/vue-antd.png)
 
 - 🚙 禅道项目管理（web项目地址）
 
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee-project-7.png)
+    ![](./public/images/example/ee-project-7.png)
 
 ### 🚂 3. 游戏（h5相关技术开发）
 - 🚊 忍者100层
 
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/ee_game_1.png)
+    ![](./public/images/example/ee_game_1.png)
 
 
 ## 📒 开始使用
 
 - ✒️ [安装文档](https://www.kaka996.com/pages/e64ff6/)
     
-## 🐶 项目案例
-- 🐟 EE框架已经应用于医疗、学校、政务、股票交易、ERP、娱乐、视频、企业等领域客户端
+## 项目案例
+- 🐟 框架已经应用于医疗、学校、政务、股票交易、ERP、娱乐、视频、企业等领域客户端
 
-- 🐸 英雄联盟助手
-    ![](https://wallace5303.gitee.io/ee/images/electron-egg/serendipity/lol-zhanji.png)
+### 🐸 远控
 
-- [更多项目](https://www.kaka996.com/pages/eadf46/)
+- RQ Center
+![](./public/images/example/rq-1.png)
+![](./public/images/example/rq-2.png)
+
+### 🐸 云盘
+
+- FM Cloud
+![](./public/images/example/fm-p2.png)
+![](./public/images/example/fm-p1.png)
+![](./public/images/example/fm-p4.png)
+
+### 🐸 IM
+
+- Cede IM
+![](./public/images/example/im-p1.png)
+![](./public/images/example/im-p5.png)
+![](./public/images/example/im-p1.png)
+
+### 🐸 壁纸
+
+- warpar
+![](./public/images/example/aw-3.png)
+
+### 🐸 英雄联盟助手
+
+- Serendlplty
+![](./public/images/example/lol-zhanji.png)
+
+### 🐸 更多
+
+- [更多案例](https://www.kaka996.com/pages/eadf46/)
 
 ## 💬 交流
 1. [讨论](https://www.kaka996.com/pages/c2720e/)
