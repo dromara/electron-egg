@@ -1,40 +1,24 @@
 {
   "name": "ee",
-  "version": "3.15.0",
+  "version": "4.0.0",
   "description": "A fast, desktop software development framework",
-  "main": "main.js",
+  "main": "./public/electron/main.js",
   "scripts": {
     "dev": "ee-bin dev",
+    "build": "npm run build-frontend && npm run build-electron && ee-bin encrypt",
+    "start": "ee-bin start",
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
     "build-frontend": "ee-bin build --cmds=frontend && ee-bin move --flag=frontend_dist",
-    "start": "ee-bin start",
-    "rd": "ee-bin move --flag=frontend_dist",
+    "build-electron": "ee-bin build --cmds=electron",
     "encrypt": "ee-bin encrypt",
-    "clean": "ee-bin clean",
     "icon": "ee-bin icon",
-    "reload": "nodemon --config ./electron/config/nodemon.json",
-    "rebuild": "electron-rebuild",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3",
-    "build-w": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
-    "build-w-32": "electron-builder --config=./electron/config/builder.json -w=nsis --ia32",
-    "build-w-64": "electron-builder --config=./electron/config/builder.json -w=nsis --x64",
-    "build-w-arm64": "electron-builder --config=./electron/config/builder.json -w=nsis --arm64",
-    "build-we": "electron-builder --config=./electron/config/builder.json -w=portable --x64",
-    "build-wz": "electron-builder --config=./electron/config/builder.json -w=7z --x64",
-    "build-wz-32": "electron-builder --config=./electron/config/builder.json -w=7z --ia32",
-    "build-wz-64": "electron-builder --config=./electron/config/builder.json -w=7z --x64",
-    "build-wz-arm64": "electron-builder --config=./electron/config/builder.json -w=7z --arm64",
-    "build-m": "electron-builder --config=./electron/config/builder.json -m",
-    "build-m-arm64": "electron-builder --config=./electron/config/builder.json -m --arm64",
-    "build-l": "electron-builder --config=./electron/config/builder.json -l=deb --x64",
-    "build-l-32": "electron-builder --config=./electron/config/builder.json -l=deb --ia32",
-    "build-l-64": "electron-builder --config=./electron/config/builder.json -l=deb --x64",
-    "build-l-arm64": "electron-builder --config=./electron/config/builder.json -l=deb --arm64",
-    "build-l-armv7l": "electron-builder --config=./electron/config/builder.json -l=deb --armv7l",
-    "build-lr-64": "electron-builder --config=./electron/config/builder.json -l=rpm --x64",
-    "build-lp-64": "electron-builder --config=./electron/config/builder.json -l=pacman --x64",
-    "test": "set DEBUG=* && electron . --env=local"
+    "build-w": "ee-bin build --cmds=win64",
+    "build-we": "ee-bin build --cmds=win_e",
+    "build-m": "ee-bin build --cmds=mac",
+    "build-m-arm64": "ee-bin build --cmds=mac_arm64",
+    "build-l": "ee-bin build --cmds=linux"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
@@ -45,19 +29,15 @@
   "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
-    "@electron/rebuild": "^3.2.13",
-    "debug": "^4.3.3",
-    "ee-bin": "1.8.3",
-    "electron": "^21.4.4",
-    "electron-builder": "^23.6.0",
-    "eslint": "^5.13.0",
-    "eslint-plugin-prettier": "^3.0.1",
-    "nodemon": "^2.0.16"
+    "@electron/rebuild": "^3.7.1",
+    "@types/node": "^20.16.0",
+    "debug": "^4.4.0",
+    "ee-bin": "^4.0.0",
+    "electron": "^31.7.6",
+    "electron-builder": "^25.1.8"
   },
   "dependencies": {
-    "dayjs": "^1.10.7",
-    "ee-core": "2.12.0",
-    "electron-updater": "^5.3.0",
-    "lodash": "^4.17.21"
+    "ee-core": "^4.0.0",
+    "electron-updater": "^6.3.8"
   }
 }

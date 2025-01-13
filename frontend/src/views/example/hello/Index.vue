@@ -11,13 +11,8 @@
     </p>
   </section>
 </template>
-<script>
-
-export default {
-  data() {
-    return {};
-  },
-};
+<script setup>
+console.log("hello")
 </script>
 <style scoped>
 section {

@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 
 import path from 'path'
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(() => {
   return {
     // 项目插件
     plugins: [

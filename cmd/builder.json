@@ -1,17 +1,21 @@
 {
   "productName": "ee",
   "appId": "com.electron.ee",
-  "copyright": "© 2025 哆啦好梦 Technology Co., Ltd.",
+  "copyright": "© 2025 duola Technology Co., Ltd.",
   "directories": {
     "output": "out"
   },
   "asar": true,
   "files": [
     "**/*",
+    "!cmd/",
+    "!data/",
+    "!electron/",
     "!frontend/",
-    "!run/",
     "!logs/",
-    "!data/"
+    "!out/",
+    "!go/",
+    "!python/"
   ],
   "extraResources": {
     "from": "build/extraResources/",
@@ -26,7 +30,7 @@
     "installerHeaderIcon": "build/icons/icon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "EE框架"
+    "shortcutName": "ee"
   },
   "publish": [
     {
@@ -34,12 +38,6 @@
       "url": "https://github.com/wallace5303/electron-egg"
     }
   ],
-  "mac": {
-    "icon": "build/icons/icon.icns",
-    "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
-    "darkModeSupport": true,
-    "hardenedRuntime": false
-  },
   "win": {
     "icon": "build/icons/icon.ico",
     "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
@@ -48,13 +46,5 @@
         "target": "nsis"
       }
     ]
-  },
-  "linux": {
-    "icon": "build/icons/icon.icns",
-    "artifactName": "${productName}-${os}-${version}-${arch}.${ext}",
-    "target": [
-      "deb"
-    ],
-    "category": "Utility"
   }
 }

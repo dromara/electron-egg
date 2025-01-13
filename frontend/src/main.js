@@ -5,7 +5,6 @@ import components from './components/global';
 import Router from './router/index';
 
 const app = createApp(App)
-app.config.productionTip = false
 
 // components
 for (const i in components) {

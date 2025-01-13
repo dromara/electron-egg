@@ -1,19 +1,13 @@
 'use strict';
 
-const { Controller } = require('ee-core');
-const Log = require('ee-core/log');
-const Services = require('ee-core/services');
+const { logger } = require('ee-core/log');
+const { exampleService } = require('../service/example');
 
 /**
  * example
  * @class
  */
-class ExampleController extends Controller {
-
-  constructor(ctx) {
-    super(ctx);
-  }
-
+class ExampleController {
 
   /**
    * 所有方法接收两个参数
@@ -25,12 +19,12 @@ class ExampleController extends Controller {
    * test
    */
   async test () {
-    const result = await Services.get('example').test('electron');
-    Log.info('service result:', result);
+    const result = await exampleService.test('electron');
+    logger.info('service result:', result);
 
     return 'hello electron-egg';
   }
 }
-
 ExampleController.toString = () => '[class ExampleController]';
-module.exports = ExampleController;  
+
+module.exports = ExampleController; 
