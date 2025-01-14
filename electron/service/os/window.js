@@ -3,7 +3,7 @@
 const path = require('path');
 const { BrowserWindow, Notification } = require('electron');
 const { getMainWindow } = require('ee-core/electron');
-const { isProd, getBaseDir } = require('ee-core/ps');
+const { isDev, isProd, getBaseDir } = require('ee-core/ps');
 const { getConfig } = require('ee-core/config');
 const { isFileProtocol } = require('ee-core/utils');
 const { logger } = require('ee-core/log');
@@ -60,7 +60,10 @@ class WindowService {
     const win = new BrowserWindow(opt);
     const winContentsId = win.webContents.id;
     win.loadURL(contentUrl);
-    win.webContents.openDevTools();
+    if (isDev()) {
+      win.webContents.openDevTools();
+    }
+
     this.windows[windowName] = win;
 
     return winContentsId;
