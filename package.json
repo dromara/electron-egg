@@ -44,12 +44,13 @@
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^20.16.0",
     "chokidar": "^4.0.3",
-    "esbuild": "0.24.2",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
     "ee-bin": "file:.yalc/ee-bin",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8",
+    "esbuild": "0.24.2",
+    "tree-kill": "^1.2.2",
     "typescript": "^5.4.2"
   },
   "dependencies": {
