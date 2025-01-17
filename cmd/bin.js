@@ -18,7 +18,8 @@ module.exports = {
       directory: './',
       cmd: 'electron',
       args: ['.', '--env=local'],
-      watch: false,
+      watch: true,
+      delay: 1000,
     }
   },
 
