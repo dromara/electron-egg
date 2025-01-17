@@ -52,7 +52,7 @@ module.exports = () => {
       channel: 'socket-channel'
     },
     httpServer: {
-      enable: false,
+      enable: true,
       https: {
         enable: false, 
         key: '/public/ssl/localhost+1.key',
