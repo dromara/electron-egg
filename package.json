@@ -45,15 +45,15 @@
     "@types/node": "^20.16.0",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
-    "ee-bin": "^4.0.0",
+    "ee-bin": "^4.0.1",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8",
     "typescript": "^5.4.2"
   },
   "dependencies": {
     "axios": "^1.7.9",
-    "dayjs": "^1.11.13",
     "better-sqlite3": "^11.7.0",
+    "dayjs": "^1.11.13",
     "ee-core": "^4.0.0",
     "electron-updater": "^6.3.8"
   }
