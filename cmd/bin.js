@@ -145,11 +145,15 @@ module.exports = {
       }
     },
     electron: {
-      type: 'confusion',
+      type: 'bytecode',
       files: [
         './public/electron/**/*.(js|json)',
       ],
       cleanFiles: ['./public/electron'],
+      specificFiles: [
+        './public/electron/main.js',
+        './public/electron/preload/bridge.js',
+      ],
       confusionOptions: {
         compact: true,      
         stringArray: true,
