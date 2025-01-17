@@ -150,6 +150,10 @@ module.exports = {
         './public/electron/**/*.(js|json)',
       ],
       cleanFiles: ['./public/electron'],
+      specificFiles: [
+        './public/electron/main.js',
+        './public/electron/preload/bridge.js',
+      ],
       confusionOptions: {
         compact: true,      
         stringArray: true,
