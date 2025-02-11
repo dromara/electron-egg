@@ -39,6 +39,7 @@ Whether you're a frontend developer, backend developer, operations engineer, gam
 - 🍑 **vision：** All developers can learn to develop desktop software.
 - 🍰 **gitee：** https://gitee.com/dromara/electron-egg **5300+**
 - 🍨 **github：** https://github.com/dromara/electron-egg **2000+**
+- 🍰 **gitcode：** https://gitcode.com/dromara/electron-egg 
 - 🏆 The Most Valuable Open - source Projects on Gitee
     ![](./public/images/example/ee-zs.png)    
 
