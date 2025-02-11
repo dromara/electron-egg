@@ -1,4 +1,7 @@
 [![star](https://gitee.com/dromara/electron-egg/badge/star.svg?theme=gvp)](https://gitee.com/dromara/electron-egg/stargazers)
+[![GitHub](https://img.shields.io/github/stars/dromara/electron-egg.svg?style=social&label=Stars)](https://github.com/dromara/electron-egg)
+[![Star](https://gitcode.com/dromara/electron-egg/star/badge.svg)](https://gitcode.com/dromara/electron-egg)
+[![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://gitee.com/dromara/electron-egg/blob/master/LICENSE)
 
 <div align=center>
 <h3>🎉🎉🎉 ElectronEgg v4.0.0 已发布! 🎉🎉🎉</h3>
@@ -34,8 +37,8 @@
 - 🍩 **为什么使用？** 桌面软件（办公方向、 个人工具），仍然是未来十几年PC端需求之一，提高工作效率
 - 🍉 **简单：** 支持 js、ts 
 - 🍑 **愿景：** 所有开发者都能学会桌面软件研发
-- 🍰 **gitee：** https://gitee.com/dromara/electron-egg **5200+**
-- 🍨 **github：** https://github.com/dromara/electron-egg **1900+**
+- 🍰 **gitee：** https://gitee.com/dromara/electron-egg **5300+**
+- 🍨 **github：** https://github.com/dromara/electron-egg **2000+**
 - 🏆 码云最有价值开源项目
     ![](./public/images/example/ee-zs.png)    
 
