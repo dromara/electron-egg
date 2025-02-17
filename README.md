@@ -96,6 +96,12 @@ Whether you're a frontend developer, backend developer, operations engineer, gam
 ## project-case
 - 🐟 The framework has been applied to the clients in various fields, including healthcare, education, government affairs, stock trading, ERP, entertainment, video, and enterprises.
 
+### 🐸 knowledge note
+
+- [gaiyan](https://gaiyan.net?from=electron-egg) 
+![](./public/images/example/gaiyan-1.jpg)
+![](./public/images/example/gaiyan-2.png)
+
 ### 🐸 remote control
 
 - RQ Center

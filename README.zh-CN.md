@@ -96,6 +96,12 @@
 ## 项目案例
 - 🐟 框架已经应用于医疗、学校、政务、股票交易、ERP、娱乐、视频、企业等领域客户端
 
+### 🐸 知识笔记
+
+- [概言](https://gaiyan.net?from=electron-egg) 
+![](./public/images/example/gaiyan-1.jpg)
+![](./public/images/example/gaiyan-2.png)
+
 ### 🐸 远控
 
 - RQ Center
