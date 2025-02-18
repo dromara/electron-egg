@@ -32,7 +32,7 @@
     "@electron/rebuild": "^3.7.1",
     "@types/node": "^20.16.0",
     "debug": "^4.4.0",
-    "ee-bin": "^4.1.1",
+    "ee-bin": "^4.1.2",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8"
   },
