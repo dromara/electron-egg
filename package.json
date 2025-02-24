@@ -1,6 +1,6 @@
 {
   "name": "ee",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "A fast, desktop software development framework",
   "main": "./public/electron/main.js",
   "scripts": {
@@ -45,7 +45,7 @@
     "@types/node": "^20.16.0",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
-    "ee-bin": "^4.1.1",
+    "ee-bin": "^4.1.2",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8",
     "typescript": "^5.4.2"
@@ -54,7 +54,7 @@
     "axios": "^1.7.9",
     "better-sqlite3": "^11.7.0",
     "dayjs": "^1.11.13",
-    "ee-core": "^4.0.0",
+    "ee-core": "^4.0.1",
     "electron-updater": "^6.3.8"
   }
 }
