@@ -48,12 +48,12 @@ Whether you're a frontend developer, backend developer, operations engineer, gam
     ![](./public/images/example/v3-home.png) 
 
 ## 📦 characteristic
-1. 🍄 Cross - platform: One set of code can be packaged into Windows, Mac, Linux versions, as well as domestic versions like UOS, Deepin, and Kylin.
+1. 🍄 Cross platform: One set of code can be packaged into Windows, Mac, Linux versions, as well as domestic versions like UOS, Deepin, and Kylin.
 2. 🌹 Architecture: Single - business process / modular / multi - task (process, thread, rendering process), which simplifies the development of large - scale projects.
 3. 🌱 Simple and efficient: Supports JavaScript (js) and TypeScript (ts).
-4. 🌴 Independent front - end: Theoretically supports any front - end technology, such as Vue, React, HTML, etc.
-5. 🍁 Engineering - oriented: Desktop software can be developed using the development concepts of front - end and back - end.
-6. 🌷 High - performance: Event - driven, non - blocking I/O.
+4. 🌴 Independent frontend: Theoretically supports any frontend technology, such as Vue, React, HTML, etc.
+5. 🍁 Engineering oriented: Desktop software can be developed using the development concepts of frontend and backend.
+6. 🌷 High performance: Event driven, non blocking I/O.
 7. 🌰 Rich in functions: Configuration, communication, plugins, database, upgrade, packaging, tools... everything is available.
 8. 💐 Secure: Supports bytecode encryption, compression, and obfuscation encryption.
 9. 🌻 Function demos: Common functions of desktop software, with the framework integrating or providing demos. 

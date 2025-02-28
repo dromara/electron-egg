@@ -32,12 +32,12 @@
     "@electron/rebuild": "^3.7.1",
     "@types/node": "^20.16.0",
     "debug": "^4.4.0",
-    "ee-bin": "^4.1.2",
+    "ee-bin": "^4.1.4",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8"
   },
   "dependencies": {
-    "ee-core": "^4.0.0",
+    "ee-core": "^4.0.1",
     "electron-updater": "^6.3.8"
   }
 }
