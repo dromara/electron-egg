@@ -1,26 +1,24 @@
 {
-  "name": "ee-next",
-  "version": "4.0.0",
+  "name": "ee",
+  "version": "4.1.0",
   "description": "A fast, desktop software development framework",
   "main": "./public/electron/main.js",
   "scripts": {
-    "typecheck": "tsc --noEmit -p ./ts/tsconfig.json --composite false",
-    "ts-dev": "tsc -p ./electronts/tsconfig.json",
-    "dev-esbuild": "ee-bin dev --serve=bundlerts",
     "dev": "ee-bin dev",
+    "build": "npm run build-frontend && npm run build-electron && ee-bin encrypt",
     "start": "ee-bin start",
-    "build": "npm run build-frontend && ee-bin encrypt",
-    "dev-frontend": "cross-env DEBUG=ee-* ee-bin dev --serve=frontend",
-    "dev-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",
+    "dev-frontend": "ee-bin dev --serve=frontend",
+    "dev-electron": "ee-bin dev --serve=electron",
     "dev-go": "ee-bin exec --cmds=go",
     "dev-go-w": "ee-bin exec --cmds=go_w",
     "dev-python": "ee-bin exec --cmds=python",
     "build-frontend": "ee-bin build --cmds=frontend && ee-bin move --flag=frontend_dist",
+    "build-electron": "ee-bin build --cmds=electron",
     "build-go-w": "ee-bin move --flag=go_static,go_config,go_package && ee-bin build --cmds=go_w",
     "build-go-m": "ee-bin move --flag=go_static,go_config,go_package,go_images && ee-bin build --cmds=go_m",
     "build-go-l": "ee-bin move --flag=go_static,go_config,go_package,go_images && ee-bin build --cmds=go_l",
     "build-python": "ee-bin build --cmds=python && ee-bin move --flag=python_dist",
-    "clean": "ee-bin clean",
+    "encrypt": "ee-bin encrypt",
     "icon": "ee-bin icon",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3",
     "build-w": "ee-bin build --cmds=win64",
@@ -28,8 +26,10 @@
     "build-m": "ee-bin build --cmds=mac",
     "build-m-arm64": "ee-bin build --cmds=mac_arm64",
     "build-l": "ee-bin build --cmds=linux",
-    "test-encrypt": "ee-bin encrypt",
-    "test-move": "ee-bin move --flag=frontend_dist"
+    "debug-dev": "cross-env DEBUG=ee-* ee-bin dev",
+    "debug-encrypt": "ee-bin encrypt",
+    "debug-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",
+    "debug-move": "ee-bin move --flag=frontend_dist"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
@@ -40,23 +40,21 @@
   "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
   "devDependencies": {
-    "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/rebuild": "^3.7.1",
     "@types/better-sqlite3": "^7.6.12",
-    "@types/node": "^22.10.2",
+    "@types/node": "^20.16.0",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
-    "ee-bin": "file:.yalc/ee-bin",
+    "ee-bin": "^4.1.4",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8",
-    "esbuild": "0.24.2",
     "typescript": "^5.4.2"
   },
   "dependencies": {
     "axios": "^1.7.9",
     "better-sqlite3": "^11.7.0",
     "dayjs": "^1.11.13",
-    "ee-core": "file:.yalc/ee-core",
+    "ee-core": "^4.0.1",
     "electron-updater": "^6.3.8"
   }
 }

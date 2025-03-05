@@ -14,13 +14,13 @@ class BasedbService {
   constructor(options: { dbname: string }) {
     const { dbname } = options;
     this.dbname = dbname;
-    this.init();
+
   }
 
   /*
    * 初始化
    */
-  private init(): void {
+  protected _init(): void {
     // 定义数据文件
     const dbFile = path.join(getDataDir(), "db", this.dbname);
     const sqliteOptions = {

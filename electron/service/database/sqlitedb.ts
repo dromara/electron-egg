@@ -12,13 +12,14 @@ class SqlitedbService extends BasedbService {
     }
     super(options);
     this.userTableName = 'user';
-    this.initTable();
   }
 
   /*
    * 初始化表
    */
-  private initTable(): void {
+  init(): void {
+    this._init();
+
     // 检查表是否存在
     const masterStmt = this.db.prepare('SELECT * FROM sqlite_master WHERE type=? AND name = ?');
     let tableExists = masterStmt.get('table', this.userTableName);
@@ -97,7 +98,7 @@ class SqlitedbService extends BasedbService {
     }
 
     this.changeDataDir(dir);
-    this.initTable();
+    this.init();
     return;
   }
 }
