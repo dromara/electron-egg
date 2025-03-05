@@ -101,7 +101,7 @@ class SqlitedbService extends BasedbService {
     }
 
     this.changeDataDir(dir);
-    this._initTable();
+    this.init();
     return;
   }
 }
