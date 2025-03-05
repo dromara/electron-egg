@@ -14,7 +14,6 @@ class BasedbService {
     const { dbname } = options;
     this.dbname = dbname;
     this.db = undefined;
-    this._init();
   }
 
   /*

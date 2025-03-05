@@ -277,8 +277,8 @@ github.com/ugorji/go v1.2.7/go.mod h1:nF9osbDWLy6bDVv/Rtoh6QgnvNDpmCalQV5urGCCS6
 github.com/ugorji/go/codec v1.2.7/go.mod h1:WGN1fab3R1fzQlVQTkfxVtIBhWDRqOviHU95kRgeqEY=
 github.com/ugorji/go/codec v1.2.11 h1:BMaWp1Bb6fHwEtbplGBGJ498wD+LKlNSl25MjdZY4dU=
 github.com/ugorji/go/codec v1.2.11/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
-github.com/wallace5303/ee-go v1.3.0 h1:wXaDAWCqWxA5U6kup9urSNSSMYb/yaTLd6hTmy7b3ZY=
-github.com/wallace5303/ee-go v1.3.0/go.mod h1:FTvDLCsRfRijBjk6neZp5VDktyMeEdv7iwlDz242FgU=
+github.com/wallace5303/ee-go v1.3.1 h1:xpRHd3vyGGMPQI8fckrfyn/sGXW65Fxyrcv5jlay/Ug=
+github.com/wallace5303/ee-go v1.3.1/go.mod h1:FTvDLCsRfRijBjk6neZp5VDktyMeEdv7iwlDz242FgU=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
