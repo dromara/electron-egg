@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://gitee.com/dromara/electron-egg/blob/master/LICENSE)
 
 <div align=center>
-<h3>🎉🎉🎉 ElectronEgg v4.0.0 has been released! 🎉🎉🎉</h3>
+<h3>🎉🎉🎉 ElectronEgg v4 has been released! 🎉🎉🎉</h3>
 </div>
 <br>
 
