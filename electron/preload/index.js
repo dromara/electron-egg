@@ -6,7 +6,7 @@ const { logger } = require('ee-core/log');
 const { trayService } = require('../service/os/tray');
 const { securityService } = require('../service/os/security');
 const { autoUpdaterService } = require('../service/os/auto_updater');
-const { crossService } = require('../service/cross');
+//const { crossService } = require('../service/cross');
 const { sqlitedbService } = require('../service/database/sqlitedb');
 
 function preload() {
@@ -17,7 +17,7 @@ function preload() {
   autoUpdaterService.create();
 
   // go server
-  crossService.createGoServer();
+  //crossService.createGoServer();
 
   // init sqlite db
   sqlitedbService.init();
