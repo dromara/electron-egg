@@ -12,8 +12,7 @@ const { UserService } = require('../../service/job/user');
  */
 class TimerJob {
 
-  constructor(params) {
-    this.params = params;
+  constructor() {
     this.timer = undefined;
     this.timeoutTimer = undefined;
     this.number = 0;
@@ -22,10 +21,11 @@ class TimerJob {
 
   /**
    * handle()方法是必要的，且会被自动调用
+   * params 传递的参数
    */
-  async handle () {
-    logger.info("[child-process] TimerJob params: ", this.params);
-    const { jobId } = this.params;
+  async handle(params) {
+    logger.info("[child-process] TimerJob params: ", params);
+    const { jobId } = params;
 
     // 子进程中使用service
     // 1. 确保引入的 service 中不能有electron 的 api或依赖， electron 不支持
@@ -33,6 +33,9 @@ class TimerJob {
     userService.hello('job');
 
     // 执行任务
+    // 多次运行时，重置倒计时
+    this.number = 0;
+    this.countdown = 10;
     this.doTimer(jobId);
   }
   
