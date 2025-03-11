@@ -42,7 +42,7 @@
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
     "@types/better-sqlite3": "^7.6.12",
-    "@types/node": "^22.10.2",
+    "@types/node": "^20.16.0",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
     "ee-bin": "^4.1.4",
@@ -53,7 +53,7 @@
     "axios": "^1.7.9",
     "better-sqlite3": "^11.7.0",
     "dayjs": "^1.11.13",
-    "ee-core": "^4.0.1",
+    "ee-core": "^4.1.0",
     "electron-updater": "^6.3.8"
   }
 }
