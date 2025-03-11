@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/glebarez/go-sqlite v1.22.0
-	github.com/wallace5303/ee-go v1.3.0
+	github.com/wallace5303/ee-go v1.3.1
 )
 
 require (

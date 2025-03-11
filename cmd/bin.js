@@ -19,6 +19,7 @@ module.exports = {
       cmd: 'electron',
       args: ['.', '--env=local'],
       watch: true,
+      delay: 1000,
     }
   },
 
