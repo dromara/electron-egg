@@ -3,32 +3,33 @@ import { isChildJob, exit } from 'ee-core/ps';
 import { childMessage } from 'ee-core/message';
 import { welcome } from './hello';
 import { UserService } from '../../service/job/user';
+import { sqlitedbService } from '../../service/database/sqlitedb';
 
 /**
  * example - TimerJob
  * @class
  */
 class TimerJob {
-  params: any;
   timer: NodeJS.Timeout | undefined;
   timeoutTimer: NodeJS.Timeout | undefined;
   number: number;
   countdown: number;
 
-  constructor(params: any) {
-    this.params = params;
+  constructor() {
     this.timer = undefined;
     this.timeoutTimer = undefined;
     this.number = 0;
     this.countdown = 10; // 倒计时
+    sqlitedbService.init();
   }
 
   /**
    * handle() method is necessary and will be automatically called
+   * params transferred parameters
    */
-  async handle(): Promise<void> {
-    logger.info("[child-process] TimerJob params: ", this.params);
-    const { jobId } = this.params;
+  async handle(params: any): Promise<void> {
+    logger.info("[child-process] TimerJob params: ", params);
+    const { jobId } = params;
 
     // Use service in child process
     // 1. Ensure that the service does not have Electron's API or dependencies, as Electron does not support them
@@ -36,7 +37,13 @@ class TimerJob {
     userService.hello('job');
 
     // Execute the task
+    this.number = 0;
+    this.countdown = 10;
     this.doTimer(jobId);
+
+    // sqlite
+    const userList = await sqlitedbService.getAllTestDataSqlite();
+    logger.info('[child-process] Sqlite userList:', userList);    
   }
   
   /**

@@ -54,7 +54,7 @@
     "axios": "^1.7.9",
     "better-sqlite3": "^11.7.0",
     "dayjs": "^1.11.13",
-    "ee-core": "^4.0.1",
+    "ee-core": "^4.1.0",
     "electron-updater": "^6.3.8"
   }
 }

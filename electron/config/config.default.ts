@@ -17,7 +17,7 @@ const config: () => AppConfig = () => {
         nodeIntegration: true,
       },
       frame: true,
-      show: true,
+      show: false,
       icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
     logger: {
