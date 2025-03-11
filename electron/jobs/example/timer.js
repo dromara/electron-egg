@@ -5,6 +5,7 @@ const { isChildJob, exit } = require('ee-core/ps');
 const { childMessage } = require('ee-core/message');
 const { welcome } = require('./hello');
 const { UserService } = require('../../service/job/user');
+const { sqlitedbService } = require('../../service/database/sqlitedb');
 
 /**
  * example - TimerJob
@@ -17,6 +18,7 @@ class TimerJob {
     this.timeoutTimer = undefined;
     this.number = 0;
     this.countdown = 10; // 倒计时
+    sqlitedbService.init();
   }
 
   /**
@@ -37,6 +39,10 @@ class TimerJob {
     this.number = 0;
     this.countdown = 10;
     this.doTimer(jobId);
+
+    // sqlite
+    const userList = await sqlitedbService.getAllTestDataSqlite();
+    logger.info('[child-process] Sqlite userList:', userList);
   }
   
   /**
