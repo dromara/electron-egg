@@ -2,7 +2,7 @@
   "name": "ee-next",
   "version": "4.1.0",
   "description": "A fast, desktop software development framework",
-  "main": "./public/electron/main.js",
+  "main": "public/electron/main.js",
   "scripts": {
     "dev": "ee-bin dev",
     "build": "npm run build-frontend && npm run build-electron && ee-bin encrypt",
