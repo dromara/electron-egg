@@ -158,7 +158,7 @@ module.exports = {
       confusionOptions: {
         compact: true,      
         stringArray: true,
-        stringArrayEncoding: ['rc4'],
+        stringArrayEncoding: ['none'],
         deadCodeInjection: false,
         stringArrayCallsTransform: true,
         numbersToExpressions: true,
