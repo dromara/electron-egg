@@ -37,7 +37,7 @@
     "electron-builder": "^25.1.8"
   },
   "dependencies": {
-    "ee-core": "^4.1.2",
+    "ee-core": "^4.1.3",
     "electron-updater": "^6.3.8"
   }
 }
