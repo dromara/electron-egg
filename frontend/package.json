@@ -11,7 +11,7 @@
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
     "ant-design-vue": "^3.2.20",
-    "axios": "^0.21.1",
+    "axios": "^1.8.4",
     "pinia": "^2.2.6",
     "socket.io-client": "^4.4.1",
     "store2": "^2.13.2",
@@ -20,14 +20,14 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.2.3",
+    "@vitejs/plugin-vue": "^5.2.3",
     "@vue/compiler-sfc": "^3.2.33",
     "less": "^4.1.2",
     "less-loader": "^10.2.0",
     "postcss": "^8.4.13",
     "postcss-pxtorem": "^6.0.0",
     "terser": "^5.19.1",
-    "vite": "^5.4.11",
+    "vite": "^6.2.5",
     "vite-plugin-compression": "^0.5.1"
   }
 }
