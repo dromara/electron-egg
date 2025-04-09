@@ -1,0 +1,6 @@
+.github/workflows/build-image.yml
+.git
+.gitignore
+.dockerignore
+README.md
+LICENSE
