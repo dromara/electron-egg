@@ -38,6 +38,10 @@ from ffmpeg_install import (
     check_ffmpeg, ffmpeg_path, current_env_path
 )
 import json
+import asyncio
+import threading
+from concurrent.futures import ThreadPoolExecutor
+import api
 
 version = "v4.0.2"
 platforms = ("\n国内站点：抖音|快手|虎牙|斗鱼|YY|B站|小红书|bigo|blued|网易CC|千度热播|猫耳FM|Look|TwitCasting|百度|微博|"
@@ -87,39 +91,44 @@ def signal_handler(_signal, _frame):
 
 signal.signal(signal.SIGTERM, signal_handler)
 
-
-def update_status_file(recording_rooms):
-    """更新录制状态文件"""
-    try:
-        status_data = {
-            'rooms': []
-        }
-        
-        for room_name in recording_rooms:
-            if room_name in recording_time_list:
-                start_time, quality = recording_time_list[room_name]
-                duration = str(datetime.datetime.now() - start_time).split('.')[0]
-                
-                status_data['rooms'].append({
-                    'name': room_name,
-                    'quality': quality,
-                    'duration': duration
-                })
-        
-        with open('recording_status.json', 'w', encoding='utf-8') as f:
-            json.dump(status_data, f, ensure_ascii=False, indent=2)
-            
-    except Exception as e:
-        logger.error(f"更新状态文件时出错: {str(e)}")
-
 def display_info() -> None:
     global start_display_time
     time.sleep(5)
+    
+    # 创建一个事件循环给异步调用使用
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    
+    # 启动FastAPI服务
+    api_port = 8000
+    api_host = "127.0.0.1"
+    print(f"启动API服务在 {api_host}:{api_port}")
+    api_thread = threading.Thread(target=api.start_server, args=(api_host, api_port), daemon=True)
+    api_thread.start()
+    
     while True:
         try:
             time.sleep(5)
             if Path(sys.executable).name != 'pythonw.exe':
                 os.system(clear_command)
+                
+            # 构建状态数据字典
+            status_data = {
+                "monitoring_count": monitoring,
+                "max_request": max_request,
+                "use_proxy": use_proxy,
+                "split_video": {
+                    "enabled": split_video_by_time,
+                    "time": split_time if split_video_by_time else None
+                },
+                "create_time_file": create_time_file,
+                "video_quality": video_record_quality,
+                "video_format": video_save_type,
+                "error_count": error_count,
+                "current_time": time.strftime("%H:%M:%S", time.localtime()),
+                "recording": []
+            }
+            
             print(f"\r共监测{monitoring}个直播中", end=" | ")
             print(f"同一时间访问网络的线程数: {max_request}", end=" | ")
             print(f"是否开启代理录制: {'是' if use_proxy else '否'}", end=" | ")
@@ -146,16 +155,27 @@ def display_info() -> None:
                 print("x" * 60)
                 no_repeat_recording = list(set(recording))
                 print(f"正在录制{len(no_repeat_recording)}个直播: ")
+                
+                # 添加录制信息到状态数据
                 for recording_live in no_repeat_recording:
                     rt, qa = recording_time_list[recording_live]
                     have_record_time = now_time - rt
-                    print(f"{recording_live}[{qa}] 正在录制中 {str(have_record_time).split('.')[0]}")
-                
-                # 更新状态文件
-                update_status_file(no_repeat_recording)
+                    record_time_str = str(have_record_time).split('.')[0]
+                    print(f"{recording_live}[{qa}] 正在录制中 {record_time_str}")
+                    
+                    # 添加到状态数据
+                    status_data["recording"].append({
+                        "name": recording_live,
+                        "quality": qa,
+                        "duration": record_time_str
+                    })
                 
                 print("x" * 60)
                 start_display_time = now_time
+            
+            # 通过WebSocket发送状态数据
+            loop.run_until_complete(api.update_status(status_data))
+                
         except Exception as e:
             logger.error(f"错误信息: {e} 发生错误的行数: {e.__traceback__.tb_lineno}")
 
