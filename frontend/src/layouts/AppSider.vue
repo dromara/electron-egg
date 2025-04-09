@@ -4,21 +4,21 @@
       v-model="collapsed"
       theme="light"
       class="layout-sider"
-      width="100"
+      width="150"
     >
       <div class="logo">
         <img class="pic-logo" src="~@/assets/logo.png">
       </div>
-      <a-menu 
-        class="menu-item" 
-        theme="light" 
+      <a-menu
+        class="menu-item"
+        theme="light"
         mode="inline"
         :selectedKeys="[current]"
         @click="menuHandle"
       >
         <a-menu-item v-for="(menuInfo, index) in menu" :key="index">
           <icon-font :type="menuInfo.icon" />
-          {{ menuInfo.title }} 
+          {{ menuInfo.title }}
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -60,6 +60,12 @@ const menu = ref({
     icon: 'icon-gouwu',
     title: 'cross',
     pageName: 'Cross',
+    params: {}
+  },
+  'menu_5': {
+    icon: 'icon-yanjing',
+    title: '直播录制',
+    pageName: 'Live_save',
     params: {}
   }
 });

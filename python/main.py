@@ -19,13 +19,13 @@ CORS(app)
 # 定义路由和处理器
 @app.route('/', methods=['GET'])
 def index():
-    name = request.args.get('name', 'World')
+    name = request.args.get('name', 'World你好兔兔')
     return jsonify({'message': f'Hello, {name}!'}), 200
 
 
 @app.route('/api/hello', methods=['GET'])
 def hello():
-    name = request.args.get('name', 'World')
+    name = request.args.get('name', 'World不吃兔兔')
     return jsonify({'message': f'Hello, {name}!'}), 200
 
 # 通过信号来退出服务，否则会出现终端显示退出后，实际进程仍在运行

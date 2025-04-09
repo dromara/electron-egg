@@ -4,9 +4,9 @@
       theme="light"
       class="layout-sider"
     >
-      <a-menu 
-        theme="light" 
-        mode="inline" 
+      <a-menu
+        theme="light"
+        mode="inline"
         :selectedKeys="[current]"
         @click="changeMenu">
         <a-menu-item v-for="(menuInfo, subIndex) in menu" :key="subIndex">
