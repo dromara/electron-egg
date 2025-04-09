@@ -9,7 +9,7 @@
       <p>* 状态：{{ currentStatus }}</p>
       <p>* 地址：{{ servicAddress }}</p>
       <p>* 发送请求：
-        <a-button @click="sendRequest('pictures')"> 打开【我的图片】 </a-button>
+        <el-button @click="sendRequest('pictures')"> 打开【我的图片】 </el-button>
       </p>
     </div>
     <div class="one-block-1">
@@ -19,7 +19,7 @@
     </div>    
     <div class="one-block-2">
       <p>
-        <a-button @click="backendRequest()"> 发送请求 </a-button>
+        <el-button @click="backendRequest()"> 发送请求 </el-button>
         （请自行创建服务）
       </p>
     </div>
@@ -31,7 +31,7 @@ import { ipc } from '@/utils/ipcRenderer';
 import axios from 'axios';
 import storage from 'store2';
 import { ref, onMounted } from 'vue';
-import { message } from 'ant-design-vue';
+import { ElMessage } from 'element-plus';
 
 const currentStatus = ref('关闭');
 const servicAddress = ref('无');
@@ -52,7 +52,7 @@ function init() {
 
 function sendRequest(id) {
   if (currentStatus.value == '关闭') {
-    message.error('http服务未开启');
+    ElMessage.error('http服务未开启');
     return;
   }
 
@@ -94,7 +94,7 @@ function backendRequest() {
   axios(cfg).then(res => {
     console.log('res:', res);
     const data = res.data || null;
-    message.info(`go服务返回: ${data}`, );
+    ElMessage.info(`go服务返回: ${data}`, );
   })
 }    
 </script>

@@ -6,9 +6,9 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="createWindow(0)">打开哔哩哔哩</a-button>
-      </a-space>
+      <el-space>
+        <el-button @click="createWindow(0)">打开哔哩哔哩</el-button>
+      </el-space>
     </div>
     <div class="one-block-1">
       <span>
@@ -16,9 +16,9 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="createWindow(1)">打开html页面</a-button>
-      </a-space>
+      <el-space>
+        <el-button @click="createWindow(1)">打开html页面</el-button>
+      </el-space>
     </div>
     <div class="one-block-1">
       <span>
@@ -26,9 +26,9 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="createWindow(2)">打开vue页面</a-button>
-      </a-space>
+      <el-space>
+        <el-button @click="createWindow(2)">打开vue页面</el-button>
+      </el-space>
     </div>    
   </div>
 </template>

@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@ant-design/icons-vue": "^6.1.0",
+    "@element-plus/icons-vue": "^2.3.1",
     "ant-design-vue": "^3.2.20",
     "axios": "^1.8.4",
+    "element-plus": "^2.9.7",
     "pinia": "^2.2.6",
     "socket.io-client": "^4.4.1",
     "store2": "^2.13.2",
@@ -27,6 +29,8 @@
     "postcss": "^8.4.13",
     "postcss-pxtorem": "^6.0.0",
     "terser": "^5.19.1",
+    "unplugin-auto-import": "^19.1.2",
+    "unplugin-vue-components": "^28.4.1",
     "vite": "^6.2.5",
     "vite-plugin-compression": "^0.5.1"
   }

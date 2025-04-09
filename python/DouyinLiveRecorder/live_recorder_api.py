@@ -1,11 +1,16 @@
 import asyncio
 import uvicorn
 import json
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+import os
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict, List, Set
+from typing import Dict, List
 
-app = FastAPI()
+app = FastAPI(title="直播录制API服务", description="抖音直播录制相关API服务")
+
+# 配置文件路径
+url_config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "URL.ini")
+text_encoding = "utf-8"
 
 # 添加CORS中间件，允许跨域请求
 app.add_middleware(
@@ -53,21 +58,46 @@ class StatusBroadcaster:
 status_broadcaster = StatusBroadcaster()
 
 
-@app.websocket("/ws/status")
-async def websocket_endpoint(websocket: WebSocket):
+# WebSocket路由
+@app.websocket("/ws/recorder/status")
+async def recorder_status_websocket(websocket: WebSocket):
     await status_broadcaster.connect(websocket)
     try:
         while True:
-            # 保持连接，等待客户端消息
-            data = await websocket.receive_text()
-            # 这里可以处理客户端发送的消息，目前不需要
+            # 接收客户端消息
+            data = await websocket.receive_json()
+            
+            # 处理添加url的消息
+            if data.get("type") == "url/add":
+                try:
+                    url = data.get("url")
+                    if url:
+                        with open(url_config_file, 'w', encoding=text_encoding) as file:
+                            file.write(url)
+                        await websocket.send_json({
+                            "type": "url/add/response",
+                            "success": True,
+                            "message": "直播链接已保存"
+                        })
+                    else:
+                        await websocket.send_json({
+                            "type": "url/add/response", 
+                            "success": False,
+                            "message": "URL不能为空"
+                        })
+                except Exception as e:
+                    await websocket.send_json({
+                        "type": "url/add/response",
+                        "success": False, 
+                        "message": f"保存直播链接失败: {str(e)}"
+                    })
     except WebSocketDisconnect:
         status_broadcaster.disconnect(websocket)
 
 
 @app.get("/")
 async def root():
-    return {"message": "DouyinLiveRecorder API服务"}
+    return {"message": "DouyinLiveRecorder API服务", "version": "1.0.0"}
 
 
 # 更新状态的函数，将由main.py调用
@@ -75,6 +105,5 @@ async def update_status(status_data: dict):
     await status_broadcaster.broadcast(status_data)
 
 
-def start_server(host="127.0.0.1", port=8000):
-    """启动FastAPI服务器"""
-    uvicorn.run(app, host=host, port=port) 
+if __name__ == "__main__":
+    uvicorn.run("live_recorder_api:app") 

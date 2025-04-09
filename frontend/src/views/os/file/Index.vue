@@ -6,10 +6,10 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="messageShow()">消息提示(ipc)</a-button>
-        <a-button @click="messageShowConfirm()">消息提示与确认(ipc)</a-button>
-      </a-space>
+      <el-space>
+        <el-button @click="messageShow()">消息提示(ipc)</el-button>
+        <el-button @click="messageShowConfirm()">消息提示与确认(ipc)</el-button>
+      </el-space>
     </div>
     <div class="one-block-1">
       <span>
@@ -17,16 +17,18 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-row>
-        <a-col :span="12">
-          <a-input v-model="dir_path" :value="dir_path" addon-before="保存目录" />
-        </a-col>
-        <a-col :span="12">
-          <a-button @click="selectDir">
+      <el-row :gutter="12">
+        <el-col :span="12">
+          <el-input v-model="dir_path" placeholder="保存目录">
+            <template #prepend>保存目录</template>
+          </el-input>
+        </el-col>
+        <el-col :span="12">
+          <el-button @click="selectDir">
             修改目录
-          </a-button>
-        </a-col>
-      </a-row>
+          </el-button>
+        </el-col>
+      </el-row>
     </div>      
     <div class="one-block-1">
       <span>
@@ -34,17 +36,18 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-list :grid="{ gutter: 16, column: 4 }" :data-source="fileList">
-        <template #renderItem="{ item }">
-          <a-list-item @click="openDirectry(item.id)">
-            <a-card :title="item.content">
-              <a-button type="link">
-                打开
-              </a-button>
-            </a-card>
-          </a-list-item>
-        </template>
-      </a-list>
+      <el-row :gutter="16">
+        <el-col :span="6" v-for="item in fileList" :key="item.id">
+          <el-card :title="item.content" @click="openDirectry(item.id)">
+            <template #header>
+              <div class="card-header">
+                {{ item.content }}
+              </div>
+            </template>
+            <el-button type="primary" text>打开</el-button>
+          </el-card>
+        </el-col>
+      </el-row>
     </div>
     <div class="footer">
     </div>
@@ -55,7 +58,7 @@ import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 
 import { ref } from 'vue';
-import { message } from 'ant-design-vue';
+import { ElMessage } from 'element-plus';
 
 const fileList = [
   {
@@ -85,19 +88,19 @@ function openDirectry (id) {
 function selectDir() {
   ipc.invoke(ipcApiRoute.os.selectFolder).then(r => {
     dir_path.value = r;
-    message.info(r);
+    ElMessage.info(r);
   })      
 }
 
 function messageShow() {
   ipc.invoke(ipcApiRoute.os.messageShow).then(r => {
-    message.info(r);
+    ElMessage.info(r);
   })
 }
 
 function messageShowConfirm() {
   ipc.invoke(ipcApiRoute.os.messageShowConfirm).then(r => {
-    message.info(r);
+    ElMessage.info(r);
   })
 }
 </script>
@@ -115,6 +118,11 @@ function messageShowConfirm() {
   }
   .footer {
     padding-top: 10px;
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 }
 </style>

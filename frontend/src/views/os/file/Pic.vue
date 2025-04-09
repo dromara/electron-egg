@@ -6,13 +6,14 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-          <a-button @click="selectPic(0)">选择图片</a-button>
-      </a-space>
+      <el-space wrap>
+          <el-button @click="selectPic(0)">选择图片</el-button>
+      </el-space>
       <p></p>
-      <a-image
+      <el-image
         :width="500"
-        :src=picPath
+        :src="picPath"
+        fit="contain"
       />
     </div>
   </div>

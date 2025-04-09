@@ -1,4 +1,3 @@
-
 /**
  * Definition of communication channel between main process and rendering process
  * separator: "/" | "." ; (Please check the config file properties: channelSeparator)
@@ -67,6 +66,14 @@ const ipcApiRoute = {
     killCrossServer: 'controller/cross/killServer',
     createCrossServer: 'controller/cross/createServer',
     requestApi: 'controller/cross/requestApi',
+  },
+  // live_monitor - 直播配置监控
+  live_monitor: {
+    test:'controller/live_monitor/test',
+    startMonitoring: 'controller/live_monitor/startMonitoring',
+    stopMonitoring: 'controller/live_monitor/stopMonitoring',
+    getLatestConfig: 'controller/live_monitor/getLatestConfig',
+    configUpdate: 'controller/live_monitor/configUpdate',
   }
 }
 

@@ -6,10 +6,10 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="checkForUpdater()">检查更新</a-button>
-        <a-button @click="download()">下载并安装</a-button>
-      </a-space>
+      <el-space>
+        <el-button @click="checkForUpdater()">检查更新</el-button>
+        <el-button @click="download()">下载并安装</el-button>
+      </el-space>
     </div>
     <div class="one-block-1">
       <span>
@@ -17,10 +17,10 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-progress :percent="percentNumber" status="active" />
-      <a-space>
+      <el-progress :percentage="percentNumber" :status="percentNumber === 100 ? 'success' : ''" />
+      <el-space>
         {{ progress }}
-      </a-space>
+      </el-space>
     </div>
   </div>
 </template>
@@ -28,7 +28,7 @@
 import { ipc } from '@/utils/ipcRenderer';
 import { ipcApiRoute, specialIpcRoute } from '@/api';
 import { ref, onMounted } from 'vue';
-import { message } from 'ant-design-vue';
+import { ElMessage } from 'element-plus';
 
 const status = ref(0);
 const progress = ref('');
@@ -47,7 +47,7 @@ function init() {
       progress.value = result.desc;
       percentNumber.value = result.percentNumber;
     } else {
-      message.info(result.desc);
+      ElMessage.info(result.desc);
     }
   })
 }
@@ -60,7 +60,7 @@ function checkForUpdater () {
 
 function download () {
   if (status.value !== 1) {
-    message.info('没有可用版本');
+    ElMessage.info('没有可用版本');
     return
   }
   ipc.invoke(ipcApiRoute.framework.downloadApp).then(r => {

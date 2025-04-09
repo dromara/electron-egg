@@ -4,57 +4,99 @@
       <span>直播录制WebSocket监控</span>
     </div>
     <div class="one-block-2">
-      <a-space>
-        <a-button type="primary" @click="create()">启动服务</a-button>
-        <a-button @click="getUrl()">获取地址</a-button>
-        <a-button danger @click="kill()">停止服务</a-button>
-      </a-space>
+      <el-space>
+        <el-button type="primary" @click="create()">启动服务</el-button>
+        <el-button @click="getUrl()">获取地址</el-button>
+        <el-button type="danger" @click="kill()">停止服务</el-button>
+      </el-space>
+    </div>
+
+    <div class="one-block-1">
+      <span>添加直播链接</span>
+    </div>
+    <div class="one-block-2">
+      <el-input 
+        v-model="liveUrl" 
+        placeholder="请输入主播直播间网址（尽量使用PC网页端的直播间地址）" 
+        class="live-url-input"
+      >
+        <template #append>
+          <el-button @click="addLiveUrl">添加链接</el-button>
+        </template>
+      </el-input>
     </div>
 
     <div class="one-block-1">
       <span>WebSocket连接状态: 
-        <a-tag :color="wsConnected ? 'success' : 'error'">
+        <el-tag :type="wsConnected ? 'success' : 'danger'">
           {{ wsConnected ? '已连接' : '未连接' }}
-        </a-tag>
+        </el-tag>
       </span>
     </div>
 
     <div class="one-block-2">
       <div class="status-overview">
-        <a-row :gutter="16">
-          <a-col :span="6">
-            <a-card title="监测直播数" :bordered="false">
+        <el-row :gutter="16">
+          <el-col :span="6">
+            <el-card shadow="hover">
+              <template #header>
+                <div class="card-header">监测直播数</div>
+              </template>
               <p class="card-value">{{ statusData.monitoring_count || 0 }}</p>
-            </a-card>
-          </a-col>
-          <a-col :span="6">
-            <a-card title="网络线程数" :bordered="false">
+            </el-card>
+          </el-col>
+          <el-col :span="6">
+            <el-card shadow="hover">
+              <template #header>
+                <div class="card-header">网络线程数</div>
+              </template>
               <p class="card-value">{{ statusData.max_request || 0 }}</p>
-            </a-card>
-          </a-col>
-          <a-col :span="6">
-            <a-card title="瞬时错误数" :bordered="false">
+            </el-card>
+          </el-col>
+          <el-col :span="6">
+            <el-card shadow="hover">
+              <template #header>
+                <div class="card-header">瞬时错误数</div>
+              </template>
               <p class="card-value">{{ statusData.error_count || 0 }}</p>
-            </a-card>
-          </a-col>
-          <a-col :span="6">
-            <a-card title="当前时间" :bordered="false">
+            </el-card>
+          </el-col>
+          <el-col :span="6">
+            <el-card shadow="hover">
+              <template #header>
+                <div class="card-header">当前时间</div>
+              </template>
               <p class="card-value">{{ statusData.current_time || '--:--:--' }}</p>
-            </a-card>
-          </a-col>
-        </a-row>
+            </el-card>
+          </el-col>
+        </el-row>
       </div>
     </div>
 
     <div class="one-block-1">
-      <span>录制列表</span>
+      <span>直播监控列表</span>
     </div>
     <div class="one-block-2">
-      <a-table :dataSource="recordingData" :columns="recordingColumns" bordered>
-        <template #emptyText>
-          <span>暂无录制任务</span>
+      <el-space>
+        <el-button type="primary" @click="startMonitoring">启动配置监控</el-button>
+        <el-button @click="getLatestConfig">获取最新配置</el-button>
+        <el-button type="danger" @click="stopMonitoring">停止配置监控</el-button>
+      </el-space>
+      <el-table :data="combinedTableData" border stripe style="margin-top: 15px;">
+        <el-table-column prop="streamerName" label="主播名" />
+        <el-table-column prop="url" label="链接" />
+        <el-table-column prop="quality" label="画质" />
+        <el-table-column prop="recordStatus" label="录制状态">
+          <template #default="scope">
+            <el-tag :type="scope.row.recordStatus ? 'success' : 'info'">
+              {{ scope.row.recordStatus ? '录制中' : '未录制' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <template #empty>
+          <el-empty description="暂无直播配置数据" />
         </template>
-      </a-table>
+      </el-table>
     </div>
   </div>
 </template>
@@ -63,12 +105,15 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
-import { message } from 'ant-design-vue';
+import { ElMessage } from 'element-plus';
 
 // 服务器URL和WebSocket连接
 const serverUrl = ref('');
 const wsConnected = ref(false);
 let socket = null;
+
+// 直播链接输入
+const liveUrl = ref('');
 
 // 状态数据
 const statusData = ref({
@@ -87,28 +132,37 @@ const statusData = ref({
   recording: []
 });
 
-// 表格列定义
-const recordingColumns = [
-  { title: '名称', dataIndex: 'name', key: 'name' },
-  { title: '画质', dataIndex: 'quality', key: 'quality' },
-  { title: '已录制时长', dataIndex: 'duration', key: 'duration' }
-];
+// 添加配置数据
+const configData = ref({
+  streams: [],
+  timestamp: ''
+});
 
-// 计算属性：录制中的直播列表
-const recordingData = computed(() => {
-  return statusData.value.recording.map((item, index) => ({
-    key: index,
-    name: item.name,
-    quality: item.quality,
-    duration: item.duration
-  }));
+// 计算属性：合并表格数据
+const combinedTableData = computed(() => {
+  // 从配置数据获取所有直播流
+  const allStreams = configData.value.streams.map((stream) => {
+    // 检查是否正在录制中
+    const isRecording = statusData.value.recording.some(
+      (rec) => rec.url && stream.url && rec.url.includes(stream.url)
+    );
+    
+    return {
+      streamerName: stream.streamerName,
+      url: stream.url,
+      quality: stream.quality,
+      recordStatus: isRecording
+    };
+  });
+  
+  return allStreams;
 });
 
 // 获取Python服务地址
 function getUrl() {
   ipc.invoke(ipcApiRoute.cross.getCrossUrl, {name: 'pyapp'}).then(url => {
     serverUrl.value = url;
-    message.info(`服务地址: ${url}`);
+    ElMessage.info(`服务地址: ${url}`);
     
     // 获取到地址后尝试连接WebSocket
     connectWebSocket();
@@ -119,14 +173,14 @@ function getUrl() {
 function kill() {
   disconnectWebSocket();
   ipc.invoke(ipcApiRoute.cross.killCrossServer, {type: 'one', name: 'pyapp'}).then(() => {
-    message.success('服务已停止');
+    ElMessage.success('服务已停止');
   });
 }
 
 // 启动Python服务
 function create() {
   ipc.invoke(ipcApiRoute.cross.createCrossServer, { program: 'python' }).then(() => {
-    message.success('服务启动中...');
+    ElMessage.success('服务启动中...');
     // 短暂延迟后获取URL并连接
     setTimeout(() => {
       getUrl();
@@ -137,12 +191,12 @@ function create() {
 // 连接WebSocket
 function connectWebSocket() {
   if (!serverUrl.value) {
-    message.warning('请先获取服务地址');
+    ElMessage.warning('请先获取服务地址');
     return;
   }
   
-  // 获取WebSocket地址
-  const wsUrl = serverUrl.value.replace('http://', 'ws://') + '/ws/status';
+  // 获取WebSocket地址 - 更新为新的路径格式
+  const wsUrl = serverUrl.value.replace('http://', 'ws://') + '/ws/recorder/status';
   
   // 关闭已有连接
   disconnectWebSocket();
@@ -152,12 +206,25 @@ function connectWebSocket() {
   
   socket.onopen = () => {
     wsConnected.value = true;
-    message.success('WebSocket连接成功');
+    ElMessage.success('WebSocket连接成功');
   };
   
   socket.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
+      
+      // 处理url/add的响应
+      if (data.type === 'url/add/response') {
+        if (data.success) {
+          ElMessage.success(data.message);
+          liveUrl.value = ''; // 清空输入框
+        } else {
+          ElMessage.error(data.message);
+        }
+        return;
+      }
+      
+      // 处理状态更新数据
       statusData.value = data;
     } catch (e) {
       console.error('解析WebSocket数据失败:', e);
@@ -166,13 +233,13 @@ function connectWebSocket() {
   
   socket.onclose = () => {
     wsConnected.value = false;
-    message.warning('WebSocket连接已关闭');
+    ElMessage.warning('WebSocket连接已关闭');
   };
   
   socket.onerror = (error) => {
     wsConnected.value = false;
     console.error('WebSocket错误:', error);
-    message.error('WebSocket连接失败');
+    ElMessage.error('WebSocket连接失败');
   };
 }
 
@@ -185,36 +252,126 @@ function disconnectWebSocket() {
   }
 }
 
+// 添加直播链接
+function addLiveUrl() {
+  if (!liveUrl.value) {
+    ElMessage.warning('请输入直播链接');
+    return; 
+  }
+
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    ElMessage.warning('WebSocket未连接,请先启动服务');
+    return;
+  }
+
+  // 通过WebSocket发送添加URL的消息
+  socket.send(JSON.stringify({
+    type: 'url/add',
+    url: liveUrl.value
+  }));
+  
+  // 短暂延迟后刷新配置数据
+  setTimeout(() => {
+    getLatestConfig();
+  }, 1000);
+}
+
+// 监听配置更新消息
+function listenConfigUpdate() {
+  ipc.on('controller/live_monitor/configUpdate', (data) => {
+    configData.value = data;
+    ElMessage.success('配置已更新');
+  });
+}
+
+// 启动监控
+// function startMonitoring() {
+//   ipc.invoke(ipcApiRoute.live_monitor.startMonitoring).then(res => {
+//     if (res.success) {
+//       ElMessage.success(res.message);
+//     } else {
+//       ElMessage.error(res.message);
+//     }
+//   });
+// }
+
+function startMonitoring() {
+  ipc.invoke(ipcApiRoute.live_monitor.test).then(res => {
+    console.log('r:', res);
+    ElMessage.success(res.message);
+  });
+}
+
+// 停止监控
+function stopMonitoring() {
+  ipc.invoke(ipcApiRoute.live_monitor.stopMonitoring).then(res => {
+    if (res.success) {
+      ElMessage.success(res.message);
+    } else {
+      ElMessage.error(res.message);
+    }
+  });
+}
+
+// 获取最新配置
+function getLatestConfig() {
+  ipc.invoke(ipcApiRoute.live_monitor.getLatestConfig).then(res => {
+    if (res.success) {
+      ElMessage.success(res.message);
+    } else {
+      ElMessage.error(res.message);
+    }
+  });
+}
+
 // 组件挂载时
 onMounted(() => {
   console.log('Live_save页面已加载');
+  listenConfigUpdate();
 });
 
 // 组件卸载时
 onUnmounted(() => {
   disconnectWebSocket();
+  ipc.removeAllListeners('controller/live_monitor/configUpdate');
 });
 </script>
 
 <style lang="less" scoped>
 .live-save-container {
-  padding: 20px;
+  padding: 10px 20px;
   text-align: left;
   
   .one-block-1 {
     font-size: 16px;
     font-weight: bold;
-    margin-top: 20px;
     margin-bottom: 10px;
+    
+    &:first-child {
+      margin-top: 0;
+    }
+    
+    &:not(:first-child) {
+      margin-top: 20px;
+    }
   }
   
   .one-block-2 {
     margin-bottom: 20px;
   }
   
+  .live-url-input {
+    width: 100%;
+  }
+  
   .status-overview {
     margin-top: 10px;
     margin-bottom: 20px;
+    
+    .card-header {
+      font-size: 14px;
+      font-weight: bold;
+    }
     
     .card-value {
       font-size: 24px;

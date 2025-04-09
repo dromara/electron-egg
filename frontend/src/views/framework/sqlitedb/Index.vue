@@ -6,17 +6,17 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-row>
-        <a-col :span="8">
+      <el-row>
+        <el-col :span="8">
           • 大数据量: 0-1024GB(单库)
-        </a-col>
-        <a-col :span="8">
+        </el-col>
+        <el-col :span="8">
           • 高性能
-        </a-col>
-        <a-col :span="8">
+        </el-col>
+        <el-col :span="8">
           • 类mysql语法
-        </a-col>
-      </a-row>
+        </el-col>
+      </el-row>
     </div>
     <div class="one-block-1">
       <span>
@@ -24,23 +24,25 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-row>
-        <a-col :span="12">
-          <a-input v-model="data_dir" :value="data_dir" addon-before="数据目录" />
-        </a-col>
-        <a-col :span="2">
-        </a-col>
-        <a-col :span="5">
-          <a-button @click="selectDir()">
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-input v-model="data_dir" :value="data_dir">
+            <template #prepend>数据目录</template>
+          </el-input>
+        </el-col>
+        <el-col :span="2">
+        </el-col>
+        <el-col :span="5">
+          <el-button @click="selectDir()">
             修改目录
-          </a-button>
-        </a-col>
-        <a-col :span="5">
-          <a-button @click="openDir()">
+          </el-button>
+        </el-col>
+        <el-col :span="5">
+          <el-button @click="openDir()">
             打开目录
-          </a-button>
-        </a-col>        
-      </a-row>
+          </el-button>
+        </el-col>        
+      </el-row>
     </div>     
     <div class="one-block-1">
       <span>
@@ -48,11 +50,11 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-row>
-        <a-col :span="24">
+      <el-row>
+        <el-col :span="24">
           {{ all_list }}
-        </a-col>
-      </a-row>
+        </el-col>
+      </el-row>
     </div>    
     <div class="one-block-1">
       <span>
@@ -60,23 +62,27 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-row>
-        <a-col :span="6">
-          <a-input v-model="name" :value="name" addon-before="姓名" />
-        </a-col>
-        <a-col :span="3">
-        </a-col>
-        <a-col :span="6">
-          <a-input v-model="age" :value="age" addon-before="年龄" />
-        </a-col>
-        <a-col :span="3">
-        </a-col>
-        <a-col :span="6">
-          <a-button @click="sqlitedbOperation('add')">
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <el-input v-model="name" :value="name">
+            <template #prepend>姓名</template>
+          </el-input>
+        </el-col>
+        <el-col :span="3">
+        </el-col>
+        <el-col :span="6">
+          <el-input v-model="age" :value="age">
+            <template #prepend>年龄</template>
+          </el-input>
+        </el-col>
+        <el-col :span="3">
+        </el-col>
+        <el-col :span="6">
+          <el-button @click="sqlitedbOperation('add')">
             添加
-          </a-button>
-        </a-col>
-      </a-row>
+          </el-button>
+        </el-col>
+      </el-row>
     </div>
     <div class="one-block-1">
       <span>
@@ -84,28 +90,29 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-row>
-        <a-col :span="6">
-          <!-- eslint-disable-next-line vue/no-v-model-argument -->
-          <a-input v-model:value="search_age" addon-before="年龄" />
-        </a-col>
-        <a-col :span="3">
-        </a-col>
-        <a-col :span="6">
-        </a-col>
-        <a-col :span="3">
-        </a-col>
-        <a-col :span="6">
-          <a-button @click="sqlitedbOperation('get')">
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <el-input v-model="search_age">
+            <template #prepend>年龄</template>
+          </el-input>
+        </el-col>
+        <el-col :span="3">
+        </el-col>
+        <el-col :span="6">
+        </el-col>
+        <el-col :span="3">
+        </el-col>
+        <el-col :span="6">
+          <el-button @click="sqlitedbOperation('get')">
             查找
-          </a-button>
-        </a-col>
-      </a-row>
-      <a-row>
-        <a-col :span="24">
+          </el-button>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
           {{ userList }}
-        </a-col>
-      </a-row>
+        </el-col>
+      </el-row>
     </div>
     <div class="one-block-1">
       <span>
@@ -113,25 +120,27 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-row>
-        <a-col :span="6">
-          <!-- eslint-disable-next-line vue/no-v-model-argument -->
-          <a-input v-model:value="update_name" addon-before="姓名(条件)" />
-        </a-col>
-        <a-col :span="3">
-        </a-col>
-        <a-col :span="6">
-          <!-- eslint-disable-next-line vue/no-v-model-argument -->
-          <a-input v-model:value="update_age" addon-before="年龄" />
-        </a-col>
-        <a-col :span="3">
-        </a-col>
-        <a-col :span="6">
-          <a-button @click="sqlitedbOperation('update')">
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <el-input v-model="update_name">
+            <template #prepend>姓名(条件)</template>
+          </el-input>
+        </el-col>
+        <el-col :span="3">
+        </el-col>
+        <el-col :span="6">
+          <el-input v-model="update_age">
+            <template #prepend>年龄</template>
+          </el-input>
+        </el-col>
+        <el-col :span="3">
+        </el-col>
+        <el-col :span="6">
+          <el-button @click="sqlitedbOperation('update')">
             更新
-          </a-button>
-        </a-col>
-      </a-row>
+          </el-button>
+        </el-col>
+      </el-row>
     </div>
     <div class="one-block-1">
       <span>
@@ -139,23 +148,24 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-row>
-        <a-col :span="6">
-          <!-- eslint-disable-next-line vue/no-v-model-argument -->
-          <a-input v-model:value="delete_name" addon-before="姓名" />
-        </a-col>
-        <a-col :span="3">
-        </a-col>
-        <a-col :span="6">
-        </a-col>
-        <a-col :span="3">
-        </a-col>
-        <a-col :span="6">
-          <a-button @click="sqlitedbOperation('del')">
+      <el-row :gutter="20">
+        <el-col :span="6">
+          <el-input v-model="delete_name">
+            <template #prepend>姓名</template>
+          </el-input>
+        </el-col>
+        <el-col :span="3">
+        </el-col>
+        <el-col :span="6">
+        </el-col>
+        <el-col :span="3">
+        </el-col>
+        <el-col :span="6">
+          <el-button @click="sqlitedbOperation('del')">
             删除
-          </a-button>
-        </a-col>
-      </a-row>
+          </el-button>
+        </el-col>
+      </el-row>
     </div>       
   </div>
 </template>
@@ -163,7 +173,7 @@
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import { ref, onMounted } from 'vue';
-import { message } from 'ant-design-vue';
+import { ElMessage } from 'element-plus';
 
 const name = ref('李四');
 const age = ref(20);
@@ -185,7 +195,7 @@ function init() {
   }
   ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
     if (res.code == -1) {
-      message.error('请检查sqlite是否正确安装', 5);
+      ElMessage.error('请检查sqlite是否正确安装');
       return
     }
 
@@ -199,66 +209,73 @@ function getAllTestData () {
     action: 'all',
   }
   ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-    if (res.all_list.length == 0) {
-      return false;
+    all_list.value = res.result;
+  })  
+}
+
+function sqlitedbOperation(action) {
+  if (action == 'add') {
+    const params = {
+      action: action,
+      name: name.value,
+      age: age.value, 
     }
-    all_list.value = res.all_list;
-  }) 
+
+    ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+      ElMessage.success(res);
+      getAllTestData();
+    })
+  } else if (action == 'get') {  
+    const params = {
+      action: action,
+      age: search_age.value, 
+    }
+    ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+      ElMessage.info("查询完成");
+      userList.value = res.result;
+    })
+  } else if (action == 'del') {  
+    const params = {
+      action: action,
+      name: delete_name.value, 
+    }
+    ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+      ElMessage.success(res);
+      getAllTestData();
+    })
+  } else if (action == 'update') {  
+    const params = {
+      action: action,
+      name: update_name.value,
+      age: update_age.value, 
+    }
+    ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+      ElMessage.success(res);
+      getAllTestData();
+    })
+  }
 }
 
 function selectDir() {
-  ipc.invoke(ipcApiRoute.os.selectFolder, '').then(r => {
+  ipc.invoke(ipcApiRoute.os.selectFolder).then(r => {
     data_dir.value = r;
-    // 修改数据目录
-    modifyDataDir(r);
-  })
+
+    const params = {
+      action: 'setDataDir',
+      dataDir: r, 
+    }
+    ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
+      ElMessage.success(res);
+    }) 
+  })      
 }
 
 function openDir() {
-  console.log('data_dir:', data_dir.value);
-  ipc.invoke(ipcApiRoute.os.openDirectory, {id: data_dir.value})
-}
-
-function modifyDataDir(dir) {
   const params = {
-    action: 'setDataDir',
-    data_dir: dir
+    action: 'openDataDir',
   }
   ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-    all_list.value = res.all_list;
-  }) 
-}
-
-function sqlitedbOperation (ac) {
-  const params = {
-    action: ac,
-    info: {
-      name: name.value,
-      age: parseInt(age.value)
-    },
-    search_age: parseInt(search_age.value),
-    update_name: update_name.value,
-    update_age: parseInt(update_age.value),
-    delete_name: delete_name.value,
-  }
-  if (ac == 'add' && name.value.length == 0) {
-    message.error(`请填写数据`);
-  }
-  ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-    console.log('res:', res);
-    if (ac == 'get') {
-      if (res.result.length == 0) {
-        message.error(`没有数据`);
-        return;
-      }
-      userList.value = res.result;
-    }
-    if (res.all_list.length == 0) {
-      all_list.value = ['空'];
-      return;
-    }
-    all_list.value = res.all_list;
-    message.success(`success`);
+    ElMessage.success(res);
   }) 
 }
 </script>

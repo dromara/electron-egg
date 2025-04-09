@@ -6,12 +6,12 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="sendNotification(0)">默认</a-button>
-        <a-button @click="sendNotification(1)">发出提示音</a-button>
-        <a-button @click="sendNotification(2)">点击通知触发事件</a-button>
-        <a-button @click="sendNotification(3)">关闭通知触发事件</a-button>
-      </a-space>
+      <el-space wrap>
+        <el-button @click="sendNotification(0)">默认</el-button>
+        <el-button @click="sendNotification(1)">发出提示音</el-button>
+        <el-button @click="sendNotification(2)">点击通知触发事件</el-button>
+        <el-button @click="sendNotification(3)">关闭通知触发事件</el-button>
+      </el-space>
     </div>
   </div>
 </template>
@@ -19,7 +19,7 @@
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import { onMounted } from 'vue';
-import { message } from 'ant-design-vue';
+import { ElMessage } from 'element-plus';
 
 const views = [
   {
@@ -61,7 +61,7 @@ function init() {
   ipc.removeAllListeners(ipcApiRoute.os.sendNotification);
   ipc.on(ipcApiRoute.os.sendNotification, (event, result) => {
     if (Object.prototype.toString.call(result) == '[object Object]') {
-      message.info(result.msg);
+      ElMessage.info(result.msg);
     }  
   })
 }

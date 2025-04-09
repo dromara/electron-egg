@@ -10,10 +10,6 @@ const constantRouterMap = [{
         children: [{
                 path: '/framework',
                 name: 'Framework',
-                component: () =>
-                    import ('@/layouts/Menu.vue'),
-                props: { id: 'framework' },
-                //props: true,
                 redirect: { name: 'FrameworkSocketIpc' },
                 children: [{
                         path: '/framework/socket/ipc',
@@ -62,9 +58,6 @@ const constantRouterMap = [{
             {
                 path: '/os',
                 name: 'Os',
-                component: () =>
-                    import ('@/layouts/Menu.vue'),
-                props: { id: 'os' },
                 redirect: { name: 'OsFileIndex' },
                 children: [{
                         path: '/os/file/index',
@@ -95,9 +88,6 @@ const constantRouterMap = [{
             {
                 path: '/effect',
                 name: 'Effect',
-                component: () =>
-                    import ('@/layouts/Menu.vue'),
-                props: { id: 'effect' },
                 redirect: { name: 'EffectLoginIndex' },
                 children: [{
                     path: '/effect/login/index',
@@ -109,9 +99,6 @@ const constantRouterMap = [{
             {
                 path: '/cross',
                 name: 'Cross',
-                component: () =>
-                    import ('@/layouts/Menu.vue'),
-                props: { id: 'cross' },
                 redirect: { name: 'CrossGoIndex' },
                 children: [{
                         path: '/cross/go/index',

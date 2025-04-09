@@ -1,26 +1,23 @@
-import * as AntIcon from '@ant-design/icons-vue';
-import Antd from 'ant-design-vue';
 import { createApp } from 'vue';
 import App from './App.vue';
 import './assets/global.less';
-import './assets/theme.less';
+// 移除 Ant Design 主题
+// import './assets/theme.less';
 import components from './components/global';
 import Router from './router/index';
+import ElementIcons from './plugins/icons';
 
 const app = createApp(App)
 app.config.productionTip = false
 
-// components
+// 注册全局组件
 for (const i in components) {
   app.component(i, components[i])
 }
 
-// icon
-for (const i in AntIcon) {
-  const whiteList = ['createFromIconfontCN', 'getTwoToneColor', 'setTwoToneColor', 'default']
-  if (!whiteList.includes(i)) {
-    app.component(i, AntIcon[i])
-  }
-}
+// 注册Element Plus图标
+app.use(ElementIcons)
 
-app.use(Antd).use(Router).mount('#app')
+// Element Plus已通过unplugin-vue-components自动导入，无需在此处导入
+
+app.use(Router).mount('#app')

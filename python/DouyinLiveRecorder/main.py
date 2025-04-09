@@ -41,7 +41,8 @@ import json
 import asyncio
 import threading
 from concurrent.futures import ThreadPoolExecutor
-import api
+import python.DouyinLiveRecorder.live_recorder_api as live_recorder_api
+import uvicorn
 
 version = "v4.0.2"
 platforms = ("\n国内站点：抖音|快手|虎牙|斗鱼|YY|B站|小红书|bigo|blued|网易CC|千度热播|猫耳FM|Look|TwitCasting|百度|微博|"
@@ -100,10 +101,8 @@ def display_info() -> None:
     asyncio.set_event_loop(loop)
     
     # 启动FastAPI服务
-    api_port = 8000
-    api_host = "127.0.0.1"
-    print(f"启动API服务在 {api_host}:{api_port}")
-    api_thread = threading.Thread(target=api.start_server, args=(api_host, api_port), daemon=True)
+    print("启动API服务...")
+    api_thread = threading.Thread(target=lambda: uvicorn.run(live_recorder_api.app), daemon=True)
     api_thread.start()
     
     while True:
@@ -174,7 +173,7 @@ def display_info() -> None:
                 start_display_time = now_time
             
             # 通过WebSocket发送状态数据
-            loop.run_until_complete(api.update_status(status_data))
+            loop.run_until_complete(live_recorder_api.update_status(status_data))
                 
         except Exception as e:
             logger.error(f"错误信息: {e} 发生错误的行数: {e.__traceback__.tb_lineno}")

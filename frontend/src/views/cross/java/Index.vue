@@ -6,12 +6,12 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="create()"> 启动 </a-button>
-        <a-button @click="getUrl()"> 获取地址 </a-button>
-        <a-button @click="kill()"> kill </a-button>
-        <a-button @click="info()"> 查看 </a-button>
-      </a-space>
+      <el-space>
+        <el-button @click="create()"> 启动 </el-button>
+        <el-button @click="getUrl()"> 获取地址 </el-button>
+        <el-button @click="kill()"> kill </el-button>
+        <el-button @click="info()"> 查看 </el-button>
+      </el-space>
     </div>
     <div class="one-block-1">
       <span>
@@ -19,10 +19,10 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="request(1)"> 前端发送 </a-button>
-        <a-button @click="request(2)"> 主进程发送 </a-button>
-      </a-space>
+      <el-space>
+        <el-button @click="request(1)"> 前端发送 </el-button>
+        <el-button @click="request(2)"> 主进程发送 </el-button>
+      </el-space>
     </div>
   </div>
 </template>
@@ -31,7 +31,7 @@ import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import axios from 'axios';
 import { ref } from 'vue';
-import { message } from 'ant-design-vue';
+import { ElMessage } from 'element-plus';
 
 const serverUrl = ref('');
 
@@ -44,7 +44,7 @@ function info() {
 function getUrl() {
   ipc.invoke(ipcApiRoute.cross.getCrossUrl, {name: 'javaapp'}).then(url => {
     serverUrl.value = url;
-    message.info(`服务地址: ${url}`);
+    ElMessage.info(`服务地址: ${url}`);
   }) 
 }
 
@@ -59,7 +59,7 @@ function create() {
 
 function request(type) {
   if (type == 1 && serverUrl.value == "") {
-    message.info("请先获取服务地址");
+    ElMessage.info("请先获取服务地址");
     return
   }
 
@@ -74,13 +74,13 @@ function request(type) {
     axios(cfg).then(res => {
       console.log('res:', res);
       const data = res.data || null;
-      message.info(`服务返回: ${data}`);
+      ElMessage.info(`服务返回: ${data}`);
     })
   } else {
     ipc.invoke(ipcApiRoute.cross.requestApi, {name: 'javaapp', urlPath: '/test1/get', params: { id: '1111111'}}).then(res => {
       console.log('res:', res);
       const data = res || null;
-      message.info(`服务返回: ${data}`);
+      ElMessage.info(`服务返回: ${data}`);
     }) 
   }
 }  

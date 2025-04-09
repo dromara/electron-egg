@@ -10,10 +10,10 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
+      <el-space>
         {{ soft }}
-        <a-button @click="openSoft">执行</a-button>
-      </a-space>
+        <el-button @click="openSoft">执行</el-button>
+      </el-space>
     </div>
   </div>
 </template>
@@ -21,14 +21,14 @@
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import { ref } from 'vue';
-import { message } from 'ant-design-vue';
+import { ElMessage } from 'element-plus';
 
 const soft = ref('powershell.exe');
 
 function openSoft() { 
   ipc.invoke(ipcApiRoute.framework.openSoftware, {softName: soft.value}).then(result => {
     if (!result) {
-      message.error('程序不存在');
+      ElMessage.error('程序不存在');
     }
   })       
 }

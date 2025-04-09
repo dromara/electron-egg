@@ -24,6 +24,8 @@ module.exports = () => {
       },
       frame: true,
       show: false,
+      menuBarVisible: false,
+      autoHideMenuBar: true,
       icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
     logger: {

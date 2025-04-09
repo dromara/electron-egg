@@ -6,9 +6,9 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="loginWindow()">切换为登录窗口</a-button>
-      </a-space>
+      <el-space>
+        <el-button @click="loginWindow()">切换为登录窗口</el-button>
+      </el-space>
     </div>
   </div>
 </template>

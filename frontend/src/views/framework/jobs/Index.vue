@@ -6,21 +6,21 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="runJob(1, 'create')">执行任务1</a-button>
+      <el-space>
+        <el-button @click="runJob(1, 'create')">执行任务1</el-button>
         进度: {{ progress1 }} , 进程pid: {{ progress1_pid }}
-        <a-button @click="runJob(1, 'pause')">暂停</a-button>
-        <a-button @click="runJob(1, 'resume')">恢复</a-button>
-        <a-button @click="runJob(1, 'close')">关闭</a-button>
-      </a-space>
+        <el-button @click="runJob(1, 'pause')">暂停</el-button>
+        <el-button @click="runJob(1, 'resume')">恢复</el-button>
+        <el-button @click="runJob(1, 'close')">关闭</el-button>
+      </el-space>
       <p></p>
-      <a-space>
-        <a-button @click="runJob(2, 'create')">执行任务2</a-button>
+      <el-space>
+        <el-button @click="runJob(2, 'create')">执行任务2</el-button>
         进度: {{ progress2 }} , 进程pid: {{ progress2_pid }}
-        <a-button @click="runJob(2, 'pause')">暂停</a-button>
-        <a-button @click="runJob(2, 'resume')">恢复</a-button>
-        <a-button @click="runJob(2, 'close')">关闭</a-button>
-      </a-space>            
+        <el-button @click="runJob(2, 'pause')">暂停</el-button>
+        <el-button @click="runJob(2, 'resume')">恢复</el-button>
+        <el-button @click="runJob(2, 'close')">关闭</el-button>
+      </el-space>            
     </div>
     <div class="one-block-1">
       <span>
@@ -28,30 +28,30 @@
       </span>
     </div>  
     <div class="one-block-2">
-      <a-space>
-        <a-button @click="createPool()">创建进程池</a-button>
+      <el-space>
+        <el-button @click="createPool()">创建进程池</el-button>
         进程pids: {{ processPids }}
-      </a-space>
+      </el-space>
       <p></p>      
-      <a-space>
-        <a-button @click="runJobByPool(3, 'run')">执行任务3</a-button>
+      <el-space>
+        <el-button @click="runJobByPool(3, 'run')">执行任务3</el-button>
         进度: {{ progress3 }} , 进程pid: {{ progress3_pid }}
-      </a-space>
+      </el-space>
       <p></p>
-      <a-space>
-        <a-button @click="runJobByPool(4, 'run')">执行任务4</a-button>
+      <el-space>
+        <el-button @click="runJobByPool(4, 'run')">执行任务4</el-button>
         进度: {{ progress4 }} , 进程pid: {{ progress4_pid }}
-      </a-space> 
+      </el-space> 
       <p></p> 
-      <a-space>
-        <a-button @click="runJobByPool(5, 'run')">执行任务5</a-button>
+      <el-space>
+        <el-button @click="runJobByPool(5, 'run')">执行任务5</el-button>
         进度: {{ progress5 }} , 进程pid: {{ progress5_pid }}
-      </a-space>
+      </el-space>
       <p></p>
-      <a-space>
-        <a-button @click="runJobByPool(6, 'run')">执行任务6</a-button>
+      <el-space>
+        <el-button @click="runJobByPool(6, 'run')">执行任务6</el-button>
         进度: {{ progress6 }} , 进程pid: {{ progress6_pid }}
-      </a-space>  
+      </el-space>  
     </div>            
   </div>
 </template>
