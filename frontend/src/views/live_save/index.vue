@@ -15,19 +15,33 @@
       <span>添加直播链接</span>
     </div>
     <div class="one-block-2">
-      <el-input 
-        v-model="liveUrl" 
-        placeholder="请输入主播直播间网址（尽量使用PC网页端的直播间地址）" 
-        class="live-url-input"
-      >
-        <template #append>
-          <el-button @click="addLiveUrl">添加链接</el-button>
-        </template>
-      </el-input>
+      <el-row :gutter="20">
+        <el-col :span="3">
+          <el-select v-model="selectedQuality" placeholder="选择清晰度" style="width: 100%;">
+            <el-option
+              v-for="item in qualityOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-col>
+        <el-col :span="21">
+          <el-input
+            v-model="liveUrl"
+            placeholder="请输入主播直播间网址（尽量使用PC网页端的直播间地址）"
+            class="live-url-input"
+          >
+            <template #append>
+              <el-button @click="addLiveUrl">添加链接</el-button>
+            </template>
+          </el-input>
+        </el-col>
+      </el-row>
     </div>
 
     <div class="one-block-1">
-      <span>WebSocket连接状态: 
+      <span>WebSocket连接状态:
         <el-tag :type="wsConnected ? 'success' : 'danger'">
           {{ wsConnected ? '已连接' : '未连接' }}
         </el-tag>
@@ -77,20 +91,63 @@
       <span>直播监控列表</span>
     </div>
     <div class="one-block-2">
-      <el-space>
-        <el-button type="primary" @click="startMonitoring">启动配置监控</el-button>
-        <el-button @click="getLatestConfig">获取最新配置</el-button>
-        <el-button type="danger" @click="stopMonitoring">停止配置监控</el-button>
-      </el-space>
-      <el-table :data="combinedTableData" border stripe style="margin-top: 15px;">
-        <el-table-column prop="streamerName" label="主播名" />
+      <el-table :data="combinedTableData" border stripe>
+        <el-table-column type="index" label="ID" width="60" />
+        <el-table-column prop="streamerName" label="主播名" width="120" />
         <el-table-column prop="url" label="链接" />
-        <el-table-column prop="quality" label="画质" />
-        <el-table-column prop="recordStatus" label="录制状态">
+        <el-table-column label="画质" width="120">
+          <template #default="{ row, $index }">
+            <el-select
+              v-model="row.quality"
+              placeholder="选择清晰度"
+              size="small"
+              style="width: 100%"
+              @change="(val) => updateQuality(row, val, $index)"
+            >
+              <el-option
+                v-for="item in qualityOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column prop="recordStatus" label="录制状态" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.recordStatus ? 'success' : 'info'">
-              {{ scope.row.recordStatus ? '录制中' : '未录制' }}
-            </el-tag>
+            <div class="status-tag-container">
+              <el-tag
+                :type="scope.row.isDisabled ? 'danger' : (scope.row.recordStatus ? 'success' : 'info')"
+                class="status-tag"
+              >
+                <span v-if="scope.row.isDisabled">停止监控</span>
+                <span v-else>{{ scope.row.recordStatus ? '录制中' : '未录制' }}</span>
+              </el-tag>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="90">
+          <template #default="{ row, $index }">
+            <el-space>
+              <el-tooltip content="删除直播链接" placement="top">
+                <el-button
+                  size="small"
+                  type="danger"
+                  icon="Delete"
+                  circle
+                  @click="removeStream(row, $index)"
+                />
+              </el-tooltip>
+              <el-tooltip :content="row.isDisabled ? '恢复监控' : '停止监控'" placement="top">
+                <el-button
+                  size="small"
+                  :type="row.isDisabled ? 'success' : 'warning'"
+                  :icon="row.isDisabled ? 'VideoPlay' : 'VideoPause'"
+                  circle
+                  @click="toggleMonitoring(row, $index)"
+                />
+              </el-tooltip>
+            </el-space>
           </template>
         </el-table-column>
         <template #empty>
@@ -105,7 +162,20 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import 'element-plus/es/components/message/style/css';
+
+// 配置全局默认值：限制只显示一个消息
+ElMessage.closeAll(); // 初始化时关闭所有消息
+const showMessage = (message, type = 'info') => {
+  ElMessage.closeAll(); // 显示新消息前关闭所有消息
+  return ElMessage({
+    message,
+    type,
+    duration: 3000,
+    showClose: true
+  });
+};
 
 // 服务器URL和WebSocket连接
 const serverUrl = ref('');
@@ -114,6 +184,16 @@ let socket = null;
 
 // 直播链接输入
 const liveUrl = ref('');
+
+// 画质选项
+const qualityOptions = [
+  { value: '原画', label: '原画' },
+  { value: '超清', label: '超清' },
+  { value: '高清', label: '高清' },
+  { value: '标清', label: '标清' },
+  { value: '流畅', label: '流畅' }
+];
+const selectedQuality = ref('原画'); // 默认选择原画
 
 // 状态数据
 const statusData = ref({
@@ -146,15 +226,16 @@ const combinedTableData = computed(() => {
     const isRecording = statusData.value.recording.some(
       (rec) => rec.url && stream.url && rec.url.includes(stream.url)
     );
-    
+
     return {
       streamerName: stream.streamerName,
       url: stream.url,
       quality: stream.quality,
-      recordStatus: isRecording
+      recordStatus: isRecording,
+      isDisabled: stream.isDisabled // 是否被禁用（通过#注释）
     };
   });
-  
+
   return allStreams;
 });
 
@@ -162,8 +243,8 @@ const combinedTableData = computed(() => {
 function getUrl() {
   ipc.invoke(ipcApiRoute.cross.getCrossUrl, {name: 'pyapp'}).then(url => {
     serverUrl.value = url;
-    ElMessage.info(`服务地址: ${url}`);
-    
+    showMessage(`服务地址: ${url}`, 'info');
+
     // 获取到地址后尝试连接WebSocket
     connectWebSocket();
   });
@@ -173,14 +254,14 @@ function getUrl() {
 function kill() {
   disconnectWebSocket();
   ipc.invoke(ipcApiRoute.cross.killCrossServer, {type: 'one', name: 'pyapp'}).then(() => {
-    ElMessage.success('服务已停止');
+    showMessage('服务已停止', 'success');
   });
 }
 
 // 启动Python服务
 function create() {
   ipc.invoke(ipcApiRoute.cross.createCrossServer, { program: 'python' }).then(() => {
-    ElMessage.success('服务启动中...');
+    showMessage('服务启动中...', 'success');
     // 短暂延迟后获取URL并连接
     setTimeout(() => {
       getUrl();
@@ -191,55 +272,55 @@ function create() {
 // 连接WebSocket
 function connectWebSocket() {
   if (!serverUrl.value) {
-    ElMessage.warning('请先获取服务地址');
+    showMessage('请先获取服务地址', 'warning');
     return;
   }
-  
+
   // 获取WebSocket地址 - 更新为新的路径格式
   const wsUrl = serverUrl.value.replace('http://', 'ws://') + '/ws/recorder/status';
-  
+
   // 关闭已有连接
   disconnectWebSocket();
-  
+
   // 创建新连接
   socket = new WebSocket(wsUrl);
-  
+
   socket.onopen = () => {
     wsConnected.value = true;
-    ElMessage.success('WebSocket连接成功');
+    showMessage('WebSocket连接成功', 'success');
   };
-  
+
   socket.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
-      
+
       // 处理url/add的响应
       if (data.type === 'url/add/response') {
         if (data.success) {
-          ElMessage.success(data.message);
+          showMessage(data.message, 'success');
           liveUrl.value = ''; // 清空输入框
         } else {
-          ElMessage.error(data.message);
+          showMessage(data.message, 'error');
         }
         return;
       }
-      
+
       // 处理状态更新数据
       statusData.value = data;
     } catch (e) {
       console.error('解析WebSocket数据失败:', e);
     }
   };
-  
+
   socket.onclose = () => {
     wsConnected.value = false;
-    ElMessage.warning('WebSocket连接已关闭');
+    showMessage('WebSocket连接已关闭', 'warning');
   };
-  
+
   socket.onerror = (error) => {
     wsConnected.value = false;
     console.error('WebSocket错误:', error);
-    ElMessage.error('WebSocket连接失败');
+    showMessage('WebSocket连接失败', 'error');
   };
 }
 
@@ -255,85 +336,202 @@ function disconnectWebSocket() {
 // 添加直播链接
 function addLiveUrl() {
   if (!liveUrl.value) {
-    ElMessage.warning('请输入直播链接');
-    return; 
-  }
-
-  if (!socket || socket.readyState !== WebSocket.OPEN) {
-    ElMessage.warning('WebSocket未连接,请先启动服务');
+    showMessage('请输入直播链接', 'warning');
     return;
   }
 
-  // 通过WebSocket发送添加URL的消息
-  socket.send(JSON.stringify({
-    type: 'url/add',
-    url: liveUrl.value
-  }));
-  
-  // 短暂延迟后刷新配置数据
-  setTimeout(() => {
-    getLatestConfig();
-  }, 1000);
+  // 获取当前的画质和链接
+  const quality = selectedQuality.value;
+  const url = liveUrl.value.trim();
+
+  if (!url.startsWith('http')) {
+    showMessage('请输入有效的URL，必须以http或https开头', 'warning');
+    return;
+  }
+
+  // 构建参数对象
+  const params = {
+    quality: quality,
+    url: url
+  };
+
+  // 使用IPC调用来添加链接
+  ipc.invoke(ipcApiRoute.livesave.addLiveUrl, params).then(res => {
+    if (res.success) {
+      showMessage(res.message, 'success');
+
+      // 清空输入框
+      liveUrl.value = '';
+      // 重置为默认画质
+      selectedQuality.value = '原画';
+
+      // 刷新配置列表
+      getLatestConfig();
+    } else {
+      showMessage(res.message || '添加链接失败', 'error');
+    }
+  }).catch(err => {
+    showMessage(`添加链接失败: ${err}`, 'error');
+  });
+}
+
+// 更新直播流画质
+function updateQuality(row, newQuality, index) {
+  // 确保行数据有效
+  if (!row || !row.url) {
+    showMessage('无效的直播流数据', 'error');
+    return;
+  }
+
+  // 保存当前画质，以便出错时恢复
+  const currentQuality = row.quality;
+
+  // 构建参数对象 - 添加行索引
+  const params = {
+    lineIndex: index,  // 行号（0-based）
+    url: row.url,
+    newQuality: newQuality
+  };
+
+  // 使用IPC调用来更新画质
+  ipc.invoke(ipcApiRoute.livesave.updateQuality, params).then(res => {
+    if (res.success) {
+      showMessage(`已将画质更新为: ${newQuality}`, 'success');
+      // 刷新配置列表
+      getLatestConfig();
+    } else {
+      showMessage(res.message || '更新画质失败', 'error');
+      // 更新失败时恢复原来的值
+      row.quality = currentQuality;
+    }
+  }).catch(err => {
+    showMessage(`更新画质失败: ${err}`, 'error');
+    // 更新失败时恢复原来的值
+    row.quality = currentQuality;
+  });
+}
+
+// 删除直播流
+function removeStream(row, index) {
+  // 确保行数据有效
+  if (!row || !row.url) {
+    showMessage('无效的直播流数据', 'error');
+    return;
+  }
+
+  console.log(`尝试删除第 ${index} 行（0-based索引）`);
+
+  // 构建参数对象 - 使用行索引
+  const params = {
+    lineIndex: index,  // 行号（0-based）
+    url: row.url,
+    quality: row.quality
+  };
+
+  // 使用IPC调用来删除链接
+  ipc.invoke(ipcApiRoute.livesave.removeStream, params).then(res => {
+    if (res.success) {
+      showMessage('已删除直播链接', 'success');
+      // 刷新配置列表
+      getLatestConfig();
+    } else {
+      showMessage('删除直播链接失败', 'error');
+    }
+  }).catch(err => {
+    showMessage('删除直播链接失败', 'error');
+  });
 }
 
 // 监听配置更新消息
 function listenConfigUpdate() {
-  ipc.on('controller/live_monitor/configUpdate', (data) => {
-    configData.value = data;
-    ElMessage.success('配置已更新');
-  });
-}
+  // 定义监听通道 - 必须与后端发送消息的通道一致
+  const channel = 'controller/live_monitor/configUpdate';
 
-// 启动监控
-// function startMonitoring() {
-//   ipc.invoke(ipcApiRoute.live_monitor.startMonitoring).then(res => {
-//     if (res.success) {
-//       ElMessage.success(res.message);
-//     } else {
-//       ElMessage.error(res.message);
-//     }
-//   });
-// }
-
-function startMonitoring() {
-  ipc.invoke(ipcApiRoute.live_monitor.test).then(res => {
-    console.log('r:', res);
-    ElMessage.success(res.message);
-  });
-}
-
-// 停止监控
-function stopMonitoring() {
-  ipc.invoke(ipcApiRoute.live_monitor.stopMonitoring).then(res => {
-    if (res.success) {
-      ElMessage.success(res.message);
-    } else {
-      ElMessage.error(res.message);
+  // 确保只监听一次
+  ipc.removeAllListeners(channel);
+  ipc.on(channel, (event, data) => {
+    if (data && data.type === 'live_config_update') {
+      configData.value = data;
+      console.log('[IPC] 收到配置更新:', data);
+      // 不每次配置更新都显示提示，减少提示数量
+      // showMessage(`配置已更新，共${data.streams ? data.streams.length : 0}条直播信息`, 'success');
+    } else if (data && data.type === 'error') {
+      showMessage(`配置更新错误: ${data.message}`, 'error');
     }
   });
 }
 
 // 获取最新配置
 function getLatestConfig() {
-  ipc.invoke(ipcApiRoute.live_monitor.getLatestConfig).then(res => {
+  ipc.invoke(ipcApiRoute.livesave.getLatestConfig).then(res => {
     if (res.success) {
-      ElMessage.success(res.message);
+      // 不显示获取配置成功的提示，减少提示数量
+      // showMessage(res.message, 'success');
     } else {
-      ElMessage.error(res.message);
+      showMessage(res.message, 'error');
     }
+  });
+}
+
+// 切换直播监控状态（启用/禁用）
+function toggleMonitoring(row, index) {
+  // 确保行数据有效
+  if (!row || !row.url) {
+    showMessage('无效的直播流数据', 'error');
+    return;
+  }
+
+  // 构建参数对象
+  const params = {
+    lineIndex: index,  // 行号（0-based）
+    url: row.url,
+    quality: row.quality,
+    disable: !row.isDisabled  // 切换状态
+  };
+
+  // 使用IPC调用来切换监控状态
+  ipc.invoke(ipcApiRoute.livesave.toggleStreamMonitoring, params).then(res => {
+    if (res.success) {
+      showMessage(res.message || `已${params.disable ? '停止' : '恢复'}监控`, 'success');
+      // 刷新配置列表
+      getLatestConfig();
+    } else {
+      showMessage(res.message || '切换监控状态失败', 'error');
+    }
+  }).catch(err => {
+    showMessage(`切换监控状态失败: ${err}`, 'error');
   });
 }
 
 // 组件挂载时
 onMounted(() => {
   console.log('Live_save页面已加载');
-  listenConfigUpdate();
+  // 初始化监听
+  initListeners();
+
+  // 主动获取一次最新配置
+  getLatestConfig();
 });
+
+// 初始化所有事件监听器
+function initListeners() {
+  // 定义监听通道 - 必须与后端发送消息的通道一致
+  const channel = 'controller/live_monitor/configUpdate';
+
+  // 清除可能存在的旧监听器
+  ipc.removeAllListeners(channel);
+
+  // 设置配置更新监听
+  listenConfigUpdate();
+}
 
 // 组件卸载时
 onUnmounted(() => {
   disconnectWebSocket();
-  ipc.removeAllListeners('controller/live_monitor/configUpdate');
+
+  // 定义监听通道 - 必须与后端发送消息的通道一致
+  const channel = 'controller/live_monitor/configUpdate';
+  ipc.removeAllListeners(channel);
 });
 </script>
 
@@ -341,38 +539,38 @@ onUnmounted(() => {
 .live-save-container {
   padding: 10px 20px;
   text-align: left;
-  
+
   .one-block-1 {
     font-size: 16px;
     font-weight: bold;
     margin-bottom: 10px;
-    
+
     &:first-child {
       margin-top: 0;
     }
-    
+
     &:not(:first-child) {
       margin-top: 20px;
     }
   }
-  
+
   .one-block-2 {
     margin-bottom: 20px;
   }
-  
+
   .live-url-input {
     width: 100%;
   }
-  
+
   .status-overview {
     margin-top: 10px;
     margin-bottom: 20px;
-    
+
     .card-header {
       font-size: 14px;
       font-weight: bold;
     }
-    
+
     .card-value {
       font-size: 24px;
       font-weight: bold;
@@ -380,5 +578,18 @@ onUnmounted(() => {
       margin: 0;
     }
   }
+}
+
+.status-tag-container {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-tag {
+  transition: all 0.3s;
+  min-width: 64px;
+  text-align: center;
 }
 </style>
