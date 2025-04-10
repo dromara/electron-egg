@@ -4,7 +4,7 @@
       <span>
         1. sqlite本地数据库
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-row>
         <el-col :span="8">
@@ -22,7 +22,7 @@
       <span>
         2. 数据目录
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-row :gutter="20">
         <el-col :span="12">
@@ -41,26 +41,26 @@
           <el-button @click="openDir()">
             打开目录
           </el-button>
-        </el-col>        
+        </el-col>
       </el-row>
-    </div>     
+    </div>
     <div class="one-block-1">
       <span>
         3. 测试数据
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-row>
         <el-col :span="24">
           {{ all_list }}
         </el-col>
       </el-row>
-    </div>    
+    </div>
     <div class="one-block-1">
       <span>
         4. 添加数据
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-row :gutter="20">
         <el-col :span="6">
@@ -88,7 +88,7 @@
       <span>
         4. 获取数据
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-row :gutter="20">
         <el-col :span="6">
@@ -118,7 +118,7 @@
       <span>
         5. 修改数据
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-row :gutter="20">
         <el-col :span="6">
@@ -146,7 +146,7 @@
       <span>
         6. 删除数据
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-row :gutter="20">
         <el-col :span="6">
@@ -166,7 +166,7 @@
           </el-button>
         </el-col>
       </el-row>
-    </div>       
+    </div>
   </div>
 </template>
 <script setup>
@@ -201,7 +201,7 @@ function init() {
 
     data_dir.value = res.result;
     getAllTestData();
-  }) 
+  })
 }
 
 function getAllTestData () {
@@ -209,8 +209,10 @@ function getAllTestData () {
     action: 'all',
   }
   ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-    all_list.value = res.result;
-  })  
+    if (res && res.all_list) {
+      all_list.value = res.all_list;
+    }
+  })
 }
 
 function sqlitedbOperation(action) {
@@ -218,40 +220,41 @@ function sqlitedbOperation(action) {
     const params = {
       action: action,
       name: name.value,
-      age: age.value, 
+      age: age.value,
     }
 
     ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-      ElMessage.success(res);
-      getAllTestData();
+      ElMessage.success('添加成功');
+      all_list.value = res.all_list;
     })
-  } else if (action == 'get') {  
+  } else if (action == 'get') {
     const params = {
       action: action,
-      age: search_age.value, 
+      age: search_age.value,
     }
     ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
       ElMessage.info("查询完成");
       userList.value = res.result;
+      all_list.value = res.all_list;
     })
-  } else if (action == 'del') {  
+  } else if (action == 'del') {
     const params = {
       action: action,
-      name: delete_name.value, 
+      name: delete_name.value,
     }
     ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-      ElMessage.success(res);
-      getAllTestData();
+      ElMessage.success('删除成功');
+      all_list.value = res.all_list;
     })
-  } else if (action == 'update') {  
+  } else if (action == 'update') {
     const params = {
       action: action,
       name: update_name.value,
-      age: update_age.value, 
+      age: update_age.value,
     }
     ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
-      ElMessage.success(res);
-      getAllTestData();
+      ElMessage.success('更新成功');
+      all_list.value = res.all_list;
     })
   }
 }
@@ -262,12 +265,12 @@ function selectDir() {
 
     const params = {
       action: 'setDataDir',
-      dataDir: r, 
+      dataDir: r,
     }
     ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
       ElMessage.success(res);
-    }) 
-  })      
+    })
+  })
 }
 
 function openDir() {
@@ -276,7 +279,7 @@ function openDir() {
   }
   ipc.invoke(ipcApiRoute.framework.sqlitedbOperation, params).then(res => {
     ElMessage.success(res);
-  }) 
+  })
 }
 </script>
 <style lang="less" scoped>

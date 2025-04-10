@@ -64,7 +64,7 @@ class LiveMonitorService {
 
                     // 创建空的配置文件
                     if (!fs.existsSync(this.configFilePath)) {
-                        fs.writeFileSync(this.configFilePath, '', 'utf-8');
+                        this.writeFileAtomically(this.configFilePath, '', this.fileEncoding);
                         logger.info(`已创建空的配置文件: ${this.configFilePath}`);
                     }
                 } catch (e) {
@@ -78,10 +78,99 @@ class LiveMonitorService {
             this.fileEncoding = 'utf-8';
             this.lastEvent = null;
             this.latestData = null; // 用于存储最新解析的配置数据
+            this.isFileLocked = false; // 文件锁定状态
+            this.maxRetries = 5; // 最大重试次数
+            this.retryInterval = 100; // 重试间隔(毫秒)
         } catch (error) {
             logger.error(`初始化LiveMonitorService失败: ${error.message}`);
             // 设置一个默认路径
             this.configFilePath = path.join(process.cwd(), 'python', 'DouyinLiveRecorder', 'config', 'URL_config.ini');
+        }
+    }
+
+    /**
+     * 原子写入文件
+     * 先写入临时文件，然后重命名替换原始文件
+     * @param {String} filePath - 文件路径
+     * @param {String} content - 文件内容
+     * @param {String} encoding - 编码
+     * @param {Number} currentRetry - 当前重试次数
+     */
+    async writeFileAtomically(filePath, content, encoding, currentRetry = 0) {
+        // 如果文件被锁定，等待后重试
+        if (this.isFileLocked) {
+            if (currentRetry >= this.maxRetries) {
+                throw new Error(`文件 ${filePath} 被锁定，重试 ${currentRetry} 次后仍无法写入`);
+            }
+
+            logger.warn(`文件 ${filePath} 被锁定，等待后重试 (${currentRetry + 1}/${this.maxRetries})`);
+
+            // 等待一段时间后重试
+            await new Promise(resolve => setTimeout(resolve, this.retryInterval));
+            return this.writeFileAtomically(filePath, content, encoding, currentRetry + 1);
+        }
+
+        try {
+            // 设置文件锁定状态
+            this.isFileLocked = true;
+
+            // 创建临时文件路径
+            const tempFilePath = `${filePath}.tmp`;
+
+            // 写入临时文件
+            fs.writeFileSync(tempFilePath, content, encoding);
+
+            // 重命名临时文件替换原始文件 (原子操作)
+            fs.renameSync(tempFilePath, filePath);
+
+            logger.info(`成功原子写入文件: ${filePath}`);
+        } catch (error) {
+            // 如果是因为文件被占用而失败，重试
+            if (error.code === 'EBUSY' || error.code === 'EACCES' || error.code === 'EPERM') {
+                if (currentRetry < this.maxRetries) {
+                    logger.warn(`文件 ${filePath} 被占用，等待后重试 (${currentRetry + 1}/${this.maxRetries})`);
+
+                    // 释放文件锁定
+                    this.isFileLocked = false;
+
+                    // 等待一段时间后重试
+                    await new Promise(resolve => setTimeout(resolve, this.retryInterval));
+                    return this.writeFileAtomically(filePath, content, encoding, currentRetry + 1);
+                }
+            }
+
+            // 重试失败或其他错误，抛出异常
+            logger.error(`原子写入文件失败: ${error.message}`);
+            throw error;
+        } finally {
+            // 无论成功还是失败，都释放文件锁定
+            this.isFileLocked = false;
+        }
+    }
+
+    /**
+     * 安全读取文件
+     * 包含重试机制，如果文件被占用则等待后重试
+     * @param {String} filePath - 文件路径
+     * @param {String} encoding - 编码
+     * @param {Number} currentRetry - 当前重试次数
+     * @returns {String} 文件内容
+     */
+    async safeReadFile(filePath, encoding, currentRetry = 0) {
+        try {
+            return fs.readFileSync(filePath, encoding);
+        } catch (error) {
+            // 如果是因为文件被占用而失败，重试
+            if ((error.code === 'EBUSY' || error.code === 'EACCES' || error.code === 'EPERM') && currentRetry < this.maxRetries) {
+                logger.warn(`读取文件 ${filePath} 失败，等待后重试 (${currentRetry + 1}/${this.maxRetries})`);
+
+                // 等待一段时间后重试
+                await new Promise(resolve => setTimeout(resolve, this.retryInterval));
+                return this.safeReadFile(filePath, encoding, currentRetry + 1);
+            }
+
+            // 重试失败或其他错误，抛出异常
+            throw error;
         }
     }
 
@@ -302,7 +391,7 @@ class LiveMonitorService {
      * @param {Object} event - IPC事件对象
      * @returns {Object} 添加结果
      */
-    addLiveUrl(args, event) {
+    async addLiveUrl(args, event) {
         try {
             // 检查参数
             if (!args || !args.quality || !args.url) {
@@ -319,7 +408,7 @@ class LiveMonitorService {
                 }
 
                 // 创建一个空的配置文件
-                fs.writeFileSync(this.configFilePath, '', this.fileEncoding);
+                await this.writeFileAtomically(this.configFilePath, '', this.fileEncoding);
                 logger.info(`已创建新的配置文件: ${this.configFilePath}`);
             }
 
@@ -331,7 +420,7 @@ class LiveMonitorService {
             // 读取现有内容
             let content = '';
             try {
-                content = fs.readFileSync(this.configFilePath, this.fileEncoding);
+                content = await this.safeReadFile(this.configFilePath, this.fileEncoding);
             } catch (err) {
                 logger.error(`读取配置文件失败: ${err.message}`);
                 // 如果读取失败，使用空字符串
@@ -346,15 +435,15 @@ class LiveMonitorService {
             // 添加新行
             content += newLine + '\n';
 
-            // 写入文件
-            fs.writeFileSync(this.configFilePath, content, this.fileEncoding);
+            // 原子写入文件
+            await this.writeFileAtomically(this.configFilePath, content, this.fileEncoding);
             logger.info(`已添加新的直播链接: ${newLine}`);
 
             // 通知前端配置已更新
             if (event) {
                 this.lastEvent = event;
                 // 发送成功消息
-                this.getLatestConfig(event);
+                await this.getLatestConfig(event);
             }
 
             return {
@@ -427,7 +516,7 @@ class LiveMonitorService {
      * @param {Object} event - IPC事件对象
      * @returns {Object} 更新结果
      */
-    updateQuality(args, event) {
+    async updateQuality(args, event) {
         try {
             // 检查参数
             if (!args || args.lineIndex === undefined || !args.newQuality) {
@@ -444,8 +533,8 @@ class LiveMonitorService {
             // 记录关键参数用于调试
             logger.info(`尝试更新行画质，表格行号: ${args.lineIndex}, 新画质: "${args.newQuality}"`);
 
-            // 读取配置文件内容
-            let content = fs.readFileSync(this.configFilePath, this.fileEncoding);
+            // 安全读取配置文件内容
+            let content = await this.safeReadFile(this.configFilePath, this.fileEncoding);
             const allLines = content.split('\n');
 
             // 分析ini文件结构
@@ -491,13 +580,13 @@ class LiveMonitorService {
 
             // 写回文件
             content = allLines.join('\n');
-            fs.writeFileSync(this.configFilePath, content, this.fileEncoding);
+            await this.writeFileAtomically(this.configFilePath, content, this.fileEncoding);
             logger.info(`已更新ini配置中的第 ${targetLineIndex + 1} 行画质为: ${newQualityStr}`);
 
             // 通知前端配置已更新
             if (event) {
                 this.lastEvent = event;
-                this.getLatestConfig(event);
+                await this.getLatestConfig(event);
             }
 
             return {
@@ -519,7 +608,7 @@ class LiveMonitorService {
      * @param {Object} event - IPC事件对象
      * @returns {Object} 删除结果
      */
-    removeStream(args, event) {
+    async removeStream(args, event) {
         try {
             // 检查参数
             if (!args || args.lineIndex === undefined) {
@@ -536,8 +625,8 @@ class LiveMonitorService {
             // 记录关键参数用于调试
             logger.info(`尝试删除行，表格行号: ${args.lineIndex}, URL: "${args.url}", 画质: "${args.quality}"`);
 
-            // 读取配置文件内容
-            let content = fs.readFileSync(this.configFilePath, this.fileEncoding);
+            // 安全读取配置文件内容
+            let content = await this.safeReadFile(this.configFilePath, this.fileEncoding);
             const allLines = content.split('\n');
 
             // 分析ini文件结构
@@ -558,7 +647,6 @@ class LiveMonitorService {
             }
 
             // 计算ini文件中对应的实际行索引
-            // ini配置文件中的行号是表格行号+偏移量(通常为1)
             // 获取有效的直播链接行
             const validLines = [];
             for (let i = 0; i < allLines.length; i++) {
@@ -593,13 +681,13 @@ class LiveMonitorService {
 
             // 写回文件
             content = newLines.join('\n');
-            fs.writeFileSync(this.configFilePath, content, this.fileEncoding);
+            await this.writeFileAtomically(this.configFilePath, content, this.fileEncoding);
             logger.info(`已删除ini配置中的第 ${targetLineIndex + 1} 行: "${lineToRemove}"`);
 
             // 通知前端配置已更新
             if (event) {
                 this.lastEvent = event;
-                this.getLatestConfig(event);
+                await this.getLatestConfig(event);
             }
 
             return {
@@ -621,7 +709,7 @@ class LiveMonitorService {
      * @param {Object} event - IPC事件对象
      * @returns {Object} 操作结果
      */
-    toggleStreamMonitoring(args, event) {
+    async toggleStreamMonitoring(args, event) {
         try {
             // 检查参数
             if (!args || args.lineIndex === undefined) {
@@ -638,8 +726,8 @@ class LiveMonitorService {
             // 记录关键参数用于调试
             logger.info(`尝试${args.disable ? '停止' : '恢复'}监控，表格行号: ${args.lineIndex}`);
 
-            // 读取配置文件内容
-            let content = fs.readFileSync(this.configFilePath, this.fileEncoding);
+            // 安全读取配置文件内容
+            let content = await this.safeReadFile(this.configFilePath, this.fileEncoding);
             const allLines = content.split('\n');
 
             // 分析ini文件结构，获取有效的直播链接行（包括被注释的行）
@@ -689,13 +777,13 @@ class LiveMonitorService {
 
             // 写回文件
             content = allLines.join('\n');
-            fs.writeFileSync(this.configFilePath, content, this.fileEncoding);
+            await this.writeFileAtomically(this.configFilePath, content, this.fileEncoding);
             logger.info(`已${args.disable ? '停止' : '恢复'}监控ini配置中的第 ${targetLineIndex + 1} 行`);
 
             // 通知前端配置已更新
             if (event) {
                 this.lastEvent = event;
-                this.getLatestConfig(event);
+                await this.getLatestConfig(event);
             }
 
             return {

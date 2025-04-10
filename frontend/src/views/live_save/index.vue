@@ -113,7 +113,7 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column prop="recordStatus" label="录制状态" width="100">
+        <el-table-column prop="recordStatus" label="录制状态" width="120">
           <template #default="scope">
             <div class="status-tag-container">
               <el-tag
@@ -121,7 +121,8 @@
                 class="status-tag"
               >
                 <span v-if="scope.row.isDisabled">停止监控</span>
-                <span v-else>{{ scope.row.recordStatus ? '录制中' : '未录制' }}</span>
+                <span v-else-if="scope.row.recordStatus">录制中: {{scope.row.recordDuration || '00:00:00'}}</span>
+                <span v-else>未录制</span>
               </el-tag>
             </div>
           </template>
@@ -180,7 +181,12 @@ const showMessage = (message, type = 'info') => {
 // 服务器URL和WebSocket连接
 const serverUrl = ref('');
 const wsConnected = ref(false);
-let socket = null;
+let eventSource = null;
+
+// 记录每个直播的开始时间
+const recordingStartTimes = ref({});
+// 定时器ID，用于定期更新录制时长
+let durationUpdateTimer = null;
 
 // 直播链接输入
 const liveUrl = ref('');
@@ -224,14 +230,31 @@ const combinedTableData = computed(() => {
   const allStreams = configData.value.streams.map((stream) => {
     // 检查是否正在录制中
     const isRecording = statusData.value.recording.some(
-      (rec) => rec.url && stream.url && rec.url.includes(stream.url)
+      (rec) => {
+        // 尝试匹配URL或部分URL
+        return stream.url && (
+          (rec.url && rec.url.includes(stream.url)) ||
+          (rec.name && stream.url.includes(rec.name))
+        );
+      }
     );
+
+    // 查找匹配的录制记录
+    const matchingRecordUrl = isRecording ?
+      Object.keys(recordingStartTimes.value).find(recUrl =>
+        recUrl.includes(stream.url) || stream.url.includes(recUrl.split(' ').pop() || '')
+      ) : null;
+
+    // 计算录制时长（如果正在录制）
+    const recordDuration = matchingRecordUrl ?
+      calculateDuration(recordingStartTimes.value[matchingRecordUrl]) : '';
 
     return {
       streamerName: stream.streamerName,
       url: stream.url,
       quality: stream.quality,
       recordStatus: isRecording,
+      recordDuration: recordDuration, // 添加录制时长
       isDisabled: stream.isDisabled // 是否被禁用（通过#注释）
     };
   });
@@ -246,13 +269,13 @@ function getUrl() {
     showMessage(`服务地址: ${url}`, 'info');
 
     // 获取到地址后尝试连接WebSocket
-    connectWebSocket();
+    connectEventSource();
   });
 }
 
 // 停止Python服务
 function kill() {
-  disconnectWebSocket();
+  disconnectEventSource();
   ipc.invoke(ipcApiRoute.cross.killCrossServer, {type: 'one', name: 'pyapp'}).then(() => {
     showMessage('服务已停止', 'success');
   });
@@ -269,68 +292,119 @@ function create() {
   });
 }
 
-// 连接WebSocket
-function connectWebSocket() {
+// 连接到服务器事件流(SSE)
+function connectEventSource() {
   if (!serverUrl.value) {
     showMessage('请先获取服务地址', 'warning');
     return;
   }
 
-  // 获取WebSocket地址 - 更新为新的路径格式
-  const wsUrl = serverUrl.value.replace('http://', 'ws://') + '/ws/recorder/status';
+  // 获取SSE地址
+  const sseUrl = serverUrl.value + '/api/sse/recorder/status';
 
   // 关闭已有连接
-  disconnectWebSocket();
+  disconnectEventSource();
 
   // 创建新连接
-  socket = new WebSocket(wsUrl);
+  eventSource = new EventSource(sseUrl);
 
-  socket.onopen = () => {
+  eventSource.onopen = () => {
     wsConnected.value = true;
-    showMessage('WebSocket连接成功', 'success');
+    showMessage('服务器事件流连接成功', 'success');
+    // 开始定时更新录制时长
+    startDurationTimer();
   };
 
-  socket.onmessage = (event) => {
+  eventSource.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data);
 
-      // 处理url/add的响应
-      if (data.type === 'url/add/response') {
-        if (data.success) {
-          showMessage(data.message, 'success');
-          liveUrl.value = ''; // 清空输入框
-        } else {
-          showMessage(data.message, 'error');
-        }
-        return;
-      }
-
       // 处理状态更新数据
       statusData.value = data;
+
+      // 更新录制开始时间记录
+      if (data.recording && data.recording.length > 0) {
+        data.recording.forEach(rec => {
+          // 保存每个直播流的开始时间
+          recordingStartTimes.value[rec.url] = rec.start_time;
+        });
+
+        // 检查是否有已停止录制的直播，从记录中移除
+        Object.keys(recordingStartTimes.value).forEach(url => {
+          const stillRecording = data.recording.some(rec => rec.url === url);
+          if (!stillRecording) {
+            delete recordingStartTimes.value[url];
+          }
+        });
+      } else if (data.recording && data.recording.length === 0) {
+        // 所有录制已停止
+        recordingStartTimes.value = {};
+      }
     } catch (e) {
-      console.error('解析WebSocket数据失败:', e);
+      console.error('解析服务器事件数据失败:', e);
     }
   };
 
-  socket.onclose = () => {
+  eventSource.onerror = () => {
     wsConnected.value = false;
-    showMessage('WebSocket连接已关闭', 'warning');
-  };
+    showMessage('服务器事件流连接失败或已关闭', 'warning');
+    // 停止定时器
+    stopDurationTimer();
 
-  socket.onerror = (error) => {
-    wsConnected.value = false;
-    console.error('WebSocket错误:', error);
-    showMessage('WebSocket连接失败', 'error');
+    // 自动尝试重连
+    setTimeout(() => {
+      if (!wsConnected.value) {
+        connectEventSource();
+      }
+    }, 5000);
   };
 }
 
-// 断开WebSocket连接
-function disconnectWebSocket() {
-  if (socket) {
-    socket.close();
-    socket = null;
-    wsConnected.value = false;
+// 启动定时更新录制时长的计时器
+function startDurationTimer() {
+  stopDurationTimer(); // 先停止可能存在的旧计时器
+  durationUpdateTimer = setInterval(() => {
+    // 强制更新计算属性
+    combinedTableData.value = [...combinedTableData.value];
+  }, 1000); // 每秒更新一次
+}
+
+// 停止定时更新录制时长的计时器
+function stopDurationTimer() {
+  if (durationUpdateTimer) {
+    clearInterval(durationUpdateTimer);
+    durationUpdateTimer = null;
   }
+}
+
+// 断开SSE连接
+function disconnectEventSource() {
+  if (eventSource) {
+    eventSource.close();
+    eventSource = null;
+    wsConnected.value = false;
+    stopDurationTimer();
+  }
+}
+
+// 替换原有的WebSocket连接/断开函数
+const connectWebSocket = connectEventSource;
+const disconnectWebSocket = disconnectEventSource;
+
+// 计算录制持续时间的函数
+function calculateDuration(startTimeStr) {
+  if (!startTimeStr) return '';
+
+  const startTime = new Date(startTimeStr);
+  const now = new Date();
+  const diff = Math.floor((now - startTime) / 1000); // 秒数差
+
+  // 格式化为 小时:分钟:秒
+  const hours = Math.floor(diff / 3600);
+  const minutes = Math.floor((diff % 3600) / 60);
+  const seconds = diff % 60;
+
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 // 添加直播链接
@@ -527,7 +601,8 @@ function initListeners() {
 
 // 组件卸载时
 onUnmounted(() => {
-  disconnectWebSocket();
+  disconnectEventSource();
+  stopDurationTimer();
 
   // 定义监听通道 - 必须与后端发送消息的通道一致
   const channel = 'controller/live_monitor/configUpdate';
