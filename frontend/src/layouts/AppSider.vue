@@ -1,6 +1,6 @@
 <template>
   <el-container id="app-layout-sider">
-    <el-aside 
+    <el-aside
       class="layout-sider"
       width="200px"
     >
@@ -16,9 +16,9 @@
       >
         <template v-for="(menuInfo, index) in menu" :key="index">
           <!-- 有子菜单的项 -->
-          <el-sub-menu 
+          <el-sub-menu
             v-if="hasSubMenu(menuInfo.pageName)"
-            :index="index" 
+            :index="index"
           >
             <template #title>
               <el-icon>
@@ -26,18 +26,18 @@
               </el-icon>
               <span>{{ menuInfo.title }}</span>
             </template>
-            
-            <el-menu-item 
-              v-for="(subItem, subKey) in getSubMenuItems(menuInfo.pageName)" 
-              :index="`${index}-${subKey}`" 
+
+            <el-menu-item
+              v-for="(subItem, subKey) in getSubMenuItems(menuInfo.pageName)"
+              :index="`${index}-${subKey}`"
               :key="`${index}-${subKey}`"
             >
               <span>{{ subItem.title }}</span>
             </el-menu-item>
           </el-sub-menu>
-          
+
           <!-- 没有子菜单的项 -->
-          <el-menu-item 
+          <el-menu-item
             v-else
             :index="index"
           >
@@ -60,11 +60,11 @@
 import { ref, onMounted, markRaw } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import subMenu from '@/router/subMenu';
-import { 
+import {
   Monitor,
-  Setting, 
-  PieChart, 
-  Connection, 
+  Setting,
+  PieChart,
+  Connection,
   VideoCamera
 } from '@element-plus/icons-vue';
 
@@ -113,6 +113,12 @@ const menu = ref({
     title: '直播录制',
     pageName: 'Live_save',
     params: {}
+  },
+  'menu_6': {
+    icon: 'VideoCamera',
+    title: '直播间控场',
+    pageName: 'LiveChat',
+    params: {}
   }
 });
 
@@ -147,15 +153,15 @@ function handleClose(key, keyPath) {
 function handleSelect(key) {
   console.log('select', key);
   activeMenuItem.value = key;
-  
+
   if (key.includes('-')) {
     // 子菜单项被选中
     const [mainIndex, subKey] = key.split('-');
     const mainMenu = menu.value[mainIndex];
     if (!mainMenu) return;
-    
+
     const subMenuItem = getSubMenuItems(mainMenu.pageName)[subKey];
-    
+
     if (subMenuItem) {
       router.push({ name: subMenuItem.pageName, params: subMenuItem.params });
     }
@@ -163,12 +169,12 @@ function handleSelect(key) {
     // 主菜单项被选中
     const mainMenu = menu.value[key];
     if (!mainMenu) return;
-    
+
     if (hasSubMenu(mainMenu.pageName)) {
       // 有子菜单，默认跳转到第一个子菜单
       const subMenuItems = getSubMenuItems(mainMenu.pageName);
       const firstSubKey = Object.keys(subMenuItems)[0];
-      
+
       if (firstSubKey) {
         const firstSubItem = subMenuItems[firstSubKey];
         router.push({ name: firstSubItem.pageName, params: firstSubItem.params });
@@ -186,14 +192,14 @@ function handleSelect(key) {
 function updateActiveMenuItem() {
   const currentRouteName = route.name;
   if (!currentRouteName) return;
-  
+
   // 遍历查找当前路由对应的菜单项
   for (const [mainIndex, mainItem] of Object.entries(menu.value)) {
     if (!mainItem) continue;
-    
+
     if (hasSubMenu(mainItem.pageName)) {
       const subItems = getSubMenuItems(mainItem.pageName);
-      
+
       for (const [subKey, subItem] of Object.entries(subItems)) {
         if (subItem?.pageName === currentRouteName) {
           activeMenuItem.value = `${mainIndex}-${subKey}`;
@@ -202,7 +208,7 @@ function updateActiveMenuItem() {
         }
       }
     }
-    
+
     // 如果主菜单路由名称匹配
     if (mainItem.pageName === currentRouteName) {
       current.value = mainIndex;
@@ -215,19 +221,19 @@ function updateActiveMenuItem() {
 // 隐藏Electron菜单栏
 onMounted(() => {
   updateActiveMenuItem();
-  
+
   // 如果没有找到匹配的菜单项，默认选中第一个菜单
   if (!activeMenuItem.value) {
     const firstMainKey = Object.keys(menu.value)[0];
     if (!firstMainKey) return;
-    
+
     const mainMenu = menu.value[firstMainKey];
-    
+
     if (mainMenu) {
       if (hasSubMenu(mainMenu.pageName)) {
         const subMenuItems = getSubMenuItems(mainMenu.pageName);
         const firstSubKey = Object.keys(subMenuItems)[0];
-        
+
         if (firstSubKey) {
           const firstSubItem = subMenuItems[firstSubKey];
           router.push({ name: firstSubItem.pageName, params: firstSubItem.params });
@@ -249,13 +255,13 @@ onMounted(() => {
   height: 100%;
   display: flex;
   overflow: hidden;
-  
+
   .layout-sider {
     border-right: 1px solid #e8e8e8;
     padding-top: 0;
     overflow-y: hidden;
   }
-  
+
   .el-menu-vertical-demo:not(.el-menu--collapse) {
     width: 200px;
     height: 100vh;
@@ -263,7 +269,7 @@ onMounted(() => {
     padding: 10px;
     overflow-y: auto;
   }
-  
+
   .layout-content {
     padding: 20px;
     height: 100vh;
@@ -285,7 +291,7 @@ onMounted(() => {
 :deep(.custom-menu) {
   border-right: none;
   background-color: transparent !important;
-    
+
   .el-menu-item {
     height: 40px;
     line-height: 40px;
@@ -294,25 +300,25 @@ onMounted(() => {
     padding: 0 16px !important;
     font-size: 14px;
     background-color: transparent;
-    
+
     &:hover {
       background-color: #eaf4fc;
     }
-    
+
     &.is-active {
       background-color: #1890ff;
       color: #ffffff;
-      
+
       .el-icon {
         color: #ffffff !important;
       }
-      
+
       &::before {
         display: none;
       }
     }
   }
-  
+
   .el-sub-menu {
     .el-sub-menu__title {
       padding-left: 16px !important;
@@ -320,23 +326,23 @@ onMounted(() => {
       margin: 4px 0;
       height: 40px;
       line-height: 40px;
-      
+
       &:hover {
         background-color: #f0f2f5;
       }
     }
-    
+
     .el-menu {
       padding: 0 !important;
       background-color: transparent;
     }
-    
+
     .el-menu-item {
       min-width: auto;
       padding-left: 40px !important;
       height: 36px;
       line-height: 36px;
-      
+
       &.is-active {
         background-color: #1890ff;
         color: #ffffff;

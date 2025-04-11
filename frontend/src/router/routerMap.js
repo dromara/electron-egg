@@ -126,6 +126,12 @@ const constantRouterMap = [{
                 component: () =>
                     import ('@/views/live_save/index.vue')
             },
+            {
+                path: '/livechat',
+                name: 'LiveChat',
+                component: () =>
+                    import ('@/views/livechat/Index.vue')
+            },
         ]
     },
     {

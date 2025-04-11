@@ -75,6 +75,14 @@ const ipcApiRoute = {
         createCrossServer: 'controller/cross/createServer',
         requestApi: 'controller/cross/requestApi',
     },
+
+    // livechat
+    livechat: {
+        getRoomStatus: 'controller/livechat/getRoomStatus',
+        startMonitoring: 'controller/livechat/startMonitoring',
+        stopMonitoring: 'controller/livechat/stopMonitoring',
+        getEventsUrl: 'controller/livechat/getEventsUrl',
+    },
 }
 
 /**
