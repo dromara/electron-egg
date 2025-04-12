@@ -1,11 +1,3 @@
-#!/usr/bin/python
-# coding:utf-8
-
-# @FileName:    liveMan.py
-# @Time:        2024/1/2 21:51
-# @Author:      bubu
-# @Project:     douyinLiveWebFetcher
-
 import codecs
 import gzip
 import hashlib
@@ -375,16 +367,16 @@ class DouyinLiveWebFetcher:
         print(fansclub_msg)
         self.send_message("fansclub", fansclub_msg)
     
-    # def _parseEmojiChatMsg(self, payload):
-    #     '''聊天表情包消息'''
-    #     message = EmojiChatMessage().parse(payload)
-    #     emoji_id = message.emoji_id
-    #     user = message.user
-    #     common = message.common
-    #     default_content = message.default_content
-    #     emoji_msg = f"【聊天表情包id】 {emoji_id},user：{user},common:{common},default_content:{default_content}"
-    #     print(emoji_msg)
-    #     self.send_message("emoji_chat", emoji_msg)
+    def _parseEmojiChatMsg(self, payload):
+        '''聊天表情包消息'''
+        message = EmojiChatMessage().parse(payload)
+        emoji_id = message.emoji_id
+        user = message.user
+        common = message.common
+        default_content = message.default_content
+        emoji_msg = f"【聊天表情包id】 {emoji_id},user：{user},common:{common},default_content:{default_content}"
+        print(emoji_msg)
+        self.send_message("emoji_chat", emoji_msg)
     
     def _parseRoomMsg(self, payload):
         message = RoomMessage().parse(payload)

@@ -82,6 +82,7 @@ const ipcApiRoute = {
         startMonitoring: 'controller/livechat/startMonitoring',
         stopMonitoring: 'controller/livechat/stopMonitoring',
         getEventsUrl: 'controller/livechat/getEventsUrl',
+        getMonitoringStatus: 'controller/livechat/getMonitoringStatus',
     },
 }
 

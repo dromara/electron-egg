@@ -11,7 +11,7 @@ module.exports = () => {
         openDevTools: false,
         singleLock: true,
         windowsOption: {
-            title: 'electron-egg',
+            title: '抖音直播间工具箱',
             width: 980,
             height: 650,
             minWidth: 400,

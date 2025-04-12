@@ -6,32 +6,73 @@ const { cross } = require('ee-core/cross');
 const { getMainWindow } = require('ee-core/electron');
 const http = require('http');
 const https = require('https');
+const path = require('path');
+const { getExtraResourcesDir } = require('ee-core/ps');
 
 /**
  * LiveChat服务
  * @class
  */
 class LiveChatService {
+
     constructor() {
-        // 开发模式下不使用cross模块
-        this.isDev = process.env.NODE_ENV !== 'production';
-        this.pythonServerName = 'douyinlive';
-        this.devServerUrl = 'http://127.0.0.1:7074';
+        this.pythonServiceName = 'DouyinLiveWebFetcher';
         this.activeRequests = {};
+        this.reconnectCounts = {};
+        // 添加监控状态跟踪
+        this.monitoringRooms = new Set();
+
+        // 配置HTTP和HTTPS agent以支持keepAlive
+        this.httpAgent = new http.Agent({
+            keepAlive: true,
+            keepAliveMsecs: 3000, // 保持连接活跃时间
+            maxSockets: 10, // 最大socket数
+            timeout: 60000 // 超时时间60秒
+        });
+
+        this.httpsAgent = new https.Agent({
+            keepAlive: true,
+            keepAliveMsecs: 3000,
+            maxSockets: 10,
+            timeout: 60000
+        });
+    }
+
+    /**
+     * 创建Python服务
+     * 使用API模式创建Python服务
+     */
+    async createPythonServer() {
+        try {
+            // 使用API模式创建服务
+            const serviceName = this.pythonServiceName;
+            const opt = {
+                name: 'DouyinLiveWebFetcher',
+                cmd: path.join(getExtraResourcesDir(), 'py', 'DouyinLiveWebFetcher'),
+                directory: path.join(getExtraResourcesDir(), 'py'),
+                args: ['--port=7074'],
+                windowsExtname: true,
+                appExit: true,
+            }
+            const entity = await cross.run(serviceName, opt);
+            logger.info('Python服务名称:', entity.name);
+            logger.info('Python服务配置:', entity.config);
+            logger.info('Python服务URL:', entity.getUrl());
+            return entity;
+        } catch (error) {
+            logger.error(`创建Python服务失败: ${error.message}`);
+            throw error;
+        }
     }
 
     /**
      * 获取Python服务的基础URL
      */
     getPythonBaseUrl() {
-        // 在开发模式下直接返回硬编码URL
-        if (this.isDev) {
-            logger.info('使用开发模式URL:', this.devServerUrl);
-            return this.devServerUrl;
+        const serverUrl = cross.getUrl(this.pythonServiceName);
+        if (!serverUrl) {
+            logger.error(`无法获取Python服务地址，服务名: ${this.pythonServiceName}`);
         }
-
-        // 生产模式下使用cross模块获取URL
-        const serverUrl = cross.getUrl(this.pythonServerName);
         return serverUrl;
     }
 
@@ -98,6 +139,8 @@ class LiveChatService {
             // 如果成功，开始接收SSE事件
             if (result.status === 'success') {
                 this.connectSSE(liveId);
+                // 记录监控状态
+                this.monitoringRooms.add(liveId);
             }
             return result;
         } catch (error) {
@@ -116,12 +159,38 @@ class LiveChatService {
             // 如果成功，关闭SSE连接
             if (result.status === 'success') {
                 this.disconnectSSE(liveId);
+                // 移除监控状态
+                this.monitoringRooms.delete(liveId);
             }
             return result;
         } catch (error) {
             logger.error(`停止监控直播间失败: ${error.message}`, error);
             throw error;
         }
+    }
+
+    /**
+     * 获取直播间监控状态
+     * @param {string} liveId - 直播间ID
+     * @returns {boolean} - 是否正在监控
+     */
+    isMonitoring(liveId) {
+        return this.monitoringRooms.has(liveId);
+    }
+
+    /**
+     * 获取所有正在监控的直播间
+     * @returns {Array} - 所有正在监控的直播间列表
+     */
+    getAllMonitoringRooms() {
+        const rooms = [];
+        for (const liveId of this.monitoringRooms) {
+            rooms.push({
+                live_id: liveId,
+                is_monitoring: true
+            });
+        }
+        return rooms;
     }
 
     /**
@@ -161,7 +230,9 @@ class LiveChatService {
                 headers: {
                     'Accept': 'text/event-stream',
                     'Cache-Control': 'no-cache'
-                }
+                },
+                timeout: 60000, // 增加超时时间为60秒
+                agent: isHttps ? this.httpsAgent : this.httpAgent // 使用配置好的Agent
             };
 
             // 创建HTTP请求
@@ -221,6 +292,14 @@ class LiveChatService {
                 this.reconnectSSE(liveId);
             });
 
+            // 设置请求超时处理
+            req.on('timeout', () => {
+                logger.error('SSE请求超时');
+                req.destroy();
+                this.sendMessageToRenderer('error', 'SSE请求超时，尝试重新连接');
+                this.reconnectSSE(liveId);
+            });
+
             // 结束请求
             req.end();
 
@@ -240,12 +319,32 @@ class LiveChatService {
      * @param {string} liveId - 直播间ID
      */
     reconnectSSE(liveId) {
+        // 获取或初始化该直播间的重连次数
+        if (!this.reconnectCounts) {
+            this.reconnectCounts = {};
+        }
+
+        if (!this.reconnectCounts[liveId]) {
+            this.reconnectCounts[liveId] = 0;
+        }
+
+        // 增加重连次数
+        this.reconnectCounts[liveId]++;
+
+        // 计算重连延迟时间，重连次数越多，延迟越长，但最长不超过30秒
+        const delay = Math.min(5000 * Math.pow(1.5, Math.min(this.reconnectCounts[liveId], 5)), 30000);
+
+        logger.info(`SSE将在${delay/1000}秒后尝试第${this.reconnectCounts[liveId]}次重连: ${liveId}`);
+
         setTimeout(() => {
             if (this.activeRequests[liveId]) {
                 logger.info(`重新连接SSE: ${liveId}`);
                 this.connectSSE(liveId);
+            } else {
+                // 如果不再需要重连，重置计数
+                delete this.reconnectCounts[liveId];
             }
-        }, 5000); // 5秒后重试
+        }, delay);
     }
 
     /**
@@ -275,6 +374,11 @@ class LiveChatService {
             logger.info(`断开SSE连接: ${liveId}`);
             this.activeRequests[liveId].destroy();
             delete this.activeRequests[liveId];
+
+            // 重置重连计数
+            if (this.reconnectCounts && this.reconnectCounts[liveId]) {
+                delete this.reconnectCounts[liveId];
+            }
         }
     }
 }

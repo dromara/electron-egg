@@ -84,6 +84,36 @@ class LiveChatController {
             return { status: 'error', message: error.message };
         }
     }
+
+    /**
+     * 获取直播间监控状态
+     * @param {object} args - 参数
+     * @param {string} args.liveId - 直播间ID
+     */
+    getMonitoringStatus(args) {
+        try {
+            const { liveId } = args;
+
+            // 如果没有指定liveId，则返回所有正在监控的直播间
+            if (!liveId) {
+                const monitoringRooms = livechatService.getAllMonitoringRooms();
+                return {
+                    status: 'success',
+                    rooms: monitoringRooms
+                };
+            }
+
+            // 否则返回指定直播间的监控状态
+            const isMonitoring = livechatService.isMonitoring(liveId);
+            return {
+                status: 'success',
+                isMonitoring: isMonitoring
+            };
+        } catch (error) {
+            logger.error('获取监控状态失败', error);
+            return { status: 'error', message: error.message };
+        }
+    }
 }
 
 LiveChatController.toString = () => '[class LiveChatController]';

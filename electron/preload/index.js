@@ -6,8 +6,9 @@ const { logger } = require('ee-core/log');
 const { trayService } = require('../service/os/tray');
 const { securityService } = require('../service/os/security');
 const { autoUpdaterService } = require('../service/os/auto_updater');
-//const { crossService } = require('../service/cross');
+const { crossService } = require('../service/cross');
 const { sqlitedbService } = require('../service/database/sqlitedb');
+const { livechatService } = require('../service/livechat');
 const { app } = require('electron');
 // liveMonitorService将在应用准备好后再加载
 
@@ -18,8 +19,13 @@ function preload() {
     securityService.create();
     autoUpdaterService.create();
 
-    // go server
-    //crossService.createGoServer();
+    // 启动Python服务
+    logger.info('[preload] 正在启动Python服务...');
+    livechatService.createPythonServer().then(() => {
+        logger.info('[preload] Python服务启动成功');
+    }).catch(err => {
+        logger.error(`[preload] Python服务启动失败: ${err.message}`);
+    });
 
     // init sqlite db
     sqlitedbService.init();
