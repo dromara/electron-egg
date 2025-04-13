@@ -53,10 +53,12 @@
     "dependencies": {
         "axios": "^1.8.4",
         "better-sqlite3": "^11.7.0",
+        "chokidar": "^4.0.3",
         "dayjs": "^1.11.13",
         "ee-core": "^4.1.2",
         "electron-updater": "^6.3.8",
         "eventsource": "^3.0.6",
+        "ini": "^5.0.0",
         "protobufjs": "^7.4.0",
         "ws": "^8.18.1"
     }

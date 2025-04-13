@@ -130,7 +130,27 @@ const constantRouterMap = [{
                 path: '/livechat',
                 name: 'LiveChat',
                 component: () =>
-                    import ('@/views/livechat/Index.vue')
+                    import ('@/views/livechat/LivechatProvider.vue'),
+                redirect: { name: 'LiveChatTextControl' },
+                children: [{
+                        path: '/livechat/text-control',
+                        name: 'LiveChatTextControl',
+                        component: () =>
+                            import ('@/views/livechat/AutoTextControl.vue')
+                    },
+                    {
+                        path: '/livechat/text-reply',
+                        name: 'LiveChatTextReply',
+                        component: () =>
+                            import ('@/views/livechat/AutoTextReply.vue')
+                    },
+                    {
+                        path: '/livechat/voice-assistant',
+                        name: 'LiveChatVoiceAssistant',
+                        component: () =>
+                            import ('@/views/livechat/VoiceAssistant.vue')
+                    }
+                ]
             },
         ]
     },

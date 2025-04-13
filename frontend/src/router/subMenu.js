@@ -83,4 +83,21 @@ export default {
             params: {}
         },
     },
+    livechat: {
+        'menu_110': {
+            title: '自动文字控场',
+            pageName: 'LiveChatTextControl',
+            params: {}
+        },
+        'menu_120': {
+            title: '自动文字回复',
+            pageName: 'LiveChatTextReply',
+            params: {}
+        },
+        'menu_130': {
+            title: '智能音频助手',
+            pageName: 'LiveChatVoiceAssistant',
+            params: {}
+        },
+    }
 }
