@@ -83,6 +83,14 @@ const ipcApiRoute = {
         stopMonitoring: 'controller/livechat/stopMonitoring',
         getEventsUrl: 'controller/livechat/getEventsUrl',
         getMonitoringStatus: 'controller/livechat/getMonitoringStatus',
+        getScriptTables: 'controller/livechat/getScriptTables',
+        getScripts: 'controller/livechat/getScripts',
+        addScript: 'controller/livechat/addScript',
+        updateScript: 'controller/livechat/updateScript',
+        deleteScript: 'controller/livechat/deleteScript',
+        createScriptTable: 'controller/livechat/createScriptTable',
+        updateScriptTable: 'controller/livechat/updateScriptTable',
+        deleteScriptTable: 'controller/livechat/deleteScriptTable',
     },
 }
 

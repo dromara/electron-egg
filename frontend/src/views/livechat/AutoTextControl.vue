@@ -73,24 +73,83 @@
             <div class="left-controls">
               <div class="group-selector">
                 <span class="selector-label">场控组:</span>
-                <el-select v-model="selectedGroup" placeholder="选择场控组" size="small" class="group-select">
+                <el-select
+                  v-model="selectedTable"
+                  placeholder="选择场控组"
+                  size="small"
+                  class="group-select"
+                  @change="handleTableChange"
+                >
+                  <!-- 现有场控组选项 -->
                   <el-option
-                    v-for="item in controlGroups"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
+                    v-for="item in scriptTables"
+                    :key="item.table_name"
+                    :label="item.display_name"
+                    :value="item.table_name"
+                  >
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                      <!-- 非编辑状态显示表名 -->
+                      <span v-if="!item.editing">{{ item.display_name }}</span>
+
+                      <!-- 编辑状态显示输入框 -->
+                      <el-input
+                        v-else
+                        v-model="item.editingName"
+                        size="small"
+                        style="width: 120px;"
+                        @click.stop
+                        @keyup.enter="confirmTableNameEdit(item)"
+                      />
+
+                      <!-- 操作按钮 -->
+                      <div>
+                        <!-- 非编辑状态显示编辑按钮 -->
+                        <span v-if="!item.editing" @click.stop="startEditTableName(item)" style="color: #409eff; cursor: pointer;">
+                          <el-icon><Edit /></el-icon>
+                        </span>
+
+                        <!-- 编辑状态显示确认和取消按钮 -->
+                        <template v-else>
+                          <span @click.stop="confirmTableNameEdit(item)" style="color: #67c23a; cursor: pointer; margin-right: 5px;">
+                            <el-icon><Check /></el-icon>
+                          </span>
+                          <span @click.stop="cancelTableNameEdit(item)" style="color: #f56c6c; cursor: pointer;">
+                            <el-icon><Close /></el-icon>
+                          </span>
+                        </template>
+                      </div>
+                    </div>
+                  </el-option>
+
+                  <!-- 新建表选项 -->
+                  <el-divider style="margin: 5px 0;" />
+                  <el-option
+                    key="create-new"
+                    label="+ 新建场控组"
+                    value="create-new"
+                  >
+                    <div style="display: flex; align-items: center;">
+                      <el-input
+                        v-model="newTableName"
+                        placeholder="输入表名"
+                        size="small"
+                        style="width: 150px; margin-right: 5px;"
+                        @click.stop
+                        @keyup.enter="createNewTable"
+                      />
+                      <el-button type="success" size="small" @click.stop="createNewTable">创建</el-button>
+                    </div>
+                  </el-option>
                 </el-select>
               </div>
             </div>
             <div class="right-controls">
-              <el-button type="primary" size="small" @click="addScriptRow">添加</el-button>
-              <el-button type="success" size="small">新建</el-button>
+              <el-button type="primary" size="small" @click="addScriptRow">添加内容</el-button>
             </div>
           </div>
 
           <!-- 控场话术表格 -->
-          <el-table :data="controlScripts" border style="width: 100%" max-height="350" stripe size="small">
+          <el-table :data="controlScripts" border style="width: 100%" max-height="350" stripe size="small" :v-loading="tableLoading">
             <el-table-column type="index" label="序号" width="50" align="center" />
             <el-table-column prop="content" label="内容">
               <template #default="scope">
@@ -113,7 +172,7 @@
                   <el-button v-else type="success" size="small" circle @click="confirmEdit(scope.row)" title="确认">
                     <el-icon><Check /></el-icon>
                   </el-button>
-                  <el-button type="danger" size="small" circle @click="deleteRow(scope.$index)" title="删除">
+                  <el-button type="danger" size="small" circle @click="deleteRow(scope.$index, scope.row)" title="删除">
                     <el-icon><Delete /></el-icon>
                   </el-button>
                 </div>
@@ -127,11 +186,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue';
+import { ref, onMounted, inject, nextTick } from 'vue';
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Edit, Delete, Check } from '@element-plus/icons-vue';
+import { Edit, Delete, Check, Close } from '@element-plus/icons-vue';
 
 // 使用共享状态 - 如果使用了 provide/inject 模式
 const sharedState = inject('livechatState', null);
@@ -142,14 +201,13 @@ const connected = ref(sharedState?.connected || false);
 const isControlEnabled = ref(false);
 const loading = ref(false);
 const consoleRef = ref(sharedState?.consoleRef || null);
+const tableLoading = ref(false);
 
-// 关键词和控场组
-const selectedGroup = ref('场控组1.txt');
-const controlGroups = ref([
-  { label: '场控组1.txt', value: '场控组1.txt' },
-  { label: '场控组2.txt', value: '场控组2.txt' },
-  { label: '常用回复.txt', value: '常用回复.txt' },
-]);
+// 脚本表相关
+const scriptTables = ref([]);
+const selectedTable = ref('');
+const controlScripts = ref([]);
+const newTableName = ref('');
 
 // 频率设置
 const frequency = ref({
@@ -178,27 +236,219 @@ const speakMode = ref({
   randomEmoji: true
 });
 
-// 话术内容
-const selectedContent = ref('内容1');
+// 添加一个变量记录上一次选中的表
+const lastSelectedTable = ref('');
 
-// 控场话术
-const controlScripts = ref([
-  { content: '微胖宝子/肉感女子适合款，显高显德', editing: false },
-  { content: '都是尺码表发货的，喜欢的姐姐直接拍拍，早上早发货!', editing: false },
-  { content: '主播穿的在1号，还没拍的姐姐们抓紧下了!', editing: false },
-  { content: '马上下播了，没有拍的姐姐们抓紧时间了，明天价更到199元的价格', editing: false },
-  { content: '没有付款的姐姐们抓紧时间了。马上就要封单下架了', editing: false },
-  { content: '还有最后5单了，没有拍的姐姐抓紧时间了，主播马上就要下播了。', editing: false },
-  { content: '还有最后3单了姐姐，没付款的姐姐抓紧了！', editing: false },
-]);
+// 加载脚本表列表
+const loadScriptTables = async () => {
+  try {
+    const result = await ipc.invoke(ipcApiRoute.livechat.getScriptTables);
+    if (result && result.status === 'success') {
+      // 为每个表添加编辑状态属性
+      scriptTables.value = (result.tables || []).map(table => ({
+        ...table,
+        editing: false,
+        editingName: table.display_name
+      }));
+
+      // 如果有表但没有选择，则选择第一个
+      if (scriptTables.value.length > 0 && !selectedTable.value) {
+        selectedTable.value = scriptTables.value[0].table_name;
+        loadScripts(selectedTable.value);
+      }
+    } else {
+      ElMessage.error(result?.message || '获取场控组失败');
+    }
+  } catch (error) {
+    ElMessage.error(`加载场控组失败: ${error.message || '未知错误'}`);
+  }
+};
+
+// 加载脚本数据
+const loadScripts = async (tableName) => {
+  if (!tableName) return;
+
+  tableLoading.value = true;
+  try {
+    const result = await ipc.invoke(ipcApiRoute.livechat.getScripts, { tableName });
+    if (result && result.status === 'success') {
+      // 转换数据结构，添加编辑状态
+      controlScripts.value = (result.scripts || []).map(script => ({
+        ...script,
+        editing: false
+      }));
+    } else {
+      ElMessage.error(result?.message || '获取话术失败');
+    }
+  } catch (error) {
+    ElMessage.error(`加载话术失败: ${error.message || '未知错误'}`);
+  } finally {
+    tableLoading.value = false;
+  }
+};
+
+// 处理表切换
+const handleTableChange = (value) => {
+  // 如果选择了新建表选项，不做处理，保持上一个选中值
+  if (value === 'create-new') {
+    // 恢复之前的选择
+    nextTick(() => {
+      if (scriptTables.value.length > 0) {
+        selectedTable.value = lastSelectedTable.value || scriptTables.value[0].table_name;
+      } else {
+        selectedTable.value = '';
+      }
+    });
+    return;
+  }
+
+  // 记住当前选择
+  lastSelectedTable.value = value;
+
+  // 加载选定表的脚本
+  loadScripts(value);
+};
+
+// 脚本操作函数（添加、编辑、删除）
+const scriptOperation = async (action, params = {}) => {
+  if (!selectedTable.value) {
+    ElMessage.warning('请先选择一个场控组');
+    return;
+  }
+
+  try {
+    // 构建请求参数
+    const requestParams = {
+      tableName: selectedTable.value,
+      ...params
+    };
+
+    // 执行对应的操作
+    const result = await ipc.invoke(ipcApiRoute.livechat[action], requestParams);
+
+    // 统一处理响应
+    if (result && result.status === 'success') {
+      // 根据操作类型处理成功响应
+      switch (action) {
+        case 'addScript':
+          // 刷新整个列表
+          loadScripts(selectedTable.value);
+
+          if (sharedState?.consoleRef) {
+            sharedState.consoleRef.addTextControlLog(`已添加新脚本: "${params.content}"`);
+          }
+
+          ElMessage.success('添加成功');
+          break;
+
+        case 'updateScript':
+          // 更新行编辑状态
+          if (params.row) {
+            params.row.editing = false;
+          }
+
+          if (sharedState?.consoleRef) {
+            sharedState.consoleRef.addTextControlLog(`已更新脚本: "${params.content}"`);
+          }
+
+          ElMessage.success('更新成功');
+          break;
+
+        case 'deleteScript':
+          // 从本地数组移除
+          if (typeof params.index === 'number') {
+            controlScripts.value.splice(params.index, 1);
+          }
+
+          if (sharedState?.consoleRef) {
+            sharedState.consoleRef.addTextControlLog('已删除一条控场脚本');
+          }
+
+          ElMessage.success('删除成功');
+          break;
+
+        case 'createScriptTable':
+          // 刷新表列表
+          await loadScriptTables();
+
+          // 选择新创建的表
+          selectedTable.value = result.tableName;
+          loadScripts(selectedTable.value);
+
+          if (sharedState?.consoleRef) {
+            sharedState.consoleRef.addSystemMessage('system', `已创建新控场组: "${params.displayName}"`);
+          }
+
+          ElMessage.success(`已创建控场组: ${params.displayName}`);
+          break;
+
+        case 'updateScriptTable':
+          // 刷新表列表
+          await loadScriptTables();
+
+          if (sharedState?.consoleRef) {
+            sharedState.consoleRef.addSystemMessage('system', `已修改控场组名称: "${params.oldDisplayName}" -> "${params.newDisplayName}"`);
+          }
+
+          ElMessage.success('修改成功');
+          break;
+
+        default:
+          ElMessage.success(result.message || '操作成功');
+      }
+    } else {
+      // 统一处理错误
+      ElMessage.error(result?.message || `${getActionName(action)}失败`);
+
+      // 如果是更新操作，恢复原始内容
+      if (action === 'updateScript' && params.row && params.originalContent !== undefined) {
+        params.row.content = params.originalContent;
+        params.row.editing = false;
+      }
+
+      // 如果是删除失败，刷新列表
+      if (action === 'deleteScript') {
+        loadScripts(selectedTable.value);
+      }
+    }
+  } catch (error) {
+    ElMessage.error(`操作失败: ${error.message || '未知错误'}`);
+
+    // 如果是更新操作，恢复原始内容
+    if (action === 'updateScript' && params.row) {
+      params.row.content = params.originalContent || '';
+      params.row.editing = false;
+    }
+  }
+};
+
+// 获取操作名称（用于错误提示）
+const getActionName = (action) => {
+  const actionMap = {
+    addScript: '添加脚本',
+    updateScript: '更新脚本',
+    deleteScript: '删除脚本',
+    createScriptTable: '创建控场组',
+    updateScriptTable: '修改控场组'
+  };
+
+  return actionMap[action] || '操作';
+};
 
 // 添加脚本行
 const addScriptRow = () => {
-  controlScripts.value.push({
-    pattern: '',
+  if (!selectedTable.value) {
+    ElMessage.warning('请先选择一个场控组');
+    return;
+  }
+
+  const newRow = {
     content: '',
     editing: true
-  });
+  };
+
+  controlScripts.value.push(newRow);
+
   if (sharedState?.consoleRef) {
     sharedState.consoleRef.addTextControlLog('添加了一条新控场脚本');
   }
@@ -206,102 +456,136 @@ const addScriptRow = () => {
 
 // 编辑行
 const editRow = (row) => {
+  // 保存原内容，以便取消时恢复
+  row.originalContent = row.content;
   row.editing = true;
 };
 
 // 确认编辑
 const confirmEdit = (row) => {
-  row.editing = false;
-  if (sharedState?.consoleRef) {
-    sharedState.consoleRef.addTextControlLog(`已编辑脚本: "${row.pattern}" => "${row.content}"`);
-  }
-};
-
-// 删除行
-const deleteRow = (index) => {
-  console.log('删除行索引:', index);
-  ElMessageBox.confirm('确认删除此脚本?', '提示', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    controlScripts.value.splice(index, 1);
-    if (sharedState?.consoleRef) {
-      sharedState.consoleRef.addTextControlLog('已删除一条控场脚本');
-    }
-    ElMessage.success('删除成功');
-  }).catch((err) => {
-    console.log('取消删除或错误:', err);
-  });
-};
-
-// 保存选定内容
-const saveSelectedContent = () => {
-  if (!selectedContent.value) {
-    ElMessage.warning('请选择一个内容');
+  if (!row.content || row.content.trim() === '') {
+    ElMessage.warning('内容不能为空');
     return;
   }
 
-  controlScripts.value.push({
-    content: selectedContent.value
+  // 直接调用API保存数据
+  ipc.invoke(ipcApiRoute.livechat.updateScript, {
+    tableName: selectedTable.value,
+    id: row.id,
+    content: row.content
+  }).then(result => {
+    if (result && result.status === 'success') {
+      // 更新成功
+      row.editing = false;
+      ElMessage.success('保存成功');
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextControlLog(`已更新脚本: "${row.content}"`);
+      }
+    } else {
+      // 更新失败，显示错误信息
+      ElMessage.error(result?.message || '保存失败');
+      // 如果有原始内容，则恢复
+      if (row.originalContent !== undefined) {
+        row.content = row.originalContent;
+      }
+    }
+  }).catch(error => {
+    ElMessage.error(`保存失败: ${error.message || '未知错误'}`);
+    // 如果有原始内容，则恢复
+    if (row.originalContent !== undefined) {
+      row.content = row.originalContent;
+    }
+  }).finally(() => {
+    row.editing = false;
+  });
+};
+
+// 删除行
+const deleteRow = (index, row) => {
+  console.log('删除行', index, row);
+
+  // 直接调用API删除
+  ipc.invoke(ipcApiRoute.livechat.deleteScript, {
+    tableName: selectedTable.value,
+    id: row.id
+  }).then(result => {
+    if (result && result.status === 'success') {
+      // 从本地数组中移除该行
+      controlScripts.value.splice(index, 1);
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextControlLog('已删除一条控场脚本');
+      }
+
+      ElMessage.success('删除成功');
+    } else {
+      ElMessage.error(result?.message || '删除脚本失败');
+      // 刷新列表
+      loadScripts(selectedTable.value);
+    }
+  }).catch(error => {
+    ElMessage.error(`删除失败: ${error.message || '未知错误'}`);
+    // 刷新列表
+    loadScripts(selectedTable.value);
+  });
+};
+
+// 创建新表
+const createNewTable = () => {
+  if (!newTableName.value || newTableName.value.trim() === '') {
+    ElMessage.warning('请输入表名');
+    return;
+  }
+
+  // 使用输入框中的值创建表
+  scriptOperation('createScriptTable', { displayName: newTableName.value });
+
+  // 创建成功后清空输入框
+  newTableName.value = '';
+};
+
+// 开始编辑表名
+const startEditTableName = (table) => {
+  // 先重置其他所有表的编辑状态
+  scriptTables.value.forEach(t => {
+    if (t !== table) {
+      t.editing = false;
+    }
   });
 
-  ElMessage.success('内容已添加到话术列表');
-  if (consoleRef.value) {
-    consoleRef.value.addTextControlLog(`已添加内容: "${selectedContent.value}"`);
-  }
+  // 设置当前表为编辑状态
+  table.editing = true;
+  table.editingName = table.display_name;
 };
 
-// 导入话术
-const importScripts = () => {
-  ElMessageBox.prompt('请输入要导入的话术内容 (JSON格式)', '导入话术', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    inputType: 'textarea',
-  }).then(({ value }) => {
-    try {
-      const importedData = JSON.parse(value);
-      if (Array.isArray(importedData)) {
-        // 简单验证格式
-        const isValid = importedData.every(item =>
-          typeof item === 'object' && 'content' in item
-        );
+// 确认表名编辑
+const confirmTableNameEdit = (table) => {
+  if (!table.editingName || table.editingName.trim() === '') {
+    ElMessage.warning('表名不能为空');
+    return;
+  }
 
-        if (isValid) {
-          controlScripts.value = importedData;
-          ElMessage.success(`成功导入${importedData.length}条话术`);
+  // 如果名称没有变化，直接取消编辑
+  if (table.editingName === table.display_name) {
+    table.editing = false;
+    return;
+  }
 
-          if (consoleRef.value) {
-            consoleRef.value.addTextControlLog(`成功导入${importedData.length}条控场话术`);
-          }
-        } else {
-          ElMessage.error('导入数据格式不正确');
-        }
-      } else {
-        ElMessage.error('导入数据必须是数组格式');
-      }
-    } catch (error) {
-      ElMessage.error(`导入失败: ${error.message}`);
-    }
-  }).catch(() => {});
+  // 调用更新API
+  scriptOperation('updateScriptTable', {
+    tableName: table.table_name,
+    newDisplayName: table.editingName,
+    oldDisplayName: table.display_name
+  });
+
+  // 退出编辑状态
+  table.editing = false;
 };
 
-// 导出话术
-const exportScripts = () => {
-  try {
-    const exportData = JSON.stringify(controlScripts.value, null, 2);
-
-    // 在实际应用中，这里可以实现下载功能
-    ElMessageBox.alert(exportData, '导出话术 (复制以下内容)', {
-      confirmButtonText: '确认',
-    });
-
-    if (consoleRef.value) {
-      consoleRef.value.addTextControlLog(`已导出${controlScripts.value.length}条控场话术`);
-    }
-  } catch (error) {
-    ElMessage.error(`导出失败: ${error.message}`);
-  }
+// 取消表名编辑
+const cancelTableNameEdit = (table) => {
+  table.editing = false;
 };
 
 // 开启自动控场
@@ -360,6 +644,9 @@ onMounted(() => {
     connected.value = sharedState.connected;
     roomId.value = sharedState.roomId;
   }
+
+  // 初始化加载表和脚本
+  loadScriptTables();
 });
 </script>
 
