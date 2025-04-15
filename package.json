@@ -2,7 +2,7 @@
   "name": "ee-next",
   "version": "4.1.0",
   "description": "A fast, desktop software development framework",
-  "main": "public/electron/main.js",
+  "main": "./public/electron/main.js",
   "scripts": {
     "dev": "ee-bin dev",
     "build": "npm run build-frontend && npm run build-electron && ee-bin encrypt",
@@ -47,7 +47,8 @@
     "debug": "^4.4.0",
     "ee-bin": "file:.yalc/ee-bin",
     "electron": "^31.7.6",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "esbuild": "^0.21.5"
   },
   "dependencies": {
     "axios": "^1.7.9",
