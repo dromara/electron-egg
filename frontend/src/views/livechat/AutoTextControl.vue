@@ -103,9 +103,12 @@
 
                       <!-- 操作按钮 -->
                       <div>
-                        <!-- 非编辑状态显示编辑按钮 -->
-                        <span v-if="!item.editing" @click.stop="startEditTableName(item)" style="color: #409eff; cursor: pointer;">
+                        <!-- 非编辑状态显示编辑和删除按钮 -->
+                        <span v-if="!item.editing" @click.stop="startEditTableName(item)" style="color: #409eff; cursor: pointer; margin-right: 5px;">
                           <el-icon><Edit /></el-icon>
+                        </span>
+                        <span v-if="!item.editing" @click.stop="deleteScriptTable(item)" style="color: #f56c6c; cursor: pointer;">
+                          <el-icon><Delete /></el-icon>
                         </span>
 
                         <!-- 编辑状态显示确认和取消按钮 -->
@@ -243,7 +246,7 @@ const lastSelectedTable = ref('');
 // 加载脚本表列表
 const loadScriptTables = async () => {
   try {
-    const result = await ipc.invoke(ipcApiRoute.livechat.getScriptTables);
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.getScriptTables);
     if (result && result.status === 'success') {
       // 为每个表添加编辑状态属性
       scriptTables.value = (result.tables || []).map(table => ({
@@ -290,7 +293,7 @@ const loadScripts = async (tableName) => {
 
   tableLoading.value = true;
   try {
-    const result = await ipc.invoke(ipcApiRoute.livechat.getScripts, { tableName });
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.getScripts, { tableName });
     if (result && result.status === 'success') {
       // 转换数据结构，添加编辑状态
       controlScripts.value = (result.scripts || []).map(script => ({
@@ -344,7 +347,7 @@ const scriptOperation = async (action, params = {}) => {
     };
 
     // 执行对应的操作
-    const result = await ipc.invoke(ipcApiRoute.livechat[action], requestParams);
+    const result = await ipc.invoke(ipcApiRoute.scriptdb[action], requestParams);
 
     // 统一处理响应
     if (result && result.status === 'success') {
@@ -500,7 +503,7 @@ const confirmEdit = (row) => {
 
   // 如果是新行，调用添加API
   if (row.isNew) {
-    ipc.invoke(ipcApiRoute.livechat.addScript, {
+    ipc.invoke(ipcApiRoute.scriptdb.addScript, {
       tableName: selectedTable.value,
       content: row.content
     }).then(result => {
@@ -537,7 +540,7 @@ const confirmEdit = (row) => {
   }
 
   // 如果是现有行，调用更新API
-  ipc.invoke(ipcApiRoute.livechat.updateScript, {
+  ipc.invoke(ipcApiRoute.scriptdb.updateScript, {
     tableName: selectedTable.value,
     id: row.id,
     content: row.content
@@ -574,7 +577,7 @@ const deleteRow = (index, row) => {
   console.log('删除行', index, row);
 
   // 直接调用API删除
-  ipc.invoke(ipcApiRoute.livechat.deleteScript, {
+  ipc.invoke(ipcApiRoute.scriptdb.deleteScript, {
     tableName: selectedTable.value,
     id: row.id
   }).then(result => {
@@ -656,6 +659,59 @@ const cancelTableNameEdit = (table) => {
   table.editing = false;
 };
 
+// 删除场控组
+const deleteScriptTable = (table) => {
+  // 确认删除
+  ElMessageBox.confirm(
+    `确定要删除场控组 "${table.display_name}" 吗？所有关联的场控内容将被删除。`,
+    '删除场控组',
+    {
+      confirmButtonText: '确定删除',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(() => {
+    // 用户确认删除，调用API
+    ipc.invoke(ipcApiRoute.scriptdb.deleteScriptTable, {
+      tableName: table.table_name
+    }).then(result => {
+      if (result && result.status === 'success') {
+        ElMessage.success(`已删除场控组: ${table.display_name}`);
+
+        // 移除已删除的表
+        const index = scriptTables.value.findIndex(t => t.table_name === table.table_name);
+        if (index !== -1) {
+          scriptTables.value.splice(index, 1);
+        }
+
+        // 如果当前选择的表被删除，切换到新的表或清空选择
+        if (selectedTable.value === table.table_name) {
+          if (scriptTables.value.length > 0) {
+            selectedTable.value = scriptTables.value[0].table_name;
+            loadScripts(selectedTable.value);
+          } else {
+            selectedTable.value = '';
+            controlScripts.value = [];
+          }
+        }
+
+        // 记录到控制台
+        if (sharedState?.consoleRef) {
+          sharedState.consoleRef.addSystemMessage('system', `已删除控场组: "${table.display_name}"`);
+        }
+      } else {
+        // 删除失败
+        ElMessage.error(result?.message || '删除场控组失败');
+      }
+    }).catch(error => {
+      ElMessage.error(`删除场控组失败: ${error.message || '未知错误'}`);
+    });
+  }).catch(() => {
+    // 用户取消删除
+    ElMessage.info('已取消删除');
+  });
+};
+
 // 开启自动控场
 const enableControl = async () => {
   if (!connected.value) {
@@ -720,14 +776,14 @@ onMounted(() => {
 // 检查默认表是否存在 - 已不再使用
 const checkDefaultTable = async () => {
   try {
-    if (!ipcApiRoute.livechat.checkAndFixDefaultTable) {
+    if (!ipcApiRoute.scriptdb.checkAndFixDefaultTable) {
       console.error('checkAndFixDefaultTable路由未定义');
       loadScriptTables();
       return;
     }
 
     // 先检查表是否存在于管理表中
-    await ipc.invoke(ipcApiRoute.livechat.checkAndFixDefaultTable)
+    await ipc.invoke(ipcApiRoute.scriptdb.checkAndFixDefaultTable)
       .then(() => {
         // 无论结果如何，都重新加载表格
         loadScriptTables();

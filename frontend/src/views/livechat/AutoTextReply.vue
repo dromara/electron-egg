@@ -77,7 +77,7 @@
                   placeholder="选择关键词组"
                   size="small"
                   class="group-select"
-                  @change="handleTableChange"
+                  @change="handleReplyTableChange"
                 >
                   <!-- 现有关键词组选项 -->
                   <el-option
@@ -106,7 +106,7 @@
                         <span v-if="!item.editing" @click.stop="startEditTableName(item)" style="color: #409eff; cursor: pointer;">
                           <el-icon><Edit /></el-icon>
                         </span>
-                        
+
                         <!-- 添加删除按钮 -->
                         <span v-if="!item.editing" @click.stop="confirmDeleteTable(item)" style="color: #f56c6c; cursor: pointer; margin-left: 8px;">
                           <el-icon><Delete /></el-icon>
@@ -139,9 +139,9 @@
                         size="small"
                         style="width: 150px; margin-right: 5px;"
                         @click.stop
-                        @keyup.enter="createNewTable"
+                        @keyup.enter="createTable"
                       />
-                      <el-button type="success" size="small" @click.stop="createNewTable">创建</el-button>
+                      <el-button type="success" size="small" @click.stop="createTable">创建</el-button>
                     </div>
                   </el-option>
                 </el-select>
@@ -189,7 +189,7 @@
                   <el-button v-else type="success" size="small" circle @click="confirmEdit(scope.row)" title="确认">
                     <el-icon><Check /></el-icon>
                   </el-button>
-                  <el-button type="danger" size="small" circle @click="deleteRow(scope.$index, scope.row)" title="删除">
+                  <el-button type="danger" size="small" circle @click="handleDelete(scope.row)" title="删除">
                     <el-icon><Delete /></el-icon>
                   </el-button>
                 </div>
@@ -253,10 +253,26 @@ const whitelist = ref({
   contribution: 0
 });
 
+// 添加对话框相关变量
+const dialogVisible = ref(false);
+const formData = ref({
+  id: null,
+  keyword: '',
+  reply: '',
+  priority: 0,
+  enabled: true
+});
+
+// 添加replies变量
+const replies = ref([]);
+
 // 加载关键词组列表
 const loadReplyTables = async () => {
   try {
-    const result = await ipc.invoke(ipcApiRoute.livechat.getReplyTables);
+    console.log('正在获取回复表列表...');
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.getReplyTables);
+    console.log('获取回复表结果:', result);
+
     if (result && result.status === 'success') {
       // 为每个表添加编辑状态属性
       replyTables.value = (result.tables || []).map(table => ({
@@ -265,81 +281,64 @@ const loadReplyTables = async () => {
         editingName: table.display_name
       }));
 
-      // 如果没有任何表，显示提示
-      if (replyTables.value.length === 0) {
-        ElMessage.warning('未找到任何关键词组，请创建一个新的关键词组');
-        return;
-      }
+      console.log('已加载表格列表:', replyTables.value);
 
       // 如果有表但没有选择，则选择第一个
       if (replyTables.value.length > 0 && !selectedTable.value) {
         selectedTable.value = replyTables.value[0].table_name;
         loadReplies(selectedTable.value);
-      } else if (selectedTable.value) {
-        // 检查当前选中的表是否存在于列表中
-        const existingTable = replyTables.value.find(t => t.table_name === selectedTable.value);
-        if (!existingTable) {
-          // 如果不存在，则切换到第一个表
-          if (replyTables.value.length > 0) {
-            selectedTable.value = replyTables.value[0].table_name;
-            loadReplies(selectedTable.value);
-            ElMessage.info('已切换到可用的关键词组');
-          } else {
-            selectedTable.value = '';
-          }
-        }
       }
     } else {
-      ElMessage.error(result?.message || '获取关键词组失败');
+      ElMessage.error(result?.message || '获取关键词组列表失败');
     }
   } catch (error) {
-    ElMessage.error(`加载关键词组失败: ${error.message || '未知错误'}`);
+    console.error('加载表格失败:', error);
+    ElMessage.error(`获取关键词组列表失败: ${error.message || '未知错误'}`);
   }
 };
 
-// 加载关键词数据
+// 加载回复列表
 const loadReplies = async (tableName) => {
   if (!tableName) return;
 
   tableLoading.value = true;
   try {
-    const result = await ipc.invoke(ipcApiRoute.livechat.getReplies, { tableName });
+    console.log('加载表格内容:', tableName);
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.getReplies, { tableName });
+    console.log('获取回复列表结果:', result);
+
     if (result && result.status === 'success') {
-      // 转换数据结构，添加编辑状态
       keywordItems.value = (result.replies || []).map(reply => ({
         ...reply,
         editing: false
       }));
+      console.log('已加载关键词条目:', keywordItems.value);
     } else {
-      ElMessage.error(result?.message || '获取关键词失败');
+      ElMessage.error(result?.message || '加载回复列表失败');
     }
   } catch (error) {
-    ElMessage.error(`加载关键词失败: ${error.message || '未知错误'}`);
+    console.error('加载回复列表失败:', error);
+    ElMessage.error(`加载回复列表失败: ${error.message || '未知错误'}`);
   } finally {
     tableLoading.value = false;
   }
 };
 
-// 处理表切换
-const handleTableChange = (value) => {
-  // 如果选择了新建表选项，不做处理，保持上一个选中值
-  if (value === 'create-new') {
+// 处理回复表切换
+const handleReplyTableChange = async (tableName) => {
+  // 如果选择了创建新表选项，不进行加载
+  if (tableName === 'create-new') {
     // 恢复之前的选择
     nextTick(() => {
-      if (replyTables.value.length > 0) {
-        selectedTable.value = lastSelectedTable.value || replyTables.value[0].table_name;
-      } else {
-        selectedTable.value = '';
-      }
+      selectedTable.value = lastSelectedTable.value || '';
     });
     return;
   }
 
-  // 记住当前选择
-  lastSelectedTable.value = value;
-
-  // 加载选定表的脚本
-  loadReplies(value);
+  // 保存当前选择
+  lastSelectedTable.value = tableName;
+  selectedTable.value = tableName;
+  await loadReplies(tableName);
 };
 
 // 回复操作函数（添加、编辑、删除）
@@ -357,7 +356,7 @@ const replyOperation = async (action, params = {}) => {
     };
 
     // 执行对应的操作
-    const result = await ipc.invoke(ipcApiRoute.livechat[action], requestParams);
+    const result = await ipc.invoke(ipcApiRoute.scriptdb[action], requestParams);
 
     // 统一处理响应
     if (result && result.status === 'success') {
@@ -489,6 +488,7 @@ const addKeywordRow = () => {
     return;
   }
 
+  console.log('添加新行');
   const newRow = {
     keyword: '',
     reply: '',
@@ -514,6 +514,7 @@ const addKeywordRow = () => {
 
 // 编辑行
 const editRow = (row) => {
+  console.log('编辑行:', row);
   // 保存原内容，以便取消时恢复
   row.originalKeyword = row.keyword;
   row.originalReply = row.reply;
@@ -522,6 +523,7 @@ const editRow = (row) => {
 
 // 确认编辑
 const confirmEdit = (row) => {
+  console.log('确认编辑:', row);
   if (!row.keyword || row.keyword.trim() === '') {
     ElMessage.warning('关键词不能为空');
     return;
@@ -534,11 +536,12 @@ const confirmEdit = (row) => {
 
   // 如果是新行，调用添加API
   if (row.isNew) {
-    ipc.invoke(ipcApiRoute.livechat.addReply, {
+    ipc.invoke(ipcApiRoute.scriptdb.addReply, {
       tableName: selectedTable.value,
       keyword: row.keyword,
       reply: row.reply
     }).then(result => {
+      console.log('添加结果:', result);
       if (result && result.status === 'success') {
         // 添加成功，更新行状态
         row.id = result.id;
@@ -561,6 +564,7 @@ const confirmEdit = (row) => {
         }
       }
     }).catch(error => {
+      console.error('添加失败:', error);
       // 添加失败，显示错误信息并从列表中移除
       ElMessage.error(`添加失败: ${error.message || '未知错误'}`);
       const index = keywordItems.value.indexOf(row);
@@ -572,12 +576,13 @@ const confirmEdit = (row) => {
   }
 
   // 如果是现有行，调用更新API
-  ipc.invoke(ipcApiRoute.livechat.updateReply, {
+  ipc.invoke(ipcApiRoute.scriptdb.updateReply, {
     tableName: selectedTable.value,
     id: row.id,
     keyword: row.keyword,
     reply: row.reply
   }).then(result => {
+    console.log('更新结果:', result);
     if (result && result.status === 'success') {
       // 更新成功
       row.editing = false;
@@ -598,6 +603,7 @@ const confirmEdit = (row) => {
       }
     }
   }).catch(error => {
+    console.error('更新失败:', error);
     ElMessage.error(`保存失败: ${error.message || '未知错误'}`);
     // 如果有原始内容，则恢复
     if (row.originalKeyword !== undefined) {
@@ -611,52 +617,119 @@ const confirmEdit = (row) => {
   });
 };
 
-// 删除行
-const deleteRow = (index, row) => {
-  if (row.isNew) {
-    // 如果是新行，直接从数组中移除
-    keywordItems.value.splice(index, 1);
+// 删除回复
+const deleteReply = (row) => {
+  if (!selectedTable.value) {
+    console.error('删除失败: 未选择表');
     return;
   }
 
-  // 直接调用API删除
-  ipc.invoke(ipcApiRoute.livechat.deleteReply, {
+  console.log('删除行数据:', row);
+  console.log('行ID:', row.id);
+
+  // 直接调用删除API
+  ipc.invoke(ipcApiRoute.scriptdb.deleteReply, {
     tableName: selectedTable.value,
     id: row.id
-  }).then(result => {
-    if (result && result.status === 'success') {
-      // 从本地数组中移除该行
-      keywordItems.value.splice(index, 1);
-
-      if (sharedState?.consoleRef) {
-        sharedState.consoleRef.addTextReplyLog('已删除一条关键词');
-      }
-
-      ElMessage.success('删除成功');
-    } else {
-      ElMessage.error(result?.message || '删除关键词失败');
+  })
+  .then(result => {
+    console.log('删除API返回:', result);
+    if (result.status === 'success') {
       // 刷新列表
       loadReplies(selectedTable.value);
+      ElMessage.success('删除成功');
+    } else {
+      console.error('删除失败:', result);
+      ElMessage.error('删除失败');
     }
-  }).catch(error => {
-    ElMessage.error(`删除失败: ${error.message || '未知错误'}`);
-    // 刷新列表
-    loadReplies(selectedTable.value);
+  })
+  .catch(err => {
+    console.error('删除API错误:', err);
+    ElMessage.error('删除失败');
   });
 };
 
 // 创建新表
-const createNewTable = () => {
-  if (!newTableName.value || newTableName.value.trim() === '') {
-    ElMessage.warning('请输入表名');
+const createTable = async () => {
+  if (!newTableName.value) {
+    ElMessage.warning('请输入关键词组名称');
     return;
   }
 
-  // 使用输入框中的值创建表
-  replyOperation('createReplyTable', { displayName: newTableName.value });
+  try {
+    console.log('创建表格:', newTableName.value);
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.createReplyTable, {
+      displayName: newTableName.value
+    });
+    console.log('创建表格结果:', result);
 
-  // 创建成功后清空输入框
-  newTableName.value = '';
+    if (result && result.status === 'success') {
+      ElMessage.success(`已创建关键词组: ${newTableName.value}`);
+
+      // 清空输入框
+      newTableName.value = '';
+
+      // 刷新表列表
+      await loadReplyTables();
+
+      // 选择新创建的表
+      if (result.tableName) {
+        selectedTable.value = result.tableName;
+        await loadReplies(selectedTable.value);
+      }
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addSystemMessage('system', `已创建新关键词组: "${newTableName.value}"`);
+      }
+    } else {
+      ElMessage.error(result?.message || '创建关键词组失败');
+    }
+  } catch (error) {
+    console.error('创建表格失败:', error);
+    ElMessage.error(`创建失败: ${error.message || '未知错误'}`);
+  }
+};
+
+// 更新表名
+const updateTableName = async (table) => {
+  if (!table.editingName || table.editingName.trim() === '') {
+    ElMessage.warning('关键词组名称不能为空');
+    return;
+  }
+
+  if (table.editingName === table.display_name) {
+    // 名称没有变化，直接退出编辑状态
+    table.editing = false;
+    return;
+  }
+
+  try {
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.updateReplyTable, {
+      tableName: table.table_name,
+      newDisplayName: table.editingName
+    });
+
+    if (result && result.status === 'success') {
+      // 刷新表列表
+      await loadReplyTables();
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addSystemMessage('system', `已修改关键词组名称: "${table.display_name}" -> "${table.editingName}"`);
+      }
+
+      ElMessage.success('修改成功');
+    } else {
+      ElMessage.error(result?.message || '修改关键词组名称失败');
+      // 恢复原始名称
+      table.editingName = table.display_name;
+    }
+  } catch (error) {
+    ElMessage.error(`修改失败: ${error.message || '未知错误'}`);
+    // 恢复原始名称
+    table.editingName = table.display_name;
+  } finally {
+    table.editing = false;
+  }
 };
 
 // 开始编辑表名
@@ -687,14 +760,7 @@ const confirmTableNameEdit = (table) => {
   }
 
   // 调用更新API
-  replyOperation('updateReplyTable', {
-    tableName: table.table_name,
-    newDisplayName: table.editingName,
-    oldDisplayName: table.display_name
-  });
-
-  // 退出编辑状态
-  table.editing = false;
+  updateTableName(table);
 };
 
 // 取消表名编辑
@@ -714,10 +780,10 @@ const confirmDeleteTable = (table) => {
       tableName: table.table_name,
       displayName: table.display_name
     });
-    
+
     // 删除成功后，更新表格列表
     replyTables.value = replyTables.value.filter(t => t.table_name !== table.table_name);
-    
+
     // 如果删除的是当前选中的表，则选择第一个表或清空选择
     if (selectedTable.value === table.table_name) {
       if (replyTables.value.length > 0) {
@@ -728,7 +794,7 @@ const confirmDeleteTable = (table) => {
         keywordItems.value = [];
       }
     }
-    
+
     // 添加控制台日志
     if (sharedState?.consoleRef) {
       sharedState.consoleRef.addSystemMessage('system', `已删除关键词组: "${table.display_name}"`);
@@ -788,16 +854,83 @@ const disableAutoReply = async () => {
 };
 
 // 页面挂载时同步状态
-onMounted(() => {
+onMounted(async () => {
   // 如果存在共享状态，将其同步到当前组件
   if (sharedState) {
     connected.value = sharedState.connected;
     roomId.value = sharedState.roomId;
   }
 
-  // 直接加载表格
-  loadReplyTables();
+  console.log('组件已挂载，开始加载数据...');
+
+  // 初始化关键词表
+  try {
+    // 首先尝试检查并修复默认表
+    await ipc.invoke(ipcApiRoute.scriptdb.checkAndFixDefaultReplyTable);
+  } catch (error) {
+    console.error('检查默认表失败:', error);
+  }
+
+  // 加载表格列表
+  await loadReplyTables();
+
+  // 如果有选中的表格，加载对应的数据
+  if (selectedTable.value) {
+    await loadReplies(selectedTable.value);
+  }
 });
+
+// 处理回复状态变更
+const handleReplyStatusChange = async (row) => {
+  try {
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.updateReply, {
+      tableName: selectedTable.value,
+      id: row.id,
+      keyword: row.keyword,
+      reply: row.reply,
+      enabled: row.enabled
+    });
+
+    if (result && result.status === 'success') {
+      ElMessage.success('状态更新成功');
+    } else {
+      ElMessage.error(result?.message || '状态更新失败');
+      // 恢复状态
+      row.enabled = !row.enabled;
+    }
+  } catch (error) {
+    ElMessage.error(`状态更新失败: ${error.message || '未知错误'}`);
+    // 恢复状态
+    row.enabled = !row.enabled;
+  }
+};
+
+// 新增的handleDelete函数
+const handleDelete = (row) => {
+  console.log('删除行数据:', row);
+  console.log('行ID:', row.id);
+
+  // 调用删除API
+  ipc.invoke(ipcApiRoute.scriptdb.deleteReply, {
+    tableName: selectedTable.value,
+    id: row.id
+  })
+  .then(result => {
+    console.log('删除API返回:', result);
+    if (result.status === 'success') {
+      // 刷新列表
+      loadReplies(selectedTable.value);
+      ElMessage.success('删除成功');
+    } else {
+      console.error('删除失败:', result);
+      ElMessage.error('删除失败');
+    }
+  })
+  .catch(err => {
+    console.error('删除API错误:', err);
+    ElMessage.error('删除失败');
+  });
+};
 </script>
 
 <style lang="less" scoped>

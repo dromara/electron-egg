@@ -59,6 +59,7 @@
         "electron-updater": "^6.3.8",
         "eventsource": "^3.0.6",
         "ini": "^5.0.0",
+        "playwright": "^1.51.1",
         "protobufjs": "^7.4.0",
         "ws": "^8.18.1"
     }

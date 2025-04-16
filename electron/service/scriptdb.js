@@ -16,7 +16,7 @@ class ScriptdbService extends BasedbService {
         super(options);
         this.tableNamePrefix = '控场话术表_';
         this.scriptTablesName = '控场表名管理表'; // 存储所有表名的表
-        
+
         // 文字回复表相关
         this.replyTablePrefix = '文字回复表_';
         this.replyTablesName = '文字回复表名管理表'; // 存储所有文字回复表名的表
@@ -31,11 +31,11 @@ class ScriptdbService extends BasedbService {
 
         // 检查控场话术表名管理表是否存在
         this._initScriptTables();
-        
+
         // 检查文字回复表名管理表是否存在
         this._initReplyTables();
     }
-    
+
     /**
      * 初始化控场话术表
      */
@@ -59,7 +59,7 @@ class ScriptdbService extends BasedbService {
             this._checkAndRegisterDefaultTable();
         }
     }
-    
+
     /**
      * 初始化文字回复表
      */
@@ -94,11 +94,11 @@ class ScriptdbService extends BasedbService {
             const defaultTableName = `${this.tableNamePrefix}默认`;
             const checkStmt = this.db.prepare(`SELECT * FROM ${this.scriptTablesName} WHERE table_name = ?`);
             const tableRecord = checkStmt.get(defaultTableName);
-            
+
             // 检查默认表是否已创建
             const tableExistsStmt = this.db.prepare('SELECT name FROM sqlite_master WHERE type=? AND name = ?');
             const tableExists = tableExistsStmt.get('table', defaultTableName);
-            
+
             // 如果默认表已创建但未注册，进行注册
             if (tableExists && !tableRecord) {
                 const insertTable = this.db.prepare(`
@@ -106,7 +106,7 @@ class ScriptdbService extends BasedbService {
                 VALUES (?, ?)`);
                 insertTable.run(defaultTableName, '默认');
                 logger.info('默认表已注册到管理表');
-            } 
+            }
             // 如果默认表未创建，创建默认表
             else if (!tableExists) {
                 this.createScriptTable('默认');
@@ -226,7 +226,7 @@ class ScriptdbService extends BasedbService {
                 SELECT 1 FROM sqlite_master 
                 WHERE type='table' AND name = ?
             ) as exists_flag`;
-            
+
             const tableCheck = this.db.prepare(tableCheckSql);
             const { exists_flag } = tableCheck.get(tableName);
 
@@ -261,10 +261,10 @@ class ScriptdbService extends BasedbService {
                 SELECT 1 FROM sqlite_master 
                 WHERE type='table' AND name = ?
             ) as exists_flag`;
-            
+
             const tableCheck = this.db.prepare(tableCheckSql);
             const { exists_flag } = tableCheck.get(tableName);
-            
+
             if (!exists_flag) {
                 return { status: 'error', message: `表"${tableName}"不存在` };
             }
@@ -307,10 +307,10 @@ class ScriptdbService extends BasedbService {
                 SELECT 1 FROM sqlite_master 
                 WHERE type='table' AND name = ?
             ) as exists_flag`;
-            
+
             const tableCheck = this.db.prepare(tableCheckSql);
             const { exists_flag } = tableCheck.get(tableName);
-            
+
             if (!exists_flag) {
                 return { status: 'error', message: `表"${tableName}"不存在` };
             }
@@ -343,10 +343,10 @@ class ScriptdbService extends BasedbService {
                 SELECT 1 FROM sqlite_master 
                 WHERE type='table' AND name = ?
             ) as exists_flag`;
-            
+
             const tableCheck = this.db.prepare(tableCheckSql);
             const { exists_flag } = tableCheck.get(tableName);
-            
+
             if (!exists_flag) {
                 return { status: 'error', message: `表"${tableName}"不存在` };
             }
@@ -392,11 +392,11 @@ class ScriptdbService extends BasedbService {
             const defaultTableName = `${this.replyTablePrefix}默认`;
             const checkStmt = this.db.prepare(`SELECT * FROM ${this.replyTablesName} WHERE table_name = ?`);
             const tableRecord = checkStmt.get(defaultTableName);
-            
+
             // 检查默认表是否已创建
             const tableExistsStmt = this.db.prepare('SELECT name FROM sqlite_master WHERE type=? AND name = ?');
             const tableExists = tableExistsStmt.get('table', defaultTableName);
-            
+
             // 如果默认表已创建但未注册，进行注册
             if (tableExists && !tableRecord) {
                 const insertTable = this.db.prepare(`
@@ -404,7 +404,7 @@ class ScriptdbService extends BasedbService {
                 VALUES (?, ?)`);
                 insertTable.run(defaultTableName, '默认');
                 logger.info('默认回复表已注册到管理表');
-            } 
+            }
             // 如果默认表未创建，创建默认表
             else if (!tableExists) {
                 this.createReplyTable('默认');
@@ -414,7 +414,7 @@ class ScriptdbService extends BasedbService {
             logger.error('检查默认回复表失败', error);
         }
     }
-    
+
     /**
      * 获取所有文字回复表
      */
@@ -525,7 +525,7 @@ class ScriptdbService extends BasedbService {
                 SELECT 1 FROM sqlite_master 
                 WHERE type='table' AND name = ?
             ) as exists_flag`;
-            
+
             const tableCheck = this.db.prepare(tableCheckSql);
             const { exists_flag } = tableCheck.get(tableName);
 
@@ -554,7 +554,7 @@ class ScriptdbService extends BasedbService {
             if (!keyword || keyword.trim() === '') {
                 return { status: 'error', message: '关键词不能为空' };
             }
-            
+
             if (!reply || reply.trim() === '') {
                 return { status: 'error', message: '回复内容不能为空' };
             }
@@ -565,10 +565,10 @@ class ScriptdbService extends BasedbService {
                 SELECT 1 FROM sqlite_master 
                 WHERE type='table' AND name = ?
             ) as exists_flag`;
-            
+
             const tableCheck = this.db.prepare(tableCheckSql);
             const { exists_flag } = tableCheck.get(tableName);
-            
+
             if (!exists_flag) {
                 return { status: 'error', message: `表"${tableName}"不存在` };
             }
@@ -606,7 +606,7 @@ class ScriptdbService extends BasedbService {
             if (!keyword || keyword.trim() === '') {
                 return { status: 'error', message: '关键词不能为空' };
             }
-            
+
             if (!reply || reply.trim() === '') {
                 return { status: 'error', message: '回复内容不能为空' };
             }
@@ -617,10 +617,10 @@ class ScriptdbService extends BasedbService {
                 SELECT 1 FROM sqlite_master 
                 WHERE type='table' AND name = ?
             ) as exists_flag`;
-            
+
             const tableCheck = this.db.prepare(tableCheckSql);
             const { exists_flag } = tableCheck.get(tableName);
-            
+
             if (!exists_flag) {
                 return { status: 'error', message: `表"${tableName}"不存在` };
             }
@@ -653,10 +653,10 @@ class ScriptdbService extends BasedbService {
                 SELECT 1 FROM sqlite_master 
                 WHERE type='table' AND name = ?
             ) as exists_flag`;
-            
+
             const tableCheck = this.db.prepare(tableCheckSql);
             const { exists_flag } = tableCheck.get(tableName);
-            
+
             if (!exists_flag) {
                 return { status: 'error', message: `表"${tableName}"不存在` };
             }
