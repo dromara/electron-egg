@@ -83,6 +83,8 @@ const ipcApiRoute = {
         stopMonitoring: 'controller/livechat/stopMonitoring',
         getEventsUrl: 'controller/livechat/getEventsUrl',
         getMonitoringStatus: 'controller/livechat/getMonitoringStatus',
+        
+        // 控场话术相关
         getScriptTables: 'controller/livechat/getScriptTables',
         getScripts: 'controller/livechat/getScripts',
         addScript: 'controller/livechat/addScript',
@@ -91,6 +93,18 @@ const ipcApiRoute = {
         createScriptTable: 'controller/livechat/createScriptTable',
         updateScriptTable: 'controller/livechat/updateScriptTable',
         deleteScriptTable: 'controller/livechat/deleteScriptTable',
+        checkAndFixDefaultTable: 'controller/livechat/checkAndFixDefaultTable',
+        
+        // 文字回复相关
+        getReplyTables: 'controller/livechat/getReplyTables',
+        getReplies: 'controller/livechat/getReplies',
+        addReply: 'controller/livechat/addReply',
+        updateReply: 'controller/livechat/updateReply',
+        deleteReply: 'controller/livechat/deleteReply',
+        createReplyTable: 'controller/livechat/createReplyTable',
+        updateReplyTable: 'controller/livechat/updateReplyTable',
+        deleteReplyTable: 'controller/livechat/deleteReplyTable',
+        checkAndFixDefaultReplyTable: 'controller/livechat/checkAndFixDefaultReplyTable',
     },
 }
 

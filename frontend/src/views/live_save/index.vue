@@ -42,7 +42,7 @@
 
     <div class="one-block-1">
       <span>WebSocket连接状态:
-        <el-tag :type="wsConnected ? 'success' : 'danger'">
+        <el-tag :type="wsConnected ? 'success' : 'info'">
           {{ wsConnected ? '已连接' : '未连接' }}
         </el-tag>
       </span>
@@ -91,11 +91,16 @@
       <span>直播监控列表</span>
     </div>
     <div class="one-block-2">
-      <el-table :data="combinedTableData" border stripe>
+      <el-space>
+        <el-button type="primary" @click="startMonitoring">启动配置监控</el-button>
+        <el-button @click="getLatestConfig">获取最新配置</el-button>
+        <el-button type="danger" @click="stopMonitoring">停止配置监控</el-button>
+      </el-space>
+      <el-table :data="combinedTableData" border stripe style="margin-top: 15px;">
         <el-table-column type="index" label="ID" width="60" />
         <el-table-column prop="streamerName" label="主播名" width="120" />
         <el-table-column prop="url" label="链接" />
-        <el-table-column label="画质" width="120">
+        <el-table-column prop="quality" label="画质" width="120">
           <template #default="{ row, $index }">
             <el-select
               v-model="row.quality"
@@ -113,18 +118,11 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column prop="recordStatus" label="录制状态" width="120">
+        <el-table-column label="录制状态">
           <template #default="scope">
-            <div class="status-tag-container">
-              <el-tag
-                :type="scope.row.isDisabled ? 'danger' : (scope.row.recordStatus ? 'success' : 'info')"
-                class="status-tag"
-              >
-                <span v-if="scope.row.isDisabled">停止监控</span>
-                <span v-else-if="scope.row.recordStatus">录制中: {{scope.row.recordDuration || '00:00:00'}}</span>
-                <span v-else>未录制</span>
-              </el-tag>
-            </div>
+            <el-tag :type="scope.row.recordStatus ? 'success' : 'info'">
+              {{ scope.row.recordStatus ? '录制中' : '未录制' }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="90">

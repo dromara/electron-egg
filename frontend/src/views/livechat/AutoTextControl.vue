@@ -157,6 +157,7 @@
                   v-if="scope.row.editing"
                   v-model="scope.row.content"
                   size="small"
+                  class="script-content-input"
                   @blur="confirmEdit(scope.row)"
                   @keyup.enter="confirmEdit(scope.row)"
                 />
@@ -251,10 +252,29 @@ const loadScriptTables = async () => {
         editingName: table.display_name
       }));
 
+      // 如果没有任何表，显示提示
+      if (scriptTables.value.length === 0) {
+        ElMessage.warning('未找到任何场控组，请创建一个新的场控组');
+        return;
+      }
+
       // 如果有表但没有选择，则选择第一个
       if (scriptTables.value.length > 0 && !selectedTable.value) {
         selectedTable.value = scriptTables.value[0].table_name;
         loadScripts(selectedTable.value);
+      } else if (selectedTable.value) {
+        // 检查当前选中的表是否存在于列表中
+        const existingTable = scriptTables.value.find(t => t.table_name === selectedTable.value);
+        if (!existingTable) {
+          // 如果不存在，则切换到第一个表
+          if (scriptTables.value.length > 0) {
+            selectedTable.value = scriptTables.value[0].table_name;
+            loadScripts(selectedTable.value);
+            ElMessage.info('已切换到可用的场控组');
+          } else {
+            selectedTable.value = '';
+          }
+        }
       }
     } else {
       ElMessage.error(result?.message || '获取场控组失败');
@@ -444,10 +464,20 @@ const addScriptRow = () => {
 
   const newRow = {
     content: '',
-    editing: true
+    editing: true,
+    isNew: true // 标记为新行
   };
 
   controlScripts.value.push(newRow);
+
+  // 聚焦新添加的行
+  nextTick(() => {
+    const inputs = document.querySelectorAll('.script-content-input');
+    if (inputs && inputs.length > 0) {
+      const lastInput = inputs[inputs.length - 1];
+      lastInput.focus();
+    }
+  });
 
   if (sharedState?.consoleRef) {
     sharedState.consoleRef.addTextControlLog('添加了一条新控场脚本');
@@ -468,7 +498,45 @@ const confirmEdit = (row) => {
     return;
   }
 
-  // 直接调用API保存数据
+  // 如果是新行，调用添加API
+  if (row.isNew) {
+    ipc.invoke(ipcApiRoute.livechat.addScript, {
+      tableName: selectedTable.value,
+      content: row.content
+    }).then(result => {
+      if (result && result.status === 'success') {
+        // 添加成功，更新行状态
+        row.id = result.id;
+        row.isNew = false;
+        row.editing = false;
+        ElMessage.success('添加成功');
+
+        // 刷新列表以获取正确的ID和顺序
+        loadScripts(selectedTable.value);
+
+        if (sharedState?.consoleRef) {
+          sharedState.consoleRef.addTextControlLog(`已添加新脚本: "${row.content}"`);
+        }
+      } else {
+        // 添加失败，显示错误信息并从列表中移除
+        ElMessage.error(result?.message || '添加失败');
+        const index = controlScripts.value.indexOf(row);
+        if (index !== -1) {
+          controlScripts.value.splice(index, 1);
+        }
+      }
+    }).catch(error => {
+      // 添加失败，显示错误信息并从列表中移除
+      ElMessage.error(`添加失败: ${error.message || '未知错误'}`);
+      const index = controlScripts.value.indexOf(row);
+      if (index !== -1) {
+        controlScripts.value.splice(index, 1);
+      }
+    });
+    return;
+  }
+
+  // 如果是现有行，调用更新API
   ipc.invoke(ipcApiRoute.livechat.updateScript, {
     tableName: selectedTable.value,
     id: row.id,
@@ -645,9 +713,36 @@ onMounted(() => {
     roomId.value = sharedState.roomId;
   }
 
-  // 初始化加载表和脚本
+  // 直接加载表格，不再尝试修复默认表
   loadScriptTables();
 });
+
+// 检查默认表是否存在 - 已不再使用
+const checkDefaultTable = async () => {
+  try {
+    if (!ipcApiRoute.livechat.checkAndFixDefaultTable) {
+      console.error('checkAndFixDefaultTable路由未定义');
+      loadScriptTables();
+      return;
+    }
+
+    // 先检查表是否存在于管理表中
+    await ipc.invoke(ipcApiRoute.livechat.checkAndFixDefaultTable)
+      .then(() => {
+        // 无论结果如何，都重新加载表格
+        loadScriptTables();
+      })
+      .catch((error) => {
+        console.error('检查默认表失败', error);
+        // 继续加载可用的表
+        loadScriptTables();
+      });
+  } catch (error) {
+    console.error('检查默认表异常', error);
+    // 出错后仍然尝试加载表
+    loadScriptTables();
+  }
+};
 </script>
 
 <style lang="less" scoped>
