@@ -48,7 +48,8 @@
         "debug": "^4.4.0",
         "ee-bin": "^4.1.7",
         "electron": "^31.7.6",
-        "electron-builder": "^25.1.8"
+        "electron-builder": "^25.1.8",
+        "sass": "^1.86.3"
     },
     "dependencies": {
         "axios": "^1.8.4",
@@ -59,6 +60,7 @@
         "electron-updater": "^6.3.8",
         "eventsource": "^3.0.6",
         "ini": "^5.0.0",
+        "pinia-plugin-persistedstate": "^4.2.0",
         "playwright": "^1.51.1",
         "protobufjs": "^7.4.0",
         "ws": "^8.18.1"

@@ -120,13 +120,17 @@ import { ipc } from '@/utils/ipcRenderer';
 import { ElMessage } from 'element-plus';
 import { UserFilled, Histogram } from '@element-plus/icons-vue';
 import LiveChatConsole from '@/components/LiveChatConsole.vue';
+import { useLivechatStore } from '@/stores/livechatStore';
 
 // 使用共享状态 - 如果使用了 provide/inject 模式
 const sharedState = inject('livechatState', null);
 
+// Pinia store
+const livechatStore = useLivechatStore();
+
 // 状态变量
-const roomId = ref(sharedState?.roomId || '');
-const connected = ref(sharedState?.connected || false);
+const roomId = ref(livechatStore.roomId || sharedState?.roomId || '');
+const connected = ref(livechatStore.connected || sharedState?.connected || false);
 const connecting = ref(false);
 const disconnecting = ref(false);
 const consoleRef = ref(null);
@@ -152,12 +156,16 @@ watch(() => connected.value, (newVal) => {
   if (sharedState) {
     sharedState.connected = newVal;
   }
+  // 同步到Pinia
+  livechatStore.setConnected(newVal);
 });
 
 watch(() => roomId.value, (newVal) => {
   if (sharedState) {
     sharedState.roomId = newVal;
   }
+  // 同步到Pinia
+  livechatStore.setRoomId(newVal);
 });
 
 // 连接到直播间
@@ -363,18 +371,29 @@ const checkMonitoringStatus = async () => {
   }
 };
 
-// 在共享状态上注册组件引用
+// 在组件挂载时从Pinia同步状态
 onMounted(() => {
+  // 同步Pinia中的直播间状态
+  if (livechatStore.roomId) {
+    roomId.value = livechatStore.roomId;
+    if (sharedState) sharedState.roomId = livechatStore.roomId;
+  }
+  
+  if (livechatStore.connected) {
+    connected.value = livechatStore.connected;
+    if (sharedState) sharedState.connected = livechatStore.connected;
+  }
+  
+  // 设置控制台引用
+  if (consoleRef.value && sharedState) {
+    sharedState.consoleRef = consoleRef.value;
+  }
+  
   // 设置IPC消息监听器
   setupIpcListeners();
 
   // 获取监控状态
   checkMonitoringStatus();
-
-  // 如果存在共享状态，注册控制台引用
-  if (sharedState && consoleRef.value) {
-    sharedState.setActiveConsoleRef(consoleRef.value);
-  }
 });
 
 // 组件卸载前

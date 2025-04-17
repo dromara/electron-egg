@@ -1,0 +1,10 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# 框架构成
+
+- 使用electron-egg框架标准写法
+- 框架采用MVC模式controller文件夹下 为控制层，service为服务层

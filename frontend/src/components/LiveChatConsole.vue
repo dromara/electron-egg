@@ -84,8 +84,9 @@
       </div>
 
       <div class="console-content" :class="{ 'console-content-active': activeTab === 'textControl' }" v-show="activeTab === 'textControl'">
-        <div v-for="(log, index) in textControlLogs" :key="'control-'+index" class="log-item">
-          {{ log.time }} {{ log.message }}
+        <div v-for="(log, index) in textControlLogs" :key="'control-'+index" class="chat-item">
+          <span class="user">机器人[{{ log.time }}]:</span>
+          <span class="content">{{ log.message }}</span>
         </div>
       </div>
 
@@ -157,6 +158,7 @@ import { ipc } from '@/utils/ipcRenderer';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { UserFilled, Histogram } from '@element-plus/icons-vue';
+import { useLivechatStore } from '@/stores/livechatStore';
 
 const route = useRoute();
 const router = useRouter();
@@ -278,6 +280,14 @@ const connect = async () => {
       // 通知父组件状态变化
       emit('update:connected', connected.value);
       emit('update:roomId', roomId.value);
+      
+      // 导入 livechatStore 确保在这个作用域可用
+      const livechatStore = useLivechatStore();
+      
+      // 更新 store 中的状态
+      livechatStore.setRoomId(roomId.value);
+      livechatStore.setConnected(true);
+      console.log('已更新 livechatStore 状态:', { roomId: roomId.value, connected: true });
 
       // 设置IPC消息监听器
       setupIpcListeners();
@@ -306,11 +316,31 @@ const disconnect = async () => {
 
       // 通知父组件状态变化
       emit('update:connected', connected.value);
+      
+      // 更新 store 中的状态
+      const livechatStore = useLivechatStore();
+      livechatStore.setConnected(false);
+      
+      // 记录日志
+      console.log('已更新 livechatStore 状态: 已断开连接');
+      addSystemMessage('system', '已断开直播间连接');
+      
+      // 重置统计数据
+      currentViewers.value = 0;
+      totalViewers.value = 0;
     } else {
       ElMessage.error(result?.message || '停止监控失败');
     }
   } catch (error) {
     ElMessage.error(`断开连接错误: ${error.message || '未知错误'}`);
+    // 出现错误时也要确保状态被重置
+    connected.value = false;
+    
+    // 更新 store 中的状态
+    const livechatStore = useLivechatStore();
+    livechatStore.setConnected(false);
+    
+    emit('update:connected', connected.value);
   } finally {
     disconnecting.value = false;
   }
@@ -329,11 +359,36 @@ const checkMonitoringStatus = async () => {
       // 通知父组件状态变化
       emit('update:connected', connected.value);
       emit('update:roomId', roomId.value);
+      
+      // 更新 store 中的状态
+      const livechatStore = useLivechatStore();
+      livechatStore.setRoomId(roomId.value);
+      livechatStore.setConnected(true);
+      console.log('已恢复并更新 livechatStore 状态:', { roomId: roomId.value, connected: true });
 
       addSystemMessage('system', `已恢复对直播间 ${roomId.value} 的监控状态`);
+      
+      // 设置IPC消息监听器
+      setupIpcListeners();
+    } else {
+      // 如果没有正在监控的直播间，确保状态为未连接
+      connected.value = false;
+      
+      // 更新 store 中的状态
+      const livechatStore = useLivechatStore();
+      livechatStore.setConnected(false);
+      console.log('检查监控状态：未连接到任何直播间');
+      
+      // 通知父组件状态变化
+      emit('update:connected', false);
     }
   } catch (error) {
     console.error('检查监控状态错误:', error);
+    // 出错时也确保状态为未连接
+    connected.value = false;
+    const livechatStore = useLivechatStore();
+    livechatStore.setConnected(false);
+    emit('update:connected', false);
   }
 };
 
@@ -504,7 +559,7 @@ const updateRoomStats = (current, totalWithUnit) => {
 const setupIpcListeners = () => {
   // 监听来自主进程的消息
   ipc.on('livechat-message', (event, data) => {
-    console.log('收到弹幕消息:', data);
+    // console.log('收到弹幕消息:', data);
     const { type, message } = data;
 
     // 根据消息类型进行处理
@@ -617,6 +672,11 @@ onBeforeUnmount(() => {
   // 清除所有超时
   Object.values(memberTimeouts.value).forEach(timeout => clearTimeout(timeout));
   Object.values(giftTimeouts.value).forEach(timeout => clearTimeout(timeout));
+  
+  // 确保在组件卸载时重置连接状态
+  const livechatStore = useLivechatStore();
+  livechatStore.setConnected(false);
+  console.log('组件卸载：重置连接状态');
 });
 
 // 导出方法给父组件使用

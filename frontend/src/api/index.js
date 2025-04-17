@@ -85,6 +85,16 @@ const ipcApiRoute = {
         getMonitoringStatus: 'controller/livechat/getMonitoringStatus',
     },
 
+    // 自动场控和自动回复
+    livechatAutoControl: {
+        connectToLiveRoom: 'controller/livechatAutoControl/connectToLiveRoom',
+        disconnectFromLiveRoom: 'controller/livechatAutoControl/disconnectFromLiveRoom',
+        startAutoControl: 'controller/livechatAutoControl/startAutoControl',
+        stopAutoControl: 'controller/livechatAutoControl/stopAutoControl',
+        sendMessage: 'controller/livechatAutoControl/sendMessage',
+        getConnectionStatus: 'controller/livechatAutoControl/getConnectionStatus',
+    },
+
     // 数据库相关API
     scriptdb: {
         // 控场话术相关

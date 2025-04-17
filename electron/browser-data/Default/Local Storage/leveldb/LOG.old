@@ -1,0 +1,15 @@
+2025/04/17-14:06:15.495 8efc Reusing MANIFEST C:\Users\Administrator\PycharmProjects\electron-egg\electron\browser-data\Default\Local Storage\leveldb/MANIFEST-000001
+2025/04/17-14:06:15.498 8efc Recovering log #25
+2025/04/17-14:06:15.499 8efc Reusing old log C:\Users\Administrator\PycharmProjects\electron-egg\electron\browser-data\Default\Local Storage\leveldb/000025.log 
+2025/04/17-14:06:33.534 4170 Level-0 table #28: started
+2025/04/17-14:06:33.536 4170 Level-0 table #28: 36084 bytes OK
+2025/04/17-14:06:33.536 4170 Delete type=0 #25
+2025/04/17-14:06:33.537 4170 Compacting 4@0 + 1@1 files
+2025/04/17-14:06:33.539 4170 Generated table #29@0: 61 keys, 19839 bytes
+2025/04/17-14:06:33.539 4170 Compacted 4@0 + 1@1 files => 19839 bytes
+2025/04/17-14:06:33.539 4170 compacted to: files[ 0 1 1 0 0 0 0 ]
+2025/04/17-14:06:33.539 4170 Delete type=2 #17
+2025/04/17-14:06:33.539 4170 Delete type=2 #20
+2025/04/17-14:06:33.539 4170 Delete type=2 #23
+2025/04/17-14:06:33.539 4170 Delete type=2 #25
+2025/04/17-14:06:33.539 4170 Delete type=2 #28

@@ -108,9 +108,21 @@
                         </span>
 
                         <!-- 添加删除按钮 -->
-                        <span v-if="!item.editing" @click.stop="confirmDeleteTable(item)" style="color: #f56c6c; cursor: pointer; margin-left: 8px;">
-                          <el-icon><Delete /></el-icon>
-                        </span>
+                        <el-popconfirm
+                          v-if="!item.editing"
+                          :title="`确定要删除关键词组 '${item.display_name}' 吗？该操作不可恢复！`"
+                          confirm-button-text="确定"
+                          cancel-button-text="取消"
+                          @confirm="handleDeleteTable(item)"
+                          width="250"
+                          confirm-button-type="danger"
+                        >
+                          <template #reference>
+                            <span @click.stop style="color: #f56c6c; cursor: pointer; margin-left: 8px;">
+                              <el-icon><Delete /></el-icon>
+                            </span>
+                          </template>
+                        </el-popconfirm>
 
                         <!-- 编辑状态显示确认和取消按钮 -->
                         <template v-else>
@@ -203,18 +215,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject, nextTick } from 'vue';
+import { ref, onMounted, inject, nextTick, watch } from 'vue';
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Edit, Delete, Check, Close } from '@element-plus/icons-vue';
+import { useLivechatStore } from '@/stores/livechatStore';
 
 // 使用共享状态 - 如果使用了 provide/inject 模式
 const sharedState = inject('livechatState', null);
 
+// Pinia store
+const livechatStore = useLivechatStore();
+
 // 状态变量
-const roomId = ref(sharedState?.roomId || '');
-const connected = ref(sharedState?.connected || false);
+const roomId = ref(livechatStore.roomId || sharedState?.roomId || '');
+const connected = ref(livechatStore.connected || sharedState?.connected || false);
 const isAutoReplyEnabled = ref(false);
 const loading = ref(false);
 const consoleRef = ref(sharedState?.consoleRef || null);
@@ -222,7 +238,7 @@ const tableLoading = ref(false);
 
 // 关键词和关键词组
 const replyTables = ref([]);
-const selectedTable = ref('');
+const selectedTable = ref(livechatStore.selectedReplyTable || '');
 const keywordItems = ref([]);
 const newTableName = ref('');
 
@@ -287,6 +303,23 @@ const loadReplyTables = async () => {
       if (replyTables.value.length > 0 && !selectedTable.value) {
         selectedTable.value = replyTables.value[0].table_name;
         loadReplies(selectedTable.value);
+      } else if (selectedTable.value) {
+        // 检查当前选中的表是否存在于列表中
+        const existingTable = replyTables.value.find(t => t.table_name === selectedTable.value);
+        if (!existingTable) {
+          // 如果不存在，则切换到第一个表
+          if (replyTables.value.length > 0) {
+            selectedTable.value = replyTables.value[0].table_name;
+            loadReplies(selectedTable.value);
+            ElMessage.info('已切换到可用的关键词组');
+          } else {
+            selectedTable.value = '';
+            keywordItems.value = [];
+          }
+        } else {
+          // 表格存在且已选中，加载该表格的数据
+          loadReplies(selectedTable.value);
+        }
       }
     } else {
       ElMessage.error(result?.message || '获取关键词组列表失败');
@@ -338,6 +371,10 @@ const handleReplyTableChange = async (tableName) => {
   // 保存当前选择
   lastSelectedTable.value = tableName;
   selectedTable.value = tableName;
+  
+  // 更新Pinia store中的选择
+  livechatStore.setSelectedReplyTable(tableName);
+  
   await loadReplies(tableName);
 };
 
@@ -768,39 +805,42 @@ const cancelTableNameEdit = (table) => {
   table.editing = false;
 };
 
-// 添加确认删除表的方法
-const confirmDeleteTable = (table) => {
-  ElMessageBox.confirm(`确定要删除关键词组"${table.display_name}"吗？该操作不可恢复！`, '删除确认', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    // 执行删除操作
-    replyOperation('deleteReplyTable', {
-      tableName: table.table_name,
-      displayName: table.display_name
-    });
+// 处理删除关键词组
+const handleDeleteTable = (table) => {
+  // 执行删除操作
+  ipc.invoke(ipcApiRoute.scriptdb.deleteReplyTable, {
+    tableName: table.table_name
+  }).then(result => {
+    if (result && result.status === 'success') {
+      ElMessage.success(`已删除关键词组: ${table.display_name}`);
 
-    // 删除成功后，更新表格列表
-    replyTables.value = replyTables.value.filter(t => t.table_name !== table.table_name);
-
-    // 如果删除的是当前选中的表，则选择第一个表或清空选择
-    if (selectedTable.value === table.table_name) {
-      if (replyTables.value.length > 0) {
-        selectedTable.value = replyTables.value[0].table_name;
-        loadReplies(selectedTable.value);
-      } else {
-        selectedTable.value = '';
-        keywordItems.value = [];
+      // 移除已删除的表
+      const index = replyTables.value.findIndex(t => t.table_name === table.table_name);
+      if (index !== -1) {
+        replyTables.value.splice(index, 1);
       }
-    }
 
-    // 添加控制台日志
-    if (sharedState?.consoleRef) {
-      sharedState.consoleRef.addSystemMessage('system', `已删除关键词组: "${table.display_name}"`);
+      // 如果删除的是当前选中的表，则选择第一个表或清空选择
+      if (selectedTable.value === table.table_name) {
+        if (replyTables.value.length > 0) {
+          selectedTable.value = replyTables.value[0].table_name;
+          loadReplies(selectedTable.value);
+        } else {
+          selectedTable.value = '';
+          keywordItems.value = [];
+        }
+      }
+
+      // 添加控制台日志
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addSystemMessage('system', `已删除关键词组: "${table.display_name}"`);
+      }
+    } else {
+      // 删除失败
+      ElMessage.error(result?.message || '删除关键词组失败');
     }
-  }).catch(() => {
-    // 用户取消，不执行任何操作
+  }).catch(error => {
+    ElMessage.error(`删除关键词组失败: ${error.message || '未知错误'}`);
   });
 };
 
@@ -860,6 +900,17 @@ onMounted(async () => {
     connected.value = sharedState.connected;
     roomId.value = sharedState.roomId;
   }
+  
+  // 同步Pinia中的直播间状态到共享状态
+  if (livechatStore.roomId) {
+    roomId.value = livechatStore.roomId;
+    if (sharedState) sharedState.roomId = livechatStore.roomId;
+  }
+  
+  if (livechatStore.connected) {
+    connected.value = livechatStore.connected;
+    if (sharedState) sharedState.connected = livechatStore.connected;
+  }
 
   console.log('组件已挂载，开始加载数据...');
 
@@ -877,6 +928,21 @@ onMounted(async () => {
   // 如果有选中的表格，加载对应的数据
   if (selectedTable.value) {
     await loadReplies(selectedTable.value);
+  }
+});
+
+// 监听连接状态和房间ID的变化，同步到Pinia
+watch(() => connected.value, (newVal) => {
+  livechatStore.setConnected(newVal);
+  if (sharedState) {
+    sharedState.connected = newVal;
+  }
+});
+
+watch(() => roomId.value, (newVal) => {
+  livechatStore.setRoomId(newVal);
+  if (sharedState) {
+    sharedState.roomId = newVal;
   }
 });
 

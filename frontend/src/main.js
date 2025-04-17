@@ -6,6 +6,11 @@ import './assets/global.less';
 import components from './components/global';
 import Router from './router/index';
 import ElementIcons from './plugins/icons';
+import { createPinia } from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
 
 const app = createApp(App)
 app.config.productionTip = false
@@ -17,7 +22,9 @@ for (const i in components) {
 
 // 注册Element Plus图标
 app.use(ElementIcons)
+// 注册Pinia
+app.use(pinia)
+// 注册路由
+app.use(Router)
 
-// Element Plus已通过unplugin-vue-components自动导入，无需在此处导入
-
-app.use(Router).mount('#app')
+app.mount('#app')

@@ -12,7 +12,9 @@
               <span class="separator">—</span>
               <el-input-number v-model="frequency.max" :min="0" :max="200" size="small" controls-position="right" />
               <span class="unit">秒</span>
-              <span class="current-value" :class="{ 'warning': frequency.current < frequency.min }">{{ frequency.current }}</span>
+              <span class="current-value" :class="{ 'warning': frequency.current < frequency.min }">
+                {{ isControlEnabled ? frequency.current : '未启动' }}
+              </span>
             </div>
           </div>
 
@@ -38,9 +40,9 @@
             </div>
           </div>
 
-          <div class="checkbox-wrapper">
-            <el-checkbox v-model="speakMode.random" class="custom-checkbox">随机发言</el-checkbox>
-            <el-checkbox v-model="speakMode.sequential" class="custom-checkbox">顺序发言</el-checkbox>
+          <div class="radio-wrapper">
+            <el-radio v-model="speakMode.type" label="random" class="custom-radio">随机发言</el-radio>
+            <el-radio v-model="speakMode.type" label="sequential" class="custom-radio">顺序发言</el-radio>
           </div>
 
           <div class="checkbox-wrapper">
@@ -55,7 +57,7 @@
           </div>
 
           <el-button
-            type="danger"
+            :type="isControlEnabled ? 'danger' : 'success'"
             @click="isControlEnabled ? disableControl() : enableControl()"
             :loading="loading"
             class="control-button"
@@ -63,7 +65,7 @@
             {{ isControlEnabled ? '关闭自动场控' : '开启自动场控' }}
           </el-button>
         </div>
-      </div>
+      </div> 
 
       <!-- 右侧话术列表区 -->
       <div class="right-panel">
@@ -107,12 +109,24 @@
                         <span v-if="!item.editing" @click.stop="startEditTableName(item)" style="color: #409eff; cursor: pointer; margin-right: 5px;">
                           <el-icon><Edit /></el-icon>
                         </span>
-                        <span v-if="!item.editing" @click.stop="deleteScriptTable(item)" style="color: #f56c6c; cursor: pointer;">
-                          <el-icon><Delete /></el-icon>
-                        </span>
+                        <el-popconfirm
+                          v-if="!item.editing"
+                          :title="`确定要删除场控组 '${item.display_name}' 吗？所有关联的场控内容将被删除。`"
+                          confirm-button-text="确定删除"
+                          cancel-button-text="取消"
+                          @confirm="handleDeleteScriptTable(item)"
+                          width="250"
+                          confirm-button-type="danger"
+                        >
+                          <template #reference>
+                            <span @click.stop style="color: #f56c6c; cursor: pointer;">
+                              <el-icon><Delete /></el-icon>
+                            </span>
+                          </template>
+                        </el-popconfirm>
 
                         <!-- 编辑状态显示确认和取消按钮 -->
-                        <template v-else>
+                        <template v-if="item.editing">
                           <span @click.stop="confirmTableNameEdit(item)" style="color: #67c23a; cursor: pointer; margin-right: 5px;">
                             <el-icon><Check /></el-icon>
                           </span>
@@ -190,18 +204,34 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject, nextTick } from 'vue';
+import { ref, onMounted, inject, nextTick, watch } from 'vue';
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage} from 'element-plus';
 import { Edit, Delete, Check, Close } from '@element-plus/icons-vue';
+import { useLivechatStore } from '@/stores/livechatStore';
+
+// 配置全局默认值：限制只显示一个消息
+ElMessage.closeAll(); // 初始化时关闭所有消息
+const showMessage = (message, type = 'info') => {
+  ElMessage.closeAll(); // 显示新消息前关闭所有消息
+  return ElMessage({
+    message,
+    type,
+    duration: 3000,
+    showClose: true
+  });
+};
 
 // 使用共享状态 - 如果使用了 provide/inject 模式
 const sharedState = inject('livechatState', null);
 
+// Pinia store
+const livechatStore = useLivechatStore();
+
 // 状态变量
-const roomId = ref(sharedState?.roomId || '');
-const connected = ref(sharedState?.connected || false);
+const roomId = ref(livechatStore.roomId || sharedState?.roomId || '');
+const connected = ref(livechatStore.connected || sharedState?.connected || false);
 const isControlEnabled = ref(false);
 const loading = ref(false);
 const consoleRef = ref(sharedState?.consoleRef || null);
@@ -209,7 +239,7 @@ const tableLoading = ref(false);
 
 // 脚本表相关
 const scriptTables = ref([]);
-const selectedTable = ref('');
+const selectedTable = ref(livechatStore.selectedControlTable || '');
 const controlScripts = ref([]);
 const newTableName = ref('');
 
@@ -234,8 +264,7 @@ const restTime = ref({
 
 // 发言模式
 const speakMode = ref({
-  random: true,
-  sequential: false,
+  type: 'random', // 'random' 或 'sequential'
   randomSpace: true,
   randomEmoji: true
 });
@@ -257,7 +286,7 @@ const loadScriptTables = async () => {
 
       // 如果没有任何表，显示提示
       if (scriptTables.value.length === 0) {
-        ElMessage.warning('未找到任何场控组，请创建一个新的场控组');
+        showMessage('未找到任何场控组，请创建一个新的场控组', 'warning');
         return;
       }
 
@@ -273,17 +302,20 @@ const loadScriptTables = async () => {
           if (scriptTables.value.length > 0) {
             selectedTable.value = scriptTables.value[0].table_name;
             loadScripts(selectedTable.value);
-            ElMessage.info('已切换到可用的场控组');
+            showMessage('已切换到可用的场控组', 'info');
           } else {
             selectedTable.value = '';
           }
+        } else {
+          // 表存在且已选中，加载该表的数据
+          loadScripts(selectedTable.value);
         }
       }
     } else {
-      ElMessage.error(result?.message || '获取场控组失败');
+      showMessage(result?.message || '获取场控组失败', 'error');
     }
   } catch (error) {
-    ElMessage.error(`加载场控组失败: ${error.message || '未知错误'}`);
+    showMessage(`加载场控组失败: ${error.message || '未知错误'}`, 'error');
   }
 };
 
@@ -301,10 +333,10 @@ const loadScripts = async (tableName) => {
         editing: false
       }));
     } else {
-      ElMessage.error(result?.message || '获取话术失败');
+      showMessage(result?.message || '获取话术失败', 'error');
     }
   } catch (error) {
-    ElMessage.error(`加载话术失败: ${error.message || '未知错误'}`);
+    showMessage(`加载话术失败: ${error.message || '未知错误'}`, 'error');
   } finally {
     tableLoading.value = false;
   }
@@ -327,6 +359,9 @@ const handleTableChange = (value) => {
 
   // 记住当前选择
   lastSelectedTable.value = value;
+  
+  // 更新Pinia store中的选择
+  livechatStore.setSelectedControlTable(value);
 
   // 加载选定表的脚本
   loadScripts(value);
@@ -335,7 +370,7 @@ const handleTableChange = (value) => {
 // 脚本操作函数（添加、编辑、删除）
 const scriptOperation = async (action, params = {}) => {
   if (!selectedTable.value) {
-    ElMessage.warning('请先选择一个场控组');
+    showMessage('请先选择一个场控组', 'warning');
     return;
   }
 
@@ -361,7 +396,7 @@ const scriptOperation = async (action, params = {}) => {
             sharedState.consoleRef.addTextControlLog(`已添加新脚本: "${params.content}"`);
           }
 
-          ElMessage.success('添加成功');
+          showMessage('添加成功');
           break;
 
         case 'updateScript':
@@ -374,7 +409,7 @@ const scriptOperation = async (action, params = {}) => {
             sharedState.consoleRef.addTextControlLog(`已更新脚本: "${params.content}"`);
           }
 
-          ElMessage.success('更新成功');
+          showMessage('更新成功');
           break;
 
         case 'deleteScript':
@@ -387,7 +422,7 @@ const scriptOperation = async (action, params = {}) => {
             sharedState.consoleRef.addTextControlLog('已删除一条控场脚本');
           }
 
-          ElMessage.success('删除成功');
+          showMessage('删除成功');
           break;
 
         case 'createScriptTable':
@@ -402,7 +437,7 @@ const scriptOperation = async (action, params = {}) => {
             sharedState.consoleRef.addSystemMessage('system', `已创建新控场组: "${params.displayName}"`);
           }
 
-          ElMessage.success(`已创建控场组: ${params.displayName}`);
+          showMessage(`已创建控场组: ${params.displayName}`);
           break;
 
         case 'updateScriptTable':
@@ -413,15 +448,15 @@ const scriptOperation = async (action, params = {}) => {
             sharedState.consoleRef.addSystemMessage('system', `已修改控场组名称: "${params.oldDisplayName}" -> "${params.newDisplayName}"`);
           }
 
-          ElMessage.success('修改成功');
+          showMessage('修改成功');
           break;
 
         default:
-          ElMessage.success(result.message || '操作成功');
+          showMessage(result.message || '操作成功');
       }
     } else {
       // 统一处理错误
-      ElMessage.error(result?.message || `${getActionName(action)}失败`);
+      showMessage(result?.message || `${getActionName(action)}失败`, 'error');
 
       // 如果是更新操作，恢复原始内容
       if (action === 'updateScript' && params.row && params.originalContent !== undefined) {
@@ -435,7 +470,7 @@ const scriptOperation = async (action, params = {}) => {
       }
     }
   } catch (error) {
-    ElMessage.error(`操作失败: ${error.message || '未知错误'}`);
+    showMessage(`操作失败: ${error.message || '未知错误'}`, 'error');
 
     // 如果是更新操作，恢复原始内容
     if (action === 'updateScript' && params.row) {
@@ -461,7 +496,7 @@ const getActionName = (action) => {
 // 添加脚本行
 const addScriptRow = () => {
   if (!selectedTable.value) {
-    ElMessage.warning('请先选择一个场控组');
+    showMessage('请先选择一个场控组', 'warning');
     return;
   }
 
@@ -497,7 +532,7 @@ const editRow = (row) => {
 // 确认编辑
 const confirmEdit = (row) => {
   if (!row.content || row.content.trim() === '') {
-    ElMessage.warning('内容不能为空');
+    showMessage('内容不能为空', 'warning');
     return;
   }
 
@@ -512,7 +547,7 @@ const confirmEdit = (row) => {
         row.id = result.id;
         row.isNew = false;
         row.editing = false;
-        ElMessage.success('添加成功');
+        showMessage('添加成功');
 
         // 刷新列表以获取正确的ID和顺序
         loadScripts(selectedTable.value);
@@ -522,7 +557,7 @@ const confirmEdit = (row) => {
         }
       } else {
         // 添加失败，显示错误信息并从列表中移除
-        ElMessage.error(result?.message || '添加失败');
+        showMessage(result?.message || '添加失败', 'error');
         const index = controlScripts.value.indexOf(row);
         if (index !== -1) {
           controlScripts.value.splice(index, 1);
@@ -530,7 +565,7 @@ const confirmEdit = (row) => {
       }
     }).catch(error => {
       // 添加失败，显示错误信息并从列表中移除
-      ElMessage.error(`添加失败: ${error.message || '未知错误'}`);
+      showMessage(`添加失败: ${error.message || '未知错误'}`, 'error');
       const index = controlScripts.value.indexOf(row);
       if (index !== -1) {
         controlScripts.value.splice(index, 1);
@@ -548,21 +583,21 @@ const confirmEdit = (row) => {
     if (result && result.status === 'success') {
       // 更新成功
       row.editing = false;
-      ElMessage.success('保存成功');
+      showMessage('保存成功');
 
       if (sharedState?.consoleRef) {
         sharedState.consoleRef.addTextControlLog(`已更新脚本: "${row.content}"`);
       }
     } else {
       // 更新失败，显示错误信息
-      ElMessage.error(result?.message || '保存失败');
+      showMessage(result?.message || '保存失败', 'error');
       // 如果有原始内容，则恢复
       if (row.originalContent !== undefined) {
         row.content = row.originalContent;
       }
     }
   }).catch(error => {
-    ElMessage.error(`保存失败: ${error.message || '未知错误'}`);
+    showMessage(`保存失败: ${error.message || '未知错误'}`, 'error');
     // 如果有原始内容，则恢复
     if (row.originalContent !== undefined) {
       row.content = row.originalContent;
@@ -589,14 +624,14 @@ const deleteRow = (index, row) => {
         sharedState.consoleRef.addTextControlLog('已删除一条控场脚本');
       }
 
-      ElMessage.success('删除成功');
+      showMessage('删除成功');
     } else {
-      ElMessage.error(result?.message || '删除脚本失败');
+      showMessage(result?.message || '删除脚本失败', 'error');
       // 刷新列表
       loadScripts(selectedTable.value);
     }
   }).catch(error => {
-    ElMessage.error(`删除失败: ${error.message || '未知错误'}`);
+    showMessage(`删除失败: ${error.message || '未知错误'}`, 'error');
     // 刷新列表
     loadScripts(selectedTable.value);
   });
@@ -605,7 +640,7 @@ const deleteRow = (index, row) => {
 // 创建新表
 const createNewTable = () => {
   if (!newTableName.value || newTableName.value.trim() === '') {
-    ElMessage.warning('请输入表名');
+    showMessage('请输入表名', 'warning');
     return;
   }
 
@@ -633,7 +668,7 @@ const startEditTableName = (table) => {
 // 确认表名编辑
 const confirmTableNameEdit = (table) => {
   if (!table.editingName || table.editingName.trim() === '') {
-    ElMessage.warning('表名不能为空');
+    showMessage('表名不能为空', 'warning');
     return;
   }
 
@@ -659,104 +694,197 @@ const cancelTableNameEdit = (table) => {
   table.editing = false;
 };
 
-// 删除场控组
-const deleteScriptTable = (table) => {
-  // 确认删除
-  ElMessageBox.confirm(
-    `确定要删除场控组 "${table.display_name}" 吗？所有关联的场控内容将被删除。`,
-    '删除场控组',
-    {
-      confirmButtonText: '确定删除',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  ).then(() => {
-    // 用户确认删除，调用API
-    ipc.invoke(ipcApiRoute.scriptdb.deleteScriptTable, {
-      tableName: table.table_name
-    }).then(result => {
-      if (result && result.status === 'success') {
-        ElMessage.success(`已删除场控组: ${table.display_name}`);
+// 处理删除场控组
+const handleDeleteScriptTable = (table) => {
+  // 用户已通过气泡确认框确认删除，直接调用API
+  ipc.invoke(ipcApiRoute.scriptdb.deleteScriptTable, {
+    tableName: table.table_name
+  }).then(result => {
+    if (result && result.status === 'success') {
+      showMessage(`已删除场控组: ${table.display_name}`);
 
-        // 移除已删除的表
-        const index = scriptTables.value.findIndex(t => t.table_name === table.table_name);
-        if (index !== -1) {
-          scriptTables.value.splice(index, 1);
-        }
-
-        // 如果当前选择的表被删除，切换到新的表或清空选择
-        if (selectedTable.value === table.table_name) {
-          if (scriptTables.value.length > 0) {
-            selectedTable.value = scriptTables.value[0].table_name;
-            loadScripts(selectedTable.value);
-          } else {
-            selectedTable.value = '';
-            controlScripts.value = [];
-          }
-        }
-
-        // 记录到控制台
-        if (sharedState?.consoleRef) {
-          sharedState.consoleRef.addSystemMessage('system', `已删除控场组: "${table.display_name}"`);
-        }
-      } else {
-        // 删除失败
-        ElMessage.error(result?.message || '删除场控组失败');
+      // 移除已删除的表
+      const index = scriptTables.value.findIndex(t => t.table_name === table.table_name);
+      if (index !== -1) {
+        scriptTables.value.splice(index, 1);
       }
-    }).catch(error => {
-      ElMessage.error(`删除场控组失败: ${error.message || '未知错误'}`);
-    });
-  }).catch(() => {
-    // 用户取消删除
-    ElMessage.info('已取消删除');
+
+      // 如果当前选择的表被删除，切换到新的表或清空选择
+      if (selectedTable.value === table.table_name) {
+        if (scriptTables.value.length > 0) {
+          selectedTable.value = scriptTables.value[0].table_name;
+          loadScripts(selectedTable.value);
+        } else {
+          selectedTable.value = '';
+          controlScripts.value = [];
+        }
+      }
+
+      // 记录到控制台
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addSystemMessage('system', `已删除控场组: "${table.display_name}"`);
+      }
+    } else {
+      // 删除失败
+      showMessage(result?.message || '删除场控组失败', 'error');
+    }
+  }).catch(error => {
+    showMessage(`删除场控组失败: ${error.message || '未知错误'}`, 'error');
   });
 };
 
-// 开启自动控场
+// 添加函数检查连接状态
+const checkConnectionStatus = async () => {
+  try {
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.getConnectionStatus);
+    if (result && result.status === 'success' && result.data) {
+      isControlEnabled.value = result.data.isAutoControlEnabled;
+      // 如果已经连接了，更新UI状态
+      if (result.data.isConnected && !connected.value) {
+        connected.value = true;
+        if (sharedState) {
+          sharedState.connected = true;
+        }
+        livechatStore.setConnected(true);
+      }
+    }
+  } catch (error) {
+    console.error('检查连接状态失败:', error);
+  }
+};
+
+// 更新开启自动控场功能
 const enableControl = async () => {
+  console.log('启动自动场控...');
+  console.log('房间ID:', roomId.value);
+  console.log('连接状态:', connected.value);
+  console.log('选中的控场组:', selectedTable.value);
+  console.log('控场脚本数量:', controlScripts.value.length);
+
+  if (!roomId.value) {
+    showMessage('请先设置直播间ID', 'warning');
+    return;
+  }
+
   if (!connected.value) {
-    ElMessage.warning('请先连接到直播间');
+    showMessage('请先连接到直播间', 'warning');
+    return;
+  }
+  
+  if (!selectedTable.value || controlScripts.value.length === 0) {
+    showMessage('请选择一个场控组并确保其中有控场话术', 'warning');
     return;
   }
 
   loading.value = true;
   try {
-    // 这里应该调用后端API启用自动控场
-    // 模拟成功响应
-    setTimeout(() => {
-      isControlEnabled.value = true;
+    // 首先确保使用LiveChatConsole中的直播间ID连接到直播间
+    console.log('尝试连接到直播间:', roomId.value);
+    const connectResult = await ipc.invoke(ipcApiRoute.livechatAutoControl.connectToLiveRoom, {
+      roomId: roomId.value
+    });
+    
+    if (!connectResult || connectResult.status !== 'success') {
+      console.error('连接失败:', connectResult);
+      showMessage(connectResult?.message || '连接直播间失败', 'error');
       loading.value = false;
-
+      return;
+    }
+    
+    // 更新连接状态
+    if (connectResult.data && connectResult.data.isConnected) {
+      connected.value = true;
+      // 更新共享状态
+      if (sharedState) {
+        sharedState.connected = true;
+      }
+      // 更新pinia状态
+      livechatStore.setConnected(true);
+      console.log('已更新连接状态为:', true);
+    }
+    
+    // 构建设置对象
+    const settings = {
+      frequency: {
+        min: frequency.value.min,
+        max: frequency.value.max
+      },
+      continuousSpeech: {
+        start: continuousSpeech.value.start,
+        end: continuousSpeech.value.end
+      },
+      restTime: {
+        start: restTime.value.start,
+        end: restTime.value.end
+      },
+      random: speakMode.value.type === 'random',
+      sequential: speakMode.value.type === 'sequential',
+      randomSpace: speakMode.value.randomSpace,
+      randomEmoji: speakMode.value.randomEmoji
+    };
+    
+    // 调用后端API启用自动场控
+    console.log('启动自动场控，设置:', settings);
+    
+    // 清理脚本数据，移除不可序列化的属性
+    const cleanScripts = controlScripts.value.map(script => {
+      // 只保留必要的属性
+      return {
+        id: script.id,
+        content: script.content
+      };
+    });
+    
+    // 使用清理后的脚本数据
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.startAutoControl, {
+      scripts: cleanScripts,
+      settings: settings
+    });
+    
+    console.log('启动结果:', result);
+    if (result && result.status === 'success') {
+      isControlEnabled.value = true;
+      
+      // 更新当前频率显示
+      frequency.value.current = Math.floor(Math.random() * (frequency.value.max - frequency.value.min + 1)) + frequency.value.min;
+      
       if (consoleRef.value) {
         consoleRef.value.addTextControlLog('自动文字控场已启用');
       }
-
-      ElMessage.success('已开启自动控场');
-    }, 1000);
+      
+      showMessage('已开启自动场控');
+    } else {
+      showMessage(result?.message || '开启自动场控失败', 'error');
+    }
   } catch (error) {
-    ElMessage.error(`开启自动控场失败: ${error.message || '未知错误'}`);
+    console.error('开启自动场控出错:', error);
+    showMessage(`开启自动场控失败: ${error.message || '未知错误'}`, 'error');
+  } finally {
     loading.value = false;
   }
 };
 
-// 停止自动控场
+// 更新关闭自动控场功能
 const disableControl = async () => {
   loading.value = true;
   try {
-    // 这里应该调用后端API停用自动控场
-    // 模拟成功响应
-    setTimeout(() => {
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.stopAutoControl);
+    
+    if (result && result.status === 'success') {
       isControlEnabled.value = false;
-      loading.value = false;
-
+      
       if (consoleRef.value) {
         consoleRef.value.addTextControlLog('自动文字控场已停用');
       }
-
-      ElMessage.success('已停止自动控场');
-    }, 1000);
+      
+      showMessage('已关闭自动场控');
+    } else {
+      showMessage(result?.message || '关闭自动场控失败', 'error');
+    }
   } catch (error) {
-    ElMessage.error(`停止自动控场失败: ${error.message || '未知错误'}`);
+    console.error('关闭自动场控出错:', error);
+    showMessage(`关闭自动场控失败: ${error.message || '未知错误'}`, 'error');
+  } finally {
     loading.value = false;
   }
 };
@@ -768,9 +896,38 @@ onMounted(() => {
     connected.value = sharedState.connected;
     roomId.value = sharedState.roomId;
   }
+  
+  // 同步Pinia中的直播间状态到共享状态
+  if (livechatStore.roomId) {
+    roomId.value = livechatStore.roomId;
+    if (sharedState) sharedState.roomId = livechatStore.roomId;
+  }
+  
+  if (livechatStore.connected) {
+    connected.value = livechatStore.connected;
+    if (sharedState) sharedState.connected = livechatStore.connected;
+  }
 
+  // 检查自动场控连接状态
+  checkConnectionStatus();
+  
   // 直接加载表格，不再尝试修复默认表
   loadScriptTables();
+});
+
+// 监听连接状态和房间ID的变化，同步到Pinia
+watch(() => connected.value, (newVal) => {
+  livechatStore.setConnected(newVal);
+  if (sharedState) {
+    sharedState.connected = newVal;
+  }
+});
+
+watch(() => roomId.value, (newVal) => {
+  livechatStore.setRoomId(newVal);
+  if (sharedState) {
+    sharedState.roomId = newVal;
+  }
 });
 
 // 检查默认表是否存在 - 已不再使用
@@ -915,6 +1072,22 @@ const checkDefaultTable = async () => {
 
           :deep(.el-select-dropdown__item) {
             font-size: 12px;
+          }
+        }
+
+        .radio-wrapper {
+          display: flex;
+          justify-content: space-between;
+          margin: 2px 0;
+          
+          :deep(.el-radio) {
+            margin-right: 0;
+            height: 24px;
+            
+            .el-radio__label {
+              font-size: 12px;
+              padding-left: 4px;
+            }
           }
         }
 
