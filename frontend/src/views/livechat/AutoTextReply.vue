@@ -6,7 +6,7 @@
       <div class="left-panel">
         <div class="panel-section">
           <div class="setting-item">
-            <div class="setting-label">等待时间</div>
+            <div class="setting-label">发言频率</div>
             <div class="time-inputs">
               <el-input-number v-model="replyDelay.min" :min="0" :max="100" size="small" controls-position="right" />
               <span class="separator">—</span>
@@ -15,46 +15,21 @@
             </div>
           </div>
 
-          <div class="setting-item">
-            <div class="setting-label">相似度</div>
-            <div class="similarity-slider">
-              <el-slider v-model="similarity" :min="0" :max="100" :step="1" :show-tooltip="false" />
-              <span class="slider-value">{{ similarity }}%</span>
-            </div>
-          </div>
-
-          <div class="checkbox-wrapper">
-            <el-checkbox v-model="replyMode.exact" class="custom-checkbox">精确匹配</el-checkbox>
-            <el-checkbox v-model="replyMode.semantic" class="custom-checkbox">语义匹配</el-checkbox>
-          </div>
-
           <div class="checkbox-wrapper">
             <el-checkbox v-model="replyMode.randomSpace" class="custom-checkbox">随机空格</el-checkbox>
             <el-checkbox v-model="replyMode.randomEmoji" class="custom-checkbox">随机表情</el-checkbox>
           </div>
 
-          <div class="whitelist-settings">
-            <div class="whitelist-header">回复白名单 <el-switch v-model="whitelistEnabled" class="whitelist-switch" /></div>
-            <div class="whitelist-form" v-if="whitelistEnabled">
-              <div class="whitelist-row">
-                <span class="row-label">用户等级</span>
-                <div class="input-group">
-                  <span>≥</span>
-                  <el-input-number v-model="whitelist.userLevel" :min="0" :max="60" :step="1" size="small" controls-position="right" />
-                </div>
-              </div>
-              <div class="whitelist-row">
-                <span class="row-label">贡献值</span>
-                <div class="input-group">
-                  <span>≥</span>
-                  <el-input-number v-model="whitelist.contribution" :min="0" :max="10000" :step="100" size="small" controls-position="right" />
-                </div>
-              </div>
-            </div>
+          <div class="tips-box">
+            <div class="tip-line">友情提示：</div>
+            <div class="tip-line">• 回复后发言间隔建议30-60秒</div>
+            <div class="tip-line">• 发言太频繁容易被屏蔽</div>
+            <div class="tip-line">• 回复话术注意不要违规</div>
+            <div class="tip-line">• 否则容易被屏蔽</div>
           </div>
 
           <el-button
-            type="danger"
+            :type="isAutoReplyEnabled ? 'danger' : 'success'"
             @click="isAutoReplyEnabled ? disableAutoReply() : enableAutoReply()"
             :loading="loading"
             class="control-button"
@@ -167,7 +142,7 @@
           <!-- 关键词表格 -->
           <el-table :data="keywordItems" border style="width: 100%" max-height="350" stripe size="small" :v-loading="tableLoading">
             <el-table-column type="index" label="序号" width="50" align="center" />
-            <el-table-column prop="keyword" label="关键词">
+            <el-table-column prop="keyword" label="关键词用逗号隔开">
               <template #default="scope">
                 <el-input
                   v-if="scope.row.editing"
@@ -251,22 +226,10 @@ const replyDelay = ref({
   max: 5
 });
 
-// 相似度设置
-const similarity = ref(90);
-
 // 回复模式
 const replyMode = ref({
-  exact: true,
-  semantic: false,
   randomSpace: false,
   randomEmoji: true
-});
-
-// 白名单设置
-const whitelistEnabled = ref(false);
-const whitelist = ref({
-  userLevel: 1,
-  contribution: 0
 });
 
 // 添加对话框相关变量
@@ -371,10 +334,10 @@ const handleReplyTableChange = async (tableName) => {
   // 保存当前选择
   lastSelectedTable.value = tableName;
   selectedTable.value = tableName;
-  
+
   // 更新Pinia store中的选择
   livechatStore.setSelectedReplyTable(tableName);
-  
+
   await loadReplies(tableName);
 };
 
@@ -844,76 +807,28 @@ const handleDeleteTable = (table) => {
   });
 };
 
-// 启用自动回复
-const enableAutoReply = async () => {
-  if (!connected.value) {
-    ElMessage.warning('请先连接到直播间');
-    return;
-  }
-
-  loading.value = true;
-  try {
-    // 这里应该调用后端API启用自动回复
-    // 模拟成功响应
-    setTimeout(() => {
-      isAutoReplyEnabled.value = true;
-      loading.value = false;
-
-      if (sharedState?.consoleRef) {
-        sharedState.consoleRef.addTextReplyLog('自动文字回复已启用');
-      }
-
-      ElMessage.success('已开启自动回复');
-    }, 1000);
-  } catch (error) {
-    ElMessage.error(`开启自动回复失败: ${error.message || '未知错误'}`);
-    loading.value = false;
-  }
-};
-
-// 停止自动回复
-const disableAutoReply = async () => {
-  loading.value = true;
-  try {
-    // 这里应该调用后端API停用自动回复
-    // 模拟成功响应
-    setTimeout(() => {
-      isAutoReplyEnabled.value = false;
-      loading.value = false;
-
-      if (sharedState?.consoleRef) {
-        sharedState.consoleRef.addTextReplyLog('自动文字回复已停用');
-      }
-
-      ElMessage.success('已停止自动回复');
-    }, 1000);
-  } catch (error) {
-    ElMessage.error(`停止自动回复失败: ${error.message || '未知错误'}`);
-    loading.value = false;
-  }
-};
-
 // 页面挂载时同步状态
 onMounted(async () => {
   // 如果存在共享状态，将其同步到当前组件
   if (sharedState) {
     connected.value = sharedState.connected;
     roomId.value = sharedState.roomId;
+    consoleRef.value = sharedState.consoleRef;
   }
-  
-  // 同步Pinia中的直播间状态到共享状态
-  if (livechatStore.roomId) {
-    roomId.value = livechatStore.roomId;
-    if (sharedState) sharedState.roomId = livechatStore.roomId;
-  }
-  
-  if (livechatStore.connected) {
-    connected.value = livechatStore.connected;
-    if (sharedState) sharedState.connected = livechatStore.connected;
+
+  // 同步Pinia中的直播间状态
+  connected.value = livechatStore.connected;
+  roomId.value = livechatStore.roomId;
+
+  // 同步到共享状态
+  if (sharedState) {
+    sharedState.connected = connected.value;
+    sharedState.roomId = roomId.value;
   }
 
   console.log('组件已挂载，开始加载数据...');
-
+  console.log('连接状态:', connected.value);
+  console.log('房间ID:', roomId.value);
   // 初始化关键词表
   try {
     // 首先尝试检查并修复默认表
@@ -925,26 +840,189 @@ onMounted(async () => {
   // 加载表格列表
   await loadReplyTables();
 
-  // 如果有选中的表格，加载对应的数据
+  // 如果有选中的表，加载对应的数据
   if (selectedTable.value) {
     await loadReplies(selectedTable.value);
   }
 });
 
-// 监听连接状态和房间ID的变化，同步到Pinia
-watch(() => connected.value, (newVal) => {
-  livechatStore.setConnected(newVal);
-  if (sharedState) {
-    sharedState.connected = newVal;
-  }
-});
+// 监听连接状态和房间ID的变化
+watch([() => livechatStore.connected, () => livechatStore.roomId], ([newConnected, newRoomId]) => {
+  console.log('Store连接状态变化:', newConnected);
+  console.log('Store房间ID变化:', newRoomId);
 
-watch(() => roomId.value, (newVal) => {
-  livechatStore.setRoomId(newVal);
+  connected.value = newConnected;
+  roomId.value = newRoomId;
+
   if (sharedState) {
-    sharedState.roomId = newVal;
+    sharedState.connected = newConnected;
+    sharedState.roomId = newRoomId;
   }
-});
+}, { immediate: true });
+
+// 如果有共享状态，也监听它的变化
+if (sharedState) {
+  watch([() => sharedState.connected, () => sharedState.roomId], ([newConnected, newRoomId]) => {
+    console.log('共享状态连接状态变化:', newConnected);
+    console.log('共享状态房间ID变化:', newRoomId);
+
+    connected.value = newConnected;
+    roomId.value = newRoomId;
+
+    // 同步到store
+    livechatStore.setConnected(newConnected);
+    livechatStore.setRoomId(newRoomId);
+  }, { immediate: true });
+}
+
+// 检查连接状态
+const checkConnectionStatus = async () => {
+  try {
+    // 调用后端API检查连接状态
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.getConnectionStatus);
+    console.log('检查连接状态结果:', result);
+
+    if (result && result.status === 'success' && result.data) {
+      // 更新连接状态
+      const isConnected = result.data.connected;
+      const roomId = result.data.roomId;
+
+      connected.value = isConnected;
+      livechatStore.setConnected(isConnected);
+
+      if (roomId) {
+        roomId.value = roomId;
+        livechatStore.setRoomId(roomId);
+      }
+
+      // 更新共享状态
+      if (sharedState) {
+        sharedState.connected = isConnected;
+        sharedState.roomId = roomId || sharedState.roomId;
+      }
+
+      console.log('已更新连接状态:', {
+        connected: isConnected,
+        roomId: roomId
+      });
+    }
+  } catch (error) {
+    console.error('检查连接状态失败:', error);
+  }
+};
+
+// 启用自动回复
+const enableAutoReply = async () => {
+  // 检查store中的连接状态
+  const isStoreConnected = livechatStore.connected;
+  const storeRoomId = livechatStore.roomId;
+
+  console.log('启用自动回复检查状态:', {
+    storeConnected: isStoreConnected,
+    storeRoomId: storeRoomId
+  });
+
+  if (!isStoreConnected || !storeRoomId) {
+    ElMessage.warning('请先连接到直播间');
+    return;
+  }
+
+  if (!selectedTable.value) {
+    ElMessage.warning('请先选择一个关键词组');
+    return;
+  }
+
+  loading.value = true;
+  try {
+    // 首先尝试连接到自动场控服务
+    console.log('尝试连接自动场控服务...');
+    const connectionResult = await ipc.invoke(ipcApiRoute.livechatAutoControl.connectToLiveRoom, {
+      roomId: storeRoomId
+    });
+
+    console.log('连接自动场控服务结果:', connectionResult);
+
+    if (!connectionResult || connectionResult.status !== 'success') {
+      throw new Error('无法连接到自动场控服务: ' + (connectionResult?.message || '未知错误'));
+    }
+
+    // 清理回复数据，只保留必要属性
+    const cleanReplyItems = keywordItems.value.map(item => ({
+      id: item.id,
+      keyword: item.keyword,
+      reply: item.reply,
+      enabled: item.enabled !== false
+    }));
+
+    // 清理设置对象
+    const cleanSettings = {
+      frequency: {
+        min: Number(replyDelay.value.min),
+        max: Number(replyDelay.value.max)
+      },
+      randomSpace: Boolean(replyMode.value.randomSpace),
+      randomEmoji: Boolean(replyMode.value.randomEmoji)
+    };
+
+    // 构建请求参数
+    const requestParams = {
+      tableName: String(selectedTable.value),
+      replyItems: cleanReplyItems,
+      settings: cleanSettings
+    };
+
+    // 调用后端API启用自动回复
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.startAutoReply, requestParams);
+    console.log('启动自动回复结果:', result);
+
+    if (result && result.status === 'success') {
+      isAutoReplyEnabled.value = true;
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextReplyLog('自动文字回复已启用');
+      }
+      ElMessage.success('已开启自动回复');
+    } else {
+      const errorMsg = result?.message || '开启自动回复失败';
+      console.error('开启自动回复失败:', errorMsg);
+      ElMessage.error(errorMsg);
+    }
+  } catch (error) {
+    console.error('开启自动回复出错:', error);
+    console.error('错误堆栈:', error.stack);
+    ElMessage.error(`开启自动回复失败: ${error.message || '未知错误'}`);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 停止自动回复
+const disableAutoReply = async () => {
+  loading.value = true;
+  try {
+    // 调用后端API停用自动回复
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.stopAutoReply);
+    console.log('停止自动回复结果:', result);
+
+    if (result && result.status === 'success') {
+      isAutoReplyEnabled.value = false;
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextReplyLog('自动文字回复已停用');
+      }
+      ElMessage.success('已停止自动回复');
+
+      // 不要断开自动场控服务连接，只是停止自动回复功能
+      // 不再修改 livechatStore 中的连接状态
+    } else {
+      const errorMsg = result?.message || '停止自动回复失败';
+      ElMessage.error(errorMsg);
+    }
+  } catch (error) {
+    console.error('停止自动回复出错:', error);
+    ElMessage.error(`停止自动回复失败: ${error.message || '未知错误'}`);
+  } finally {
+    loading.value = false;
+  }
+};
 
 // 处理回复状态变更
 const handleReplyStatusChange = async (row) => {
@@ -1084,61 +1162,6 @@ const handleDelete = (row) => {
             color: #606266;
           }
         }
-
-        .similarity-slider {
-          display: flex;
-          align-items: center;
-          flex: 1;
-
-          :deep(.el-slider) {
-            flex: 1;
-            margin-right: 5px;
-
-            .el-slider__runway {
-              height: 4px;
-              margin: 8px 0;
-            }
-
-            .el-slider__bar {
-              height: 4px;
-            }
-
-            .el-slider__button-wrapper {
-              height: 16px;
-              width: 16px;
-              top: -6px;
-            }
-
-            .el-slider__button {
-              height: 12px;
-              width: 12px;
-            }
-          }
-
-          .slider-value {
-            font-size: 12px;
-            font-weight: bold;
-            color: #409eff;
-            width: 34px;
-            text-align: right;
-          }
-        }
-
-        .group-select {
-          flex: 1;
-
-          :deep(.el-input__wrapper) {
-            height: 24px;
-
-            .el-input__inner {
-              font-size: 12px;
-            }
-          }
-
-          :deep(.el-select-dropdown__item) {
-            font-size: 12px;
-          }
-        }
       }
 
       .checkbox-wrapper {
@@ -1161,82 +1184,28 @@ const handleDelete = (row) => {
         }
       }
 
-      .whitelist-settings {
-        margin-top: 3px;
-        border: 1px solid #e4e7ed;
-        border-radius: 3px;
-        padding: 3px;
-
-        .whitelist-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 12px;
-          font-weight: bold;
-          color: #606266;
-          margin-bottom: 3px;
-
-          .whitelist-switch {
-            transform: scale(0.7);
-          }
-        }
-
-        .whitelist-form {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-
-          .whitelist-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-            .row-label {
-              font-size: 11px;
-              color: #606266;
-            }
-
-            .input-group {
-              display: flex;
-              align-items: center;
-
-              span {
-                font-size: 12px;
-                margin-right: 3px;
-                color: #606266;
-              }
-
-              :deep(.el-input-number) {
-                width: 60px;
-                height: 22px;
-
-                .el-input__wrapper {
-                  padding: 0 5px;
-                }
-
-                .el-input__inner {
-                  padding: 0;
-                  text-align: center;
-                  height: 22px;
-                  font-size: 11px;
-                }
-
-                .el-input-number__decrease,
-                .el-input-number__increase {
-                  display: none;
-                }
-              }
-            }
-          }
-        }
-      }
-
       .control-button {
         margin-top: 4px;
         width: 100%;
         height: 26px;
         font-size: 12px;
         padding: 3px 8px;
+      }
+
+      .tips-box {
+        background-color: #fdf6ec;
+        border: 1px solid #faecd8;
+        border-radius: 2px;
+        padding: 4px 8px;
+        margin: 8px 0;
+        text-align: left;
+
+        .tip-line {
+          color: #e6a23c;
+          font-size: 11px;
+          line-height: 1.4;
+          text-align: left;
+        }
       }
     }
 

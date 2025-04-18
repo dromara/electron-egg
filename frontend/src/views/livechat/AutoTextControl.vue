@@ -65,7 +65,7 @@
             {{ isControlEnabled ? '关闭自动场控' : '开启自动场控' }}
           </el-button>
         </div>
-      </div> 
+      </div>
 
       <!-- 右侧话术列表区 -->
       <div class="right-panel">
@@ -359,7 +359,7 @@ const handleTableChange = (value) => {
 
   // 记住当前选择
   lastSelectedTable.value = value;
-  
+
   // 更新Pinia store中的选择
   livechatStore.setSelectedControlTable(value);
 
@@ -733,76 +733,73 @@ const handleDeleteScriptTable = (table) => {
   });
 };
 
-// 添加函数检查连接状态
+// 检查连接状态
 const checkConnectionStatus = async () => {
   try {
+    // 调用后端API检查连接状态
     const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.getConnectionStatus);
+
     if (result && result.status === 'success' && result.data) {
-      isControlEnabled.value = result.data.isAutoControlEnabled;
-      // 如果已经连接了，更新UI状态
-      if (result.data.isConnected && !connected.value) {
-        connected.value = true;
-        if (sharedState) {
-          sharedState.connected = true;
-        }
-        livechatStore.setConnected(true);
+      // 更新连接状态
+      const isConnected = result.data.connected;
+      const roomId = result.data.roomId;
+
+      // 更新组件状态
+      connected.value = isConnected;
+
+      // 更新 store 状态
+      livechatStore.setConnected(isConnected);
+
+      if (roomId) {
+        roomId.value = roomId;
+        livechatStore.setRoomId(roomId);
       }
+
+      // 更新共享状态
+      if (sharedState) {
+        sharedState.connected = isConnected;
+        if (roomId) sharedState.roomId = roomId;
+      }
+
+      console.log('场控: 已更新连接状态:', {
+        connected: isConnected,
+        roomId: roomId
+      });
     }
   } catch (error) {
     console.error('检查连接状态失败:', error);
   }
 };
 
-// 更新开启自动控场功能
+// 启动自动场控
 const enableControl = async () => {
-  console.log('启动自动场控...');
-  console.log('房间ID:', roomId.value);
-  console.log('连接状态:', connected.value);
-  console.log('选中的控场组:', selectedTable.value);
-  console.log('控场脚本数量:', controlScripts.value.length);
+  // 先检查连接状态
+  await checkConnectionStatus();
 
-  if (!roomId.value) {
-    showMessage('请先设置直播间ID', 'warning');
-    return;
-  }
-
-  if (!connected.value) {
+  // 使用store中的连接状态
+  if (!livechatStore.connected) {
     showMessage('请先连接到直播间', 'warning');
     return;
   }
-  
-  if (!selectedTable.value || controlScripts.value.length === 0) {
-    showMessage('请选择一个场控组并确保其中有控场话术', 'warning');
+
+  if (!selectedTable.value) {
+    showMessage('请先选择一个场控组', 'warning');
+    return;
+  }
+
+  if (!controlScripts.value || controlScripts.value.length === 0) {
+    showMessage('当前场控组中没有控场话术', 'warning');
     return;
   }
 
   loading.value = true;
   try {
-    // 首先确保使用LiveChatConsole中的直播间ID连接到直播间
-    console.log('尝试连接到直播间:', roomId.value);
-    const connectResult = await ipc.invoke(ipcApiRoute.livechatAutoControl.connectToLiveRoom, {
-      roomId: roomId.value
-    });
-    
-    if (!connectResult || connectResult.status !== 'success') {
-      console.error('连接失败:', connectResult);
-      showMessage(connectResult?.message || '连接直播间失败', 'error');
-      loading.value = false;
-      return;
-    }
-    
-    // 更新连接状态
-    if (connectResult.data && connectResult.data.isConnected) {
-      connected.value = true;
-      // 更新共享状态
-      if (sharedState) {
-        sharedState.connected = true;
-      }
-      // 更新pinia状态
-      livechatStore.setConnected(true);
-      console.log('已更新连接状态为:', true);
-    }
-    
+    // 清理脚本数据，移除不可序列化的属性
+    const cleanScripts = controlScripts.value.map(script => ({
+      id: script.id,
+      content: script.content
+    }));
+
     // 构建设置对象
     const settings = {
       frequency: {
@@ -822,36 +819,27 @@ const enableControl = async () => {
       randomSpace: speakMode.value.randomSpace,
       randomEmoji: speakMode.value.randomEmoji
     };
-    
+
     // 调用后端API启用自动场控
     console.log('启动自动场控，设置:', settings);
-    
-    // 清理脚本数据，移除不可序列化的属性
-    const cleanScripts = controlScripts.value.map(script => {
-      // 只保留必要的属性
-      return {
-        id: script.id,
-        content: script.content
-      };
-    });
-    
+
     // 使用清理后的脚本数据
     const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.startAutoControl, {
       scripts: cleanScripts,
       settings: settings
     });
-    
+
     console.log('启动结果:', result);
     if (result && result.status === 'success') {
       isControlEnabled.value = true;
-      
+
       // 更新当前频率显示
       frequency.value.current = Math.floor(Math.random() * (frequency.value.max - frequency.value.min + 1)) + frequency.value.min;
-      
+
       if (consoleRef.value) {
         consoleRef.value.addTextControlLog('自动文字控场已启用');
       }
-      
+
       showMessage('已开启自动场控');
     } else {
       showMessage(result?.message || '开启自动场控失败', 'error');
@@ -869,14 +857,14 @@ const disableControl = async () => {
   loading.value = true;
   try {
     const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.stopAutoControl);
-    
+
     if (result && result.status === 'success') {
       isControlEnabled.value = false;
-      
+
       if (consoleRef.value) {
         consoleRef.value.addTextControlLog('自动文字控场已停用');
       }
-      
+
       showMessage('已关闭自动场控');
     } else {
       showMessage(result?.message || '关闭自动场控失败', 'error');
@@ -890,29 +878,21 @@ const disableControl = async () => {
 };
 
 // 页面挂载时同步状态
-onMounted(() => {
-  // 如果存在共享状态，将其同步到当前组件
+onMounted(async () => {
+  // 同步状态
+  connected.value = livechatStore.connected;
+  roomId.value = livechatStore.roomId;
+
   if (sharedState) {
-    connected.value = sharedState.connected;
-    roomId.value = sharedState.roomId;
-  }
-  
-  // 同步Pinia中的直播间状态到共享状态
-  if (livechatStore.roomId) {
-    roomId.value = livechatStore.roomId;
-    if (sharedState) sharedState.roomId = livechatStore.roomId;
-  }
-  
-  if (livechatStore.connected) {
-    connected.value = livechatStore.connected;
-    if (sharedState) sharedState.connected = livechatStore.connected;
+    sharedState.connected = connected.value;
+    sharedState.roomId = roomId.value;
   }
 
-  // 检查自动场控连接状态
-  checkConnectionStatus();
-  
-  // 直接加载表格，不再尝试修复默认表
-  loadScriptTables();
+  // 检查连接状态
+  await checkConnectionStatus();
+
+  // 加载表格
+  await loadScriptTables();
 });
 
 // 监听连接状态和房间ID的变化，同步到Pinia
@@ -1079,11 +1059,11 @@ const checkDefaultTable = async () => {
           display: flex;
           justify-content: space-between;
           margin: 2px 0;
-          
+
           :deep(.el-radio) {
             margin-right: 0;
             height: 24px;
-            
+
             .el-radio__label {
               font-size: 12px;
               padding-left: 4px;

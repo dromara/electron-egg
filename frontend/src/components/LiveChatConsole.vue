@@ -259,6 +259,7 @@ const connect = async () => {
     return;
   }
 
+  console.log('[调试] connect() - 开始连接直播间:', roomId.value);
   connecting.value = true;
   try {
     // 清空之前的消息
@@ -268,9 +269,11 @@ const connect = async () => {
     giftMessages.value = [];
 
     // 调用API开始监控直播间
+    console.log('[调试] 准备调用API开始监控直播间:', roomId.value);
     const result = await ipc.invoke(ipcApiRoute.livechat.startMonitoring, {
       liveId: roomId.value
     });
+    console.log('[调试] API调用结果:', result);
 
     if (result && result.status === 'success') {
       ElMessage.success(result.message || '成功开始监控');
@@ -280,35 +283,55 @@ const connect = async () => {
       // 通知父组件状态变化
       emit('update:connected', connected.value);
       emit('update:roomId', roomId.value);
-      
+
       // 导入 livechatStore 确保在这个作用域可用
       const livechatStore = useLivechatStore();
-      
+      console.log('[调试] 连接前 livechatStore 状态:', {
+        roomId: livechatStore.roomId,
+        connected: livechatStore.connected
+      });
+
       // 更新 store 中的状态
       livechatStore.setRoomId(roomId.value);
       livechatStore.setConnected(true);
-      console.log('已更新 livechatStore 状态:', { roomId: roomId.value, connected: true });
+      console.log('[调试] 已更新 livechatStore 状态:', {
+        roomId: livechatStore.roomId,
+        connected: livechatStore.connected
+      });
+
+      // 查看localStorage中是否有保存
+      try {
+        const savedState = JSON.parse(localStorage.getItem('livechat-state'));
+        console.log('[调试] localStorage 中的 livechat-state:', savedState);
+      } catch (e) {
+        console.log('[调试] 无法解析 localStorage 中的 livechat-state');
+      }
 
       // 设置IPC消息监听器
       setupIpcListeners();
     } else {
       ElMessage.error(result?.message || '开始监控失败');
+      console.log('[调试] 开始监控失败:', result?.message);
     }
   } catch (error) {
     ElMessage.error(`连接错误: ${error.message || '未知错误'}`);
+    console.error('[调试] 连接错误:', error);
   } finally {
     connecting.value = false;
+    console.log('[调试] connect() - 连接流程结束, 状态:', connected.value);
   }
 };
 
 // 断开连接
 const disconnect = async () => {
+  console.log('[调试] disconnect() - 开始断开连接, 当前roomId:', roomId.value);
   disconnecting.value = true;
   try {
     // 停止监控
     const result = await ipc.invoke(ipcApiRoute.livechat.stopMonitoring, {
       liveId: roomId.value
     });
+    console.log('[调试] 停止监控API调用结果:', result);
 
     if (result && result.status === 'success') {
       ElMessage.success(result.message || '已停止监控');
@@ -316,40 +339,67 @@ const disconnect = async () => {
 
       // 通知父组件状态变化
       emit('update:connected', connected.value);
-      
+
       // 更新 store 中的状态
       const livechatStore = useLivechatStore();
+      console.log('[调试] 断开连接前 livechatStore 状态:', {
+        roomId: livechatStore.roomId,
+        connected: livechatStore.connected
+      });
+
       livechatStore.setConnected(false);
-      
+      console.log('[调试] 断开连接后 livechatStore 状态:', {
+        roomId: livechatStore.roomId,
+        connected: livechatStore.connected
+      });
+
+      // 查看localStorage中是否有更新
+      try {
+        const savedState = JSON.parse(localStorage.getItem('livechat-state'));
+        console.log('[调试] 断开连接后 localStorage 中的 livechat-state:', savedState);
+      } catch (e) {
+        console.log('[调试] 无法解析 localStorage 中的 livechat-state');
+      }
+
       // 记录日志
-      console.log('已更新 livechatStore 状态: 已断开连接');
+      console.log('[调试] 已更新 livechatStore 状态: 已断开连接');
       addSystemMessage('system', '已断开直播间连接');
-      
+
       // 重置统计数据
       currentViewers.value = 0;
       totalViewers.value = 0;
     } else {
       ElMessage.error(result?.message || '停止监控失败');
+      console.log('[调试] 停止监控失败:', result?.message);
     }
   } catch (error) {
     ElMessage.error(`断开连接错误: ${error.message || '未知错误'}`);
+    console.error('[调试] 断开连接错误:', error);
+
     // 出现错误时也要确保状态被重置
     connected.value = false;
-    
+
     // 更新 store 中的状态
     const livechatStore = useLivechatStore();
     livechatStore.setConnected(false);
-    
+    console.log('[调试] 错误处理后 livechatStore 状态:', {
+      roomId: livechatStore.roomId,
+      connected: livechatStore.connected
+    });
+
     emit('update:connected', connected.value);
   } finally {
     disconnecting.value = false;
+    console.log('[调试] disconnect() - 断开连接流程结束, 状态:', connected.value);
   }
 };
 
 // 检查当前监控状态
 const checkMonitoringStatus = async () => {
+  console.log('[调试] checkMonitoringStatus() - 开始检查监控状态');
   try {
     const response = await ipc.invoke(ipcApiRoute.livechat.getMonitoringStatus, {});
+    console.log('[调试] 监控状态检查结果:', response);
 
     if (response && response.status === 'success' && response.rooms && response.rooms.length > 0) {
       const monitoringRoom = response.rooms[0];
@@ -359,35 +409,65 @@ const checkMonitoringStatus = async () => {
       // 通知父组件状态变化
       emit('update:connected', connected.value);
       emit('update:roomId', roomId.value);
-      
+
       // 更新 store 中的状态
       const livechatStore = useLivechatStore();
+      console.log('[调试] 恢复监控前 livechatStore 状态:', {
+        roomId: livechatStore.roomId,
+        connected: livechatStore.connected
+      });
+
       livechatStore.setRoomId(roomId.value);
       livechatStore.setConnected(true);
-      console.log('已恢复并更新 livechatStore 状态:', { roomId: roomId.value, connected: true });
+      console.log('[调试] 已恢复并更新 livechatStore 状态:', {
+        roomId: livechatStore.roomId,
+        connected: livechatStore.connected
+      });
+
+      // 查看localStorage中是否有更新
+      try {
+        const savedState = JSON.parse(localStorage.getItem('livechat-state'));
+        console.log('[调试] 恢复监控后 localStorage 中的 livechat-state:', savedState);
+      } catch (e) {
+        console.log('[调试] 无法解析 localStorage 中的 livechat-state');
+      }
 
       addSystemMessage('system', `已恢复对直播间 ${roomId.value} 的监控状态`);
-      
+
       // 设置IPC消息监听器
       setupIpcListeners();
     } else {
       // 如果没有正在监控的直播间，确保状态为未连接
       connected.value = false;
-      
+
       // 更新 store 中的状态
       const livechatStore = useLivechatStore();
+      console.log('[调试] 未监控任何直播间前 livechatStore 状态:', {
+        roomId: livechatStore.roomId,
+        connected: livechatStore.connected
+      });
+
       livechatStore.setConnected(false);
-      console.log('检查监控状态：未连接到任何直播间');
-      
+      console.log('[调试] 未监控任何直播间后 livechatStore 状态:', {
+        roomId: livechatStore.roomId,
+        connected: livechatStore.connected
+      });
+
+      console.log('[调试] 检查监控状态：未连接到任何直播间');
+
       // 通知父组件状态变化
       emit('update:connected', false);
     }
   } catch (error) {
-    console.error('检查监控状态错误:', error);
+    console.error('[调试] 检查监控状态错误:', error);
     // 出错时也确保状态为未连接
     connected.value = false;
     const livechatStore = useLivechatStore();
     livechatStore.setConnected(false);
+    console.log('[调试] 检查状态出错后 livechatStore 状态:', {
+      roomId: livechatStore.roomId,
+      connected: livechatStore.connected
+    });
     emit('update:connected', false);
   }
 };
@@ -660,7 +740,23 @@ onMounted(() => {
     consoleHeight.value = parseInt(savedHeight);
   }
 
+  // 检查localStorage中的livechatStore状态
+  try {
+    const savedState = JSON.parse(localStorage.getItem('livechat-state'));
+    console.log('[调试] 组件挂载时 localStorage 中的 livechat-state:', savedState);
+  } catch (e) {
+    console.log('[调试] 组件挂载时无法解析 localStorage 中的 livechat-state');
+  }
+
+  // 获取当前livechatStore状态
+  const livechatStore = useLivechatStore();
+  console.log('[调试] 组件挂载时 livechatStore 状态:', {
+    roomId: livechatStore.roomId,
+    connected: livechatStore.connected
+  });
+
   // 检查监控状态
+  console.log('[调试] 组件挂载时准备检查监控状态');
   checkMonitoringStatus();
 });
 
@@ -672,11 +768,28 @@ onBeforeUnmount(() => {
   // 清除所有超时
   Object.values(memberTimeouts.value).forEach(timeout => clearTimeout(timeout));
   Object.values(giftTimeouts.value).forEach(timeout => clearTimeout(timeout));
-  
-  // 确保在组件卸载时重置连接状态
+
+  // 获取卸载前的livechatStore状态
   const livechatStore = useLivechatStore();
+  console.log('[调试] 组件卸载前 livechatStore 状态:', {
+    roomId: livechatStore.roomId,
+    connected: livechatStore.connected
+  });
+
+  // 确保在组件卸载时重置连接状态
   livechatStore.setConnected(false);
-  console.log('组件卸载：重置连接状态');
+  console.log('[调试] 组件卸载后 livechatStore 状态:', {
+    roomId: livechatStore.roomId,
+    connected: livechatStore.connected
+  });
+
+  // 查看localStorage中是否有更新
+  try {
+    const savedState = JSON.parse(localStorage.getItem('livechat-state'));
+    console.log('[调试] 组件卸载后 localStorage 中的 livechat-state:', savedState);
+  } catch (e) {
+    console.log('[调试] 组件卸载后无法解析 localStorage 中的 livechat-state');
+  }
 });
 
 // 导出方法给父组件使用

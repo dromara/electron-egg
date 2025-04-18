@@ -1,87 +1,59 @@
 <template>
-  <div class="voice-assistant-container">
+  <div class="auto-text-reply-container">
     <!-- 主要内容区域 - 左右布局 -->
     <div class="main-content">
       <!-- 左侧设置区 -->
       <div class="left-panel">
         <div class="panel-section">
           <div class="setting-item">
-            <div class="setting-label">声音调节</div>
-            <div class="voice-slider">
-              <el-slider v-model="voiceSettings.volume" :min="0" :max="100" :step="1" :show-tooltip="false" />
-              <span class="slider-value">{{ voiceSettings.volume }}%</span>
+            <div class="setting-label">回复间隔设置</div>
+            <div class="time-inputs">
+              <el-input v-model.number="audioSettings.minInterval" size="small" style="width: 60px" />
+              <span class="separator">—</span>
+              <el-input v-model.number="audioSettings.maxInterval" size="small" style="width: 60px" />
+              <span class="unit">秒</span>
             </div>
           </div>
 
           <div class="setting-item">
-            <div class="setting-label">语音引擎</div>
-            <el-select v-model="voiceSettings.engine" placeholder="选择引擎" size="small" class="engine-select">
-              <el-option
-                v-for="item in voiceEngines"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </div>
-
-          <div class="setting-item">
-            <div class="setting-label">语速</div>
-            <div class="voice-slider">
-              <el-slider v-model="voiceSettings.speed" :min="0.5" :max="2" :step="0.1" :show-tooltip="false" />
-              <span class="slider-value">{{ voiceSettings.speed.toFixed(1) }}x</span>
+            <div class="setting-label">播放模式</div>
+            <div class="play-mode">
+              <el-radio-group v-model="audioSettings.playMode" size="small">
+                <el-radio :value="'random'" label="随机播放"></el-radio>
+                <el-radio :value="'sequential'" label="顺序播放"></el-radio>
+              </el-radio-group>
             </div>
           </div>
 
           <div class="setting-item">
-            <div class="setting-label">音调</div>
+            <div class="setting-label">播放音量</div>
             <div class="voice-slider">
-              <el-slider v-model="voiceSettings.pitch" :min="-10" :max="10" :step="1" :show-tooltip="false" />
-              <span class="slider-value">{{ voiceSettings.pitch > 0 ? '+' + voiceSettings.pitch : voiceSettings.pitch }}</span>
+              <el-slider v-model="audioSettings.volume" :min="0" :max="100" :step="1" :show-tooltip="false" />
+              <span class="slider-value">{{ audioSettings.volume }}%</span>
             </div>
           </div>
 
-          <div class="checkbox-wrapper">
-            <el-checkbox v-model="voiceSettings.autoRead" class="custom-checkbox">自动朗读</el-checkbox>
-            <el-checkbox v-model="voiceSettings.skipUser" class="custom-checkbox">跳过用户名</el-checkbox>
-          </div>
-
-          <div class="checkbox-wrapper">
-            <el-checkbox v-model="voiceSettings.readGifts" class="custom-checkbox">朗读礼物</el-checkbox>
-            <el-checkbox v-model="voiceSettings.readFans" class="custom-checkbox">朗读粉丝关注</el-checkbox>
-          </div>
-
-          <div class="filter-settings">
-            <div class="filter-header">筛选条件 <el-switch v-model="filterEnabled" class="filter-switch" /></div>
-            <div class="filter-form" v-if="filterEnabled">
-              <div class="filter-row">
-                <span class="row-label">用户等级</span>
-                <div class="input-group">
-                  <span>≥</span>
-                  <el-input-number v-model="filter.userLevel" :min="0" :max="60" :step="1" size="small" controls-position="right" />
-                </div>
-              </div>
-              <div class="filter-row">
-                <span class="row-label">贡献值</span>
-                <div class="input-group">
-                  <span>≥</span>
-                  <el-input-number v-model="filter.contribution" :min="0" :max="10000" :step="100" size="small" controls-position="right" />
-                </div>
-              </div>
-              <div class="filter-row">
-                <span class="row-label">发言字数</span>
-                <div class="input-group">
-                  <span>≥</span>
-                  <el-input-number v-model="filter.textLength" :min="0" :max="100" :step="1" size="small" controls-position="right" />
-                </div>
-              </div>
+          <div class="setting-item">
+            <div class="setting-label">播放倍速</div>
+            <div class="voice-slider">
+              <el-slider v-model="audioSettings.playbackRate" :min="0.5" :max="2" :step="0.1" :show-tooltip="false" />
+              <span class="slider-value">{{ audioSettings.playbackRate.toFixed(1) }}x</span>
             </div>
+          </div>
+
+          <div class="tips-box">
+            <div class="tip-line">友情提示：</div>
+            <div class="tip-line">• 播放间隔建议30-60秒</div>
+            <div class="tip-line">• 音频文件放在data/audio文件夹</div>
+            <div class="tip-line">• 每个子文件夹代表一个音频组</div>
+            <div class="tip-line">• 支持MP3, WAV等格式</div>
           </div>
 
           <el-button
-            type="primary"
+            :type="isVoiceEnabled ? 'danger' : 'success'"
             @click="isVoiceEnabled ? disableVoiceAssistant() : enableVoiceAssistant()"
             :loading="loading"
+            :disabled="!selectedAudioGroup || !connected"
             class="control-button"
           >
             {{ isVoiceEnabled ? '停止语音助手' : '启动语音助手' }}
@@ -89,47 +61,56 @@
         </div>
       </div>
 
-      <!-- 右侧话术列表区 -->
+      <!-- 右侧音频文件列表区 -->
       <div class="right-panel">
         <div class="panel-section">
-          <div class="test-voice-area">
-            <div class="test-title">语音测试</div>
-            <div class="test-content">
-              <el-input
-                v-model="testText"
-                type="textarea"
-                :rows="4"
-                placeholder="在此输入测试文本..."
-                resize="none"
-              />
-              <div class="test-buttons">
-                <el-button type="primary" size="small" @click="testVoice">测试朗读</el-button>
-                <el-button size="small" @click="stopVoice">停止朗读</el-button>
+          <!-- 表格上方的操作区域 -->
+          <div class="table-header">
+            <div class="left-controls">
+              <div class="group-selector">
+                <span class="selector-label">音频组:</span>
+                <el-select v-model="selectedAudioGroup" placeholder="选择音频组" size="small" class="group-select" @change="getAudioFiles(selectedAudioGroup)">
+                  <el-option
+                    v-for="group in audioGroups"
+                    :key="group"
+                    :label="group"
+                    :value="group"
+                  />
+                </el-select>
+                <el-button size="small" @click="refreshAudioGroups" :loading="loadingAudioGroups" class="refresh-btn">
+                  <el-icon><Refresh /></el-icon>
+                </el-button>
               </div>
             </div>
           </div>
 
-          <div class="custom-templates">
-            <div class="templates-title">自定义语音模板</div>
-            <el-table :data="voiceTemplates" border style="width: 100%" max-height="160" stripe size="small">
-              <el-table-column type="index" label="序号" width="50" align="center" />
-              <el-table-column prop="type" label="类型" width="80">
-                <template #default="scope">
-                  <el-tag :type="getTagType(scope.row.type)" size="small">{{ scope.row.type }}</el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column prop="template" label="模板内容">
-                <template #default="scope">
-                  <div>{{ scope.row.template }}</div>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="80" align="center">
-                <template #default="scope">
-                  <el-button type="text" size="small" @click="editTemplate(scope.row)">编辑</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
+          <!-- 音频文件表格 -->
+          <el-table
+            :data="audioFiles"
+            border
+            style="width: 100%"
+            max-height="350"
+            stripe
+            size="small"
+            v-loading="loadingAudioFiles"
+          >
+            <el-table-column type="index" label="序号" width="50" align="center" />
+            <el-table-column prop="name" label="文件名">
+              <template #default="scope">
+                <div class="file-name">{{ scope.row.name }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="size" label="大小" width="100">
+              <template #default="scope">
+                <div>{{ formatFileSize(scope.row.size) }}</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="80" align="center">
+              <template #default="scope">
+                <el-button link size="small" @click="playAudioFile(scope.row)">播放</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
       </div>
     </div>
@@ -137,68 +118,130 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue';
+import { ref, onMounted, watch, inject, onBeforeUnmount } from 'vue';
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElMessage } from 'element-plus';
+import { Refresh } from '@element-plus/icons-vue';
+import { useLivechatStore } from '@/stores/livechatStore';
 
 // 使用共享状态 - 如果使用了 provide/inject 模式
 const sharedState = inject('livechatState', null);
+const livechatStore = useLivechatStore();
 
 // 状态变量
-const roomId = ref(sharedState?.roomId || '');
-const connected = ref(sharedState?.connected || false);
+const roomId = ref(sharedState?.roomId || livechatStore.roomId || '');
+const connected = ref(sharedState?.connected || livechatStore.connected || false);
 const isVoiceEnabled = ref(false);
 const loading = ref(false);
-const testText = ref('这是一段测试语音，用来检测语音助手的效果。您可以调整音量、语速和音调来获得最佳体验。');
 
-// 语音引擎选项
-const voiceEngines = ref([
-  { label: '微软语音', value: 'microsoft' },
-  { label: '讯飞语音', value: 'xunfei' },
-  { label: '百度语音', value: 'baidu' },
-  { label: '系统语音', value: 'system' },
-]);
+// 音频组
+const audioGroups = ref([]);
+const selectedAudioGroup = ref('');
+const audioFiles = ref([]);
+const loadingAudioGroups = ref(false);
+const loadingAudioFiles = ref(false);
 
-// 语音设置
-const voiceSettings = ref({
-  volume: 75,
-  engine: 'microsoft',
-  speed: 1.0,
-  pitch: 0,
-  autoRead: true,
-  skipUser: false,
-  readGifts: true,
-  readFans: true,
+// 音频播放设置
+const audioSettings = ref({
+  volume: 80,
+  playbackRate: 1.0,
+  minInterval: 5,
+  maxInterval: 10,
+  playMode: 'random'
 });
 
-// 筛选设置
-const filterEnabled = ref(false);
-const filter = ref({
-  userLevel: 1,
-  contribution: 0,
-  textLength: 5,
-});
+// 音频播放器
+const audioPlayer = ref(null);
 
-// 语音模板
-const voiceTemplates = ref([
-  { type: '弹幕', template: '{username}说：{content}' },
-  { type: '礼物', template: '感谢{username}送出{gift_name}，共{gift_count}个！' },
-  { type: '关注', template: '感谢{username}关注了主播！' },
-  { type: '进入', template: '欢迎{username}进入直播间！' },
-  { type: '点赞', template: '感谢{username}的点赞支持！' },
-]);
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+};
 
-// 获取标签类型
-const getTagType = (type) => {
-  const typeMap = {
-    '弹幕': '',
-    '礼物': 'success',
-    '关注': 'warning',
-    '进入': 'info',
-    '点赞': 'danger',
-  };
-  return typeMap[type] || '';
+// 获取音频组列表
+const getAudioGroups = async () => {
+  loadingAudioGroups.value = true;
+  try {
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.getAudioGroups);
+    if (result && result.status === 'success' && result.data) {
+      audioGroups.value = result.data;
+      console.log('获取到音频组列表:', audioGroups.value);
+
+      // 如果当前选中的音频组不在列表中，重置选择
+      if (selectedAudioGroup.value && !audioGroups.value.includes(selectedAudioGroup.value)) {
+        selectedAudioGroup.value = audioGroups.value.length > 0 ? audioGroups.value[0] : '';
+      } else if (!selectedAudioGroup.value && audioGroups.value.length > 0) {
+        selectedAudioGroup.value = audioGroups.value[0];
+      }
+    } else {
+      console.error('获取音频组列表失败:', result?.message);
+      ElMessage.warning('获取音频组列表失败: ' + (result?.message || '未知错误'));
+    }
+  } catch (error) {
+    console.error('获取音频组列表出错:', error);
+    ElMessage.error('获取音频组列表出错: ' + (error.message || '未知错误'));
+  } finally {
+    loadingAudioGroups.value = false;
+  }
+};
+
+// 刷新音频组列表
+const refreshAudioGroups = async () => {
+  await getAudioGroups();
+};
+
+// 获取音频文件列表
+const getAudioFiles = async (groupName) => {
+  if (!groupName) return;
+
+  loadingAudioFiles.value = true;
+  try {
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.getAudioFiles, { groupName });
+    if (result && result.status === 'success' && result.data) {
+      audioFiles.value = result.data;
+      console.log('获取到音频文件列表:', audioFiles.value);
+    } else {
+      console.error('获取音频文件列表失败:', result?.message);
+      audioFiles.value = [];
+      ElMessage.warning('获取音频文件列表失败: ' + (result?.message || '未知错误'));
+    }
+  } catch (error) {
+    console.error('获取音频文件列表出错:', error);
+    audioFiles.value = [];
+    ElMessage.error('获取音频文件列表出错: ' + (error.message || '未知错误'));
+  } finally {
+    loadingAudioFiles.value = false;
+  }
+};
+
+// 播放单个音频文件（测试用）
+const playAudioFile = (file) => {
+  try {
+    console.log('请求播放音频文件:', file.path);
+    // 通过IPC调用后端播放音频
+    ipc.invoke(ipcApiRoute.voiceAssistant.playAudioFile, {
+      filePath: file.path,
+      volume: audioSettings.value.volume / 100,
+      playbackRate: audioSettings.value.playbackRate
+    }).then(result => {
+      if (result && result.status === 'success') {
+        ElMessage.success('开始播放音频');
+      } else {
+        ElMessage.error(result?.message || '播放音频失败');
+      }
+    }).catch(error => {
+      console.error('播放音频出错:', error);
+      ElMessage.error('播放音频出错: ' + (error.message || '未知错误'));
+    });
+  } catch (error) {
+    console.error('播放音频请求出错:', error);
+    ElMessage.error('播放音频请求出错: ' + (error.message || '未知错误'));
+  }
 };
 
 // 启用语音助手
@@ -208,22 +251,32 @@ const enableVoiceAssistant = async () => {
     return;
   }
 
+  if (!selectedAudioGroup.value) {
+    ElMessage.warning('请先选择一个音频组');
+    return;
+  }
+
   loading.value = true;
   try {
-    // 这里应该调用后端API启用语音助手
-    // 模拟成功响应
-    setTimeout(() => {
+    // 调用后端API启用语音助手
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.startVoiceAssistant, {
+      groupName: selectedAudioGroup.value,
+      settings: audioSettings.value
+    });
+
+    if (result && result.status === 'success') {
       isVoiceEnabled.value = true;
-      loading.value = false;
-
       if (sharedState?.consoleRef) {
-        sharedState.consoleRef.addSystemMessage('system', '语音助手已启用');
+        sharedState.consoleRef.addVoiceAssistantLog(`语音助手已启用，使用音频组: ${selectedAudioGroup.value}`);
       }
-
       ElMessage.success('已启动语音助手');
-    }, 1000);
+    } else {
+      ElMessage.error(result?.message || '启动语音助手失败');
+    }
   } catch (error) {
+    console.error('启动语音助手出错:', error);
     ElMessage.error(`启动语音助手失败: ${error.message || '未知错误'}`);
+  } finally {
     loading.value = false;
   }
 };
@@ -232,77 +285,137 @@ const enableVoiceAssistant = async () => {
 const disableVoiceAssistant = async () => {
   loading.value = true;
   try {
-    // 这里应该调用后端API停用语音助手
-    // 模拟成功响应
-    setTimeout(() => {
+    // 调用后端API停用语音助手
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.stopVoiceAssistant);
+
+    if (result && result.status === 'success') {
       isVoiceEnabled.value = false;
-      loading.value = false;
-
       if (sharedState?.consoleRef) {
-        sharedState.consoleRef.addSystemMessage('system', '语音助手已停用');
+        sharedState.consoleRef.addVoiceAssistantLog('语音助手已停用');
       }
-
       ElMessage.success('已停止语音助手');
-    }, 1000);
+    } else {
+      ElMessage.error(result?.message || '停止语音助手失败');
+    }
   } catch (error) {
+    console.error('停止语音助手出错:', error);
     ElMessage.error(`停止语音助手失败: ${error.message || '未知错误'}`);
+  } finally {
     loading.value = false;
   }
 };
 
-// 测试语音
-const testVoice = () => {
-  if (!testText.value) {
-    ElMessage.warning('请输入测试文本');
-    return;
-  }
+// 检查语音助手状态
+const checkVoiceAssistantStatus = async () => {
+  try {
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.getVoiceAssistantStatus);
+    if (result && result.status === 'success' && result.data) {
+      const { isEnabled, currentGroup, settings } = result.data;
+      isVoiceEnabled.value = isEnabled;
 
-  if (sharedState?.consoleRef) {
-    sharedState.consoleRef.addSystemMessage('system', `测试朗读: "${testText.value}"`);
-  }
+      if (isEnabled && currentGroup) {
+        selectedAudioGroup.value = currentGroup;
 
-  ElMessage.success('开始测试朗读');
-  // 这里应调用语音合成API
-};
+        // 更新设置
+        if (settings) {
+          audioSettings.value = { ...audioSettings.value, ...settings };
+        }
 
-// 停止语音
-const stopVoice = () => {
-  // 这里应调用停止语音API
-  ElMessage.info('已停止朗读');
-};
-
-// 编辑模板
-const editTemplate = (template) => {
-  ElMessageBox.prompt('请编辑模板内容', `编辑${template.type}模板`, {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    inputValue: template.template,
-  }).then(({ value }) => {
-    if (value) {
-      // 更新模板内容
-      template.template = value;
-
-      if (sharedState?.consoleRef) {
-        sharedState.consoleRef.addSystemMessage('system', `已更新${template.type}模板`);
+        console.log('语音助手已启用，使用音频组:', currentGroup);
       }
-
-      ElMessage.success(`已更新${template.type}模板`);
     }
-  }).catch(() => {});
+  } catch (error) {
+    console.error('检查语音助手状态出错:', error);
+  }
 };
 
-// 页面挂载时同步状态
-onMounted(() => {
-  // 如果存在共享状态，将其同步到当前组件
+// 监听音频播放消息（从主进程）
+const setupAudioPlayListener = () => {
+  ipc.on('play-audio', (event, data) => {
+    const { filePath, volume, playbackRate } = data;
+
+    if (!audioPlayer.value) {
+      audioPlayer.value = new Audio();
+    }
+
+    // 设置音频源
+    audioPlayer.value.src = `file://${filePath}`;
+
+    // 设置音量和播放速率
+    audioPlayer.value.volume = volume;
+    audioPlayer.value.playbackRate = playbackRate;
+
+    // 播放
+    audioPlayer.value.play().catch(error => {
+      console.error('播放音频出错:', error);
+    });
+
+    console.log('收到播放请求:', filePath);
+  });
+};
+
+// 监听选中的音频组变化
+watch(selectedAudioGroup, (newGroup) => {
+  if (newGroup) {
+    getAudioFiles(newGroup);
+  } else {
+    audioFiles.value = [];
+  }
+});
+
+// 监听共享状态中的连接状态变化
+watch([() => sharedState?.connected, () => livechatStore.connected], ([newSharedConnected, newStoreConnected]) => {
+  const newConnected = newSharedConnected !== undefined ? newSharedConnected : newStoreConnected;
+  if (connected.value !== newConnected) {
+    connected.value = newConnected;
+    console.log('连接状态变化:', connected.value);
+  }
+}, { immediate: true });
+
+// 监听共享状态中的房间ID变化
+watch([() => sharedState?.roomId, () => livechatStore.roomId], ([newSharedRoomId, newStoreRoomId]) => {
+  const newRoomId = newSharedRoomId || newStoreRoomId;
+  if (roomId.value !== newRoomId) {
+    roomId.value = newRoomId;
+    console.log('房间ID变化:', roomId.value);
+  }
+}, { immediate: true });
+
+// 组件挂载时
+onMounted(async () => {
+  // 如果存在共享状态，同步到当前组件
   if (sharedState) {
     connected.value = sharedState.connected;
     roomId.value = sharedState.roomId;
+  } else {
+    // 否则使用Pinia Store中的状态
+    connected.value = livechatStore.connected;
+    roomId.value = livechatStore.roomId;
   }
+
+  // 初始化
+  await getAudioGroups();
+  await checkVoiceAssistantStatus();
+
+  // 设置音频播放监听器
+  setupAudioPlayListener();
+});
+
+// 组件卸载前
+onBeforeUnmount(() => {
+  // 停止当前正在播放的音频
+  if (audioPlayer.value) {
+    audioPlayer.value.pause();
+    audioPlayer.value = null;
+  }
+
+  // 移除事件监听器
+  ipc.removeAllListeners('play-audio');
 });
 </script>
 
 <style lang="less" scoped>
-.voice-assistant-container {
+.auto-text-reply-container {
   padding: 5px 10px;
 
   .main-content {
@@ -334,13 +447,38 @@ onMounted(() => {
         .setting-item {
           display: flex;
           align-items: center;
-          margin-bottom: 5px;
+          margin-bottom: 8px;
 
           .setting-label {
-            width: 65px;
+            width: 80px;
             color: #606266;
             font-size: 12px;
-            white-space: nowrap; /* 防止标签换行 */
+            font-weight: bold;
+            margin-bottom: 0;
+            white-space: nowrap;
+          }
+
+          .time-inputs {
+            display: flex;
+            align-items: center;
+            flex: 1;
+
+            :deep(.el-input) {
+              width: 60px;
+              height: 24px;
+              text-align: center;
+            }
+
+            .separator {
+              margin: 0 5px;
+              color: #606266;
+            }
+
+            .unit {
+              margin: 0 3px;
+              font-size: 12px;
+              color: #606266;
+            }
           }
 
           .voice-slider {
@@ -350,152 +488,55 @@ onMounted(() => {
 
             :deep(.el-slider) {
               flex: 1;
-              margin-right: 5px;
-
-              .el-slider__runway {
-                height: 4px;
-                margin: 8px 0;
-              }
-
-              .el-slider__bar {
-                height: 4px;
-              }
-
-              .el-slider__button-wrapper {
-                height: 16px;
-                width: 16px;
-                top: -6px;
-              }
-
-              .el-slider__button {
-                height: 12px;
-                width: 12px;
-              }
+              margin-right: 10px;
             }
 
             .slider-value {
+              min-width: 40px;
               font-size: 12px;
-              font-weight: bold;
-              color: #409eff;
-              width: 34px;
-              text-align: right;
+              color: #606266;
             }
           }
 
-          .engine-select {
+          .play-mode {
             flex: 1;
 
-            :deep(.el-input__wrapper) {
-              height: 24px;
+            :deep(.el-radio-group) {
+              width: 100%;
+              display: flex;
+              justify-content: space-between;
 
-              .el-input__inner {
+              .el-radio {
+                margin-right: 0;
                 font-size: 12px;
               }
             }
-
-            :deep(.el-select-dropdown__item) {
-              font-size: 12px;
-            }
           }
         }
+      }
 
-        .checkbox-wrapper {
-          display: flex;
-          justify-content: space-between;
-          margin: 2px 0;
+      .tips-box {
+        background-color: #fdf6ec;
+        border: 1px solid #faecd8;
+        border-radius: 2px;
+        padding: 4px 8px;
+        margin: 8px 0;
+        text-align: left;
 
-          :deep(.el-checkbox) {
-            margin-right: 0;
-            height: 20px;
-
-            .el-checkbox__input {
-              margin-right: 2px;
-            }
-
-            .el-checkbox__label {
-              font-size: 11px;
-              padding-left: 4px;
-            }
-          }
+        .tip-line {
+          color: #e6a23c;
+          font-size: 11px;
+          line-height: 1.4;
+          text-align: left;
         }
+      }
 
-        .filter-settings {
-          margin-top: 3px;
-          border: 1px solid #e4e7ed;
-          border-radius: 3px;
-          padding: 5px;
-
-          .filter-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            font-weight: bold;
-            color: #606266;
-            margin-bottom: 4px;
-
-            .filter-switch {
-              transform: scale(0.7);
-            }
-          }
-
-          .filter-form {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-
-            .filter-row {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-
-              .row-label {
-                font-size: 11px;
-                color: #606266;
-              }
-
-              .input-group {
-                display: flex;
-                align-items: center;
-
-                span {
-                  font-size: 12px;
-                  margin-right: 3px;
-                  color: #606266;
-                }
-
-                :deep(.el-input-number) {
-                  width: 60px;
-                  height: 22px;
-
-                  .el-input__wrapper {
-                    padding: 0 5px;
-                  }
-
-                  .el-input__inner {
-                    padding: 0;
-                    text-align: center;
-                    height: 22px;
-                    font-size: 11px;
-                  }
-
-                  .el-input-number__decrease,
-                  .el-input-number__increase {
-                    display: none;
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        .control-button {
-          margin-top: 8px;
-          width: 100%;
-          height: 28px;
-          font-size: 12px;
-          padding: 5px 8px;
-        }
+      .control-button {
+        margin-top: 4px;
+        width: 100%;
+        height: 26px;
+        font-size: 12px;
+        padding: 3px 8px;
       }
     }
 
@@ -510,68 +551,76 @@ onMounted(() => {
       .panel-section {
         display: flex;
         flex-direction: column;
+        overflow: hidden;
         height: 100%;
-        gap: 10px;
 
-        .test-voice-area, .custom-templates {
-          .test-title, .templates-title {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 6px;
-            color: #303133;
-          }
-        }
-
-        .test-content {
-          :deep(.el-textarea__inner) {
-            font-size: 12px;
-            padding: 6px 8px;
-          }
-
-          .test-buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 6px;
-            flex-wrap: wrap; /* 允许按钮换行 */
-
-            :deep(.el-button) {
-              padding: 5px 10px;
-              font-size: 12px;
-            }
-          }
-        }
-
-        .custom-templates {
-          margin-top: 0;
-          flex: 1;
+        // 表格上方的操作区域样式
+        .table-header {
           display: flex;
-          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
 
-          :deep(.el-table) {
-            flex: 1;
-            font-size: 12px;
+          .left-controls {
+            display: flex;
+            align-items: center;
 
-            .el-table__body-wrapper {
-              overflow-x: auto; /* 允许表格水平滚动 */
-            }
+            .group-selector {
+              display: flex;
+              align-items: center;
 
-            // 设置列宽比例
-            .el-table__header th:nth-child(1) {
-              width: 50px; /* 序号列 */
-            }
-            .el-table__header th:nth-child(2) {
-              width: 80px; /* 类型列 */
-            }
-            .el-table__header th:nth-child(3) {
-              min-width: 150px; /* 模板内容列 */
-            }
-            .el-table__header th:nth-child(4) {
-              width: 80px; /* 操作列 */
+              .selector-label {
+                margin-right: 5px;
+                font-size: 12px;
+                white-space: nowrap;
+              }
+
+              .group-select {
+                width: 150px;
+              }
+
+              .refresh-btn {
+                margin-left: 5px;
+                padding: 3px 6px;
+              }
             }
           }
+        }
+
+        .el-table {
+          // 允许表格内容滚动
+          .el-table__body-wrapper {
+            overflow-x: auto;
+          }
+        }
+
+        .file-name {
+          font-size: 12px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
     }
   }
+}
+
+.select-with-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.group-select {
+  flex: 1;
+}
+
+.refresh-btn {
+  padding: 2px 6px;
+  line-height: 1;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

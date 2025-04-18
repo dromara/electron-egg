@@ -93,6 +93,18 @@ const ipcApiRoute = {
         stopAutoControl: 'controller/livechatAutoControl/stopAutoControl',
         sendMessage: 'controller/livechatAutoControl/sendMessage',
         getConnectionStatus: 'controller/livechatAutoControl/getConnectionStatus',
+        startAutoReply: 'controller/livechatAutoControl/startAutoReply',
+        stopAutoReply: 'controller/livechatAutoControl/stopAutoReply',
+    },
+
+    // 语音助手相关
+    voiceAssistant: {
+        getAudioGroups: 'controller/voiceAssistant/getAudioGroups',
+        getAudioFiles: 'controller/voiceAssistant/getAudioFiles',
+        startVoiceAssistant: 'controller/voiceAssistant/startVoiceAssistant',
+        stopVoiceAssistant: 'controller/voiceAssistant/stopVoiceAssistant',
+        getVoiceAssistantStatus: 'controller/voiceAssistant/getVoiceAssistantStatus',
+        playAudioFile: 'controller/voiceAssistant/playAudioFile'
     },
 
     // 数据库相关API
