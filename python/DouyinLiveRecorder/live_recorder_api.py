@@ -2,7 +2,7 @@ import argparse
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from typing import Dict, List
 import os
 import threading
@@ -10,6 +10,7 @@ import sys
 import asyncio
 import json
 from asyncio import Queue
+import time
 
 # 确保main模块可以被导入
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -37,6 +38,10 @@ app.add_middleware(
 latest_status: Dict = {}
 # 为每个SSE客户端创建一个队列
 message_queues: List[Queue] = []
+# 标记recorder是否已经运行
+recorder_running = False
+# 创建一个锁，用于防止多个请求同时启动recorder
+recorder_lock = threading.Lock()
 
 
 # SSE事件流生成器
@@ -80,6 +85,60 @@ async def root():
     return {"message": "DouyinLiveRecorder API服务", "version": "1.0.0"}
 
 
+# 新增：启动录制器的API端点
+@app.post("/api/recorder/start")
+async def start_recorder():
+    global recorder_running
+    
+    # 使用锁确保只有一个请求能启动recorder
+    with recorder_lock:
+        if recorder_running:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "success": True,
+                    "message": "录制器已经在运行中",
+                    "status": "running"
+                }
+            )
+        
+        # 在新线程中启动main.run()
+        def run_main():
+            global recorder_running
+            recorder_running = True
+            try:
+                main.run()
+            except Exception as e:
+                recorder_running = False
+                print(f"录制器运行出错: {str(e)}")
+        
+        threading.Thread(target=run_main, daemon=True).start()
+        
+        return JSONResponse(
+            status_code=200, 
+            content={
+                "success": True,
+                "message": "录制器已启动",
+                "status": "started"
+            }
+        )
+
+
+# 新增：获取录制器状态的API端点
+@app.get("/api/recorder/status")
+async def get_recorder_status():
+    global recorder_running
+    
+    return JSONResponse(
+        status_code=200,
+        content={
+            "running": recorder_running,
+            "status": "running" if recorder_running else "stopped",
+            "latest_status": latest_status
+        }
+    )
+
+
 # 更新状态的函数，将由main.py调用
 async def update_status(status_data: dict):
     global latest_status
@@ -105,8 +164,16 @@ if __name__ == "__main__":
     uvicorn_thread = threading.Thread(target=run_uvicorn, daemon=True)
     uvicorn_thread.start()
     
-    # 运行main模块的run方法
-    main.run()
-
+    # 注意：不再自动运行main.run()，而是等待API请求
+    
     # 控制台默认关闭输出信息，如果想要查看控制台输出，请单独启动服务 npm run dev-python
     print("python server is running at port:", args.port)
+    print("请通过API请求启动录制器: POST /api/recorder/start")
+    
+    # 保持主线程运行
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("服务已停止")
+        sys.exit(0)

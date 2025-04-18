@@ -16,6 +16,7 @@ from numpy import (
     vecdot,
 
     # other
+    generic,
     floating,
     complexfloating,
     signedinteger,
@@ -78,13 +79,13 @@ __all__ = [
     "vecdot",
 ]
 
+_T = TypeVar("_T")
 _ArrayType = TypeVar("_ArrayType", bound=NDArray[Any])
+_SCT2 = TypeVar("_SCT2", bound=generic, covariant=True)
 
+_2Tuple: TypeAlias = tuple[_T, _T]
 _ModeKind: TypeAlias = L["reduced", "complete", "r", "raw"]
 
-###
-
-fortran_int = np.intc
 
 class EigResult(NamedTuple):
     eigenvalues: NDArray[Any]
@@ -175,11 +176,11 @@ def matrix_power(
 ) -> NDArray[Any]: ...
 
 @overload
-def cholesky(a: _ArrayLikeInt_co, /, *, upper: bool = False) -> NDArray[float64]: ...
+def cholesky(a: _ArrayLikeInt_co) -> NDArray[float64]: ...
 @overload
-def cholesky(a: _ArrayLikeFloat_co, /, *, upper: bool = False) -> NDArray[floating[Any]]: ...
+def cholesky(a: _ArrayLikeFloat_co) -> NDArray[floating[Any]]: ...
 @overload
-def cholesky(a: _ArrayLikeComplex_co, /, *, upper: bool = False) -> NDArray[complexfloating[Any, Any]]: ...
+def cholesky(a: _ArrayLikeComplex_co) -> NDArray[complexfloating[Any, Any]]: ...
 
 @overload
 def outer(x1: _ArrayLikeUnknown, x2: _ArrayLikeUnknown) -> NDArray[Any]: ...
@@ -372,16 +373,12 @@ def norm(
 @overload
 def matrix_norm(
     x: ArrayLike,
-    /,
-    *,
     ord: None | float | L["fro", "nuc"] = ...,
     keepdims: bool = ...,
 ) -> floating[Any]: ...
 @overload
 def matrix_norm(
     x: ArrayLike,
-    /,
-    *,
     ord: None | float | L["fro", "nuc"] = ...,
     keepdims: bool = ...,
 ) -> Any: ...
@@ -389,8 +386,6 @@ def matrix_norm(
 @overload
 def vector_norm(
     x: ArrayLike,
-    /,
-    *,
     axis: None = ...,
     ord: None | float = ...,
     keepdims: bool = ...,
@@ -398,8 +393,6 @@ def vector_norm(
 @overload
 def vector_norm(
     x: ArrayLike,
-    /,
-    *,
     axis: SupportsInt | SupportsIndex | tuple[int, ...] = ...,
     ord: None | float = ...,
     keepdims: bool = ...,
@@ -414,49 +407,37 @@ def multi_dot(
 
 def diagonal(
     x: ArrayLike,  # >= 2D array
-    /,
-    *,
     offset: SupportsIndex = ...,
 ) -> NDArray[Any]: ...
 
 def trace(
     x: ArrayLike,  # >= 2D array
-    /,
-    *,
     offset: SupportsIndex = ...,
     dtype: DTypeLike = ...,
 ) -> Any: ...
 
 @overload
 def cross(
-    x1: _ArrayLikeUInt_co,
-    x2: _ArrayLikeUInt_co,
-    /,
-    *,
+    a: _ArrayLikeUInt_co,
+    b: _ArrayLikeUInt_co,
     axis: int = ...,
 ) -> NDArray[unsignedinteger[Any]]: ...
 @overload
 def cross(
-    x1: _ArrayLikeInt_co,
-    x2: _ArrayLikeInt_co,
-    /,
-    *,
+    a: _ArrayLikeInt_co,
+    b: _ArrayLikeInt_co,
     axis: int = ...,
 ) -> NDArray[signedinteger[Any]]: ...
 @overload
 def cross(
-    x1: _ArrayLikeFloat_co,
-    x2: _ArrayLikeFloat_co,
-    /,
-    *,
+    a: _ArrayLikeFloat_co,
+    b: _ArrayLikeFloat_co,
     axis: int = ...,
 ) -> NDArray[floating[Any]]: ...
 @overload
 def cross(
-    x1: _ArrayLikeComplex_co,
-    x2: _ArrayLikeComplex_co,
-    /,
-    *,
+    a: _ArrayLikeComplex_co,
+    b: _ArrayLikeComplex_co,
     axis: int = ...,
 ) -> NDArray[complexfloating[Any, Any]]: ...
 

@@ -91,11 +91,6 @@
       <span>直播监控列表</span>
     </div>
     <div class="one-block-2">
-      <el-space>
-        <el-button type="primary" @click="startMonitoring">启动配置监控</el-button>
-        <el-button @click="getLatestConfig">获取最新配置</el-button>
-        <el-button type="danger" @click="stopMonitoring">停止配置监控</el-button>
-      </el-space>
       <el-table :data="combinedTableData" border stripe style="margin-top: 15px;">
         <el-table-column type="index" label="ID" width="60" />
         <el-table-column prop="streamerName" label="主播名" width="120" />
@@ -180,6 +175,7 @@ const showMessage = (message, type = 'info') => {
 const serverUrl = ref('');
 const wsConnected = ref(false);
 let eventSource = null;
+const recorderRunning = ref(false); // 新增：录制器运行状态
 
 // 记录每个直播的开始时间
 const recordingStartTimes = ref({});
@@ -266,15 +262,63 @@ function getUrl() {
     serverUrl.value = url;
     showMessage(`服务地址: ${url}`, 'info');
 
-    // 获取到地址后尝试连接WebSocket
+    // 获取到地址后先检查录制器状态
+    checkRecorderStatus();
+    
+    // 然后尝试连接WebSocket
     connectEventSource();
   });
+}
+
+// 检查录制器状态
+function checkRecorderStatus() {
+  if (!serverUrl.value) return;
+  
+  fetch(`${serverUrl.value}/api/recorder/status`)
+    .then(response => response.json())
+    .then(data => {
+      recorderRunning.value = data.running;
+      
+      // 如果录制器未运行，自动启动
+      if (!recorderRunning.value) {
+        startRecorder();
+      }
+    })
+    .catch(error => {
+      console.error('获取录制器状态失败:', error);
+    });
+}
+
+// 启动录制器
+function startRecorder() {
+  if (!serverUrl.value) return;
+  
+  fetch(`${serverUrl.value}/api/recorder/start`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        recorderRunning.value = true;
+        showMessage('录制器已启动', 'success');
+      } else {
+        showMessage('启动录制器失败', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('启动录制器失败:', error);
+      showMessage(`启动录制器失败: ${error}`, 'error');
+    });
 }
 
 // 停止Python服务
 function kill() {
   disconnectEventSource();
   ipc.invoke(ipcApiRoute.cross.killCrossServer, {type: 'one', name: 'pyapp'}).then(() => {
+    recorderRunning.value = false;
     showMessage('服务已停止', 'success');
   });
 }
@@ -451,12 +495,8 @@ function addLiveUrl() {
 function updateQuality(row, newQuality, index) {
   // 确保行数据有效
   if (!row || !row.url) {
-    showMessage('无效的直播流数据', 'error');
     return;
   }
-
-  // 保存当前画质，以便出错时恢复
-  const currentQuality = row.quality;
 
   // 构建参数对象 - 添加行索引
   const params = {
@@ -465,22 +505,18 @@ function updateQuality(row, newQuality, index) {
     newQuality: newQuality
   };
 
-  // 使用IPC调用来更新画质
-  ipc.invoke(ipcApiRoute.livesave.updateQuality, params).then(res => {
-    if (res.success) {
-      showMessage(`已将画质更新为: ${newQuality}`, 'success');
-      // 刷新配置列表
-      getLatestConfig();
-    } else {
-      showMessage(res.message || '更新画质失败', 'error');
-      // 更新失败时恢复原来的值
-      row.quality = currentQuality;
-    }
-  }).catch(err => {
-    showMessage(`更新画质失败: ${err}`, 'error');
-    // 更新失败时恢复原来的值
-    row.quality = currentQuality;
-  });
+  // 直接更新本地数据，给用户即时反馈
+  row.quality = newQuality;
+
+  // 使用IPC调用来更新画质，并处理返回的消息
+  ipc.invoke(ipcApiRoute.livesave.updateQuality, params)
+    .then(res => {
+      if (res.success) {
+        // 使用服务层返回的成功消息
+        showMessage(res.message || `已将画质更新为: ${newQuality}`, 'success');
+      }
+
+    })
 }
 
 // 删除直播流

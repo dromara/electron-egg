@@ -15,7 +15,7 @@ import requests
 import websocket
 from py_mini_racer import MiniRacer
 
-from protobuf.douyin import *
+from .protobuf.douyin import *
 
 
 @contextmanager

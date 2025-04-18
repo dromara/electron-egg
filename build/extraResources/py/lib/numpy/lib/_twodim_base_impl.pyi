@@ -10,6 +10,7 @@ from typing import (
 import numpy as np
 from numpy import (
     generic,
+    number,
     timedelta64,
     datetime64,
     int_,
@@ -55,28 +56,14 @@ __all__ = [
     "triu_indices_from",
 ]
 
-###
-
 _T = TypeVar("_T")
 _SCT = TypeVar("_SCT", bound=generic)
-_SCT_complex = TypeVar("_SCT_complex", bound=np.complexfloating)
-_SCT_inexact = TypeVar("_SCT_inexact", bound=np.inexact)
-_SCT_number_co = TypeVar("_SCT_number_co", bound=_Number_co)
 
 # The returned arrays dtype must be compatible with `np.equal`
-_MaskFunc: TypeAlias = Callable[[NDArray[int_], _T], NDArray[_Number_co | timedelta64 | datetime64 | object_]]
-
-_Int_co: TypeAlias = np.integer | np.bool
-_Float_co: TypeAlias = np.floating | _Int_co
-_Number_co: TypeAlias = np.number | np.bool
-
-_ArrayLike1D: TypeAlias = _SupportsArray[np.dtype[_SCT]] | Sequence[_SCT]
-_ArrayLike1DInt_co: TypeAlias = _SupportsArray[np.dtype[_Int_co]] | Sequence[int | _Int_co]
-_ArrayLike1DFloat_co: TypeAlias = _SupportsArray[np.dtype[_Float_co]] | Sequence[float | _Float_co]
-_ArrayLike2DFloat_co: TypeAlias = _SupportsArray[np.dtype[_Float_co]] | Sequence[_ArrayLike1DFloat_co]
-_ArrayLike1DNumber_co: TypeAlias = _SupportsArray[np.dtype[_Number_co]] | Sequence[complex | _Number_co]
-
-###
+_MaskFunc: TypeAlias = Callable[
+    [NDArray[int_], _T],
+    NDArray[number[Any] | np.bool | timedelta64 | datetime64 | object_],
+]
 
 @overload
 def fliplr(m: _ArrayLike[_SCT]) -> NDArray[_SCT]: ...
@@ -102,22 +89,11 @@ def eye(
 @overload
 def eye(
     N: int,
-    M: None | int,
-    k: int,
-    dtype: _DTypeLike[_SCT],
-    order: _OrderCF = ...,
-    *,
-    device: None | L["cpu"] = ...,
-    like: None | _SupportsArrayFunc = ...,
-) -> NDArray[_SCT]: ...
-@overload
-def eye(
-    N: int,
     M: None | int = ...,
     k: int = ...,
-    *,
-    dtype: _DTypeLike[_SCT],
+    dtype: _DTypeLike[_SCT] = ...,
     order: _OrderCF = ...,
+    *,
     device: None | L["cpu"] = ...,
     like: None | _SupportsArrayFunc = ...,
 ) -> NDArray[_SCT]: ...
@@ -155,19 +131,10 @@ def tri(
 @overload
 def tri(
     N: int,
-    M: None | int,
-    k: int,
-    dtype: _DTypeLike[_SCT],
-    *,
-    like: None | _SupportsArrayFunc = ...
-) -> NDArray[_SCT]: ...
-@overload
-def tri(
-    N: int,
     M: None | int = ...,
     k: int = ...,
+    dtype: _DTypeLike[_SCT] = ...,
     *,
-    dtype: _DTypeLike[_SCT],
     like: None | _SupportsArrayFunc = ...
 ) -> NDArray[_SCT]: ...
 @overload
@@ -181,14 +148,14 @@ def tri(
 ) -> NDArray[Any]: ...
 
 @overload
-def tril(m: _ArrayLike[_SCT], k: int = 0) -> NDArray[_SCT]: ...
+def tril(v: _ArrayLike[_SCT], k: int = ...) -> NDArray[_SCT]: ...
 @overload
-def tril(m: ArrayLike, k: int = 0) -> NDArray[Any]: ...
+def tril(v: ArrayLike, k: int = ...) -> NDArray[Any]: ...
 
 @overload
-def triu(m: _ArrayLike[_SCT], k: int = 0) -> NDArray[_SCT]: ...
+def triu(v: _ArrayLike[_SCT], k: int = ...) -> NDArray[_SCT]: ...
 @overload
-def triu(m: ArrayLike, k: int = 0) -> NDArray[Any]: ...
+def triu(v: ArrayLike, k: int = ...) -> NDArray[Any]: ...
 
 @overload
 def vander(  # type: ignore[misc]
@@ -214,6 +181,38 @@ def vander(
     N: None | int = ...,
     increasing: bool = ...,
 ) -> NDArray[object_]: ...
+
+
+_Int_co: TypeAlias = np.integer[Any] | np.bool
+_Float_co: TypeAlias = np.floating[Any] | _Int_co
+_Number_co: TypeAlias = np.number[Any] | np.bool
+
+_ArrayLike1D: TypeAlias = _SupportsArray[np.dtype[_SCT]] | Sequence[_SCT]
+_ArrayLike2D: TypeAlias = (
+    _SupportsArray[np.dtype[_SCT]]
+    | Sequence[_ArrayLike1D[_SCT]]
+)
+
+_ArrayLike1DInt_co: TypeAlias = (
+    _SupportsArray[np.dtype[_Int_co]]
+    | Sequence[int | _Int_co]
+)
+_ArrayLike1DFloat_co: TypeAlias = (
+    _SupportsArray[np.dtype[_Float_co]]
+    | Sequence[float | int | _Float_co]
+)
+_ArrayLike2DFloat_co: TypeAlias = (
+    _SupportsArray[np.dtype[_Float_co]]
+    | Sequence[_ArrayLike1DFloat_co]
+)
+_ArrayLike1DNumber_co: TypeAlias = (
+    _SupportsArray[np.dtype[_Number_co]]
+    | Sequence[int | float | complex | _Number_co]
+)
+
+_SCT_complex = TypeVar("_SCT_complex", bound=np.complexfloating[Any, Any])
+_SCT_inexact = TypeVar("_SCT_inexact", bound=np.inexact[Any])
+_SCT_number_co = TypeVar("_SCT_number_co", bound=_Number_co)
 
 @overload
 def histogram2d(
@@ -345,6 +344,7 @@ def histogram2d(
     NDArray[_SCT_number_co | complex128 | float64],
     NDArray[_SCT_number_co | complex128 | float64] ,
 ]: ...
+
 @overload
 def histogram2d(
     x: _ArrayLike1DNumber_co,

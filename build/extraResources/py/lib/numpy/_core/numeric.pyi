@@ -44,16 +44,8 @@ from numpy import (
     float64,
     timedelta64,
     object_,
-    _AnyShapeType,
     _OrderKACF,
     _OrderCF,
-)
-from .fromnumeric import (
-    all as all,
-    any as any,
-    argpartition as argpartition,
-    matrix_transpose as matrix_transpose,
-    mean as mean,
 )
 from .multiarray import (
     # re-exports
@@ -191,6 +183,7 @@ _T = TypeVar("_T")
 _SCT = TypeVar("_SCT", bound=generic)
 _DType = TypeVar("_DType", bound=np.dtype[Any])
 _ArrayType = TypeVar("_ArrayType", bound=np.ndarray[Any, Any])
+_SizeType = TypeVar("_SizeType", bound=int)
 _ShapeType = TypeVar("_ShapeType", bound=tuple[int, ...])
 
 _CorrelateMode: TypeAlias = L["valid", "same", "full"]
@@ -303,69 +296,69 @@ def ones_like(
 # 1-D shape
 @overload
 def full(
-    shape: SupportsIndex,
+    shape: _SizeType,
     fill_value: _SCT,
     dtype: None = ...,
     order: _OrderCF = ...,
     **kwargs: Unpack[_KwargsEmpty],
-) -> _Array[tuple[int], _SCT]: ...
+) -> _Array[tuple[_SizeType], _SCT]: ...
 @overload
 def full(
-    shape: SupportsIndex,
+    shape: _SizeType,
     fill_value: Any,
     dtype: _DType | _SupportsDType[_DType],
     order: _OrderCF = ...,
     **kwargs: Unpack[_KwargsEmpty],
-) -> np.ndarray[tuple[int], _DType]: ...
+) -> np.ndarray[tuple[_SizeType], _DType]: ...
 @overload
 def full(
-    shape: SupportsIndex,
+    shape: _SizeType,
     fill_value: Any,
     dtype: type[_SCT],
     order: _OrderCF = ...,
     **kwargs: Unpack[_KwargsEmpty],
-) -> _Array[tuple[int], _SCT]: ...
+) -> _Array[tuple[_SizeType], _SCT]: ...
 @overload
 def full(
-    shape: SupportsIndex,
+    shape: _SizeType,
     fill_value: Any,
     dtype: None | DTypeLike = ...,
     order: _OrderCF = ...,
     **kwargs: Unpack[_KwargsEmpty],
-) -> _Array[tuple[int], Any]: ...
+) -> _Array[tuple[_SizeType], Any]: ...
 # known shape
 @overload
 def full(
-    shape: _AnyShapeType,
+    shape: _ShapeType,
     fill_value: _SCT,
     dtype: None = ...,
     order: _OrderCF = ...,
     **kwargs: Unpack[_KwargsEmpty],
-) -> _Array[_AnyShapeType, _SCT]: ...
+) -> _Array[_ShapeType, _SCT]: ...
 @overload
 def full(
-    shape: _AnyShapeType,
+    shape: _ShapeType,
     fill_value: Any,
     dtype: _DType | _SupportsDType[_DType],
     order: _OrderCF = ...,
     **kwargs: Unpack[_KwargsEmpty],
-) -> np.ndarray[_AnyShapeType, _DType]: ...
+) -> np.ndarray[_ShapeType, _DType]: ...
 @overload
 def full(
-    shape: _AnyShapeType,
+    shape: _ShapeType,
     fill_value: Any,
     dtype: type[_SCT],
     order: _OrderCF = ...,
     **kwargs: Unpack[_KwargsEmpty],
-) -> _Array[_AnyShapeType, _SCT]: ...
+) -> _Array[_ShapeType, _SCT]: ...
 @overload
 def full(
-    shape: _AnyShapeType,
+    shape: _ShapeType,
     fill_value: Any,
     dtype: None | DTypeLike = ...,
     order: _OrderCF = ...,
     **kwargs: Unpack[_KwargsEmpty],
-) -> _Array[_AnyShapeType, Any]: ...
+) -> _Array[_ShapeType, Any]: ...
 # unknown shape
 @overload
 def full(
@@ -706,8 +699,8 @@ def moveaxis(
 
 @overload
 def cross(
-    a: _ArrayLikeUnknown,
-    b: _ArrayLikeUnknown,
+    x1: _ArrayLikeUnknown,
+    x2: _ArrayLikeUnknown,
     axisa: int = ...,
     axisb: int = ...,
     axisc: int = ...,
@@ -715,8 +708,8 @@ def cross(
 ) -> NDArray[Any]: ...
 @overload
 def cross(
-    a: _ArrayLikeBool_co,
-    b: _ArrayLikeBool_co,
+    x1: _ArrayLikeBool_co,
+    x2: _ArrayLikeBool_co,
     axisa: int = ...,
     axisb: int = ...,
     axisc: int = ...,
@@ -724,8 +717,8 @@ def cross(
 ) -> NoReturn: ...
 @overload
 def cross(
-    a: _ArrayLikeUInt_co,
-    b: _ArrayLikeUInt_co,
+    x1: _ArrayLikeUInt_co,
+    x2: _ArrayLikeUInt_co,
     axisa: int = ...,
     axisb: int = ...,
     axisc: int = ...,
@@ -733,8 +726,8 @@ def cross(
 ) -> NDArray[unsignedinteger[Any]]: ...
 @overload
 def cross(
-    a: _ArrayLikeInt_co,
-    b: _ArrayLikeInt_co,
+    x1: _ArrayLikeInt_co,
+    x2: _ArrayLikeInt_co,
     axisa: int = ...,
     axisb: int = ...,
     axisc: int = ...,
@@ -742,8 +735,8 @@ def cross(
 ) -> NDArray[signedinteger[Any]]: ...
 @overload
 def cross(
-    a: _ArrayLikeFloat_co,
-    b: _ArrayLikeFloat_co,
+    x1: _ArrayLikeFloat_co,
+    x2: _ArrayLikeFloat_co,
     axisa: int = ...,
     axisb: int = ...,
     axisc: int = ...,
@@ -751,8 +744,8 @@ def cross(
 ) -> NDArray[floating[Any]]: ...
 @overload
 def cross(
-    a: _ArrayLikeComplex_co,
-    b: _ArrayLikeComplex_co,
+    x1: _ArrayLikeComplex_co,
+    x2: _ArrayLikeComplex_co,
     axisa: int = ...,
     axisb: int = ...,
     axisc: int = ...,
@@ -760,8 +753,8 @@ def cross(
 ) -> NDArray[complexfloating[Any, Any]]: ...
 @overload
 def cross(
-    a: _ArrayLikeObject_co,
-    b: _ArrayLikeObject_co,
+    x1: _ArrayLikeObject_co,
+    x2: _ArrayLikeObject_co,
     axisa: int = ...,
     axisb: int = ...,
     axisc: int = ...,
@@ -879,19 +872,15 @@ def array_equiv(a1: ArrayLike, a2: ArrayLike) -> bool: ...
 
 @overload
 def astype(
-    x: ndarray[_ShapeType, dtype[Any]],
+    x: NDArray[Any],
     dtype: _DTypeLike[_SCT],
-    /,
-    *,
     copy: bool = ...,
     device: None | L["cpu"] = ...,
-) -> ndarray[_ShapeType, dtype[_SCT]]: ...
+) -> NDArray[_SCT]: ...
 @overload
 def astype(
-    x: ndarray[_ShapeType, dtype[Any]],
+    x: NDArray[Any],
     dtype: DTypeLike,
-    /,
-    *,
     copy: bool = ...,
     device: None | L["cpu"] = ...,
-) -> ndarray[_ShapeType, dtype[Any]]: ...
+) -> NDArray[Any]: ...

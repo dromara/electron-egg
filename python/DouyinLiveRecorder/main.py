@@ -27,19 +27,18 @@ import urllib.request
 from urllib.error import URLError, HTTPError
 from typing import Any
 import configparser
-from douyinliverecorder import spider, stream
-from douyinliverecorder.proxy import ProxyDetector
-from douyinliverecorder.utils import logger
-from douyinliverecorder import utils
-from msg_push import (
+from .douyinliverecorder import spider, stream
+from .douyinliverecorder.proxy import ProxyDetector
+from .douyinliverecorder.utils import logger
+from .douyinliverecorder import utils
+from .msg_push import (
     dingtalk, xizhi, tg_bot, send_email, bark, ntfy
 )
-from ffmpeg_install import (
+from .ffmpeg_install import (
     check_ffmpeg, ffmpeg_path, current_env_path
 )
 import asyncio
 import threading
-from concurrent.futures import ThreadPoolExecutor
 import live_recorder_api as live_recorder_api
 
 version = "v4.0.2"

@@ -1,13 +1,18 @@
-# ruff: noqa: ANN401
-from types import MemberDescriptorType
-from typing import Any, ClassVar, Generic, NoReturn, TypeAlias, final, type_check_only
-from typing import Literal as L
-
+from typing import (
+    Any,
+    Final,
+    Generic,
+    Literal as L,
+    NoReturn,
+    TypeAlias,
+    final,
+    type_check_only,
+)
 from typing_extensions import LiteralString, Self, TypeVar
 
 import numpy as np
 
-__all__ = [  # noqa: RUF022
+__all__ = [
     'BoolDType',
     'Int8DType',
     'ByteDType',
@@ -48,7 +53,7 @@ __all__ = [  # noqa: RUF022
 _SCT_co = TypeVar("_SCT_co", bound=np.generic, covariant=True)
 
 @type_check_only
-class _SimpleDType(np.dtype[_SCT_co], Generic[_SCT_co]):  # type: ignore[misc]  # pyright: ignore[reportGeneralTypeIssues]
+class _SimpleDType(Generic[_SCT_co], np.dtype[_SCT_co]):  # type: ignore[misc]
     names: None  # pyright: ignore[reportIncompatibleVariableOverride]
     def __new__(cls, /) -> Self: ...
     def __getitem__(self, key: Any, /) -> NoReturn: ...
@@ -68,7 +73,7 @@ class _SimpleDType(np.dtype[_SCT_co], Generic[_SCT_co]):  # type: ignore[misc]  
     def subdtype(self) -> None: ...
 
 @type_check_only
-class _LiteralDType(_SimpleDType[_SCT_co], Generic[_SCT_co]):  # type: ignore[misc]
+class _LiteralDType(Generic[_SCT_co], _SimpleDType[_SCT_co]):  # type: ignore[misc]
     @property
     def flags(self) -> L[0]: ...
     @property
@@ -229,11 +234,10 @@ class UInt64DType(  # type: ignore[misc]
     def str(self) -> L["<u8", ">u8"]: ...
 
 # Standard C-named version/alias:
-# NOTE: Don't make these `Final`: it will break stubtest
-ByteDType = Int8DType
-UByteDType = UInt8DType
-ShortDType = Int16DType
-UShortDType = UInt16DType
+ByteDType: Final = Int8DType
+UByteDType: Final = UInt8DType
+ShortDType: Final = Int16DType
+UShortDType: Final = UInt16DType
 
 @final
 class IntDType(  # type: ignore[misc]
@@ -415,11 +419,11 @@ class ObjectDType(  # type: ignore[misc]
 
 @final
 class BytesDType(  # type: ignore[misc]
+    Generic[_ItemSize_co],
     _TypeCodes[L["S"], L["S"], L[18]],
     _NoOrder,
     _NBit[L[1],_ItemSize_co],
     _SimpleDType[np.bytes_],
-    Generic[_ItemSize_co],
 ):
     def __new__(cls, size: _ItemSize_co, /) -> BytesDType[_ItemSize_co]: ...
     @property
@@ -431,11 +435,11 @@ class BytesDType(  # type: ignore[misc]
 
 @final
 class StrDType(  # type: ignore[misc]
+    Generic[_ItemSize_co],
     _TypeCodes[L["U"], L["U"], L[19]],
     _NativeOrder,
     _NBit[L[4],_ItemSize_co],
     _SimpleDType[np.str_],
-    Generic[_ItemSize_co],
 ):
     def __new__(cls, size: _ItemSize_co, /) -> StrDType[_ItemSize_co]: ...
     @property
@@ -447,11 +451,11 @@ class StrDType(  # type: ignore[misc]
 
 @final
 class VoidDType(  # type: ignore[misc]
+    Generic[_ItemSize_co],
     _TypeCodes[L["V"], L["V"], L[20]],
     _NoOrder,
     _NBit[L[1], _ItemSize_co],
-    np.dtype[np.void],  # pyright: ignore[reportGeneralTypeIssues]
-    Generic[_ItemSize_co],
+    np.dtype[np.void],
 ):
     # NOTE: `VoidDType(...)` raises a `TypeError` at the moment
     def __new__(cls, length: _ItemSize_co, /) -> NoReturn: ...
@@ -574,13 +578,8 @@ class StringDType(  # type: ignore[misc]
     _NativeOrder,
     _NBit[L[8], L[16]],
     # TODO: Replace the (invalid) `str` with the scalar type, once implemented
-    np.dtype[str],  # type: ignore[type-var]  # pyright: ignore[reportGeneralTypeIssues,reportInvalidTypeArguments]
+    np.dtype[str],  # type: ignore[type-var]
 ):
-    @property
-    def coerce(self) -> L[True]: ...
-    na_object: ClassVar[MemberDescriptorType]  # does not get instantiated
-
-    #
     def __new__(cls, /) -> StringDType: ...
     def __getitem__(self, key: Any, /) -> NoReturn: ...
     @property

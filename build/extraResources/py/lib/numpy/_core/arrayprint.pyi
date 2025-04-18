@@ -1,53 +1,42 @@
 from collections.abc import Callable
+from typing import Any, Literal, TypeAlias, TypedDict, SupportsIndex, type_check_only
 
 # Using a private class is by no means ideal, but it is simply a consequence
 # of a `contextlib.context` returning an instance of aforementioned class
 from contextlib import _GeneratorContextManager
-from typing import Any, Final, Literal, SupportsIndex, TypeAlias, TypedDict, overload, type_check_only
-
-from typing_extensions import deprecated
 
 import numpy as np
-from numpy._globals import _NoValueType
+from numpy import (
+    integer,
+    timedelta64,
+    datetime64,
+    floating,
+    complexfloating,
+    void,
+    longdouble,
+    clongdouble,
+)
 from numpy._typing import NDArray, _CharLike_co, _FloatLike_co
 
-__all__ = [
-    "array2string",
-    "array_repr",
-    "array_str",
-    "format_float_positional",
-    "format_float_scientific",
-    "get_printoptions",
-    "printoptions",
-    "set_printoptions",
-]
-
-###
-
 _FloatMode: TypeAlias = Literal["fixed", "unique", "maxprec", "maxprec_equal"]
-_LegacyNoStyle: TypeAlias = Literal["1.21", "1.25", "2.1", False]
-_Legacy: TypeAlias = Literal["1.13", _LegacyNoStyle]
-_Sign: TypeAlias = Literal["-", "+", " "]
-_Trim: TypeAlias = Literal["k", ".", "0", "-"]
-_ReprFunc: TypeAlias = Callable[[NDArray[Any]], str]
 
 @type_check_only
 class _FormatDict(TypedDict, total=False):
     bool: Callable[[np.bool], str]
-    int: Callable[[np.integer], str]
-    timedelta: Callable[[np.timedelta64], str]
-    datetime: Callable[[np.datetime64], str]
-    float: Callable[[np.floating], str]
-    longfloat: Callable[[np.longdouble], str]
-    complexfloat: Callable[[np.complexfloating], str]
-    longcomplexfloat: Callable[[np.clongdouble], str]
-    void: Callable[[np.void], str]
+    int: Callable[[integer[Any]], str]
+    timedelta: Callable[[timedelta64], str]
+    datetime: Callable[[datetime64], str]
+    float: Callable[[floating[Any]], str]
+    longfloat: Callable[[longdouble], str]
+    complexfloat: Callable[[complexfloating[Any, Any]], str]
+    longcomplexfloat: Callable[[clongdouble], str]
+    void: Callable[[void], str]
     numpystr: Callable[[_CharLike_co], str]
     object: Callable[[object], str]
     all: Callable[[object], str]
-    int_kind: Callable[[np.integer], str]
-    float_kind: Callable[[np.floating], str]
-    complex_kind: Callable[[np.complexfloating], str]
+    int_kind: Callable[[integer[Any]], str]
+    float_kind: Callable[[floating[Any]], str]
+    complex_kind: Callable[[complexfloating[Any, Any]], str]
     str_kind: Callable[[_CharLike_co], str]
 
 @type_check_only
@@ -59,14 +48,10 @@ class _FormatOptions(TypedDict):
     suppress: bool
     nanstr: str
     infstr: str
-    formatter: _FormatDict | None
-    sign: _Sign
+    formatter: None | _FormatDict
+    sign: Literal["-", "+", " "]
     floatmode: _FloatMode
-    legacy: _Legacy
-
-###
-
-__docformat__: Final = "restructuredtext"  # undocumented
+    legacy: Literal[False, "1.13", "1.21"]
 
 def set_printoptions(
     precision: None | SupportsIndex = ...,
@@ -77,113 +62,37 @@ def set_printoptions(
     nanstr: None | str = ...,
     infstr: None | str = ...,
     formatter: None | _FormatDict = ...,
-    sign: _Sign | None = None,
-    floatmode: _FloatMode | None = None,
+    sign: Literal[None, "-", "+", " "] = ...,
+    floatmode: None | _FloatMode = ...,
     *,
-    legacy: _Legacy | None = None,
-    override_repr: _ReprFunc | None = None,
+    legacy: Literal[None, False, "1.13", "1.21"] = ...,
+    override_repr: None | Callable[[NDArray[Any]], str] = ...,
 ) -> None: ...
 def get_printoptions() -> _FormatOptions: ...
-
-# public numpy export
-@overload  # no style
 def array2string(
     a: NDArray[Any],
-    max_line_width: int | None = None,
-    precision: SupportsIndex | None = None,
-    suppress_small: bool | None = None,
-    separator: str = " ",
-    prefix: str = "",
-    style: _NoValueType = ...,
-    formatter: _FormatDict | None = None,
-    threshold: int | None = None,
-    edgeitems: int | None = None,
-    sign: _Sign | None = None,
-    floatmode: _FloatMode | None = None,
-    suffix: str = "",
+    max_line_width: None | int = ...,
+    precision: None | SupportsIndex = ...,
+    suppress_small: None | bool = ...,
+    separator: str = ...,
+    prefix: str = ...,
+    # NOTE: With the `style` argument being deprecated,
+    # all arguments between `formatter` and `suffix` are de facto
+    # keyworld-only arguments
     *,
-    legacy: _Legacy | None = None,
+    formatter: None | _FormatDict = ...,
+    threshold: None | int = ...,
+    edgeitems: None | int = ...,
+    sign: Literal[None, "-", "+", " "] = ...,
+    floatmode: None | _FloatMode = ...,
+    suffix: str = ...,
+    legacy: Literal[None, False, "1.13", "1.21"] = ...,
 ) -> str: ...
-@overload  # style=<given> (positional), legacy="1.13"
-def array2string(
-    a: NDArray[Any],
-    max_line_width: int | None,
-    precision: SupportsIndex | None,
-    suppress_small: bool | None,
-    separator: str,
-    prefix: str,
-    style: _ReprFunc,
-    formatter: _FormatDict | None = None,
-    threshold: int | None = None,
-    edgeitems: int | None = None,
-    sign: _Sign | None = None,
-    floatmode: _FloatMode | None = None,
-    suffix: str = "",
-    *,
-    legacy: Literal["1.13"],
-) -> str: ...
-@overload  # style=<given> (keyword), legacy="1.13"
-def array2string(
-    a: NDArray[Any],
-    max_line_width: int | None = None,
-    precision: SupportsIndex | None = None,
-    suppress_small: bool | None = None,
-    separator: str = " ",
-    prefix: str = "",
-    *,
-    style: _ReprFunc,
-    formatter: _FormatDict | None = None,
-    threshold: int | None = None,
-    edgeitems: int | None = None,
-    sign: _Sign | None = None,
-    floatmode: _FloatMode | None = None,
-    suffix: str = "",
-    legacy: Literal["1.13"],
-) -> str: ...
-@overload  # style=<given> (positional), legacy!="1.13"
-@deprecated("'style' argument is deprecated and no longer functional except in 1.13 'legacy' mode")
-def array2string(
-    a: NDArray[Any],
-    max_line_width: int | None,
-    precision: SupportsIndex | None,
-    suppress_small: bool | None,
-    separator: str,
-    prefix: str,
-    style: _ReprFunc,
-    formatter: _FormatDict | None = None,
-    threshold: int | None = None,
-    edgeitems: int | None = None,
-    sign: _Sign | None = None,
-    floatmode: _FloatMode | None = None,
-    suffix: str = "",
-    *,
-    legacy: _LegacyNoStyle | None = None,
-) -> str: ...
-@overload  # style=<given> (keyword), legacy="1.13"
-@deprecated("'style' argument is deprecated and no longer functional except in 1.13 'legacy' mode")
-def array2string(
-    a: NDArray[Any],
-    max_line_width: int | None = None,
-    precision: SupportsIndex | None = None,
-    suppress_small: bool | None = None,
-    separator: str = " ",
-    prefix: str = "",
-    *,
-    style: _ReprFunc,
-    formatter: _FormatDict | None = None,
-    threshold: int | None = None,
-    edgeitems: int | None = None,
-    sign: _Sign | None = None,
-    floatmode: _FloatMode | None = None,
-    suffix: str = "",
-    legacy: _LegacyNoStyle | None = None,
-) -> str: ...
-
 def format_float_scientific(
     x: _FloatLike_co,
     precision: None | int = ...,
     unique: bool = ...,
-    trim: _Trim = "k",
+    trim: Literal["k", ".", "0", "-"] = ...,
     sign: bool = ...,
     pad_left: None | int = ...,
     exp_digits: None | int = ...,
@@ -194,7 +103,7 @@ def format_float_positional(
     precision: None | int = ...,
     unique: bool = ...,
     fractional: bool = ...,
-    trim: _Trim = "k",
+    trim: Literal["k", ".", "0", "-"] = ...,
     sign: bool = ...,
     pad_left: None | int = ...,
     pad_right: None | int = ...,
@@ -221,9 +130,8 @@ def printoptions(
     nanstr: None | str = ...,
     infstr: None | str = ...,
     formatter: None | _FormatDict = ...,
-    sign: None | _Sign = None,
-    floatmode: _FloatMode | None = None,
+    sign: Literal[None, "-", "+", " "] = ...,
+    floatmode: None | _FloatMode = ...,
     *,
-    legacy: _Legacy | None = None,
-    override_repr: _ReprFunc | None = None,
+    legacy: Literal[None, False, "1.13", "1.21"] = ...
 ) -> _GeneratorContextManager[_FormatOptions]: ...

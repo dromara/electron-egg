@@ -202,5 +202,6 @@ module.exports = {
             args: ['./main.py', '--port=7074'],
             stdio: "inherit", // ignore
         },
+        
     },
 };

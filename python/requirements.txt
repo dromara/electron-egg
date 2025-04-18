@@ -1,3 +1,8 @@
-fastapi
-uvicorn
+fastapi==0.103.1
+uvicorn==0.23.2
 argparse
+sse-starlette==1.6.5
+websocket-client==1.6.4
+py-mini-racer==0.6.0
+pydantic==2.4.2
+requests==2.31.0

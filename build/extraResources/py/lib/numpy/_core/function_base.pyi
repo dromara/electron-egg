@@ -29,8 +29,8 @@ def linspace(
     dtype: None = ...,
     axis: SupportsIndex = ...,
     *,
-    device: L["cpu"] | None = ...,
-) -> NDArray[floating]: ...
+    device: None | L["cpu"] = ...,
+) -> NDArray[floating[Any]]: ...
 @overload
 def linspace(
     start: _ArrayLikeComplex_co,
@@ -41,20 +41,8 @@ def linspace(
     dtype: None = ...,
     axis: SupportsIndex = ...,
     *,
-    device: L["cpu"] | None = ...,
-) -> NDArray[complexfloating]: ...
-@overload
-def linspace(
-    start: _ArrayLikeComplex_co,
-    stop: _ArrayLikeComplex_co,
-    num: SupportsIndex,
-    endpoint: bool,
-    retstep: L[False],
-    dtype: _DTypeLike[_SCT],
-    axis: SupportsIndex = ...,
-    *,
-    device: L["cpu"] | None = ...,
-) -> NDArray[_SCT]: ...
+    device: None | L["cpu"] = ...,
+) -> NDArray[complexfloating[Any, Any]]: ...
 @overload
 def linspace(
     start: _ArrayLikeComplex_co,
@@ -62,10 +50,10 @@ def linspace(
     num: SupportsIndex = ...,
     endpoint: bool = ...,
     retstep: L[False] = ...,
-    *,
-    dtype: _DTypeLike[_SCT],
+    dtype: _DTypeLike[_SCT] = ...,
     axis: SupportsIndex = ...,
-    device: L["cpu"] | None = ...,
+    *,
+    device: None | L["cpu"] = ...,
 ) -> NDArray[_SCT]: ...
 @overload
 def linspace(
@@ -77,7 +65,7 @@ def linspace(
     dtype: DTypeLike = ...,
     axis: SupportsIndex = ...,
     *,
-    device: L["cpu"] | None = ...,
+    device: None | L["cpu"] = ...,
 ) -> NDArray[Any]: ...
 @overload
 def linspace(
@@ -85,35 +73,35 @@ def linspace(
     stop: _ArrayLikeFloat_co,
     num: SupportsIndex = ...,
     endpoint: bool = ...,
-    *,
-    retstep: L[True],
+    retstep: L[True] = ...,
     dtype: None = ...,
     axis: SupportsIndex = ...,
-    device: L["cpu"] | None = ...,
-) -> tuple[NDArray[floating], floating]: ...
+    *,
+    device: None | L["cpu"] = ...,
+) -> tuple[NDArray[floating[Any]], floating[Any]]: ...
 @overload
 def linspace(
     start: _ArrayLikeComplex_co,
     stop: _ArrayLikeComplex_co,
     num: SupportsIndex = ...,
     endpoint: bool = ...,
-    *,
-    retstep: L[True],
+    retstep: L[True] = ...,
     dtype: None = ...,
     axis: SupportsIndex = ...,
-    device: L["cpu"] | None = ...,
-) -> tuple[NDArray[complexfloating], complexfloating]: ...
+    *,
+    device: None | L["cpu"] = ...,
+) -> tuple[NDArray[complexfloating[Any, Any]], complexfloating[Any, Any]]: ...
 @overload
 def linspace(
     start: _ArrayLikeComplex_co,
     stop: _ArrayLikeComplex_co,
     num: SupportsIndex = ...,
     endpoint: bool = ...,
-    *,
-    retstep: L[True],
-    dtype: _DTypeLike[_SCT],
+    retstep: L[True] = ...,
+    dtype: _DTypeLike[_SCT] = ...,
     axis: SupportsIndex = ...,
-    device: L["cpu"] | None = ...,
+    *,
+    device: None | L["cpu"] = ...,
 ) -> tuple[NDArray[_SCT], _SCT]: ...
 @overload
 def linspace(
@@ -121,11 +109,11 @@ def linspace(
     stop: _ArrayLikeComplex_co,
     num: SupportsIndex = ...,
     endpoint: bool = ...,
-    *,
-    retstep: L[True],
+    retstep: L[True] = ...,
     dtype: DTypeLike = ...,
     axis: SupportsIndex = ...,
-    device: L["cpu"] | None = ...,
+    *,
+    device: None | L["cpu"] = ...,
 ) -> tuple[NDArray[Any], Any]: ...
 
 @overload
@@ -137,7 +125,7 @@ def logspace(
     base: _ArrayLikeFloat_co = ...,
     dtype: None = ...,
     axis: SupportsIndex = ...,
-) -> NDArray[floating]: ...
+) -> NDArray[floating[Any]]: ...
 @overload
 def logspace(
     start: _ArrayLikeComplex_co,
@@ -147,17 +135,7 @@ def logspace(
     base: _ArrayLikeComplex_co = ...,
     dtype: None = ...,
     axis: SupportsIndex = ...,
-) -> NDArray[complexfloating]: ...
-@overload
-def logspace(
-    start: _ArrayLikeComplex_co,
-    stop: _ArrayLikeComplex_co,
-    num: SupportsIndex,
-    endpoint: bool,
-    base: _ArrayLikeComplex_co,
-    dtype: _DTypeLike[_SCT],
-    axis: SupportsIndex = ...,
-) -> NDArray[_SCT]: ...
+) -> NDArray[complexfloating[Any, Any]]: ...
 @overload
 def logspace(
     start: _ArrayLikeComplex_co,
@@ -165,8 +143,7 @@ def logspace(
     num: SupportsIndex = ...,
     endpoint: bool = ...,
     base: _ArrayLikeComplex_co = ...,
-    *,
-    dtype: _DTypeLike[_SCT],
+    dtype: _DTypeLike[_SCT] = ...,
     axis: SupportsIndex = ...,
 ) -> NDArray[_SCT]: ...
 @overload
@@ -188,7 +165,7 @@ def geomspace(
     endpoint: bool = ...,
     dtype: None = ...,
     axis: SupportsIndex = ...,
-) -> NDArray[floating]: ...
+) -> NDArray[floating[Any]]: ...
 @overload
 def geomspace(
     start: _ArrayLikeComplex_co,
@@ -197,24 +174,14 @@ def geomspace(
     endpoint: bool = ...,
     dtype: None = ...,
     axis: SupportsIndex = ...,
-) -> NDArray[complexfloating]: ...
-@overload
-def geomspace(
-    start: _ArrayLikeComplex_co,
-    stop: _ArrayLikeComplex_co,
-    num: SupportsIndex,
-    endpoint: bool,
-    dtype: _DTypeLike[_SCT],
-    axis: SupportsIndex = ...,
-) -> NDArray[_SCT]: ...
+) -> NDArray[complexfloating[Any, Any]]: ...
 @overload
 def geomspace(
     start: _ArrayLikeComplex_co,
     stop: _ArrayLikeComplex_co,
     num: SupportsIndex = ...,
     endpoint: bool = ...,
-    *,
-    dtype: _DTypeLike[_SCT],
+    dtype: _DTypeLike[_SCT] = ...,
     axis: SupportsIndex = ...,
 ) -> NDArray[_SCT]: ...
 @overload

@@ -15,7 +15,7 @@ options = {
         "build_exe":"./dist/",
         "excludes": ["PySide6", "PyQt5", "PyQt6", "PySide2", "tkinter"],
         "includes": ["liveMan"],
-        "packages": ["uvicorn", "fastapi", "starlette", "pydantic"],
+        "packages": ["uvicorn", "fastapi", "starlette", "pydantic", "py_mini_racer", "websocket", "sse_starlette"],
         "optimize": 2,
     }
 }

@@ -10,7 +10,35 @@ from typing import (
 from typing_extensions import deprecated
 
 import numpy as np
-from numpy import generic, number, int8, intp, timedelta64, object_
+from numpy import (
+    generic,
+    number,
+    ushort,
+    ubyte,
+    uintc,
+    uint,
+    ulonglong,
+    short,
+    int8,
+    byte,
+    intc,
+    int_,
+    intp,
+    longlong,
+    half,
+    single,
+    double,
+    longdouble,
+    csingle,
+    cdouble,
+    clongdouble,
+    timedelta64,
+    datetime64,
+    object_,
+    str_,
+    bytes_,
+    void,
+)
 
 from numpy._typing import (
     ArrayLike,
@@ -47,17 +75,33 @@ _NumberType = TypeVar("_NumberType", bound=number[Any])
 # Only relevant if two or more arguments are parametrized, (e.g. `setdiff1d`)
 # which could result in, for example, `int64` and `float64`producing a
 # `number[_64Bit]` array
-_EitherSCT = TypeVar(
-    "_EitherSCT",
+_SCTNoCast = TypeVar(
+    "_SCTNoCast",
     np.bool,
-    np.int8, np.int16, np.int32, np.int64, np.intp,
-    np.uint8, np.uint16, np.uint32, np.uint64, np.uintp,
-    np.float16, np.float32, np.float64, np.longdouble,
-    np.complex64, np.complex128, np.clongdouble,
-    np.timedelta64, np.datetime64,
-    np.bytes_, np.str_, np.void, np.object_,
-    np.integer, np.floating, np.complexfloating, np.character,
-)  # fmt: skip
+    ushort,
+    ubyte,
+    uintc,
+    uint,
+    ulonglong,
+    short,
+    byte,
+    intc,
+    int_,
+    longlong,
+    half,
+    single,
+    double,
+    longdouble,
+    csingle,
+    cdouble,
+    clongdouble,
+    timedelta64,
+    datetime64,
+    object_,
+    str_,
+    bytes_,
+    void,
+)
 
 class UniqueAllResult(NamedTuple, Generic[_SCT]):
     values: NDArray[_SCT]
@@ -295,11 +339,11 @@ def unique_values(x: ArrayLike, /) -> NDArray[Any]: ...
 
 @overload
 def intersect1d(
-    ar1: _ArrayLike[_EitherSCT],
-    ar2: _ArrayLike[_EitherSCT],
+    ar1: _ArrayLike[_SCTNoCast],
+    ar2: _ArrayLike[_SCTNoCast],
     assume_unique: bool = ...,
     return_indices: L[False] = ...,
-) -> NDArray[_EitherSCT]: ...
+) -> NDArray[_SCTNoCast]: ...
 @overload
 def intersect1d(
     ar1: ArrayLike,
@@ -309,11 +353,11 @@ def intersect1d(
 ) -> NDArray[Any]: ...
 @overload
 def intersect1d(
-    ar1: _ArrayLike[_EitherSCT],
-    ar2: _ArrayLike[_EitherSCT],
+    ar1: _ArrayLike[_SCTNoCast],
+    ar2: _ArrayLike[_SCTNoCast],
     assume_unique: bool = ...,
     return_indices: L[True] = ...,
-) -> tuple[NDArray[_EitherSCT], NDArray[intp], NDArray[intp]]: ...
+) -> tuple[NDArray[_SCTNoCast], NDArray[intp], NDArray[intp]]: ...
 @overload
 def intersect1d(
     ar1: ArrayLike,
@@ -324,10 +368,10 @@ def intersect1d(
 
 @overload
 def setxor1d(
-    ar1: _ArrayLike[_EitherSCT],
-    ar2: _ArrayLike[_EitherSCT],
+    ar1: _ArrayLike[_SCTNoCast],
+    ar2: _ArrayLike[_SCTNoCast],
     assume_unique: bool = ...,
-) -> NDArray[_EitherSCT]: ...
+) -> NDArray[_SCTNoCast]: ...
 @overload
 def setxor1d(
     ar1: ArrayLike,
@@ -356,9 +400,9 @@ def in1d(
 
 @overload
 def union1d(
-    ar1: _ArrayLike[_EitherSCT],
-    ar2: _ArrayLike[_EitherSCT],
-) -> NDArray[_EitherSCT]: ...
+    ar1: _ArrayLike[_SCTNoCast],
+    ar2: _ArrayLike[_SCTNoCast],
+) -> NDArray[_SCTNoCast]: ...
 @overload
 def union1d(
     ar1: ArrayLike,
@@ -367,10 +411,10 @@ def union1d(
 
 @overload
 def setdiff1d(
-    ar1: _ArrayLike[_EitherSCT],
-    ar2: _ArrayLike[_EitherSCT],
+    ar1: _ArrayLike[_SCTNoCast],
+    ar2: _ArrayLike[_SCTNoCast],
     assume_unique: bool = ...,
-) -> NDArray[_EitherSCT]: ...
+) -> NDArray[_SCTNoCast]: ...
 @overload
 def setdiff1d(
     ar1: ArrayLike,

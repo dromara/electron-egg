@@ -4,11 +4,11 @@ import logging
 import threading
 import queue
 import traceback
-from typing import Dict, List, Optional
+from typing import Dict
 import uvicorn
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 
