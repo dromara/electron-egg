@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
 
-from liveMan import DouyinLiveWebFetcher
+from .liveMan import DouyinLiveWebFetcher
 
 # 配置日志
 logging.basicConfig(

@@ -33,6 +33,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# 禁用uvicorn默认日志
+uvicorn_logger = logging.getLogger("uvicorn")
+uvicorn_logger.handlers.clear()
+uvicorn_logger.propagate = False  # 不传播日志到父级记录器
+
 # 检查端口是否可用
 def is_port_available(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -369,7 +374,8 @@ if __name__ == "__main__":
         print(f"  - GET    http://127.0.0.1:{port}/api/recorder/status - 获取录制器状态")
         print(f"  - GET    http://127.0.0.1:{port}/api/sse/recorder/status - 录制器状态SSE事件流")
         
-        uvicorn.run(app, host="127.0.0.1", port=port)
+        # 使用log_level=None禁用uvicorn内部日志
+        uvicorn.run(app, host="127.0.0.1", port=port, log_level="error", access_log=False)
     except Exception as e:
         logger.error(f"启动服务出错: {str(e)}")
         logger.error(traceback.format_exc())

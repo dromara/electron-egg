@@ -5,6 +5,8 @@ const path = require('path');
 const { app } = require('electron');
 const { logger } = require('ee-core/log');
 const { getBaseDir } = require('ee-core/ps');
+const { cross } = require('ee-core/cross');
+const { getExtraResourcesDir } = require('ee-core/ps');
 
 /**
  * 直播配置监控服务
@@ -14,6 +16,7 @@ class LiveMonitorService {
     constructor() {
         // 初始化文件路径 
         try {
+            this.pythonServiceName = 'DouyinLiveRecorder';
             this.baseDir = getBaseDir();
 
             // 确保baseDir有效
@@ -797,6 +800,44 @@ class LiveMonitorService {
                 message: `切换监控状态失败: ${error.message}`
             };
         }
+    }
+
+    /**
+     * 创建Python服务
+     * 使用API模式创建Python服务
+     */
+    async createPythonServer() {
+        try {
+            // 使用API模式创建服务
+            const serviceName = this.pythonServiceName;
+            const opt = {
+                name: 'DouyinLiveRecorder',
+                cmd: path.join(getExtraResourcesDir(), 'py', 'DouyinLiveRecorder'),
+                directory: path.join(getExtraResourcesDir(), 'py'),
+                args: ['--port=7075'],
+                windowsExtname: true,
+                appExit: true,
+            }
+            const entity = await cross.run(serviceName, opt);
+            logger.info('Python服务名称:', entity.name);
+            logger.info('Python服务配置:', entity.config);
+            logger.info('Python服务URL:', entity.getUrl());
+            return entity;
+        } catch (error) {
+            logger.error(`创建Python服务失败: ${error.message}`);
+            throw error;
+        }
+    }
+
+    /**
+     * 获取Python服务的基础URL
+     */
+    getPythonBaseUrl() {
+        const serverUrl = cross.getUrl(this.pythonServiceName);
+        if (!serverUrl) {
+            logger.error(`无法获取Python服务地址，服务名: ${this.pythonServiceName}`);
+        }
+        return serverUrl;
     }
 }
 

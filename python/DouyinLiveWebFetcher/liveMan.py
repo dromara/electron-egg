@@ -81,12 +81,11 @@ def generateMsToken(length=107):
 
 class DouyinLiveWebFetcher:
     
-    def __init__(self, live_id, message_queue=None):
+    def __init__(self, live_id):
         """
         直播间弹幕抓取对象
         :param live_id: 直播间的直播id，打开直播间web首页的链接如：https://live.douyin.com/261378947940，
                         其中的261378947940即是live_id
-        :param message_queue: 消息队列，用于存储消息并通过SSE发送到前端
         """
         self.__ttwid = None
         self.__room_id = None
@@ -94,7 +93,6 @@ class DouyinLiveWebFetcher:
         self.live_url = "https://live.douyin.com/"
         self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " \
                           "Chrome/120.0.0.0 Safari/537.36"
-        self.message_queue = message_queue
     
     def start(self):
         self._connectWebSocket()
@@ -173,9 +171,7 @@ class DouyinLiveWebFetcher:
             user = data.get('user')
             user_id = user.get('id_str')
             nickname = user.get('nickname')
-            status_msg = f"【{nickname}】[{user_id}]直播间：{['正在直播', '已结束'][bool(room_status)]}."
-            print(status_msg)
-            self.send_message("system", status_msg)
+            print(f"【{nickname}】[{user_id}]直播间：{['正在直播', '已结束'][bool(room_status)]}.")
     
     def _connectWebSocket(self):
         """
@@ -224,13 +220,9 @@ class DouyinLiveWebFetcher:
             try:
                 heartbeat = PushFrame(payload_type='hb').SerializeToString()
                 self.ws.send(heartbeat, websocket.ABNF.OPCODE_PING)
-                heartbeat_msg = "【√】发送心跳包"
-                print(heartbeat_msg)
-                # self.send_message("heartbeat", heartbeat_msg)
+                print("【√】发送心跳包")
             except Exception as e:
-                error_msg = f"【X】心跳包检测错误: {e}"
-                print(error_msg)
-                # self.send_message("error", error_msg)
+                print("【X】心跳包检测错误: ", e)
                 break
             else:
                 time.sleep(5)
@@ -239,9 +231,7 @@ class DouyinLiveWebFetcher:
         """
         连接建立成功
         """
-        success_msg = "【√】WebSocket连接成功."
-        print(success_msg)
-        self.send_message("system", success_msg)
+        print("【√】WebSocket连接成功.")
         threading.Thread(target=self._sendHeartbeat).start()
     
     def _wsOnMessage(self, ws, message):
@@ -286,21 +276,11 @@ class DouyinLiveWebFetcher:
                 pass
     
     def _wsOnError(self, ws, error):
-        """
-        连接错误
-        """
-        error_msg = f"【X】WebSocket连接错误: {error}"
-        print(error_msg)
-        self.send_message("error", error_msg)
+        print("WebSocket error: ", error)
     
     def _wsOnClose(self, ws, *args):
-        """
-        连接关闭
-        """
         self.get_room_status()
-        close_msg = "WebSocket connection closed."
-        print(close_msg)
-        self.send_message("system", close_msg)
+        print("WebSocket connection closed.")
     
     def _parseChatMsg(self, payload):
         """聊天消息"""
@@ -308,9 +288,7 @@ class DouyinLiveWebFetcher:
         user_name = message.user.nick_name
         user_id = message.user.id
         content = message.content
-        chat_msg = f"【聊天msg】[{user_id}]{user_name}: {content}"
-        print(chat_msg)
-        self.send_message("chat", chat_msg)
+        print(f"【聊天msg】[{user_id}]{user_name}: {content}")
     
     def _parseGiftMsg(self, payload):
         """礼物消息"""
@@ -318,18 +296,14 @@ class DouyinLiveWebFetcher:
         user_name = message.user.nick_name
         gift_name = message.gift.name
         gift_cnt = message.combo_count
-        gift_msg = f"【礼物msg】{user_name} 送出了 {gift_name}x{gift_cnt}"
-        print(gift_msg)
-        self.send_message("gift", gift_msg)
+        print(f"【礼物msg】{user_name} 送出了 {gift_name}x{gift_cnt}")
     
     def _parseLikeMsg(self, payload):
         '''点赞消息'''
         message = LikeMessage().parse(payload)
         user_name = message.user.nick_name
         count = message.count
-        like_msg = f"【点赞msg】{user_name} 点了{count}个赞"
-        print(like_msg)
-        self.send_message("like", like_msg)
+        print(f"【点赞msg】{user_name} 点了{count}个赞")
     
     def _parseMemberMsg(self, payload):
         '''进入直播间消息'''
@@ -337,35 +311,27 @@ class DouyinLiveWebFetcher:
         user_name = message.user.nick_name
         user_id = message.user.id
         gender = ["女", "男"][message.user.gender]
-        member_msg = f"【进场msg】[{user_id}][{gender}]{user_name} 进入了直播间"
-        print(member_msg)
-        self.send_message("member", member_msg)
+        print(f"【进场msg】[{user_id}][{gender}]{user_name} 进入了直播间")
     
     def _parseSocialMsg(self, payload):
         '''关注消息'''
         message = SocialMessage().parse(payload)
         user_name = message.user.nick_name
         user_id = message.user.id
-        social_msg = f"【关注msg】[{user_id}]{user_name} 关注了主播"
-        print(social_msg)
-        self.send_message("social", social_msg)
+        print(f"【关注msg】[{user_id}]{user_name} 关注了主播")
     
     def _parseRoomUserSeqMsg(self, payload):
         '''直播间统计'''
         message = RoomUserSeqMessage().parse(payload)
         current = message.total
         total = message.total_pv_for_anchor
-        stat_msg = f"【统计msg】当前观看人数: {current}, 累计观看人数: {total}"
-        print(stat_msg)
-        self.send_message("room_user_seq", stat_msg)
+        print(f"【统计msg】当前观看人数: {current}, 累计观看人数: {total}")
     
     def _parseFansclubMsg(self, payload):
         '''粉丝团消息'''
         message = FansclubMessage().parse(payload)
         content = message.content
-        fansclub_msg = f"【粉丝团msg】 {content}"
-        print(fansclub_msg)
-        self.send_message("fansclub", fansclub_msg)
+        print(f"【粉丝团msg】 {content}")
     
     def _parseEmojiChatMsg(self, payload):
         '''聊天表情包消息'''
@@ -374,53 +340,33 @@ class DouyinLiveWebFetcher:
         user = message.user
         common = message.common
         default_content = message.default_content
-        emoji_msg = f"【聊天表情包id】 {emoji_id},user：{user},common:{common},default_content:{default_content}"
-        print(emoji_msg)
-        self.send_message("emoji_chat", emoji_msg)
+        print(f"【聊天表情包id】 {emoji_id},user：{user},common:{common},default_content:{default_content}")
     
     def _parseRoomMsg(self, payload):
         message = RoomMessage().parse(payload)
         common = message.common
         room_id = common.room_id
-        room_msg = f"【直播间msg】直播间id:{room_id}"
-        print(room_msg)
-        self.send_message("room", room_msg)
+        print(f"【直播间msg】直播间id:{room_id}")
     
     def _parseRoomStatsMsg(self, payload):
         message = RoomStatsMessage().parse(payload)
         display_long = message.display_long
-        stats_msg = f"【直播间统计msg】{display_long}"
-        print(stats_msg)
-        self.send_message("room_stats", stats_msg)
+        print(f"【直播间统计msg】{display_long}")
     
     def _parseRankMsg(self, payload):
         message = RoomRankMessage().parse(payload)
         ranks_list = message.ranks_list
-        rank_msg = f"【直播间排行榜msg】{ranks_list}"
-        print(rank_msg)
-        self.send_message("rank", rank_msg)
+        print(f"【直播间排行榜msg】{ranks_list}")
     
     def _parseControlMsg(self, payload):
         '''直播间状态消息'''
         message = ControlMessage().parse(payload)
         
         if message.status == 3:
-            control_msg = "直播间已结束"
-            print(control_msg)
-            self.send_message("control", control_msg)
+            print("直播间已结束")
             self.stop()
     
     def _parseRoomStreamAdaptationMsg(self, payload):
         message = RoomStreamAdaptationMessage().parse(payload)
         adaptationType = message.adaptation_type
-        adaptation_msg = f'直播间adaptation: {adaptationType}'
-        print(adaptation_msg)
-        self.send_message("room_stream_adaptation", adaptation_msg)
-
-    def send_message(self, type, message):
-        """发送消息到队列"""
-        if self.message_queue:
-            self.message_queue.put({
-                "type": type,
-                "message": message
-            })
+        print(f'直播间adaptation: {adaptationType}')
