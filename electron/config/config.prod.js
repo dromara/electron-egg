@@ -4,7 +4,7 @@
  *  coverage config.default.js
  */
 module.exports = () => {
-  return {
-    openDevTools: false,
-  };
+    return {
+        openDevTools: false,
+    };
 };

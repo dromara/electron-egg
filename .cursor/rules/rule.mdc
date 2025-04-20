@@ -3,8 +3,18 @@ description:
 globs: 
 alwaysApply: true
 ---
+---
+description: 
+globs: 
+alwaysApply: true
+---
 
 # 框架构成
 
 - 使用electron-egg框架标准写法
-- 框架采用MVC模式controller文件夹下 为控制层，service为服务层
+- 框架采用MVC模式electron/controller文件夹下 为控制层，electron/service为服务层，严格使用框架的写法
+- frontend是前端文件夹，使用的vite-vue3实现，src/api/index.vue是api的路由文件
+- 不要添加额外的逻辑，代码要精简，不要添加过度的调试输出，代码风格
+- api编写要符合RESTful风格
+- 组件级注释，在组件文件开头添加注释，说明组件的用途、输入输出参数、使用示例等信息。
+- 方法级注释，对复杂的方法添加注释，说明方法的功能、参数、返回值等。

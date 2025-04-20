@@ -199,9 +199,9 @@ module.exports = {
         douyinlive: {
             directory: './python/DouyinLiveWebFetcher',
             cmd: 'python',
-            args: ['./main.py', '--port=7074'],
+            args: ['./main.py', '--port=7075'],
             stdio: "inherit", // ignore
         },
-        
+
     },
 };

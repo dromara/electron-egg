@@ -229,9 +229,12 @@ const sharedState = inject('livechatState', null);
 // Pinia store
 const livechatStore = useLivechatStore();
 
-// 状态变量
-const roomId = ref(livechatStore.roomId || sharedState?.roomId || '');
-const connected = ref(livechatStore.connected || sharedState?.connected || false);
+// 直播间连接状态
+const roomId = ref('');
+const connected = ref(false);
+const isConnected = ref(false); // 自动场控服务的连接状态
+
+// 初始化场控状态
 const isControlEnabled = ref(false);
 const loading = ref(false);
 const consoleRef = ref(sharedState?.consoleRef || null);
@@ -733,52 +736,35 @@ const handleDeleteScriptTable = (table) => {
   });
 };
 
-// 检查连接状态
+// 检查场控服务连接状态
 const checkConnectionStatus = async () => {
   try {
-    // 调用后端API检查连接状态
+    // 调用后端API检查场控服务连接状态
     const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.getConnectionStatus);
 
-    if (result && result.status === 'success' && result.data) {
-      // 更新连接状态
-      const isConnected = result.data.connected;
-      const roomId = result.data.roomId;
+    if (result && result.status === 'success') {
+      // 更新场控服务连接状态
+      isConnected.value = result.data?.connected || false;
 
-      // 更新组件状态
-      connected.value = isConnected;
-
-      // 更新 store 状态
-      livechatStore.setConnected(isConnected);
-
-      if (roomId) {
-        roomId.value = roomId;
-        livechatStore.setRoomId(roomId);
-      }
-
-      // 更新共享状态
-      if (sharedState) {
-        sharedState.connected = isConnected;
-        if (roomId) sharedState.roomId = roomId;
-      }
-
-      console.log('场控: 已更新连接状态:', {
-        connected: isConnected,
-        roomId: roomId
+      console.log('场控服务状态检查结果:', {
+        isConnected: isConnected.value,
+        livechatStore: {
+          connected: livechatStore.connected,
+          roomId: livechatStore.roomId
+        }
       });
     }
   } catch (error) {
-    console.error('检查连接状态失败:', error);
+    console.error('检查场控服务连接状态失败:', error);
+    isConnected.value = false;
   }
 };
 
 // 启动自动场控
 const enableControl = async () => {
-  // 先检查连接状态
-  await checkConnectionStatus();
-
-  // 使用store中的连接状态
-  if (!livechatStore.connected) {
-    showMessage('请先连接到直播间', 'warning');
+  // 先检查直播连接状态
+  if (!livechatStore.connected || !livechatStore.roomId) {
+    showMessage('请先在弹幕监控中连接直播间', 'warning');
     return;
   }
 
@@ -794,13 +780,31 @@ const enableControl = async () => {
 
   loading.value = true;
   try {
-    // 清理脚本数据，移除不可序列化的属性
+    // 如果场控服务未连接，尝试连接
+    if (!isConnected.value) {
+      console.log('场控服务未连接，尝试连接到直播间:', livechatStore.roomId);
+
+      const connectResult = await ipc.invoke(ipcApiRoute.livechatAutoControl.connectToLiveRoom, {
+        roomId: livechatStore.roomId
+      });
+
+      if (!connectResult || connectResult.status !== 'success') {
+        showMessage('场控服务连接失败，请检查直播间连接', 'error');
+        loading.value = false;
+        return;
+      }
+
+      console.log('场控服务连接成功');
+      isConnected.value = true;
+    }
+
+    // 准备脚本数据
     const cleanScripts = controlScripts.value.map(script => ({
       id: script.id,
       content: script.content
     }));
 
-    // 构建设置对象
+    // 构建场控设置
     const settings = {
       frequency: {
         min: frequency.value.min,
@@ -820,20 +824,14 @@ const enableControl = async () => {
       randomEmoji: speakMode.value.randomEmoji
     };
 
-    // 调用后端API启用自动场控
-    console.log('启动自动场控，设置:', settings);
-
-    // 使用清理后的脚本数据
+    // 调用后端API启动自动场控
     const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.startAutoControl, {
       scripts: cleanScripts,
       settings: settings
     });
 
-    console.log('启动结果:', result);
     if (result && result.status === 'success') {
       isControlEnabled.value = true;
-
-      // 更新当前频率显示
       frequency.value.current = Math.floor(Math.random() * (frequency.value.max - frequency.value.min + 1)) + frequency.value.min;
 
       if (consoleRef.value) {
@@ -879,16 +877,16 @@ const disableControl = async () => {
 
 // 页面挂载时同步状态
 onMounted(async () => {
-  // 同步状态
-  connected.value = livechatStore.connected;
+  // 从livechatStore获取状态
   roomId.value = livechatStore.roomId;
+  connected.value = livechatStore.connected;
 
   if (sharedState) {
     sharedState.connected = connected.value;
     sharedState.roomId = roomId.value;
   }
 
-  // 检查连接状态
+  // 检查自动场控服务连接状态
   await checkConnectionStatus();
 
   // 加载表格

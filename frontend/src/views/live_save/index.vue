@@ -264,7 +264,7 @@ function getUrl() {
 
     // 获取到地址后先检查录制器状态
     checkRecorderStatus();
-    
+
     // 然后尝试连接WebSocket
     connectEventSource();
   });
@@ -273,12 +273,12 @@ function getUrl() {
 // 检查录制器状态
 function checkRecorderStatus() {
   if (!serverUrl.value) return;
-  
+
   fetch(`${serverUrl.value}/api/recorder/status`)
     .then(response => response.json())
     .then(data => {
       recorderRunning.value = data.running;
-      
+
       // 如果录制器未运行，自动启动
       if (!recorderRunning.value) {
         startRecorder();
@@ -292,7 +292,7 @@ function checkRecorderStatus() {
 // 启动录制器
 function startRecorder() {
   if (!serverUrl.value) return;
-  
+
   fetch(`${serverUrl.value}/api/recorder/start`, {
     method: 'POST',
     headers: {

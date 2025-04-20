@@ -23,7 +23,7 @@ app = FastAPI(title="直播录制API服务", description="抖音直播录制相�
 url_config_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "URL.ini")
 text_encoding = "utf-8"
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--port', type=int, default=7074, help='The port number.')
+parser.add_argument('--port', type=int, default=7075, help='The port number.')
 args = parser.parse_args()
 # 添加CORS中间件，允许跨域请求
 app.add_middleware(

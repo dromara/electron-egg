@@ -43,31 +43,30 @@ class LiveChatService {
      * 使用API模式创建Python服务
      */
     async createPythonServer() {
-        try {
-            // 使用API模式创建服务
-            const serviceName = this.pythonServiceName;
-            const opt = {
-                name: 'DouyinLiveWebFetcher',
-                cmd: path.join(getExtraResourcesDir(), 'py', 'DouyinLiveWebFetcher'),
-                directory: path.join(getExtraResourcesDir(), 'py'),
-                args: ['--port=7074'],
-                windowsExtname: true,
-                appExit: true,
+            try {
+                // 使用API模式创建服务
+                const serviceName = this.pythonServiceName;
+                const opt = {
+                    name: 'DouyinLiveWebFetcher',
+                    cmd: path.join(getExtraResourcesDir(), 'py', 'DouyinLiveWebFetcher'),
+                    directory: path.join(getExtraResourcesDir(), 'py'),
+                    args: ['--port=7075'],
+                    windowsExtname: true,
+                    appExit: true,
+                }
+                const entity = await cross.run(serviceName, opt);
+                logger.info('Python服务名称:', entity.name);
+                logger.info('Python服务配置:', entity.config);
+                logger.info('Python服务URL:', entity.getUrl());
+                return entity;
+            } catch (error) {
+                logger.error(`创建Python服务失败: ${error.message}`);
+                throw error;
             }
-            const entity = await cross.run(serviceName, opt);
-            logger.info('Python服务名称:', entity.name);
-            logger.info('Python服务配置:', entity.config);
-            logger.info('Python服务URL:', entity.getUrl());
-            return entity;
-        } catch (error) {
-            logger.error(`创建Python服务失败: ${error.message}`);
-            throw error;
         }
-    }
-
-    /**
-     * 获取Python服务的基础URL
-     */
+        /**
+         * 获取Python服务的基础URL
+         */
     getPythonBaseUrl() {
         const serverUrl = cross.getUrl(this.pythonServiceName);
         if (!serverUrl) {

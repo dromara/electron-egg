@@ -8,7 +8,7 @@ const { securityService } = require('../service/os/security');
 const { autoUpdaterService } = require('../service/os/auto_updater');
 const { sqlitedbService } = require('../service/database/sqlitedb');
 const { livechatService } = require('../service/livechat');
-const { app } = require('electron');
+const { pythonServer } = require('../service/PythonServer');
 // liveMonitorService将在应用准备好后再加载
 
 function preload() {
@@ -19,41 +19,26 @@ function preload() {
     autoUpdaterService.create();
 
     // 启动Python服务
-    logger.info('[preload] 正在启动直播监控服务...');
+    pythonServer.createPythonServer().then(() => {
+        logger.info('[preload] 直播录制服务启动成功');
+    }).catch(err => {
+        logger.error(`[preload] 直播录制服务服务启动失败: ${err.message}`);
+    });
+
     livechatService.createPythonServer().then(() => {
         logger.info('[preload] 直播监控服务启动成功');
     }).catch(err => {
-        logger.error(`[preload] Python服务启动失败: ${err.message}`);
+        logger.error(`[preload] 直播监控服务启动失败: ${err.message}`);
     });
-    
+
+
     // init sqlite db
     sqlitedbService.init();
 
-    // 延迟加载直播监控服务，确保应用已完全初始化
-    logger.info('[preload] 准备启动直播监控服务');
 
-    // 确保app准备好
-    if (app.isReady()) {
-        initLiveMonitorService();
-    } else {
-        app.on('ready', () => {
-            initLiveMonitorService();
-        });
-    }
 }
 
-/**
- * 初始化直播监控服务
- */
-function initLiveMonitorService() {
-    try {
-        // 动态导入，确保路径已准备好
-        logger.info('[preload] 自动启动直播监控服务');
-        liveMonitorService.startWatching();
-    } catch (error) {
-        logger.error(`[preload] 启动直播监控失败: ${error.message}`);
-    }
-}
+
 
 /**
  * 预加载模块入口

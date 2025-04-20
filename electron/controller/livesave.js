@@ -174,7 +174,7 @@ class LiveMonitorController {
             logger.warn('收到的event对象为空');
         }
 
-        const result = liveMonitorService.toggleStreamMonitoring(args, event);
+        const result = await liveMonitorService.toggleStreamMonitoring(args, event);
 
         return {
             success: result.status === 'success',
