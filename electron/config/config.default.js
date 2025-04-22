@@ -67,6 +67,6 @@ module.exports = () => {
         mainServer: {
             indexPath: '/public/dist/index.html',
             channelSeparator: '/',
-        }
+        },
     }
 }

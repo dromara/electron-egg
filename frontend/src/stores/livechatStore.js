@@ -2,42 +2,54 @@ import { defineStore } from 'pinia';
 
 // 定义直播场控相关的store
 export const useLivechatStore = defineStore('livechatStore', {
-  state: () => ({
-    // 场控组相关状态
-    selectedControlTable: '',
-    
-    // 关键词组相关状态
-    selectedReplyTable: '',
-    
-    // 直播间连接状态
-    roomId: '',
-    connected: false,
-  }),
-  
-  actions: {
-    // 设置选中的场控组
-    setSelectedControlTable(tableName) {
-      this.selectedControlTable = tableName;
+    state: () => ({
+        // 场控组相关状态
+        selectedControlTable: '',
+        isAutoControlEnabled: false, // 自动场控是否开启
+
+        // 关键词组相关状态
+        selectedReplyTable: '',
+        isAutoReplyEnabled: false, // 自动回复是否开启
+
+        // 直播间连接状态
+        roomId: '',
+        connected: false,
+    }),
+
+    actions: {
+        // 设置选中的场控组
+        setSelectedControlTable(tableName) {
+            this.selectedControlTable = tableName;
+        },
+
+        // 设置选中的关键词组
+        setSelectedReplyTable(tableName) {
+            this.selectedReplyTable = tableName;
+        },
+
+        // 设置直播间ID
+        setRoomId(id) {
+            this.roomId = id;
+        },
+
+        // 设置连接状态
+        setConnected(status) {
+            this.connected = status;
+        },
+
+        // 设置自动场控状态
+        setAutoControlEnabled(status) {
+            this.isAutoControlEnabled = status;
+        },
+
+        // 设置自动回复状态
+        setAutoReplyEnabled(status) {
+            this.isAutoReplyEnabled = status;
+        }
     },
-    
-    // 设置选中的关键词组
-    setSelectedReplyTable(tableName) {
-      this.selectedReplyTable = tableName;
+
+    persist: {
+        key: 'livechat-state',
+        storage: localStorage,
     },
-    
-    // 设置直播间ID
-    setRoomId(id) {
-      this.roomId = id;
-    },
-    
-    // 设置连接状态
-    setConnected(status) {
-      this.connected = status;
-    }
-  },
-  
-  persist: {
-    key: 'livechat-state',
-    storage: localStorage,
-  },
-}); 
+});

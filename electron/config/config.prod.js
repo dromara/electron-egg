@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- *  coverage config.default.js
+ *  生产环境配置，覆盖config.default.js
  */
 module.exports = () => {
     return {

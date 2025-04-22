@@ -6,15 +6,15 @@
  */
 const ipcApiRoute = {
     livesave: {
-        test: 'controller/livesave/test',
-        startMonitoring: 'controller/livesave/startMonitoring',
-        stopMonitoring: 'controller/livesave/stopMonitoring',
+        startRecorder: 'controller/livesave/startRecorder',
+        stopRecorder: 'controller/livesave/stopRecorder',
         getLatestConfig: 'controller/livesave/getLatestConfig',
         configUpdate: 'controller/livesave/configUpdate',
         addLiveUrl: 'controller/livesave/addLiveUrl',
         updateQuality: 'controller/livesave/updateQuality',
         removeStream: 'controller/livesave/removeStream',
         toggleStreamMonitoring: 'controller/livesave/toggleStreamMonitoring',
+        openDownloadsFolder: 'controller/livesave/openDownloadsFolder',
     },
     framework: {
         checkForUpdater: 'controller/framework/checkForUpdater',
@@ -65,6 +65,9 @@ const ipcApiRoute = {
         selectFile: 'controller/effect/selectFile',
         loginWindow: 'controller/effect/loginWindow',
         restoreWindow: 'controller/effect/restoreWindow',
+        verifyActivation: 'controller/effect/verifyActivation',
+        checkActivation: 'controller/effect/checkActivation',
+        generateDeviceFingerprint: 'controller/effect/generateDeviceFingerprint',
     },
 
     // cross
@@ -89,12 +92,16 @@ const ipcApiRoute = {
     livechatAutoControl: {
         connectToLiveRoom: 'controller/livechatAutoControl/connectToLiveRoom',
         disconnectFromLiveRoom: 'controller/livechatAutoControl/disconnectFromLiveRoom',
-        startAutoControl: 'controller/livechatAutoControl/startAutoControl',
-        stopAutoControl: 'controller/livechatAutoControl/stopAutoControl',
         sendMessage: 'controller/livechatAutoControl/sendMessage',
         getConnectionStatus: 'controller/livechatAutoControl/getConnectionStatus',
+        startAutoControl: 'controller/livechatAutoControl/startAutoControl',
+        stopAutoControl: 'controller/livechatAutoControl/stopAutoControl',
+        getAutoControlStatus: 'controller/livechatAutoControl/getAutoControlStatus',
         startAutoReply: 'controller/livechatAutoControl/startAutoReply',
         stopAutoReply: 'controller/livechatAutoControl/stopAutoReply',
+        getAutoReplyStatus: 'controller/livechatAutoControl/getAutoReplyStatus',
+        getEmojis: 'controller/livechatAutoControl/getEmojis',
+        saveEmojis: 'controller/livechatAutoControl/saveEmojis'
     },
 
     // 语音助手相关
@@ -119,6 +126,8 @@ const ipcApiRoute = {
         updateScriptTable: 'controller/scriptdb/updateScriptTable',
         deleteScriptTable: 'controller/scriptdb/deleteScriptTable',
         checkAndFixDefaultTable: 'controller/scriptdb/checkAndFixDefaultTable',
+        exportScriptTable: 'controller/scriptdb/exportScriptTable',
+        importScriptTable: 'controller/scriptdb/importScriptTable',
 
         // 文字回复相关
         getReplyTables: 'controller/scriptdb/getReplyTables',
@@ -130,6 +139,8 @@ const ipcApiRoute = {
         updateReplyTable: 'controller/scriptdb/updateReplyTable',
         deleteReplyTable: 'controller/scriptdb/deleteReplyTable',
         checkAndFixDefaultReplyTable: 'controller/scriptdb/checkAndFixDefaultReplyTable',
+        exportReplyTable: 'controller/scriptdb/exportReplyTable',
+        importReplyTable: 'controller/scriptdb/importReplyTable',
     },
 }
 

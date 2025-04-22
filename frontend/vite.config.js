@@ -21,9 +21,19 @@ export default defineConfig(({ command, mode }) => {
             }),
             AutoImport({
                 resolvers: [ElementPlusResolver()],
+                // 自动导入Vue API和组件
+                imports: [
+                    'vue',
+                    'vue-router'
+                ],
+                // 可以选择是否自动导入directives
+                dirs: ['src/composables', 'src/utils'],
+                // 声明文件生成位置
+                dts: 'auto-imports.d.ts'
             }),
             Components({
                 resolvers: [ElementPlusResolver()],
+                dts: 'components.d.ts'
             }),
         ],
         // 基础配置

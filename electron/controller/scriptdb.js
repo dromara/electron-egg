@@ -186,6 +186,47 @@ class ScriptdbController {
     async checkAndFixDefaultReplyTable(args, event) {
         logger.info('检查并修复默认文字回复表');
         const result = await scriptdbService.checkAndFixDefaultReplyTable();
+        logger.info('[checkAndFixDefaultReplyTable] 修复默认回复表:', result);
+        return result;
+    }
+
+    /**
+     * 导出场控脚本表格
+     */
+    async exportScriptTable(args, event) {
+        const tableName = args.tableName;
+        logger.info('[exportScriptTable] 导出场控脚本表格:', tableName);
+        const result = await scriptdbService.exportScriptTable(tableName, event);
+        return result;
+    }
+
+    /**
+     * 导入场控脚本表格
+     */
+    async importScriptTable(args, event) {
+        const tableName = args.tableName;
+        logger.info('[importScriptTable] 导入场控脚本表格:', tableName);
+        const result = await scriptdbService.importScriptTable(tableName, event);
+        return result;
+    }
+
+    /**
+     * 导出关键词回复表格
+     */
+    async exportReplyTable(args, event) {
+        const tableName = args.tableName;
+        logger.info('[exportReplyTable] 导出关键词回复表格:', tableName);
+        const result = await scriptdbService.exportReplyTable(tableName, event);
+        return result;
+    }
+
+    /**
+     * 导入关键词回复表格
+     */
+    async importReplyTable(args, event) {
+        const tableName = args.tableName;
+        logger.info('[importReplyTable] 导入关键词回复表格:', tableName);
+        const result = await scriptdbService.importReplyTable(tableName, event);
         return result;
     }
 }

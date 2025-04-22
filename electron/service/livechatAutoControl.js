@@ -3,9 +3,12 @@
  */
 'use strict';
 
-const { chromium } = require('playwright');
 const { logger } = require('ee-core/log');
+const { BrowserWindow, ipcMain } = require('electron');
 const { getMainWindow } = require('ee-core/electron');
+const { scriptdbService } = require('./scriptdb');
+const { livechatService } = require('./livechat');
+const { douyinLivechatHandler } = require('./douyinLivechatHandler');
 
 /**
  * 自动场控和自动回复服务
@@ -13,19 +16,18 @@ const { getMainWindow } = require('ee-core/electron');
  */
 class LivechatAutoControlService {
     constructor() {
-        this.browser = null;
-        this.page = null;
-        this.context = null;
+        this.douyinWindow = null;
         this.isConnected = false;
         this.isAutoControlEnabled = false;
         this.isAutoReplyEnabled = false;
         this.controlTimer = null;
-        this.replyTimer = null;
+        this.keepAliveTimer = null;
         this.currentIndex = 0; // 用于顺序发言
         this.controlSettings = {
             frequency: { min: 30, max: 60 }, // 发言频率（秒）
-            continuousSpeech: { start: 15, end: 15 }, // 连续发言时长（分钟）
-            restTime: { start: 0, end: 0 }, // 休息时间（分钟）
+            continuousSpeechEnabled: false, // 连续发言功能开关
+            continuousSpeechDuration: 15, // 连续发言时长（分钟）
+            restTime: 5, // 休息时间（分钟）
             random: true, // 随机发言
             sequential: false, // 顺序发言
             randomSpace: false, // 随机空格
@@ -38,11 +40,29 @@ class LivechatAutoControlService {
         // 自动回复相关
         this.replyItems = []; // 关键词和回复的配置
         this.replySettings = {}; // 自动回复的设置
-        this.lastReplyTime = {}; // 记录最后一次回复的时间，用于控制回复频率
         this.messageBus = null; // 用于接收弹幕消息的事件总线
 
-        // 表情代码表
-        this.emojis = ['[赞]'];
+        this.pendingMessages = []; // 新增的消息队列
+        this.isProcessing = false; // 新增的处理状态
+        this.canReplyNow = true; // 新增的回复状态
+    }
+
+    /**
+     * 查找抖音窗口
+     * @returns {BrowserWindow|null} - 抖音窗口实例
+     */
+    findDouyinWindow() {
+        // 获取所有窗口
+        const allWindows = BrowserWindow.getAllWindows();
+
+        // 查找名称为 'window-douyin' 的窗口
+        for (const win of allWindows) {
+            if (win && win.webContents && win.webContents.getTitle().includes('抖音')) {
+                return win;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -56,182 +76,63 @@ class LivechatAutoControlService {
                 await this.disconnect();
             }
 
-            // 创建用户数据目录，用于保存登录状态和cookies
-            const path = require('path');
-            const fs = require('fs');
-            const userDataDir = path.join(__dirname, '..', 'browser-data');
+            // 查找抖音窗口
+            this.douyinWindow = this.findDouyinWindow();
 
-            // 确保目录存在
-            if (!fs.existsSync(userDataDir)) {
-                fs.mkdirSync(userDataDir, { recursive: true });
-                logger.info(`创建浏览器数据目录: ${userDataDir}`);
-            }
-
-            // 启动持久化浏览器 - 保留cookies和登录状态
-            logger.info('启动持久化浏览器...');
-            this.context = await chromium.launchPersistentContext(userDataDir, {
-                headless: false, // 设置为false以便看到浏览器窗口
-                args: ['--disable-gpu', '--disable-dev-shm-usage', '--disable-setuid-sandbox', '--no-sandbox']
-            });
-
-            // 获取或创建页面
-            if (this.context.pages().length > 0) {
-                this.page = this.context.pages()[0];
-            } else {
-                this.page = await this.context.newPage();
-            }
-
-            // 阻止视频和图片等资源加载以降低资源占用
-            await this.context.route('**/*.{png,jpg,jpeg,webp,svg,mp4,webm}', route => {
-                if (route.request().url().includes('video') || route.request().resourceType() === 'media') {
-                    route.abort();
-                } else {
-                    route.continue();
-                }
-            });
-
-            // 设置视口大小
-            await this.page.setViewportSize({ width: 1280, height: 720 });
-
-            // 修改userAgent以防止被检测
-            await this.page.setExtraHTTPHeaders({
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'
-            });
-
-            // 禁用视频自动播放
-            await this.page.addInitScript(() => {
-                // 覆盖HTMLMediaElement的原生方法来阻止视频播放
-                Object.defineProperty(HTMLMediaElement.prototype, 'play', {
-                    value: async function() { return Promise.resolve(); }
-                });
-                // 设置 autoplay 为 false
-                document.addEventListener('DOMContentLoaded', () => {
-                    const videos = document.querySelectorAll('video');
-                    videos.forEach(video => {
-                        video.autoplay = false;
-                        video.pause();
-                        video.muted = true;
-                        video.style.display = 'none';
-                    });
-                }, true);
-            });
-
-            // 访问直播间
-            const liveUrl = `https://live.douyin.com/${roomId}`;
-            await this.page.goto(liveUrl, { timeout: 0 }); // 设置为0表示不超时
-
-            // 设置查找标志
-            let inputBoxFound = false;
-
-            // 同时异步查找播放按钮和输入框
-            logger.info('同时查找播放按钮和输入框...');
-            const textareaSelector = 'textarea.webcast-chatroom___textarea';
-
-            // 创建查找输入框的Promise
-            const findInputBox = (async() => {
-                try {
-                    await this.page.waitForSelector(textareaSelector, { timeout: 30000 });
-                    logger.info('成功找到评论输入框');
-                    inputBoxFound = true;
-                    return true;
-                } catch (e) {
-                    logger.error(`等待评论输入框超时: ${e.message}`);
-                    return false;
-                }
-            })();
-
-            // 创建查找播放按钮的Promise
-            const findPlayButton = (async() => {
-                try {
-                    // 设置标志，控制是否继续查找和点击播放按钮
-                    let shouldContinue = true;
-
-                    // 检查输入框是否已找到
-                    const checkInputBox = () => {
-                        if (inputBoxFound) {
-                            logger.info('输入框已找到，停止查找播放按钮');
-                            shouldContinue = false;
-                        }
-                        return inputBoxFound;
-                    };
-
-                    // 最多尝试5次，或者直到找到输入框
-                    for (let i = 0; i < 5 && shouldContinue; i++) {
-                        // 每次循环前检查输入框是否已找到
-                        if (checkInputBox()) break;
-
-                        logger.info(`尝试查找播放按钮 (${i+1}/5)...`);
-                        // 尝试查找播放按钮
-                        const playButton = await this.page.$(`.xgplayer-icon`);
-
-                        // 再次检查输入框是否已找到
-                        if (checkInputBox()) break;
-
-                        if (playButton) {
-                            logger.info('找到播放按钮，尝试点击...');
-                            // 设置较短的超时时间，避免长时间等待
-                            try {
-                                await Promise.race([
-                                    playButton.click(),
-                                    new Promise((_, reject) =>
-                                        setTimeout(() => reject(new Error('点击超时，可能已找到输入框')), 3000)
-                                    )
-                                ]);
-                                logger.info('已点击播放按钮');
-                            } catch (error) {
-                                logger.warn(`点击操作中断: ${error.message}`);
-                            }
-                        } else {
-                            logger.info('未找到播放按钮');
-                        }
-
-                        // 等待一段时间后再尝试
-                        await this.page.waitForTimeout(1000);
-
-                        // 再次检查输入框是否已找到
-                        if (checkInputBox()) break;
-                    }
-                } catch (e) {
-                    logger.warn(`查找播放按钮过程中出错: ${e.message}`);
-                }
-            })();
-
-            // 等待两个Promise都完成
-            await Promise.all([findInputBox, findPlayButton]);
-
-            // 如果没找到输入框，返回失败
-            if (!inputBoxFound) {
-                logger.error('未能找到评论输入框，连接失败');
-                await this.disconnect();
+            if (!this.douyinWindow) {
+                logger.error('未找到抖音窗口，请先点击"登录抖音"按钮');
                 return false;
             }
 
-            // 检查是否成功进入直播间
-            const title = await this.page.title();
+            // 访问直播间
+            const liveUrl = `https://live.douyin.com/${roomId}`;
+            await this.douyinWindow.webContents.loadURL(liveUrl);
+
+            // 等待页面加载
+            await new Promise(resolve => setTimeout(resolve, 5000));
+
+            // 检查页面标题，确认是否是直播间
+            const title = await this.douyinWindow.webContents.executeJavaScript('document.title');
             logger.info(`直播间标题: ${title}`);
 
             if (title.includes('抖音直播') || title.includes('正在直播')) {
+                // 检查输入框是否存在
+                const inputSelector = '.zone-container.editor-kit-container';
+                const hasInputBox = await this.douyinWindow.webContents.executeJavaScript(`
+                    document.querySelector('${inputSelector}') != null
+                `);
+
+                if (!hasInputBox) {
+                    logger.error('未找到评论输入框，连接失败');
+                    return false;
+                }
+
                 this.isConnected = true;
                 logger.info(`成功连接到直播间 ID: ${roomId}`);
+
+                // 将抖音窗口引用设置到livechat服务
+                livechatService.setDouyinWindow(this.douyinWindow);
+
+                // 初始化抖音窗口的消息处理器
+                await douyinLivechatHandler.initMessageListener(this.douyinWindow);
 
                 // 设置保活定时器，防止会话超时
                 this.keepAliveTimer = setInterval(async() => {
                     try {
-                        if (this.page && !this.page.isClosed()) {
+                        if (this.douyinWindow && !this.douyinWindow.isDestroyed()) {
                             // 定期执行一些操作，保持页面活跃
-                            await this.page.evaluate(() => {
-                                // 滚动页面或点击页面某处
+                            await this.douyinWindow.webContents.executeJavaScript(`
                                 window.scrollBy(0, 1);
                                 window.scrollBy(0, -1);
-
+                                
                                 // 移除可能的视频元素，减少资源占用
-                                const videos = document.querySelectorAll('video');
-                                videos.forEach(video => {
+                                let videoElements = document.querySelectorAll('video');
+                                videoElements.forEach(video => {
                                     video.pause();
                                     video.muted = true;
                                     video.style.display = 'none';
                                 });
-                            });
+                            `);
                             logger.debug('执行页面保活操作');
                         }
                     } catch (err) {
@@ -245,7 +146,6 @@ class LivechatAutoControlService {
                 return true;
             } else {
                 logger.error(`连接到直播间失败，直播间可能不存在或已下播`);
-                await this.disconnect();
                 return false;
             }
         } catch (error) {
@@ -274,8 +174,10 @@ class LivechatAutoControlService {
             // 移除消息监听
             this.removeMessageListener();
 
-            // 不再自动关闭页面和浏览器，让用户手动关闭
-            // 只更新连接状态
+            // 清除livechat服务中的抖音窗口引用
+            livechatService.clearDouyinWindow();
+
+            // 不关闭窗口，只更新连接状态
             this.isConnected = false;
             logger.info('已断开直播间连接，浏览器窗口保持打开');
         } catch (error) {
@@ -289,39 +191,20 @@ class LivechatAutoControlService {
      */
     setupMessageListener() {
         try {
-            // 使用electron模块直接监听livechat-message事件
-            const { ipcMain } = require('electron');
-
+            // 直接监听从livechat.js发送的livechat-message事件
             // 创建消息处理函数
             this.messageBus = (event, data) => {
-                // 只处理chat类型的消息，并且自动回复功能已启用
-                if (data && data.type === 'chat' && this.isAutoReplyEnabled) {
-                    this.processAutoReply(data.message);
-                }
-            };
-
-            // 注册监听器
-            ipcMain.on('livechat-message-relay', this.messageBus);
-            logger.info('已设置弹幕消息监听，准备自动回复');
-
-            // 设置转发逻辑
-            const { BrowserWindow } = require('electron');
-            this.messageForwarder = (event, data) => {
-                // 将livechat-message事件转发为livechat-message-relay事件
+                // 只处理chat类型的消息
                 if (data && data.type === 'chat') {
-                    event.sender.send('livechat-message-relay', data);
+                    if (this.isAutoReplyEnabled) {
+                        this.processAutoReply(data.message);
+                    }
                 }
             };
 
-            // 获取所有窗口并设置监听
-            const windows = BrowserWindow.getAllWindows();
-            for (const win of windows) {
-                win.webContents.on('ipc-message', (event, channel, ...args) => {
-                    if (channel === 'livechat-message') {
-                        this.messageForwarder(event, args[0]);
-                    }
-                });
-            }
+            // 注册监听器，直接监听livechat-message事件
+            ipcMain.on('livechat-message', this.messageBus);
+            logger.info('已设置弹幕消息监听，准备自动回复');
         } catch (error) {
             logger.error(`设置消息监听出错: ${error.message}`);
         }
@@ -333,20 +216,9 @@ class LivechatAutoControlService {
     removeMessageListener() {
         try {
             if (this.messageBus) {
-                const { ipcMain } = require('electron');
                 // 移除监听器
-                ipcMain.removeListener('livechat-message-relay', this.messageBus);
+                ipcMain.removeListener('livechat-message', this.messageBus);
                 this.messageBus = null;
-            }
-
-            // 移除转发逻辑
-            if (this.messageForwarder) {
-                const { BrowserWindow } = require('electron');
-                const windows = BrowserWindow.getAllWindows();
-                for (const win of windows) {
-                    win.webContents.removeAllListeners('ipc-message');
-                }
-                this.messageForwarder = null;
             }
 
             logger.info('已移除弹幕消息监听');
@@ -361,55 +233,30 @@ class LivechatAutoControlService {
      * @returns {Promise<boolean>} - 发送结果
      */
     async sendMessage(message) {
-        if (!this.isConnected || !this.page) {
-            logger.error('未连接到直播间，无法发送消息');
+        if (!this.isConnected || !this.douyinWindow || this.douyinWindow.isDestroyed()) {
+            logger.error('未连接到直播间或窗口已关闭，无法发送消息');
             return false;
         }
 
         try {
-            // 查找输入框
-            const textareaSelector = 'textarea.webcast-chatroom___textarea';
-            await this.page.waitForSelector(textareaSelector, { timeout: 5000 });
+            // 使用douyinLivechatHandler发送消息
+            const result = await douyinLivechatHandler.sendMessage(this.douyinWindow, message);
 
-            // 点击输入框获取焦点
-            await this.page.click(textareaSelector);
+            if (result) {
+                logger.info(`已发送消息: ${message}`);
 
-            // 等待一小段时间确保焦点已获取
-            await this.page.waitForTimeout(500);
-
-            // 清空输入框
-            await this.page.evaluate((selector) => {
-                document.querySelector(selector).value = '';
-            }, textareaSelector);
-
-            // 直接使用键盘输入消息
-            await this.page.keyboard.type(message);
-
-            // 等待一小段时间后按回车发送
-            await this.page.waitForTimeout(300);
-            await this.page.keyboard.press('Enter');
-
-            logger.info(`已发送消息: ${message}`);
-
-            // 记录到控制台
-            try {
-                // 导入electron模块
-                const { BrowserWindow } = require('electron');
-                // 获取主窗口实例
-                const mainWindow = BrowserWindow.getAllWindows()[0];
-
-                if (mainWindow) {
+                // 记录到控制台
+                const mainWindow = getMainWindow();
+                if (mainWindow && !mainWindow.isDestroyed()) {
                     // 发送消息给渲染进程
                     mainWindow.webContents.send('livechat-message', {
                         type: 'text_reply',
                         message: `已发送: ${message}`
                     });
                 }
-            } catch (err) {
-                logger.error(`发送消息通知到控制台失败: ${err.message}`);
             }
 
-            return true;
+            return result;
         } catch (error) {
             logger.error(`发送消息出错: ${error.message}`);
             return false;
@@ -442,10 +289,11 @@ class LivechatAutoControlService {
         }
 
         // 添加随机表情
-        if (this.controlSettings.randomEmoji && this.emojis.length > 0) {
+        if (this.controlSettings.randomEmoji) {
+            const emojis = this.getEmojis();
             // 30%概率在消息末尾添加表情
-            if (Math.random() < 0.3) {
-                const randomEmoji = this.emojis[Math.floor(Math.random() * this.emojis.length)];
+            if (emojis.length > 0 && Math.random() < 0.3) {
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
                 result += randomEmoji;
             }
         }
@@ -486,6 +334,7 @@ class LivechatAutoControlService {
      */
     getRandomWaitTime() {
         const { min, max } = this.controlSettings.frequency;
+        // 每次都从区间随机生成一个新的时间值
         const seconds = min + Math.floor(Math.random() * (max - min + 1));
         return seconds * 1000; // 转换为毫秒
     }
@@ -499,27 +348,35 @@ class LivechatAutoControlService {
             return;
         }
 
+        if (!this.douyinWindow || this.douyinWindow.isDestroyed()) {
+            logger.error('抖音窗口已关闭，停止自动场控');
+            await this.stopAutoControl();
+            return;
+        }
+
         try {
-            // 检查是否超过了连续发言时间
-            const now = new Date();
-            const elapsedMinutes = (now - this.autoControlStartTime) / (1000 * 60);
+            // 只有当连续发言功能开启时才检查发言时长
+            if (this.controlSettings.continuousSpeechEnabled) {
+                // 检查是否超过了连续发言时间
+                const now = new Date();
+                const elapsedMinutes = (now - this.autoControlStartTime) / (1000 * 60);
 
-            if (elapsedMinutes >= this.autoControlDuration) {
-                logger.info(`已达到设定的连续发言时长 ${this.autoControlDuration} 分钟，停止自动场控`);
-                await this.stopAutoControl();
+                if (elapsedMinutes >= this.autoControlDuration) {
+                    logger.info(`已达到设定的连续发言时长 ${this.autoControlDuration} 分钟，停止自动场控`);
+                    await this.stopAutoControl();
 
-                // 如果设置了休息时间，则在休息后重新启动
-                const { start, end } = this.controlSettings.restTime;
-                if (start > 0 || end > 0) {
-                    const restMinutes = start + Math.floor(Math.random() * (end - start + 1));
-                    logger.info(`将在 ${restMinutes} 分钟后重新启动自动场控`);
+                    // 如果设置了休息时间，则在休息后重新启动
+                    const restTime = this.controlSettings.restTime;
+                    if (restTime > 0) {
+                        logger.info(`将在 ${restTime} 分钟后重新启动自动场控`);
 
-                    setTimeout(() => {
-                        this.startAutoControl(this.controlScripts, this.controlSettings);
-                    }, restMinutes * 60 * 1000);
+                        setTimeout(() => {
+                            this.startAutoControl(this.controlScripts, this.controlSettings);
+                        }, restTime * 60 * 1000);
+                    }
+
+                    return;
                 }
-
-                return;
             }
 
             // 获取要发送的消息
@@ -538,8 +395,11 @@ class LivechatAutoControlService {
                 await this.sendMessage(processedMessage);
             }
 
-            // 获取随机等待时间
+            // 获取随机等待时间 - 每次发言后都重新计算
             const waitTime = this.getRandomWaitTime();
+
+            // 向主窗口发送倒计时信息
+            this.sendCountdownToMainWindow(waitTime / 1000);
 
             // 设置下一次发言的定时器
             this.controlTimer = setTimeout(() => {
@@ -564,44 +424,59 @@ class LivechatAutoControlService {
      * @returns {Promise<boolean>} - 启动结果
      */
     async startAutoControl(scripts, settings) {
-        if (!this.isConnected) {
-            logger.error('未连接到直播间，无法启动自动场控');
-            return false;
-        }
+            // 检查抖音窗口是否存在
+            this.douyinWindow = this.findDouyinWindow();
 
-        try {
-            // 停止当前正在运行的自动场控（如果有）
-            await this.stopAutoControl();
-
-            // 保存场控话术和设置
-            this.controlScripts = scripts || [];
-            this.controlSettings = settings || this.controlSettings;
-
-            // 校验数据
-            if (!this.controlScripts || this.controlScripts.length === 0) {
-                logger.error('没有可用的场控话术');
+            if (!this.douyinWindow) {
+                logger.error('未找到抖音窗口，请先点击"登录抖音"按钮');
                 return false;
             }
 
-            // 设置连续发言时长
-            const { start, end } = this.controlSettings.continuousSpeech;
-            this.autoControlDuration = start + Math.floor(Math.random() * (end - start + 1));
+            if (!this.isConnected) {
+                logger.error('未连接到直播间，无法启动自动场控');
+                return false;
+            }
 
-            // 设置开始时间
-            this.autoControlStartTime = new Date();
+            try {
+                // 停止当前正在运行的自动场控（如果有）
+                await this.stopAutoControl();
 
-            // 启用自动场控
-            this.isAutoControlEnabled = true;
+                // 保存场控话术和设置
+                this.controlScripts = scripts || [];
+                this.controlSettings = settings || this.controlSettings;
 
-            // 重置顺序发言索引
-            this.currentIndex = 0;
+                // 校验数据
+                if (!this.controlScripts || this.controlScripts.length === 0) {
+                    logger.error('没有可用的场控话术');
+                    return false;
+                }
 
-            // 执行第一次场控发言
-            setTimeout(() => {
-                this.executeAutoControl();
-            }, 1000);
+                // 设置连续发言时长 - 使用单一固定值而不是从区间随机生成
+                if (this.controlSettings.continuousSpeechEnabled) {
+                    this.autoControlDuration = this.controlSettings.continuousSpeechDuration;
+                } else {
+                    // 如果连续发言功能未启用，设置一个很大的值，实际上不会达到
+                    this.autoControlDuration = 24 * 60; // 24小时
+                }
 
-            logger.info(`已启动自动场控，连续发言时长: ${this.autoControlDuration} 分钟`);
+                // 设置开始时间
+                this.autoControlStartTime = new Date();
+
+                // 启用自动场控
+                this.isAutoControlEnabled = true;
+                logger.info('自动场控状态已设置为启用');
+
+                // 重置顺序发言索引
+                this.currentIndex = 0;
+
+                // 执行第一次场控发言
+                setTimeout(() => {
+                    this.executeAutoControl();
+                }, 1000);
+
+                logger.info(`已启动自动场控${this.controlSettings.continuousSpeechEnabled ? 
+                `，连续发言时长: ${this.autoControlDuration} 分钟，休息时间: ${this.controlSettings.restTime} 分钟` : 
+                '，持续发言模式'}`);
             return true;
         } catch (error) {
             logger.error(`启动自动场控出错: ${error.message}`);
@@ -625,7 +500,7 @@ class LivechatAutoControlService {
             this.autoControlStartTime = null;
             this.autoControlDuration = 0;
 
-            logger.info('已停止自动场控');
+            logger.info('已停止自动场控，状态已设置为停用');
             return true;
         } catch (error) {
             logger.error(`停止自动场控出错: ${error.message}`);
@@ -638,64 +513,13 @@ class LivechatAutoControlService {
      * @param {string} message - 弹幕消息内容
      */
     processAutoReply(message) {
-        if (!this.isAutoReplyEnabled || !this.isConnected || !this.replyItems || this.replyItems.length === 0) {
+        if (!this.isAutoReplyEnabled || !this.isConnected) {
             return;
         }
 
         try {
-            // 提取用户和内容（如果是聊天消息）
-            const chatMatch = message.match(/【聊天msg】\[([^\]]+)\]([^:]+): (.*)/);
-            if (!chatMatch) {
-                return; // 不是聊天消息
-            }
-
-            const [_, userId, userName, content] = chatMatch;
-            const now = Date.now();
-
-            // 遍历所有关键词规则
-            for (const item of this.replyItems) {
-                // 分割关键词（支持中英文逗号）
-                const keywords = item.keywords.split(/[,，]/);
-
-                // 检查弹幕内容是否包含任一关键词
-                const matchedKeyword = keywords.find(keyword =>
-                    content.toLowerCase().includes(keyword.trim().toLowerCase())
-                );
-
-                if (matchedKeyword) {
-                    // 检查回复频率限制
-                    const lastReply = this.lastReplyTime[item.id] || 0;
-                    const minInterval = this.replySettings.minReplyInterval || 5000; // 默认5秒
-
-                    if (now - lastReply >= minInterval) {
-                        // 获取回复内容
-                        let replyContent = item.reply;
-
-                        // 将用户名替换到回复内容中
-                        replyContent = replyContent.replace(/\{username\}/g, userName.trim());
-
-                        // 记录本次回复时间
-                        this.lastReplyTime[item.id] = now;
-
-                        // 发送回复
-                        this.sendMessage(replyContent);
-
-                        logger.info(`自动回复触发: 用户 "${userName.trim()}" 消息含关键词 "${matchedKeyword}"`);
-
-                        // 添加控制台日志
-                        const mainWindow = getMainWindow();
-                        if (mainWindow) {
-                            mainWindow.webContents.send('livechat-message', {
-                                type: 'text_reply',
-                                message: `自动回复: "${userName.trim()}" 的消息触发了关键词 "${matchedKeyword}"`
-                            });
-                        }
-
-                        // 只回复一次，避免多个关键词同时匹配
-                        break;
-                    }
-                }
-            }
+            // 自动回复由抖音窗口内的处理器完成，这里只记录日志
+            logger.debug(`收到聊天消息，转发至抖音窗口处理`);
         } catch (error) {
             logger.error(`处理自动回复出错: ${error.message}`);
         }
@@ -709,19 +533,26 @@ class LivechatAutoControlService {
      * @returns {Promise<boolean>} - 启动结果
      */
     async startAutoReply(tableName, replyItems, settings = {}) {
-        try {
-            if (!this.isConnected) {
-                logger.error('未连接到直播间，无法启动自动回复');
-                return false;
-            }
+        // 检查抖音窗口是否存在
+        this.douyinWindow = this.findDouyinWindow();
 
+        if (!this.douyinWindow) {
+            logger.error('未找到抖音窗口，请先点击"登录抖音"按钮');
+            return false;
+        }
+
+        if (!this.isConnected) {
+            logger.error('未连接到直播间，无法启动自动回复');
+            return false;
+        }
+
+        try {
             // 停止当前正在运行的自动回复（如果有）
             await this.stopAutoReply();
 
             // 保存回复配置
             this.replyItems = replyItems || [];
             this.replySettings = settings || {};
-            this.lastReplyTime = {}; // 重置回复时间
 
             // 校验数据
             if (!this.replyItems || this.replyItems.length === 0) {
@@ -731,8 +562,30 @@ class LivechatAutoControlService {
 
             // 启用自动回复
             this.isAutoReplyEnabled = true;
+            logger.info('自动回复状态已设置为启用');
 
-            logger.info(`已启动自动回复，共 ${this.replyItems.length} 条规则`);
+            // 准备设置参数
+            const replySettings = {
+                minReplyInterval: settings.minReplyInterval !== undefined ? settings.minReplyInterval : 2000, // 默认最小间隔2秒
+                maxReplyInterval: settings.maxReplyInterval !== undefined ? settings.maxReplyInterval : 5000, // 默认最大间隔5秒
+                randomSpace: this.controlSettings.randomSpace || false, // 随机空格设置
+                randomEmoji: this.controlSettings.randomEmoji || false,  // 随机表情设置
+                delayEnabled: settings.delayEnabled !== undefined ? settings.delayEnabled : true // 默认启用延迟
+            };
+
+            // 获取表情列表
+            const emojis = this.getEmojis();
+
+            // 更新抖音窗口中的自动回复配置
+            await douyinLivechatHandler.updateConfig(
+                this.douyinWindow, 
+                this.replyItems, 
+                this.isAutoReplyEnabled,
+                replySettings,
+                emojis
+            );
+
+            logger.info(`已启动自动回复，共 ${this.replyItems.length} 条规则，${replySettings.delayEnabled ? `发言频率: ${replySettings.minReplyInterval}-${replySettings.maxReplyInterval}毫秒` : '无发言延迟'}，随机空格: ${replySettings.randomSpace}，随机表情: ${replySettings.randomEmoji}`);
             return true;
         } catch (error) {
             logger.error(`启动自动回复出错: ${error.message}`);
@@ -748,9 +601,14 @@ class LivechatAutoControlService {
         try {
             this.isAutoReplyEnabled = false;
             this.replyItems = [];
-            this.lastReplyTime = {};
 
-            logger.info('已停止自动回复');
+            // 更新抖音窗口中的自动回复配置（如果窗口存在）
+            const douyinWindow = this.findDouyinWindow();
+            if (douyinWindow && !douyinWindow.isDestroyed()) {
+                await douyinLivechatHandler.updateConfig(douyinWindow, [], false);
+            }
+
+            logger.info('已停止自动回复，状态已设置为停用');
             return true;
         } catch (error) {
             logger.error(`停止自动回复出错: ${error.message}`);
@@ -759,15 +617,217 @@ class LivechatAutoControlService {
     }
 
     /**
+     * 获取自动场控状态
+     * @returns {Object} - 自动场控状态信息
+     */
+    getAutoControlStatus() {
+        // 显式记录状态以便调试
+        logger.info(`获取自动场控状态：当前状态 ${this.isAutoControlEnabled ? '已启用' : '未启用'}`);
+        
+        return {
+            status: 'success',
+            data: {
+                enabled: this.isAutoControlEnabled
+            }
+        };
+    }
+
+    /**
+     * 获取自动回复状态
+     * @returns {Object} - 自动回复状态信息
+     */
+    getAutoReplyStatus() {
+        // 显式记录状态以便调试
+        logger.info(`获取自动回复状态：当前状态 ${this.isAutoReplyEnabled ? '已启用' : '未启用'}`);
+        
+        return {
+            status: 'success',
+            data: {
+                enabled: this.isAutoReplyEnabled
+            }
+        };
+    }
+
+    /**
      * 获取连接状态
      * @returns {Object} - 连接状态信息
      */
     getConnectionStatus() {
+        // 检查抖音窗口是否存在
+        this.douyinWindow = this.findDouyinWindow();
+
+        const connected = this.isConnected && this.douyinWindow && !this.douyinWindow.isDestroyed();
+        let roomId = '';
+
+        if (connected && this.douyinWindow) {
+            try {
+                const url = this.douyinWindow.webContents.getURL();
+                const urlParts = url.split('/');
+                roomId = urlParts[urlParts.length - 1];
+            } catch (err) {
+                logger.error(`获取房间ID出错: ${err.message}`);
+            }
+        }
+
         return {
             status: 'success',
-            connected: this.isConnected,
-            roomId: this.page ? this.page.url().split('/').pop() : ''
+            connected: connected,
+            roomId: roomId,
+            hasDouyinWindow: !!this.douyinWindow
         };
+    }
+    
+    /**
+     * 获取表情列表
+     * @returns {Array} - 表情列表
+     */
+    getEmojis() {
+        try {
+            // 检查emojis表是否存在，不存在则创建
+            this._ensureEmojisTable();
+            
+            // 使用SQL查询获取所有表情
+            const sql = "SELECT emoji FROM emojis";
+            const rows = scriptdbService.db.prepare(sql).all();
+            
+            // 将查询结果转换为表情数组
+            return rows.map(row => row.emoji);
+        } catch (error) {
+            logger.error(`获取表情列表出错: ${error.message}`);
+            // 出错时返回空数组
+            return [];
+        }
+    }
+
+    /**
+     * 保存表情列表
+     * @param {Array} emojis - 表情列表
+     * @returns {boolean} - 保存结果
+     */
+    saveEmojis(emojis) {
+        try {
+            if (!Array.isArray(emojis)) {
+                throw new Error('表情列表必须是数组');
+            }
+            
+            // 确保表存在
+            this._ensureEmojisTable();
+            
+            // 开始事务
+            scriptdbService.db.prepare('BEGIN').run();
+            
+            try {
+                // 清空现有表情
+                scriptdbService.db.prepare('DELETE FROM emojis').run();
+                
+                // 插入新表情
+                const insertStmt = scriptdbService.db.prepare('INSERT INTO emojis (emoji) VALUES (?)');
+                
+                for (const emoji of emojis) {
+                    insertStmt.run(emoji);
+                }
+                
+                // 提交事务
+                scriptdbService.db.prepare('COMMIT').run();
+                
+                logger.info(`成功保存${emojis.length}个表情`);
+                return true;
+            } catch (err) {
+                // 回滚事务
+                scriptdbService.db.prepare('ROLLBACK').run();
+                throw err;
+            }
+        } catch (error) {
+            logger.error(`保存表情列表失败: ${error.message}`);
+            return false;
+        }
+    }
+    
+    /**
+     * 确保emojis表存在
+     * @private
+     */
+    _ensureEmojisTable() {
+        try {
+            // 检查表是否存在
+            const tableExists = scriptdbService.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='emojis'").get();
+            
+            if (!tableExists) {
+                // 创建表
+                const createTableSql = `
+                    CREATE TABLE emojis (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        emoji TEXT NOT NULL
+                    )
+                `;
+                scriptdbService.db.exec(createTableSql);
+                logger.info('创建emojis表成功');
+            }
+        } catch (error) {
+            logger.error(`确保emojis表存在时出错: ${error.message}`);
+            throw error;
+        }
+    }
+
+    // 新增的处理消息队列的函数
+    async processMessageQueue() {
+        if (this.pendingMessages.length === 0) {
+            this.isProcessing = false;
+            return;
+        }
+        
+        this.isProcessing = true;
+        
+        // 获取下一条消息
+        const data = this.pendingMessages.shift();
+        
+        try {
+            const message = data.message;
+            
+            // 修改判断逻辑，如果delayEnabled为false，则可以立即回复
+            if (message && (this.canReplyNow || !this.replySettings.delayEnabled)) {
+                // 提取消息主体
+                const messageContent = this.extractMessageContent(message);
+                
+                // 标记当前不能回复，防止重复回复
+                this.canReplyNow = false;
+                
+                // 使用消息主体进行关键词匹配
+                const matched = await this.checkKeywordsParallel(messageContent);
+                
+                // 如果匹配了关键词，等待用户设置的延迟后再处理下一条消息
+                if (matched) {
+                    // 等待用户设置的时间
+                    const waitTime = this.replySettings.delayEnabled ? this.getRandomWaitTime() : 500;
+                    
+                    setTimeout(() => {
+                        this.canReplyNow = true;
+                        // 继续处理队列中的下一条消息
+                        this.processMessageQueue();
+                    }, waitTime);
+                    
+                    // 提前返回，不继续处理
+                    return;
+                } else {
+                    // 没有匹配，立即可以回复下一条
+                    this.canReplyNow = true;
+                }
+            }
+        } catch (error) {
+            console.error('处理消息出错:', error);
+            this.canReplyNow = true; // 出错时也恢复可回复状态
+        }
+        
+        // 继续处理队列中的下一条消息
+        setTimeout(() => this.processMessageQueue(), 10);
+    }
+
+    // 新增的方法来向主窗口发送倒计时信息
+    sendCountdownToMainWindow(seconds) {
+        const mainWindow = getMainWindow();
+        if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send('livechat-countdown', { seconds });
+        }
     }
 }
 

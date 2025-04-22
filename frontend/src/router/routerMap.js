@@ -3,8 +3,18 @@
  * @type { *[] }
  */
 
+// 引入electron环境判断
+import { isEE } from '@/utils/ipcRenderer';
+
+// 判断是否是打包环境（非开发环境）
+// isEE为true表示在electron环境中运行
+// 在electron环境中，如果检测到是开发模式（通过URL中是否包含localhost或特定端口），则不重定向到登录页
+const isDev = isEE && window.location.href.includes('localhost');
+const rootRedirect = (!isDev) ? { name: 'SpecialLoginWindow' } : { name: 'Framework' };
+
 const constantRouterMap = [{
         path: '/',
+        redirect: rootRedirect,
         component: () =>
             import ('@/layouts/AppSider.vue'),
         children: [{
@@ -47,13 +57,13 @@ const constantRouterMap = [{
                         component: () =>
                             import ('@/views/framework/software/Index.vue')
                     },
-                    {
-                        path: '/framework/updater/index',
-                        name: 'FrameworkUpdaterIndex',
-                        component: () =>
-                            import ('@/views/framework/updater/Index.vue')
-                    },
                 ]
+            },
+            {
+                path: '/updater',
+                name: 'Updater',
+                component: () =>
+                    import ('@/views/framework/updater/Index.vue')
             },
             {
                 path: '/os',

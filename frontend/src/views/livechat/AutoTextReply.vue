@@ -7,6 +7,14 @@
         <div class="panel-section">
           <div class="setting-item">
             <div class="setting-label">发言频率</div>
+            <div class="setting-content">
+              <el-switch v-model="replyDelay.enabled" class="delay-switch" />
+              <span class="switch-label">{{ replyDelay.enabled ? '启用延迟' : '立即回复' }}</span>
+            </div>
+          </div>
+
+          <div class="setting-item" v-if="replyDelay.enabled">
+            <div class="setting-label"></div>
             <div class="time-inputs">
               <el-input-number v-model="replyDelay.min" :min="0" :max="100" size="small" controls-position="right" />
               <span class="separator">—</span>
@@ -17,7 +25,10 @@
 
           <div class="checkbox-wrapper">
             <el-checkbox v-model="replyMode.randomSpace" class="custom-checkbox">随机空格</el-checkbox>
-            <el-checkbox v-model="replyMode.randomEmoji" class="custom-checkbox">随机表情</el-checkbox>
+            <div class="emoji-checkbox-container">
+              <el-checkbox v-model="replyMode.randomEmoji" class="custom-checkbox">随机表情</el-checkbox>
+              <EmojiManager :disabled="!replyMode.randomEmoji" />
+            </div>
           </div>
 
           <div class="tips-box">
@@ -135,7 +146,9 @@
               </div>
             </div>
             <div class="right-controls">
-              <el-button type="primary" size="small" @click="addKeywordRow">添加</el-button>
+              <el-button type="primary" size="small" @click="addKeywordRow">添加关键词</el-button>
+              <el-button type="success" size="small" @click="exportTable">导出</el-button>
+              <el-button type="warning" size="small" @click="importTable">导入</el-button>
             </div>
           </div>
 
@@ -190,12 +203,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject, nextTick, watch } from 'vue';
+import { ref, onMounted, inject, nextTick, watch, onActivated } from 'vue';
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Edit, Delete, Check, Close } from '@element-plus/icons-vue';
 import { useLivechatStore } from '@/stores/livechatStore';
+import EmojiManager from '@/components/EmojiManager.vue';
 
 // 使用共享状态 - 如果使用了 provide/inject 模式
 const sharedState = inject('livechatState', null);
@@ -206,7 +220,7 @@ const livechatStore = useLivechatStore();
 // 状态变量
 const roomId = ref(livechatStore.roomId || sharedState?.roomId || '');
 const connected = ref(livechatStore.connected || sharedState?.connected || false);
-const isAutoReplyEnabled = ref(false);
+const isAutoReplyEnabled = ref(livechatStore.isAutoReplyEnabled || false);
 const loading = ref(false);
 const consoleRef = ref(sharedState?.consoleRef || null);
 const tableLoading = ref(false);
@@ -220,16 +234,38 @@ const newTableName = ref('');
 // 添加一个变量记录上一次选中的表
 const lastSelectedTable = ref('');
 
-// 回复延迟设置
+// 回复延迟设置 - 从localStorage获取保存的值或使用默认值
 const replyDelay = ref({
-  min: 2,
-  max: 5
+  enabled: localStorage.getItem('autoReply_delay_enabled') !== 'false', // 默认为true
+  min: Number(localStorage.getItem('autoReply_delay_min')) || 2,
+  max: Number(localStorage.getItem('autoReply_delay_max')) || 5
 });
 
-// 回复模式
+// 回复模式 - 从localStorage获取保存的值或使用默认值
 const replyMode = ref({
-  randomSpace: false,
-  randomEmoji: true
+  randomSpace: localStorage.getItem('autoReply_mode_randomSpace') === 'true', // 默认为false
+  randomEmoji: localStorage.getItem('autoReply_mode_randomEmoji') !== 'false' // 默认为true
+});
+
+// 监听设置变化并保存到localStorage
+watch(() => replyDelay.value.enabled, (newVal) => {
+  localStorage.setItem('autoReply_delay_enabled', newVal);
+});
+
+watch(() => replyDelay.value.min, (newVal) => {
+  localStorage.setItem('autoReply_delay_min', newVal);
+});
+
+watch(() => replyDelay.value.max, (newVal) => {
+  localStorage.setItem('autoReply_delay_max', newVal);
+});
+
+watch(() => replyMode.value.randomSpace, (newVal) => {
+  localStorage.setItem('autoReply_mode_randomSpace', newVal);
+});
+
+watch(() => replyMode.value.randomEmoji, (newVal) => {
+  localStorage.setItem('autoReply_mode_randomEmoji', newVal);
 });
 
 // 添加对话框相关变量
@@ -807,28 +843,237 @@ const handleDeleteTable = (table) => {
   });
 };
 
-// 页面挂载时同步状态
-onMounted(async () => {
-  // 如果存在共享状态，将其同步到当前组件
-  if (sharedState) {
-    connected.value = sharedState.connected;
-    roomId.value = sharedState.roomId;
-    consoleRef.value = sharedState.consoleRef;
+// 导出表格数据
+const exportTable = async () => {
+  if (!selectedTable.value) {
+    ElMessage.warning('请先选择一个关键词组');
+    return;
   }
 
-  // 同步Pinia中的直播间状态
+  try {
+    // 调用后端API导出表格
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.exportReplyTable, {
+      tableName: selectedTable.value
+    });
+
+    if (result && result.status === 'success') {
+      ElMessage.success(`导出成功: ${result.filePath}`);
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextReplyLog(`已导出关键词组: ${selectedTable.value}`);
+      }
+    } else {
+      ElMessage.error(result?.message || '导出失败');
+    }
+  } catch (error) {
+    console.error('导出失败:', error);
+    ElMessage.error(`导出失败: ${error.message || '未知错误'}`);
+  }
+};
+
+// 导入表格数据
+const importTable = async () => {
+  if (!selectedTable.value) {
+    ElMessage.warning('请先选择一个要导入到的关键词组');
+    return;
+  }
+
+  try {
+    // 调用后端API导入表格
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.importReplyTable, {
+      tableName: selectedTable.value
+    });
+
+    if (result && result.status === 'success') {
+      // 刷新表格数据
+      loadReplies(selectedTable.value);
+      ElMessage.success(`导入成功: 共导入 ${result.importedCount || 0} 条记录`);
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextReplyLog(`已导入数据到关键词组: ${selectedTable.value}`);
+      }
+    } else {
+      ElMessage.error(result?.message || '导入失败');
+    }
+  } catch (error) {
+    console.error('导入失败:', error);
+    ElMessage.error(`导入失败: ${error.message || '未知错误'}`);
+  }
+};
+
+// 启用自动回复
+const enableAutoReply = async () => {
+  // 检查store中的连接状态
+  const isStoreConnected = livechatStore.connected;
+  const storeRoomId = livechatStore.roomId;
+
+  console.log('启用自动回复检查状态:', {
+    storeConnected: isStoreConnected,
+    storeRoomId: storeRoomId
+  });
+
+  if (!isStoreConnected || !storeRoomId) {
+    ElMessage.warning('请先连接到直播间');
+    return;
+  }
+
+  if (!selectedTable.value) {
+    ElMessage.warning('请先选择一个关键词组');
+    return;
+  }
+
+  loading.value = true;
+  try {
+    // 首先检查连接状态，避免重复连接
+    const connectionStatus = await ipc.invoke(ipcApiRoute.livechatAutoControl.getConnectionStatus);
+    console.log('当前连接状态:', connectionStatus);
+
+    let connectionResult = { status: 'success' };
+
+    // 只有当实际未连接时才进行连接
+    if (!connectionStatus.data?.connected) {
+    console.log('尝试连接自动场控服务...');
+      connectionResult = await ipc.invoke(ipcApiRoute.livechatAutoControl.connectToLiveRoom, {
+      roomId: storeRoomId
+    });
+
+    console.log('连接自动场控服务结果:', connectionResult);
+
+    if (!connectionResult || connectionResult.status !== 'success') {
+      throw new Error('无法连接到自动场控服务: ' + (connectionResult?.message || '未知错误'));
+      }
+    } else {
+      console.log('已连接到直播间，无需重新连接');
+    }
+
+    // 清理回复数据，只保留必要属性
+    const cleanReplyItems = keywordItems.value.map(item => ({
+      id: item.id,
+      keyword: item.keyword,
+      reply: item.reply,
+      enabled: item.enabled !== false
+    }));
+
+    // 清理设置对象
+    const cleanSettings = {
+      minReplyInterval: replyDelay.value.enabled ? Number(replyDelay.value.min) * 1000 : 0, // 转换为毫秒
+      maxReplyInterval: replyDelay.value.enabled ? Number(replyDelay.value.max) * 1000 : 0, // 转换为毫秒
+      randomSpace: Boolean(replyMode.value.randomSpace),
+      randomEmoji: Boolean(replyMode.value.randomEmoji),
+      delayEnabled: Boolean(replyDelay.value.enabled)
+    };
+
+    // 构建请求参数
+    const requestParams = {
+      tableName: String(selectedTable.value),
+      replyItems: cleanReplyItems,
+      settings: cleanSettings
+    };
+
+    // 调用后端API启用自动回复
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.startAutoReply, requestParams);
+    console.log('启动自动回复结果:', result);
+
+    if (result && result.status === 'success') {
+      isAutoReplyEnabled.value = true;
+      // 更新Pinia store中的状态
+      livechatStore.setAutoReplyEnabled(true);
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextReplyLog('自动文字回复已启用');
+      }
+      ElMessage.success('已开启自动回复');
+    } else {
+      const errorMsg = result?.message || '开启自动回复失败';
+      console.error('开启自动回复失败:', errorMsg);
+      ElMessage.error(errorMsg);
+    }
+  } catch (error) {
+    console.error('开启自动回复出错:', error);
+    console.error('错误堆栈:', error.stack);
+    ElMessage.error(`开启自动回复失败: ${error.message || '未知错误'}`);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 停止自动回复
+const disableAutoReply = async () => {
+  loading.value = true;
+  try {
+    // 调用后端API停用自动回复
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.stopAutoReply);
+    console.log('停止自动回复结果:', result);
+
+    if (result && result.status === 'success') {
+      isAutoReplyEnabled.value = false;
+      // 更新Pinia store中的状态
+      livechatStore.setAutoReplyEnabled(false);
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextReplyLog('自动文字回复已停用');
+      }
+      ElMessage.success('已停止自动回复');
+
+      // 不要断开自动场控服务连接，只是停止自动回复功能
+      // 不再修改 livechatStore 中的连接状态
+    } else {
+      const errorMsg = result?.message || '停止自动回复失败';
+      ElMessage.error(errorMsg);
+    }
+  } catch (error) {
+    console.error('停止自动回复出错:', error);
+    ElMessage.error(`停止自动回复失败: ${error.message || '未知错误'}`);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 检查自动回复状态
+const checkAutoReplyStatus = async () => {
+  try {
+    // 调用后端API检查自动回复状态
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.getAutoReplyStatus);
+    console.log('检查自动回复状态结果:', JSON.stringify(result));
+
+    if (result && result.status === 'success') {
+      // 正确处理不同的返回数据结构
+      let enabled = false;
+
+      if (result.data && result.data.hasOwnProperty('enabled')) {
+        // 新的返回结构 { status, data: { enabled } }
+        enabled = !!result.data.enabled;
+      } else if (result.hasOwnProperty('enabled')) {
+        // 旧的返回结构 { status, enabled }
+        enabled = !!result.enabled;
+      }
+
+      console.log(`解析后的自动回复状态: ${enabled ? '已启用' : '未启用'}`);
+
+      isAutoReplyEnabled.value = enabled;
+      // 更新Pinia store中的状态
+      livechatStore.setAutoReplyEnabled(enabled);
+    }
+  } catch (error) {
+    console.error('检查自动回复状态失败:', error);
+  }
+};
+
+// 页面挂载时同步状态并检查自动回复状态
+onMounted(async () => {
+  console.log('AutoTextReply组件已挂载，开始加载数据...');
+
+  // 先从Pinia获取初始状态
   connected.value = livechatStore.connected;
   roomId.value = livechatStore.roomId;
+  isAutoReplyEnabled.value = livechatStore.isAutoReplyEnabled;
 
-  // 同步到共享状态
-  if (sharedState) {
-    sharedState.connected = connected.value;
-    sharedState.roomId = roomId.value;
-  }
+  console.log('初始状态:', {
+    connected: connected.value,
+    roomId: roomId.value,
+    isAutoReplyEnabled: isAutoReplyEnabled.value
+  });
 
-  console.log('组件已挂载，开始加载数据...');
-  console.log('连接状态:', connected.value);
-  console.log('房间ID:', roomId.value);
   // 初始化关键词表
   try {
     // 首先尝试检查并修复默认表
@@ -844,6 +1089,25 @@ onMounted(async () => {
   if (selectedTable.value) {
     await loadReplies(selectedTable.value);
   }
+
+  // 检查自动回复状态，确保显示正确的按钮状态
+  await checkAutoReplyStatus();
+  console.log('自动回复状态同步完成，当前状态:', isAutoReplyEnabled.value);
+});
+
+// 页面激活时检查状态
+onActivated(async () => {
+  console.log('AutoTextReply组件被激活，检查状态...');
+  // 每次页面激活时，重新检查自动回复状态
+  await checkAutoReplyStatus();
+});
+
+// 监听来自Pinia的自动回复状态变化
+watch(() => livechatStore.isAutoReplyEnabled, (newValue) => {
+  console.log('Pinia中自动回复状态变化:', newValue);
+  if (newValue !== isAutoReplyEnabled.value) {
+    isAutoReplyEnabled.value = newValue;
+  }
 });
 
 // 监听连接状态和房间ID的变化
@@ -856,7 +1120,7 @@ watch([() => livechatStore.connected, () => livechatStore.roomId], ([newConnecte
 
   if (sharedState) {
     sharedState.connected = newConnected;
-    sharedState.roomId = newRoomId;
+    sharedState.roomId = roomId.value;
   }
 }, { immediate: true });
 
@@ -908,119 +1172,6 @@ const checkConnectionStatus = async () => {
     }
   } catch (error) {
     console.error('检查连接状态失败:', error);
-  }
-};
-
-// 启用自动回复
-const enableAutoReply = async () => {
-  // 检查store中的连接状态
-  const isStoreConnected = livechatStore.connected;
-  const storeRoomId = livechatStore.roomId;
-
-  console.log('启用自动回复检查状态:', {
-    storeConnected: isStoreConnected,
-    storeRoomId: storeRoomId
-  });
-
-  if (!isStoreConnected || !storeRoomId) {
-    ElMessage.warning('请先连接到直播间');
-    return;
-  }
-
-  if (!selectedTable.value) {
-    ElMessage.warning('请先选择一个关键词组');
-    return;
-  }
-
-  loading.value = true;
-  try {
-    // 首先尝试连接到自动场控服务
-    console.log('尝试连接自动场控服务...');
-    const connectionResult = await ipc.invoke(ipcApiRoute.livechatAutoControl.connectToLiveRoom, {
-      roomId: storeRoomId
-    });
-
-    console.log('连接自动场控服务结果:', connectionResult);
-
-    if (!connectionResult || connectionResult.status !== 'success') {
-      throw new Error('无法连接到自动场控服务: ' + (connectionResult?.message || '未知错误'));
-    }
-
-    // 清理回复数据，只保留必要属性
-    const cleanReplyItems = keywordItems.value.map(item => ({
-      id: item.id,
-      keyword: item.keyword,
-      reply: item.reply,
-      enabled: item.enabled !== false
-    }));
-
-    // 清理设置对象
-    const cleanSettings = {
-      frequency: {
-        min: Number(replyDelay.value.min),
-        max: Number(replyDelay.value.max)
-      },
-      randomSpace: Boolean(replyMode.value.randomSpace),
-      randomEmoji: Boolean(replyMode.value.randomEmoji)
-    };
-
-    // 构建请求参数
-    const requestParams = {
-      tableName: String(selectedTable.value),
-      replyItems: cleanReplyItems,
-      settings: cleanSettings
-    };
-
-    // 调用后端API启用自动回复
-    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.startAutoReply, requestParams);
-    console.log('启动自动回复结果:', result);
-
-    if (result && result.status === 'success') {
-      isAutoReplyEnabled.value = true;
-      if (sharedState?.consoleRef) {
-        sharedState.consoleRef.addTextReplyLog('自动文字回复已启用');
-      }
-      ElMessage.success('已开启自动回复');
-    } else {
-      const errorMsg = result?.message || '开启自动回复失败';
-      console.error('开启自动回复失败:', errorMsg);
-      ElMessage.error(errorMsg);
-    }
-  } catch (error) {
-    console.error('开启自动回复出错:', error);
-    console.error('错误堆栈:', error.stack);
-    ElMessage.error(`开启自动回复失败: ${error.message || '未知错误'}`);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// 停止自动回复
-const disableAutoReply = async () => {
-  loading.value = true;
-  try {
-    // 调用后端API停用自动回复
-    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.stopAutoReply);
-    console.log('停止自动回复结果:', result);
-
-    if (result && result.status === 'success') {
-      isAutoReplyEnabled.value = false;
-      if (sharedState?.consoleRef) {
-        sharedState.consoleRef.addTextReplyLog('自动文字回复已停用');
-      }
-      ElMessage.success('已停止自动回复');
-
-      // 不要断开自动场控服务连接，只是停止自动回复功能
-      // 不再修改 livechatStore 中的连接状态
-    } else {
-      const errorMsg = result?.message || '停止自动回复失败';
-      ElMessage.error(errorMsg);
-    }
-  } catch (error) {
-    console.error('停止自动回复出错:', error);
-    ElMessage.error(`停止自动回复失败: ${error.message || '未知错误'}`);
-  } finally {
-    loading.value = false;
   }
 };
 
@@ -1287,5 +1438,27 @@ const handleDelete = (row) => {
   justify-content: center;
   gap: 5px;
   flex-wrap: wrap; /* 允许按钮换行 */
+}
+
+.emoji-checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.setting-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.switch-label {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #606266;
+}
+
+.delay-switch {
+  margin-right: 5px;
 }
 </style>

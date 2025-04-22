@@ -1151,7 +1151,7 @@ def start_record(url_data: tuple, count_variable: int = -1) -> None:
 
                                 recording.add(record_name)
                                 start_record_time = datetime.datetime.now()
-                                recording_time_list[record_name] = [start_record_time, record_quality]
+                                recording_time_list[record_name] = (start_record_time, record_quality)
                                 rec_info = f"\r{anchor_name} 准备开始录制视频: {full_path}"
                                 if show_url:
                                     re_plat = ('WinkTV', 'PandaTV', 'ShowRoom', 'CHZZK', 'Youtube')

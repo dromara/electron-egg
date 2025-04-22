@@ -31,11 +31,6 @@ export default {
             pageName: 'FrameworkSoftwareIndex',
             params: {}
         },
-        'menu_107': {
-            title: '自动更新',
-            pageName: 'FrameworkUpdaterIndex',
-            params: {}
-        },
     },
     os: {
         'menu_100': {

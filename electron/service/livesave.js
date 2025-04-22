@@ -2,9 +2,10 @@
 
 const fs = require('fs');
 const path = require('path');
-const { app } = require('electron');
 const { logger } = require('ee-core/log');
 const { getBaseDir } = require('ee-core/ps');
+const { getExtraResourcesDir } = require('ee-core/ps');
+const { pythonServer } = require('./PythonServer');
 
 
 /**
@@ -13,81 +14,48 @@ const { getBaseDir } = require('ee-core/ps');
  */
 class LiveMonitorService {
     constructor() {
-        this.pythonServiceName = 'DouyinLiveRecorder';
         // 初始化文件路径 
         try {
-
+            this.pythonServiceName = 'DouyinLiveRecorder';
             this.baseDir = getBaseDir();
 
-            // 确保baseDir有效
-            if (!this.baseDir) {
-                logger.warn('baseDir未定义，将使用当前目录');
-                this.baseDir = process.cwd();
-            }
+            // 使用extraResources目录下的py/config作为配置文件目录
+            const configDir = path.join(getExtraResourcesDir(), 'py', 'config');
+            this.configFilePath = path.join(configDir, 'URL_config.ini');
 
-            // 确保app.getAppPath()可用
-            const appPath = app.getAppPath() || '';
-
-            // URL_config.ini 文件可能在多个位置，我们尝试查找正确位置
-            const possiblePaths = [
-                path.join(this.baseDir, 'python', 'DouyinLiveRecorder', 'config', 'URL_config.ini'),
-                path.join(this.baseDir, '..', 'python', 'DouyinLiveRecorder', 'config', 'URL_config.ini')
-            ];
-
-            // 只有当appPath有效时才添加第三个路径
-            if (appPath) {
-                possiblePaths.push(path.join(appPath, 'python', 'DouyinLiveRecorder', 'config', 'URL_config.ini'));
-            }
-
-            this.configFilePath = '';
-            for (const possiblePath of possiblePaths) {
-                try {
-                    if (fs.existsSync(possiblePath)) {
-                        this.configFilePath = possiblePath;
-                        logger.info(`找到配置文件路径: ${this.configFilePath}`);
-                        break;
-                    }
-                } catch (e) {
-                    logger.warn(`检查路径失败: ${possiblePath}, 错误: ${e.message}`);
-                }
-            }
-
-            if (!this.configFilePath) {
-                logger.error('无法找到URL_config.ini文件，将使用默认路径');
-                // 使用第一个路径作为默认值，即使它可能不存在
-                this.configFilePath = possiblePaths[0] || path.join(process.cwd(), 'python', 'DouyinLiveRecorder', 'config', 'URL_config.ini');
-
-                // 尝试创建配置文件所在的目录
-                try {
-                    const dirPath = path.dirname(this.configFilePath);
-                    if (!fs.existsSync(dirPath)) {
-                        fs.mkdirSync(dirPath, { recursive: true });
-                        logger.info(`已创建配置目录: ${dirPath}`);
-                    }
-
-                    // 创建空的配置文件
-                    if (!fs.existsSync(this.configFilePath)) {
-                        this.writeFileAtomically(this.configFilePath, '', this.fileEncoding);
-                        logger.info(`已创建空的配置文件: ${this.configFilePath}`);
-                    }
-                } catch (e) {
-                    logger.error(`创建配置文件失败: ${e.message}`);
-                }
-            }
-
+            // 初始化文件编码和其他设置
+            this.fileEncoding = 'utf-8';
             this.watchers = {};
             this.lastFileContent = '';
             this.watcherRunning = false;
-            this.fileEncoding = 'utf-8';
             this.lastEvent = null;
             this.latestData = null; // 用于存储最新解析的配置数据
             this.isFileLocked = false; // 文件锁定状态
             this.maxRetries = 5; // 最大重试次数
             this.retryInterval = 100; // 重试间隔(毫秒)
+
+            logger.info(`使用配置文件路径: ${this.configFilePath}`);
+
+            // 尝试创建配置文件所在的目录
+            try {
+                if (!fs.existsSync(configDir)) {
+                    fs.mkdirSync(configDir, { recursive: true });
+                    logger.info(`已创建配置目录: ${configDir}`);
+                }
+
+                // 创建空的配置文件(如果不存在)
+                if (!fs.existsSync(this.configFilePath)) {
+                    this.writeFileAtomically(this.configFilePath, '', this.fileEncoding);
+                    logger.info(`已创建空的配置文件: ${this.configFilePath}`);
+                }
+            } catch (e) {
+                logger.error(`创建配置文件失败: ${e.message}`);
+            }
         } catch (error) {
             logger.error(`初始化LiveMonitorService失败: ${error.message}`);
             // 设置一个默认路径
-            this.configFilePath = path.join(process.cwd(), 'python', 'DouyinLiveRecorder', 'config', 'URL_config.ini');
+            this.configFilePath = path.join(getExtraResourcesDir(), 'py', 'config', 'URL_config.ini');
+            this.fileEncoding = 'utf-8';
         }
     }
 
@@ -801,39 +769,65 @@ class LiveMonitorService {
             };
         }
     }
-
-    async createPythonServer2() {
-        console.log('createPythonServer2');
-        // try {
-        //     // 使用API模式创建服务
-        //     const serviceName = this.pythonServiceName;
-        //     const opt = {
-        //         name: 'DouyinLiveRecorder',
-        //         cmd: path.join(getExtraResourcesDir(), 'py', 'DouyinLiveRecorder'),
-        //         directory: path.join(getExtraResourcesDir(), 'py'),
-        //         args: ['--port=7075'],
-        //         windowsExtname: true,
-        //         appExit: true,
-        //     }
-        //     const entity = await cross.run(serviceName, opt);
-        //     logger.info('Python服务名称:', entity.name);
-        //     logger.info('Python服务配置:', entity.config);
-        //     logger.info('Python服务URL:', entity.getUrl());
-        //     return entity;
-        // } catch (error) {
-        //     logger.error(`创建Python服务失败: ${error.message}`);
-        //     throw error;
-        // }
+    async startRecorder() {
+        const baseUrl = pythonServer.getPythonBaseUrl();
+        try {
+            const result = await this.requestApi('POST', `${baseUrl}/api/recorder/start`);
+            logger.info('录制器启动结果:', result);
+            return result;
+        } catch (error) {
+            logger.error(`启动录制器失败: ${error.message}`, error);
+            throw error;
+        }
     }
 
-    // getPythonBaseUrl() {
-    //     const serverUrl = cross.getUrl(this.pythonServiceName);
-    //     if (!serverUrl) {
-    //         logger.error(`无法获取Python服务地址，服务名: ${this.pythonServiceName}`);
-    //     }
-    //     return serverUrl;
-    // }
+    /**
+     * 停止录制器
+     */
+    async stopRecorder() {
+        const baseUrl = pythonServer.getPythonBaseUrl();
+        const result = await this.requestApi('POST', `${baseUrl}/api/recorder/stop`);
+    }
 
+    /**
+     * 请求API
+     * @param {string} method - 请求方法 GET/POST/DELETE等
+     * @param {string} url - API完整URL
+     * @param {object} data - 请求数据
+     * @param {number} timeout - 超时时间(毫秒)
+     */
+    async requestApi(method, url, data = {}, timeout = 30000) {
+        try {
+            const axios = require('axios');
+            logger.info(`正在请求API: ${method} ${url}`, data);
+
+            // 区分GET和其他请求方法的参数传递方式
+            const options = {
+                method: method,
+                url: url,
+                timeout: timeout,
+                proxy: false,
+            };
+
+            // GET请求使用params，其他请求使用data
+            if (method.toUpperCase() === 'GET') {
+                options.params = data;
+            } else {
+                options.data = data;
+            }
+
+            logger.info('请求选项:', JSON.stringify(options));
+            const response = await axios(options);
+            if (response.status === 200) {
+                return response.data;
+            } else {
+                throw new Error(`请求失败，状态码: ${response.status}`);
+            }
+        } catch (error) {
+            logger.error(`API请求错误: ${error.message}`, error);
+            throw error;
+        }
+    }
 }
 
 LiveMonitorService.toString = () => '[class LiveMonitorService]';

@@ -2,6 +2,15 @@
 
 const { BasedbService } = require('./database/basedb');
 const { logger } = require('ee-core/log');
+const { app } = require('electron');
+const path = require('path');
+const fs = require('fs');
+const { Service } = require('ee-core');
+const Storage = require('ee-core/storage');
+const Log = require('ee-core/log');
+const Utils = require('ee-core/utils');
+const _ = require('lodash');
+const { dialog } = require('electron');
 
 /**
  * 控场话术数据库服务
@@ -679,16 +688,436 @@ class ScriptdbService extends BasedbService {
 
     /**
      * 检查并修复默认回复表
-     * 公开接口，允许从外部调用
      */
     async checkAndFixDefaultReplyTable() {
         try {
-            // 检查默认表是否在管理表中注册
-            this._checkAndRegisterDefaultReplyTable();
-            return { status: 'success', message: '检查完成' };
+            const tableName = 'reply';
+            // 检查表是否存在
+            const tableExists = await this.checkTableExists(tableName);
+            if (!tableExists) {
+                logger.info('默认回复表不存在，创建之');
+                await this.createTable(tableName);
+                return { code: 0, message: '成功创建默认回复表' };
+            }
+            return { code: 0, message: '默认回复表已存在' };
         } catch (error) {
-            logger.error('检查默认回复表失败', error);
-            return { status: 'error', message: error.message };
+            logger.error(`检查默认回复表失败: ${error.message}`);
+            return { code: -1, message: `检查默认回复表失败: ${error.message}` };
+        }
+    }
+
+    /**
+     * 导出场控脚本表格数据
+     * @param {string} tableName - 表名
+     * @param {Object} event - 事件对象，用于发送保存对话框
+     * @returns {Object} 操作结果
+     */
+    async exportScriptTable(tableName, event) {
+        try {
+            // 获取表格数据
+            const scripts = await this.getScripts(tableName);
+            if (!scripts || scripts.status !== 'success' || !scripts.scripts || scripts.scripts.length === 0) {
+                return { status: 'error', message: '导出失败：没有找到表格数据' };
+            }
+
+            // 显示保存对话框
+            const saveOptions = {
+                title: '保存场控脚本表格',
+                defaultPath: path.join(app.getPath('desktop'), `${tableName}_scripts_${new Date().getTime()}`),
+                filters: [
+                    { name: 'Excel Files', extensions: ['xlsx'] },
+                    { name: 'JSON Files', extensions: ['json'] }
+                ]
+            };
+
+            const { canceled, filePath } = await dialog.showSaveDialog(saveOptions);
+            if (canceled || !filePath) {
+                return { status: 'error', message: '用户取消导出' };
+            }
+
+            const fileExt = path.extname(filePath).toLowerCase();
+
+            if (fileExt === '.xlsx') {
+                // 导出为Excel格式
+                try {
+                    // 需要安装xlsx库: npm install xlsx --save
+                    const XLSX = require('xlsx');
+
+                    // 准备Excel数据
+                    const wsData = scripts.scripts.map(script => ({
+                        ID: script.id,
+                        内容: script.content
+                    }));
+
+                    // 创建工作簿和工作表
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.json_to_sheet(wsData);
+
+                    // 添加工作表到工作簿
+                    XLSX.utils.book_append_sheet(wb, ws, '场控脚本');
+
+                    // 写入文件
+                    XLSX.writeFile(wb, filePath);
+
+                    logger.info(`场控脚本表格成功导出为Excel到: ${filePath}`);
+                    return { status: 'success', message: '导出Excel成功', filePath };
+                } catch (error) {
+                    logger.error(`导出为Excel格式失败: ${error.message}`);
+                    return { status: 'error', message: `导出为Excel格式失败: ${error.message}` };
+                }
+            } else {
+                // 导出为JSON格式
+                // 准备导出数据
+                const exportData = {
+                    tableName: tableName,
+                    scripts: scripts.scripts,
+                    exportTime: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                // 保存到文件
+                fs.writeFileSync(filePath, JSON.stringify(exportData, null, 2), 'utf-8');
+                logger.info(`场控脚本表格成功导出到: ${filePath}`);
+
+                return { status: 'success', message: '导出JSON成功', filePath };
+            }
+        } catch (error) {
+            logger.error(`导出场控脚本表格失败: ${error.message}`);
+            return { status: 'error', message: `导出失败: ${error.message}` };
+        }
+    }
+
+    /**
+     * 导出关键词回复表格数据
+     * @param {string} tableName - 表名
+     * @param {Object} event - 事件对象，用于发送保存对话框
+     * @returns {Object} 操作结果
+     */
+    async exportReplyTable(tableName, event) {
+        try {
+            // 获取表格数据
+            const replies = await this.getReplies(tableName);
+            if (!replies || replies.status !== 'success' || !replies.replies || replies.replies.length === 0) {
+                return { status: 'error', message: '导出失败：没有找到表格数据' };
+            }
+
+            // 显示保存对话框
+            const saveOptions = {
+                title: '保存关键词回复表格',
+                defaultPath: path.join(app.getPath('desktop'), `${tableName}_replies_${new Date().getTime()}`),
+                filters: [
+                    { name: 'Excel Files', extensions: ['xlsx'] },
+                    { name: 'JSON Files', extensions: ['json'] }
+                ]
+            };
+
+            const { canceled, filePath } = await dialog.showSaveDialog(saveOptions);
+            if (canceled || !filePath) {
+                return { status: 'error', message: '用户取消导出' };
+            }
+
+            const fileExt = path.extname(filePath).toLowerCase();
+
+            if (fileExt === '.xlsx') {
+                // 导出为Excel格式
+                try {
+                    // 需要安装xlsx库: npm install xlsx --save
+                    const XLSX = require('xlsx');
+
+                    // 准备Excel数据
+                    const wsData = replies.replies.map(reply => ({
+                        ID: reply.id,
+                        关键词: reply.keyword,
+                        回复内容: reply.reply
+                    }));
+
+                    // 创建工作簿和工作表
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.json_to_sheet(wsData);
+
+                    // 添加工作表到工作簿
+                    XLSX.utils.book_append_sheet(wb, ws, '关键词回复');
+
+                    // 写入文件
+                    XLSX.writeFile(wb, filePath);
+
+                    logger.info(`关键词回复表格成功导出为Excel到: ${filePath}`);
+                    return { status: 'success', message: '导出Excel成功', filePath };
+                } catch (error) {
+                    logger.error(`导出为Excel格式失败: ${error.message}`);
+                    return { status: 'error', message: `导出为Excel格式失败: ${error.message}` };
+                }
+            } else {
+                // 导出为JSON格式
+                // 准备导出数据
+                const exportData = {
+                    tableName: tableName,
+                    replies: replies.replies,
+                    exportTime: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                // 保存到文件
+                fs.writeFileSync(filePath, JSON.stringify(exportData, null, 2), 'utf-8');
+                logger.info(`关键词回复表格成功导出到: ${filePath}`);
+
+                return { status: 'success', message: '导出JSON成功', filePath };
+            }
+        } catch (error) {
+            logger.error(`导出关键词回复表格失败: ${error.message}`);
+            return { status: 'error', message: `导出失败: ${error.message}` };
+        }
+    }
+
+    /**
+     * 导入场控脚本表格数据
+     * @param {string} tableName - 表名
+     * @param {Object} event - 事件对象，用于发送打开对话框
+     * @returns {Object} 操作结果
+     */
+    async importScriptTable(tableName, event) {
+        try {
+            // 显示打开对话框
+            const openOptions = {
+                title: '导入场控脚本表格',
+                defaultPath: app.getPath('desktop'),
+                filters: [
+                    { name: 'Excel Files', extensions: ['xlsx', 'xls'] },
+                    { name: 'JSON Files', extensions: ['json'] }
+                ],
+                properties: ['openFile']
+            };
+
+            const { canceled, filePaths } = await dialog.showOpenDialog(openOptions);
+            if (canceled || filePaths.length === 0) {
+                return { status: 'error', message: '用户取消导入' };
+            }
+
+            // 读取文件
+            const filePath = filePaths[0];
+            const fileExt = path.extname(filePath).toLowerCase();
+
+            let scriptsToImport = [];
+
+            if (fileExt === '.xlsx' || fileExt === '.xls') {
+                // 导入Excel文件
+                try {
+                    const XLSX = require('xlsx');
+                    const workbook = XLSX.readFile(filePath);
+
+                    // 获取第一个工作表
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+
+                    // 将工作表转换为JSON
+                    const data = XLSX.utils.sheet_to_json(worksheet);
+
+                    // 提取内容字段（根据Excel的列名）
+                    scriptsToImport = data.map(row => ({
+                        content: row['内容'] || row['content'] || row['Content'] || '',
+                    })).filter(script => script.content.trim() !== '');
+
+                    if (scriptsToImport.length === 0) {
+                        return { status: 'error', message: '导入失败：未在Excel中找到有效内容数据' };
+                    }
+                } catch (error) {
+                    logger.error(`解析Excel文件失败: ${error.message}`);
+                    return { status: 'error', message: `解析Excel文件失败: ${error.message}` };
+                }
+            } else {
+                // 导入JSON文件
+                try {
+                    const fileContent = fs.readFileSync(filePath, 'utf-8');
+                    const importData = JSON.parse(fileContent);
+
+                    // 验证导入数据格式
+                    if (!importData.scripts || !Array.isArray(importData.scripts)) {
+                        return { status: 'error', message: '导入失败：JSON文件格式不正确' };
+                    }
+
+                    scriptsToImport = importData.scripts;
+                } catch (error) {
+                    logger.error(`解析JSON文件失败: ${error.message}`);
+                    return { status: 'error', message: `解析JSON文件失败: ${error.message}` };
+                }
+            }
+
+            // 检查表是否存在
+            const tableExists = await this.checkTableExists(tableName);
+            if (!tableExists) {
+                // 如果表不存在，创建新表
+                const result = await this.createScriptTable('导入的场控组');
+                if (result.status === 'success') {
+                    tableName = result.tableName;
+                } else {
+                    return { status: 'error', message: '创建新表失败' };
+                }
+            }
+
+            // 导入数据
+            let importedCount = 0;
+            for (const script of scriptsToImport) {
+                try {
+                    // 确保content属性存在
+                    const content = script.content || '';
+                    if (content.trim() !== '') {
+                        await this.addScript(tableName, content);
+                        importedCount++;
+                    }
+                } catch (err) {
+                    logger.error(`导入单条场控脚本失败: ${err.message}`);
+                }
+            }
+
+            logger.info(`成功导入场控脚本表格数据，共 ${importedCount} 条记录`);
+            return {
+                status: 'success',
+                message: `导入成功，共 ${importedCount} 条记录`,
+                importedCount: importedCount
+            };
+        } catch (error) {
+            logger.error(`导入场控脚本表格失败: ${error.message}`);
+            return { status: 'error', message: `导入失败: ${error.message}` };
+        }
+    }
+
+    /**
+     * 导入关键词回复表格数据
+     * @param {string} tableName - 表名
+     * @param {Object} event - 事件对象，用于发送打开对话框
+     * @returns {Object} 操作结果
+     */
+    async importReplyTable(tableName, event) {
+        try {
+            // 显示打开对话框
+            const openOptions = {
+                title: '导入关键词回复表格',
+                defaultPath: app.getPath('desktop'),
+                filters: [
+                    { name: 'Excel Files', extensions: ['xlsx', 'xls'] },
+                    { name: 'JSON Files', extensions: ['json'] }
+                ],
+                properties: ['openFile']
+            };
+
+            const { canceled, filePaths } = await dialog.showOpenDialog(openOptions);
+            if (canceled || filePaths.length === 0) {
+                return { status: 'error', message: '用户取消导入' };
+            }
+
+            // 读取文件
+            const filePath = filePaths[0];
+            const fileExt = path.extname(filePath).toLowerCase();
+
+            let repliesToImport = [];
+
+            if (fileExt === '.xlsx' || fileExt === '.xls') {
+                // 导入Excel文件
+                try {
+                    const XLSX = require('xlsx');
+                    const workbook = XLSX.readFile(filePath);
+
+                    // 获取第一个工作表
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+
+                    // 将工作表转换为JSON
+                    const data = XLSX.utils.sheet_to_json(worksheet);
+
+                    // 提取关键词和回复内容字段（适配不同的列名）
+                    repliesToImport = data.map(row => ({
+                        keyword: row['关键词'] || row['keyword'] || row['Keyword'] || '',
+                        reply: row['回复内容'] || row['reply'] || row['Reply'] || row['内容'] || row['content'] || '',
+                    })).filter(reply =>
+                        reply.keyword.trim() !== '' &&
+                        reply.reply.trim() !== ''
+                    );
+
+                    if (repliesToImport.length === 0) {
+                        return { status: 'error', message: '导入失败：未在Excel中找到有效的关键词和回复数据' };
+                    }
+                } catch (error) {
+                    logger.error(`解析Excel文件失败: ${error.message}`);
+                    return { status: 'error', message: `解析Excel文件失败: ${error.message}` };
+                }
+            } else {
+                // 导入JSON文件
+                try {
+                    const fileContent = fs.readFileSync(filePath, 'utf-8');
+                    const importData = JSON.parse(fileContent);
+
+                    // 验证导入数据格式
+                    if (!importData.replies || !Array.isArray(importData.replies)) {
+                        return { status: 'error', message: '导入失败：JSON文件格式不正确' };
+                    }
+
+                    repliesToImport = importData.replies;
+                } catch (error) {
+                    logger.error(`解析JSON文件失败: ${error.message}`);
+                    return { status: 'error', message: `解析JSON文件失败: ${error.message}` };
+                }
+            }
+
+            // 检查表是否存在
+            const tableExists = await this.checkTableExists(tableName);
+            if (!tableExists) {
+                // 如果表不存在，创建新表
+                const result = await this.createReplyTable('导入的关键词组');
+                if (result.status === 'success') {
+                    tableName = result.tableName;
+                } else {
+                    return { status: 'error', message: '创建新表失败' };
+                }
+            }
+
+            // 导入数据
+            let importedCount = 0;
+            for (const reply of repliesToImport) {
+                try {
+                    // 确保keyword和reply属性存在且不为空
+                    if (reply.keyword && reply.keyword.trim() !== '' &&
+                        reply.reply && reply.reply.trim() !== '') {
+                        await this.addReply(tableName, reply.keyword, reply.reply);
+                        importedCount++;
+                    }
+                } catch (err) {
+                    logger.error(`导入单条关键词回复失败: ${err.message}`);
+                }
+            }
+
+            logger.info(`成功导入关键词回复表格数据，共 ${importedCount} 条记录`);
+            return {
+                status: 'success',
+                message: `导入成功，共 ${importedCount} 条记录`,
+                importedCount: importedCount
+            };
+        } catch (error) {
+            logger.error(`导入关键词回复表格失败: ${error.message}`);
+            return { status: 'error', message: `导入失败: ${error.message}` };
+        }
+    }
+
+    /**
+     * 检查表是否存在
+     * @param {string} tableName 表名
+     * @returns {boolean} 表是否存在
+     */
+    async checkTableExists(tableName) {
+        try {
+            // 使用EXISTS检查表是否存在
+            const tableCheckSql = `
+            SELECT EXISTS (
+                SELECT 1 FROM sqlite_master 
+                WHERE type='table' AND name = ?
+            ) as exists_flag`;
+
+            const tableCheck = this.db.prepare(tableCheckSql);
+            const { exists_flag } = tableCheck.get(tableName);
+
+            return exists_flag === 1;
+        } catch (error) {
+            logger.error(`检查表是否存在失败: ${error.message}`);
+            return false;
         }
     }
 }

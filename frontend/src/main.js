@@ -1,8 +1,6 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import './assets/global.less';
-// 移除 Ant Design 主题
-// import './assets/theme.less';
 import components from './components/global';
 import Router from './router/index';
 import ElementIcons from './plugins/icons';

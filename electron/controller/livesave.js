@@ -2,7 +2,10 @@
 
 const { liveMonitorService } = require('../service/livesave');
 const { logger } = require('ee-core/log');
-
+const { cross } = require('ee-core/cross');
+const path = require('path');
+const { shell } = require('electron');
+const { getExtraResourcesDir } = require('ee-core/ps');
 /**
  * 直播监控控制器
  * @class
@@ -61,6 +64,9 @@ class LiveMonitorController {
             logger.warn('收到的event对象为空');
         }
 
+        // 确保args参数存在
+        args = args || {};
+
         const result = liveMonitorService.getLatestConfig(event);
 
         return {
@@ -86,7 +92,7 @@ class LiveMonitorController {
             logger.warn('收到的event对象为空');
         }
 
-        const result = liveMonitorService.addLiveUrl(args, event);
+        const result = await liveMonitorService.addLiveUrl(args, event);
 
         return {
             success: result.status === 'success',
@@ -124,7 +130,7 @@ class LiveMonitorController {
             logger.warn('收到的event对象为空');
         }
 
-        const result = liveMonitorService.updateQuality(args, event);
+        const result = await liveMonitorService.updateQuality(args, event);
 
         return {
             success: result.status === 'success',
@@ -149,7 +155,7 @@ class LiveMonitorController {
             logger.warn('收到的event对象为空');
         }
 
-        const result = liveMonitorService.removeStream(args, event);
+        const result = await liveMonitorService.removeStream(args, event);
 
         return {
             success: result.status === 'success',
@@ -181,6 +187,77 @@ class LiveMonitorController {
             status: result.status,
             message: result.message
         };
+    }
+
+    /**
+     * 启动录制器
+     */
+    async startRecorder(args, event) {
+        try {
+            logger.info('正在启动录制器');
+            const result = await liveMonitorService.startRecorder();
+            return {
+                success: true,
+                status: 'success',
+                message: '录制器启动成功',
+                data: result
+            };
+        } catch (error) {
+            logger.error('启动录制器失败', error);
+            return {
+                success: false,
+                status: 'error',
+                message: error.message
+            };
+        }
+    }
+
+    /**
+     * 停止录制器
+     */
+    async stopRecorder(args, event) {
+        try {
+            logger.info('正在停止录制器');
+            cross.killByName('DouyinLiveRecorder');
+            return {
+                success: true,
+                status: 'success',
+                message: '录制器已停止'
+            };
+        } catch (error) {
+            logger.error('停止录制器失败', error);
+            return {
+                success: false,
+                status: 'error',
+                message: error.message
+            };
+        }
+    }
+
+    /**
+     * 打开下载目录
+     */
+    async openDownloadsFolder(args, event) {
+        try {
+            logger.info('打开录制文件目录');
+            // 构建下载目录路径
+            const downloadsPath = path.join(getExtraResourcesDir(), 'py', 'downloads');
+            logger.info(`打开目录: ${downloadsPath}`);
+            // 打开目录
+            await shell.openPath(downloadsPath);
+            return {
+                success: true,
+                status: 'success',
+                message: '已打开录制文件目录'
+            };
+        } catch (error) {
+            logger.error('打开录制文件目录失败', error);
+            return {
+                success: false,
+                status: 'error',
+                message: error.message
+            };
+        }
     }
 }
 

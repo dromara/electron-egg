@@ -56,12 +56,27 @@ class VoiceAssistantController {
      */
     async startVoiceAssistant(args) {
         try {
-            const { groupName, settings } = args;
+            const { groupName, settings } = args || {};
             if (!groupName) {
                 return this.fail('缺少必要参数: groupName');
             }
 
-            const result = await this.voiceAssistantService.start(groupName, settings);
+            logger.info(`尝试启动语音助手，使用音频组: ${groupName}`);
+
+            // 处理设置对象，确保数据类型正确
+            let validSettings = null;
+            if (settings) {
+                validSettings = {
+                    volume: typeof settings.volume === 'number' ? settings.volume : 80,
+                    playbackRate: typeof settings.playbackRate === 'number' ? settings.playbackRate : 1.0,
+                    minInterval: typeof settings.minInterval === 'number' ? settings.minInterval : 5,
+                    maxInterval: typeof settings.maxInterval === 'number' ? settings.maxInterval : 10,
+                    playMode: typeof settings.playMode === 'string' ? settings.playMode : 'random'
+                };
+                logger.info(`语音助手设置: ${JSON.stringify(validSettings)}`);
+            }
+
+            const result = await this.voiceAssistantService.start(groupName, validSettings);
             if (result) {
                 return this.success('启动语音助手成功');
             } else {

@@ -9,7 +9,7 @@ const fs = require('fs');
 const { promisify } = require('util');
 const { logger } = require('ee-core/log');
 const { getMainWindow } = require('ee-core/electron');
-const { getDataDir } = require('ee-core/ps');
+const { getDataDir, getExtraResourcesDir } = require('ee-core/ps');
 
 // 将fs操作转换为Promise版本
 const readdir = promisify(fs.readdir);
@@ -22,7 +22,7 @@ const stat = promisify(fs.stat);
 class VoiceAssistantService {
     constructor() {
         this.isEnabled = false;
-        this.audioFolder = path.join(getDataDir(), 'audio');
+        this.audioFolder = path.join(getExtraResourcesDir(), 'audio');
         this.audioGroups = [];
         this.currentAudioGroup = '';
         this.audioFiles = [];
@@ -36,9 +36,16 @@ class VoiceAssistantService {
             playMode: 'random'
         };
         this.lastPlayTime = 0;
+        // 记录所有活跃的播放进程
+        this.activeProcesses = [];
 
         // 确保音频文件夹存在
         this.ensureAudioFolderExists();
+
+        // 在应用退出时清理
+        app.on('will-quit', () => {
+            this.cleanupAllProcesses();
+        });
     }
 
     /**
@@ -163,8 +170,10 @@ class VoiceAssistantService {
             this.currentIndex = 0;
             this.lastPlayTime = Date.now();
 
-            // 开始播放
-            this.scheduleNextPlay();
+            // 立即开始第一次播放，然后安排后续播放
+            setTimeout(() => {
+                this.playAudio();
+            }, 1000);
 
             logger.info(`已启动语音助手，使用音频组: ${groupName}，共 ${audioFiles.length} 个音频文件`);
             return true;
@@ -204,7 +213,7 @@ class VoiceAssistantService {
 
         // 计算下一次播放的延迟时间
         const { minInterval, maxInterval } = this.settings;
-        const delay = (minInterval + Math.random() * (maxInterval - minInterval)) * 1000;
+        const delay = Math.floor((minInterval + Math.random() * (maxInterval - minInterval)) * 1000);
 
         this.playTimer = setTimeout(() => {
             this.playAudio();
@@ -231,22 +240,19 @@ class VoiceAssistantService {
             this.currentIndex = (this.currentIndex + 1) % this.audioFiles.length;
         }
 
-        // 发送播放请求到渲染进程
+        // 使用playSingleAudio来播放文件
+        this.playSingleAudio(audioFile.path, {
+            volume: this.settings.volume / 100,
+            playbackRate: this.settings.playbackRate
+        });
+
+        // 发送播放信息到渲染进程
         const win = getMainWindow();
         if (win && !win.isDestroyed()) {
-            win.webContents.send('play-audio', {
-                filePath: audioFile.path,
-                volume: this.settings.volume / 100,
-                playbackRate: this.settings.playbackRate
-            });
-
-            // 记录日志
             win.webContents.send('livechat-message', {
                 type: 'voice_assistant',
                 message: `正在播放: ${audioFile.name}`
             });
-
-            logger.info(`正在播放音频: ${audioFile.name}`);
         }
 
         // 更新最后播放时间
@@ -294,59 +300,128 @@ class VoiceAssistantService {
                 return false;
             }
 
-            // 获取主窗口
-            const win = getMainWindow();
-            if (!win || win.isDestroyed()) {
-                logger.error('无法获取主窗口');
-                return false;
-            }
+            logger.info(`准备播放音频文件: ${filePath}`);
 
-            // 将文件转换为URL格式
-            const fileUrl = path.resolve(filePath);
-
-            // 使用node-cmd或shell来播放音频，这样可以避免浏览器安全限制
+            // 使用子进程播放音频
             try {
-                const { exec } = require('child_process');
-                const fs = require('fs');
+                const { spawn, exec } = require('child_process');
                 const os = require('os');
-                const isWindows = os.platform() === 'win32';
-                const isMac = os.platform() === 'darwin';
-                const isLinux = os.platform() === 'linux';
+                const platform = os.platform();
 
-                let command = '';
+                if (platform === 'win32') {
+                    // Windows平台使用ffplay在后台播放，无界面
+                    // 检查ffplay是否存在
+                    const ffplayPath = path.join(app.getAppPath(), '..', 'extraResources', 'py', 'ffmpeg', 'ffplay.exe');
 
-                if (isWindows) {
-                    // Windows使用媒体播放器命令行
-                    command = `start "" "${fileUrl}"`;
-                } else if (isMac) {
+                    if (fs.existsSync(ffplayPath)) {
+                        // 使用ffplay无界面播放
+                        const args = [
+                            '-nodisp', // 无显示
+                            '-autoexit', // 播放完自动退出
+                            '-i', filePath, // 输入文件
+                            '-volume', Math.floor(volume * 100).toString(), // 音量
+                        ];
+
+                        logger.info(`使用ffplay播放: ${ffplayPath} ${args.join(' ')}`);
+
+                        // 使用spawn并传递detached: true和stdio: 'ignore'来实现后台运行
+                        const process = spawn(ffplayPath, args, {
+                            detached: true, // 进程从父进程中分离
+                            stdio: 'ignore', // 忽略所有输入输出
+                            windowsHide: true // 在Windows上隐藏窗口
+                        });
+
+                        // 添加到活跃进程列表
+                        this.activeProcesses.push(process);
+
+                        // 当进程结束时从列表中移除
+                        process.on('exit', () => {
+                            const index = this.activeProcesses.indexOf(process);
+                            if (index !== -1) {
+                                this.activeProcesses.splice(index, 1);
+                            }
+                        });
+
+                        // 让子进程独立于父进程运行
+                        process.unref();
+                    } else {
+                        // 备选方案：使用PowerShell但隐藏窗口
+                        const volume_param = Math.floor(volume * 100);
+                        const escapedPath = filePath.replace(/'/g, "''").replace(/"/g, '\\"');
+
+                        const cmd = `(New-Object -ComObject WMPlayer.OCX).openPlayer('${escapedPath}')`;
+
+                        // 使用-WindowStyle Hidden参数隐藏PowerShell窗口
+                        const command = `powershell -WindowStyle Hidden -Command "${cmd}"`;
+
+                        logger.info(`使用PowerShell播放: ${command}`);
+
+                        // 使用exec执行命令
+                        const process = exec(command, { windowsHide: true });
+
+                        // 添加到活跃进程列表
+                        this.activeProcesses.push(process);
+
+                        // 当进程结束时从列表中移除
+                        process.on('exit', () => {
+                            const index = this.activeProcesses.indexOf(process);
+                            if (index !== -1) {
+                                this.activeProcesses.splice(index, 1);
+                            }
+                        });
+                    }
+                } else if (platform === 'darwin') {
                     // macOS使用afplay
-                    command = `afplay "${fileUrl}"`;
-                } else if (isLinux) {
-                    // Linux使用aplay
-                    command = `aplay "${fileUrl}"`;
-                }
-
-                if (command) {
-                    logger.info(`执行播放命令: ${command}`);
-                    exec(command, (error, stdout, stderr) => {
-                        if (error) {
-                            logger.error(`播放音频出错: ${error.message}`);
-                            return;
-                        }
-                        logger.info('播放音频成功');
+                    const args = [filePath, '-v', volume.toString()];
+                    const process = spawn('afplay', args, {
+                        detached: true,
+                        stdio: 'ignore'
                     });
 
-                    // 通知渲染进程
+                    // 添加到活跃进程列表
+                    this.activeProcesses.push(process);
+
+                    // 当进程结束时从列表中移除
+                    process.on('exit', () => {
+                        const index = this.activeProcesses.indexOf(process);
+                        if (index !== -1) {
+                            this.activeProcesses.splice(index, 1);
+                        }
+                    });
+
+                    process.unref();
+                } else if (platform === 'linux') {
+                    // Linux使用aplay
+                    const args = [filePath];
+                    const process = spawn('aplay', args, {
+                        detached: true,
+                        stdio: 'ignore'
+                    });
+
+                    // 添加到活跃进程列表
+                    this.activeProcesses.push(process);
+
+                    // 当进程结束时从列表中移除
+                    process.on('exit', () => {
+                        const index = this.activeProcesses.indexOf(process);
+                        if (index !== -1) {
+                            this.activeProcesses.splice(index, 1);
+                        }
+                    });
+
+                    process.unref();
+                }
+
+                // 通知渲染进程
+                const win = getMainWindow();
+                if (win && !win.isDestroyed()) {
                     win.webContents.send('livechat-message', {
                         type: 'voice_assistant',
                         message: `正在播放: ${path.basename(filePath)}`
                     });
-
-                    return true;
-                } else {
-                    logger.error('不支持的操作系统');
-                    return false;
                 }
+
+                return true;
             } catch (err) {
                 logger.error(`执行播放命令出错: ${err.message}`);
                 return false;
@@ -354,6 +429,41 @@ class VoiceAssistantService {
         } catch (error) {
             logger.error(`播放单个音频文件出错: ${error.message}`);
             return false;
+        }
+    }
+
+    /**
+     * 清理所有活跃的播放进程
+     */
+    cleanupAllProcesses() {
+        try {
+            logger.info(`清理 ${this.activeProcesses.length} 个音频播放进程`);
+
+            for (const process of this.activeProcesses) {
+                try {
+                    if (!process.killed) {
+                        process.kill();
+                    }
+                } catch (error) {
+                    logger.error(`终止进程失败: ${error.message}`);
+                }
+            }
+
+            // 重置数组
+            this.activeProcesses = [];
+
+            // 在Windows上可能需要额外清理
+            if (process.platform === 'win32') {
+                try {
+                    const { exec } = require('child_process');
+                    // 终止可能的ffplay进程
+                    exec('taskkill /F /IM ffplay.exe', { windowsHide: true });
+                } catch (e) {
+                    // 忽略错误，可能没有运行的ffplay进程
+                }
+            }
+        } catch (error) {
+            logger.error(`清理播放进程失败: ${error.message}`);
         }
     }
 }

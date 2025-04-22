@@ -4,7 +4,7 @@
       <span>
         1. 新窗口中加载web内容
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-space>
         <el-button @click="createWindow(0)">打开哔哩哔哩</el-button>
@@ -14,7 +14,7 @@
       <span>
         2. 新窗口中加载html内容
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-space>
         <el-button @click="createWindow(1)">打开html页面</el-button>
@@ -24,12 +24,12 @@
       <span>
         3. 新窗口中加载当前项目页面
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-space>
         <el-button @click="createWindow(2)">打开vue页面</el-button>
       </el-space>
-    </div>    
+    </div>
   </div>
 </template>
 <script setup>
@@ -54,7 +54,7 @@ const views = [
     content: '#/special/subwindow',
     windowName: 'window-vue',
     windowTitle: 'vue window'
-  }, 
+  },
 ];
 
 function createWindow(index) {

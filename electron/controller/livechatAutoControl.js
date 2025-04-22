@@ -214,6 +214,70 @@ class LivechatAutoControlController {
     }
 
     /**
+     * 获取表情列表
+     */
+    async getEmojis() {
+        try {
+            const emojis = this.livechatAutoControlService.getEmojis();
+            return this.success('获取表情列表成功', emojis);
+        } catch (error) {
+            logger.error(`获取表情列表出错: ${error.message}`);
+            return this.fail(`获取表情列表失败: ${error.message}`);
+        }
+    }
+
+    /**
+     * 保存表情列表
+     */
+    async saveEmojis(args) {
+        const { emojis } = args;
+
+        if (!emojis || !Array.isArray(emojis)) {
+            return this.fail('缺少必要参数: emojis');
+        }
+
+        try {
+            const result = this.livechatAutoControlService.saveEmojis(emojis);
+            if (result) {
+                return this.success('保存表情列表成功');
+            } else {
+                return this.fail('保存表情列表失败');
+            }
+        } catch (error) {
+            logger.error(`保存表情列表出错: ${error.message}`);
+            return this.fail(`保存失败: ${error.message}`);
+        }
+    }
+
+    /**
+     * 获取自动场控状态
+     */
+    async getAutoControlStatus() {
+        try {
+            const result = this.livechatAutoControlService.getAutoControlStatus();
+            logger.info(`控制器获取到自动场控状态: ${JSON.stringify(result)}`);
+            return result; // 直接返回服务层结果
+        } catch (e) {
+            logger.error(`获取自动场控状态失败: ${e.message}`);
+            return this.fail(e.message);
+        }
+    }
+
+    /**
+     * 获取自动回复状态
+     */
+    async getAutoReplyStatus() {
+        try {
+            const result = this.livechatAutoControlService.getAutoReplyStatus();
+            logger.info(`控制器获取到自动回复状态: ${JSON.stringify(result)}`);
+            return result; // 直接返回服务层结果
+        } catch (e) {
+            logger.error(`获取自动回复状态失败: ${e.message}`);
+            return this.fail(e.message);
+        }
+    }
+
+    /**
      * 响应成功结果
      * @param {string} message - 成功消息
      * @param {any} data - 返回数据

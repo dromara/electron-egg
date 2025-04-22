@@ -21,6 +21,9 @@ class LiveChatService {
         this.reconnectCounts = {};
         // 添加监控状态跟踪
         this.monitoringRooms = new Set();
+        // 添加抖音窗口引用
+        this.douyinWindow = null;
+        this.hasDouyinWindow = false;
 
         // 配置HTTP和HTTPS agent以支持keepAlive
         this.httpAgent = new http.Agent({
@@ -347,20 +350,61 @@ class LiveChatService {
     }
 
     /**
+     * 设置抖音窗口引用
+     * @param {BrowserWindow} window - 抖音窗口实例
+     */
+    setDouyinWindow(window) {
+        if (window && !window.isDestroyed()) {
+            this.douyinWindow = window;
+            this.hasDouyinWindow = true;
+            logger.info('已设置抖音窗口引用');
+        } else {
+            this.douyinWindow = null;
+            this.hasDouyinWindow = false;
+            logger.info('清除抖音窗口引用');
+        }
+    }
+
+    /**
+     * 清除抖音窗口引用
+     */
+    clearDouyinWindow() {
+        this.douyinWindow = null;
+        this.hasDouyinWindow = false;
+        logger.info('已清除抖音窗口引用');
+    }
+
+    /**
      * 发送消息到渲染进程
      * @param {string} type - 消息类型
      * @param {string} message - 消息内容
      */
     sendMessageToRenderer(type, message) {
+        // 保持原有逻辑：发送到主窗口
         const win = getMainWindow();
         if (win && !win.isDestroyed()) {
             win.webContents.send('livechat-message', {
                 type: type,
                 message: message
             });
-            logger.info(`发送消息到渲染进程: ${type}`, message);
+            // logger.info(`发送消息到主窗口: ${type}`, message);
         } else {
             logger.error('未找到主窗口或窗口已销毁，无法发送消息');
+        }
+
+        // 增加逻辑：同时发送到抖音窗口
+        if (this.hasDouyinWindow && this.douyinWindow && !this.douyinWindow.isDestroyed()) {
+            try {
+                this.douyinWindow.webContents.send('douyin-livechat-message', {
+                    type: type,
+                    message: message
+                });
+                logger.debug(`同时发送消息到抖音窗口: ${type}`);
+            } catch (error) {
+                logger.error(`发送消息到抖音窗口失败: ${error.message}`);
+                // 如果发送失败，可能窗口已关闭但引用未清除，此时清除引用
+                this.clearDouyinWindow();
+            }
         }
     }
 

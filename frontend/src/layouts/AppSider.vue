@@ -17,7 +17,7 @@
         <template v-for="(menuInfo, index) in menu" :key="index">
           <!-- 有子菜单的项 -->
           <el-sub-menu
-            v-if="hasSubMenu(menuInfo.pageName)"
+            v-if="hasSubMenu(menuInfo.pageName) && menuInfo.show"
             :index="index"
           >
             <template #title>
@@ -38,7 +38,7 @@
 
           <!-- 没有子菜单的项 -->
           <el-menu-item
-            v-else
+            v-else-if="menuInfo.show"
             :index="index"
           >
             <el-icon>
@@ -60,6 +60,7 @@
 import { ref, onMounted, markRaw } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import subMenu from '@/router/subMenu';
+import { isEE } from '@/utils/ipcRenderer';
 import {
   Monitor,
   Setting,
@@ -70,6 +71,9 @@ import {
 
 const router = useRouter();
 const route = useRoute();
+
+// 判断是否是开发环境
+const isDev = isEE && window.location.href.includes('localhost');
 
 // 预先注册图标组件以避免动态渲染问题
 const icons = {
@@ -88,37 +92,50 @@ const menu = ref({
     icon: 'Monitor',
     title: '框架',
     pageName: 'Framework',
-    params: {}
+    params: {},
+    show: isDev // 只在开发环境显示
   },
   'menu_2': {
     icon: 'Setting',
     title: '系统',
     pageName: 'Os',
-    params: {}
+    params: {},
+    show: isDev // 只在开发环境显示
   },
   'menu_3': {
     icon: 'PieChart',
     title: '特效',
     pageName: 'Effect',
-    params: {}
+    params: {},
+    show: isDev // 只在开发环境显示
   },
   'menu_4': {
     icon: 'Connection',
     title: 'cross',
     pageName: 'Cross',
-    params: {}
+    params: {},
+    show: isDev // 只在开发环境显示
   },
   'menu_5': {
     icon: 'VideoCamera',
     title: '直播录制',
     pageName: 'Live_save',
-    params: {}
+    params: {},
+    show: true
   },
   'menu_6': {
     icon: 'VideoCamera',
     title: '直播间控场',
     pageName: 'LiveChat',
-    params: {}
+    params: {},
+    show: true
+  },
+  'menu_7': {
+    icon: 'Setting',
+    title: '自动更新',
+    pageName: 'Updater',
+    params: {},
+    show: true
   }
 });
 

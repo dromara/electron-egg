@@ -2,11 +2,11 @@
     "name": "ee",
     "version": "4.1.0",
     "description": "A fast, desktop software development framework",
-    "main": "public\\electron\\main.js",
+    "main": "./public/electron/main.js",
     "scripts": {
-        "dev": "ee-bin dev",
-        "build": "npm run build-frontend && npm run build-electron && ee-bin encrypt",
-        "start": "ee-bin start",
+        "dev": "chcp 65001 && ee-bin dev",
+        "build": "node build.js",
+        "start": "chcp 65001 && ee-bin start",
         "dev-frontend": "ee-bin dev --serve=frontend",
         "dev-electron": "ee-bin dev --serve=electron",
         "dev-go": "ee-bin exec --cmds=go",
@@ -46,9 +46,10 @@
         "@types/node": "^20.16.0",
         "cross-env": "^7.0.3",
         "debug": "^4.4.0",
-        "ee-bin": "^4.1.7",
+        "ee-bin": "^4.1.9",
         "electron": "^31.7.6",
         "electron-builder": "^25.1.8",
+        "icon-gen": "^5.0.0",
         "sass": "^1.86.3"
     },
     "dependencies": {
@@ -56,13 +57,14 @@
         "better-sqlite3": "^11.7.0",
         "chokidar": "^4.0.3",
         "dayjs": "^1.11.13",
+        "dotenv": "^16.5.0",
         "ee-core": "^4.1.2",
         "electron-updater": "^6.3.8",
         "eventsource": "^3.0.6",
         "ini": "^5.0.0",
         "pinia-plugin-persistedstate": "^4.2.0",
-        "playwright": "^1.51.1",
         "protobufjs": "^7.4.0",
-        "ws": "^8.18.1"
+        "ws": "^8.18.1",
+        "xlsx": "^0.18.5"
     }
 }

@@ -18,25 +18,37 @@
             </div>
           </div>
 
-          <div class="setting-item">
-            <div class="setting-label">连续发言</div>
-            <div class="time-inputs">
-              <el-input-number v-model="continuousSpeech.start" :min="0" :max="100" size="small" controls-position="right" />
-              <span class="separator">—</span>
-              <el-input-number v-model="continuousSpeech.end" :min="0" :max="100" size="small" controls-position="right" />
-              <span class="unit">分</span>
-              <span class="current-value">{{ continuousSpeech.start * continuousSpeech.end }}</span>
-            </div>
+          <div class="checkbox-wrapper" style="margin-bottom: 10px;">
+            <el-checkbox v-model="continuousSpeechEnabled" class="custom-checkbox">间歇发言模式</el-checkbox>
           </div>
 
-          <div class="setting-item">
-            <div class="setting-label">休息时间</div>
-            <div class="time-inputs">
-              <el-input-number v-model="restTime.start" :min="0" :max="100" size="small" controls-position="right" disabled />
-              <span class="separator">—</span>
-              <el-input-number v-model="restTime.end" :min="0" :max="100" size="small" controls-position="right" disabled />
-              <span class="unit">分</span>
-              <span class="current-value disabled">{{ restTime.start * restTime.end }}</span>
+          <div class="setting-item time-settings">
+            <div class="combined-inputs">
+              <div class="input-group">
+                <span class="input-label">发言:</span>
+                <el-input-number
+                  v-model="continuousSpeechDuration"
+                  :min="1"
+                  :max="1440"
+                  size="small"
+                  controls-position="right"
+                  :disabled="!continuousSpeechEnabled"
+                />
+                <span class="unit">分</span>
+              </div>
+
+              <div class="input-group">
+                <span class="input-label">休息:</span>
+                <el-input-number
+                  v-model="restTime"
+                  :min="0"
+                  :max="1440"
+                  size="small"
+                  controls-position="right"
+                  :disabled="!continuousSpeechEnabled"
+                />
+                <span class="unit">分</span>
+              </div>
             </div>
           </div>
 
@@ -47,7 +59,10 @@
 
           <div class="checkbox-wrapper">
             <el-checkbox v-model="speakMode.randomSpace" class="custom-checkbox">随机空格</el-checkbox>
-            <el-checkbox v-model="speakMode.randomEmoji" class="custom-checkbox">随机添加表情</el-checkbox>
+            <div class="emoji-checkbox-container">
+              <el-checkbox v-model="speakMode.randomEmoji" class="custom-checkbox">随机添加表情</el-checkbox>
+              <EmojiManager :disabled="!speakMode.randomEmoji" />
+            </div>
           </div>
 
           <div class="tips-box">
@@ -56,14 +71,24 @@
             <div class="tip-line">发言太快易被封禁话术违规风险警示</div>
           </div>
 
-          <el-button
-            :type="isControlEnabled ? 'danger' : 'success'"
-            @click="isControlEnabled ? disableControl() : enableControl()"
-            :loading="loading"
-            class="control-button"
-          >
-            {{ isControlEnabled ? '关闭自动场控' : '开启自动场控' }}
-          </el-button>
+          <div class="buttons-container">
+            <el-button
+              type="primary"
+              @click="openDouyinWindow"
+              class="control-button"
+            >
+              登录抖音
+            </el-button>
+
+            <el-button
+              :type="isControlEnabled ? 'danger' : 'success'"
+              @click="isControlEnabled ? disableControl() : startAutoControl()"
+              :loading="loading"
+              class="control-button"
+            >
+              {{ isControlEnabled ? '关闭自动场控' : '开启自动场控' }}
+            </el-button>
+          </div>
         </div>
       </div>
 
@@ -162,6 +187,8 @@
             </div>
             <div class="right-controls">
               <el-button type="primary" size="small" @click="addScriptRow">添加内容</el-button>
+              <el-button type="success" size="small" @click="exportTable">导出</el-button>
+              <el-button type="warning" size="small" @click="importTable">导入</el-button>
             </div>
           </div>
 
@@ -204,12 +231,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject, nextTick, watch } from 'vue';
 import { ipcApiRoute } from '@/api';
-import { ipc } from '@/utils/ipcRenderer';
-import { ElMessage} from 'element-plus';
-import { Edit, Delete, Check, Close } from '@element-plus/icons-vue';
 import { useLivechatStore } from '@/stores/livechatStore';
+import { ipc } from '@/utils/ipcRenderer';
+import EmojiManager from '@/components/EmojiManager.vue';
+import { ref, reactive, computed, watch, onMounted, onActivated, inject, nextTick, onUnmounted } from 'vue';
 
 // 配置全局默认值：限制只显示一个消息
 ElMessage.closeAll(); // 初始化时关闭所有消息
@@ -235,7 +261,7 @@ const connected = ref(false);
 const isConnected = ref(false); // 自动场控服务的连接状态
 
 // 初始化场控状态
-const isControlEnabled = ref(false);
+const isControlEnabled = ref(livechatStore.isAutoControlEnabled || false);
 const loading = ref(false);
 const consoleRef = ref(sharedState?.consoleRef || null);
 const tableLoading = ref(false);
@@ -246,30 +272,61 @@ const selectedTable = ref(livechatStore.selectedControlTable || '');
 const controlScripts = ref([]);
 const newTableName = ref('');
 
-// 频率设置
+// 频率设置 - 从localStorage中获取保存的值或使用默认值
 const frequency = ref({
-  min: 40,
-  max: 60,
-  current: 26
+  min: Number(localStorage.getItem('autoControl_frequency_min')) || 30,
+  max: Number(localStorage.getItem('autoControl_frequency_max')) || 60,
+  current: null  // 由后端随机生成
 });
 
-// 连续发言设置
-const continuousSpeech = ref({
-  start: 15,
-  end: 15
+// 监听频率设置变化并保存到localStorage
+watch(() => frequency.value.min, (newVal) => {
+  localStorage.setItem('autoControl_frequency_min', newVal);
 });
 
-// 休息时间设置
-const restTime = ref({
-  start: 0,
-  end: 0
+watch(() => frequency.value.max, (newVal) => {
+  localStorage.setItem('autoControl_frequency_max', newVal);
 });
 
-// 发言模式
+// 连续发言功能开关 - 从localStorage获取
+const continuousSpeechEnabled = ref(localStorage.getItem('autoControl_continuousSpeechEnabled') === 'true');
+
+// 连续发言时长（分钟）- 从localStorage获取
+const continuousSpeechDuration = ref(Number(localStorage.getItem('autoControl_continuousSpeechDuration')) || 15);
+
+// 休息时间（分钟）- 从localStorage获取
+const restTime = ref(Number(localStorage.getItem('autoControl_restTime')) || 5);
+
+// 发言模式 - 从localStorage获取
 const speakMode = ref({
-  type: 'random', // 'random' 或 'sequential'
-  randomSpace: true,
-  randomEmoji: true
+  type: localStorage.getItem('autoControl_speakMode_type') || 'random', // 'random' 或 'sequential'
+  randomSpace: localStorage.getItem('autoControl_speakMode_randomSpace') !== 'false', // 默认为true
+  randomEmoji: localStorage.getItem('autoControl_speakMode_randomEmoji') !== 'false'  // 默认为true
+});
+
+// 监听所有设置变化并保存到localStorage
+watch(() => continuousSpeechEnabled.value, (newVal) => {
+  localStorage.setItem('autoControl_continuousSpeechEnabled', newVal);
+});
+
+watch(() => continuousSpeechDuration.value, (newVal) => {
+  localStorage.setItem('autoControl_continuousSpeechDuration', newVal);
+});
+
+watch(() => restTime.value, (newVal) => {
+  localStorage.setItem('autoControl_restTime', newVal);
+});
+
+watch(() => speakMode.value.type, (newVal) => {
+  localStorage.setItem('autoControl_speakMode_type', newVal);
+});
+
+watch(() => speakMode.value.randomSpace, (newVal) => {
+  localStorage.setItem('autoControl_speakMode_randomSpace', newVal);
+});
+
+watch(() => speakMode.value.randomEmoji, (newVal) => {
+  localStorage.setItem('autoControl_speakMode_randomEmoji', newVal);
 });
 
 // 添加一个变量记录上一次选中的表
@@ -760,11 +817,16 @@ const checkConnectionStatus = async () => {
   }
 };
 
-// 启动自动场控
-const enableControl = async () => {
-  // 先检查直播连接状态
-  if (!livechatStore.connected || !livechatStore.roomId) {
-    showMessage('请先在弹幕监控中连接直播间', 'warning');
+/**
+ * 启动自动场控
+ */
+const startAutoControl = async () => {
+  // 检查store中的连接状态
+  const isStoreConnected = livechatStore.connected;
+  const storeRoomId = livechatStore.roomId;
+
+  if (!isStoreConnected || !storeRoomId) {
+    showMessage('请先连接到直播间', 'warning');
     return;
   }
 
@@ -773,78 +835,85 @@ const enableControl = async () => {
     return;
   }
 
+  // 检查场控组中的脚本数量
   if (!controlScripts.value || controlScripts.value.length === 0) {
-    showMessage('当前场控组中没有控场话术', 'warning');
+    showMessage('当前场控组中没有任何脚本，请先添加脚本', 'warning');
     return;
   }
 
   loading.value = true;
-  try {
-    // 如果场控服务未连接，尝试连接
-    if (!isConnected.value) {
-      console.log('场控服务未连接，尝试连接到直播间:', livechatStore.roomId);
 
-      const connectResult = await ipc.invoke(ipcApiRoute.livechatAutoControl.connectToLiveRoom, {
-        roomId: livechatStore.roomId
+  try {
+    // 首先检查连接状态，避免重复连接
+    const connectionStatus = await ipc.invoke(ipcApiRoute.livechatAutoControl.getConnectionStatus);
+    console.log('当前连接状态:', connectionStatus);
+
+    let connectionResult = { status: 'success' };
+
+    // 只有当实际未连接时才进行连接
+    if (!connectionStatus.data?.connected) {
+      console.log('尝试连接自动场控服务...');
+      connectionResult = await ipc.invoke(ipcApiRoute.livechatAutoControl.connectToLiveRoom, {
+        roomId: storeRoomId
       });
 
-      if (!connectResult || connectResult.status !== 'success') {
-        showMessage('场控服务连接失败，请检查直播间连接', 'error');
-        loading.value = false;
-        return;
+      if (!connectionResult.status || connectionResult.status !== 'success') {
+        throw new Error('无法连接到自动场控服务: ' + (connectionResult.message || '未知错误'));
       }
 
-      console.log('场控服务连接成功');
+      if (connectionResult && connectionResult.status === 'success') {
+        isConnected.value = true;
+      }
+    } else {
+      console.log('已连接到直播间，无需重新连接');
       isConnected.value = true;
     }
 
-    // 准备脚本数据
-    const cleanScripts = controlScripts.value.map(script => ({
+    // 构建脚本数据
+    const scripts = controlScripts.value.map(script => ({
       id: script.id,
-      content: script.content
+      content: script.content,
+      enabled: script.enabled !== false
     }));
 
     // 构建场控设置
     const settings = {
       frequency: {
-        min: frequency.value.min,
-        max: frequency.value.max
+        min: Number(frequency.value.min),
+        max: Number(frequency.value.max)
       },
-      continuousSpeech: {
-        start: continuousSpeech.value.start,
-        end: continuousSpeech.value.end
-      },
-      restTime: {
-        start: restTime.value.start,
-        end: restTime.value.end
-      },
+      continuousSpeechEnabled: Boolean(continuousSpeechEnabled.value),
+      continuousSpeechDuration: Number(continuousSpeechDuration.value),
+      restTime: Number(restTime.value),
       random: speakMode.value.type === 'random',
       sequential: speakMode.value.type === 'sequential',
-      randomSpace: speakMode.value.randomSpace,
-      randomEmoji: speakMode.value.randomEmoji
+      randomSpace: Boolean(speakMode.value.randomSpace),
+      randomEmoji: Boolean(speakMode.value.randomEmoji)
     };
 
-    // 调用后端API启动自动场控
+    // 调用后端启动自动场控
     const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.startAutoControl, {
-      scripts: cleanScripts,
+      tableName: selectedTable.value,
+      scripts: scripts,
       settings: settings
     });
 
     if (result && result.status === 'success') {
       isControlEnabled.value = true;
-      frequency.value.current = Math.floor(Math.random() * (frequency.value.max - frequency.value.min + 1)) + frequency.value.min;
+      // 更新Pinia store中的状态
+      livechatStore.setAutoControlEnabled(true);
 
-      if (consoleRef.value) {
-        consoleRef.value.addTextControlLog('自动文字控场已启用');
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextControlLog('自动场控已启用');
+        sharedState.consoleRef.addTextControlLog(`使用场控组: ${selectedTable.value}，${scripts.length}条脚本`);
       }
-
-      showMessage('已开启自动场控');
+      showMessage('已开启自动场控', 'success');
     } else {
-      showMessage(result?.message || '开启自动场控失败', 'error');
+      showMessage(result?.message || '启动自动场控失败', 'error');
     }
   } catch (error) {
-    console.error('开启自动场控出错:', error);
-    showMessage(`开启自动场控失败: ${error.message || '未知错误'}`, 'error');
+    console.error('启动自动场控出错:', error);
+    showMessage('启动自动场控失败: ' + error.message, 'error');
   } finally {
     loading.value = false;
   }
@@ -877,20 +946,52 @@ const disableControl = async () => {
 
 // 页面挂载时同步状态
 onMounted(async () => {
-  // 从livechatStore获取状态
-  roomId.value = livechatStore.roomId;
-  connected.value = livechatStore.connected;
+  // 先加载数据
+  console.log('AutoTextControl组件已挂载，开始加载数据...');
 
-  if (sharedState) {
-    sharedState.connected = connected.value;
-    sharedState.roomId = roomId.value;
+  // 添加倒计时消息监听
+  ipc.on('livechat-countdown', (event, data) => {
+    if (data && data.seconds) {
+      frequency.value.current = data.seconds;
+    }
+  });
+
+  // 先从Pinia中获取初始状态
+  isControlEnabled.value = livechatStore.isAutoControlEnabled;
+
+  // 同步Pinia中的直播间状态
+  connected.value = livechatStore.connected;
+  roomId.value = livechatStore.roomId;
+
+  // 初始化默认表
+  try {
+    // 首先尝试检查并修复默认表
+    await ipc.invoke(ipcApiRoute.scriptdb.checkAndFixDefaultTable)
+      .then(() => {
+  // 加载表格
+        loadScriptTables();
+      })
+      .catch((error) => {
+        console.error('检查默认表失败', error);
+        // 继续加载可用的表
+        loadScriptTables();
+      });
+  } catch (error) {
+    console.error('检查默认表异常', error);
+    // 出错后仍然尝试加载表
+    loadScriptTables();
   }
 
-  // 检查自动场控服务连接状态
-  await checkConnectionStatus();
+  // 然后检查实际的自动场控状态，确保按钮状态与实际状态同步
+  await checkAutoControlStatus();
+  console.log('自动场控状态同步完成，当前状态:', isControlEnabled.value);
+});
 
-  // 加载表格
-  await loadScriptTables();
+// 页面激活时检查状态
+onActivated(async () => {
+  console.log('AutoTextControl组件被激活，检查状态...');
+  // 每次页面激活时，重新检查自动场控状态
+  await checkAutoControlStatus();
 });
 
 // 监听连接状态和房间ID的变化，同步到Pinia
@@ -934,6 +1035,119 @@ const checkDefaultTable = async () => {
     loadScriptTables();
   }
 };
+
+// 导出表格数据
+const exportTable = async () => {
+  if (!selectedTable.value) {
+    showMessage('请先选择一个场控组', 'warning');
+    return;
+  }
+
+  try {
+    // 调用后端API导出表格
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.exportScriptTable, {
+      tableName: selectedTable.value
+    });
+
+    if (result && result.status === 'success') {
+      showMessage(`导出成功: ${result.filePath}`, 'success');
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextControlLog(`已导出场控组: ${selectedTable.value}`);
+      }
+    } else {
+      showMessage(result?.message || '导出失败', 'error');
+    }
+  } catch (error) {
+    showMessage(`导出失败: ${error.message || '未知错误'}`, 'error');
+  }
+};
+
+// 导入表格数据
+const importTable = async () => {
+  if (!selectedTable.value) {
+    showMessage('请先选择一个要导入到的场控组', 'warning');
+    return;
+  }
+
+  try {
+    // 调用后端API导入表格
+    const result = await ipc.invoke(ipcApiRoute.scriptdb.importScriptTable, {
+      tableName: selectedTable.value
+    });
+
+    if (result && result.status === 'success') {
+      // 刷新表格数据
+      loadScripts(selectedTable.value);
+      showMessage(`导入成功: 共导入 ${result.importedCount || 0} 条记录`, 'success');
+
+      if (sharedState?.consoleRef) {
+        sharedState.consoleRef.addTextControlLog(`已导入数据到场控组: ${selectedTable.value}`);
+      }
+    } else {
+      showMessage(result?.message || '导入失败', 'error');
+    }
+  } catch (error) {
+    showMessage(`导入失败: ${error.message || '未知错误'}`, 'error');
+  }
+};
+
+// 打开抖音窗口
+const openDouyinWindow = () => {
+  const windowConfig = {
+    type: 'web',
+    content: 'https://www.douyin.com/',
+    windowName: 'window-douyin',
+    windowTitle: '抖音',
+    userDataDir: 'douyin_user_data', // 数据持久化目录，会保存在extraResources下
+    persist: true // 启用数据持久化
+  };
+  ipc.invoke(ipcApiRoute.os.createWindow, windowConfig);
+};
+
+// 检查自动场控状态
+const checkAutoControlStatus = async () => {
+  try {
+    // 调用后端API检查自动场控状态
+    const result = await ipc.invoke(ipcApiRoute.livechatAutoControl.getAutoControlStatus);
+    console.log('检查自动场控状态结果:', JSON.stringify(result));
+
+    if (result && result.status === 'success') {
+      // 正确处理不同的返回数据结构
+      let enabled = false;
+
+      if (result.data && result.data.hasOwnProperty('enabled')) {
+        // 新的返回结构 { status, data: { enabled } }
+        enabled = !!result.data.enabled;
+      } else if (result.hasOwnProperty('enabled')) {
+        // 旧的返回结构 { status, enabled }
+        enabled = !!result.enabled;
+      }
+
+      console.log(`解析后的自动场控状态: ${enabled ? '已启用' : '未启用'}`);
+
+      isControlEnabled.value = enabled;
+      // 更新Pinia store中的状态
+      livechatStore.setAutoControlEnabled(enabled);
+    }
+  } catch (error) {
+    console.error('检查自动场控状态失败:', error);
+  }
+};
+
+// 监听来自Pinia的自动场控状态变化
+watch(() => livechatStore.isAutoControlEnabled, (newValue) => {
+  console.log('Pinia中自动场控状态变化:', newValue);
+  if (newValue !== isControlEnabled.value) {
+    isControlEnabled.value = newValue;
+  }
+});
+
+// 在组件卸载时清理
+onUnmounted(() => {
+  // 移除倒计时监听
+  ipc.removeAllListeners('livechat-countdown');
+});
 </script>
 
 <style lang="less" scoped>
@@ -946,7 +1160,7 @@ const checkDefaultTable = async () => {
     gap: 12px;
     height: 420px;
     min-width: 600px; /* 确保有最小宽度 */
-    overflow-x: auto; /* 当宽度小于最小宽度时允许水平滚动 */
+    overflow-x: hidden; /* 修改为hidden，防止水平滚动 */
 
     .left-panel, .right-panel {
       border: 1px solid #e4e7ed;
@@ -958,7 +1172,7 @@ const checkDefaultTable = async () => {
       width: 28%;
       min-width: 200px; /* 确保左面板有最小宽度 */
       max-width: 300px; /* 限制最大宽度 */
-      overflow: auto; /* 允许滚动 */
+      overflow: hidden; /* 修改为hidden，防止水平滚动 */
       padding: 8px;
 
       .panel-section {
@@ -982,6 +1196,20 @@ const checkDefaultTable = async () => {
             flex: 1;
             display: flex;
             align-items: center;
+          }
+
+          .combined-inputs {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            flex-wrap: nowrap;
+
+            .input-label {
+              font-size: 12px;
+              color: #606266;
+              margin-right: 4px;
+              white-space: nowrap;
+            }
           }
         }
 
@@ -1103,12 +1331,17 @@ const checkDefaultTable = async () => {
           }
         }
 
-        .control-button {
-          margin-top: 8px;
+        .buttons-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           width: 100%;
-          height: 28px;
-          font-size: 12px;
-          padding: 5px 8px;
+          margin-top: 10px;
+
+          .control-button {
+            width: 90%;
+            margin: 5px 0;
+          }
         }
       }
     }
@@ -1191,5 +1424,90 @@ const checkDefaultTable = async () => {
   justify-content: center;
   gap: 5px;
   flex-wrap: wrap; /* 允许按钮换行 */
+}
+
+.time-settings {
+  padding: 0 2px;
+  width: 100%;
+
+  .combined-inputs {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    .input-group {
+      display: flex;
+      align-items: center;
+
+      .input-label {
+        font-size: 12px;
+        color: #606266;
+        margin-right: 4px;
+        white-space: nowrap;
+      }
+
+      .el-input-number {
+        width: 70px;
+      }
+
+      .unit {
+        margin-left: 2px;
+        font-size: 12px;
+        color: #606266;
+      }
+    }
+  }
+}
+
+.emoji-checkbox-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.emoji-edit-button {
+  margin-left: 5px;
+  font-size: 12px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+}
+
+.emoji-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.emoji-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 100px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  align-items: center;
+}
+
+.emoji-tag {
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+.emoji-input {
+  width: 100px;
+  margin-left: 5px;
+  vertical-align: bottom;
+}
+
+.button-new-emoji {
+  margin-left: 5px;
+  height: 28px;
+  line-height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
 }
 </style>

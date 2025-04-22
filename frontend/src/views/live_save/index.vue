@@ -1,13 +1,13 @@
 <template>
   <div class="live-save-container">
     <div class="one-block-1">
-      <span>直播录制WebSocket监控</span>
+      <span>直播录制服务</span>
     </div>
     <div class="one-block-2">
       <el-space>
-        <el-button type="primary" @click="create()">启动服务</el-button>
-        <el-button @click="getUrl()">获取地址</el-button>
+        <el-button type="primary" @click="startRecorder()">启动服务</el-button>
         <el-button type="danger" @click="kill()">停止服务</el-button>
+        <el-button type="success" @click="openDownloadsFolder()">打开录制目录</el-button>
       </el-space>
     </div>
 
@@ -41,52 +41,12 @@
     </div>
 
     <div class="one-block-1">
-      <span>WebSocket连接状态:
-        <el-tag :type="wsConnected ? 'success' : 'info'">
-          {{ wsConnected ? '已连接' : '未连接' }}
+      <span>录制器状态:
+        <el-tag :type="recorderRunning ? 'success' : 'info'">
+          {{ recorderRunning ? '运行中' : '未运行' }}
         </el-tag>
       </span>
     </div>
-
-    <div class="one-block-2">
-      <div class="status-overview">
-        <el-row :gutter="16">
-          <el-col :span="6">
-            <el-card shadow="hover">
-              <template #header>
-                <div class="card-header">监测直播数</div>
-              </template>
-              <p class="card-value">{{ statusData.monitoring_count || 0 }}</p>
-            </el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card shadow="hover">
-              <template #header>
-                <div class="card-header">网络线程数</div>
-              </template>
-              <p class="card-value">{{ statusData.max_request || 0 }}</p>
-            </el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card shadow="hover">
-              <template #header>
-                <div class="card-header">瞬时错误数</div>
-              </template>
-              <p class="card-value">{{ statusData.error_count || 0 }}</p>
-            </el-card>
-          </el-col>
-          <el-col :span="6">
-            <el-card shadow="hover">
-              <template #header>
-                <div class="card-header">当前时间</div>
-              </template>
-              <p class="card-value">{{ statusData.current_time || '--:--:--' }}</p>
-            </el-card>
-          </el-col>
-        </el-row>
-      </div>
-    </div>
-
     <div class="one-block-1">
       <span>直播监控列表</span>
     </div>
@@ -153,11 +113,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { ipcApiRoute } from '@/api';
-import { ipc } from '@/utils/ipcRenderer';
-import { ElMessage, ElMessageBox } from 'element-plus';
-import 'element-plus/es/components/message/style/css';
+import path from 'path';
 
 // 配置全局默认值：限制只显示一个消息
 ElMessage.closeAll(); // 初始化时关闭所有消息
@@ -171,16 +128,9 @@ const showMessage = (message, type = 'info') => {
   });
 };
 
-// 服务器URL和WebSocket连接
+// 服务器URL
 const serverUrl = ref('');
-const wsConnected = ref(false);
-let eventSource = null;
-const recorderRunning = ref(false); // 新增：录制器运行状态
-
-// 记录每个直播的开始时间
-const recordingStartTimes = ref({});
-// 定时器ID，用于定期更新录制时长
-let durationUpdateTimer = null;
+const recorderRunning = ref(false); // 录制器运行状态
 
 // 直播链接输入
 const liveUrl = ref('');
@@ -196,21 +146,7 @@ const qualityOptions = [
 const selectedQuality = ref('原画'); // 默认选择原画
 
 // 状态数据
-const statusData = ref({
-  monitoring_count: 0,
-  max_request: 0,
-  use_proxy: false,
-  split_video: {
-    enabled: false,
-    time: null
-  },
-  create_time_file: false,
-  video_quality: '--',
-  video_format: '--',
-  error_count: 0,
-  current_time: '--:--:--',
-  recording: []
-});
+const statusData = ref({});
 
 // 添加配置数据
 const configData = ref({
@@ -222,33 +158,10 @@ const configData = ref({
 const combinedTableData = computed(() => {
   // 从配置数据获取所有直播流
   const allStreams = configData.value.streams.map((stream) => {
-    // 检查是否正在录制中
-    const isRecording = statusData.value.recording.some(
-      (rec) => {
-        // 尝试匹配URL或部分URL
-        return stream.url && (
-          (rec.url && rec.url.includes(stream.url)) ||
-          (rec.name && stream.url.includes(rec.name))
-        );
-      }
-    );
-
-    // 查找匹配的录制记录
-    const matchingRecordUrl = isRecording ?
-      Object.keys(recordingStartTimes.value).find(recUrl =>
-        recUrl.includes(stream.url) || stream.url.includes(recUrl.split(' ').pop() || '')
-      ) : null;
-
-    // 计算录制时长（如果正在录制）
-    const recordDuration = matchingRecordUrl ?
-      calculateDuration(recordingStartTimes.value[matchingRecordUrl]) : '';
-
     return {
       streamerName: stream.streamerName,
       url: stream.url,
       quality: stream.quality,
-      recordStatus: isRecording,
-      recordDuration: recordDuration, // 添加录制时长
       isDisabled: stream.isDisabled // 是否被禁用（通过#注释）
     };
   });
@@ -256,197 +169,40 @@ const combinedTableData = computed(() => {
   return allStreams;
 });
 
-// 获取Python服务地址
-function getUrl() {
-  ipc.invoke(ipcApiRoute.cross.getCrossUrl, {name: 'pyapp'}).then(url => {
-    serverUrl.value = url;
-    showMessage(`服务地址: ${url}`, 'info');
-
-    // 获取到地址后先检查录制器状态
-    checkRecorderStatus();
-
-    // 然后尝试连接WebSocket
-    connectEventSource();
-  });
-}
-
-// 检查录制器状态
-function checkRecorderStatus() {
-  if (!serverUrl.value) return;
-
-  fetch(`${serverUrl.value}/api/recorder/status`)
-    .then(response => response.json())
-    .then(data => {
-      recorderRunning.value = data.running;
-
-      // 如果录制器未运行，自动启动
-      if (!recorderRunning.value) {
-        startRecorder();
-      }
-    })
-    .catch(error => {
-      console.error('获取录制器状态失败:', error);
-    });
-}
-
-// 启动录制器
-function startRecorder() {
-  if (!serverUrl.value) return;
-
-  fetch(`${serverUrl.value}/api/recorder/start`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        recorderRunning.value = true;
-        showMessage('录制器已启动', 'success');
-      } else {
-        showMessage('启动录制器失败', 'error');
-      }
-    })
-    .catch(error => {
-      console.error('启动录制器失败:', error);
-      showMessage(`启动录制器失败: ${error}`, 'error');
-    });
-}
-
-// 停止Python服务
 function kill() {
-  disconnectEventSource();
-  ipc.invoke(ipcApiRoute.cross.killCrossServer, {type: 'one', name: 'pyapp'}).then(() => {
-    recorderRunning.value = false;
-    showMessage('服务已停止', 'success');
-  });
+  ipc.invoke(ipcApiRoute.livesave.stopRecorder, { program: 'python' })
 }
 
-// 启动Python服务
-function create() {
-  ipc.invoke(ipcApiRoute.cross.createCrossServer, { program: 'python' }).then(() => {
-    showMessage('服务启动中...', 'success');
-    // 短暂延迟后获取URL并连接
-    setTimeout(() => {
-      getUrl();
-    }, 2000);
-  });
-}
 
-// 连接到服务器事件流(SSE)
-function connectEventSource() {
-  if (!serverUrl.value) {
-    showMessage('请先获取服务地址', 'warning');
-    return;
-  }
-
-  // 获取SSE地址
-  const sseUrl = serverUrl.value + '/api/sse/recorder/status';
-
-  // 关闭已有连接
-  disconnectEventSource();
-
-  // 创建新连接
-  eventSource = new EventSource(sseUrl);
-
-  eventSource.onopen = () => {
-    wsConnected.value = true;
-    showMessage('服务器事件流连接成功', 'success');
-    // 开始定时更新录制时长
-    startDurationTimer();
-  };
-
-  eventSource.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-
-      // 处理状态更新数据
-      statusData.value = data;
-
-      // 更新录制开始时间记录
-      if (data.recording && data.recording.length > 0) {
-        data.recording.forEach(rec => {
-          // 保存每个直播流的开始时间
-          recordingStartTimes.value[rec.url] = rec.start_time;
-        });
-
-        // 检查是否有已停止录制的直播，从记录中移除
-        Object.keys(recordingStartTimes.value).forEach(url => {
-          const stillRecording = data.recording.some(rec => rec.url === url);
-          if (!stillRecording) {
-            delete recordingStartTimes.value[url];
-          }
-        });
-      } else if (data.recording && data.recording.length === 0) {
-        // 所有录制已停止
-        recordingStartTimes.value = {};
-      }
-    } catch (e) {
-      console.error('解析服务器事件数据失败:', e);
+// 启动录制服务
+function startRecorder() {
+  ipc.invoke(ipcApiRoute.livesave.startRecorder, { program: 'python' }).then(res => {
+    if (res.success) {
+      showMessage('服务启动成功', 'success');
+      // 获取服务地址
+      getServerUrl();
+    } else {
+      showMessage('服务启动失败: ' + (res.message || '未知错误'), 'error');
     }
-  };
-
-  eventSource.onerror = () => {
-    wsConnected.value = false;
-    showMessage('服务器事件流连接失败或已关闭', 'warning');
-    // 停止定时器
-    stopDurationTimer();
-
-    // 自动尝试重连
-    setTimeout(() => {
-      if (!wsConnected.value) {
-        connectEventSource();
-      }
-    }, 5000);
-  };
+  }).catch(err => {
+    showMessage('服务启动错误: ' + err.message, 'error');
+  });
 }
 
-// 启动定时更新录制时长的计时器
-function startDurationTimer() {
-  stopDurationTimer(); // 先停止可能存在的旧计时器
-  durationUpdateTimer = setInterval(() => {
-    // 强制更新计算属性
-    combinedTableData.value = [...combinedTableData.value];
-  }, 1000); // 每秒更新一次
-}
-
-// 停止定时更新录制时长的计时器
-function stopDurationTimer() {
-  if (durationUpdateTimer) {
-    clearInterval(durationUpdateTimer);
-    durationUpdateTimer = null;
-  }
-}
-
-// 断开SSE连接
-function disconnectEventSource() {
-  if (eventSource) {
-    eventSource.close();
-    eventSource = null;
-    wsConnected.value = false;
-    stopDurationTimer();
-  }
-}
-
-// 替换原有的WebSocket连接/断开函数
-const connectWebSocket = connectEventSource;
-const disconnectWebSocket = disconnectEventSource;
-
-// 计算录制持续时间的函数
-function calculateDuration(startTimeStr) {
-  if (!startTimeStr) return '';
-
-  const startTime = new Date(startTimeStr);
-  const now = new Date();
-  const diff = Math.floor((now - startTime) / 1000); // 秒数差
-
-  // 格式化为 小时:分钟:秒
-  const hours = Math.floor(diff / 3600);
-  const minutes = Math.floor((diff % 3600) / 60);
-  const seconds = diff % 60;
-
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+// 获取服务地址并标记录制器状态
+function getServerUrl() {
+  ipc.invoke(ipcApiRoute.cross.getCrossUrl, {name: 'DouyinLiveRecorder'}).then(url => {
+    if (url) {
+      serverUrl.value = url;
+      showMessage(`已获取服务地址: ${url}`, 'info');
+      // 标记录制器为运行状态
+      recorderRunning.value = true;
+    } else {
+      showMessage('无法获取服务地址', 'warning');
+    }
+  }).catch(err => {
+    showMessage('获取服务地址失败: ' + err.message, 'error');
+  });
 }
 
 // 添加直播链接
@@ -571,7 +327,7 @@ function listenConfigUpdate() {
 
 // 获取最新配置
 function getLatestConfig() {
-  ipc.invoke(ipcApiRoute.livesave.getLatestConfig).then(res => {
+  ipc.invoke(ipcApiRoute.livesave.getLatestConfig, {}).then(res => {
     if (res.success) {
       // 不显示获取配置成功的提示，减少提示数量
       // showMessage(res.message, 'success');
@@ -611,6 +367,21 @@ function toggleMonitoring(row, index) {
   });
 }
 
+// 打开录制文件保存目录
+function openDownloadsFolder() {
+  ipc.invoke(ipcApiRoute.livesave.openDownloadsFolder, {})
+    .then(res => {
+      if (res.success) {
+        showMessage(res.message, 'success');
+      } else {
+        showMessage(res.message || '打开录制文件目录失败', 'error');
+      }
+    })
+    .catch(err => {
+      showMessage(`打开目录失败: ${err}`, 'error');
+    });
+}
+
 // 组件挂载时
 onMounted(() => {
   console.log('Live_save页面已加载');
@@ -635,13 +406,11 @@ function initListeners() {
 
 // 组件卸载时
 onUnmounted(() => {
-  disconnectEventSource();
-  stopDurationTimer();
-
   // 定义监听通道 - 必须与后端发送消息的通道一致
   const channel = 'controller/live_monitor/configUpdate';
   ipc.removeAllListeners(channel);
 });
+
 </script>
 
 <style lang="less" scoped>

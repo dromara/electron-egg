@@ -44,7 +44,7 @@
           <div class="tips-box">
             <div class="tip-line">友情提示：</div>
             <div class="tip-line">• 播放间隔建议30-60秒</div>
-            <div class="tip-line">• 音频文件放在data/audio文件夹</div>
+            <div class="tip-line">• 音频文件放在extraResources/audio文件夹</div>
             <div class="tip-line">• 每个子文件夹代表一个音频组</div>
             <div class="tip-line">• 支持MP3, WAV等格式</div>
           </div>
@@ -53,7 +53,7 @@
             :type="isVoiceEnabled ? 'danger' : 'success'"
             @click="isVoiceEnabled ? disableVoiceAssistant() : enableVoiceAssistant()"
             :loading="loading"
-            :disabled="!selectedAudioGroup || !connected"
+            :disabled="!selectedAudioGroup"
             class="control-button"
           >
             {{ isVoiceEnabled ? '停止语音助手' : '启动语音助手' }}
@@ -246,11 +246,6 @@ const playAudioFile = (file) => {
 
 // 启用语音助手
 const enableVoiceAssistant = async () => {
-  if (!connected.value) {
-    ElMessage.warning('请先连接到直播间');
-    return;
-  }
-
   if (!selectedAudioGroup.value) {
     ElMessage.warning('请先选择一个音频组');
     return;
@@ -258,10 +253,19 @@ const enableVoiceAssistant = async () => {
 
   loading.value = true;
   try {
+    // 创建一个只包含简单数据类型的设置对象
+    const simpleSettings = {
+      volume: Number(audioSettings.value.volume),
+      playbackRate: Number(audioSettings.value.playbackRate),
+      minInterval: Number(audioSettings.value.minInterval),
+      maxInterval: Number(audioSettings.value.maxInterval),
+      playMode: String(audioSettings.value.playMode)
+    };
+
     // 调用后端API启用语音助手
     const result = await ipc.invoke(ipcApiRoute.voiceAssistant.startVoiceAssistant, {
       groupName: selectedAudioGroup.value,
-      settings: audioSettings.value
+      settings: simpleSettings
     });
 
     if (result && result.status === 'success') {

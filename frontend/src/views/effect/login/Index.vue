@@ -4,7 +4,7 @@
       <span>
           1. 登录
       </span>
-    </div>  
+    </div>
     <div class="one-block-2">
       <el-space>
         <el-button @click="loginWindow()">切换为登录窗口</el-button>
@@ -21,7 +21,7 @@ const router = useRouter();
 
 function loginWindow() {
   router.push({ name: 'SpecialLoginWindow'});
-  ipc.invoke(ipcApiRoute.effect.loginWindow, {width: 400, height: 300});
+  ipc.invoke(ipcApiRoute.effect.loginWindow, {width: 980, height: 650});
 }
 </script>
 <style lang="less" scoped>
@@ -38,4 +38,3 @@ function loginWindow() {
   }
 }
 </style>
-  
