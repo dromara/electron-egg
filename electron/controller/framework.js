@@ -259,7 +259,18 @@ class FrameworkController {
      */
     downloadApp() {
         autoUpdaterService.download();
-        return;
+    }
+
+    /**
+     * 获取应用当前版本
+     */
+    getAppVersion() {
+        const version = electronApp.getVersion();
+        logger.info('[getAppVersion] current version:', version);
+        return {
+            status: 'success',
+            data: version
+        };
     }
 
     /**

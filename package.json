@@ -1,11 +1,11 @@
 {
-    "name": "ee",
-    "version": "4.1.0",
+    "name": "douyin-tool",
+    "version": "1.3.1",
     "description": "A fast, desktop software development framework",
     "main": "./public/electron/main.js",
     "scripts": {
         "dev": "chcp 65001 && ee-bin dev",
-        "build": "node build.js",
+        "build": "npm run build-frontend && npm run build-electron && ee-bin encrypt",
         "start": "chcp 65001 && ee-bin start",
         "dev-frontend": "ee-bin dev --serve=frontend",
         "dev-electron": "ee-bin dev --serve=electron",

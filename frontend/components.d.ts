@@ -45,6 +45,7 @@ declare module 'vue' {
     LiveChatConsole: typeof import('./src/components/LiveChatConsole.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    UpdateNotification: typeof import('./src/components/common/UpdateNotification.vue')['default']
   }
   export interface ComponentCustomProperties {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

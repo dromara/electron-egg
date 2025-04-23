@@ -1,0 +1,3 @@
+provider: generic
+url: https://douyin-tool-1342151814.cos.ap-guangzhou.myqcloud.com
+updaterCacheDirName: douyin-tool-updater 

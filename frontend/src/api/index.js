@@ -19,6 +19,7 @@ const ipcApiRoute = {
     framework: {
         checkForUpdater: 'controller/framework/checkForUpdater',
         downloadApp: 'controller/framework/downloadApp',
+        getAppVersion: 'controller/framework/getAppVersion',
         jsondbOperation: 'controller/framework/jsondbOperation',
         sqlitedbOperation: 'controller/framework/sqlitedbOperation',
         uploadFile: 'controller/framework/uploadFile',

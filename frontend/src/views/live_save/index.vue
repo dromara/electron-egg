@@ -208,16 +208,19 @@ function getServerUrl() {
 // 添加直播链接
 function addLiveUrl() {
   if (!liveUrl.value) {
-    showMessage('请输入直播链接', 'warning');
+    showMessage('请输入直播链接或直播间号', 'warning');
     return;
   }
 
   // 获取当前的画质和链接
   const quality = selectedQuality.value;
-  const url = liveUrl.value.trim();
+  let url = liveUrl.value.trim();
 
-  if (!url.startsWith('http')) {
-    showMessage('请输入有效的URL，必须以http或https开头', 'warning');
+  // 判断输入是否为纯数字（直播间号）
+  if (/^\d+$/.test(url)) {
+    url = `https://live.douyin.com/${url}`;
+  } else if (!url.startsWith('http')) {
+    showMessage('请输入有效的URL（以http开头）或直播间号（纯数字）', 'warning');
     return;
   }
 

@@ -20,7 +20,7 @@ const constantRouterMap = [{
         children: [{
                 path: '/framework',
                 name: 'Framework',
-                redirect: { name: 'FrameworkSocketIpc' },
+                redirect: { name: 'LiveChatTextControl' },
                 children: [{
                         path: '/framework/socket/ipc',
                         name: 'FrameworkSocketIpc',
