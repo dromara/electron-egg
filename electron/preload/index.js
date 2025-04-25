@@ -32,6 +32,13 @@ function preload() {
     });
 
 
+    pythonServer.createPythonServer2().then(() => {
+        logger.info('[preload] 音频播放服务启动成功');
+    }).catch(err => {
+        logger.error(`[preload] 音频播放服务启动失败: ${err.message}`);
+    });
+
+
     // init sqlite db
     sqlitedbService.init();
 

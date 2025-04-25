@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
 const { app: electronApp, shell } = require('electron');
-const { getExtraResourcesDir } = require('ee-core/ps');
+const { getExtraResourcesDir, getDataDir } = require('ee-core/ps');
 const { logger } = require('ee-core/log');
 const { getConfig } = require('ee-core/config');
 const { frameworkService } = require('../service/framework');
@@ -278,6 +278,57 @@ class FrameworkController {
      */
     hello(args) {
         logger.info('hello ', args);
+    }
+
+    /**
+     * JSON数据库操作
+     */
+    async jsondbOperation(args) {
+        const { action, table, key, value } = args;
+        const data = {
+            status: 'success',
+            data: null,
+            message: ''
+        };
+
+        try {
+            switch (action) {
+                case 'get':
+                    // 从JSON文件中读取数据
+                    const filePath = path.join(getDataDir(), 'db', `${table}.json`);
+                    if (fs.existsSync(filePath)) {
+                        const fileContent = fs.readFileSync(filePath, 'utf-8');
+                        const jsonData = JSON.parse(fileContent);
+                        data.data = jsonData[key] || null;
+                    }
+                    break;
+                case 'set':
+                    // 写入数据到JSON文件
+                    const dirPath = path.join(getDataDir(), 'db');
+                    if (!fs.existsSync(dirPath)) {
+                        fs.mkdirSync(dirPath, { recursive: true });
+                    }
+                    const setFilePath = path.join(dirPath, `${table}.json`);
+                    let jsonData = {};
+                    if (fs.existsSync(setFilePath)) {
+                        const fileContent = fs.readFileSync(setFilePath, 'utf-8');
+                        jsonData = JSON.parse(fileContent);
+                    }
+                    jsonData[key] = value;
+                    fs.writeFileSync(setFilePath, JSON.stringify(jsonData, null, 2));
+                    data.data = value;
+                    break;
+                default:
+                    data.status = 'error';
+                    data.message = '不支持的操作类型';
+            }
+        } catch (error) {
+            data.status = 'error';
+            data.message = error.message;
+            logger.error('JSON数据库操作失败:', error);
+        }
+
+        return data;
     }
 }
 FrameworkController.toString = () => '[class FrameworkController]';

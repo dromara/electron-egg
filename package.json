@@ -1,6 +1,6 @@
 {
     "name": "douyin-tool",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "description": "A fast, desktop software development framework",
     "main": "./public/electron/main.js",
     "scripts": {
@@ -61,6 +61,7 @@
         "ee-core": "^4.1.2",
         "electron-updater": "^6.3.8",
         "eventsource": "^3.0.6",
+        "fluent-ffmpeg": "^2.1.3",
         "ini": "^5.0.0",
         "pinia-plugin-persistedstate": "^4.2.0",
         "protobufjs": "^7.4.0",

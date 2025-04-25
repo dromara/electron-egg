@@ -487,6 +487,33 @@ class VoiceAssistantService {
             logger.error(`清理播放进程失败: ${error.message}`);
         }
     }
+
+    /**
+     * 打开音频组文件夹
+     * @param {string} groupName - 音频组名称
+     * @returns {Promise<boolean>} - 是否成功打开
+     */
+    async openAudioGroupFolder(groupName) {
+        try {
+            const groupPath = path.join(this.audioFolder, groupName);
+
+            // 检查文件夹是否存在
+            if (!fs.existsSync(groupPath)) {
+                logger.error(`音频组文件夹不存在: ${groupPath}`);
+                return false;
+            }
+
+            // 使用系统默认程序打开文件夹
+            const { shell } = require('electron');
+            await shell.openPath(groupPath);
+
+            logger.info(`已打开音频组文件夹: ${groupPath}`);
+            return true;
+        } catch (error) {
+            logger.error(`打开音频组文件夹失败: ${error.message}`);
+            return false;
+        }
+    }
 }
 
 // 创建单例

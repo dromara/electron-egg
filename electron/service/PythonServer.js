@@ -13,6 +13,7 @@ class PythonServer {
 
     constructor() {
         this.pythonServiceName = 'DouyinLiveRecorder';
+        this.pythonServiceName2 = 'AudioPlayer';
     }
 
     /**
@@ -52,6 +53,39 @@ class PythonServer {
         return serverUrl;
     }
 
+
+    async createPythonServer2() {
+            try {
+                // 使用API模式创建服务
+                const serviceName = this.pythonServiceName2;
+                const opt = {
+                    name: 'AudioPlayer',
+                    cmd: path.join(getExtraResourcesDir(), 'py', 'AudioPlayer'),
+                    directory: path.join(getExtraResourcesDir(), 'py'),
+                    args: ['--port=7074'],
+                    windowsExtname: true,
+                    appExit: true,
+                }
+                const entity = await cross.run(serviceName, opt);
+                logger.info('Python服务名称:', entity.name);
+                logger.info('Python服务配置:', entity.config);
+                logger.info('Python服务URL:', entity.getUrl());
+                return entity;
+            } catch (error) {
+                logger.error(`创建Python服务失败: ${error.message}`);
+                throw error;
+            }
+        }
+        /**
+         * 获取Python服务的基础URL
+         */
+    getPythonBaseUrl2() {
+        const serverUrl = cross.getUrl(this.pythonServiceName2);
+        if (!serverUrl) {
+            logger.error(`无法获取Python服务地址，服务名: ${this.pythonServiceName2}`);
+        }
+        return serverUrl;
+    }
 
 }
 

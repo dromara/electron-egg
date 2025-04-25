@@ -201,6 +201,36 @@ class VoiceAssistantController {
     }
 
     /**
+     * 打开音频组文件夹
+     * @param {Object} args - 参数
+     * @param {string} args.groupName - 音频组名称
+     */
+    async openAudioGroupFolder(args) {
+        try {
+            const { groupName } = args || {};
+            if (!groupName) {
+                return this.fail('缺少必要参数: groupName');
+            }
+
+            logger.info(`尝试打开音频组文件夹: ${groupName}`);
+
+            // 获取voiceAssistantService实例
+            const { voiceAssistantService } = require('../service/voiceAssistant');
+
+            // 调用服务层打开文件夹
+            const result = await voiceAssistantService.openAudioGroupFolder(groupName);
+            if (result) {
+                return this.success('打开文件夹成功');
+            } else {
+                return this.fail('打开文件夹失败');
+            }
+        } catch (error) {
+            logger.error(`打开音频组文件夹失败: ${error.message}`);
+            return this.fail(`打开音频组文件夹失败: ${error.message}`);
+        }
+    }
+
+    /**
      * 成功响应
      * @param {string} message - 消息
      * @param {*} data - 数据

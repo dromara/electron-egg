@@ -5,8 +5,8 @@
     </div>
     <div class="one-block-2">
       <el-space>
-        <el-button type="primary" @click="startRecorder()">启动服务</el-button>
-        <el-button type="danger" @click="kill()">停止服务</el-button>
+        <el-button type="primary" @click="startRecorder()" :disabled="recorderRunning">启动服务</el-button>
+        <el-button type="danger" @click="kill()" :disabled="!recorderRunning">停止服务</el-button>
         <el-button type="success" @click="openDownloadsFolder()">打开录制目录</el-button>
       </el-space>
     </div>
@@ -75,8 +75,8 @@
         </el-table-column>
         <el-table-column label="录制状态">
           <template #default="scope">
-            <el-tag :type="scope.row.recordStatus ? 'success' : 'info'">
-              {{ scope.row.recordStatus ? '录制中' : '未录制' }}
+            <el-tag :type="getRecordStatusType(scope.row)">
+              {{ getRecordStatusText(scope.row) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -162,17 +162,13 @@ const combinedTableData = computed(() => {
       streamerName: stream.streamerName,
       url: stream.url,
       quality: stream.quality,
-      isDisabled: stream.isDisabled // 是否被禁用（通过#注释）
+      isDisabled: stream.isDisabled, // 是否被禁用（通过#注释）
+      recordStatus: stream.recordStatus
     };
   });
 
   return allStreams;
 });
-
-function kill() {
-  ipc.invoke(ipcApiRoute.livesave.stopRecorder, { program: 'python' })
-}
-
 
 // 启动录制服务
 function startRecorder() {
@@ -181,11 +177,37 @@ function startRecorder() {
       showMessage('服务启动成功', 'success');
       // 获取服务地址
       getServerUrl();
+      // 更新所有直播流的录制状态
+      if (configData.value.streams) {
+        configData.value.streams.forEach(stream => {
+          stream.recordStatus = true;
+        });
+      }
     } else {
       showMessage('服务启动失败: ' + (res.message || '未知错误'), 'error');
     }
   }).catch(err => {
     showMessage('服务启动错误: ' + err.message, 'error');
+  });
+}
+
+// 停止录制服务
+function kill() {
+  ipc.invoke(ipcApiRoute.livesave.stopRecorder, { program: 'python' }).then(res => {
+    if (res.success) {
+      showMessage('服务停止成功', 'success');
+      recorderRunning.value = false;
+      // 更新所有直播流的录制状态
+      if (configData.value.streams) {
+        configData.value.streams.forEach(stream => {
+          stream.recordStatus = false;
+        });
+      }
+    } else {
+      showMessage('服务停止失败: ' + (res.message || '未知错误'), 'error');
+    }
+  }).catch(err => {
+    showMessage('服务停止错误: ' + err.message, 'error');
   });
 }
 
@@ -383,6 +405,22 @@ function openDownloadsFolder() {
     .catch(err => {
       showMessage(`打开目录失败: ${err}`, 'error');
     });
+}
+
+// 获取录制状态标签类型
+function getRecordStatusType(row) {
+  if (row.isDisabled) {
+    return 'warning'; // 暂停状态显示黄色
+  }
+  return row.recordStatus ? 'success' : 'info';
+}
+
+// 获取录制状态文本
+function getRecordStatusText(row) {
+  if (row.isDisabled) {
+    return '录制暂停';
+  }
+  return row.recordStatus ? '录制中' : '未录制';
 }
 
 // 组件挂载时

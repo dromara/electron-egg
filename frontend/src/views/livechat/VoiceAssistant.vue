@@ -6,7 +6,7 @@
       <div class="left-panel">
         <div class="panel-section">
           <div class="setting-item">
-            <div class="setting-label">回复间隔设置</div>
+            <div class="setting-label">播放间隔设置</div>
             <div class="time-inputs">
               <el-input v-model.number="audioSettings.minInterval" size="small" style="width: 60px" />
               <span class="separator">—</span>
@@ -31,9 +31,9 @@
               <el-select v-model="selectedAudioDevice" placeholder="选择音频输出设备" style="width: 100%;" @change="updateAudioDevice">
                 <el-option
                   v-for="device in audioDevices"
-                  :key="device.deviceId"
-                  :label="device.label || `设备 ${device.deviceId.substring(0, 5)}...`"
-                  :value="device.deviceId"
+                  :key="device.index"
+                  :label="device.name"
+                  :value="device.index"
                 />
               </el-select>
               <el-button size="small" @click="refreshAudioDevices" :loading="loadingAudioDevices" class="refresh-btn">
@@ -64,6 +64,7 @@
             <div class="tip-line">• 音频文件放在extraResources/audio文件夹</div>
             <div class="tip-line">• 每个子文件夹代表一个音频组</div>
             <div class="tip-line">• 支持MP3, WAV等格式</div>
+            <div class="tip-line">• 会从不同分组随机选择音频播放</div>
           </div>
 
           <el-button
@@ -96,6 +97,9 @@
                 </el-select>
                 <el-button size="small" @click="refreshAudioGroups" :loading="loadingAudioGroups" class="refresh-btn">
                   <el-icon><Refresh /></el-icon>
+                </el-button>
+                <el-button size="small" @click="openAudioGroupFolder" class="folder-btn">
+                  <el-icon><Folder /></el-icon>
                 </el-button>
               </div>
             </div>
@@ -139,8 +143,9 @@ import { ref, onMounted, watch, inject, onBeforeUnmount } from 'vue';
 import { ipcApiRoute } from '@/api';
 import { ipc } from '@/utils/ipcRenderer';
 import { ElMessage } from 'element-plus';
-import { Refresh } from '@element-plus/icons-vue';
+import { Refresh, Folder } from '@element-plus/icons-vue';
 import { useLivechatStore } from '@/stores/livechatStore';
+import axios from 'axios';
 
 // 使用共享状态 - 如果使用了 provide/inject 模式
 const sharedState = inject('livechatState', null);
@@ -151,6 +156,7 @@ const roomId = ref(sharedState?.roomId || livechatStore.roomId || '');
 const connected = ref(sharedState?.connected || livechatStore.connected || false);
 const isVoiceEnabled = ref(false);
 const loading = ref(false);
+const pythonBaseUrl = ref('');
 
 // 音频组
 const audioGroups = ref([]);
@@ -161,7 +167,7 @@ const loadingAudioFiles = ref(false);
 
 // 音频设备
 const audioDevices = ref([]);
-const selectedAudioDevice = ref('');
+const selectedAudioDevice = ref(null);
 const loadingAudioDevices = ref(false);
 
 // 音频播放设置
@@ -171,7 +177,7 @@ const audioSettings = ref({
   minInterval: 5,
   maxInterval: 10,
   playMode: 'random',
-  deviceId: '' // 用于存储选中的设备ID
+  deviceId: null // 用于存储选中的设备ID
 });
 
 // 格式化文件大小
@@ -183,26 +189,72 @@ const formatFileSize = (bytes) => {
   return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
 };
 
-// 获取音频设备列表
+// 获取Python服务的基础URL
+const getPythonBaseUrl = async () => {
+  try {
+    const result = await ipc.invoke(ipcApiRoute.cross.getCrossUrl, { name: 'AudioPlayer' });
+    if (result) {
+      pythonBaseUrl.value = result;
+      console.log('Python服务基础URL:', pythonBaseUrl.value);
+      return result;
+    } else {
+      console.error('获取Python服务基础URL失败');
+      ElMessage.error('获取Python服务基础URL失败');
+      return null;
+    }
+  } catch (error) {
+    console.error('获取Python服务基础URL出错:', error);
+    ElMessage.error('获取Python服务基础URL出错: ' + (error.message || '未知错误'));
+    return null;
+  }
+};
+
+// 获取音频设备列表 - 使用Python服务
 const getAudioDevices = async () => {
   loadingAudioDevices.value = true;
   try {
-    // 请求麦克风权限以便能够获取设备列表
-    await navigator.mediaDevices.getUserMedia({ audio: true });
-    
-    // 获取所有媒体设备
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    
-    // 过滤出音频输出设备
-    const audioOutputs = devices.filter(device => device.kind === 'audiooutput');
-    
-    audioDevices.value = audioOutputs;
-    console.log('获取到音频输出设备列表:', audioDevices.value);
-    
-    // 如果有设备并且未选择设备，则默认选择第一个
-    if (audioDevices.value.length > 0 && !selectedAudioDevice.value) {
-      selectedAudioDevice.value = audioDevices.value[0].deviceId;
-      audioSettings.value.deviceId = selectedAudioDevice.value;
+    const baseUrl = pythonBaseUrl.value || await getPythonBaseUrl();
+    if (!baseUrl) {
+      throw new Error('无法获取Python服务地址');
+    }
+
+    const response = await axios.get(`${baseUrl}/api/devices`);
+
+    if (response.data && response.data.code === 0) {
+      audioDevices.value = response.data.data;
+      console.log('获取到音频输出设备列表:', audioDevices.value);
+
+      // 首先尝试加载保存的设备设置
+      const savedSettings = await ipc.invoke(ipcApiRoute.framework.jsondbOperation, {
+        action: 'get',
+        table: 'settings',
+        key: 'audioDevice'
+      });
+
+      if (savedSettings && savedSettings.status === 'success' && savedSettings.data) {
+        const savedDeviceId = savedSettings.data.deviceId;
+        // 检查保存的设备是否在当前设备列表中
+        const deviceExists = audioDevices.value.some(d => d.index === savedDeviceId);
+
+        if (deviceExists) {
+          selectedAudioDevice.value = savedDeviceId;
+          audioSettings.value.deviceId = savedDeviceId;
+          console.log('已恢复设备设置:', savedDeviceId);
+          return;  // 已找到保存的设备，不需要默认选择第一个设备
+        } else {
+          console.log('保存的设备不在当前设备列表中');
+        }
+      }
+
+      // 如果没有保存的设备设置或设备不存在，则选择第一个设备
+      if (audioDevices.value.length > 0 && !selectedAudioDevice.value) {
+        selectedAudioDevice.value = audioDevices.value[0].index;
+        audioSettings.value.deviceId = selectedAudioDevice.value;
+        // 保存第一个设备作为默认设备
+        saveDeviceSetting(selectedAudioDevice.value);
+      }
+    } else {
+      throw new Error(response.data?.message || '获取设备列表失败');
     }
   } catch (error) {
     console.error('获取音频设备列表出错:', error);
@@ -223,9 +275,70 @@ const updateAudioDevice = (deviceId) => {
   // 保存设备ID到设置中，后续会通过API传递给后端
   console.log('已选择音频设备:', deviceId);
   // 查找设备名称，用于显示
-  const device = audioDevices.value.find(d => d.deviceId === deviceId);
+  const device = audioDevices.value.find(d => d.index === deviceId);
   if (device) {
-    ElMessage.success(`已选择输出设备: ${device.label || '默认设备'}`);
+    ElMessage.success(`已选择输出设备: ${device.name || '默认设备'}`);
+    // 保存设备设置到本地存储
+    saveDeviceSetting(deviceId);
+  }
+};
+
+// 保存设备设置到本地存储
+const saveDeviceSetting = async (deviceId) => {
+  try {
+    // 使用jsondb保存设备设置
+    const result = await ipc.invoke(ipcApiRoute.framework.jsondbOperation, {
+      action: 'set',
+      table: 'settings',
+      key: 'audioDevice',
+      value: {
+        deviceId: deviceId,
+        timestamp: new Date().getTime()
+      }
+    });
+
+    if (result && result.status === 'success') {
+      console.log('设备设置已保存');
+    } else {
+      console.error('保存设备设置失败:', result?.message);
+    }
+  } catch (error) {
+    console.error('保存设备设置出错:', error);
+  }
+};
+
+// 加载保存的设备设置
+const loadDeviceSetting = async () => {
+  try {
+    const result = await ipc.invoke(ipcApiRoute.framework.jsondbOperation, {
+      action: 'get',
+      table: 'settings',
+      key: 'audioDevice'
+    });
+
+    if (result && result.status === 'success' && result.data) {
+      const savedDevice = result.data;
+      console.log('加载到保存的设备设置:', savedDevice);
+
+      // 如果设备列表已加载，检查设备是否存在
+      if (audioDevices.value.length > 0) {
+        const deviceExists = audioDevices.value.some(d => d.index === savedDevice.deviceId);
+        if (deviceExists) {
+          selectedAudioDevice.value = savedDevice.deviceId;
+          audioSettings.value.deviceId = savedDevice.deviceId;
+          console.log('已恢复设备设置:', savedDevice.deviceId);
+        } else {
+          console.log('保存的设备不存在于当前设备列表中');
+        }
+      } else {
+        // 设备列表尚未加载，先保存设置，等设备列表加载后再检查
+        const tempDeviceId = savedDevice.deviceId;
+        // 在getAudioDevices函数完成后会检查这个临时设备ID
+        // 见下面对getAudioDevices函数的修改
+      }
+    }
+  } catch (error) {
+    console.error('加载设备设置出错:', error);
   }
 };
 
@@ -285,29 +398,86 @@ const getAudioFiles = async (groupName) => {
   }
 };
 
-// 播放单个音频文件（测试用）
-const playAudioFile = (file) => {
+// 播放单个音频文件（测试用） - 使用Python服务
+const playAudioFile = async (file) => {
   try {
     console.log('请求播放音频文件:', file.path);
-    // 通过IPC调用后端播放音频，后端会通过Python API来实现
-    ipc.invoke(ipcApiRoute.voiceAssistant.playAudioFile, {
-      filePath: file.path,
-      volume: audioSettings.value.volume / 100,
-      playbackRate: audioSettings.value.playbackRate,
-      deviceId: audioSettings.value.deviceId // 添加设备ID
-    }).then(result => {
-      if (result && result.status === 'success') {
-        ElMessage.success('开始播放音频');
-      } else {
-        ElMessage.error(result?.message || '播放音频失败');
-      }
-    }).catch(error => {
-      console.error('播放音频出错:', error);
-      ElMessage.error('播放音频出错: ' + (error.message || '未知错误'));
+
+    if (!selectedAudioDevice.value) {
+      ElMessage.warning('请先选择音频输出设备');
+      return;
+    }
+
+    const baseUrl = pythonBaseUrl.value || await getPythonBaseUrl();
+    if (!baseUrl) {
+      throw new Error('无法获取Python服务地址');
+    }
+
+    // 使用Python服务API播放音频
+    const response = await axios.post(`${baseUrl}/api/play`, {
+      file_path: file.path,
+      device_id: selectedAudioDevice.value,
+      playback_speed: audioSettings.value.playbackRate
     });
+
+    if (response.data && response.data.code === 0) {
+      ElMessage.success('播放音频文件完成');
+
+      // 计算随机等待时间（秒）
+      const minInterval = audioSettings.value.minInterval;
+      const maxInterval = audioSettings.value.maxInterval;
+      const randomWaitTime = Math.floor(minInterval + Math.random() * (maxInterval - minInterval));
+
+      // 显示等待时间
+      ElMessage.info(`等待 ${randomWaitTime} 秒后播放下一个音频`);
+
+      // 等待随机时间
+      await new Promise(resolve => setTimeout(resolve, randomWaitTime * 1000));
+
+      // 如果语音助手仍在运行，继续播放下一个音频
+      if (isVoiceEnabled.value) {
+        // 根据播放模式选择下一个音频
+        let nextFile;
+        if (audioSettings.value.playMode === 'random') {
+          const randomIndex = Math.floor(Math.random() * audioFiles.value.length);
+          nextFile = audioFiles.value[randomIndex];
+        } else {
+          // 顺序播放模式
+          const currentIndex = audioFiles.value.findIndex(f => f.path === file.path);
+          const nextIndex = (currentIndex + 1) % audioFiles.value.length;
+          nextFile = audioFiles.value[nextIndex];
+        }
+
+        // 播放下一个音频
+        await playAudioFile(nextFile);
+      }
+    } else {
+      ElMessage.error(response.data?.message || '播放音频失败');
+    }
   } catch (error) {
     console.error('播放音频请求出错:', error);
     ElMessage.error('播放音频请求出错: ' + (error.message || '未知错误'));
+  }
+};
+
+// 停止当前音频播放
+const stopAudioPlayback = async () => {
+  try {
+    const baseUrl = pythonBaseUrl.value || await getPythonBaseUrl();
+    if (!baseUrl) {
+      throw new Error('无法获取Python服务地址');
+    }
+
+    // 使用Python服务API停止播放
+    const response = await axios.post(`${baseUrl}/api/stop`);
+
+    if (response.data && response.data.code === 0) {
+      console.log('已停止音频播放');
+    } else {
+      console.error('停止音频播放失败:', response.data?.message);
+    }
+  } catch (error) {
+    console.error('停止音频播放出错:', error);
   }
 };
 
@@ -315,6 +485,11 @@ const playAudioFile = (file) => {
 const enableVoiceAssistant = async () => {
   if (!selectedAudioGroup.value) {
     ElMessage.warning('请先选择一个音频组');
+    return;
+  }
+
+  if (!selectedAudioDevice.value) {
+    ElMessage.warning('请先选择音频输出设备');
     return;
   }
 
@@ -326,8 +501,7 @@ const enableVoiceAssistant = async () => {
       playbackRate: Number(audioSettings.value.playbackRate),
       minInterval: Number(audioSettings.value.minInterval),
       maxInterval: Number(audioSettings.value.maxInterval),
-      playMode: String(audioSettings.value.playMode),
-      deviceId: String(audioSettings.value.deviceId) // 添加设备ID
+      deviceId: Number(selectedAudioDevice.value) // 添加设备ID
     };
 
     // 调用后端API启用语音助手，后端会通过Python API来实现
@@ -357,6 +531,9 @@ const enableVoiceAssistant = async () => {
 const disableVoiceAssistant = async () => {
   loading.value = true;
   try {
+    // 首先停止当前音频播放
+    await stopAudioPlayback();
+
     // 调用后端API停用语音助手
     const result = await ipc.invoke(ipcApiRoute.voiceAssistant.stopVoiceAssistant);
 
@@ -431,6 +608,29 @@ watch([() => sharedState?.roomId, () => livechatStore.roomId], ([newSharedRoomId
   }
 }, { immediate: true });
 
+// 打开音频组文件夹
+const openAudioGroupFolder = async () => {
+  if (!selectedAudioGroup.value) {
+    ElMessage.warning('请先选择一个音频组');
+    return;
+  }
+
+  try {
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.openAudioGroupFolder, {
+      groupName: selectedAudioGroup.value
+    });
+
+    if (result && result.status === 'success') {
+      ElMessage.success('已打开音频组文件夹');
+    } else {
+      ElMessage.error(result?.message || '打开文件夹失败');
+    }
+  } catch (error) {
+    console.error('打开文件夹出错:', error);
+    ElMessage.error('打开文件夹出错: ' + (error.message || '未知错误'));
+  }
+};
+
 // 组件挂载时
 onMounted(async () => {
   // 如果存在共享状态，同步到当前组件
@@ -444,15 +644,22 @@ onMounted(async () => {
   }
 
   // 初始化
-  await getAudioDevices(); // 先获取音频设备
+  await getPythonBaseUrl(); // 先获取Python服务地址
+  // 尝试加载保存的设备设置
+  await loadDeviceSetting();
+  await getAudioDevices(); // 获取音频设备
   await getAudioGroups();
   await checkVoiceAssistantStatus();
 });
 
 // 组件卸载前
 onBeforeUnmount(() => {
-  // 移除事件监听器
-  ipc.removeAllListeners('play-audio');
+  // 如果正在播放，停止播放
+  if (isVoiceEnabled.value) {
+    disableVoiceAssistant();
+  } else {
+    stopAudioPlayback();
+  }
 });
 </script>
 
@@ -559,7 +766,7 @@ onBeforeUnmount(() => {
             flex: 1;
             display: flex;
             align-items: center;
-            
+
             :deep(.el-select) {
               flex: 1;
               margin-right: 5px;
@@ -633,6 +840,11 @@ onBeforeUnmount(() => {
               }
 
               .refresh-btn {
+                margin-left: 5px;
+                padding: 3px 6px;
+              }
+
+              .folder-btn {
                 margin-left: 5px;
                 padding: 3px 6px;
               }
