@@ -33,7 +33,8 @@ class VoiceAssistantService {
             playbackRate: 1.0,
             minInterval: 5,
             maxInterval: 10,
-            playMode: 'random'
+            playMode: 'random',
+            deviceId: '' // 存储选中的设备ID
         };
         this.lastPlayTime = 0;
         // 记录所有活跃的播放进程
@@ -243,28 +244,30 @@ class VoiceAssistantService {
         // 使用playSingleAudio来播放文件
         this.playSingleAudio(audioFile.path, {
             volume: this.settings.volume / 100,
-            playbackRate: this.settings.playbackRate
+            playbackRate: this.settings.playbackRate,
+            deviceId: this.settings.deviceId
         });
 
         // 发送播放信息到渲染进程
         const win = getMainWindow();
         if (win && !win.isDestroyed()) {
+            const filename = path.basename(audioFile.path);
             win.webContents.send('livechat-message', {
                 type: 'voice_assistant',
-                message: `正在播放: ${audioFile.name}`
+                message: `正在播放: ${filename}`
             });
         }
 
-        // 更新最后播放时间
-        this.lastPlayTime = Date.now();
-
         // 安排下一次播放
         this.scheduleNextPlay();
+
+        // 更新最后播放时间
+        this.lastPlayTime = Date.now();
     }
 
     /**
-     * 获取当前状态
-     * @returns {Object} - 当前状态
+     * 获取服务状态
+     * @returns {Object} - 服务状态
      */
     getStatus() {
         return {
@@ -277,16 +280,33 @@ class VoiceAssistantService {
     }
 
     /**
+     * 更新音频输出设备
+     * @param {string} deviceId - 设备ID
+     * @returns {boolean} - 是否成功更新
+     */
+    updateAudioDevice(deviceId) {
+        try {
+            this.settings.deviceId = deviceId;
+            logger.info(`已更新音频输出设备: ${deviceId}`);
+            return true;
+        } catch (error) {
+            logger.error(`更新音频设备失败: ${error.message}`);
+            return false;
+        }
+    }
+
+    /**
      * 播放单个音频文件
      * @param {string} filePath - 文件路径
      * @param {Object} options - 播放选项
      * @param {number} options.volume - 音量 (0-1)
      * @param {number} options.playbackRate - 播放速率
+     * @param {string} options.deviceId - 设备ID
      * @returns {boolean} - 是否成功开始播放
      */
     playSingleAudio(filePath, options = {}) {
         try {
-            const { volume = 0.8, playbackRate = 1.0 } = options;
+            const { volume = 0.8, playbackRate = 1.0, deviceId = '' } = options;
 
             // 检查文件是否存在
             if (!fs.existsSync(filePath)) {
@@ -300,9 +320,10 @@ class VoiceAssistantService {
                 return false;
             }
 
-            logger.info(`准备播放音频文件: ${filePath}`);
+            logger.info(`准备通过Python API播放音频文件: ${filePath}`);
 
-            // 使用子进程播放音频
+            // 这里将来会调用Python API来播放音频
+            // 临时使用子进程播放音频以保持功能可用
             try {
                 const { spawn, exec } = require('child_process');
                 const os = require('os');
@@ -468,11 +489,10 @@ class VoiceAssistantService {
     }
 }
 
-// 创建服务实例并导出
+// 创建单例
 const voiceAssistantService = new VoiceAssistantService();
-voiceAssistantService.toString = () => '[VoiceAssistantService]';
 
+// 导出服务实例
 module.exports = {
-    voiceAssistantService,
-    VoiceAssistantService
+    voiceAssistantService
 };

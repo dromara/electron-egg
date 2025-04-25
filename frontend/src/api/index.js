@@ -112,7 +112,9 @@ const ipcApiRoute = {
         startVoiceAssistant: 'controller/voiceAssistant/startVoiceAssistant',
         stopVoiceAssistant: 'controller/voiceAssistant/stopVoiceAssistant',
         getVoiceAssistantStatus: 'controller/voiceAssistant/getVoiceAssistantStatus',
-        playAudioFile: 'controller/voiceAssistant/playAudioFile'
+        playAudioFile: 'controller/voiceAssistant/playAudioFile',
+        getAudioDevices: 'controller/voiceAssistant/getAudioDevices',
+        updateAudioDevice: 'controller/voiceAssistant/updateAudioDevice'
     },
 
     // 数据库相关API

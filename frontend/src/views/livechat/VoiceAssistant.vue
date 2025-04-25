@@ -26,6 +26,23 @@
           </div>
 
           <div class="setting-item">
+            <div class="setting-label">输出设备</div>
+            <div class="device-selector">
+              <el-select v-model="selectedAudioDevice" placeholder="选择音频输出设备" style="width: 100%;" @change="updateAudioDevice">
+                <el-option
+                  v-for="device in audioDevices"
+                  :key="device.deviceId"
+                  :label="device.label || `设备 ${device.deviceId.substring(0, 5)}...`"
+                  :value="device.deviceId"
+                />
+              </el-select>
+              <el-button size="small" @click="refreshAudioDevices" :loading="loadingAudioDevices" class="refresh-btn">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
+            </div>
+          </div>
+
+          <div class="setting-item">
             <div class="setting-label">播放音量</div>
             <div class="voice-slider">
               <el-slider v-model="audioSettings.volume" :min="0" :max="100" :step="1" :show-tooltip="false" />
@@ -142,17 +159,20 @@ const audioFiles = ref([]);
 const loadingAudioGroups = ref(false);
 const loadingAudioFiles = ref(false);
 
+// 音频设备
+const audioDevices = ref([]);
+const selectedAudioDevice = ref('');
+const loadingAudioDevices = ref(false);
+
 // 音频播放设置
 const audioSettings = ref({
   volume: 80,
   playbackRate: 1.0,
   minInterval: 5,
   maxInterval: 10,
-  playMode: 'random'
+  playMode: 'random',
+  deviceId: '' // 用于存储选中的设备ID
 });
-
-// 音频播放器
-const audioPlayer = ref(null);
 
 // 格式化文件大小
 const formatFileSize = (bytes) => {
@@ -161,6 +181,52 @@ const formatFileSize = (bytes) => {
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+};
+
+// 获取音频设备列表
+const getAudioDevices = async () => {
+  loadingAudioDevices.value = true;
+  try {
+    // 请求麦克风权限以便能够获取设备列表
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+    
+    // 获取所有媒体设备
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    
+    // 过滤出音频输出设备
+    const audioOutputs = devices.filter(device => device.kind === 'audiooutput');
+    
+    audioDevices.value = audioOutputs;
+    console.log('获取到音频输出设备列表:', audioDevices.value);
+    
+    // 如果有设备并且未选择设备，则默认选择第一个
+    if (audioDevices.value.length > 0 && !selectedAudioDevice.value) {
+      selectedAudioDevice.value = audioDevices.value[0].deviceId;
+      audioSettings.value.deviceId = selectedAudioDevice.value;
+    }
+  } catch (error) {
+    console.error('获取音频设备列表出错:', error);
+    ElMessage.error('获取音频设备列表出错: ' + (error.message || '未知错误'));
+  } finally {
+    loadingAudioDevices.value = false;
+  }
+};
+
+// 刷新音频设备列表
+const refreshAudioDevices = async () => {
+  await getAudioDevices();
+};
+
+// 更新选中的音频设备
+const updateAudioDevice = (deviceId) => {
+  audioSettings.value.deviceId = deviceId;
+  // 保存设备ID到设置中，后续会通过API传递给后端
+  console.log('已选择音频设备:', deviceId);
+  // 查找设备名称，用于显示
+  const device = audioDevices.value.find(d => d.deviceId === deviceId);
+  if (device) {
+    ElMessage.success(`已选择输出设备: ${device.label || '默认设备'}`);
+  }
 };
 
 // 获取音频组列表
@@ -223,11 +289,12 @@ const getAudioFiles = async (groupName) => {
 const playAudioFile = (file) => {
   try {
     console.log('请求播放音频文件:', file.path);
-    // 通过IPC调用后端播放音频
+    // 通过IPC调用后端播放音频，后端会通过Python API来实现
     ipc.invoke(ipcApiRoute.voiceAssistant.playAudioFile, {
       filePath: file.path,
       volume: audioSettings.value.volume / 100,
-      playbackRate: audioSettings.value.playbackRate
+      playbackRate: audioSettings.value.playbackRate,
+      deviceId: audioSettings.value.deviceId // 添加设备ID
     }).then(result => {
       if (result && result.status === 'success') {
         ElMessage.success('开始播放音频');
@@ -259,10 +326,11 @@ const enableVoiceAssistant = async () => {
       playbackRate: Number(audioSettings.value.playbackRate),
       minInterval: Number(audioSettings.value.minInterval),
       maxInterval: Number(audioSettings.value.maxInterval),
-      playMode: String(audioSettings.value.playMode)
+      playMode: String(audioSettings.value.playMode),
+      deviceId: String(audioSettings.value.deviceId) // 添加设备ID
     };
 
-    // 调用后端API启用语音助手
+    // 调用后端API启用语音助手，后端会通过Python API来实现
     const result = await ipc.invoke(ipcApiRoute.voiceAssistant.startVoiceAssistant, {
       groupName: selectedAudioGroup.value,
       settings: simpleSettings
@@ -323,6 +391,9 @@ const checkVoiceAssistantStatus = async () => {
         // 更新设置
         if (settings) {
           audioSettings.value = { ...audioSettings.value, ...settings };
+          if (settings.deviceId) {
+            selectedAudioDevice.value = settings.deviceId;
+          }
         }
 
         console.log('语音助手已启用，使用音频组:', currentGroup);
@@ -331,31 +402,6 @@ const checkVoiceAssistantStatus = async () => {
   } catch (error) {
     console.error('检查语音助手状态出错:', error);
   }
-};
-
-// 监听音频播放消息（从主进程）
-const setupAudioPlayListener = () => {
-  ipc.on('play-audio', (event, data) => {
-    const { filePath, volume, playbackRate } = data;
-
-    if (!audioPlayer.value) {
-      audioPlayer.value = new Audio();
-    }
-
-    // 设置音频源
-    audioPlayer.value.src = `file://${filePath}`;
-
-    // 设置音量和播放速率
-    audioPlayer.value.volume = volume;
-    audioPlayer.value.playbackRate = playbackRate;
-
-    // 播放
-    audioPlayer.value.play().catch(error => {
-      console.error('播放音频出错:', error);
-    });
-
-    console.log('收到播放请求:', filePath);
-  });
 };
 
 // 监听选中的音频组变化
@@ -398,21 +444,13 @@ onMounted(async () => {
   }
 
   // 初始化
+  await getAudioDevices(); // 先获取音频设备
   await getAudioGroups();
   await checkVoiceAssistantStatus();
-
-  // 设置音频播放监听器
-  setupAudioPlayListener();
 });
 
 // 组件卸载前
 onBeforeUnmount(() => {
-  // 停止当前正在播放的音频
-  if (audioPlayer.value) {
-    audioPlayer.value.pause();
-    audioPlayer.value = null;
-  }
-
   // 移除事件监听器
   ipc.removeAllListeners('play-audio');
 });
@@ -514,6 +552,17 @@ onBeforeUnmount(() => {
                 margin-right: 0;
                 font-size: 12px;
               }
+            }
+          }
+
+          .device-selector {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            
+            :deep(.el-select) {
+              flex: 1;
+              margin-right: 5px;
             }
           }
         }

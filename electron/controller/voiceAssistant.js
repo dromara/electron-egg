@@ -49,6 +49,45 @@ class VoiceAssistantController {
     }
 
     /**
+     * 获取音频输出设备列表
+     */
+    async getAudioDevices() {
+        try {
+            // 这个方法将来会由Python API来实现
+            // 暂时返回空数组
+            logger.info('获取音频设备列表功能将由Python API实现');
+            return this.success('获取音频设备列表接口预留', []);
+        } catch (error) {
+            logger.error(`获取音频设备列表失败: ${error.message}`);
+            return this.fail(`获取音频设备列表失败: ${error.message}`);
+        }
+    }
+
+    /**
+     * 更新音频输出设备
+     * @param {Object} args - 参数
+     * @param {string} args.deviceId - 设备ID
+     */
+    async updateAudioDevice(args) {
+        try {
+            const { deviceId } = args;
+            if (!deviceId) {
+                return this.fail('缺少必要参数: deviceId');
+            }
+
+            const result = this.voiceAssistantService.updateAudioDevice(deviceId);
+            if (result) {
+                return this.success('更新音频设备成功');
+            } else {
+                return this.fail('更新音频设备失败');
+            }
+        } catch (error) {
+            logger.error(`更新音频设备失败: ${error.message}`);
+            return this.fail(`更新音频设备失败: ${error.message}`);
+        }
+    }
+
+    /**
      * 启动语音助手
      * @param {Object} args - 参数
      * @param {string} args.groupName - 音频组名称
@@ -71,7 +110,8 @@ class VoiceAssistantController {
                     playbackRate: typeof settings.playbackRate === 'number' ? settings.playbackRate : 1.0,
                     minInterval: typeof settings.minInterval === 'number' ? settings.minInterval : 5,
                     maxInterval: typeof settings.maxInterval === 'number' ? settings.maxInterval : 10,
-                    playMode: typeof settings.playMode === 'string' ? settings.playMode : 'random'
+                    playMode: typeof settings.playMode === 'string' ? settings.playMode : 'random',
+                    deviceId: settings.deviceId || '' // 添加设备ID
                 };
                 logger.info(`语音助手设置: ${JSON.stringify(validSettings)}`);
             }
@@ -124,11 +164,12 @@ class VoiceAssistantController {
      * @param {string} args.filePath - 文件路径
      * @param {number} args.volume - 音量 (0-1)
      * @param {number} args.playbackRate - 播放速率
+     * @param {string} args.deviceId - 设备ID
      * @returns {Object} - 操作结果
      */
     playAudioFile(args) {
         try {
-            const { filePath, volume, playbackRate } = args;
+            const { filePath, volume, playbackRate, deviceId } = args;
             if (!filePath) {
                 return this.fail('缺少文件路径参数');
             }
@@ -144,7 +185,8 @@ class VoiceAssistantController {
             // 调用服务层播放音频
             const result = voiceAssistantService.playSingleAudio(filePath, {
                 volume: volume || 0.8,
-                playbackRate: playbackRate || 1.0
+                playbackRate: playbackRate || 1.0,
+                deviceId: deviceId || ''
             });
 
             if (result) {
