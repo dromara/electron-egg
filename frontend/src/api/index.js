@@ -109,7 +109,9 @@ const ipcApiRoute = {
     voiceAssistant: {
         getAudioGroups: 'controller/voiceAssistant/getAudioGroups',
         getAudioFiles: 'controller/voiceAssistant/getAudioFiles',
+        getSubFolders: 'controller/voiceAssistant/getSubFolders',
         startVoiceAssistant: 'controller/voiceAssistant/startVoiceAssistant',
+        startNewPlayMode: 'controller/voiceAssistant/startNewPlayMode',
         stopVoiceAssistant: 'controller/voiceAssistant/stopVoiceAssistant',
         getVoiceAssistantStatus: 'controller/voiceAssistant/getVoiceAssistantStatus',
         playAudioFile: 'controller/voiceAssistant/playAudioFile',

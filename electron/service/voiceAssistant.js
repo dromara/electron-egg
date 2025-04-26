@@ -10,6 +10,7 @@ const { promisify } = require('util');
 const { logger } = require('ee-core/log');
 const { getMainWindow } = require('ee-core/electron');
 const { getDataDir, getExtraResourcesDir } = require('ee-core/ps');
+const { spawn } = require('child_process');
 
 // 将fs操作转换为Promise版本
 const readdir = promisify(fs.readdir);
@@ -141,12 +142,86 @@ class VoiceAssistantService {
     }
 
     /**
-     * 开始语音助手
+     * 获取音频组中的子文件夹
+     * @param {string} groupName - 音频组名称
+     * @returns {Promise<Array>} - 子文件夹列表，包含名称和音频文件数量
+     */
+    async getSubFolders(groupName) {
+        try {
+            const groupPath = path.join(this.audioFolder, groupName);
+            if (!fs.existsSync(groupPath)) {
+                logger.error(`音频组文件夹不存在: ${groupPath}`);
+                return [];
+            }
+
+            const entries = await readdir(groupPath, { withFileTypes: true });
+            const subFolders = [];
+
+            for (const entry of entries) {
+                if (entry.isDirectory()) {
+                    const folderPath = path.join(groupPath, entry.name);
+                    // 获取该子文件夹中的音频文件数量
+                    const audioFiles = await this.getAudioFilesInFolder(folderPath);
+
+                    subFolders.push({
+                        name: entry.name,
+                        path: folderPath,
+                        audioCount: audioFiles.length
+                    });
+                }
+            }
+
+            logger.info(`获取到音频组 "${groupName}" 中的子文件夹: ${subFolders.length} 个`);
+            return subFolders;
+        } catch (error) {
+            logger.error(`获取子文件夹列表失败: ${error.message}`);
+            return [];
+        }
+    }
+
+    /**
+     * 获取指定文件夹中的音频文件
+     * @param {string} folderPath - 文件夹路径
+     * @returns {Promise<Array>} - 音频文件列表
+     */
+    async getAudioFilesInFolder(folderPath) {
+        try {
+            if (!fs.existsSync(folderPath)) {
+                logger.error(`文件夹不存在: ${folderPath}`);
+                return [];
+            }
+
+            const entries = await readdir(folderPath);
+            const audioFiles = [];
+
+            for (const entry of entries) {
+                const filePath = path.join(folderPath, entry);
+                const stats = await stat(filePath);
+
+                if (stats.isFile() && this.isAudioFile(entry)) {
+                    audioFiles.push({
+                        name: entry,
+                        path: filePath,
+                        size: stats.size,
+                        modifiedTime: stats.mtime
+                    });
+                }
+            }
+
+            return audioFiles;
+        } catch (error) {
+            logger.error(`获取音频文件列表失败: ${error.message}`);
+            return [];
+        }
+    }
+
+    /**
+     * 开始语音助手（修改版）
      * @param {string} groupName - 音频组名称
      * @param {Object} settings - 语音助手设置
      * @returns {Promise<boolean>} - 是否成功开始
      */
-    async start(groupName, settings) {
+    async startNewPlayMode(groupName, settings) {
         try {
             // 停止当前可能正在运行的语音助手
             this.stop();
@@ -156,30 +231,113 @@ class VoiceAssistantService {
                 return false;
             }
 
-            // 加载音频文件
-            const audioFiles = await this.getAudioFiles(groupName);
-            if (audioFiles.length === 0) {
-                logger.error(`音频组 "${groupName}" 中没有可播放的音频文件`);
+            // 加载子文件夹列表
+            const subFolders = await this.getSubFolders(groupName);
+            if (subFolders.length === 0) {
+                logger.error(`音频组 "${groupName}" 中没有子文件夹`);
                 return false;
+            }
+
+            // 初始化每个子文件夹中的音频文件
+            for (const folder of subFolders) {
+                folder.audioFiles = await this.getAudioFilesInFolder(folder.path);
             }
 
             // 保存设置
             this.currentAudioGroup = groupName;
-            this.audioFiles = audioFiles;
+            this.subFolders = subFolders;
             this.settings = {...this.settings, ...settings };
             this.isEnabled = true;
-            this.currentIndex = 0;
-            this.lastPlayTime = Date.now();
+            this.currentFolderIndex = 0;
 
-            // 立即开始第一次播放，然后安排后续播放
-            setTimeout(() => {
-                this.playAudio();
-            }, 1000);
+            // 立即开始第一次播放
+            this.playAudioFromSubFolder();
 
-            logger.info(`已启动语音助手，使用音频组: ${groupName}，共 ${audioFiles.length} 个音频文件`);
             return true;
         } catch (error) {
             logger.error(`启动语音助手失败: ${error.message}`);
+            return false;
+        }
+    }
+
+    /**
+     * 从子文件夹中播放音频
+     */
+    playAudioFromSubFolder() {
+        if (!this.isEnabled || !this.subFolders || this.subFolders.length === 0) {
+            return;
+        }
+
+        // 获取当前应该播放的子文件夹
+        const currentFolder = this.subFolders[this.currentFolderIndex];
+        logger.info(`准备从子文件夹播放: ${currentFolder.name}`);
+
+        // 检查该文件夹中是否有音频文件
+        if (!currentFolder.audioFiles || currentFolder.audioFiles.length === 0) {
+            logger.warn(`子文件夹 ${currentFolder.name} 中没有音频文件，跳到下一个文件夹`);
+            this.currentFolderIndex = (this.currentFolderIndex + 1) % this.subFolders.length;
+            this.scheduleNextPlay();
+            return;
+        }
+
+        // 在当前子文件夹中随机选择一个音频文件
+        const randomIndex = Math.floor(Math.random() * currentFolder.audioFiles.length);
+        const audioFile = currentFolder.audioFiles[randomIndex];
+        logger.info(`从子文件夹 ${currentFolder.name} 中随机选择音频: ${audioFile.name}`);
+
+        // 发送播放信息到渲染进程
+        const win = getMainWindow();
+        if (win && !win.isDestroyed()) {
+            win.webContents.send('livechat-message', {
+                type: 'voice_assistant',
+                message: `正在播放: ${currentFolder.name}/${audioFile.name}`
+            });
+        }
+
+        // 使用测试播放逻辑播放音频
+        this.playSingleAudio(audioFile.path, {
+            volume: this.settings.volume / 100,
+            playbackRate: this.settings.playbackRate,
+            deviceId: this.settings.deviceId
+        });
+
+        // 更新到下一个子文件夹
+        this.currentFolderIndex = (this.currentFolderIndex + 1) % this.subFolders.length;
+
+        // 安排下一次播放
+        this.scheduleNextPlay();
+    }
+
+    /**
+     * 使用Python API播放音频
+     * @param {string} filePath - 音频文件路径
+     */
+    async playAudioWithPythonAPI(filePath) {
+        try {
+            const axios = require('axios');
+            const cross = require('ee-core/cross');
+            const baseUrl = cross.getCrossUrl('AudioPlayer');
+
+            if (!baseUrl) {
+                logger.error('无法获取Python服务地址');
+                return false;
+            }
+
+            const response = await axios.post(`${baseUrl}/api/play`, {
+                file_path: filePath,
+                device_id: this.settings.deviceId,
+                playback_speed: this.settings.playbackRate
+            });
+
+            if (response.data && response.data.code === 0) {
+                logger.info(`通过Python API播放音频成功: ${filePath}`);
+                return true;
+            } else {
+                logger.error(`通过Python API播放音频失败: ${response.data?.message || '未知错误'}`);
+                return false;
+            }
+        } catch (error) {
+            logger.error(`通过Python API播放音频出错: ${error.message}`);
             return false;
         }
     }
@@ -208,7 +366,7 @@ class VoiceAssistantService {
      * 安排下一次播放
      */
     scheduleNextPlay() {
-        if (!this.isEnabled || this.audioFiles.length === 0) {
+        if (!this.isEnabled || this.subFolders.length === 0) {
             return;
         }
 
@@ -216,11 +374,20 @@ class VoiceAssistantService {
         const { minInterval, maxInterval } = this.settings;
         const delay = Math.floor((minInterval + Math.random() * (maxInterval - minInterval)) * 1000);
 
-        this.playTimer = setTimeout(() => {
-            this.playAudio();
-        }, delay);
+        // 发送等待消息到渲染进程
+        const win = getMainWindow();
+        if (win && !win.isDestroyed()) {
+            win.webContents.send('livechat-message', {
+                type: 'voice_assistant',
+                message: `等待 ${Math.round(delay/1000)} 秒后播放下一个音频...`
+            });
+        }
 
         logger.info(`安排下一次播放，延迟: ${delay / 1000} 秒`);
+
+        this.playTimer = setTimeout(() => {
+            this.playAudioFromSubFolder();
+        }, delay);
     }
 
     /**
@@ -304,7 +471,7 @@ class VoiceAssistantService {
      * @param {string} options.deviceId - 设备ID
      * @returns {boolean} - 是否成功开始播放
      */
-    playSingleAudio(filePath, options = {}) {
+    async playSingleAudio(filePath, options = {}) {
         try {
             const { volume = 0.8, playbackRate = 1.0, deviceId = '' } = options;
 
@@ -320,131 +487,30 @@ class VoiceAssistantService {
                 return false;
             }
 
-            logger.info(`准备通过Python API播放音频文件: ${filePath}`);
+            logger.info(`准备播放音频文件: ${filePath}`);
 
-            // 这里将来会调用Python API来播放音频
-            // 临时使用子进程播放音频以保持功能可用
-            try {
-                const { spawn, exec } = require('child_process');
-                const os = require('os');
-                const platform = os.platform();
+            // 使用 Python API 播放音频
+            const axios = require('axios');
+            const { pythonServer } = require('./PythonServer');
+            const baseUrl = pythonServer.getPythonBaseUrl2();
 
-                if (platform === 'win32') {
-                    // Windows平台使用ffplay在后台播放，无界面
-                    // 检查ffplay是否存在
-                    const ffplayPath = path.join(app.getAppPath(), '..', 'extraResources', 'py', 'ffmpeg', 'ffplay.exe');
+            if (!baseUrl) {
+                logger.error('无法获取Python服务地址');
+                return false;
+            }
 
-                    if (fs.existsSync(ffplayPath)) {
-                        // 使用ffplay无界面播放
-                        const args = [
-                            '-nodisp', // 无显示
-                            '-autoexit', // 播放完自动退出
-                            '-i', filePath, // 输入文件
-                            '-volume', Math.floor(volume * 100).toString(), // 音量
-                        ];
+            const response = await axios.post(`${baseUrl}/api/play`, {
+                file_path: filePath,
+                device_id: deviceId,
+                playback_speed: playbackRate,
+                volume: volume
+            });
 
-                        logger.info(`使用ffplay播放: ${ffplayPath} ${args.join(' ')}`);
-
-                        // 使用spawn并传递detached: true和stdio: 'ignore'来实现后台运行
-                        const process = spawn(ffplayPath, args, {
-                            detached: true, // 进程从父进程中分离
-                            stdio: 'ignore', // 忽略所有输入输出
-                            windowsHide: true // 在Windows上隐藏窗口
-                        });
-
-                        // 添加到活跃进程列表
-                        this.activeProcesses.push(process);
-
-                        // 当进程结束时从列表中移除
-                        process.on('exit', () => {
-                            const index = this.activeProcesses.indexOf(process);
-                            if (index !== -1) {
-                                this.activeProcesses.splice(index, 1);
-                            }
-                        });
-
-                        // 让子进程独立于父进程运行
-                        process.unref();
-                    } else {
-                        // 备选方案：使用PowerShell但隐藏窗口
-                        const volume_param = Math.floor(volume * 100);
-                        const escapedPath = filePath.replace(/'/g, "''").replace(/"/g, '\\"');
-
-                        const cmd = `(New-Object -ComObject WMPlayer.OCX).openPlayer('${escapedPath}')`;
-
-                        // 使用-WindowStyle Hidden参数隐藏PowerShell窗口
-                        const command = `powershell -WindowStyle Hidden -Command "${cmd}"`;
-
-                        logger.info(`使用PowerShell播放: ${command}`);
-
-                        // 使用exec执行命令
-                        const process = exec(command, { windowsHide: true });
-
-                        // 添加到活跃进程列表
-                        this.activeProcesses.push(process);
-
-                        // 当进程结束时从列表中移除
-                        process.on('exit', () => {
-                            const index = this.activeProcesses.indexOf(process);
-                            if (index !== -1) {
-                                this.activeProcesses.splice(index, 1);
-                            }
-                        });
-                    }
-                } else if (platform === 'darwin') {
-                    // macOS使用afplay
-                    const args = [filePath, '-v', volume.toString()];
-                    const process = spawn('afplay', args, {
-                        detached: true,
-                        stdio: 'ignore'
-                    });
-
-                    // 添加到活跃进程列表
-                    this.activeProcesses.push(process);
-
-                    // 当进程结束时从列表中移除
-                    process.on('exit', () => {
-                        const index = this.activeProcesses.indexOf(process);
-                        if (index !== -1) {
-                            this.activeProcesses.splice(index, 1);
-                        }
-                    });
-
-                    process.unref();
-                } else if (platform === 'linux') {
-                    // Linux使用aplay
-                    const args = [filePath];
-                    const process = spawn('aplay', args, {
-                        detached: true,
-                        stdio: 'ignore'
-                    });
-
-                    // 添加到活跃进程列表
-                    this.activeProcesses.push(process);
-
-                    // 当进程结束时从列表中移除
-                    process.on('exit', () => {
-                        const index = this.activeProcesses.indexOf(process);
-                        if (index !== -1) {
-                            this.activeProcesses.splice(index, 1);
-                        }
-                    });
-
-                    process.unref();
-                }
-
-                // 通知渲染进程
-                const win = getMainWindow();
-                if (win && !win.isDestroyed()) {
-                    win.webContents.send('livechat-message', {
-                        type: 'voice_assistant',
-                        message: `正在播放: ${path.basename(filePath)}`
-                    });
-                }
-
+            if (response.data && response.data.code === 0) {
+                logger.info(`通过Python API播放音频成功: ${filePath}`);
                 return true;
-            } catch (err) {
-                logger.error(`执行播放命令出错: ${err.message}`);
+            } else {
+                logger.error(`通过Python API播放音频失败: ${response.data?.message || '未知错误'}`);
                 return false;
             }
         } catch (error) {
@@ -472,17 +538,6 @@ class VoiceAssistantService {
 
             // 重置数组
             this.activeProcesses = [];
-
-            // 在Windows上可能需要额外清理
-            if (process.platform === 'win32') {
-                try {
-                    const { exec } = require('child_process');
-                    // 终止可能的ffplay进程
-                    exec('taskkill /F /IM ffplay.exe', { windowsHide: true });
-                } catch (e) {
-                    // 忽略错误，可能没有运行的ffplay进程
-                }
-            }
         } catch (error) {
             logger.error(`清理播放进程失败: ${error.message}`);
         }

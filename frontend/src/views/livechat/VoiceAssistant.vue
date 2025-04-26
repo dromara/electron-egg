@@ -64,7 +64,7 @@
             <div class="tip-line">• 音频文件放在extraResources/audio文件夹</div>
             <div class="tip-line">• 每个子文件夹代表一个音频组</div>
             <div class="tip-line">• 支持MP3, WAV等格式</div>
-            <div class="tip-line">• 会从不同分组随机选择音频播放</div>
+            <div class="tip-line">• 按子文件夹顺序播放，每次随机选一个</div>
           </div>
 
           <el-button
@@ -87,7 +87,7 @@
             <div class="left-controls">
               <div class="group-selector">
                 <span class="selector-label">音频组:</span>
-                <el-select v-model="selectedAudioGroup" placeholder="选择音频组" size="small" class="group-select" @change="getAudioFiles(selectedAudioGroup)">
+                <el-select v-model="selectedAudioGroup" placeholder="选择音频组" size="small" class="group-select" @change="getSubFolders(selectedAudioGroup)">
                   <el-option
                     v-for="group in audioGroups"
                     :key="group"
@@ -105,30 +105,31 @@
             </div>
           </div>
 
-          <!-- 音频文件表格 -->
+          <!-- 子文件夹表格 -->
           <el-table
-            :data="audioFiles"
+            :data="subFolders"
             border
             style="width: 100%"
             max-height="350"
             stripe
             size="small"
-            v-loading="loadingAudioFiles"
+            v-loading="loadingSubFolders"
           >
             <el-table-column type="index" label="序号" width="50" align="center" />
-            <el-table-column prop="name" label="文件名">
+            <el-table-column prop="name" label="子文件夹名称">
               <template #default="scope">
                 <div class="file-name">{{ scope.row.name }}</div>
               </template>
             </el-table-column>
-            <el-table-column prop="size" label="大小" width="100">
+            <el-table-column prop="audioCount" label="音频数量" width="100" align="center">
               <template #default="scope">
-                <div>{{ formatFileSize(scope.row.size) }}</div>
+                <el-tag size="small" type="info">{{ scope.row.audioCount }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="80" align="center">
+            <el-table-column label="操作" width="120" align="center">
               <template #default="scope">
-                <el-button link size="small" @click="playAudioFile(scope.row)">播放</el-button>
+                <el-button link size="small" @click="openSubFolder(scope.row)">查看</el-button>
+                <el-button link size="small" @click="playTestAudio(scope.row)">测试</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -162,8 +163,10 @@ const pythonBaseUrl = ref('');
 const audioGroups = ref([]);
 const selectedAudioGroup = ref('');
 const audioFiles = ref([]);
+const subFolders = ref([]);  // 添加子文件夹列表
 const loadingAudioGroups = ref(false);
 const loadingAudioFiles = ref(false);
+const loadingSubFolders = ref(false);  // 添加子文件夹加载状态标记
 
 // 音频设备
 const audioDevices = ref([]);
@@ -493,6 +496,11 @@ const enableVoiceAssistant = async () => {
     return;
   }
 
+  if (subFolders.value.length === 0) {
+    ElMessage.warning('所选音频组没有子文件夹');
+    return;
+  }
+
   loading.value = true;
   try {
     // 创建一个只包含简单数据类型的设置对象
@@ -504,8 +512,8 @@ const enableVoiceAssistant = async () => {
       deviceId: Number(selectedAudioDevice.value) // 添加设备ID
     };
 
-    // 调用后端API启用语音助手，后端会通过Python API来实现
-    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.startVoiceAssistant, {
+    // 使用新的播放模式API
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.startNewPlayMode, {
       groupName: selectedAudioGroup.value,
       settings: simpleSettings
     });
@@ -515,7 +523,7 @@ const enableVoiceAssistant = async () => {
       if (sharedState?.consoleRef) {
         sharedState.consoleRef.addVoiceAssistantLog(`语音助手已启用，使用音频组: ${selectedAudioGroup.value}`);
       }
-      ElMessage.success('已启动语音助手');
+      ElMessage.success('已启动语音助手（子文件夹模式）');
     } else {
       ElMessage.error(result?.message || '启动语音助手失败');
     }
@@ -584,9 +592,9 @@ const checkVoiceAssistantStatus = async () => {
 // 监听选中的音频组变化
 watch(selectedAudioGroup, (newGroup) => {
   if (newGroup) {
-    getAudioFiles(newGroup);
+    getSubFolders(newGroup);
   } else {
-    audioFiles.value = [];
+    subFolders.value = [];
   }
 });
 
@@ -631,6 +639,77 @@ const openAudioGroupFolder = async () => {
   }
 };
 
+// 获取子文件夹列表
+const getSubFolders = async (groupName) => {
+  if (!groupName) return;
+
+  loadingSubFolders.value = true;
+  try {
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.getSubFolders, { groupName });
+    if (result && result.status === 'success' && result.data) {
+      subFolders.value = result.data;
+      console.log('获取到子文件夹列表:', subFolders.value);
+    } else {
+      console.error('获取子文件夹列表失败:', result?.message);
+      subFolders.value = [];
+      ElMessage.warning('获取子文件夹列表失败: ' + (result?.message || '未知错误'));
+    }
+  } catch (error) {
+    console.error('获取子文件夹列表出错:', error);
+    subFolders.value = [];
+    ElMessage.error('获取子文件夹列表出错: ' + (error.message || '未知错误'));
+  } finally {
+    loadingSubFolders.value = false;
+  }
+};
+
+// 打开子文件夹
+const openSubFolder = async (folder) => {
+  try {
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.openAudioGroupFolder, {
+      groupName: `${selectedAudioGroup.value}/${folder.name}`
+    });
+
+    if (result && result.status === 'success') {
+      ElMessage.success('已打开子文件夹');
+    } else {
+      ElMessage.error(result?.message || '打开文件夹失败');
+    }
+  } catch (error) {
+    console.error('打开文件夹出错:', error);
+    ElMessage.error('打开文件夹出错: ' + (error.message || '未知错误'));
+  }
+};
+
+// 从子文件夹中随机播放一个音频进行测试
+const playTestAudio = async (folder) => {
+  try {
+    if (!selectedAudioDevice.value) {
+      ElMessage.warning('请先选择音频输出设备');
+      return;
+    }
+
+    // 先获取该文件夹下的所有音频文件
+    const result = await ipc.invoke(ipcApiRoute.voiceAssistant.getAudioFiles, {
+      groupName: `${selectedAudioGroup.value}/${folder.name}`
+    });
+
+    if (result && result.status === 'success' && result.data && result.data.length > 0) {
+      const files = result.data;
+      // 随机选择一个文件播放
+      const randomIndex = Math.floor(Math.random() * files.length);
+      const file = files[randomIndex];
+
+      playAudioFile(file);
+    } else {
+      ElMessage.warning('该文件夹中没有可播放的音频文件');
+    }
+  } catch (error) {
+    console.error('测试播放出错:', error);
+    ElMessage.error('测试播放出错: ' + (error.message || '未知错误'));
+  }
+};
+
 // 组件挂载时
 onMounted(async () => {
   // 如果存在共享状态，同步到当前组件
@@ -649,6 +728,9 @@ onMounted(async () => {
   await loadDeviceSetting();
   await getAudioDevices(); // 获取音频设备
   await getAudioGroups();
+  if (selectedAudioGroup.value) {
+    await getSubFolders(selectedAudioGroup.value);
+  }
   await checkVoiceAssistantStatus();
 });
 

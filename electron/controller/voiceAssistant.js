@@ -231,6 +231,67 @@ class VoiceAssistantController {
     }
 
     /**
+     * 获取音频组中的子文件夹
+     * @param {Object} args - 参数
+     * @param {string} args.groupName - 音频组名称
+     */
+    async getSubFolders(args) {
+        try {
+            const { groupName } = args;
+            if (!groupName) {
+                return this.fail('缺少必要参数: groupName');
+            }
+
+            const subFolders = await this.voiceAssistantService.getSubFolders(groupName);
+            return this.success('获取子文件夹列表成功', subFolders);
+        } catch (error) {
+            logger.error(`获取子文件夹列表失败: ${error.message}`);
+            return this.fail(`获取子文件夹列表失败: ${error.message}`);
+        }
+    }
+
+    /**
+     * 使用新播放模式启动语音助手
+     * @param {Object} args - 参数
+     * @param {string} args.groupName - 音频组名称
+     * @param {Object} args.settings - 语音助手设置
+     */
+    async startNewPlayMode(args) {
+        try {
+            const { groupName, settings } = args || {};
+            if (!groupName) {
+                return this.fail('缺少必要参数: groupName');
+            }
+
+            logger.info(`尝试以新模式启动语音助手，使用音频组: ${groupName}`);
+
+            // 处理设置对象，确保数据类型正确
+            let validSettings = null;
+            if (settings) {
+                validSettings = {
+                    volume: typeof settings.volume === 'number' ? settings.volume : 80,
+                    playbackRate: typeof settings.playbackRate === 'number' ? settings.playbackRate : 1.0,
+                    minInterval: typeof settings.minInterval === 'number' ? settings.minInterval : 5,
+                    maxInterval: typeof settings.maxInterval === 'number' ? settings.maxInterval : 10,
+                    playMode: typeof settings.playMode === 'string' ? settings.playMode : 'random',
+                    deviceId: settings.deviceId || '' // 添加设备ID
+                };
+                logger.info(`语音助手设置: ${JSON.stringify(validSettings)}`);
+            }
+
+            const result = await this.voiceAssistantService.startNewPlayMode(groupName, validSettings);
+            if (result) {
+                return this.success('启动语音助手成功');
+            } else {
+                return this.fail('启动语音助手失败');
+            }
+        } catch (error) {
+            logger.error(`启动语音助手失败: ${error.message}`);
+            return this.fail(`启动语音助手失败: ${error.message}`);
+        }
+    }
+
+    /**
      * 成功响应
      * @param {string} message - 消息
      * @param {*} data - 数据
