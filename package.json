@@ -55,6 +55,7 @@
     "better-sqlite3": "^11.7.0",
     "dayjs": "^1.11.13",
     "ee-core": "file:.yalc/ee-core",
-    "electron-updater": "^6.3.8"
+    "electron-updater": "^6.3.8",
+    "tree-kill": "^1.2.2"
   }
 }
