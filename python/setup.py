@@ -1,4 +1,8 @@
 from cx_Freeze import setup, Executable
+import sys
+
+# relieve stack overflow
+sys.setrecursionlimit(5000)
 
 # 创建可执行文件的配置
 executableApp = Executable(
