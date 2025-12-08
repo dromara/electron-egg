@@ -42,7 +42,7 @@
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
     "@types/better-sqlite3": "^7.6.12",
-    "@types/node": "^20.16.0",
+    "@types/node": "^22.19.1",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
     "ee-bin": "^4.2.0",
