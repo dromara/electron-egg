@@ -1,11 +1,11 @@
 {
   "name": "ee-next",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "description": "A fast, desktop software development framework",
   "main": "./public/electron/main.js",
   "scripts": {
     "dev": "ee-bin dev",
-    "build": "npm run build-frontend && npm run build-electron && ee-bin encrypt",
+    "build": "pnpm run build-frontend && pnpm run build-electron && ee-bin encrypt",
     "start": "ee-bin start",
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
@@ -45,7 +45,7 @@
     "@types/node": "^20.16.0",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
-    "ee-bin": "file:.yalc/ee-bin",
+    "ee-bin": "^1.8.3",
     "electron": "^31.7.6",
     "electron-builder": "^25.1.8",
     "esbuild": "^0.21.5"
@@ -54,7 +54,6 @@
     "axios": "^1.7.9",
     "better-sqlite3": "^11.7.0",
     "dayjs": "^1.11.13",
-    "ee-core": "file:.yalc/ee-core",
     "electron-updater": "^6.3.8",
     "tree-kill": "^1.2.2"
   }
