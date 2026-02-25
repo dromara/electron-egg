@@ -1,5 +1,5 @@
 packages:
-  # 根目录包
-  - .
-  # 可以添加其他包，如需要
-  packages/*
+  - packages/*
+
+ignoredBuiltDependencies:
+  - electron

@@ -42,19 +42,18 @@
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
     "@types/better-sqlite3": "^7.6.12",
-    "@types/node": "^20.16.0",
+    "@types/node": "^22.19.1",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
-    "ee-bin": "^1.8.3",
-    "electron": "^31.7.6",
-    "electron-builder": "^25.1.8",
-    "esbuild": "^0.21.5"
+    "electron": "^39.2.6",
+    "electron-builder": "^26.3.5",
+    "ee-bin": "workspace:*"
   },
   "dependencies": {
     "axios": "^1.7.9",
-    "better-sqlite3": "^11.7.0",
+    "better-sqlite3": "^12.5.0",
     "dayjs": "^1.11.13",
-    "electron-updater": "^6.3.8",
-    "tree-kill": "^1.2.2"
+    "electron-updater": "^6.7.3",
+    "ee-core": "workspace:*"
   }
 }
