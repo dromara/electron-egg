@@ -2,9 +2,13 @@
   "name": "ee-core",
   "version": "4.1.5",
   "description": "ee core",
-  "main": "index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && esbuild *.ts app/**/*.ts config/**/*.ts const/**/*.ts controller/**/*.ts core/**/*.ts cross/**/*.ts electron/**/*.ts exception/**/*.ts html/**/*.ts jobs/**/*.ts loader/**/*.ts log/**/*.ts message/**/*.ts ps/**/*.ts socket/**/*.ts storage/**/*.ts utils/**/*.ts --outdir=dist/esm --format=esm --platform=node",
+    "dev": "tsc --watch"
   },
   "author": "",
   "license": "ISC",
@@ -31,12 +35,13 @@
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1",
     "tree-kill": "^1.2.2",
+    "typescript": "^5.7.2",
     "urllib": "^2.38.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.12",
+    "@types/cross-spawn": "^6.0.6",
     "@types/electron": "^1.4.38",
-    "@types/node": "^20.16.0",
-    "typescript": "^5.7.2"
+    "@types/node": "^20.16.0"
   }
 }

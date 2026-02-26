@@ -2,14 +2,18 @@
   "name": "ee-bin",
   "version": "4.2.0",
   "description": "ee bin",
-  "main": "index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/cjs/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && esbuild index.ts lib/**/*.ts config/**/*.ts tools/**/*.ts --outdir=dist/esm --format=esm --platform=node",
+    "dev": "tsc --watch"
   },
   "author": "",
   "license": "ISC",
   "bin": {
-    "ee-bin": "index.js"
+    "ee-bin": "dist/cjs/index.js"
   },
   "dependencies": {
     "adm-zip": "^0.4.11",
@@ -25,9 +29,15 @@
     "globby": "^10.0.0",
     "is-type-of": "^1.2.1",
     "javascript-obfuscator": "^4.0.2",
+    "js-yaml": "^4.1.0",
     "json5": "^2.2.3",
     "mkdirp": "^2.1.3",
-    "js-yaml": "^4.1.0",
-    "tree-kill": "^1.2.2"
+    "tree-kill": "^1.2.2",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/cross-spawn": "^6.0.6",
+    "@types/js-yaml": "^4.0.9"
   }
 }

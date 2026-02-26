@@ -15,12 +15,9 @@
   },
   "include": [
     "*.ts",
-    "app/**/*.ts",
+    "lib/**/*.ts",
     "config/**/*.ts",
-    "const/**/*.ts",
-    "ps/**/*.ts",
-    "utils/**/*.ts",
-    "exception/**/*.ts"
+    "tools/**/*.ts"
   ],
   "exclude": [
     "node_modules",

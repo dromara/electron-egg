@@ -1,0 +1,1 @@
+const internal = require("stream");
