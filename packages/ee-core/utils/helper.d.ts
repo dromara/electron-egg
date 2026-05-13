@@ -1,0 +1,14 @@
+export declare function fnDebounce(): (fn: any, delayTime: any, isImediate: any, args: any) => any;
+export declare function getRandomString(): string;
+export declare function mkdir(filepath: string, opt?: {}): void;
+export declare function chmodPath(path: string, mode: number | string): void;
+export declare function compareVersion(v1: string, v2: string): 0 | 1 | -1;
+export declare function middleware(fn: Function): any;
+export declare function stringify(obj: any, ignore?: any[]): string;
+export declare function validValue(value: any): boolean;
+export declare function checkConfig(prop: any): boolean;
+export declare function loadConfig(prop: any): any;
+export declare function sleep(ms: number): Promise<any>;
+export declare function replaceArgsValue(argv: any, key: any, value: any): any;
+export declare function getValueFromArgv(argv: any, key: any): any;
+export declare function fileIsExist(filepath: string): boolean;
