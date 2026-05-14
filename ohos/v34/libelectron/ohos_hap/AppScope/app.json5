@@ -1,0 +1,15 @@
+{
+  "app": {
+    "bundleName": "com.huawei.ohos_electron",
+    "vendor": "example",
+    "versionCode": 1000000,
+    "versionName": "1.0.0",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name",
+    "configuration": "$profile:configuration",
+    "multiAppMode": {
+      "multiAppModeType": "multiInstance",
+      "maxCount": 1
+    }
+  }
+}

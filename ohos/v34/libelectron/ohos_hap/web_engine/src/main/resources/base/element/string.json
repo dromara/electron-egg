@@ -1,0 +1,124 @@
+{
+  "string": [
+    {
+      "name": "page_show",
+      "value": "page from package"
+    },
+    {
+      "name": "button_ok",
+      "value": "ok"
+    },
+    {
+      "name": "button_cancel",
+      "value": "cancel"
+    },
+    {
+      "name": "camera",
+      "value": "Camera requires user_grant permission"
+    },
+    {
+      "name": "microphone",
+      "value": "Microphone requires user_grant permission"
+    },
+    {
+      "name": "access_pasteboard",
+      "value": "Pasteboard requires user_grant permission"
+    },
+    {
+      "name": "location",
+      "value": "Geolocation requires user_grant permission"
+    },
+    {
+      "name": "download_dir",
+      "value": "Download requires user_grant permission"
+    },
+    {
+      "name": "documents_dir",
+      "value": "Documents requires user_grant permission"
+    },
+    {
+      "name": "desktop_dir",
+      "value": "Desktop requires user_grant permission"
+    },
+    {
+      "name": "upload_default_type_description",
+      "value": "Custom file"
+    },
+    {
+      "name": "upload_all_file_description",
+      "value": "all file(*.*)"
+    },
+    {
+      "name": "access_bluetooth",
+      "value": "Used to access bluetooth"
+    },
+    {
+      "name": "print_title",
+      "value": "Print prompt"
+    },
+    {
+      "name": "print_tip",
+      "value": "Preview data has not finished loading, please print after loading!"
+    },
+    {
+      "name": "print_ok",
+      "value": "OK"
+    },
+    {
+      "name": "screen_capture",
+      "value": "Screen Capture requires user_grant permission"
+    },
+    {
+      "name": "pasteBoard_dialog_title",
+      "value": "Unable to access system clipboard"
+    },
+    {
+      "name": "screenshot_dialog_title",
+      "value": "Unable to access system screenshot"
+    },
+    {
+      "name": "pasteBoard_dialog_content",
+      "value": "You have disabled the clipboard access permission. Go to Settings > Privacy & security > Clipboard and enable the clipboard access permission for label"
+    },
+    {
+      "name": "screenshot_dialog_content",
+      "value": "You have disabled the screenshoot access permission. Go to Settings > Privacy & security > Screenshot and enable the screenshot access permission for label"
+    },
+    {
+      "name": "dialog_confirm_button",
+      "value": "Go to System Settings"
+    },
+    {
+      "name": "dialog_cancel_button",
+      "value": "cancel"
+    },
+    {
+      "name": "go_to_app_gallery",
+      "value": "Go to the app gallery to search"
+    },
+    {
+      "name": "download",
+      "value": "Download"
+    },
+    {
+      "name": "still_download",
+      "value": "Still want to download"
+    },
+    {
+      "name": "installation_not_supported",
+      "value": "Installation of this format file is not supported"
+    },
+    {
+      "name": "add_failed_tip",
+      "value": "Add failed"
+    },
+    {
+      "name": "file_name_str",
+      "value": "File Name:"
+    },
+    {
+      "name": "file_size_str",
+      "value": "File Size:"
+    }
+  ]
+}

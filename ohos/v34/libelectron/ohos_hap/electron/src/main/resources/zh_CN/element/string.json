@@ -1,0 +1,36 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "模块描述"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Electron"
+    },
+    {
+      "name": "button_ok",
+      "value": "确认"
+    },
+    {
+      "name": "button_cancel",
+      "value": "取消"
+    },
+    {
+      "name": "StatusBarEntryAbility_desc",
+      "value": "应用状态栏"
+    },
+    {
+      "name": "StatusBarEntryAbility_label",
+      "value": "应用状态栏"
+    },
+    {
+      "name": "OpenNewWindow_label",
+      "value": "打开新窗口"
+    }
+  ]
+}

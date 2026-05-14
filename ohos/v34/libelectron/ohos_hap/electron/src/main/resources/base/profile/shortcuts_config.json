@@ -1,0 +1,18 @@
+{
+  "shortcuts": [
+    {
+      "shortcutId": "OpenNewWindow",
+      "label": "$string:OpenNewWindow_label",
+      "wants": [
+        {
+          "bundleName": "com.huawei.ohos_electron",
+          "moduleName": "electron",
+          "abilityName": "EntryAbility",
+          "parameters": {
+            "openInNewWindow": "true"
+          }
+        }
+      ]
+    }
+  ]
+}
