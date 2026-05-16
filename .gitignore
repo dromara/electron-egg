@@ -20,3 +20,15 @@ python/*.spec
 python/build/
 python/dist/
 *DS_Store
+
+# 忽略鸿蒙相关文件
+ohos_hap/docs/
+ohos_hap/.idea
+ohos_hap/.appanalyzer
+ohos_hap/.hvigor
+oh_modules/
+oh-package-lock.json5
+ohos_hap/electron/build/
+ohos_hap/web_engine/build/
+
+

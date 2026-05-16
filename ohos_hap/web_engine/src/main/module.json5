@@ -1,0 +1,175 @@
+{
+  "module": {
+    "name": "web_engine",
+    "type": "har",
+    "deviceTypes": [
+      "tablet",
+      "2in1"
+    ],
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.INTERNET"
+      },
+      {
+        "name": "ohos.permission.GET_NETWORK_INFO"
+      },
+      {
+        "name": "ohos.permission.ACCESS_CERT_MANAGER"
+      },
+      {
+        "name": "ohos.permission.RUNNING_LOCK"
+      },
+      {
+        "name": "ohos.permission.PRINT"
+      },
+      {
+        "name": "ohos.permission.PREPARE_APP_TERMINATE"
+      },
+      {
+        "name": "ohos.permission.ACCESS_BIOMETRIC"
+      },
+      {
+        "name": "ohos.permission.FILE_ACCESS_PERSIST"
+      },
+      {
+        "name": "ohos.permission.PRIVACY_WINDOW"
+      },
+      {
+        "name": "ohos.permission.WINDOW_TOPMOST"
+      },
+      {
+        "name": "ohos.permission.GYROSCOPE"
+      },
+      {
+        "name": "ohos.permission.ACCELEROMETER"
+      },
+      {
+        "name": "ohos.permission.SET_ABILITY_INSTANCE_INFO"
+      },
+      {
+        "name": "ohos.permission.GET_FILE_ICON"
+      },
+      {
+        "name": "ohos.permission.LOCK_WINDOW_CURSOR"
+      },
+      {
+        "name": "ohos.permission.WEB_NATIVE_MESSAGING"
+      },
+      {
+        "name": "ohos.permission.READ_PASTEBOARD",
+        "reason": "$string:access_pasteboard",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.READ_WRITE_DOWNLOAD_DIRECTORY",
+        "reason": "$string:download_dir",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.READ_WRITE_DOCUMENTS_DIRECTORY",
+        "reason": "$string:documents_dir",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.READ_WRITE_DESKTOP_DIRECTORY",
+        "reason": "$string:desktop_dir",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.LOCATION",
+        "reason": "$string:location",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.APPROXIMATELY_LOCATION",
+        "reason": "$string:location",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.LOCATION_IN_BACKGROUND",
+        "reason": "$string:location",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.MICROPHONE",
+        "reason": "$string:microphone",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.CAMERA",
+        "reason": "$string:camera",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.ACCESS_BLUETOOTH",
+        "reason": "$string:access_bluetooth",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      },
+      {
+        "name": "ohos.permission.CUSTOM_SCREEN_CAPTURE",
+        "reason": "$string:screen_capture",
+        "usedScene": {
+          "abilities": [
+            "FormAbility"
+          ],
+          "when":"always"
+        }
+      }
+    ],
+    "definePermissions": [
+      {
+        "name": "ohos.permission.LOCK_WINDOW_CURSOR"
+      },
+    ]
+  }
+}

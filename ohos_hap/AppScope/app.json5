@@ -1,0 +1,15 @@
+{
+  "app": {
+    "bundleName": "com.electronegg.demo",
+    "vendor": "electron-egg",
+    "versionCode": 1000000,
+    "versionName": "1.0.0",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name",
+    "configuration": "$profile:configuration",
+    "multiAppMode": {
+      "multiAppModeType": "multiInstance",
+      "maxCount": 1
+    }
+  }
+}
