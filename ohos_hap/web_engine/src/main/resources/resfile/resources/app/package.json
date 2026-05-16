@@ -1,0 +1,15 @@
+{
+  "name": "ee-next",
+  "version": "4.3.0",
+  "description": "A fast, desktop software development framework",
+  "main": "./public/electron/main.js",
+  "repository": "https://github.com/dromara/electron-egg.git",
+  "author": "哆啦好梦, Inc <530353222@qq.com>",
+  "license": "Apache",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dayjs": "^1.11.13",
+    "ee-core": "^4.1.5",
+    "tree-kill": "^1.2.2"
+  }
+}

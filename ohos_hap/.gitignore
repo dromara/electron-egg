@@ -21,5 +21,5 @@
 /web_engine/oh-package-lock.json5
 /web_engine/oh_modules
 /web_engine/src/main/resources/rawfile
-/web_engine/src/main/resources/resfile
+#/web_engine/src/main/resources/resfile
 /dependencies
