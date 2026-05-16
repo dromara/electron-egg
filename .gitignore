@@ -22,7 +22,7 @@ python/dist/
 *DS_Store
 
 # 忽略鸿蒙相关文件
-ohos_hap/docs/
+#ohos_hap/docs/
 ohos_hap/.idea
 ohos_hap/.appanalyzer
 ohos_hap/.hvigor
