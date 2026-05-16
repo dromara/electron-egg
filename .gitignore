@@ -23,9 +23,9 @@ python/dist/
 
 # 忽略鸿蒙相关文件
 #ohos_hap/docs/
-ohos_hap/.idea
-ohos_hap/.appanalyzer
-ohos_hap/.hvigor
+ohos_hap/.idea/
+ohos_hap/.appanalyzer/
+ohos_hap/.hvigor/
 oh_modules/
 oh-package-lock.json5
 ohos_hap/electron/build/
