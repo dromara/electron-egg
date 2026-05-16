@@ -5,7 +5,7 @@
       "label": "$string:OpenNewWindow_label",
       "wants": [
         {
-          "bundleName": "com.huawei.ohos_electron",
+          "bundleName": "com.electronegg.demo",
           "moduleName": "electron",
           "abilityName": "EntryAbility",
           "parameters": {
