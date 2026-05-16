@@ -1,1 +1,0 @@
-export { WebChildProcess } from './src/main/ets/process/WebChildProcess';
