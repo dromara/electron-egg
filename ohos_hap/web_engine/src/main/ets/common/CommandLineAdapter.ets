@@ -150,12 +150,13 @@ export class CommandLineAdapter {
       "--enable-features=UseOzonePlatform",
       "--ozone-platform=ohos",
       "--enable-logging",
-      "--ozone-dump-file=/data/storage/el2/base/cache/",
-      "--no-zygote",
-      "--user-data-dir=/data/storage/el2/base/files/",
+      "--ozone-dump-file=/data/storage/el2/base/cache/", // 来设置输出图片目录的路径
+      "--no-zygote", // 用它换取工具兼容、调试便利或规避 Zygote bug，但代价是更慢的启动、更高的内存和更低的安全性GitHub
+      "--user-data-dir=/data/storage/el2/base/files/", // 用户数据存储目录
       "--force-renderer-accessibility=complete",
       "--disable-gpu-watchdog",
       "--disable-features=EnableDrDc",
+      //"--inspect=9229",
     ];
     return vec_args;
   }
