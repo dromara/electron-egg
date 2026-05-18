@@ -1,0 +1,164 @@
+import type { BrowserWindowConstructorOptions, OpenDevToolsOptions } from 'electron';
+
+export interface ElectronEggOptions {
+  env: string;
+  baseDir: string;
+  electronDir: string;
+  appName: string;
+  userHome: string;
+  appData: string;
+  appUserData: string;
+  appVersion: string;
+  isPackaged: boolean;
+  execDir: string;
+}
+
+export interface RemoteConfig {
+  enable: boolean;
+  url: string;
+}
+
+export interface MainServerConfig {
+  protocol: string;
+  indexPath: string;
+  options?: Record<string, unknown>;
+  takeover?: string;
+  loadingPage?: string;
+  channelSeparator?: string;
+}
+
+export interface SocketServerConfig {
+  enable: boolean;
+  port: number;
+  path: string;
+  connectTimeout: number;
+  pingTimeout: number;
+  pingInterval: number;
+  maxHttpBufferSize: number;
+  transports: string[];
+  cors: {
+    origin: boolean | string | RegExp | string[] | ((origin: string, callback: (err: Error | null, allow?: boolean) => void) => void);
+  };
+  channel: string;
+}
+
+export interface HttpsConfig {
+  enable: boolean;
+  key: string;
+  cert: string;
+}
+
+export interface HttpServerConfig {
+  enable: boolean;
+  https: HttpsConfig;
+  protocol: string;
+  host: string;
+  port: number;
+  cors: {
+    origin: string;
+  };
+  body: {
+    multipart: boolean;
+    formidable: {
+      keepExtensions: boolean;
+    };
+  };
+  filterRequest: {
+    uris: string[];
+    returnData: string;
+  };
+}
+
+export interface LoggerConfig {
+  type: string;
+  dir: string;
+  encoding: string;
+  env: string;
+  level: string;
+  consoleLevel: string;
+  disableConsoleAfterReady: boolean;
+  outputJSON: boolean;
+  buffer: boolean;
+  appLogName: string;
+  coreLogName: string;
+  agentLogName: string;
+  errorLogName: string;
+  coreLogger: Record<string, unknown>;
+  allowDebugAtProd: boolean;
+  enablePerformanceTimer: boolean;
+  rotator: string;
+}
+
+export interface ExceptionConfig {
+  mainExit: boolean;
+  childExit: boolean;
+  rendererExit: boolean;
+}
+
+export interface JobsConfig {
+  messageLog: boolean;
+}
+
+export interface CrossConfig {
+  [key: string]: unknown;
+}
+
+export interface Config {
+  [key: string]: unknown;
+  openDevTools: boolean | OpenDevToolsOptions;
+  singleLock: boolean;
+  windowsOption: BrowserWindowConstructorOptions;
+  logger: LoggerConfig;
+  socketServer: SocketServerConfig;
+  httpServer: HttpServerConfig;
+  remote: RemoteConfig;
+  mainServer: MainServerConfig;
+  exception: ExceptionConfig;
+  jobs: JobsConfig;
+  cross: CrossConfig;
+}
+
+export interface JobChildOptions {
+  name: string;
+  script: string;
+  args?: string[];
+  env?: NodeJS.ProcessEnv;
+}
+
+export interface ExtendOptions {
+  deep?: boolean;
+}
+
+export interface TimingItem {
+  name: string;
+  start: number;
+  end: number | undefined;
+  duration: number | undefined;
+  pid: number;
+  index: number;
+}
+
+export interface FileLoaderOptions {
+  caseStyle?: 'lower' | 'upper' | 'camel' | ((filepath: string) => string[]);
+  directory: string;
+  initializer?: (obj: unknown, options: { pathName: string; path: string }) => unknown;
+  call?: boolean;
+  override?: boolean;
+  inject?: unknown;
+  match?: string | string[] | ((name: string) => boolean);
+  ignore?: string | string[] | ((name: string) => boolean);
+}
+
+export interface AppInfo {
+  name: string;
+  baseDir: string;
+  electronDir: string;
+  env: string;
+  root: string;
+}
+
+export interface MessageData {
+  channel: string;
+  event: string;
+  data: unknown;
+}
