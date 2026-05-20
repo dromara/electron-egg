@@ -90,7 +90,7 @@ export function getFrontendCodeDir(basePath?: string): string {
 
 // 获取base目录
 export function getBaseDir(): string {
-  return process.env.EE_BASE_DIR || process.cwd();
+  return process.env.EE_BASE_DIR || '';
 }
 
 // 获取electron目录
@@ -136,7 +136,7 @@ export function getAppUserDataDir(): string {
 
 // 获取 exec目录
 export function getExecDir(): string {
-  return process.env.EE_EXEC_DIR || process.cwd();
+  return process.env.EE_EXEC_DIR || '';
 }
 
 // 获取操作系统用户目录

@@ -10,9 +10,9 @@ export function loadController(): Record<string, unknown> {
 
 export function getControllers(): Record<string, unknown> {
   if (!controllers) {
-    throw new Error('Controllers not loaded. Call loadController() first.');
+    loadController();
   }
-  return controllers;
+  return controllers!;
 }
 
 export function getController(): Record<string, unknown> {

@@ -54,8 +54,8 @@ export class ElectronEgg {
     process.env.EE_APP_USER_DATA = options.appUserData;
     process.env.EE_EXEC_DIR = options.execDir;
     process.env.EE_IS_PACKAGED = String(options.isPackaged);
-    process.env.EE_SOCKET_PORT = 'null';
-    process.env.EE_HTTP_PORT = 'null';
+    process.env.EE_SOCKET_PORT = '';
+    process.env.EE_HTTP_PORT = '';
 
     log('[constructor] options:%j', options);
     this.options = options;

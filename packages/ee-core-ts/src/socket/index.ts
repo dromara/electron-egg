@@ -2,9 +2,14 @@ export { SocketServer } from './socketServer.js';
 export { HttpServer } from './httpServer.js';
 export { IpcServer } from './ipcServer.js';
 
+import { Server as IoServer } from 'socket.io';
+import IoClient from 'socket.io-client';
+import Koa from 'koa';
 import { SocketServer } from './socketServer.js';
 import { HttpServer } from './httpServer.js';
 import { IpcServer } from './ipcServer.js';
+
+export { Koa, IoServer, IoClient };
 
 const Instance: {
   socketServer: SocketServer | null;

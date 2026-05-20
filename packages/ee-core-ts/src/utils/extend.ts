@@ -30,14 +30,13 @@ function isPlainObject(obj: unknown): obj is Record<string, unknown> {
   return typeof key === 'undefined' || hasOwn.call(plainObj, key);
 }
 
-export function extend<T extends Record<string, unknown>>(
+export function extend(
   deep: boolean | ExtendOptions,
-  target: T,
+  target: Record<string, unknown>,
   ...sources: Array<Record<string, unknown> | undefined | null>
-): T {
+): Record<string, unknown> {
   // Handle a deep copy situation
   const isDeep = typeof deep === 'boolean' ? deep : deep?.deep ?? false;
-  let result: Record<string, unknown> = { ...target };
 
   for (const source of sources) {
     // Only deal with non-null/undefined values
@@ -47,18 +46,20 @@ export function extend<T extends Record<string, unknown>>(
     for (const key of Object.keys(source)) {
       if (key === '__proto__') continue;
       const val = source[key];
+      const src = target[key];
       // Prevent never-ending loop
-      if (isDeep && isPlainObject(val) && isPlainObject(result[key])) {
-        // Recurse if we're merging plain objects
-        // Never move original objects, clone them
-        result[key] = extend(true, result[key] as Record<string, unknown>, val);
-      } else {
+      if (target === val) continue;
+      // Recurse if we're merging plain objects
+      if (isDeep && val && isPlainObject(val)) {
+        const clone = src && isPlainObject(src) ? src : {};
+        target[key] = extend(true, clone as Record<string, unknown>, val as Record<string, unknown>);
+      } else if (typeof val !== 'undefined') {
         // Don't bring in undefined values
-        result[key] = val;
+        target[key] = val;
       }
     }
   }
 
   // Return the modified object
-  return result as T;
+  return target;
 }

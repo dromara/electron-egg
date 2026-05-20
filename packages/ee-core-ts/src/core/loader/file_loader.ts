@@ -135,6 +135,12 @@ export class FileLoader {
           exports = initializer(exports, { pathName, path: fullpath });
         }
 
+        // set properties of class
+        if (is.class_(exports) || isBytecodeClass(exports)) {
+          (exports as { prototype: Record<string, unknown> }).prototype.pathName = pathName;
+          (exports as { prototype: Record<string, unknown> }).prototype.fullPath = fullpath;
+        }
+
         // class / generator / async / bytecodeClass → return directly
         if (is.class_(exports) || is.generatorFunction(exports) || is.asyncFunction(exports) || isBytecodeClass(exports)) {
           items.push({ fullpath, properties, exports });

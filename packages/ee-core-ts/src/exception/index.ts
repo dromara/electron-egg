@@ -24,6 +24,14 @@ function uncaughtExceptionHandler(): void {
   });
 }
 
+// 当进程上抛出异常而没有被捕获时触发该事件。
+export function uncaughtExceptionMonitorHandler(): void {
+  process.on('uncaughtExceptionMonitor', function (err: unknown) {
+    let error = err instanceof Error ? err : new Error(String(err));
+    coreLogger.error('uncaughtExceptionMonitor:', error);
+  });
+}
+
 // 当promise中reject的异常在同步任务中没有使用catch捕获就会触发该事件，
 // 即便是在异步情况下使用了catch也会触发该事件
 function unhandledRejectionHandler(): void {
@@ -61,17 +69,17 @@ function _exit(): void {
   const exceptionConfig = getConfig().exception as { mainExit: boolean; childExit: boolean; rendererExit: boolean };
   const { mainExit, childExit, rendererExit } = exceptionConfig;
 
-  if (isMain() && mainExit) {
+  if (isMain() && mainExit == true) {
     _delayExit();
-  } else if (isForkedChild() && childExit) {
+  } else if (isForkedChild() && childExit == true) {
     _delayExit();
-  } else if (isRenderer() && rendererExit) {
+  } else if (isRenderer() && rendererExit == true) {
     _delayExit();
   }
 }
 
 function _delayExit(): void {
   setTimeout(() => {
-    process.exit(1);
-  }, 3000);
+    process.exit();
+  }, 1500);
 }

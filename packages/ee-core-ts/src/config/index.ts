@@ -9,7 +9,7 @@ export function loadConfig(): void {
 
 export function getConfig(): Record<string, unknown> {
   if (!config) {
-    throw new Error('Config not loaded. Call loadConfig() first.');
+    loadConfig();
   }
-  return config;
+  return config!;
 }
