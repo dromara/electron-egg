@@ -9,7 +9,7 @@ import { app } from './application.js';
 import { loadDir } from './dir.js';
 import type { ElectronEggOptions } from '../types/index.js';
 
-const log = debug('ee-core:app:boot');
+const debugLog = debug('ee-core:app:boot');
 
 export class ElectronEgg {
   options: ElectronEggOptions;
@@ -57,7 +57,7 @@ export class ElectronEgg {
     process.env.EE_SOCKET_PORT = '';
     process.env.EE_HTTP_PORT = '';
 
-    log('[constructor] options:%j', options);
+    debugLog('[constructor] options:%j', options);
     this.options = options;
     this.init();
   }

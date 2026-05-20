@@ -14,7 +14,7 @@ import { fileIsExist, sleep } from '../../utils/helper.js';
 import { extend } from '../../utils/extend.js';
 import { cross } from '../../cross/index.js';
 
-const log = debug('ee-core:electron:window');
+const debugLog = debug('ee-core:electron:window');
 
 const Instance: {
   mainWindow: BrowserWindow | null;
@@ -166,7 +166,7 @@ function loadMainUrl(type: string, url: string): void {
 
   coreLogger.info('[ee-core] Env: %s, Type: %s', env(), type);
   coreLogger.info('[ee-core] App running at: %s', url);
-  log('[loadMainUrl] type:%s, url:%s', type, url);
+  debugLog('[loadMainUrl] type:%s, url:%s', type, url);
   if (type === 'file') {
     win.loadFile(url);
   } else {
@@ -235,7 +235,7 @@ async function crossTakeover(): Promise<void> {
     }
     count++;
   }
-  log('it takes %d seconds to start the cross service', count * sleeptime);
+  debugLog('it takes %d seconds to start the cross service', count * sleeptime);
 
   if (!serviceReady) {
     const bootFailurePage = getHtmlFilepath('cross-failure.html');

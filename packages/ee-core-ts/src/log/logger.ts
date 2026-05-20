@@ -6,7 +6,7 @@ import { extend } from '../utils/extend.js';
 import { getConfig } from '../config/index.js';
 import { getLogDir, env, isDev } from '../ps/index.js';
 
-const log = debug('ee-core:log:logger');
+const debugLog = debug('ee-core:log:logger');
 
 let LogDate = 0;
 const TmpFileName = {
@@ -53,7 +53,7 @@ export function create(config: Record<string, unknown> = {}): EggLoggers {
     opt = _rotateByDay(opt);
   }
 
-  log('[create] opt:%j', opt);
+  debugLog('[create] opt:%j', opt);
   return new EggLoggers(opt as ConstructorParameters<typeof EggLoggers>[0]);
 }
 

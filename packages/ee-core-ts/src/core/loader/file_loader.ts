@@ -7,7 +7,7 @@ import { loadFile, filePatterns, isBytecodeClass } from '../utils/index.js';
 import { getProperties } from '../../utils/wrap.js';
 import type { FileLoaderOptions } from '../../types/index.js';
 
-const log = debug('ee-core:core:loader:file_loader');
+const debugLog = debug('ee-core:core:loader:file_loader');
 
 export const FULLPATH = Symbol('LOADER_ITEM_FULLPATH');
 export const EXPORTS = Symbol('LOADER_ITEM_EXPORTS');
@@ -48,7 +48,7 @@ export class FileLoader {
       throw new Error('options.directory is required');
     }
     this.options = Object.assign({}, defaults, options);
-    log('[constructor] options: %o', this.options);
+    debugLog('[constructor] options: %o', this.options);
   }
 
   /**
@@ -111,11 +111,11 @@ export class FileLoader {
     }
 
     const items: LoaderItem[] = [];
-    log('[parse] directories %o', directories);
+    debugLog('[parse] directories %o', directories);
 
     for (const directory of directories) {
       const filepaths = globby.sync(files, { cwd: directory });
-      log('[parse] filepaths %o', filepaths);
+      debugLog('[parse] filepaths %o', filepaths);
       for (const filepath of filepaths) {
         const fullpath = path.join(directory, filepath);
         if (!fs.statSync(fullpath).isFile()) continue;

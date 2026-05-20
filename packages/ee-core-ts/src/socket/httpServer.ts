@@ -14,7 +14,7 @@ import { getController } from '../controller/index.js';
 import { getConfig } from '../config/index.js';
 import { getPort } from '../utils/port/index.js';
 
-const log = debug('ee-core:socket:httpServer');
+const debugLog = debug('ee-core:socket:httpServer');
 
 export class HttpServer {
   config: Record<string, unknown>;
@@ -129,12 +129,12 @@ export class HttpServer {
         uriPath = 'controller/' + uriPath;
       }
       const cmd = uriPath.split('/').join(this.channelSeparator);
-      log('[request] uri %s', cmd);
+      debugLog('[request] uri %s', cmd);
       const args = method === 'POST' ? body : params;
       let fn: ((...args: unknown[]) => unknown) | null = null;
       if (is.string(cmd)) {
         const actions = cmd.split(this.channelSeparator);
-        log('[findFn] channel %o', actions);
+        debugLog('[findFn] channel %o', actions);
         let obj: Record<string, unknown> = { controller };
         actions.forEach((key) => {
           obj = obj[key] as Record<string, unknown>;

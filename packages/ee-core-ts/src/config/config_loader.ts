@@ -7,7 +7,7 @@ import { Timing } from '../core/utils/timing.js';
 import defaultConfig from './default_config.js';
 import type { AppInfo } from '../types/index.js';
 
-const log = debug('ee-core:config:config_loader');
+const debugLog = debug('ee-core:config:config_loader');
 
 export class ConfigLoader {
   timing: Timing;
@@ -26,7 +26,7 @@ export class ConfigLoader {
     const appConfig = this._AppConfig();
     const defaultConf = defaultConfig();
     const config = extend(true, defaultConf, appConfig);
-    log('[load] config: %o', config);
+    debugLog('[load] config: %o', config);
 
     this.timing.end('Load Config');
     return config;
@@ -54,7 +54,7 @@ export class ConfigLoader {
     };
     const filepath = path.join(dirpath, 'config', filename);
     const config = loadFile(filepath, appInfo);
-    log('[_loadConfig] filepath: %s', filepath);
+    debugLog('[_loadConfig] filepath: %s', filepath);
     if (!config) return null;
 
     return config as Record<string, unknown>;

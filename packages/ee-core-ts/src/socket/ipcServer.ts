@@ -6,7 +6,7 @@ import { getController } from '../controller/index.js';
 import { EXPORTS } from '../core/loader/file_loader.js';
 import { getConfig } from '../config/index.js';
 
-const log = debug('ee-core:socket:ipcServer');
+const debugLog = debug('ee-core:socket:ipcServer');
 
 export class IpcServer {
   channelSeparator: string;
@@ -48,7 +48,7 @@ export class IpcServer {
       // channel: controller.file.function | controller/file/function
       const tmpChannel = `${propertyChain}.${key}`;
       const channel = tmpChannel.split('.').join(this.channelSeparator);
-      log('[register] channel %s', channel);
+      debugLog('[register] channel %s', channel);
 
       // send/on model
       ipcMain.on(channel, async (event, params) => {
@@ -84,7 +84,7 @@ export class IpcServer {
       let fn: ((...args: unknown[]) => unknown) | null = null;
       if (is.string(cmd)) {
         const actions = cmd.split(this.channelSeparator);
-        log('[findFn] channel %o', actions);
+        debugLog('[findFn] channel %o', actions);
         let obj: Record<string, unknown> = { controller };
         for (const key of actions) {
           obj = obj[key] as Record<string, unknown>;

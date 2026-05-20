@@ -7,7 +7,7 @@ import { SocketIO } from '../const/channel.js';
 import { getController } from '../controller/index.js';
 import { getPort } from '../utils/port/index.js';
 
-const log = debug('ee-core:socket:socketServer');
+const debugLog = debug('ee-core:socket:socketServer');
 
 export class SocketServer {
   config: Record<string, unknown>;
@@ -56,10 +56,10 @@ export class SocketServer {
           const cmd = message.cmd;
           const args = message.args;
           let fn: ((...args: unknown[]) => unknown) | null = null;
-          log('[socket] channel %s', cmd);
+          debugLog('[socket] channel %s', cmd);
           if (is.string(cmd)) {
             const actions = cmd.split(this.channelSeparator);
-            log('[findFn] channel %o', actions);
+            debugLog('[findFn] channel %o', actions);
             let obj: Record<string, unknown> = { controller };
             actions.forEach((key) => {
               obj = obj[key] as Record<string, unknown>;

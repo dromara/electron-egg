@@ -6,7 +6,7 @@ import { Timing } from '../core/utils/timing.js';
 import { FileLoader, FULLPATH } from '../core/loader/file_loader.js';
 import { isBytecodeClass, callFn } from '../core/utils/index.js';
 
-const log = debug('ee-core:controller:controller_loader');
+const debugLog = debug('ee-core:controller:controller_loader');
 
 export class ControllerLoader {
   timing: Timing;
@@ -34,7 +34,7 @@ export class ControllerLoader {
       },
     };
     const target = new FileLoader(opt).load();
-    log('[load] controllers: %o', target);
+    debugLog('[load] controllers: %o', target);
     this.timing.end('Load Controller');
     return target;
   }

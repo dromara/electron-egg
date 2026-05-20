@@ -6,7 +6,7 @@ import { coreLogger } from '../log/index.js';
 import { getValueFromArgv } from '../utils/helper.js';
 import type { JobChildOptions } from '../types/index.js';
 
-const log = debug('ee-core:cross');
+const debugLog = debug('ee-core:cross');
 
 export class Cross {
   // pid唯一
@@ -34,13 +34,13 @@ export class Cross {
     try {
       childProcess = fork(cmd, args, options);
     } catch (e) {
-      log('[createJob] fork error:', e);
+      debugLog('[createJob] fork error:', e);
       coreLogger.error('[createJob] fork error:', e);
     }
 
     if (childProcess) {
       childProcess.on('exit', (code, signal) => {
-        log(`[createJob] child process exited with code ${code} and signal ${signal}`);
+        debugLog(`[createJob] child process exited with code ${code} and signal ${signal}`);
         this.jobPool.delete(name);
       });
       this.jobPool.set(name, { process: childProcess, opt });
@@ -53,7 +53,7 @@ export class Cross {
     for (const [name, item] of this.jobPool) {
       if (item.process) {
         item.process.kill();
-        log(`[killAll] kill job ${name}`);
+        debugLog(`[killAll] kill job ${name}`);
       }
     }
     this.jobPool.clear();
