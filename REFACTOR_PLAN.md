@@ -811,24 +811,6 @@ export { helper } from './utils/helper.js';
 }
 ```
 
-### 5.6 直接替换策略
-
-新模块开发完成后直接替换原模块，不保留过渡期共存：
-
-1. 新模块使用新包名（`ee-core-ts`、`ee-bin-ts`）独立发布
-2. 主项目 `package.json` 直接切换 workspace 引用至新模块
-3. 原模块（`ee-bin`、`ee-core`）从 workspace 中移除
-4. 所有功能验证通过后一次性提交，不保留旧代码
-
-```bash
-# 替换步骤
-rm -rf packages/ee-bin packages/ee-core
-# 更新根 package.json 的依赖引用
-pnpm install
-# 运行全量测试验证
-pnpm test
-```
-
 ***
 
 ## 六、验收标准
