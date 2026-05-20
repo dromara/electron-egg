@@ -16,9 +16,13 @@ export class ConfigLoader {
     this.timing = new Timing();
   }
 
+  /**
+   * Load config/config.xxx.js
+   */
   load(): Record<string, unknown> {
     this.timing.start('Load Config');
 
+    // Load Application config
     const appConfig = this._AppConfig();
     const defaultConf = defaultConfig();
     const config = extend(true, defaultConf, appConfig);

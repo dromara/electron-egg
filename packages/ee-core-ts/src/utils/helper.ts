@@ -39,14 +39,17 @@ export function fnDebounce(): (
   };
 }
 
+// 随机10位字符串
 export function getRandomString(): string {
   return Math.random().toString(36).substring(2);
 }
 
+// 创建文件夹
 export function mkdir(filepath: string, opt: { mode?: number } = {}): void {
   mkdirp.sync(filepath, opt);
 }
 
+// 修改文件权限
 export function chmodPath(filepath: string, mode: number): void {
   if (fs.existsSync(filepath)) {
     const files = fs.readdirSync(filepath);
@@ -62,6 +65,7 @@ export function chmodPath(filepath: string, mode: number): void {
   }
 }
 
+// 版本号比较
 export function compareVersion(v1: string, v2: string): number {
   const s1 = v1.split('.');
   const s2 = v2.split('.');
@@ -92,6 +96,7 @@ export function middleware(fn: unknown): unknown {
   return is.generatorFunction(fn) ? convert(fn as GeneratorFunction) : fn;
 }
 
+// 序列化对象
 export function stringify(obj: Record<string, unknown>, ignore: string[] = []): string {
   const result: Record<string, unknown> = {};
   Object.keys(obj).forEach((key) => {
@@ -102,6 +107,7 @@ export function stringify(obj: Record<string, unknown>, ignore: string[] = []): 
   return JSON.stringify(result);
 }
 
+// 是否有效值
 export function validValue(value: unknown): boolean {
   return value !== undefined && value !== null && value !== '';
 }

@@ -22,9 +22,13 @@ export class SqliteStorage {
     this.db = this._initDB(opt);
   }
 
+  /**
+   * 初始化db
+   */
   _initDB(opt: Record<string, unknown> = {}): Database.Database {
     const options = Object.assign({ timeout: 5000 }, opt);
 
+    // 存储类型：db文件、内存(:memory:)
     let dbPath = this.name;
     if (this.mode !== 'memory') {
       dbPath = this.getFilePath();
@@ -32,6 +36,7 @@ export class SqliteStorage {
 
     const db = new Database(dbPath, options as Database.Options);
 
+    // 如果是文件类型，判断文件是否创建成功
     if (this.mode !== 'memory') {
       assert(fs.existsSync(dbPath), `error: db ${dbPath} not exists`);
     }
@@ -39,6 +44,9 @@ export class SqliteStorage {
     return db;
   }
 
+  /**
+   * 获取文件名
+   */
   _formatFileName(name: string): string {
     if (this.mode === 'memory') {
       return name;
@@ -46,6 +54,9 @@ export class SqliteStorage {
     return path.basename(name);
   }
 
+  /**
+   * 创建storage目录
+   */
   _createDatabaseDir(): string {
     let dbDir = path.join(getDataDir(), 'db');
     if (this.mode === 'absolute') {
@@ -59,7 +70,11 @@ export class SqliteStorage {
     return dbDir;
   }
 
+  /**
+   * 获取file path 模式
+   */
   getMode(name: string): string {
+    // 内存模式
     if (name === ':memory:') {
       return 'memory';
     }

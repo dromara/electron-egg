@@ -123,6 +123,7 @@ export interface JobChildOptions {
   script: string;
   args?: string[];
   env?: NodeJS.ProcessEnv;
+  port?: number;
 }
 
 export interface ExtendOptions {

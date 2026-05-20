@@ -34,6 +34,7 @@ export class IpcServer {
       if (subObj && (subObj as Record<symbol, unknown>)[EXPORTS] === true) {
         this.register(subObj as Record<string, unknown>, propertyChain);
       } else if (typeof subObj === 'object') {
+        // 如果子对象依然是对象，则递归调用继续判断
         this.loop(subObj as Record<string, unknown>, propertyChain);
       }
     }
@@ -43,10 +44,13 @@ export class IpcServer {
     const controller = getController();
     const keys = Object.keys(exportObj);
     for (const key of keys) {
+      // Supports two types of routing separators
+      // channel: controller.file.function | controller/file/function
       const tmpChannel = `${propertyChain}.${key}`;
       const channel = tmpChannel.split('.').join(this.channelSeparator);
       log('[register] channel %s', channel);
 
+      // send/on model
       ipcMain.on(channel, async (event, params) => {
         try {
           const fn = this.findFn(controller, channel);
@@ -59,6 +63,7 @@ export class IpcServer {
         }
       });
 
+      // invoke/handle model
       ipcMain.handle(channel, async (event, params) => {
         try {
           const fn = this.findFn(controller, channel);
@@ -66,6 +71,7 @@ export class IpcServer {
           return await fn.call(controller, params, event);
         } catch (e) {
           coreLogger.error('[ee-core] [socket/IpcServer] invoke/handle throw error:', e);
+          return undefined;
         }
       });
     }
@@ -73,23 +79,24 @@ export class IpcServer {
 
   findFn(controller: Record<string, unknown>, c: string): ((...args: unknown[]) => unknown) | null {
     try {
+      // 找函数
       const cmd = c;
       let fn: ((...args: unknown[]) => unknown) | null = null;
       if (is.string(cmd)) {
         const actions = cmd.split(this.channelSeparator);
         log('[findFn] channel %o', actions);
         let obj: Record<string, unknown> = { controller };
-        actions.forEach((key) => {
+        for (const key of actions) {
           obj = obj[key] as Record<string, unknown>;
           if (!obj) throw new Error(`class or function '${key}' not exists`);
-        });
+        }
         fn = obj as unknown as (...args: unknown[]) => unknown;
       }
       if (!fn) throw new Error('function not exists');
       return fn;
     } catch (err) {
       coreLogger.error('[ee-core] [socket/IpcServer] throw error:', err);
+      return null;
     }
-    return null;
   }
 }

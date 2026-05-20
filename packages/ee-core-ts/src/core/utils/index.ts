@@ -4,19 +4,29 @@ import path from 'path';
 import fs from 'fs';
 import { createRequire } from 'module';
 
-const requireMod = createRequire(import.meta.url);
+const requireMod = createRequire(__filename);
 const Module = requireMod('module');
+
+// Module._extensions:
+// '.js': [Function (anonymous)],
+// '.json': [Function (anonymous)],
+// '.node': [Function: func],
+// '.jsc': [Function (anonymous)]
+
 const extensions: NodeJS.RequireExtensions = Module._extensions;
 
 export function loadFile(filepath: string): unknown {
   try {
+    // if not js module, just return content buffer
     const extname = path.extname(filepath);
     if (extname && !extensions[extname]) {
       return fs.readFileSync(filepath);
     }
 
+    // require js module
     const obj = requireMod(filepath);
     if (!obj) return obj;
+    // it's es module
     if (obj.__esModule) return 'default' in obj ? obj.default : obj;
     return obj;
   } catch (err) {
@@ -37,11 +47,18 @@ export function getResolvedFilename(filepath: string, baseDir: string): string {
   return filepath.replace(baseDir + path.sep, '').replace(reg, '/');
 }
 
+/**
+ * 字节码类
+ */
 export function isBytecodeClass(exports: unknown): boolean {
   if (!exports) return false;
+  // 标识
   return String(exports).indexOf('[class') !== -1;
 }
 
+/**
+ * 文件类型
+ */
 export function filePatterns(): string[] {
   return ['**/*.js', '**/*.jsc'];
 }

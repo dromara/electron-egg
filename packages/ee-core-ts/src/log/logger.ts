@@ -15,6 +15,7 @@ const TmpFileName = {
   errorLogName: '',
 };
 
+// 创建
 export function create(config: Record<string, unknown> = {}): EggLoggers {
   let opt: Record<string, unknown> = {};
 
@@ -56,32 +57,36 @@ export function create(config: Record<string, unknown> = {}): EggLoggers {
   return new EggLoggers(opt as ConstructorParameters<typeof EggLoggers>[0]);
 }
 
+/**
+ * 按天分割
+ */
 function _rotateByDay(logOpt: Record<string, unknown>): Record<string, unknown> {
   const now = parseInt(dayjs().format('YYYYMMDD'));
   if (LogDate !== now) {
     LogDate = now;
 
     const logger = logOpt.logger as Record<string, string>;
+    // 保存一个临时文件名，防止文件名按日期累加
     if (TmpFileName.appLogName.length === 0) {
-      TmpFileName.appLogName = logger.appLogName;
+      TmpFileName.appLogName = logger.appLogName || '';
     }
     if (TmpFileName.coreLogName.length === 0) {
-      TmpFileName.coreLogName = logger.coreLogName;
+      TmpFileName.coreLogName = logger.coreLogName || '';
     }
     if (TmpFileName.errorLogName.length === 0) {
-      TmpFileName.errorLogName = logger.errorLogName;
+      TmpFileName.errorLogName = logger.errorLogName || '';
     }
 
     logger.appLogName = path.join(
-      path.dirname(TmpFileName.appLogName) || '.',
+      (path.dirname(TmpFileName.appLogName) || '.'),
       dayjs().format('YYYY-MM-DD') + '.' + path.basename(TmpFileName.appLogName)
     );
     logger.coreLogName = path.join(
-      path.dirname(TmpFileName.coreLogName) || '.',
+      (path.dirname(TmpFileName.coreLogName) || '.'),
       dayjs().format('YYYY-MM-DD') + '.' + path.basename(TmpFileName.coreLogName)
     );
     logger.errorLogName = path.join(
-      path.dirname(TmpFileName.errorLogName) || '.',
+      (path.dirname(TmpFileName.errorLogName) || '.'),
       dayjs().format('YYYY-MM-DD') + '.' + path.basename(TmpFileName.errorLogName)
     );
   }

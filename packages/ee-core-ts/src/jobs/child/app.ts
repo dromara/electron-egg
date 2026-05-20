@@ -61,6 +61,7 @@ class ChildApp {
         instance = this.jobMap.get(jobPath) as Record<string, unknown>;
       }
 
+      // 如果指定了函数名，则调用指定的函数
       if (jobFunc && typeof instance[jobFunc] === 'function') {
         (instance[jobFunc] as (...args: unknown[]) => unknown)(...(jobFuncParams || []));
       } else if (typeof instance.handle === 'function') {

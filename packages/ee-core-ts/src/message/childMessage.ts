@@ -1,11 +1,13 @@
 import { Receiver, Processes } from '../const/channel.js';
 
 export class ChildMessage {
+  // Send a message to the main process for ChildJob instance
   sendToMain(eventName: string, params: Record<string, unknown> = {}): boolean {
     const receiver = Receiver.childJob;
     return this.send(eventName, params, receiver);
   }
 
+  // Send a message to the main process for a task instance
   send(eventName: string, params: Record<string, unknown> = {}, receiver?: string): boolean {
     const eventReceiver = receiver || Receiver.forkProcess;
     const message = {

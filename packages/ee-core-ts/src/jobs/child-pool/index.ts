@@ -102,6 +102,7 @@ export class ChildPoolJob extends EventEmitter {
     return Object.keys(this.children);
   }
 
+  // Post creation processing of child processes
   _childCreated(childProcess: JobProcess): void {
     const pid = childProcess.pid;
     if (pid === undefined) return;
@@ -116,6 +117,7 @@ export class ChildPoolJob extends EventEmitter {
     this.LB.add(lbTask);
   }
 
+  // Execute a job file
   async run(filepath: string, params: Record<string, unknown> = {}): Promise<JobProcess> {
     const jobPath = getFullpath(filepath);
     const childProcess = await this.getChild();
@@ -124,10 +126,12 @@ export class ChildPoolJob extends EventEmitter {
     return childProcess;
   }
 
+  // Asynchronous execution of a job file
   async runPromise(filepath: string, params: Record<string, unknown> = {}): Promise<JobProcess> {
     return this.run(filepath, params);
   }
 
+  // Get the bound process object
   async getBoundChild(boundId: string | number): Promise<JobProcess> {
     let proc: JobProcess | undefined;
     const boundPid = this.boundMap.get(boundId);

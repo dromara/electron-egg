@@ -8,8 +8,12 @@ import { getConfig } from '../../config/index.js';
 
 export { electronApp };
 
+/**
+ * 创建electron应用
+ */
 export function createElectron(): void {
   const { singleLock } = getConfig() as { singleLock: boolean };
+  // 允许多个实例
   const gotTheLock = electronApp.requestSingleInstanceLock();
   if (singleLock && !gotTheLock) {
     electronApp.quit();

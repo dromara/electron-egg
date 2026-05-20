@@ -19,6 +19,7 @@ export class ElectronEgg {
     const environmet = getArgumentByName('env') || 'prod';
     const debugging = getArgumentByName('debuger') === 'true';
 
+    // Debugging source code
     let electronDir = getBundleDir(baseDir);
     if (debugging) {
       electronDir = getElectronCodeDir(baseDir);
@@ -37,10 +38,12 @@ export class ElectronEgg {
       execDir: baseDir,
     };
 
+    // exec directory (exe dmg dep) for prod
     if (environmet === 'prod' && options.isPackaged) {
       options.execDir = path.dirname(electronApp.getPath('exe'));
     }
 
+    // normalize env
     process.env.EE_ENV = environmet;
     process.env.EE_APP_NAME = options.appName;
     process.env.EE_APP_VERSION = options.appVersion;
@@ -60,6 +63,7 @@ export class ElectronEgg {
   }
 
   init(): void {
+    // basic functions
     loadException();
     loadConfig();
     loadDir();

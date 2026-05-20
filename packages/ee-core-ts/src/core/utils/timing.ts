@@ -15,11 +15,13 @@ export class Timing {
   }
 
   init(): void {
+    // process start time
     this.start('Process Start', Date.now() - Math.floor(process.uptime() * 1000));
     this.end('Process Start');
 
     const proc = process as unknown as { scriptStartTime?: number };
     if (typeof proc.scriptStartTime === 'number') {
+      // js script start execute time
       this.start('Script Start', proc.scriptStartTime);
       this.end('Script Start');
     }

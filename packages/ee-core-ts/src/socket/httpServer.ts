@@ -67,7 +67,7 @@ export class HttpServer {
       sslOptions.cert = fs.readFileSync(certFile);
     }
 
-    const url = config.protocol + config.host + ':' + config.port;
+    const url = (config.protocol as string) + (config.host as string) + ':' + config.port;
     const corsOptions = config.cors as Record<string, unknown>;
 
     const koaApp = new Koa();
@@ -84,14 +84,19 @@ export class HttpServer {
     let msg = '[ee-core] [socket/http] server is: ' + url;
     const listenOpt = { host: config.host as string, port: config.port as number };
     if (isHttps) {
-      https.createServer(sslOptions, koaApp.callback()).listen(listenOpt, (err?: Error) => {
-        msg = err ? err.message : msg;
+      const server = https.createServer(sslOptions, koaApp.callback());
+      server.on('error', (err) => {
+        coreLogger.error(`[ee-core] [socket/http] https server error: ${err.message}`);
+      });
+      server.listen(listenOpt, () => {
         coreLogger.info(msg);
       });
     } else {
-      koaApp.listen(listenOpt, (e?: Error) => {
-        msg = e ? e.message : msg;
+      const server = koaApp.listen(listenOpt, () => {
         coreLogger.info(msg);
+      });
+      server.on('error', (err) => {
+        coreLogger.error(`[ee-core] [socket/http] http server error: ${err.message}`);
       });
     }
 

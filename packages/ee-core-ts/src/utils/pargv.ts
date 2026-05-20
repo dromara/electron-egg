@@ -69,28 +69,30 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
     }) ?? false;
   }
 
-  Object.keys(opts.alias || {}).forEach(function (key) {
-    aliases[key] = ([] as string[]).concat(opts.alias![key]);
-    aliases[key].forEach(function (x) {
-      aliases[x] = [key].concat(
-        aliases[key].filter(function (y) {
-          return x !== y;
-        })
-      );
+  const aliasOpts = opts.alias || {};
+  Object.keys(aliasOpts).forEach(function (key) {
+    const aliasValue = aliasOpts[key];
+    if (!aliasValue) return;
+    const aliasList = ([] as string[]).concat(aliasValue);
+    aliases[key] = aliasList;
+    aliasList.forEach(function (x) {
+      const filtered = aliasList.filter(function (y) {
+        return x !== y;
+      });
+      aliases[x] = [key].concat(filtered);
     });
   });
 
-  ([] as string[])
-    .concat(opts.string || [])
-    .filter(Boolean)
-    .forEach(function (key) {
-      flags.strings[key] = true;
-      if (aliases[key]) {
-        ([] as string[]).concat(aliases[key]).forEach(function (k) {
-          flags.strings[k] = true;
-        });
-      }
-    });
+  const stringOpts = opts.string || [];
+  const stringList = ([] as string[]).concat(stringOpts).filter(Boolean);
+  stringList.forEach(function (key) {
+    flags.strings[key] = true;
+    if (aliases[key]) {
+      ([] as string[]).concat(aliases[key]).forEach(function (k) {
+        flags.strings[k] = true;
+      });
+    }
+  });
 
   const defaults = opts.default || {};
 
@@ -111,23 +113,24 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
       const key = keys[i];
       if (!key || isConstructorOrProto(o, key)) return;
       if (o[key] === undefined) o[key] = {};
+      const oValue = o[key];
       if (
-        o[key] === Object.prototype ||
-        o[key] === Number.prototype ||
-        o[key] === String.prototype
+        oValue === Object.prototype ||
+        oValue === Number.prototype ||
+        oValue === String.prototype
       ) {
         o[key] = {};
       }
-      if (o[key] === Array.prototype) o[key] = [];
+      if (oValue === Array.prototype) o[key] = {};
       o = o[key] as Record<string, unknown>;
     }
 
     const lastKey = keys[keys.length - 1];
     if (!lastKey || isConstructorOrProto(o, lastKey)) return;
-    if (o === Object.prototype || o === Number.prototype || o === String.prototype) {
+    if ((o as unknown) === Object.prototype || (o as unknown) === Number.prototype || (o as unknown) === String.prototype) {
       o = {};
     }
-    if (o === Array.prototype) o = [];
+    if ((o as unknown) === Array.prototype) o = {};
     if (o[lastKey] === undefined || flags.bools[lastKey] || typeof o[lastKey] === 'boolean') {
       o[lastKey] = value;
     } else if (Array.isArray(o[lastKey])) {
@@ -164,91 +167,99 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    let key: string;
+    if (!arg) continue;
     let next: string | undefined;
 
     if (/^--.+?=/.test(arg)) {
       const m = arg.match(/^--([^=]+)=([\s\S]*)$/);
       if (!m) continue;
-      key = m[1];
+      const argKey = m[1];
+      if (!argKey) continue;
       let value = m[2];
-      if (flags.bools[key]) {
+      if (flags.bools[argKey]) {
         value = value !== 'false' ? 'true' : 'false';
       }
-      setArg(key, value, arg);
+      setArg(argKey, value, arg);
     } else if (/^--no-.+/.test(arg)) {
       const m = arg.match(/^--no-(.+)$/);
       if (!m) continue;
-      key = m[1];
-      setArg(key, false, arg);
+      const argKey = m[1];
+      if (!argKey) continue;
+      setArg(argKey, false, arg);
     } else if (/^--.+/.test(arg)) {
       const m = arg.match(/^--(.+)$/);
       if (!m) continue;
-      key = m[1];
+      const argKey = m[1];
+      if (!argKey) continue;
       next = args[i + 1];
       if (
         next !== undefined &&
         !/^(-|--)[^-]/.test(next) &&
-        !flags.bools[key] &&
+        !flags.bools[argKey] &&
         !flags.allBools &&
-        (aliases[key] ? !aliasIsBoolean(key) : true)
+        (aliases[argKey] ? !aliasIsBoolean(argKey) : true)
       ) {
-        setArg(key, next, arg);
+        setArg(argKey, next, arg);
         i += 1;
       } else if (next && /^(true|false)$/.test(next)) {
-        setArg(key, next === 'true', arg);
+        setArg(argKey, next === 'true', arg);
         i += 1;
       } else {
-        setArg(key, flags.strings[key] ? '' : true, arg);
+        setArg(argKey, flags.strings[argKey] ? '' : true, arg);
       }
     } else if (/^-[^-]+/.test(arg)) {
       const letters = arg.slice(1, -1).split('');
 
       let broken = false;
       for (let j = 0; j < letters.length; j++) {
+        const letter = letters[j];
+        if (!letter) continue;
         next = arg.slice(j + 2);
 
         if (next === '-') {
-          setArg(letters[j], next, arg);
+          setArg(letter, next, arg);
           continue;
         }
 
-        if (/[A-Za-z]/.test(letters[j]) && next[0] === '=') {
-          setArg(letters[j], next.slice(1), arg);
+        if (/[A-Za-z]/.test(letter) && next && next[0] === '=') {
+          setArg(letter, next.slice(1), arg);
           broken = true;
           break;
         }
 
-        if (/[A-Za-z]/.test(letters[j]) && /-?\d+(\.\d*)?(e-?\d+)?$/.test(next)) {
-          setArg(letters[j], next, arg);
+        if (/[A-Za-z]/.test(letter) && next && /-?\d+(\.\d*)?(e-?\d+)?$/.test(next)) {
+          setArg(letter, next, arg);
           broken = true;
           break;
         }
 
-        if (letters[j + 1] && letters[j + 1].match(/\W/)) {
-          setArg(letters[j], arg.slice(j + 2), arg);
+        const nextLetter = letters[j + 1];
+        if (nextLetter && nextLetter.match(/\W/)) {
+          setArg(letter, arg.slice(j + 2), arg);
           broken = true;
           break;
         } else {
-          setArg(letters[j], flags.strings[letters[j]] ? '' : true, arg);
+          setArg(letter, flags.strings[letter] ? '' : true, arg);
         }
       }
 
-      key = arg.slice(-1)[0];
-      if (!broken && key !== '-') {
+      const lastChar = arg.slice(-1);
+      const shortKey = lastChar;
+      if (!broken && shortKey !== '-') {
+        const nextArg = args[i + 1];
         if (
-          args[i + 1] &&
-          !/^(-|--)[^-]/.test(args[i + 1]) &&
-          !flags.bools[key] &&
-          (aliases[key] ? !aliasIsBoolean(key) : true)
+          nextArg &&
+          !/^(-|--)[^-]/.test(nextArg) &&
+          !flags.bools[shortKey] &&
+          (aliases[shortKey] ? !aliasIsBoolean(shortKey) : true)
         ) {
-          setArg(key, args[i + 1], arg);
+          setArg(shortKey, nextArg, arg);
           i += 1;
-        } else if (args[i + 1] && /^(true|false)$/.test(args[i + 1])) {
-          setArg(key, args[i + 1] === 'true', arg);
+        } else if (nextArg && /^(true|false)$/.test(nextArg)) {
+          setArg(shortKey, nextArg === 'true', arg);
           i += 1;
         } else {
-          setArg(key, flags.strings[key] ? '' : true, arg);
+          setArg(shortKey, flags.strings[shortKey] ? '' : true, arg);
         }
       }
     } else {

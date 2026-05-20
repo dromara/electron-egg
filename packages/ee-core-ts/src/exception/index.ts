@@ -3,11 +3,13 @@ import { isForkedChild, isRenderer, isDev, isMain } from '../ps/index.js';
 import { getConfig } from '../config/index.js';
 import { childMessage } from '../message/index.js';
 
+// 捕获异常
 export function loadException(): void {
   uncaughtExceptionHandler();
   unhandledRejectionHandler();
 }
 
+// 当进程上抛出异常而没有被捕获时触发该事件，并且使异常静默。
 function uncaughtExceptionHandler(): void {
   process.on('uncaughtException', function (err: unknown) {
     let error = err instanceof Error ? err : new Error(String(err));
@@ -22,6 +24,8 @@ function uncaughtExceptionHandler(): void {
   });
 }
 
+// 当promise中reject的异常在同步任务中没有使用catch捕获就会触发该事件，
+// 即便是在异步情况下使用了catch也会触发该事件
 function unhandledRejectionHandler(): void {
   process.on('unhandledRejection', function (err: unknown) {
     let error: Error;

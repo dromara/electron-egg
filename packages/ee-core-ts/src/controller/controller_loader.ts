@@ -15,6 +15,9 @@ export class ControllerLoader {
     this.timing = new Timing();
   }
 
+  /**
+   * Load controller/xxx.js
+   */
   load(): Record<string, unknown> {
     this.timing.start('Load Controller');
 

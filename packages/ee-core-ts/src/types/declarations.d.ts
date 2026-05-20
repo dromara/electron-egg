@@ -2,6 +2,7 @@ declare module 'is-type-of' {
   export function function_(val: unknown): val is (...args: unknown[]) => unknown;
   export function class_(val: unknown): val is new (...args: unknown[]) => unknown;
   export function generatorFunction(val: unknown): val is GeneratorFunction;
+  export function asyncFunction(val: unknown): val is (...args: unknown[]) => Promise<unknown>;
   export function primitive(val: unknown): boolean;
   export function array(val: unknown): val is unknown[];
   export function object(val: unknown): val is Record<string, unknown>;

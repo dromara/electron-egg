@@ -6,6 +6,7 @@ import { getBaseDir, isPackaged, allEnv } from '../../ps/index.js';
 import { Processes, Events, Receiver } from '../../const/channel.js';
 import { getRandomString } from '../../utils/helper.js';
 import { getFullpath } from '../../loader/index.js';
+import { extend } from '../../utils/extend.js';
 import type { JobsConfig } from '../../types/index.js';
 
 export interface JobProcessOptions {
@@ -29,16 +30,6 @@ export interface ProcessMessage {
   eventReceiver: string;
 }
 
-function deepMergeOptions(
-  defaultOpt: JobProcessOptions,
-  userOpt: JobProcessOptions
-): JobProcessOptions {
-  return {
-    processArgs: { ...defaultOpt.processArgs, ...userOpt.processArgs },
-    processOptions: { ...defaultOpt.processOptions, ...userOpt.processOptions },
-  };
-}
-
 export class JobProcess {
   emitter: EventEmitter;
   host: EventEmitter;
@@ -52,6 +43,7 @@ export class JobProcess {
     let cwd = getBaseDir();
     const currentFilePath = typeof __filename !== 'undefined' ? __filename : '';
     const appPath = path.join(path.dirname(currentFilePath), 'app.js');
+    // todo fork的cwd目录为什么要在app.asar外 ？
     if (isPackaged()) {
       cwd = path.join(getBaseDir(), '..');
     }
@@ -61,11 +53,15 @@ export class JobProcess {
       processOptions: {
         cwd,
         env: allEnv(),
-        stdio: 'ignore',
+        stdio: 'ignore', // pipe
       },
     };
 
-    const options = deepMergeOptions(defaultOptions, opt);
+    const options = extend(
+      true,
+      defaultOptions as unknown as Record<string, unknown>,
+      opt as unknown as Record<string, unknown>
+    ) as unknown as JobProcessOptions;
 
     this.emitter = new EventEmitter();
     this.host = host;
@@ -73,6 +69,7 @@ export class JobProcess {
     this.sleeping = false;
     this.config = config;
 
+    // 传递给子进程的参数
     this.args.push(JSON.stringify(options.processArgs));
 
     this.child = fork(appPath, this.args, options.processOptions ?? {});
@@ -91,6 +88,7 @@ export class JobProcess {
         coreLogger.error(`${m.data}`);
       }
 
+      // 收到子进程消息，转发到 event
       if (m.channel === Processes.sendToMain) {
         this._eventEmit(m);
       }
@@ -125,6 +123,7 @@ export class JobProcess {
   }
 
   dispatch(cmd: string, jobPath = '', ...params: unknown[]): void {
+    // 消息对象
     const mid = getRandomString();
     const msg: JobMessage = {
       mid,
@@ -133,11 +132,15 @@ export class JobProcess {
       jobParams: params,
     };
 
+    // todo 是否会发生监听未完成时，接收不到消息？
+    // 发消息到子进程
     this.child.send(msg as Serializable);
   }
 
   callFunc(jobPath = '', funcName = '', ...params: unknown[]): void {
     const fullPath = getFullpath(jobPath);
+
+    // 消息对象
     const mid = getRandomString();
     const msg: JobMessage = {
       mid,

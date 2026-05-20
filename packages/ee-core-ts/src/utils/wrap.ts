@@ -1,6 +1,9 @@
 import is from 'is-type-of';
 
+// convert file path to an array of properties
+// a/b/c.js => ['a', 'b', 'c']
 export function getProperties(filepath: string, { caseStyle }: { caseStyle: string | ((filepath: string) => string[]) }): string[] {
+  // if caseStyle is function, return the result of function
   if (is.function_(caseStyle)) {
     const result = (caseStyle as (filepath: string) => string[])(filepath);
     if (!Array.isArray(result)) {
@@ -8,7 +11,8 @@ export function getProperties(filepath: string, { caseStyle }: { caseStyle: stri
     }
     return result;
   }
-  return defaultCamelize(filepath, caseStyle);
+  // use default camelize
+  return defaultCamelize(filepath, caseStyle as string);
 }
 
 export function defaultCamelize(filepath: string, caseStyle: string): string[] {
@@ -18,6 +22,12 @@ export function defaultCamelize(filepath: string, caseStyle: string): string[] {
       throw new Error(`${property} is not match 'a-z0-9_-' in ${filepath}`);
     }
 
+    // use default camelize, will capitalize the first letter
+    // foo_bar.js > FooBar
+    // fooBar.js  > FooBar
+    // FooBar.js  > FooBar
+    // FooBar.js  > FooBar
+    // FooBar.js  > fooBar
     const normalized = property.replace(/[_-][a-z]/gi, (s) => s.substring(1).toUpperCase());
     const first = normalized[0];
     if (!first) return normalized;

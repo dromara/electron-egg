@@ -12,12 +12,18 @@ const lockedPorts = {
   young: new Set<number>(),
 };
 
+// On this interval, the old locked ports are discarded,
+// the young locked ports are moved to old locked ports,
+// and a new young set for locked ports are created.
 const releaseOldLockedPortsIntervalMs = 1000 * 15;
 
+// Lazily create interval on first use
 let interval: NodeJS.Timeout | undefined;
 
 const getLocalHosts = (): Set<string | undefined> => {
   const interfaces = os.networkInterfaces();
+  // Add undefined value for createServer function to use default host,
+  // and default IPv4 host in case createServer defaults to IPv6.
   const results = new Set<string | undefined>([undefined, '0.0.0.0']);
 
   for (const _interface of Object.values(interfaces)) {
@@ -92,6 +98,7 @@ export async function getPort(options?: GetPortOptions): Promise<number> {
       lockedPorts.young = new Set();
     }, releaseOldLockedPortsIntervalMs);
 
+    // Does not exist in some environments (Electron, Jest jsdom env, browser, etc).
     if (interval.unref) {
       interval.unref();
     }

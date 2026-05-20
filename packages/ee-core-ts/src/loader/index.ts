@@ -4,6 +4,7 @@ import path from 'path';
 import { loadFile as coreLoadFile, isBytecodeClass } from '../core/utils/index.js';
 import { getElectronDir } from '../ps/index.js';
 
+// 加载单个文件(如果是函数，将被执行)
 export function loadFile(filepath: string, ...inject: unknown[]): unknown {
   let fullpath = filepath;
   const isAbsolute = path.isAbsolute(fullpath);
@@ -23,10 +24,12 @@ export function loadFile(filepath: string, ...inject: unknown[]): unknown {
   return ret;
 }
 
+// requireFile
 export function requireFile(filepath: string): unknown {
   return coreLoadFile(filepath);
 }
 
+// 加载并运行文件
 export function execFile(filepath: string, ...inject: unknown[]): unknown {
   let ret = coreLoadFile(filepath);
   if (is.class_(ret) || isBytecodeClass(ret)) {
@@ -37,11 +40,13 @@ export function execFile(filepath: string, ...inject: unknown[]): unknown {
   return ret;
 }
 
+// 模块的绝对路径
 export function resolveModule(filepath: string): string | undefined {
   let fullpath: string | undefined;
   try {
     fullpath = require.resolve(filepath);
   } catch {
+    // 特殊后缀处理
     if (filepath && (filepath.endsWith('.defalut') || filepath.endsWith('.prod'))) {
       fullpath = filepath + '.jsc';
     } else if (filepath && filepath.endsWith('.js')) {
@@ -57,6 +62,7 @@ export function resolveModule(filepath: string): string | undefined {
   return fullpath;
 }
 
+// 获取electron目录下文件的绝对路径
 export function getFullpath(filepath: string): string {
   let fullpath: string | undefined;
   const isAbsolute = path.isAbsolute(filepath);

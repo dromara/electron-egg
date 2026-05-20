@@ -16,7 +16,9 @@ import { readSync } from './json.js';
 import * as is from './is.js';
 
 const { platform } = process;
-const win32RegBinPath = {
+
+// machine id
+const win32RegBinPath: Record<string, string> = {
   native: '%windir%\\System32',
   mixed: '%windir%\\sysnative\\cmd.exe /c %windir%\\System32',
 };
@@ -30,11 +32,14 @@ const MachineGuid: Record<string, string> = {
   freebsd: 'kenv -q smbios.system.uuid || sysctl -n kern.hostuuid',
 };
 
+// 获取项目根目录package.json
 export function getPackage(): unknown {
   const json = readSync(path.join(getBaseDir(), 'package.json'));
   return json;
 }
 
+// Get the first proper MAC address
+// iface: If provided, restrict MAC address fetching to this interface
 export function getMAC(iface?: string): string {
   const zeroRegex = /(?:[0]{1,2}[:-]){5}[0]{1,2}/;
   const list = os.networkInterfaces();
@@ -62,6 +67,7 @@ export function getMAC(iface?: string): string {
   throw new Error('failed to get the MAC address');
 }
 
+// Check if the input is a valid MAC address
 export function isMAC(macAddress: string): boolean {
   const macRegex = /(?:[a-z0-9]{1,2}[:-]){5}[a-z0-9]{1,2}/i;
   return macRegex.test(macAddress);
@@ -81,14 +87,25 @@ export function isJsProject(baseDir: string): boolean {
   return fs.existsSync(entryFile1) || fs.existsSync(entryFile2);
 }
 
+// get machine id
 export function machineIdSync(original = false): string {
-  const id = _expose(execSync(MachineGuid[platform]).toString());
+  const cmd = MachineGuid[platform];
+  if (!cmd) {
+    throw new Error(`Unsupported platform: ${platform}`);
+  }
+  const id = _expose(execSync(cmd).toString());
   return original ? id : _hash(id);
 }
 
+// get machine id (promise)
+// original <Boolean>, If true return original value of machine id, otherwise return hashed value (sha-256), default: false
 export function machineId(original = false): Promise<string> {
   return new Promise((resolve, reject) => {
-    exec(MachineGuid[platform], {}, (err, stdout) => {
+    const cmd = MachineGuid[platform];
+    if (!cmd) {
+      return reject(new Error(`Unsupported platform: ${platform}`));
+    }
+    exec(cmd, {}, (err: Error | null, stdout: string | Buffer) => {
       if (err) {
         return reject(new Error(`Error while obtaining machine id: ${err.stack}`));
       }
@@ -98,6 +115,8 @@ export function machineId(original = false): Promise<string> {
   });
 }
 
+// get platform
+// values:  windows | windows_32 | windows_64 | macos_intel | macos_apple | linux
 export function getPlatform(delimiter = '_', isDiffArch = false): string {
   let osName = '';
   if (is.windows()) {
@@ -125,6 +144,8 @@ export function getPlatform(delimiter = '_', isDiffArch = false): string {
 }
 
 function _isWindowsProcessMixedOrNativeArchitecture(): string {
+  // detect if the node binary is the same arch as the Windows OS.
+  // or if this is 32 bit node on 64 bit windows.
   if (process.platform !== 'win32') {
     return '';
   }
@@ -140,28 +161,25 @@ function _hash(guid: string): string {
 
 function _expose(result: string): string {
   switch (platform) {
-    case 'darwin':
-      return result
-        .split('IOPlatformUUID')[1]
-        .split('\n')[0]
-        .replace(/\=|\s+|"/gi, '')
-        .toLowerCase();
-    case 'win32':
-      return result
-        .toString()
-        .split('REG_SZ')[1]
-        .replace(/\r+|\n+|\s+/gi, '')
-        .toLowerCase();
+    case 'darwin': {
+      const parts = result.split('IOPlatformUUID');
+      const part = parts[1];
+      if (!part) return '';
+      const lines = part.split('\n');
+      const line = lines[0];
+      if (!line) return '';
+      return line.replace(/\=|\s+|"/gi, '').toLowerCase();
+    }
+    case 'win32': {
+      const parts = result.toString().split('REG_SZ');
+      const part = parts[1];
+      if (!part) return '';
+      return part.replace(/\r+|\n+|\s+/gi, '').toLowerCase();
+    }
     case 'linux':
-      return result
-        .toString()
-        .replace(/\r+|\n+|\s+/gi, '')
-        .toLowerCase();
+      return result.toString().replace(/\r+|\n+|\s+/gi, '').toLowerCase();
     case 'freebsd':
-      return result
-        .toString()
-        .replace(/\r+|\n+|\s+/gi, '')
-        .toLowerCase();
+      return result.toString().replace(/\r+|\n+|\s+/gi, '').toLowerCase();
     default:
       throw new Error(`Unsupported platform: ${process.platform}`);
   }

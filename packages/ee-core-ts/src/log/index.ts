@@ -3,6 +3,7 @@ import { create } from './logger.js';
 
 let loggers: EggLoggers | null = null;
 
+// 加载日志
 export function loadLog(): void {
   loggers = create();
 }
