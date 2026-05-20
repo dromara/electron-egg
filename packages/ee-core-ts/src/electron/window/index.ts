@@ -108,69 +108,94 @@ export async function loadServer(): Promise<void> {
       load = 'file';
     }
 
+    // Check if UI serve is started, load a boot page first
     if (load === 'url') {
+      // loading page
       let lp = getHtmlFilepath('boot.html');
       if (electronConf.loadingPage) {
         lp = path.join(getBaseDir(), electronConf.loadingPage as string);
       }
       _loadingPage(lp);
 
+      // check frontend is ready
       const retryTimes = frontendConf.force === true ? 3 : 60;
       let count = 0;
-      while (count < retryTimes) {
+      let frontendReady = false;
+      while (!frontendReady && count < retryTimes) {
+        await sleep(1 * 1000);
         try {
-          await sleep(1000);
-          const res = await fetch(url);
-          if (res.status === 200) {
-            loadMainUrl('url', url);
-            break;
-          }
-        } catch {
+          await axios({
+            method: 'get',
+            url,
+            timeout: 1000,
+            proxy: false,
+            headers: {
+              'Accept': 'text/html, application/json, text/plain, */*',
+            },
+          });
+          frontendReady = true;
+        } catch (err) {
           // ignore
         }
         count++;
       }
+      debugLog('it takes %d seconds to start the frontend', count);
 
-      if (count >= retryTimes) {
-        const failurePage = getHtmlFilepath('failure.html');
-        _loadingPage(failurePage);
+      if (frontendReady === false && frontendConf.force !== true) {
+        const bootFailurePage = getHtmlFilepath('failure.html');
+        const win = getMainWindow();
+        if (win) {
+          win.loadFile(bootFailurePage);
+        }
+        coreLogger.error(`[ee-core] Please check the ${url} !`);
+        return;
       }
-    } else {
-      loadMainUrl('file', url);
-    }
-  } else {
-    // 生产环境
-    // cross takeover web
-    if (mainServer.takeover && mainServer.takeover.length > 0) {
-      await crossTakeover();
-      return;
     }
 
-    // 主进程
-    const indexPath = mainServer.indexPath;
-    let url = path.join(getBaseDir(), indexPath);
-    if (!isFileProtocol(mainServer.protocol)) {
-      url = mainServer.protocol + indexPath;
-    }
-    loadMainUrl('file', url);
+    loadMainUrl('spa', url, load);
+    return;
   }
+
+  // 生产环境
+  // cross takeover web
+  if (mainServer.takeover && mainServer.takeover.length > 0) {
+    await crossTakeover();
+    return;
+  }
+
+  // 主进程
+  const indexPath = mainServer.indexPath;
+  let prodUrl = path.join(getBaseDir(), indexPath);
+  if (!isFileProtocol(mainServer.protocol)) {
+    prodUrl = mainServer.protocol + indexPath;
+  }
+  loadMainUrl('spa', prodUrl, 'file');
 }
 
 /**
  * 主服务
  * @params load <string> value: "url" 、 "file"
  */
-function loadMainUrl(type: string, url: string): void {
+function loadMainUrl(type: string, url: string, load = 'url'): void {
+  const { mainServer } = getConfig() as { mainServer: { options: Electron.LoadURLOptions & Electron.LoadFileOptions } };
   const win = getMainWindow();
   if (!win) return;
 
   coreLogger.info('[ee-core] Env: %s, Type: %s', env(), type);
   coreLogger.info('[ee-core] App running at: %s', url);
   debugLog('[loadMainUrl] type:%s, url:%s', type, url);
-  if (type === 'file') {
-    win.loadFile(url);
+  if (load === 'file') {
+    win.loadFile(url, mainServer.options)
+      .then()
+      .catch((err) => {
+        coreLogger.error(`[ee-core] Please check the ${url} !`, err);
+      });
   } else {
-    win.loadURL(url);
+    win.loadURL(url, mainServer.options)
+      .then()
+      .catch((err) => {
+        coreLogger.error(`[ee-core] Please check the ${url} !`, err);
+      });
   }
 }
 

@@ -1,110 +1,158 @@
-import debug from 'debug';
-import path from 'path';
-import { fork } from 'child_process';
-import { getExtraResourcesDir, isDev, getBaseDir } from '../ps/index.js';
-import { coreLogger } from '../log/index.js';
-import { getValueFromArgv } from '../utils/helper.js';
-import type { JobChildOptions } from '../types/index.js';
+import EventEmitter from 'events';
+import { getConfig } from '../config/index.js';
+import { getValueFromArgv, replaceArgsValue } from '../utils/helper.js';
+import { CrossProcess, CrossTargetConfig } from './crossProcess.js';
+import { Events } from '../const/channel.js';
+import { extend } from '../utils/extend.js';
+import { getPort } from '../utils/port/index.js';
 
-const debugLog = debug('ee-core:cross');
+export interface CrossRunOptions {
+  [key: string]: unknown;
+  args?: string[];
+  port?: number;
+}
 
 export class Cross {
+  emitter: EventEmitter | undefined;
+
   // pid唯一
   // {pid:{name,entity}, pid:{name,entity}, ...}
-  private jobPool: Map<string, { process: ReturnType<typeof fork> | null; opt: JobChildOptions }> = new Map();
+  private children: Record<string, { name: string; entity: CrossProcess }>;
 
-  createJob(name: string, opt: JobChildOptions): ReturnType<typeof fork> | null {
-    let childProcess: ReturnType<typeof fork> | null = null;
-    let cmd = '';
-    if (isDev()) {
-      cmd = path.join(getBaseDir(), opt.script);
-    } else {
-      cmd = path.join(getExtraResourcesDir(), opt.script);
+  // name唯一
+  // {name:pid, name:pid, ...}
+  private childrenMap: Record<string, number>;
+
+  constructor() {
+    this.emitter = undefined;
+    this.children = {};
+    this.childrenMap = {};
+    this._initEventEmitter();
+  }
+
+  async create(): Promise<void> {
+    // boot services
+    const crossCfg = getConfig().cross as Record<string, CrossTargetConfig>;
+    //await sleep(5 * 1000);
+    
+    for (const key of Object.keys(crossCfg)) {
+      const val = crossCfg[key];
+      if (val && val.enable === true) {
+        this.run(key);
+      }
+    }
+  }
+
+  // run
+  async run(service: string, opt: CrossRunOptions = {}): Promise<CrossProcess> {
+    const crossConf = getConfig().cross as Record<string, CrossTargetConfig>;
+    const defaultOpt = crossConf[service] || {};
+    const targetConf = extend(true, {}, defaultOpt, opt) as unknown as CrossTargetConfig;
+    if (Object.keys(targetConf).length === 0) {
+      throw new Error(`[ee-core] [cross] The service [${service}] config does not exit`);
     }
 
-    const args = opt.args || [];
-    const execArgv = process.execArgv;
-    const options = {
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc'] as ('pipe' | 'ipc')[],
-      env: { ...process.env, ...(opt.env || {}) },
-      execArgv,
-    };
+    // format params
+    const tmpArgs = targetConf.args || [];
+    let confPort = parseInt(String(getValueFromArgv(tmpArgs, 'port') || '0'), 10);
+    // 某些程序给它传入不存在的参数时会报错
+    if (isNaN(confPort) && (targetConf.port || 0) > 0) {
+      confPort = targetConf.port || 0;
+    }
+    if (confPort > 0) {
+      // 动态生成port，传入的端口必须为int
+      confPort = await getPort({ port: confPort });
+      // 替换port
+      targetConf.args = replaceArgsValue(tmpArgs, 'port', String(confPort));
+    }
 
     // 创建进程
-    try {
-      childProcess = fork(cmd, args, options);
-    } catch (e) {
-      debugLog('[createJob] fork error:', e);
-      coreLogger.error('[createJob] fork error:', e);
+    const subProcess = new CrossProcess(this, { targetConf, port: confPort });
+    let uniqueName = targetConf.name;
+    if (Object.prototype.hasOwnProperty.call(this.childrenMap, uniqueName)) {
+      uniqueName = uniqueName + '-' + String(subProcess.pid);
     }
+    this.childrenMap[uniqueName] = subProcess.pid;
+    subProcess.name = uniqueName;
+    this.children[subProcess.pid] = {
+      name: uniqueName,
+      entity: subProcess,
+    };
 
-    if (childProcess) {
-      childProcess.on('exit', (code, signal) => {
-        debugLog(`[createJob] child process exited with code ${code} and signal ${signal}`);
-        this.jobPool.delete(name);
-      });
-      this.jobPool.set(name, { process: childProcess, opt });
-    }
-
-    return childProcess;
+    return subProcess;
   }
 
   killAll(): void {
-    for (const [name, item] of this.jobPool) {
-      if (item.process) {
-        item.process.kill();
-        debugLog(`[killAll] kill job ${name}`);
-      }
-    }
-    this.jobPool.clear();
+    Object.keys(this.children).forEach((pid) => {
+      this.kill(pid);
+    });
   }
 
-  kill(name: string): void {
-    const item = this.jobPool.get(name);
-    if (item?.process) {
-      item.process.kill();
-      this.jobPool.delete(name);
+  kill(pid: string | number): void {
+    const entity = this.getProc(pid);
+    if (entity) {
+      entity.kill();
     }
+  }
+
+  killByName(name: string): void {
+    const entity = this.getProcByName(name);
+    if (entity) {
+      entity.kill();
+    }
+  }
+
+  getUrl(name: string): string {
+    const entity = this.getProcByName(name);
+    const url = entity.getUrl();
+
+    return url;
   }
 
   // 获取 proc
-  getJob(name: string): ReturnType<typeof fork> | null {
-    return this.jobPool.get(name)?.process || null;
+  getProcByName(name: string): CrossProcess {
+    // [todo] 如果有名字一样的服务，需要加 pid
+    const pid = this.childrenMap[name];
+    if (!pid) {
+      throw new Error(`[ee-core] [cross] The process named [${name}] does not exit`);
+    }
+    const entity = this.getProc(pid);
+
+    return entity;
+  }
+
+  // 获取 proc
+  getProc(pid: string | number): CrossProcess {
+    const child = this.children[String(pid)];
+    if (!child) {
+      throw new Error(`[ee-core] [cross] The process pid [${pid}] does not exit`);
+    }
+
+    return child.entity;
   }
 
   // 获取pids
-  getAllJobs(): Map<string, { process: ReturnType<typeof fork> | null; opt: JobChildOptions }> {
-    return this.jobPool;
+  getPids(): string[] {
+    const pids = Object.keys(this.children);
+    return pids;
   }
 
-  // 获取服务url
-  getUrl(name: string): string {
-    const item = this.jobPool.get(name);
-    if (!item) {
-      throw new Error(`[ee-core] [cross] The process named [${name}] does not exist`);
-    }
-
-    const opt = item.opt;
-    const args = opt.args || [];
-    const ssl = getValueFromArgv(args, 'ssl');
-    let hostname = getValueFromArgv(args, 'hostname') as string | undefined;
-    let protocol = 'http://';
-    if (ssl && (ssl === 'true' || ssl === '1')) {
-      protocol = 'https://';
-    }
-    hostname = hostname || '127.0.0.1';
-
-    // 从args中解析port，如果没有则使用opt.port
-    let port = getValueFromArgv(args, 'port') as string | number | undefined;
-    if (!port && opt.port) {
-      port = opt.port;
-    }
-    if (!port) {
-      throw new Error(`[ee-core] [cross] The process named [${name}] port does not exist`);
-    }
-
-    const url = protocol + hostname + ':' + port;
-    return url;
+  _initEventEmitter(): void {
+    this.emitter = new EventEmitter();
+    this.emitter.on(Events.childProcessExit, (data: { pid: number }) => {
+      const child = this.children[String(data.pid)];
+      if (child) {
+        delete this.childrenMap[child.name];
+        delete this.children[String(data.pid)];
+      }
+    });
+    this.emitter.on(Events.childProcessError, (data: { pid: number }) => {
+      const child = this.children[String(data.pid)];
+      if (child) {
+        delete this.childrenMap[child.name];
+        delete this.children[String(data.pid)];
+      }
+    });
   }
 }
 

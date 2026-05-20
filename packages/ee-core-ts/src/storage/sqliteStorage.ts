@@ -81,6 +81,7 @@ export class SqliteStorage {
 
     assert(path.extname(name) === '.db', `error: db ${name} file ext name must be .db`);
 
+    // 路径模式
     const normalized = name.replace(/[/\\]/g, '/');
     if (normalized.indexOf('/') !== -1) {
       return path.isAbsolute(name) ? 'absolute' : 'relative';

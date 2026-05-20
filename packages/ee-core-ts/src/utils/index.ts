@@ -5,6 +5,7 @@ export * from './pargv.js';
 export * from './wrap.js';
 export * from './helper.js';
 export * from './port/index.js';
+export { publicIpv4, publicIpv6 } from './ip.js';
 
 import os from 'os';
 import path from 'path';

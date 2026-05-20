@@ -49,6 +49,39 @@ declare module 'urllib' {
   export function curl(url: string, options?: Record<string, unknown>): Promise<{ data: Buffer; res: { status: number; headers: Record<string, string> } }>;
 }
 
+declare module 'dns-socket' {
+  import type { Socket } from 'dgram';
+
+  interface DnsSocketOptions {
+    retries?: number;
+    maxQueries?: number;
+    socket: Socket;
+    timeout?: number;
+  }
+
+  interface DnsQuestion {
+    name: string;
+    type: string;
+  }
+
+  interface DnsAnswer {
+    data: string | Buffer;
+  }
+
+  interface DnsResponse {
+    answers: DnsAnswer[];
+  }
+
+  class DnsSocket {
+    destroyed: boolean;
+    query(query: { questions: DnsQuestion[] }, port: number, server: string): Promise<DnsResponse>;
+    destroy(): void;
+  }
+
+  function createDnsSocket(options: DnsSocketOptions): DnsSocket;
+  export = createDnsSocket;
+}
+
 declare module 'bytenode' {
   // bytenode has minimal exports
 }

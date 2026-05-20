@@ -78,7 +78,9 @@ function _exit(): void {
   }
 }
 
+// 捕获异常后是否退出
 function _delayExit(): void {
+  // 等待日志等异步写入完成
   setTimeout(() => {
     process.exit();
   }, 1500);

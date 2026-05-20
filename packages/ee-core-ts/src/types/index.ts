@@ -142,7 +142,7 @@ export interface TimingItem {
 export interface FileLoaderOptions {
   caseStyle?: 'lower' | 'upper' | 'camel' | ((filepath: string) => string[]);
   directory: string;
-  initializer?: (obj: unknown, options: { pathName: string; path: string }) => unknown;
+  initializer?: ((obj: unknown, options: { pathName: string; path: string }) => unknown) | null;
   call?: boolean;
   override?: boolean;
   inject?: unknown;

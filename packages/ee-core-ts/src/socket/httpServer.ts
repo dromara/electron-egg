@@ -72,13 +72,16 @@ export class HttpServer {
 
     const koaApp = new Koa();
 
+    // 设置错误处理器，便于统一错误代码处理
     this._setupErrorHandler(koaApp, errorHandler);
+    // 加载前置中间件
     this._loadMiddlewares(koaApp, preMiddleware, 'pre');
 
+    // 核心中间件
     koaApp.use(cors(corsOptions as Parameters<typeof cors>[0]));
     koaApp.use(koaBody(config.body as Parameters<typeof koaBody>[0]));
     koaApp.use(this._dispatch.bind(this));
-
+    // 加载后置中间件
     this._loadMiddlewares(koaApp, postMiddleware, 'post');
 
     let msg = '[ee-core] [socket/http] server is: ' + url;
@@ -117,9 +120,12 @@ export class HttpServer {
     ctx.response.status = 200;
 
     try {
+      // 找函数
+      // 去除开头的 '/'
       if (uriPath.indexOf('/') === 0) {
         uriPath = uriPath.substring(1);
       }
+      // 过滤
       if (_.includes(filterRequest.uris, uriPath)) {
         ctx.response.body = filterRequest.returnData;
         await next();
@@ -157,16 +163,26 @@ export class HttpServer {
     return this.httpApp;
   }
 
+  // 设置错误处理函数
   _setupErrorHandler(app: Koa, errorHandler: ((err: Error) => void) | null): void {
     if (is.function_(errorHandler)) {
       app.on('error', errorHandler);
     }
   }
 
+  /**
+   * 加载前置、后置中间件
+   * @param {*} app koaApp示例
+   * @param {*} middlewares 中间件数组
+   * @param {*} type 类型，pre/post
+   */
   _loadMiddlewares(app: Koa, middlewares: unknown[] = [], type = 'pre'): void {
     if (is.array(middlewares)) {
       middlewares.forEach((middleware) => {
         if (is.function_(middleware)) {
+          // middleware是一个方法
+          // 返回值是中间件(ctx, next) => {}的异步函数
+          // 便于使用async/await进行同步编程
           app.use((middleware as () => Koa.Middleware)());
         } else {
           coreLogger.warn(`[ee-core/httpServer] Invalid ${type} middleware detected, skipping.`);

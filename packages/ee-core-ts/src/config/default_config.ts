@@ -40,21 +40,21 @@ export default function defaultConfig(): Record<string, unknown> {
       rotator: 'day',
     },
     socketServer: {
-      enable: false,
-      port: 7070,
-      path: '/socket.io/',
-      connectTimeout: 45000,
-      pingTimeout: 30000,
-      pingInterval: 25000,
-      maxHttpBufferSize: 1e8,
-      transports: ['polling', 'websocket'],
+      enable: false, // is it enabled
+      port: 7070, // default port (if the port is in use, randomly select one)
+      path: "/socket.io/", // path
+      connectTimeout: 45000, // client connection timeout
+      pingTimeout: 30000, // heartbeat detection timeout
+      pingInterval: 25000, // heartbeat detection interval
+      maxHttpBufferSize: 1e8, // the data size of each message 1M
+      transports: ["polling", "websocket"], // http polling or websocket
       cors: {
-        origin: true,
+        origin: true, // http协议时，要设置跨域 类型 Boolean String RegExp Array Function
       },
       channel: SocketIO.partySoftware,
     },
     httpServer: {
-      enable: false,
+      enable: false, // is it enabled
       https: {
         enable: false,
         key: '/public/ssl/localhost+1.key',
@@ -62,7 +62,7 @@ export default function defaultConfig(): Record<string, unknown> {
       },
       protocol: 'http://',
       host: '127.0.0.1',
-      port: 7071,
+      port: 7071, // Default port (if the port is in use, randomly select one)
       cors: {
         origin: '*',
       },

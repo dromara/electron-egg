@@ -1,10 +1,13 @@
+import dayjs from 'dayjs';
 import { EggLoggers } from 'egg-logger';
 import { create } from './logger.js';
 
 let loggers: EggLoggers | null = null;
+let logDate = 0;
 
 // 创建日志实例
 export function createLog(config?: Record<string, unknown>): EggLoggers {
+  _delCache();
   return create(config);
 }
 
@@ -13,7 +16,16 @@ export function loadLog(): void {
   loggers = create();
 }
 
+function _delCache(): void {
+  const now = parseInt(dayjs().format('YYYYMMDD'), 10);
+  if (logDate !== now) {
+    logDate = now;
+    loggers = null;
+  }
+}
+
 export function getLoggers(): EggLoggers {
+  _delCache();
   if (!loggers) {
     loadLog();
   }
@@ -21,6 +33,7 @@ export function getLoggers(): EggLoggers {
 }
 
 function getCoreLoggers(): EggLoggers {
+  _delCache();
   if (!loggers) {
     loadLog();
   }

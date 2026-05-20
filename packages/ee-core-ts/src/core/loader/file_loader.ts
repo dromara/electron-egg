@@ -20,6 +20,7 @@ interface LoaderItem {
 
 const defaults = {
   caseStyle: 'camel' as const,
+  initializer: null as ((obj: unknown, options: { pathName: string; path: string }) => unknown) | null,
   call: true,
   inject: undefined,
   target: null as Record<string, unknown> | null,
@@ -122,10 +123,12 @@ export class FileLoader {
         // get properties
         // controller/foo/bar.js => [ 'foo', 'bar' ]
         const properties = getProperties(filepath, { caseStyle: this.options.caseStyle! });
+        // debugLog('[parse] properties %o', properties);
         // controller/foo/bar.js => controller.foo.bar
         const dirName = directory.split(/[/\\]/).slice(-1)[0];
         const pathName = dirName + '.' + properties.join('.');
-
+        // debugLog('[parse] pathName %s', pathName);
+        // get exports from the file
         let exports = loadFile(fullpath);
         // ignore exports when it's null or false returned by filter function
         if (exports == null) continue;

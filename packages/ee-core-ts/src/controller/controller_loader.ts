@@ -40,16 +40,22 @@ export class ControllerLoader {
   }
 }
 
+// wrap the class, yield a object with middlewares
 function wrapClass(Controller: new (...args: unknown[]) => unknown): Record<string, unknown> {
   let proto = (Controller as unknown as { prototype: Record<string, unknown> }).prototype;
   const ret: Record<string, unknown> = {};
 
+  // tracing the prototype chain
   while (proto !== Object.prototype) {
     const keys = Object.getOwnPropertyNames(proto);
+    // debugLog("[wrapClass] keys:", keys);
     for (const key of keys) {
+      // getOwnPropertyNames will return constructor
+      // that should be ignored
       if (key === 'constructor') continue;
-
+      // skip getter, setter & non-function properties
       const d = Object.getOwnPropertyDescriptor(proto, key);
+      // prevent to override sub method
       if (is.function_(d?.value) && !Object.prototype.hasOwnProperty.call(ret, key)) {
         ret[key] = methodToMiddleware(Controller, key);
         (ret[key] as Record<symbol, string>)[FULLPATH] =

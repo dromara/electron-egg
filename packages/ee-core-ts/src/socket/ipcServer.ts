@@ -26,6 +26,7 @@ export class IpcServer {
 
   loop(obj: Record<string, unknown>, pathname: string): void {
     const keys = Object.keys(obj);
+    // debugLog("[loop] keys: %j", keys);
     for (const key of keys) {
       if (key === 'constructor') continue;
 
