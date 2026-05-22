@@ -1,7 +1,7 @@
 import debug from 'debug';
 import path from 'path';
 import fs from 'fs';
-import chalk from 'chalk/index.js';
+import chalk from 'chalk';
 import is from 'is-type-of';
 import { loadTsConfig } from 'config-file-ts';
 import JsonLib from 'json5';

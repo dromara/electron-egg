@@ -5,7 +5,7 @@ import is from 'is-type-of';
 import bytenode from 'bytenode';
 import JavaScriptObfuscator from 'javascript-obfuscator';
 import globby from 'globby';
-import chalk from 'chalk/index.js';
+import chalk from 'chalk';
 import { loadConfig } from '../lib/utils.js';
 import { extend } from '../lib/extend.js';
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { program, Command } from 'commander';
-import chalk from 'chalk/index.js';
+import chalk from 'chalk';
 import { serveProcess } from './tools/serve.js';
 import { move } from './tools/move.js';
 import { encrypt, cleanEncrypt } from './tools/encrypt.js';
