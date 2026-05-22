@@ -112,7 +112,7 @@ class ServeProcess {
           }
           debounceTimer = setTimeout(async () => {
             console.log(chalk.blue('[ee-bin] [dev] ') + `Restart ${cmd}`);
-            this.bundle((binCfg.build || {}) as Record<string, unknown>);
+            this.bundle((binCfg.build as Record<string, unknown>)?.electron as Record<string, unknown>);
             const subProcess = this.execProcess[cmd];
             if (subProcess && subProcess.pid) {
               kill(subProcess.pid, 'SIGKILL', (err) => {
@@ -134,7 +134,7 @@ class ServeProcess {
         });
       }
 
-      this.bundle((binCfg.build || {}) as Record<string, unknown>);
+      this.bundle((binCfg.build as Record<string, unknown>)?.electron as Record<string, unknown>);
     }
 
     this.multiExec(opt);
@@ -176,7 +176,7 @@ class ServeProcess {
 
     const commands = this._formatCmds(cmds);
     if (commands.indexOf('electron') !== -1) {
-      this.bundle((binCfg.build || {}) as Record<string, unknown>);
+      this.bundle((binCfg.build as Record<string, unknown>)?.electron as Record<string, unknown>);
       const index = commands.indexOf('electron');
       commands.splice(index, 1);
       cmds = commands.join(',');
