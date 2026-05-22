@@ -60,7 +60,7 @@ export class IpcServer {
           event.returnValue = result;
           event.reply(channel, result);
         } catch (e) {
-          coreLogger.error('[ee-core] [socket/IpcServer] send/on throw error:', e);
+          coreLogger.error('[socket/IpcServer] send/on throw error:', e);
         }
       });
 
@@ -71,7 +71,7 @@ export class IpcServer {
           if (!fn) return undefined;
           return await fn.call(controller, params, event);
         } catch (e) {
-          coreLogger.error('[ee-core] [socket/IpcServer] invoke/handle throw error:', e);
+          coreLogger.error('[socket/IpcServer] invoke/handle throw error:', e);
           return undefined;
         }
       });
@@ -96,7 +96,7 @@ export class IpcServer {
       if (!fn) throw new Error('function not exists');
       return fn;
     } catch (err) {
-      coreLogger.error('[ee-core] [socket/IpcServer] throw error:', err);
+      coreLogger.error('[socket/IpcServer] throw error:', err);
       return null;
     }
   }

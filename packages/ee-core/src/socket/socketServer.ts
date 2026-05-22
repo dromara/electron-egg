@@ -34,7 +34,7 @@ export class SocketServer {
     if (!port) {
       throw new Error('[ee-core] [socket/socketServer] socekt port required, and must be a number !');
     }
-    coreLogger.info('[ee-core] [socket/socketServer] port is:', port);
+    coreLogger.info('[socket/socketServer] port is:', port);
 
     process.env.EE_SOCKET_PORT = String(port);
     this.config.port = port;
@@ -50,7 +50,7 @@ export class SocketServer {
       const channel = (this.config.channel as string) || SocketIO.partySoftware;
       this.socket = socket as unknown as ReturnType<Server['on']>;
       socket.on(channel, async (message: { cmd: string; args: unknown }, callback: (result: unknown) => void) => {
-        coreLogger.info('[ee-core] [socket/socketServer] socket id:' + socket.id + ' message cmd: ' + message.cmd);
+        coreLogger.info('[socket/socketServer] socket id:' + socket.id + ' message cmd: ' + message.cmd);
 
         try {
           const cmd = message.cmd;
@@ -74,7 +74,7 @@ export class SocketServer {
             callback(result);
           }
         } catch (err) {
-          coreLogger.error('[ee-core] [socket/socketServer] throw error:', err);
+          coreLogger.error('[socket/socketServer] throw error:', err);
         }
       });
     });

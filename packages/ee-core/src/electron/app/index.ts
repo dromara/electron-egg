@@ -28,7 +28,7 @@ export function createElectron(): void {
 
   electronApp.on('window-all-closed', () => {
     if (!is.macOS()) {
-      coreLogger.info('[ee-core] [lib/eeApp] window-all-closed quit');
+      coreLogger.info('[lib/eeApp] window-all-closed quit');
       electronApp.quit();
     }
   });

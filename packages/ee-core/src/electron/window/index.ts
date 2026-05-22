@@ -147,7 +147,7 @@ export async function loadServer(): Promise<void> {
         if (win) {
           win.loadFile(bootFailurePage);
         }
-        coreLogger.error(`[ee-core] Please check the ${url} !`);
+        coreLogger.error(`Please check the ${url} !`);
         return;
       }
     }
@@ -181,20 +181,20 @@ function loadMainUrl(type: string, url: string, load = 'url'): void {
   const win = getMainWindow();
   if (!win) return;
 
-  coreLogger.info('[ee-core] Env: %s, Type: %s', env(), type);
-  coreLogger.info('[ee-core] App running at: %s', url);
+  coreLogger.info('Env: %s, Type: %s', env(), type);
+  coreLogger.info('App running at: %s', url);
   debugLog('[loadMainUrl] type:%s, url:%s', type, url);
   if (load === 'file') {
     win.loadFile(url, mainServer.options)
       .then()
       .catch((err) => {
-        coreLogger.error(`[ee-core] Please check the ${url} !`, err);
+        coreLogger.error(`Please check the ${url} !`, err);
       });
   } else {
     win.loadURL(url, mainServer.options)
       .then()
       .catch((err) => {
-        coreLogger.error(`[ee-core] Please check the ${url} !`, err);
+        coreLogger.error(`Please check the ${url} !`, err);
       });
   }
 }
@@ -271,6 +271,6 @@ async function crossTakeover(): Promise<void> {
     throw new Error(`[ee-core] Please check cross service [${service}] ${url} !`);
   }
 
-  coreLogger.info(`[ee-core] cross service [${service}] is started successfully`);
+  coreLogger.info(`cross service [${service}] is started successfully`);
   loadMainUrl('spa', url);
 }

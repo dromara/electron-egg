@@ -84,12 +84,12 @@ export class HttpServer {
     // 加载后置中间件
     this._loadMiddlewares(koaApp, postMiddleware, 'post');
 
-    let msg = '[ee-core] [socket/http] server is: ' + url;
+    let msg = '[socket/http] server is: ' + url;
     const listenOpt = { host: config.host as string, port: config.port as number };
     if (isHttps) {
       const server = https.createServer(sslOptions, koaApp.callback());
       server.on('error', (err) => {
-        coreLogger.error(`[ee-core] [socket/http] https server error: ${err.message}`);
+        coreLogger.error(`[socket/http] https server error: ${err.message}`);
       });
       server.listen(listenOpt, () => {
         coreLogger.info(msg);
@@ -99,7 +99,7 @@ export class HttpServer {
         coreLogger.info(msg);
       });
       server.on('error', (err) => {
-        coreLogger.error(`[ee-core] [socket/http] http server error: ${err.message}`);
+        coreLogger.error(`[socket/http] http server error: ${err.message}`);
       });
     }
 
@@ -153,7 +153,7 @@ export class HttpServer {
       const result = await fn.call(controller, args, ctx);
       ctx.response.body = result;
     } catch (err) {
-      coreLogger.error('[ee-core/httpServer] throw error:', err);
+      coreLogger.error('[httpServer] throw error:', err);
     }
 
     await next();

@@ -106,7 +106,7 @@ export class CrossProcess {
       execDir = getExtraResourcesDir();
     }
 
-    coreLogger.info(`[ee-core] [cross/run] cmd: ${cmdPath}, args: ${cmdArgs}`);
+    coreLogger.info(`[cross/run] cmd: ${cmdPath}, args: ${cmdArgs}`);
     const coreProcess = crossSpawn(cmdPath, cmdArgs, {
       stdio: standardOutput,
       detached: false,
@@ -120,7 +120,7 @@ export class CrossProcess {
       this.host.emitter?.emit(Events.childProcessExit, data);
       // Child process closed: The child process was killed externally or an internal error caused the application to stop, resulting in the application exiting
       coreLogger.info(
-        `[ee-core] [cross/process] received a exit from child-process, code:${code}, signal:${signal}, pid:${this.pid}, cmd:${cmdPath}, args: ${cmdArgs}`
+        `[cross/process] received a exit from child-process, code:${code}, signal:${signal}, pid:${this.pid}, cmd:${cmdPath}, args: ${cmdArgs}`
       );
       this._exitElectron();
     });
@@ -129,7 +129,7 @@ export class CrossProcess {
       const data = { pid: this.pid };
       this.host.emitter?.emit(Events.childProcessError, data);
       coreLogger.error(
-        `[ee-core] [cross/process] received a error from child-process, error: ${err}, pid:${this.pid}`
+        `[cross/process] received a error from child-process, error: ${err}, pid:${this.pid}`
       );
       this._exitElectron();
     });
@@ -142,7 +142,7 @@ export class CrossProcess {
     tkill(this.pid, 'SIGINT', (err: Error | undefined) => {
       if (err) {
         coreLogger.error(
-          `[ee-core] [cross/process] kill cross-process, error: ${err}, pid:${this.pid}`
+          `[cross/process] kill cross-process, error: ${err}, pid:${this.pid}`
         );
         tkill(this.pid, 'SIGKILL');
       }

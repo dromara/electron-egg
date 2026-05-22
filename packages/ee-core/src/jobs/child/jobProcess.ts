@@ -81,7 +81,7 @@ export class JobProcess {
     const { messageLog } = this.config;
     this.child.on('message', (m: ProcessMessage) => {
       if (messageLog) {
-        coreLogger.info(`[ee-core] [jobs/child] received a message from child-process, message: ${JSON.stringify(m)}`);
+        coreLogger.info(`[jobs/child] received a message from child-process, message: ${JSON.stringify(m)}`);
       }
 
       if (m.channel === Processes.showException) {
@@ -97,13 +97,13 @@ export class JobProcess {
     this.child.on('exit', (code: number | null, signal: string | null) => {
       const data = { pid: this.pid };
       this.host.emit(Events.childProcessExit, data);
-      coreLogger.info(`[ee-core] [jobs/child] received a exit from child-process, code:${code}, signal:${signal}, pid:${this.pid}`);
+      coreLogger.info(`[jobs/child] received a exit from child-process, code:${code}, signal:${signal}, pid:${this.pid}`);
     });
 
     this.child.on('error', (err: Error) => {
       const data = { pid: this.pid };
       this.host.emit(Events.childProcessError, data);
-      coreLogger.error(`[ee-core] [jobs/child] received a error from child-process, error: ${err}, pid:${this.pid}`);
+      coreLogger.error(`[jobs/child] received a error from child-process, error: ${err}, pid:${this.pid}`);
     });
   }
 

@@ -23,7 +23,7 @@ class ChildApp {
   _initEvents(): void {
     process.on('message', this._handleMessage.bind(this));
     process.once('exit', (code: number | null) => {
-      coreLogger.info(`[ee-core] [jobs/child] received a exit from main-process, code:${code}, pid:${process.pid}`);
+      coreLogger.info(`[jobs/child] received a exit from main-process, code:${code}, pid:${process.pid}`);
     });
   }
 
@@ -41,7 +41,7 @@ class ChildApp {
       default:
         break;
     }
-    coreLogger.info(`[ee-core] [jobs/child] received a message from main-process, message: ${JSON.stringify(m)}`);
+    coreLogger.info(`[jobs/child] received a message from main-process, message: ${JSON.stringify(m)}`);
   }
 
   /**
