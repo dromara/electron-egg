@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import fsPro from 'fs-extra';
 import crypto from 'crypto';
-import chalk from 'chalk';
+import chalk from 'chalk/index.js';
 import AdmZip from 'adm-zip';
 import globby from 'globby';
 import yaml from 'js-yaml';

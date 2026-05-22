@@ -2,7 +2,7 @@ import debug from 'debug';
 import path from 'path';
 import fsPro from 'fs-extra';
 import is from 'is-type-of';
-import chalk from 'chalk';
+import chalk from 'chalk/index.js';
 import crossSpawn from 'cross-spawn';
 import { buildSync, BuildOptions } from 'esbuild';
 import chokidar from 'chokidar';
