@@ -1,5 +1,5 @@
 {
-  "name": "ee-bin-ts",
+  "name": "ee-bin",
   "version": "5.0.0",
   "description": "ee-bin typescript version",
   "main": "./dist/esm/index.js",

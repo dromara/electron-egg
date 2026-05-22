@@ -1,6 +1,6 @@
-# ee-bin / ee-core TypeScript 重构计划
+# ee-bin-js / ee-core-js TypeScript 重构计划
 
-> 目标：将现有 CommonJS 模块（ee-bin、ee-core）全面重构为 TypeScript，同时输出 CJS + ESM 双格式，建立完善的类型系统、测试体系与工程化流程。
+> 目标：将现有 CommonJS 模块（ee-bin-js、ee-core-js）全面重构为 TypeScript，同时输出 CJS + ESM 双格式，建立完善的类型系统、测试体系与工程化流程。
 
 ***
 
@@ -11,12 +11,12 @@
 ```
 ee-dev-v5 (pnpm workspace)
 ├── packages/
-│   ├── ee-bin/          # CLI 构建工具（纯 JS，无类型）
+│   ├── ee-bin-js/          # CLI 构建工具（纯 JS，无类型）
 │   │   ├── index.js             # CLI 入口 (commander)
 │   │   ├── config/bin_default.js
 │   │   ├── lib/extend.js, pargv.js, utils.js
 │   │   └── tools/encrypt.js, iconGen.js, incrUpdater.js, move.js, serve.js
-│   └── ee-core/         # 核心框架（纯 JS，手写 .d.ts）
+│   └── ee-core-js/         # 核心框架（纯 JS，手写 .d.ts）
 │       ├── index.js, index.d.ts
 │       ├── app/         # Application, Boot, Events, Dir
 │       ├── config/      # ConfigLoader, DefaultConfig
@@ -59,8 +59,8 @@ ee-dev-v5 (pnpm workspace)
 
 ```
 packages/
-├── ee-bin/              # [原] 待替换，新模块完成后删除
-├── ee-core/             # [原] 待替换，新模块完成后删除
+├── ee-bin-js/              # [原] 待替换，新模块完成后删除
+├── ee-core-js/             # [原] 待替换，新模块完成后删除
 ├── ee-bin-ts/           # [新] TypeScript 重构版
 │   ├── src/             # TypeScript 源码
 │   ├── dist/            # 编译输出 (CJS + ESM)
@@ -470,7 +470,7 @@ Phase 3: ee-core-ts 高级功能迁移 (3周)
   ├── Week 1: jobs/ (Child, ChildPool, LoadBalancer)
   ├── Week 2: cross/ + html/
   ├── Week 3: 集成测试 + 性能基准
-  └── 与原 ee-core 并行对比测试
+  └── 与原 ee-core-js 并行对比测试
 
 Phase 4: ee-bin-ts 迁移 (3周)
   ├── Week 1: lib/ + config/
@@ -482,7 +482,7 @@ Phase 5: 集成验证与替换 (2周)
   ├── 在主项目中切换 workspace 引用至新模块
   ├── 完整功能测试（dev/build/start/exec/move/encrypt）
   ├── 性能基准对比
-  ├── 验证通过后删除原 ee-bin / ee-core 目录
+  ├── 验证通过后删除原 ee-bin-js / ee-core-js 目录
   └── 编写迁移指南
 
 Phase 6: 正式发布 (1周)
@@ -730,8 +730,8 @@ module.exports = {
 
 | 原模块版本          | 新模块版本             | 说明            |
 | -------------- | ----------------- | ------------- |
-| ee-core\@4.1.5 | ee-core-ts\@5.0.0 | 主版本号升级，标识重大变更 |
-| ee-bin\@4.2.0  | ee-bin-ts\@5.0.0  | 主版本号升级，标识重大变更 |
+| ee-core-js\@4.1.5 | ee-core-ts\@5.0.0 | 主版本号升级，标识重大变更 |
+| ee-bin-js\@4.2.0  | ee-bin-ts\@5.0.0  | 主版本号升级，标识重大变更 |
 
 **版本对齐规则**：
 
@@ -912,21 +912,20 @@ export { helper } from './utils/helper.js';
 
 ### 9.1 去掉 lodash
 
-- **现状**：`ee-core/socket/httpServer.js` 等文件使用了 `_.includes`、`_.cloneDeep`、`_.merge` 等方法
+- **现状**：`ee-core-js/socket/httpServer.js` 等文件使用了 `_.includes`、`_.cloneDeep`、`_.merge` 等方法
 - **方案**：
   - `_.includes(arr, val)` → `arr.includes(val)`
   - `_.cloneDeep(obj)` → `JSON.parse(JSON.stringify(obj))`（简单场景）或手写递归深拷贝
   - `_.merge(a, b)` → 使用重构后的 `extend` 方法（见 9.2）
   - `_.pick`、`_.omit` → ES 解构语法
   - `_.isEqual` → 手写递归比较
-- **影响范围**：`ee-core/socket/`、`ee-core/utils/`、`ee-core/jobs/`
+- **影响范围**：`ee-core-js/socket/`、`ee-core-js/utils/`、`ee-core-js/jobs/`
 
 ### 9.2 去掉 extend，封装替代方法
 
-- **现状**：`ee-core/lib/extend.js` 和 `ee-bin/lib/extend.js` 各自维护了一套对象合并逻辑
-- **方案**：
-  1. 在 `ee-core` 中统一封装 `deepMerge<T>(target: T, ...sources: Partial<T>[]): T`
-  2. `ee-bin` 作为 `ee-core` 的下游，直接引用 `ee-core` 的合并方法
+- **现状**：`ee-core-js/lib/extend.js` 和 `ee-bin-js/lib/extend.js` 各自维护了一套对象合并逻辑
+  1. 在 `ee-core-js` 中统一封装 `deepMerge<T>(target: T, ...sources: Partial<T>[]): T`
+  2. `ee-bin-js` 作为 `ee-core-js` 的下游，直接引用 `ee-core-js` 的合并方法
   3. 不再依赖 `is-type-of` 判断对象类型，改用 TS 类型守卫
 - **接口设计**：
   ```ts
@@ -950,13 +949,13 @@ export { helper } from './utils/helper.js';
 
 ### 9.4 去掉 mkdirp
 
-- **现状**：`ee-bin/tools/move.js` 等文件调用了 `mkdirp.sync(path)`
+- **现状**：`ee-bin-js/tools/move.js` 等文件调用了 `mkdirp.sync(path)`
 - **方案**：全部替换为 `fs.mkdirSync(path, { recursive: true })`
 - **兼容性**：`recursive` 选项在 Node.js 10.12.0+ 支持，Electron 39 内嵌 Node 22，完全兼容
 
 ### 9.5 去掉 config-file-ts
 
-- **现状**：`ee-bin/lib/utils.js` 使用 `loadTsConfig()` 加载 `.ts` 配置文件
+- **现状**：`ee-bin-js/lib/utils.js` 使用 `loadTsConfig()` 加载 `.ts` 配置文件
 - **方案**：
   1. 改用 `tsx` 或 `ts-node` 的 `--import` loader 方案
   2. 或要求用户配置文件使用 `.js` / `.mjs` 格式
