@@ -1,6 +1,6 @@
 import debug from 'debug';
 import path from 'path';
-import is from 'is-type-of';
+import { isClass, isFunction } from '../utils/type_check.js';
 import { getElectronDir } from '../ps/index.js';
 import { Timing } from '../core/utils/timing.js';
 import { FileLoader, FULLPATH } from '../core/loader/file_loader.js';
@@ -25,7 +25,7 @@ export class ControllerLoader {
       caseStyle: 'lower' as const,
       directory: path.join(getElectronDir(), 'controller'),
       initializer: (obj: unknown, options: { pathName: string; path: string }) => {
-        if (is.class_(obj) || isBytecodeClass(obj)) {
+        if (isClass(obj) || isBytecodeClass(obj)) {
           (obj as { prototype: Record<string, unknown> }).prototype.pathName = options.pathName;
           (obj as { prototype: Record<string, unknown> }).prototype.fullPath = options.path;
           return wrapClass(obj as new (...args: unknown[]) => unknown);
@@ -56,7 +56,7 @@ function wrapClass(Controller: new (...args: unknown[]) => unknown): Record<stri
       // skip getter, setter & non-function properties
       const d = Object.getOwnPropertyDescriptor(proto, key);
       // prevent to override sub method
-      if (is.function_(d?.value) && !Object.prototype.hasOwnProperty.call(ret, key)) {
+      if (isFunction(d?.value) && !Object.prototype.hasOwnProperty.call(ret, key)) {
         ret[key] = methodToMiddleware(Controller, key);
         (ret[key] as Record<symbol, string>)[FULLPATH] =
           (proto as Record<string, string>).fullPath + '#' + (Controller as unknown as { name: string }).name + '.' + key + '()';

@@ -1,24 +1,3 @@
-declare module 'is-type-of' {
-  export function function_(val: unknown): val is (...args: unknown[]) => unknown;
-  export function class_(val: unknown): val is new (...args: unknown[]) => unknown;
-  export function generatorFunction(val: unknown): val is GeneratorFunction;
-  export function asyncFunction(val: unknown): val is (...args: unknown[]) => Promise<unknown>;
-  export function primitive(val: unknown): boolean;
-  export function array(val: unknown): val is unknown[];
-  export function object(val: unknown): val is Record<string, unknown>;
-  export function string(val: unknown): val is string;
-  export function number(val: unknown): val is number;
-  export function boolean(val: unknown): val is boolean;
-  export function null_(val: unknown): val is null;
-  export function undefined_(val: unknown): val is undefined;
-  export function regexp(val: unknown): val is RegExp;
-  export function date(val: unknown): val is Date;
-  export function error(val: unknown): val is Error;
-  export function buffer(val: unknown): val is Buffer;
-  export function stream(val: unknown): boolean;
-  export function promise(val: unknown): val is Promise<unknown>;
-}
-
 declare module 'egg-logger' {
   export class EggLoggers {
     constructor(options: Record<string, unknown>);

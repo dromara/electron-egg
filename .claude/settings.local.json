@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(node scripts/gen-exports.js)",
-      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\(JSON.stringify\\(pkg.exports, null, 2\\)\\)\")"
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\(JSON.stringify\\(pkg.exports, null, 2\\)\\)\")",
+      "WebSearch",
+      "Bash(pnpm dev-electron *)",
+      "Bash(node *)",
+      "Bash(npm run *)"
     ]
   }
 }

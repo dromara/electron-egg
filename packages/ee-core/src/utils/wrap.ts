@@ -1,10 +1,10 @@
-import is from 'is-type-of';
+import { isFunction } from './type_check.js';
 
 // convert file path to an array of properties
 // a/b/c.js => ['a', 'b', 'c']
 export function getProperties(filepath: string, { caseStyle }: { caseStyle: string | ((filepath: string) => string[]) }): string[] {
   // if caseStyle is function, return the result of function
-  if (is.function_(caseStyle)) {
+  if (isFunction(caseStyle)) {
     const result = (caseStyle as (filepath: string) => string[])(filepath);
     if (!Array.isArray(result)) {
       throw new Error(`caseStyle expect an array, but got ${result}`);

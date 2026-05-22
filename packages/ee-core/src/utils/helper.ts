@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import mkdirp from 'mkdirp';
 import convert from 'koa-convert';
-import is from 'is-type-of';
+import { isFunction, isClass, isGeneratorFunction } from './type_check.js';
 import chalk from 'chalk';
 import { parseArgv } from './pargv.js';
 
@@ -93,7 +93,7 @@ export function compareVersion(v1: string, v2: string): number {
 }
 
 export function middleware(fn: unknown): unknown {
-  return is.generatorFunction(fn) ? convert(fn as GeneratorFunction) : fn;
+  return isGeneratorFunction(fn) ? convert(fn as GeneratorFunction) : fn;
 }
 
 // 序列化对象
@@ -127,7 +127,7 @@ export function loadConfig(prop: string): unknown {
   if (!obj) return obj;
 
   let ret = obj;
-  if (is.function_(obj) && !is.class_(obj)) {
+  if (isFunction(obj) && !isClass(obj)) {
     ret = (obj as (...args: unknown[]) => unknown)();
   }
 

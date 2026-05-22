@@ -1,4 +1,4 @@
-import is from 'is-type-of';
+import { isClass, isFunction } from '../../utils/type_check.js';
 import { loadException } from '../../exception/index.js';
 import { requireFile } from '../../loader/index.js';
 import { coreLogger } from '../../log/index.js';
@@ -52,7 +52,7 @@ class ChildApp {
     if (!jobPath) return;
 
     const mod = requireFile(jobPath);
-    if (is.class_(mod) || isBytecodeClass(mod)) {
+    if (isClass(mod) || isBytecodeClass(mod)) {
       let instance: Record<string, unknown>;
       if (!this.jobMap.has(jobPath)) {
         instance = new (mod as new (...args: unknown[]) => Record<string, unknown>)(...(jobParams || []));
@@ -67,7 +67,7 @@ class ChildApp {
       } else if (typeof instance.handle === 'function') {
         instance.handle(...(jobParams || []));
       }
-    } else if (is.function_(mod)) {
+    } else if (isFunction(mod)) {
       (mod as (...args: unknown[]) => unknown)(jobParams);
     }
   }

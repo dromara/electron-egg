@@ -1,5 +1,5 @@
 import debug from 'debug';
-import is from 'is-type-of';
+import { isObject } from '../../utils/type_check.js';
 import path from 'path';
 import axios from 'axios';
 import { BrowserWindow } from 'electron';
@@ -39,7 +39,7 @@ export function createMainWindow(): BrowserWindow {
   Instance.mainWindow = win;
 
   // DevTools
-  if (is.object(openDevTools)) {
+  if (isObject(openDevTools)) {
     win.webContents.openDevTools(openDevTools as unknown as Electron.OpenDevToolsOptions);
   } else if (openDevTools === true) {
     win.webContents.openDevTools({ mode: 'bottom' });

@@ -1,5 +1,5 @@
 import debug from 'debug';
-import is from 'is-type-of';
+import { isString } from '../utils/type_check.js';
 import { ipcMain } from 'electron';
 import { coreLogger } from '../log/index.js';
 import { getController } from '../controller/index.js';
@@ -83,7 +83,7 @@ export class IpcServer {
       // 找函数
       const cmd = c;
       let fn: ((...args: unknown[]) => unknown) | null = null;
-      if (is.string(cmd)) {
+      if (isString(cmd)) {
         const actions = cmd.split(this.channelSeparator);
         debugLog('[findFn] channel %o', actions);
         let obj: Record<string, unknown> = { controller };

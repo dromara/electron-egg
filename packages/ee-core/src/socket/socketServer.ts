@@ -1,5 +1,5 @@
 import debug from 'debug';
-import is from 'is-type-of';
+import { isString } from '../utils/type_check.js';
 import { Server } from 'socket.io';
 import { coreLogger } from '../log/index.js';
 import { getConfig } from '../config/index.js';
@@ -57,7 +57,7 @@ export class SocketServer {
           const args = message.args;
           let fn: ((...args: unknown[]) => unknown) | null = null;
           debugLog('[socket] channel %s', cmd);
-          if (is.string(cmd)) {
+          if (isString(cmd)) {
             const actions = cmd.split(this.channelSeparator);
             debugLog('[findFn] channel %o', actions);
             let obj: Record<string, unknown> = { controller };

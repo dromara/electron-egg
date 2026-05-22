@@ -1,4 +1,4 @@
-import is from 'is-type-of';
+import { isFunction, isClass } from '../utils/type_check.js';
 import fs from 'fs';
 import path from 'path';
 import { loadFile as coreLoadFile, isBytecodeClass } from '../core/utils/index.js';
@@ -18,7 +18,7 @@ export function loadFile(filepath: string, ...inject: unknown[]): unknown {
   }
 
   let ret = coreLoadFile(fullpath);
-  if (is.function_(ret) && !is.class_(ret) && !isBytecodeClass(ret)) {
+  if (isFunction(ret) && !isClass(ret) && !isBytecodeClass(ret)) {
     ret = (ret as (...args: unknown[]) => unknown)(...inject);
   }
   return ret;
@@ -32,9 +32,9 @@ export function requireFile(filepath: string): unknown {
 // 加载并运行文件
 export function execFile(filepath: string, ...inject: unknown[]): unknown {
   let ret = coreLoadFile(filepath);
-  if (is.class_(ret) || isBytecodeClass(ret)) {
+  if (isClass(ret) || isBytecodeClass(ret)) {
     ret = new (ret as new (...args: unknown[]) => unknown)(inject);
-  } else if (is.function_(ret)) {
+  } else if (isFunction(ret)) {
     ret = (ret as (...args: unknown[]) => unknown)(inject);
   }
   return ret;

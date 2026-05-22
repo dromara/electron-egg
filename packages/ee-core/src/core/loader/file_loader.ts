@@ -2,7 +2,7 @@ import debug from 'debug';
 import fs from 'fs';
 import path from 'path';
 import globby from 'globby';
-import * as is from 'is-type-of';
+import { isClass, isFunction, isPrimitive, isGeneratorFunction, isAsyncFunction } from '../../utils/type_check.js';
 import { loadFile, filePatterns, isBytecodeClass } from '../utils/index.js';
 import { getProperties } from '../../utils/wrap.js';
 import type { FileLoaderOptions } from '../../types/index.js';
@@ -70,7 +70,7 @@ export class FileLoader {
         const isLast = i === item.properties.length - 1;
         if (isLast) {
           current[property] = item.exports;
-          if (item.exports && !is.primitive(item.exports)) {
+          if (item.exports && !isPrimitive(item.exports)) {
             (item.exports as Record<symbol, unknown>)[FULLPATH] = item.fullpath;
             (item.exports as Record<symbol, unknown>)[EXPORTS] = true;
           }
@@ -139,19 +139,19 @@ export class FileLoader {
         }
 
         // set properties of class
-        if (is.class_(exports) || isBytecodeClass(exports)) {
+        if (isClass(exports) || isBytecodeClass(exports)) {
           (exports as { prototype: Record<string, unknown> }).prototype.pathName = pathName;
           (exports as { prototype: Record<string, unknown> }).prototype.fullPath = fullpath;
         }
 
         // class / generator / async / bytecodeClass → return directly
-        if (is.class_(exports) || is.generatorFunction(exports) || is.asyncFunction(exports) || isBytecodeClass(exports)) {
+        if (isClass(exports) || isGeneratorFunction(exports) || isAsyncFunction(exports) || isBytecodeClass(exports)) {
           items.push({ fullpath, properties, exports });
           continue;
         }
 
         // whether to execute the function
-        if (this.options.call && is.function_(exports)) {
+        if (this.options.call && isFunction(exports)) {
           exports = (exports as (...args: unknown[]) => unknown)(this.options.inject);
           if (exports != null) {
             items.push({ fullpath, properties, exports });

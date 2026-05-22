@@ -1,5 +1,5 @@
 import 'bytenode';
-import is from 'is-type-of';
+import { isFunction as isFunctionCheck } from '../../utils/type_check.js';
 import path from 'path';
 import fs from 'fs';
 import { createRequire } from 'module';
@@ -38,7 +38,7 @@ export function loadFile(filepath: string): unknown {
 
 export async function callFn(fn: (...args: unknown[]) => unknown, args?: unknown[], ctx?: unknown): Promise<unknown> {
   args = args || [];
-  if (!is.function_(fn)) return undefined;
+  if (!isFunctionCheck(fn)) return undefined;
   return ctx ? fn.call(ctx, ...args) : fn(...args);
 }
 

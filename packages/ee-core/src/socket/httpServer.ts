@@ -1,6 +1,6 @@
 import debug from 'debug';
 import assert from 'assert';
-import is from 'is-type-of';
+import { isFunction, isObject, isArray, isString } from '../utils/type_check.js';
 import Koa from 'koa';
 import cors from 'koa2-cors';
 import koaBody from 'koa-body';
@@ -114,7 +114,7 @@ export class HttpServer {
     let uriPath = ctx.request.path;
     const method = ctx.request.method;
     let params = ctx.request.query;
-    params = is.object(params) ? JSON.parse(JSON.stringify(params)) : {};
+    params = isObject(params) ? JSON.parse(JSON.stringify(params)) : {};
     const body = ctx.request.body;
 
     ctx.response.status = 200;
@@ -138,7 +138,7 @@ export class HttpServer {
       debugLog('[request] uri %s', cmd);
       const args = method === 'POST' ? body : params;
       let fn: ((...args: unknown[]) => unknown) | null = null;
-      if (is.string(cmd)) {
+      if (isString(cmd)) {
         const actions = cmd.split(this.channelSeparator);
         debugLog('[findFn] channel %o', actions);
         let obj: Record<string, unknown> = { controller };
@@ -165,7 +165,7 @@ export class HttpServer {
 
   // 设置错误处理函数
   _setupErrorHandler(app: Koa, errorHandler: ((err: Error) => void) | null): void {
-    if (is.function_(errorHandler)) {
+    if (isFunction(errorHandler)) {
       app.on('error', errorHandler);
     }
   }
@@ -177,9 +177,9 @@ export class HttpServer {
    * @param {*} type 类型，pre/post
    */
   _loadMiddlewares(app: Koa, middlewares: unknown[] = [], type = 'pre'): void {
-    if (is.array(middlewares)) {
+    if (isArray(middlewares)) {
       middlewares.forEach((middleware) => {
-        if (is.function_(middleware)) {
+        if (isFunction(middleware)) {
           // middleware是一个方法
           // 返回值是中间件(ctx, next) => {}的异步函数
           // 便于使用async/await进行同步编程
