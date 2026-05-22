@@ -1,19 +1,3 @@
-declare module 'egg-logger' {
-  export class EggLoggers {
-    constructor(options: Record<string, unknown>);
-    error(...args: unknown[]): void;
-    warn(...args: unknown[]): void;
-    info(...args: unknown[]): void;
-    debug(...args: unknown[]): void;
-  }
-  export class Logger {
-    constructor(options: Record<string, unknown>);
-    error(...args: unknown[]): void;
-    warn(...args: unknown[]): void;
-    info(...args: unknown[]): void;
-    debug(...args: unknown[]): void;
-  }
-}
 
 declare module 'mkdirp' {
   function mkdirp(path: string, opts?: { mode?: number }): Promise<string | undefined>;

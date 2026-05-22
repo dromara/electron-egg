@@ -1,5 +1,5 @@
 import path from 'path';
-import { env, getBaseDir, getLogDir } from '../ps/index.js';
+import { isDev, getBaseDir, getLogDir } from '../ps/index.js';
 import { SocketIO } from '../const/channel.js';
 
 export default function defaultConfig(): Record<string, unknown> {
@@ -23,21 +23,17 @@ export default function defaultConfig(): Record<string, unknown> {
     logger: {
       type: 'application',
       dir: getLogDir(),
-      encoding: 'utf8',
-      env: env(),
-      level: 'INFO',
-      consoleLevel: 'INFO',
-      disableConsoleAfterReady: env() !== 'local',
+      level: 'info',
       outputJSON: false,
-      buffer: true,
+      prettyPrint: isDev(),
       appLogName: 'ee.log',
       coreLogName: 'ee-core.log',
-      agentLogName: 'ee-agent.log',
       errorLogName: 'ee-error.log',
-      coreLogger: {},
-      allowDebugAtProd: false,
-      enablePerformanceTimer: false,
       rotator: 'day',
+      redact: [],
+      timestamp: true,
+      name: 'ee',
+      maxSize: '10m',
     },
     socketServer: {
       enable: false, // is it enabled

@@ -29,9 +29,10 @@ module.exports = () => {
     logger: {
       level: 'INFO',
       outputJSON: false,
+      prettyPrint: true,
       appLogName: 'ee.log',
       coreLogName: 'ee-core.log',
-      errorLogName: 'ee-error.log' 
+      errorLogName: 'ee-error.log'
     },
     remote: {
       enable: false,

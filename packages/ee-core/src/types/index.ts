@@ -72,21 +72,17 @@ export interface HttpServerConfig {
 export interface LoggerConfig {
   type: string;
   dir: string;
-  encoding: string;
-  env: string;
   level: string;
-  consoleLevel: string;
-  disableConsoleAfterReady: boolean;
   outputJSON: boolean;
-  buffer: boolean;
+  prettyPrint?: boolean;
   appLogName: string;
   coreLogName: string;
-  agentLogName: string;
   errorLogName: string;
-  coreLogger: Record<string, unknown>;
-  allowDebugAtProd: boolean;
-  enablePerformanceTimer: boolean;
   rotator: string;
+  redact?: string[];
+  timestamp?: boolean;
+  name?: string;
+  maxSize?: number | string;
 }
 
 export interface ExceptionConfig {

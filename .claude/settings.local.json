@@ -9,7 +9,14 @@
       "Bash(npm run *)",
       "Bash(xxd /Users/gsx/www/gofile/src/gowork/ee-dev-v5/packages/ee-bin/src/tools/serve.ts)",
       "Bash(grep *)",
-      "Bash(timeout 15 pnpm run dev-electron)"
+      "Bash(timeout 15 pnpm run dev-electron)",
+      "Bash(timeout 20 pnpm run dev-electron)",
+      "WebFetch(domain:getpino.io)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm remove *)",
+      "Bash(pnpm run *)"
     ]
   }
 }
