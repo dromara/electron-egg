@@ -97,7 +97,7 @@ class ServeProcess {
     if (cmds.indexOf('electron') !== -1) {
       const electronConfig = binCmdConfig.electron;
 
-      const debugging = getArgumentByName('debuger', Array.isArray(electronConfig?.args) ? electronConfig.args : undefined) === 'true';
+      const debugging = getArgumentByName('debuger', electronConfig?.args as string[] | undefined) === 'true';
       this._switchPkgMain(debugging);
 
       if (electronConfig?.watch) {
@@ -130,7 +130,7 @@ class ServeProcess {
                 this.multiExec(onlyElectronOpt);
               });
             }
-          }, electronConfig.delay || 1000);
+          }, electronConfig.delay);
         });
       }
 

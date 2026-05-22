@@ -145,6 +145,7 @@ class IconGen {
             const newName = filename + extname;
             fs.copyFileSync(filePath, path.join(this.imagesDir, newName));
             console.log(`${filename}${extname} --> ${this.params.imagesDir}/${newName} 复制成功!`);
+            continue;
           }
 
           const newName = basename + 'x' + basename + extname;
@@ -161,7 +162,27 @@ class IconGen {
   }
 }
 
-export function run(): void {
+export function run(opts?: Record<string, unknown>): void {
+  if (opts && Object.keys(opts).length > 0) {
+    // Merge commander options into process.argv so the constructor can parse them
+    const argMap: Record<string, string> = {
+      input: '-i',
+      output: '-o',
+      size: '-s',
+      clear: '-c',
+      images: '-img',
+    };
+    for (const [key, value] of Object.entries(opts)) {
+      const flag = argMap[key];
+      if (flag && value !== undefined) {
+        if (typeof value === 'boolean') {
+          process.argv.push(flag);
+        } else {
+          process.argv.push(flag, String(value));
+        }
+      }
+    }
+  }
   const i = new IconGen();
   i.generateIcons();
 }
