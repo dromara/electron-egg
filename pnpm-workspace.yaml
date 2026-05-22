@@ -1,5 +1,11 @@
 packages:
   - packages/*
 
-ignoredBuiltDependencies:
-  - electron
+allowBuilds:
+  better-sqlite3: true
+  electron: true
+  electron-winstaller: true
+  esbuild: true
+
+overrides:
+  "@electron/node-gyp": "npm:@electron/node-gyp@10.2.0-electron.2"

@@ -16,7 +16,10 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(pnpm add *)",
       "Bash(pnpm remove *)",
-      "Bash(pnpm run *)"
+      "Bash(pnpm run *)",
+      "Bash(pnpm *)",
+      "WebFetch(domain:pnpm.io)",
+      "Bash(npm view *)"
     ]
   }
 }
