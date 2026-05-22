@@ -388,7 +388,7 @@
     "node": ">=16.0.0"
   },
   "scripts": {
-    "build": "npm run clean && npm run build:cjs && npm run build:esm",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run gen-exports",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.json",
     "clean": "rm -rf dist",
@@ -398,6 +398,7 @@
     "lint:fix": "eslint src tests --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "typecheck": "tsc --noEmit",
+    "gen-exports": "node scripts/gen-exports.js",
     "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
