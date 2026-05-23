@@ -48,21 +48,6 @@ declare module 'javascript-obfuscator' {
   export function obfuscate(sourceCode: string, options?: Record<string, unknown>): ObfuscationResult;
 }
 
-declare module 'compressing' {
-  import { Readable } from 'stream';
-
-  class ZipStream extends Readable {
-    addEntry(entry: Readable | Buffer | string | null, options: { relativePath: string; size?: number }): void;
-  }
-
-  const compressing: {
-    zip: {
-      Stream: typeof ZipStream;
-    };
-  };
-  export default compressing;
-}
-
 declare module 'js-yaml' {
   export function load(str: string, opts?: Record<string, unknown>): unknown;
   export function dump(obj: unknown, opts?: Record<string, unknown>): string;

@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { fsPro, chalk } from '../lib/helpers.js';
 import crypto from 'crypto';
-import compressing from 'compressing';
+import { zip as compressZip } from 'compressing';
 import globby from 'globby';
 import yaml from 'js-yaml';
 import { loadConfig, writeJsonSync } from '../lib/utils.js';
@@ -120,7 +120,7 @@ class IncrUpdater {
       fsPro.removeSync(asarZipPath);
     }
 
-    const zipStream = new compressing.zip.Stream();
+    const zipStream = new compressZip.Stream();
     zipStream.addEntry(asarFilePath, { relativePath: path.basename(asarFilePath) });
 
     if (cfg.extraResources && cfg.extraResources.length > 0) {
@@ -214,13 +214,12 @@ class IncrUpdater {
     }
   }
 
-  _addFolderToZip(zipStream: InstanceType<typeof compressing.zip.Stream>, folderPath: string, zipDir: string): void {
+  _addFolderToZip(zipStream: compressZip.Stream, folderPath: string, zipDir: string): void {
     const entries = fs.readdirSync(folderPath, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(folderPath, entry.name);
       const relativePath = zipDir + '/' + entry.name;
       if (entry.isDirectory()) {
-        zipStream.addEntry(null, { relativePath: relativePath + '/' });
         this._addFolderToZip(zipStream, fullPath, relativePath);
       } else {
         zipStream.addEntry(fullPath, { relativePath });
