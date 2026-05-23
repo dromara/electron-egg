@@ -90,7 +90,9 @@ class IconGen {
     if (!fs.existsSync(this.output)) {
       fs.mkdirSync(this.output, { recursive: true });
     } else {
-      this.params.clear && this.deleteGenFile(this.output);
+      if (this.params.clear) {
+        this.deleteGenFile(this.output);
+      }
     }
     if (!fs.existsSync(this.imagesDir)) {
       fs.mkdirSync(this.imagesDir, { recursive: true });

@@ -36,6 +36,7 @@ export function loadFile(filepath: string): Record<string, unknown> {
     return JsonLib.parse(data) as Record<string, unknown>;
   }
   if (configFile.endsWith('.js') || configFile.endsWith('.cjs')) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- dynamic user config loading
     const mod = require(configFile);
     result = mod.default != null ? mod.default : mod;
   } else if (configFile.endsWith('.ts')) {
@@ -114,13 +115,7 @@ export function rm(name: string): void {
   if (!fs.existsSync(name)) {
     return;
   }
-
-  const nodeVersion = (process.versions && process.versions.node) || null;
-  if (nodeVersion && compareVersion(nodeVersion, '14.14.0') === 1) {
-    fs.rmSync(name, { recursive: true });
-  } else {
-    fs.rmdirSync(name, { recursive: true });
-  }
+  fs.rmSync(name, { recursive: true, force: true });
 }
 
 export function getPackage(): Record<string, unknown> {

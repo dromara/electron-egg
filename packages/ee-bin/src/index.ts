@@ -6,6 +6,7 @@ import { serveProcess } from './tools/serve.js';
 import { move } from './tools/move.js';
 import { encrypt, cleanEncrypt } from './tools/encrypt.js';
 import { incrUpdater } from './tools/incrUpdater.js';
+import { run as iconGenRun } from './tools/iconGen.js';
 
 program
   .name('ee-bin')
@@ -83,7 +84,6 @@ program
   .option('-c, --clear', 'clear output directory first')
   .option('-img, --images <flag>', 'Win window icon/tray image generation path default /public/images/')
   .action(function (this: Command) {
-    const { run: iconGenRun } = require('./tools/iconGen.js');
     iconGenRun(this.opts());
   });
 

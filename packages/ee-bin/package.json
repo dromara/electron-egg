@@ -26,7 +26,7 @@
     "config"
   ],
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "build": "npm run build:esm && npm run build:cjs",
@@ -41,28 +41,28 @@
   "license": "ISC",
   "dependencies": {
     "compressing": "^2.1.1",
-    "bytenode": "^1.3.6",
+    "bytenode": "^1.5.7",
     "chokidar": "^4.0.3",
-    "commander": "^11.0.0",
+    "commander": "^14.0.3",
     "config-file-ts": "^0.2.8-rc1",
-    "cross-spawn": "^7.0.3",
-    "esbuild": "^0.21.5",
-    "globby": "^10.0.0",
-    "javascript-obfuscator": "^4.0.2",
+    "cross-spawn": "^7.0.6",
+    "esbuild": "^0.28.0",
+    "globby": "^11.1.0",
+    "javascript-obfuscator": "^5.4.3",
     "json5": "^2.2.3",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "tree-kill": "^1.2.2"
   },
   "devDependencies": {
-        "@types/cross-spawn": "^6.0.6",
+    "@types/cross-spawn": "^6.0.6",
     "@types/js-yaml": "^4.0.9",
     "@types/json5": "^2.2.0",
-    "@types/node": "^20.16.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.0",
-    "typescript": "^5.7.2",
-    "vitest": "^1.6.0"
+    "@types/node": "^22.15.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.4",
+    "@typescript-eslint/parser": "^8.59.4",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.7"
   }
 }

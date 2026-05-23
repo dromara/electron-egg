@@ -102,4 +102,5 @@ pnpm re-sqlite         # Rebuild better-sqlite3 for Electron
 - **The `exports` map in ee-core's package.json is auto-generated** by `scripts/gen-exports.js` — do not edit manually; run `npm run gen-exports` after adding new subpath modules
 - **The old JS packages (`ee-core-js`, `ee-bin-js`) are still present** but will be removed once the TS rewrite is validated. See `REFACTOR_PLAN.md` for full migration plan.
 - **Better-sqlite3 requires native rebuild** for Electron: use `pnpm re-sqlite` if you see native module errors
+- **Node.js minimum version**: v20 (required for the project)
 - **`debug-dev` and `debug-electron` scripts** use `cross-env DEBUG=ee-*` for verbose logging during development
