@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import icongen from 'icon-gen';
 
 interface IconGenParams {
   input: string;
@@ -24,6 +23,7 @@ class IconGen {
   output: string;
   imagesDir: string;
   iconOptions: Record<string, unknown>;
+  icongen: ((input: string, output: string, options?: Record<string, unknown>) => Promise<string[]>) | null;
 
   constructor(opts: Record<string, unknown> = {}) {
     const params: IconGenParams = {
@@ -34,6 +34,14 @@ class IconGen {
       imagesDir: (opts.images as string) || DEFAULT_PARAMS.imagesDir,
     };
     this.params = params;
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports -- optional dependency lazy load
+      const mod = require('icon-gen');
+      this.icongen = typeof mod.default === 'function' ? mod.default : mod;
+    } catch {
+      this.icongen = null;
+    }
 
     console.log('[ee-bin] [icon-gen] icon 当前路径: ', process.cwd());
     this.input = path.join(process.cwd(), params.input);
@@ -55,6 +63,12 @@ class IconGen {
   }
 
   generateIcons(): void {
+    if (!this.icongen) {
+      console.log('[ee-bin] [icon-gen] icon-gen is not installed.');
+      console.log('[ee-bin] [icon-gen] Please run: pnpm add icon-gen');
+      return;
+    }
+
     console.log('[ee-bin] [icon-gen] iconGen 开始处理生成logo图片');
     if (!fs.existsSync(this.input)) {
       console.error('[ee-bin] [icon-gen] input: ', this.input);
@@ -70,7 +84,7 @@ class IconGen {
     if (!fs.existsSync(this.imagesDir)) {
       fs.mkdirSync(this.imagesDir, { recursive: true });
     }
-    icongen(this.input, this.output, this.iconOptions)
+    this.icongen(this.input, this.output, this.iconOptions)
       .then((results) => {
         console.log('[ee-bin] [icon-gen] iconGen 已生成下方图片资源');
         console.log(results);

@@ -33,10 +33,6 @@ declare module 'tree-kill' {
   export default function kill(pid: number, signal?: string | number, callback?: (error?: Error) => void): void;
 }
 
-declare module 'icon-gen' {
-  export default function icongen(input: string, output: string, options?: Record<string, unknown>): Promise<string[]>;
-}
-
 declare module 'javascript-obfuscator' {
   export interface ObfuscationResult {
     getObfuscatedCode(): string;

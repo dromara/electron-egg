@@ -40,17 +40,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "compressing": "^2.1.1",
     "bytenode": "^1.5.7",
     "chokidar": "^4.0.3",
     "commander": "^14.0.3",
+    "compressing": "^2.1.1",
     "cross-spawn": "^7.0.6",
     "esbuild": "^0.28.0",
     "globby": "^11.1.0",
     "javascript-obfuscator": "^5.4.3",
-    "json5": "^2.2.3",
     "js-yaml": "^4.1.1",
+    "json5": "^2.2.3",
     "tree-kill": "^1.2.2"
+  },
+  "optionalDependencies": {
+    "icon-gen": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

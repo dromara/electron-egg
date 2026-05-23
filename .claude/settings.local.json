@@ -22,7 +22,10 @@
       "Bash(npm view *)",
       "Bash(npm info *)",
       "Bash(npm pack *)",
-      "Bash(npm ls *)"
+      "Bash(npm ls *)",
+      "Bash(confirmModulesPurge=false pnpm install *)",
+      "Bash(mv /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-bin/node_modules/icon-gen /tmp/icon-gen-backup)",
+      "Bash(mv /tmp/icon-gen-backup /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-bin/node_modules/icon-gen)"
     ]
   }
 }

@@ -6,6 +6,7 @@ allowBuilds:
   electron: true
   electron-winstaller: true
   esbuild: true
+  sharp: true
 
 overrides:
   "@electron/node-gyp": "npm:@electron/node-gyp@10.2.0-electron.2"
