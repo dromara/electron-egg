@@ -48,17 +48,19 @@ declare module 'javascript-obfuscator' {
   export function obfuscate(sourceCode: string, options?: Record<string, unknown>): ObfuscationResult;
 }
 
-declare module 'adm-zip' {
-  class AdmZip {
-    constructor(zipPath?: string);
-    addLocalFile(localPath: string, zipPath?: string): void;
-    addLocalFolder(localPath: string, zipPath?: string): void;
-    writeZip(zipPath?: string, callback?: (error?: Error) => void): void;
-    extractAllTo(targetPath: string, overwrite?: boolean): void;
-    getEntries(): Array<{ entryName: string; getData(): Buffer }>;
-    readFile(fileName: string): Buffer;
+declare module 'compressing' {
+  import { Readable } from 'stream';
+
+  class ZipStream extends Readable {
+    addEntry(entry: Readable | Buffer | string | null, options: { relativePath: string; size?: number }): void;
   }
-  export = AdmZip;
+
+  const compressing: {
+    zip: {
+      Stream: typeof ZipStream;
+    };
+  };
+  export default compressing;
 }
 
 declare module 'js-yaml' {

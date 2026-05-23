@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { fsPro, chalk } from '../lib/helpers.js';
 import crypto from 'crypto';
-import AdmZip from 'adm-zip';
+import compressing from 'compressing';
 import globby from 'globby';
 import yaml from 'js-yaml';
 import { loadConfig, writeJsonSync } from '../lib/utils.js';
@@ -60,7 +60,7 @@ class IncrUpdater {
     this.asarUnpackedString = 'app.asar.unpacked';
   }
 
-  run(options: UpdaterOptions = {}): void {
+  async run(options: UpdaterOptions = {}): Promise<void> {
     console.log('[ee-bin] [updater] Start');
     const { config, asarFile, platform, force } = options;
     const binCfg = loadConfig(config);
@@ -72,12 +72,12 @@ class IncrUpdater {
       return;
     }
 
-    this.generateFile(cfg, asarFile, platform, forceUpdate);
+    await this.generateFile(cfg, asarFile, platform, forceUpdate);
 
     console.log('[ee-bin] [updater] End');
   }
 
-  generateFile(config: Record<string, UpdaterConfig>, asarFile: string | undefined, platform: string, force = false): void {
+  async generateFile(config: Record<string, UpdaterConfig>, asarFile: string | undefined, platform: string, force = false): Promise<void> {
     const cfg = config[platform];
     if (!cfg) {
       console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: ${platform} config does not exist`));
@@ -119,8 +119,9 @@ class IncrUpdater {
     if (fs.existsSync(asarZipPath)) {
       fsPro.removeSync(asarZipPath);
     }
-    const zip = new AdmZip();
-    zip.addLocalFile(asarFilePath);
+
+    const zipStream = new compressing.zip.Stream();
+    zipStream.addEntry(asarFilePath, { relativePath: path.basename(asarFilePath) });
 
     if (cfg.extraResources && cfg.extraResources.length > 0) {
       const files = globby.sync(cfg.extraResources, { cwd: homeDir });
@@ -131,8 +132,8 @@ class IncrUpdater {
         }
         const extraResDir = path.dirname(extraResPath);
         const index = extraResDir.indexOf('extraResources');
-        const zipFileDir = extraResDir.substring(index);
-        zip.addLocalFile(extraResPath, zipFileDir);
+        const zipFileDir = extraResDir.substring(index).replace(/\\/g, '/');
+        zipStream.addEntry(extraResPath, { relativePath: zipFileDir + '/' + path.basename(extraResPath) });
       }
     }
 
@@ -144,15 +145,16 @@ class IncrUpdater {
           throw new Error(`${modulePath} is not exists!`);
         }
 
-        const zipDir = path.join(this.asarUnpackedString, moduleItem);
-        zip.addLocalFolder(modulePath, zipDir);
+        const zipDir = path.join(this.asarUnpackedString, moduleItem).replace(/\\/g, '/');
+        this._addFolderToZip(zipStream, modulePath, zipDir);
       }
     }
 
-    zip.writeZip(asarZipPath, (err) => {
-      if (err) {
-        console.log(chalk.blue('[ee-bin] [updater] create zip ') + chalk.red(`Error: ${err}`));
-      }
+    const writeStream = fs.createWriteStream(asarZipPath);
+    zipStream.pipe(writeStream);
+    await new Promise<void>((resolve, reject) => {
+      writeStream.on('finish', resolve);
+      writeStream.on('error', reject);
     });
 
     const zipSha1 = this.generateHash(asarZipPath, 'sha1', 'hex');
@@ -208,6 +210,20 @@ class IncrUpdater {
         if (fs.existsSync(dirPath)) {
           fsPro.removeSync(dirPath);
         }
+      }
+    }
+  }
+
+  _addFolderToZip(zipStream: InstanceType<typeof compressing.zip.Stream>, folderPath: string, zipDir: string): void {
+    const entries = fs.readdirSync(folderPath, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(folderPath, entry.name);
+      const relativePath = zipDir + '/' + entry.name;
+      if (entry.isDirectory()) {
+        zipStream.addEntry(null, { relativePath: relativePath + '/' });
+        this._addFolderToZip(zipStream, fullPath, relativePath);
+      } else {
+        zipStream.addEntry(fullPath, { relativePath });
       }
     }
   }

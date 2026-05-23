@@ -19,7 +19,9 @@
       "Bash(pnpm run *)",
       "Bash(pnpm *)",
       "WebFetch(domain:pnpm.io)",
-      "Bash(npm view *)"
+      "Bash(npm view *)",
+      "Bash(npm info *)",
+      "Bash(npm pack *)"
     ]
   }
 }
