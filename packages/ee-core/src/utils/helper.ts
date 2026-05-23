@@ -113,6 +113,32 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+const sleepNaive = (ms: number): void => {
+  const endTime = Date.now() + ms;
+  while (endTime > Date.now()) {
+    /* sleeping */
+  }
+};
+
+const sleepAtomic = (ms: number): void => {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+};
+
+// 同步阻塞休眠（不释放事件循环）
+export function systemSleep(ms: number): void {
+  if (typeof ms !== 'number') {
+    throw new TypeError(`systemSleep: ms is not of type 'number'. Given: ${ms} of type '${typeof ms}'`);
+  }
+  if (!(ms >= 0 && ms < Infinity)) {
+    throw new RangeError(`systemSleep: ms must be in the range [0, Infinity). Given: ${ms}`);
+  }
+  if (typeof SharedArrayBuffer !== 'undefined' && typeof Atomics !== 'undefined') {
+    sleepAtomic(ms);
+  } else {
+    sleepNaive(ms);
+  }
+}
+
 export function replaceArgsValue(argv: string[], key: string, value: string): string[] {
   const searchKey = key + '=';
   for (let i = 0; i < argv.length; i++) {

@@ -24,7 +24,7 @@ export { strictParse, readSync, writeSync, read, write } from './utils/json.js';
 export { getPackage, getMAC, isMAC, isFileProtocol, isWebProtocol, isJsProject, machineIdSync, machineId, getPlatform } from './utils/index.js';
 export { parseArgv } from './utils/pargv.js';
 export { getProperties, defaultCamelize } from './utils/wrap.js';
-export { fnDebounce, getRandomString, mkdir, chmodPath, compareVersion, stringify, validValue, checkConfig, sleep, replaceArgsValue, getValueFromArgv, fileIsExist } from './utils/helper.js';
+export { fnDebounce, getRandomString, mkdir, chmodPath, compareVersion, stringify, validValue, checkConfig, sleep, systemSleep, replaceArgsValue, getValueFromArgv, fileIsExist } from './utils/helper.js';
 export { getPort } from './utils/port/index.js';
 export { allEnv, env, isProd, isDev, isRenderer, isMain, isForkedChild, processType, appName, appVersion, getDataDir, getLogDir, getBundleDir, getElectronCodeDir, getFrontendCodeDir, getRootDir, getBaseDir, getElectronDir, getPublicDir, getExtraResourcesDir, getAppUserDataDir, getExecDir, getUserHomeDir, getUserHomeHiddenAppDir, getUserHomeAppDir, getSocketPort, getHttpPort, isPackaged, exit, makeMessage, exitChildJob, isChildJob, isChildPoolJob, getArgumentByName } from './ps/index.js';
 
