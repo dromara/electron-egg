@@ -41,22 +41,10 @@ interface Metadata {
 
 class IncrUpdater {
   tmpAppDirs: string[];
-  windows32Platform: string;
-  windows64Platform: string;
-  macosIntelPlatform: string;
-  macosApplePlatform: string;
-  linuxPlatform: string;
-  nodeModulesString: string;
   asarUnpackedString: string;
 
   constructor() {
     this.tmpAppDirs = ['mac', 'mac-arm64', 'win-unpacked', 'win-ia32-unpacked', 'linux-unpacked'];
-    this.windows32Platform = 'windows_32';
-    this.windows64Platform = 'windows_64';
-    this.macosIntelPlatform = 'macos_intel';
-    this.macosApplePlatform = 'macos_apple';
-    this.linuxPlatform = 'linux';
-    this.nodeModulesString = 'node_modules';
     this.asarUnpackedString = 'app.asar.unpacked';
   }
 

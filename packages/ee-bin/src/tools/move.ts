@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { chalk, copyDirSync } from '../lib/helpers.js';
+import { chalk, copyDirSync, formatCmds } from '../lib/helpers.js';
 import { loadConfig, rm } from '../lib/utils.js';
 
 const homeDir = process.cwd();
@@ -28,13 +28,7 @@ export function move(options: MoveOptions = {}): void {
     return;
   }
 
-  let flags: string[];
-  const flagString = flag.trim();
-  if (flagString.indexOf(',') !== -1) {
-    flags = flagString.split(',');
-  } else {
-    flags = [flagString];
-  }
+  const flags = formatCmds(flag.trim());
 
   for (const f of flags) {
     const cfg = moveConfig[f];

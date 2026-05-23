@@ -1,4 +1,4 @@
-import { createDebug, chalk, is, copyDirSync } from '../lib/helpers.js';
+import { createDebug, chalk, is, copyDirSync, formatCmds } from '../lib/helpers.js';
 import path from 'path';
 import fs from 'fs';
 import { buildSync, BuildOptions } from 'esbuild';
@@ -36,7 +36,6 @@ class ServeProcess {
   pkgPath: string;
 
   constructor() {
-    process.env.NODE_ENV = 'prod';
     this.execProcess = {};
     this.electronDir = './electron';
     this.bundleDir = './public/electron';
@@ -91,7 +90,7 @@ class ServeProcess {
       command: command || '',
     };
 
-    const cmds = this._formatCmds(command || '');
+    const cmds = formatCmds(command || '');
     if (cmds.indexOf('electron') !== -1) {
       const electronConfig = binCmdConfig.electron;
 
@@ -139,6 +138,7 @@ class ServeProcess {
   }
 
   start(options: ServeOptions = {}): void {
+    process.env.NODE_ENV = 'prod';
     const { config } = options;
     const binCfg = loadConfig(config);
     const binCmd = 'start';
@@ -172,7 +172,7 @@ class ServeProcess {
       return;
     }
 
-    const commands = this._formatCmds(cmds);
+    const commands = formatCmds(cmds);
     if (commands.indexOf('electron') !== -1) {
       this.bundle((binCfg.build as Record<string, unknown>)?.electron as Record<string, unknown>);
       const index = commands.indexOf('electron');
@@ -206,7 +206,7 @@ class ServeProcess {
 
   multiExec(opt: { binCmd: string; binCmdConfig: Record<string, ExecConfig>; command: string }): void {
     const { binCmd, binCmdConfig, command } = opt;
-    const commands = this._formatCmds(command || '');
+    const commands = formatCmds(command || '');
 
     for (const cmd of commands) {
       const cfg = binCmdConfig[cmd];
@@ -280,14 +280,6 @@ class ServeProcess {
         buildSync(esbuildOptions as BuildOptions);
       }
     }
-  }
-
-  _formatCmds(command: string): string[] {
-    const cmdString = command.trim();
-    if (cmdString.indexOf(',') !== -1) {
-      return cmdString.split(',');
-    }
-    return [cmdString];
   }
 
   _switchPkgMain(isDebugger = false): void {

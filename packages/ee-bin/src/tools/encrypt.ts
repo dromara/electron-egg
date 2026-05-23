@@ -13,7 +13,6 @@ interface EncryptConfig {
   type: string;
   files?: string[];
   fileExt?: string[];
-  cleanFiles?: string[];
   specificFiles?: string[];
   encryptDir?: string;
   confusionOptions?: Record<string, unknown>;
@@ -35,7 +34,6 @@ class Encrypt {
   type: string;
   bOpt: Record<string, unknown>;
   cOpt: Record<string, unknown>;
-  cleanFiles: string[];
   patterns: string[] | null;
   specFiles: string[];
   codefiles: string[] | undefined;
@@ -53,7 +51,6 @@ class Encrypt {
     this.type = this.config.type || 'none';
     this.bOpt = this.config.bytecodeOptions || {};
     this.cOpt = this.config.confusionOptions || {};
-    this.cleanFiles = this.config.cleanFiles || [];
     this.patterns = this.config.files || null;
     this.specFiles = this.config.specificFiles || [];
 
@@ -68,7 +65,7 @@ class Encrypt {
   }
 
   encrypt(): void {
-    if (EncryptTypes.indexOf(this.type) === -1) return;
+    if (!EncryptTypes.includes(this.type)) return;
     if (this.target === 'frontend' && (this.type === 'bytecode' || this.type === 'strict')) return;
 
     console.log(chalk.blue('[ee-bin] [encrypt] ') + `start ciphering ${this.target}`);
@@ -86,23 +83,6 @@ class Encrypt {
       this.generate(fullpath);
     }
     console.log(chalk.blue('[ee-bin] [encrypt] ') + 'end ciphering');
-  }
-
-  loop(dirPath: string): void {
-    if (!fs.existsSync(dirPath)) return;
-
-    const files = fs.readdirSync(dirPath);
-    for (const file of files) {
-      const curPath = dirPath + '/' + file;
-      if (fs.statSync(curPath).isDirectory()) {
-        this.loop(curPath);
-      } else {
-        const extname = path.extname(curPath);
-        if (this.filesExt.indexOf(extname) !== -1) {
-          this.generate(curPath);
-        }
-      }
-    }
   }
 
   generate(curPath: string, type?: string): void {

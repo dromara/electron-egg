@@ -83,3 +83,13 @@ export function createDebug(namespace: string): (...args: unknown[]) => void {
     }
   };
 }
+
+// ─── formatCmds ────────────────────────────────────────────
+
+export function formatCmds(command: string): string[] {
+  const cmdString = command.trim();
+  if (cmdString.includes(',')) {
+    return cmdString.split(',');
+  }
+  return [cmdString];
+}
