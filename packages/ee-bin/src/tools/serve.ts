@@ -5,7 +5,7 @@ import { buildSync, BuildOptions } from 'esbuild';
 import chokidar from 'chokidar';
 import kill from 'tree-kill';
 import process from 'process';
-import crossSpawn from 'cross-spawn';
+import crossSpawn, { sync as crossSpawnSync } from 'cross-spawn';
 import { loadConfig, getArgumentByName, readJsonSync, writeJsonSync, rm } from '../lib/utils.js';
 
 const log = createDebug('ee-bin:serve');
@@ -224,17 +224,17 @@ class ServeProcess {
 
       const execDir = path.join(process.cwd(), cfg.directory);
       const execArgs = is.string(cfg.args) ? [cfg.args] : (cfg.args || []);
-      const stdioOpt = cfg.stdio ? cfg.stdio : 'inherit';
+      const stdioOpt: 'inherit' | 'pipe' | 'ignore' = (cfg.stdio as 'inherit' | 'pipe' | 'ignore') || 'inherit';
 
       if (cfg.sync) {
-        this.execProcess[cmd] = (crossSpawn as unknown as { sync: (command: string, args?: string[], options?: { stdio?: string; cwd?: string; maxBuffer?: number }) => { status: number | null; output: string[]; stdout: string | Buffer; stderr: string | Buffer; signal: string | null; pid: number } }).sync(cfg.cmd, execArgs as string[], {
+        this.execProcess[cmd] = crossSpawnSync(cfg.cmd, execArgs as string[], {
           stdio: stdioOpt,
           cwd: execDir,
           maxBuffer: 1024 * 1024 * 1024,
         }) as unknown as ReturnType<typeof crossSpawn>;
       } else {
         this.execProcess[cmd] = crossSpawn(cfg.cmd, execArgs as string[], {
-          stdio: stdioOpt as 'inherit' | 'pipe' | 'ignore',
+          stdio: stdioOpt,
           cwd: execDir,
           maxBuffer: 1024 * 1024 * 1024,
         });
@@ -251,7 +251,7 @@ class ServeProcess {
         this.execProcess[cmd].on('exit', () => {
           if (binCmd === 'dev') {
             console.log(chalk.blue(`[ee-bin] [${binCmd}] `) + `The ${chalk.green(cmd)} process is exiting`);
-            if (this.isWindows() && cmd === 'electron') {
+            if (process.platform === 'win32' && cmd === 'electron') {
               console.log(chalk.blue(`[ee-bin] [${binCmd}] `) + chalk.green('Press "CTRL+C" to exit'));
             }
             return;
@@ -312,14 +312,7 @@ class ServeProcess {
     }
   }
 
-  isDev(): boolean {
-    return process.env.NODE_ENV === 'dev';
   }
-
-  isWindows(): boolean {
-    return process.platform === 'win32';
-  }
-}
 
 export const serveProcess = new ServeProcess();
 export { ServeProcess };

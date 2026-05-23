@@ -10,6 +10,14 @@ interface IconGenParams {
   imagesDir: string;
 }
 
+const DEFAULT_PARAMS: IconGenParams = {
+  input: '/public/images/logo.png',
+  output: '/build/icons/',
+  size: '16,32,64,256,512',
+  clear: false,
+  imagesDir: '/public/images/',
+};
+
 class IconGen {
   params: IconGenParams;
   input: string;
@@ -17,49 +25,14 @@ class IconGen {
   imagesDir: string;
   iconOptions: Record<string, unknown>;
 
-  constructor() {
-    const args = process.argv.splice(3);
-    let params: IconGenParams = {
-      input: '/public/images/logo.png',
-      output: '/build/icons/',
-      size: '16,32,64,256,512',
-      clear: false,
-      imagesDir: '/public/images/',
+  constructor(opts: Record<string, unknown> = {}) {
+    const params: IconGenParams = {
+      input: (opts.input as string) || DEFAULT_PARAMS.input,
+      output: (opts.output as string) || DEFAULT_PARAMS.output,
+      size: (opts.size as string) || DEFAULT_PARAMS.size,
+      clear: opts.clear === true,
+      imagesDir: (opts.images as string) || DEFAULT_PARAMS.imagesDir,
     };
-    try {
-      const len = args.length;
-      for (let i = 0; i < len; i++) {
-        const arg = args[i];
-        if (arg && (arg.match(/^-i/) || arg.match(/^-input/))) {
-          params['input'] = args[i + 1] || params['input'];
-          i++;
-          continue;
-        }
-        if (arg && (arg.match(/^-o/) || arg.match(/^-output/))) {
-          params['output'] = args[i + 1] || params['output'];
-          i++;
-          continue;
-        }
-        if (arg && (arg.match(/^-s/) || arg.match(/^-size/))) {
-          params['size'] = args[i + 1] || params['size'];
-          i++;
-          continue;
-        }
-        if (arg && (arg.match(/^-c/) || arg.match(/^-clear/))) {
-          params['clear'] = true;
-          continue;
-        }
-        if (arg && (arg.match(/^-img/) || arg.match(/^-images/))) {
-          params['imagesDir'] = args[i + 1] || params['imagesDir'];
-          i++;
-          continue;
-        }
-      }
-    } catch (e) {
-      console.error('[ee-bin] [icon-gen] args: ', args);
-      console.error('[ee-bin] [icon-gen] ERROR: ', e);
-      throw new Error('参数错误!!');
-    }
     this.params = params;
 
     console.log('[ee-bin] [icon-gen] icon 当前路径: ', process.cwd());
@@ -165,26 +138,6 @@ class IconGen {
 }
 
 export function run(opts?: Record<string, unknown>): void {
-  if (opts && Object.keys(opts).length > 0) {
-    // Merge commander options into process.argv so the constructor can parse them
-    const argMap: Record<string, string> = {
-      input: '-i',
-      output: '-o',
-      size: '-s',
-      clear: '-c',
-      images: '-img',
-    };
-    for (const [key, value] of Object.entries(opts)) {
-      const flag = argMap[key];
-      if (flag && value !== undefined) {
-        if (typeof value === 'boolean') {
-          process.argv.push(flag);
-        } else {
-          process.argv.push(flag, String(value));
-        }
-      }
-    }
-  }
-  const i = new IconGen();
+  const i = new IconGen(opts || {});
   i.generateIcons();
 }
