@@ -94,8 +94,8 @@ program
   .option('--asar-file <file>', 'asar file path')
   .option('--platform <flag>', 'platform')
   .option('--force <flag>', 'force update full')
-  .action(function (this: Command) {
-    incrUpdater.run(this.opts());
+  .action(async function (this: Command) {
+    await incrUpdater.run(this.opts());
   });
 
 program.parse();

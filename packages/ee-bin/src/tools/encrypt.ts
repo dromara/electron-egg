@@ -178,12 +178,10 @@ export function encrypt(options: EncryptOptions = {}): void {
 }
 
 export function cleanEncrypt(options: { dir?: string | string[] } = {}): void {
-  // [todo] 删除前端和主进程代码
-  return;
-  let files: string[] = options.dir !== undefined ? (is.array(options.dir) ? (options.dir as string[]) : [options.dir as string]) : ['./public/electron'];
+  const dirs: string[] = options.dir !== undefined ? (is.array(options.dir) ? (options.dir as string[]) : [options.dir as string]) : ['./public/electron'];
 
-  for (const file of files) {
-    const tmpFile = path.join(process.cwd(), file);
+  for (const dir of dirs) {
+    const tmpFile = path.join(process.cwd(), dir);
     if (fs.existsSync(tmpFile)) {
       fsPro.removeSync(tmpFile);
       console.log(
