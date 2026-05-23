@@ -1,11 +1,12 @@
-import { createDebug, fsPro, chalk, is } from '../lib/helpers.js';
+import { createDebug, chalk, is, copyDirSync } from '../lib/helpers.js';
 import path from 'path';
+import fs from 'fs';
 import { buildSync, BuildOptions } from 'esbuild';
 import chokidar from 'chokidar';
 import kill from 'tree-kill';
 import process from 'process';
 import crossSpawn from 'cross-spawn';
-import { loadConfig, getArgumentByName, readJsonSync, writeJsonSync } from '../lib/utils.js';
+import { loadConfig, getArgumentByName, readJsonSync, writeJsonSync, rm } from '../lib/utils.js';
 
 const log = createDebug('ee-bin:serve');
 
@@ -269,8 +270,8 @@ class ServeProcess {
     if (bundleType === 'copy') {
       const srcResource = path.join(process.cwd(), this.electronDir);
       const destResource = path.join(process.cwd(), this.bundleDir);
-      fsPro.removeSync(destResource);
-      fsPro.copySync(srcResource, destResource);
+      rm(destResource);
+      copyDirSync(srcResource, destResource);
     } else {
       const type = (bundleConfig.type as string) || 'javascript';
       const esbuildOptions = bundleConfig[type] as Record<string, unknown> | undefined;
@@ -294,7 +295,7 @@ class ServeProcess {
     const pkgPath = path.join(process.cwd(), this.pkgPath);
     const pkg = readJsonSync(pkgPath);
     const maints = path.join(process.cwd(), this.electronDir, 'main.ts');
-    if (fsPro.existsSync(maints)) {
+    if (fs.existsSync(maints)) {
       mainFile = 'main.ts';
     }
 

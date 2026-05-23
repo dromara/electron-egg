@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { fsPro, chalk } from '../lib/helpers.js';
+import { chalk, copyDirSync } from '../lib/helpers.js';
 import { loadConfig, rm } from '../lib/utils.js';
 
 const homeDir = process.cwd();
@@ -71,7 +71,7 @@ export function move(options: MoveOptions = {}): void {
       console.log('[ee-bin] [move] Clear history resources:', destResource);
     }
 
-    fsPro.copySync(srcResource, destResource);
+    copyDirSync(srcResource, destResource);
 
     console.log(`[ee-bin] [move] Copy ${srcResource} to ${destResource}`);
   }

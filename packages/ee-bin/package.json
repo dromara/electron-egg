@@ -53,9 +53,6 @@
     "tree-kill": "^1.2.2"
   },
   "devDependencies": {
-    "@types/cross-spawn": "^6.0.6",
-    "@types/js-yaml": "^4.0.9",
-    "@types/json5": "^2.2.0",
     "@types/node": "^22.15.0",
     "@typescript-eslint/eslint-plugin": "^8.59.4",
     "@typescript-eslint/parser": "^8.59.4",

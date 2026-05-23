@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { fsPro, chalk } from '../lib/helpers.js';
+import { chalk } from '../lib/helpers.js';
 import crypto from 'crypto';
 import { zip as compressZip } from 'compressing';
 import globby from 'globby';
@@ -117,7 +117,7 @@ class IncrUpdater {
     const zipName = path.basename(cfg.output.zip, extZip) + `-${platformForFilename}-${version}${extZip}`;
     const asarZipPath = path.join(homeDir, cfg.output.directory, zipName);
     if (fs.existsSync(asarZipPath)) {
-      fsPro.removeSync(asarZipPath);
+      fs.rmSync(asarZipPath, { recursive: true, force: true });
     }
 
     const zipStream = new compressZip.Stream();
@@ -208,7 +208,7 @@ class IncrUpdater {
       for (const dir of this.tmpAppDirs) {
         const dirPath = path.join(homeDir, cfg.output.directory, dir);
         if (fs.existsSync(dirPath)) {
-          fsPro.removeSync(dirPath);
+          fs.rmSync(dirPath, { recursive: true, force: true });
         }
       }
     }

@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { fsPro, chalk, is } from '../lib/helpers.js';
+import { chalk, is } from '../lib/helpers.js';
 import bytenode from 'bytenode';
 import JavaScriptObfuscator from 'javascript-obfuscator';
 import globby from 'globby';
@@ -155,7 +155,7 @@ class Encrypt {
     );
 
     bytenode.compileFile(opt);
-    fsPro.removeSync(curPath);
+    fs.rmSync(curPath, { recursive: true, force: true });
   }
 }
 
@@ -183,7 +183,7 @@ export function cleanEncrypt(options: { dir?: string | string[] } = {}): void {
   for (const dir of dirs) {
     const tmpFile = path.join(process.cwd(), dir);
     if (fs.existsSync(tmpFile)) {
-      fsPro.removeSync(tmpFile);
+      fs.rmSync(tmpFile, { recursive: true, force: true });
       console.log(
         chalk.blue('[ee-bin] [encrypt] ') + 'clean up tmp files: ' + chalk.magenta(`${tmpFile}`)
       );
