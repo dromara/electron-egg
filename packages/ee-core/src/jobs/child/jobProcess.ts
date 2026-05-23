@@ -1,6 +1,7 @@
 import path from 'path';
 import { EventEmitter } from 'events';
 import { fork, type ChildProcess, type Serializable, type ForkOptions } from 'child_process';
+import serialize from 'serialize-javascript';
 import { coreLogger } from '../../log/index.js';
 import { getBaseDir, isPackaged, allEnv } from '../../ps/index.js';
 import { Processes, Events, Receiver } from '../../const/channel.js';
@@ -81,7 +82,7 @@ export class JobProcess {
     const { messageLog } = this.config;
     this.child.on('message', (m: ProcessMessage) => {
       if (messageLog) {
-        coreLogger.info(`[jobs/child] received a message from child-process, message: ${JSON.stringify(m)}`);
+        coreLogger.info(`[jobs/child] received a message from child-process, message: ${serialize(m)}`);
       }
 
       if (m.channel === Processes.showException) {

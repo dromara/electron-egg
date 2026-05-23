@@ -1,12 +1,4 @@
 
-declare module 'mkdirp' {
-  function mkdirp(path: string, opts?: { mode?: number }): Promise<string | undefined>;
-  namespace mkdirp {
-    function sync(path: string, opts?: { mode?: number }): string | undefined;
-  }
-  export = mkdirp;
-}
-
 declare module 'urllib' {
   export function request(url: string, options?: Record<string, unknown>): Promise<{ data: Buffer; res: { status: number; headers: Record<string, string> } }>;
   export function curl(url: string, options?: Record<string, unknown>): Promise<{ data: Buffer; res: { status: number; headers: Record<string, string> } }>;
@@ -47,12 +39,6 @@ declare module 'dns-socket' {
 
 declare module 'bytenode' {
   // bytenode has minimal exports
-}
-
-declare module 'koa-convert' {
-  import type { Middleware } from 'koa';
-  function convert(mw: GeneratorFunction): Middleware;
-  export = convert;
 }
 
 declare module 'config-file-ts' {
@@ -125,7 +111,3 @@ declare module 'koa-body' {
   export = koaBody;
 }
 
-declare module 'lodash' {
-  function includes<T>(collection: T[], value: T): boolean;
-  export { includes };
-}

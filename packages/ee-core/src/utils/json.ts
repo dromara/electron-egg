@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import mkdirp from 'mkdirp';
 
 export interface JsonWriteOptions {
   space?: number;
@@ -25,7 +24,7 @@ export function readSync(filepath: string): unknown {
 export function writeSync(filepath: string, str: unknown, options: JsonWriteOptions = {}): void {
   const opts = { space: 2, ...options };
 
-  mkdirp.sync(path.dirname(filepath));
+  fs.mkdirSync(path.dirname(filepath), { recursive: true });
   let content: string;
   if (typeof str === 'object') {
     content = JSON.stringify(str, opts.replacer as (key: string, value: unknown) => unknown, opts.space) + '\n';
@@ -58,5 +57,5 @@ export function write(filepath: string, str: unknown, options: JsonWriteOptions 
     content = String(str);
   }
 
-  return mkdirp(path.dirname(filepath)).then(() => fs.promises.writeFile(filepath, content));
+  return fs.promises.mkdir(path.dirname(filepath), { recursive: true }).then(() => fs.promises.writeFile(filepath, content));
 }

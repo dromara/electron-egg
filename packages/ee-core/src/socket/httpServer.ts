@@ -7,7 +7,6 @@ import koaBody from 'koa-body';
 import https from 'https';
 import fs from 'fs';
 import path from 'path';
-import _ from 'lodash';
 import { coreLogger } from '../log/index.js';
 import { getBaseDir } from '../ps/index.js';
 import { getController } from '../controller/index.js';
@@ -126,7 +125,7 @@ export class HttpServer {
         uriPath = uriPath.substring(1);
       }
       // 过滤
-      if (_.includes(filterRequest.uris, uriPath)) {
+      if (filterRequest.uris.includes(uriPath)) {
         ctx.response.body = filterRequest.returnData;
         await next();
         return;

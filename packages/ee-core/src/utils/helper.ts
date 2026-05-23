@@ -1,9 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import mkdirp from 'mkdirp';
-import convert from 'koa-convert';
-import { isFunction, isClass, isGeneratorFunction } from './type_check.js';
-import chalk from 'chalk';
 import { parseArgv } from './pargv.js';
 
 const _basePath = process.cwd();
@@ -46,7 +42,7 @@ export function getRandomString(): string {
 
 // 创建文件夹
 export function mkdir(filepath: string, opt: { mode?: number } = {}): void {
-  mkdirp.sync(filepath, opt);
+  fs.mkdirSync(filepath, { recursive: true, ...opt });
 }
 
 // 修改文件权限
@@ -92,10 +88,6 @@ export function compareVersion(v1: string, v2: string): number {
   return 0;
 }
 
-export function middleware(fn: unknown): unknown {
-  return isGeneratorFunction(fn) ? convert(fn as GeneratorFunction) : fn;
-}
-
 // 序列化对象
 export function stringify(obj: Record<string, unknown>, ignore: string[] = []): string {
   const result: Record<string, unknown> = {};
@@ -115,23 +107,6 @@ export function validValue(value: unknown): boolean {
 export function checkConfig(prop: string): boolean {
   const filepath = path.join(_basePath, prop);
   return fs.existsSync(filepath);
-}
-
-export function loadConfig(prop: string): unknown {
-  const filepath = path.join(_basePath, prop);
-  if (!fs.existsSync(filepath)) {
-    const errorTips = 'config file ' + chalk.blue(`${filepath}`) + ' does not exist !';
-    throw new Error(errorTips);
-  }
-  const obj = require(filepath);
-  if (!obj) return obj;
-
-  let ret = obj;
-  if (isFunction(obj) && !isClass(obj)) {
-    ret = (obj as (...args: unknown[]) => unknown)();
-  }
-
-  return ret || {};
 }
 
 export function sleep(ms: number): Promise<void> {
