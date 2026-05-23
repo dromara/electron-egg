@@ -1,7 +1,3 @@
-declare module 'config-file-ts' {
-  export function loadTsConfig(filepath: string): Record<string, unknown>;
-}
-
 declare module 'json5' {
   const json5: {
     parse(text: string, reviver?: (key: string, value: unknown) => unknown): unknown;

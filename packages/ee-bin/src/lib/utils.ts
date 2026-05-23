@@ -3,7 +3,6 @@ import path from 'path';
 import fs from 'fs';
 import { chalk } from './helpers.js';
 import { is } from './helpers.js';
-import { loadTsConfig } from 'config-file-ts';
 import JsonLib from 'json5';
 import { mkdirp } from './helpers.js';
 import OS from 'os';
@@ -39,8 +38,6 @@ export function loadFile(filepath: string): Record<string, unknown> {
     // eslint-disable-next-line @typescript-eslint/no-require-imports -- dynamic user config loading
     const mod = require(configFile);
     result = mod.default != null ? mod.default : mod;
-  } else if (configFile.endsWith('.ts')) {
-    result = loadTsConfig(configFile);
   }
   if (is.function(result) && !is.class(result)) {
     result = (result as () => unknown)();
