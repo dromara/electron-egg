@@ -1,11 +1,9 @@
 import path from 'path';
 import fs from 'fs';
-import fsPro from 'fs-extra';
-import is from 'is-type-of';
+import { fsPro, chalk, is } from '../lib/helpers.js';
 import bytenode from 'bytenode';
 import JavaScriptObfuscator from 'javascript-obfuscator';
 import globby from 'globby';
-import chalk from 'chalk';
 import { loadConfig } from '../lib/utils.js';
 import { extend } from '../lib/extend.js';
 

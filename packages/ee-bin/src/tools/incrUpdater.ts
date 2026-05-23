@@ -1,8 +1,7 @@
 import path from 'path';
 import fs from 'fs';
-import fsPro from 'fs-extra';
+import { fsPro, chalk } from '../lib/helpers.js';
 import crypto from 'crypto';
-import chalk from 'chalk';
 import AdmZip from 'adm-zip';
 import globby from 'globby';
 import yaml from 'js-yaml';

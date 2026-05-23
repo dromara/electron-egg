@@ -1,16 +1,16 @@
-import debug from 'debug';
+import { createDebug } from './helpers.js';
 import path from 'path';
 import fs from 'fs';
-import chalk from 'chalk';
-import is from 'is-type-of';
+import { chalk } from './helpers.js';
+import { is } from './helpers.js';
 import { loadTsConfig } from 'config-file-ts';
 import JsonLib from 'json5';
-import mkdirp from 'mkdirp';
+import { mkdirp } from './helpers.js';
 import OS from 'os';
 import defaultConfig from '../config/bin_default.js';
 import { extend } from './extend.js';
 
-const log = debug('ee-bin:lib:utils');
+const log = createDebug('ee-bin:lib:utils');
 const _basePath = process.cwd();
 const userBin = './cmd/bin.js';
 

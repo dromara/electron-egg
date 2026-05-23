@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import fsPro from 'fs-extra';
-import chalk from 'chalk';
+import { fsPro, chalk } from '../lib/helpers.js';
 import { loadConfig, rm } from '../lib/utils.js';
 
 const homeDir = process.cwd();

@@ -1,7 +1,3 @@
-declare module 'mkdirp' {
-  export function sync(dir: string, opts?: { mode?: number }): string | undefined;
-}
-
 declare module 'config-file-ts' {
   export function loadTsConfig(filepath: string): Record<string, unknown>;
 }
@@ -12,27 +8,6 @@ declare module 'json5' {
     stringify(value: unknown, replacer?: unknown, space?: string | number): string;
   };
   export default json5;
-}
-
-declare module 'is-type-of' {
-  const is: {
-    function(value: unknown): boolean;
-    class(value: unknown): boolean;
-    string(value: unknown): boolean;
-    array(value: unknown): boolean;
-    object(value: unknown): boolean;
-    boolean(value: unknown): boolean;
-    number(value: unknown): boolean;
-    null(value: unknown): boolean;
-    undefined(value: unknown): boolean;
-    date(value: unknown): boolean;
-    regexp(value: unknown): boolean;
-    error(value: unknown): boolean;
-    promise(value: unknown): boolean;
-    generatorFunction(value: unknown): boolean;
-    asyncFunction(value: unknown): boolean;
-  };
-  export default is;
 }
 
 declare module 'bytenode' {

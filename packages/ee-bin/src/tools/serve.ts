@@ -1,16 +1,13 @@
-import debug from 'debug';
+import { createDebug, fsPro, chalk, is } from '../lib/helpers.js';
 import path from 'path';
-import fsPro from 'fs-extra';
-import is from 'is-type-of';
-import chalk from 'chalk';
-import crossSpawn from 'cross-spawn';
 import { buildSync, BuildOptions } from 'esbuild';
 import chokidar from 'chokidar';
 import kill from 'tree-kill';
 import process from 'process';
+import crossSpawn from 'cross-spawn';
 import { loadConfig, getArgumentByName, readJsonSync, writeJsonSync } from '../lib/utils.js';
 
-const log = debug('ee-bin:serve');
+const log = createDebug('ee-bin:serve');
 
 interface ExecConfig {
   directory: string;
