@@ -2,6 +2,7 @@ import pino from 'pino';
 import path from 'path';
 import debug from 'debug';
 import { getConfig } from '../config/index.js';
+import defaultConfig from '../config/default_config.js';
 import { extend } from '../utils/extend.js';
 import { getLogDir, isDev } from '../ps/index.js';
 
@@ -83,25 +84,9 @@ export function create(config: Record<string, unknown> = {}): PinoLoggers {
   let opt: Record<string, unknown> = {};
 
   if (Object.keys(config).length === 0) {
-    const defaultConfig = {
-      logger: {
-        type: 'application',
-        dir: getLogDir(),
-        level: 'info',
-        outputJSON: false,
-        prettyPrint: isDev(),
-        appLogName: 'ee.log',
-        coreLogName: 'ee-core.log',
-        errorLogName: 'ee-error.log',
-        rotator: 'day',
-        redact: [],
-        timestamp: true,
-        name: 'ee',
-        maxSize: '10m',
-      },
-    };
+    const defaultLoggerConf = (defaultConfig() as Record<string, unknown>).logger as Record<string, unknown>;
     const sysConfig = getConfig();
-    opt = extend(true, defaultConfig, { logger: sysConfig.logger });
+    opt = extend(true, { logger: defaultLoggerConf }, { logger: sysConfig.logger });
   } else {
     opt = { logger: config };
   }
