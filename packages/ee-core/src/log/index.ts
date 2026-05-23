@@ -33,61 +33,32 @@ export function getLoggers(): PinoLoggers {
 }
 
 function _getLogger(): pino.Logger {
-  if (!loggers) {
-    loadLog();
-  }
+  if (!loggers) { loadLog(); }
   return loggers!.logger;
 }
 
 function _getCoreLogger(): pino.Logger {
-  if (!loggers) {
-    loadLog();
-  }
+  if (!loggers) { loadLog(); }
   return loggers!.coreLogger;
 }
 
 function _getErrorLogger(): pino.Logger {
-  if (!loggers) {
-    loadLog();
-  }
+  if (!loggers) { loadLog(); }
   return loggers!.errorLogger;
 }
 
-// logger proxy — lazy-init, forwards to pino.Logger
-export const logger: EeLogger = new Proxy({} as unknown as EeLogger, {
-  get(_target, prop) {
-    return (...args: unknown[]) => {
-      const l = _getLogger();
-      const method = (l as unknown as Record<string, (...args: unknown[]) => void>)[prop as string];
-      if (method) {
-        method.apply(l, args);
-      }
-    };
-  },
-});
+function createLoggerProxy(getter: () => pino.Logger): EeLogger {
+  return new Proxy({} as unknown as EeLogger, {
+    get(_target, prop) {
+      return (...args: unknown[]) => {
+        const l = getter();
+        const method = (l as unknown as Record<string, (...args: unknown[]) => void>)[prop as string];
+        if (method) { method.apply(l, args); }
+      };
+    },
+  });
+}
 
-// coreLogger proxy
-export const coreLogger: EeLogger = new Proxy({} as unknown as EeLogger, {
-  get(_target, prop) {
-    return (...args: unknown[]) => {
-      const l = _getCoreLogger();
-      const method = (l as unknown as Record<string, (...args: unknown[]) => void>)[prop as string];
-      if (method) {
-        method.apply(l, args);
-      }
-    };
-  },
-});
-
-// errorLogger proxy (error+ level only)
-export const errorLogger: EeLogger = new Proxy({} as unknown as EeLogger, {
-  get(_target, prop) {
-    return (...args: unknown[]) => {
-      const l = _getErrorLogger();
-      const method = (l as unknown as Record<string, (...args: unknown[]) => void>)[prop as string];
-      if (method) {
-        method.apply(l, args);
-      }
-    };
-  },
-});
+export const logger: EeLogger = createLoggerProxy(_getLogger);
+export const coreLogger: EeLogger = createLoggerProxy(_getCoreLogger);
+export const errorLogger: EeLogger = createLoggerProxy(_getErrorLogger);

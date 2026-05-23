@@ -119,29 +119,18 @@ export function machineId(original = false): Promise<string> {
 // get platform
 // values:  windows | windows_32 | windows_64 | macos_intel | macos_apple | linux
 export function getPlatform(delimiter = '_', isDiffArch = false): string {
-  let osName = '';
-  if (is.windows()) {
-    osName = 'windows';
+  if (process.platform === 'win32') {
+    let os = 'windows';
     if (isDiffArch) {
-      const arch = is.x64() ? '64' : '32';
-      osName += delimiter + arch;
+      os += delimiter + (process.arch === 'x64' ? '64' : '32');
     }
-  } else if (is.macOS()) {
-    let isAppleSilicon = false;
-    const cpus = os.cpus();
-    for (const cpu of cpus) {
-      if (cpu.model.includes('Apple')) {
-        isAppleSilicon = true;
-        break;
-      }
-    }
-    const core = isAppleSilicon ? 'apple' : 'intel';
-    osName = 'macos' + delimiter + core;
-  } else if (is.linux()) {
-    osName = 'linux';
+    return os;
   }
-
-  return osName;
+  if (process.platform === 'darwin') {
+    const core = process.arch === 'arm64' ? 'apple' : 'intel';
+    return 'macos' + delimiter + core;
+  }
+  return 'linux';
 }
 
 function _isWindowsProcessMixedOrNativeArchitecture(): string {
