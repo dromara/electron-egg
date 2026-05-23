@@ -115,7 +115,7 @@ export class CrossProcess {
     this.child = coreProcess;
     this.pid = coreProcess.pid || 0;
 
-    coreProcess.on('exit', (code, signal) => {
+    coreProcess.on('exit', (code: number | null, signal: NodeJS.Signals | null) => {
       const data = { pid: this.pid };
       this.host.emitter?.emit(Events.childProcessExit, data);
       // Child process closed: The child process was killed externally or an internal error caused the application to stop, resulting in the application exiting
@@ -125,7 +125,7 @@ export class CrossProcess {
       this._exitElectron();
     });
 
-    coreProcess.on('error', (err) => {
+    coreProcess.on('error', (err: Error) => {
       const data = { pid: this.pid };
       this.host.emitter?.emit(Events.childProcessError, data);
       coreLogger.error(

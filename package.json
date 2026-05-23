@@ -29,6 +29,7 @@
     "debug-encrypt": "ee-bin encrypt",
     "debug-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",
     "debug-move": "ee-bin move --flag=frontend_dist",
+    "packages-build": "pnpm --filter ee-bin run build && pnpm --filter ee-core run build",
     "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
