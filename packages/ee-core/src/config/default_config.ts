@@ -31,9 +31,15 @@ export default function defaultConfig(): Record<string, unknown> {
       errorLogName: 'ee-error.log',
       rotator: 'day',
       redact: [],
+      redactCensor: '[Redacted]',
       timestamp: true,
       name: 'ee',
       maxSize: '10m',
+      serializers: {},
+      customLevels: {},
+      depthLimit: 5,
+      safe: true,
+      enabled: true,
     },
     socketServer: {
       enable: false, // is it enabled

@@ -14,14 +14,31 @@ export interface PinoLoggers {
   errorLogger: pino.Logger;
 }
 
-// Backward-compatible level name mapping (INFO → info, etc.)
+interface LoggerConf {
+  type?: string;
+  dir?: string;
+  level?: string;
+  outputJSON?: boolean;
+  prettyPrint?: boolean;
+  appLogName?: string;
+  coreLogName?: string;
+  errorLogName?: string;
+  rotator?: string;
+  redact?: string[];
+  redactCensor?: string;
+  timestamp?: boolean;
+  name?: string;
+  maxSize?: string | number;
+  serializers?: Record<string, (value: unknown) => unknown>;
+  customLevels?: Record<string, number>;
+  depthLimit?: number;
+  safe?: boolean;
+  enabled?: boolean;
+}
+
 const LEVEL_MAP: Record<string, string> = {
-  DEBUG: 'debug',
-  INFO: 'info',
-  WARN: 'warn',
-  ERROR: 'error',
-  FATAL: 'fatal',
-  TRACE: 'trace',
+  DEBUG: 'debug', INFO: 'info', WARN: 'warn',
+  ERROR: 'error', FATAL: 'fatal', TRACE: 'trace',
 };
 
 function normalizeLevel(level: string): string {
@@ -39,7 +56,6 @@ function buildTransportTargets(
 ): pino.TransportTargetOptions[] {
   const targets: pino.TransportTargetOptions[] = [];
 
-  // Target 1: file with daily rotation (pino-roll)
   targets.push({
     target: 'pino-roll',
     level,
@@ -52,7 +68,6 @@ function buildTransportTargets(
     },
   });
 
-  // Target 2: console pretty output (dev only)
   if (prettyPrint) {
     targets.push({
       target: 'pino-pretty',
@@ -80,70 +95,78 @@ function mapRotatorToFrequency(rotator: string): string {
   return 'daily';
 }
 
+function createLoggerInstance(
+  opts: pino.LoggerOptions,
+  logDir: string,
+  logFileBase: string,
+  logFileExt: string,
+  level: string,
+  prettyPrint: boolean,
+  frequency: string,
+  maxSize: string,
+): pino.Logger {
+  const targets = buildTransportTargets(logDir, logFileBase, logFileExt, level, prettyPrint, frequency, maxSize);
+  const transport = pino.transport({ targets });
+  return pino(opts, transport);
+}
+
 export function create(config: Record<string, unknown> = {}): PinoLoggers {
-  let opt: Record<string, unknown> = {};
+  const defaults = (defaultConfig() as Record<string, unknown>).logger as Record<string, unknown>;
+  let loggerConf: LoggerConf;
 
   if (Object.keys(config).length === 0) {
-    const defaultLoggerConf = (defaultConfig() as Record<string, unknown>).logger as Record<string, unknown>;
     const sysConfig = getConfig();
-    opt = extend(true, { logger: defaultLoggerConf }, { logger: sysConfig.logger });
+    loggerConf = extend(true, {}, defaults, (sysConfig.logger || {}) as Record<string, unknown>) as LoggerConf;
   } else {
-    opt = { logger: config };
+    loggerConf = config as LoggerConf;
   }
 
-  if (Object.keys(opt).length === 0) {
-    throw new Error('logger config is null');
-  }
-
-  const loggerConf = opt.logger as Record<string, unknown>;
-  const logDir = (loggerConf.dir as string) || getLogDir();
-  const level = normalizeLevel((loggerConf.level as string) || 'info');
-  const outputJSON = (loggerConf.outputJSON as boolean) ?? false;
-  // When outputJSON is true, disable prettyPrint (force JSON everywhere)
-  const prettyPrint = outputJSON ? false : ((loggerConf.prettyPrint as boolean) ?? isDev());
-  const appLogName = (loggerConf.appLogName as string) || 'ee.log';
-  const coreLogName = (loggerConf.coreLogName as string) || 'ee-core.log';
-  const errorLogName = (loggerConf.errorLogName as string) || 'ee-error.log';
-  const redact = (loggerConf.redact as string[]) || [];
-  const name = (loggerConf.name as string) || 'ee';
-  const timestamp = (loggerConf.timestamp as boolean) ?? true;
-  const rotator = (loggerConf.rotator as string) || 'day';
+  const logDir = loggerConf.dir || getLogDir();
+  const level = normalizeLevel(loggerConf.level || 'info');
+  const outputJSON = loggerConf.outputJSON ?? false;
+  const prettyPrint = outputJSON ? false : (loggerConf.prettyPrint ?? isDev());
+  const appLogName = loggerConf.appLogName || 'ee.log';
+  const coreLogName = loggerConf.coreLogName || 'ee-core.log';
+  const errorLogName = loggerConf.errorLogName || 'ee-error.log';
+  const redact = loggerConf.redact || [];
+  const redactCensor = loggerConf.redactCensor || '[Redacted]';
+  const name = loggerConf.name || 'ee';
+  const timestamp = loggerConf.timestamp ?? true;
   const maxSize = typeof loggerConf.maxSize === 'number'
     ? `${(loggerConf.maxSize as number) / 1024 / 1024}m`
     : (loggerConf.maxSize as string) || '10m';
-  const frequency = mapRotatorToFrequency(rotator);
+  const frequency = mapRotatorToFrequency(loggerConf.rotator || 'day');
+  const serializers = loggerConf.serializers;
+  const customLevels = loggerConf.customLevels;
+  const depthLimit = loggerConf.depthLimit ?? 5;
+  const safe = loggerConf.safe ?? true;
+  const enabled = loggerConf.enabled ?? true;
 
-  // Common pino options
   const baseOpts: pino.LoggerOptions = {
     level,
     name,
     timestamp: timestamp ? pino.stdTimeFunctions.isoTime : false,
+    depthLimit,
+    safe,
+    enabled,
   };
+  if (customLevels && Object.keys(customLevels).length > 0) {
+    baseOpts.customLevels = customLevels;
+  }
+  if (serializers && Object.keys(serializers).length > 0) {
+    baseOpts.serializers = serializers as { [key: string]: pino.SerializerFn };
+  }
   if (redact.length > 0) {
-    baseOpts.redact = { paths: redact, censor: '[Redacted]' };
+    baseOpts.redact = { paths: redact, censor: redactCensor };
   }
 
-  // Parse file names for pino-roll
   const appParsed = parseLogFileName(appLogName);
   const coreParsed = parseLogFileName(coreLogName);
   const errorParsed = parseLogFileName(errorLogName);
 
-  // Create logger (app)
-  const appTargets = buildTransportTargets(logDir, appParsed.base, appParsed.ext, level, prettyPrint, frequency, maxSize);
-  const appTransport = pino.transport({ targets: appTargets });
-  const loggerInstance = pino(baseOpts, appTransport);
-
-  // Create coreLogger
-  const coreOpts = { ...baseOpts, name: `${name}-core` };
-  const coreTargets = buildTransportTargets(logDir, coreParsed.base, coreParsed.ext, level, prettyPrint, frequency, maxSize);
-  const coreTransport = pino.transport({ targets: coreTargets });
-  const coreLoggerInstance = pino(coreOpts, coreTransport);
-
-  // Create errorLogger (error+ level only)
-  const errorOpts = { ...baseOpts, level: 'error', name: `${name}-error` };
-  const errorTargets = buildTransportTargets(logDir, errorParsed.base, errorParsed.ext, 'error', prettyPrint, frequency, maxSize);
-  const errorTransport = pino.transport({ targets: errorTargets });
-  const errorLoggerInstance = pino(errorOpts, errorTransport);
+  const loggerInstance = createLoggerInstance(baseOpts, logDir, appParsed.base, appParsed.ext, level, prettyPrint, frequency, maxSize);
+  const coreLoggerInstance = createLoggerInstance({ ...baseOpts, name: `${name}-core` }, logDir, coreParsed.base, coreParsed.ext, level, prettyPrint, frequency, maxSize);
+  const errorLoggerInstance = createLoggerInstance({ ...baseOpts, level: 'error', name: `${name}-error` }, logDir, errorParsed.base, errorParsed.ext, 'error', prettyPrint, frequency, maxSize);
 
   debugLog('[create] level: %s, dir: %s, frequency: %s', level, logDir, frequency);
 
