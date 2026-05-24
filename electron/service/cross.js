@@ -60,9 +60,9 @@ class CrossService {
       appExit: true,
     }
     const entity = await cross.run(serviceName, opt);
-    logger.info('server name:', entity.name);
-    logger.info('server config:', entity.config);
-    logger.info('server url:', entity.getUrl());
+    logger.info('[go] server name:', entity.name);
+    logger.info('[go] server config:', entity.config);
+    logger.info('[go] server url:', entity.getUrl());
 
     return;
   }

@@ -39,7 +39,7 @@ module.exports = () => {
       url: 'http://electron-egg.kaka996.com/'
     },
     socketServer: {
-      enable: false,
+      enable: true,
       port: 7070,
       path: "/socket.io/",
       connectTimeout: 45000,
