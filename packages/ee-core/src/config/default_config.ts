@@ -22,7 +22,6 @@ export default function defaultConfig(): Config {
       icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
     logger: {
-      type: 'application',
       dir: getLogDir(),
       level: 'info',
       prettyPrint: isDev(),

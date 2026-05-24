@@ -29,6 +29,8 @@ module.exports = () => {
     logger: {
       level: 'INFO',
       prettyPrint: true,
+      dateFormat: 'yyyy-MM-dd',
+      maxSize: '10m',
       appLogName: 'ee.log',
       coreLogName: 'ee-core.log',
       errorLogName: 'ee-error.log'

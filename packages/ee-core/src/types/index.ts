@@ -70,7 +70,6 @@ export interface HttpServerConfig {
 }
 
 export interface LoggerConfig {
-  type: string;
   dir: string;
   level: string;
   prettyPrint?: boolean;
