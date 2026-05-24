@@ -23,22 +23,24 @@ module.exports = () => {
         //preload: path.join(getElectronDir(), 'preload', 'bridge.js'),
       },
       frame: true,
-      show: false,
+      show: true,
       icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
     logger: {
       level: 'INFO',
-      outputJSON: false,
+      prettyPrint: true,
+      dateFormat: 'yyyy-MM-dd',
+      maxSize: '10m',
       appLogName: 'ee.log',
       coreLogName: 'ee-core.log',
-      errorLogName: 'ee-error.log' 
+      errorLogName: 'ee-error.log'
     },
     remote: {
       enable: false,
       url: 'http://electron-egg.kaka996.com/'
     },
     socketServer: {
-      enable: false,
+      enable: true,
       port: 7070,
       path: "/socket.io/",
       connectTimeout: 45000,

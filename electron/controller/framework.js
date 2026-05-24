@@ -223,17 +223,17 @@ class FrameworkController {
 
   /**
    * 通过进程池执行任务
-   */ 
-  someJobByPool(args, event) {
+   */
+  async someJobByPool(args, event) {
     const { jobId, action } = args;
     let result;
     switch (action) {
       case 'run':
-        result = frameworkService.doJobByPool(jobId, action, event);
+        result = await frameworkService.doJobByPool(jobId, action, event);
         break;
-      default:  
+      default:
     }
-    
+
     let data = {
       jobId,
       action,
