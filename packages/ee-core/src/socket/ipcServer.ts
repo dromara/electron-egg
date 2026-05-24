@@ -13,8 +13,7 @@ export class IpcServer {
   directory: string;
 
   constructor() {
-    const { mainServer } = getConfig() as { mainServer: { channelSeparator: string } };
-    this.channelSeparator = mainServer.channelSeparator;
+    this.channelSeparator = getConfig().mainServer.channelSeparator || '/';
     this.directory = 'controller';
     this.init();
   }

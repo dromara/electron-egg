@@ -5,7 +5,7 @@ import { extend } from '../utils/extend.js';
 import { loadFile } from '../loader/index.js';
 import { Timing } from '../core/utils/timing.js';
 import defaultConfig from './default_config.js';
-import type { AppInfo } from '../types/index.js';
+import type { AppInfo, Config } from '../types/index.js';
 
 const debugLog = debug('ee-core:config:config_loader');
 
@@ -16,16 +16,12 @@ export class ConfigLoader {
     this.timing = new Timing();
   }
 
-  /**
-   * Load config/config.xxx.js
-   */
-  load(): Record<string, unknown> {
+  load(): Config {
     this.timing.start('Load Config');
 
-    // Load Application config
     const appConfig = this._AppConfig();
     const defaultConf = defaultConfig();
-    const config = extend(true, defaultConf, appConfig);
+    const config = extend(true, defaultConf as Record<string, unknown>, appConfig) as Config;
     debugLog('[load] config: %o', config);
 
     this.timing.end('Load Config');

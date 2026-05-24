@@ -3,7 +3,7 @@ import { JobProcess, type JobProcessOptions } from './jobProcess.js';
 import { getFullpath } from '../../loader/index.js';
 import { Events } from '../../const/channel.js';
 import { getConfig } from '../../config/index.js';
-import type { JobsConfig } from '../../types/index.js';
+import type { JobsConfig, ProcessExitEventData } from '../../types/index.js';
 
 export class ChildJob extends EventEmitter {
   jobs: Record<number, JobProcess>;
@@ -26,12 +26,12 @@ export class ChildJob extends EventEmitter {
    * 初始化监听
    */
   _initEvents(): void {
-    this.on(Events.childProcessExit, (data: { pid: number | undefined }) => {
+    this.on(Events.childProcessExit, (data: ProcessExitEventData) => {
       if (data.pid !== undefined) {
         delete this.jobs[data.pid];
       }
     });
-    this.on(Events.childProcessError, (data: { pid: number | undefined }) => {
+    this.on(Events.childProcessError, (data: ProcessExitEventData) => {
       if (data.pid !== undefined) {
         delete this.jobs[data.pid];
       }

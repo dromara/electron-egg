@@ -1,13 +1,14 @@
 import { ConfigLoader } from './config_loader.js';
+import type { Config } from '../types/index.js';
 
-let config: Record<string, unknown> | null = null;
+let config: Config | null = null;
 
 export function loadConfig(): void {
   const loader = new ConfigLoader();
   config = loader.load();
 }
 
-export function getConfig(): Record<string, unknown> {
+export function getConfig(): Config {
   if (!config) {
     loadConfig();
   }

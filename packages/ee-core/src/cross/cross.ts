@@ -5,6 +5,7 @@ import { CrossProcess, CrossTargetConfig } from './crossProcess.js';
 import { Events } from '../const/channel.js';
 import { extend } from '../utils/extend.js';
 import { getPort } from '../utils/port/index.js';
+import type { ProcessExitEventData } from '../types/index.js';
 
 export interface CrossRunOptions {
   [key: string]: unknown;
@@ -139,14 +140,14 @@ export class Cross {
 
   _initEventEmitter(): void {
     this.emitter = new EventEmitter();
-    this.emitter.on(Events.childProcessExit, (data: { pid: number }) => {
+    this.emitter.on(Events.childProcessExit, (data: ProcessExitEventData) => {
       const child = this.children[String(data.pid)];
       if (child) {
         delete this.childrenMap[child.name];
         delete this.children[String(data.pid)];
       }
     });
-    this.emitter.on(Events.childProcessError, (data: { pid: number }) => {
+    this.emitter.on(Events.childProcessError, (data: ProcessExitEventData) => {
       const child = this.children[String(data.pid)];
       if (child) {
         delete this.childrenMap[child.name];

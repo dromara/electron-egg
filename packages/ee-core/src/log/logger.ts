@@ -5,6 +5,7 @@ import { getConfig } from '../config/index.js';
 import defaultConfig from '../config/default_config.js';
 import { extend } from '../utils/extend.js';
 import { getLogDir, isDev } from '../ps/index.js';
+import type { LoggerConfig } from '../types/index.js';
 
 const debugLog = debug('ee-core:log:logger');
 
@@ -12,28 +13,6 @@ export interface PinoLoggers {
   logger: pino.Logger;
   coreLogger: pino.Logger;
   errorLogger: pino.Logger;
-}
-
-interface LoggerConf {
-  type?: string;
-  dir?: string;
-  level?: string;
-  outputJSON?: boolean;
-  prettyPrint?: boolean;
-  appLogName?: string;
-  coreLogName?: string;
-  errorLogName?: string;
-  rotator?: string;
-  redact?: string[];
-  redactCensor?: string;
-  timestamp?: boolean;
-  name?: string;
-  maxSize?: string | number;
-  serializers?: Record<string, (value: unknown) => unknown>;
-  customLevels?: Record<string, number>;
-  depthLimit?: number;
-  safe?: boolean;
-  enabled?: boolean;
 }
 
 const LEVEL_MAP: Record<string, string> = {
@@ -110,15 +89,15 @@ function createLoggerInstance(
   return pino(opts, transport);
 }
 
-export function create(config: Record<string, unknown> = {}): PinoLoggers {
-  const defaults = (defaultConfig() as Record<string, unknown>).logger as Record<string, unknown>;
-  let loggerConf: LoggerConf;
+export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
+  const defaults = defaultConfig().logger;
+  let loggerConf: LoggerConfig;
 
   if (Object.keys(config).length === 0) {
     const sysConfig = getConfig();
-    loggerConf = extend(true, {}, defaults, (sysConfig.logger || {}) as Record<string, unknown>) as LoggerConf;
+    loggerConf = extend(true, { ...defaults } as unknown as Record<string, unknown>, sysConfig.logger as unknown as Record<string, unknown>) as unknown as LoggerConfig;
   } else {
-    loggerConf = config as LoggerConf;
+    loggerConf = extend(true, { ...defaults } as unknown as Record<string, unknown>, config as unknown as Record<string, unknown>) as unknown as LoggerConfig;
   }
 
   const logDir = loggerConf.dir || getLogDir();

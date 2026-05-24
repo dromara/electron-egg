@@ -1,8 +1,9 @@
 import path from 'path';
 import { isDev, getBaseDir, getLogDir } from '../ps/index.js';
 import { SocketIO } from '../const/channel.js';
+import type { Config } from '../types/index.js';
 
-export default function defaultConfig(): Record<string, unknown> {
+export default function defaultConfig(): Config {
   return {
     openDevTools: false,
     singleLock: true,

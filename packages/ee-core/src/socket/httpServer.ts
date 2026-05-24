@@ -12,21 +12,19 @@ import { getBaseDir } from '../ps/index.js';
 import { getController } from '../controller/index.js';
 import { getConfig } from '../config/index.js';
 import { getPort } from '../utils/port/index.js';
+import type { HttpServerConfig } from '../types/index.js';
 
 const debugLog = debug('ee-core:socket:httpServer');
 
 export class HttpServer {
-  config: Record<string, unknown>;
+  config: HttpServerConfig;
   httpApp: Koa | undefined;
   channelSeparator: string;
 
   constructor() {
-    const { httpServer, mainServer } = getConfig() as {
-      httpServer: Record<string, unknown>;
-      mainServer: { channelSeparator: string };
-    };
-    this.config = httpServer;
-    this.channelSeparator = mainServer.channelSeparator;
+    const config = getConfig();
+    this.config = config.httpServer;
+    this.channelSeparator = config.mainServer.channelSeparator || '/';
     this.httpApp = undefined;
     this.init();
   }
@@ -36,7 +34,7 @@ export class HttpServer {
       return;
     }
 
-    const port = await getPort({ port: parseInt(this.config.port as string) });
+    const port = await getPort({ port: this.config.port });
     if (!port) {
       throw new Error('[ee-core] [socket/HttpServer] http port required, and must be a number !');
     }
@@ -45,18 +43,18 @@ export class HttpServer {
     this._create();
   }
 
-  _create(): void {
+  async _create(): Promise<void> {
     const config = this.config;
-    const koaConfig = (config.koaConfig as Record<string, unknown>) || {};
+    const koaConfig = (config as unknown as Record<string, unknown>).koaConfig as Record<string, unknown> || {};
     const preMiddleware = (koaConfig.preMiddleware as unknown[]) || [];
     const postMiddleware = (koaConfig.postMiddleware as unknown[]) || [];
     const errorHandler = koaConfig.errorHandler as ((err: Error) => void) | null;
-    const isHttps = (config.https as Record<string, unknown> | undefined)?.enable === true;
+    const isHttps = config.https.enable === true;
     const sslOptions: { key?: Buffer; cert?: Buffer } = {};
 
     if (isHttps) {
       config.protocol = 'https://';
-      const httpsConfig = config.https as { key: string; cert: string };
+      const httpsConfig = config.https;
       const keyFile = path.join(getBaseDir(), httpsConfig.key);
       const certFile = path.join(getBaseDir(), httpsConfig.cert);
       assert(fs.existsSync(keyFile), 'ssl key file is required');
@@ -66,7 +64,7 @@ export class HttpServer {
       sslOptions.cert = fs.readFileSync(certFile);
     }
 
-    const url = (config.protocol as string) + (config.host as string) + ':' + config.port;
+    const url = config.protocol + config.host + ':' + config.port;
     const corsOptions = config.cors as Record<string, unknown>;
 
     const koaApp = new Koa();
@@ -78,13 +76,13 @@ export class HttpServer {
 
     // 核心中间件
     koaApp.use(cors(corsOptions as Parameters<typeof cors>[0]));
-    koaApp.use(koaBody(config.body as Parameters<typeof koaBody>[0]));
+    koaApp.use(koaBody(config.body));
     koaApp.use(this._dispatch.bind(this));
     // 加载后置中间件
     this._loadMiddlewares(koaApp, postMiddleware, 'post');
 
     let msg = '[socket/http] server is: ' + url;
-    const listenOpt = { host: config.host as string, port: config.port as number };
+    const listenOpt = { host: config.host, port: config.port };
     if (isHttps) {
       const server = https.createServer(sslOptions, koaApp.callback());
       server.on('error', (err) => {
@@ -107,9 +105,7 @@ export class HttpServer {
 
   async _dispatch(ctx: Koa.Context, next: Koa.Next): Promise<void> {
     const controller = getController();
-    const { filterRequest } = getConfig().httpServer as {
-      filterRequest: { uris: string[]; returnData: string };
-    };
+    const { filterRequest } = getConfig().httpServer;
     let uriPath = ctx.request.path;
     const method = ctx.request.method;
     let params = ctx.request.query;
@@ -139,7 +135,6 @@ export class HttpServer {
       let fn: ((...args: unknown[]) => unknown) | null = null;
       if (isString(cmd)) {
         const actions = cmd.split(this.channelSeparator);
-        debugLog('[findFn] channel %o', actions);
         let obj: Record<string, unknown> = { controller };
         actions.forEach((key) => {
           obj = obj[key] as Record<string, unknown>;

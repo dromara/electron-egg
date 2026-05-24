@@ -35,9 +35,9 @@ export interface SocketServerConfig {
   pingTimeout: number;
   pingInterval: number;
   maxHttpBufferSize: number;
-  transports: string[];
+  transports: ('polling' | 'websocket')[];
   cors: {
-    origin: boolean | string | RegExp | string[] | ((origin: string, callback: (err: Error | null, allow?: boolean) => void) => void);
+    origin: boolean | string | RegExp | string[] | ((origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void);
   };
   channel: string;
 }
@@ -80,9 +80,15 @@ export interface LoggerConfig {
   errorLogName: string;
   rotator: string;
   redact?: string[];
+  redactCensor?: string;
   timestamp?: boolean;
   name?: string;
   maxSize?: number | string;
+  serializers?: Record<string, (value: unknown) => unknown>;
+  customLevels?: Record<string, number>;
+  depthLimit?: number;
+  safe?: boolean;
+  enabled?: boolean;
 }
 
 export interface ExceptionConfig {
@@ -158,4 +164,8 @@ export interface MessageData {
   channel: string;
   event: string;
   data: unknown;
+}
+
+export interface ProcessExitEventData {
+  pid: number | undefined;
 }

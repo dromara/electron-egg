@@ -8,7 +8,7 @@ import { Processes, Events, Receiver } from '../../const/channel.js';
 import { getRandomString } from '../../utils/helper.js';
 import { getFullpath } from '../../loader/index.js';
 import { extend } from '../../utils/extend.js';
-import type { JobsConfig } from '../../types/index.js';
+import type { JobsConfig, MessageData, ProcessExitEventData } from '../../types/index.js';
 
 export interface JobProcessOptions {
   processArgs?: Record<string, unknown>;
@@ -24,10 +24,7 @@ export interface JobMessage {
   jobFuncParams?: unknown[];
 }
 
-export interface ProcessMessage {
-  channel: string;
-  event: string;
-  data: unknown;
+export interface ProcessMessage extends MessageData {
   eventReceiver: string;
 }
 
@@ -96,13 +93,13 @@ export class JobProcess {
     });
 
     this.child.on('exit', (code: number | null, signal: string | null) => {
-      const data = { pid: this.pid };
+      const data: ProcessExitEventData = { pid: this.pid };
       this.host.emit(Events.childProcessExit, data);
       coreLogger.info(`[jobs/child] received a exit from child-process, code:${code}, signal:${signal}, pid:${this.pid}`);
     });
 
     this.child.on('error', (err: Error) => {
-      const data = { pid: this.pid };
+      const data: ProcessExitEventData = { pid: this.pid };
       this.host.emit(Events.childProcessError, data);
       coreLogger.error(`[jobs/child] received a error from child-process, error: ${err}, pid:${this.pid}`);
     });

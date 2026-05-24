@@ -5,7 +5,7 @@ import { JobProcess, type JobProcessOptions } from '../child/jobProcess.js';
 import { Events } from '../../const/channel.js';
 import { validValue } from '../../utils/helper.js';
 import { getConfig } from '../../config/index.js';
-import type { JobsConfig } from '../../types/index.js';
+import type { JobsConfig, ProcessExitEventData } from '../../types/index.js';
 
 export interface ChildPoolOptions {
   weights?: number[];
@@ -54,12 +54,12 @@ export class ChildPoolJob extends EventEmitter {
   }
 
   _initEvents(): void {
-    this.on(Events.childProcessExit, (data: { pid: number | undefined }) => {
+    this.on(Events.childProcessExit, (data: ProcessExitEventData) => {
       if (data.pid !== undefined) {
         this._removeChild(data.pid);
       }
     });
-    this.on(Events.childProcessError, (data: { pid: number | undefined }) => {
+    this.on(Events.childProcessError, (data: ProcessExitEventData) => {
       if (data.pid !== undefined) {
         this._removeChild(data.pid);
       }

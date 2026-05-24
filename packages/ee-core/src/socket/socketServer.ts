@@ -6,22 +6,20 @@ import { getConfig } from '../config/index.js';
 import { SocketIO } from '../const/channel.js';
 import { getController } from '../controller/index.js';
 import { getPort } from '../utils/port/index.js';
+import type { SocketServerConfig } from '../types/index.js';
 
 const debugLog = debug('ee-core:socket:socketServer');
 
 export class SocketServer {
-  config: Record<string, unknown>;
+  config: SocketServerConfig;
   channelSeparator: string;
   socket: ReturnType<Server['on']> | undefined;
   io: Server | undefined;
 
   constructor() {
-    const { socketServer, mainServer } = getConfig() as {
-      socketServer: Record<string, unknown>;
-      mainServer: { channelSeparator: string };
-    };
-    this.config = socketServer;
-    this.channelSeparator = mainServer.channelSeparator;
+    const config = getConfig();
+    this.config = config.socketServer;
+    this.channelSeparator = config.mainServer.channelSeparator || '/';
     this.init();
   }
 
@@ -30,7 +28,7 @@ export class SocketServer {
       return;
     }
 
-    const port = await getPort({ port: parseInt(this.config.port as string) });
+    const port = await getPort({ port: this.config.port });
     if (!port) {
       throw new Error('[ee-core] [socket/socketServer] socekt port required, and must be a number !');
     }
@@ -38,7 +36,7 @@ export class SocketServer {
 
     process.env.EE_SOCKET_PORT = String(port);
     this.config.port = port;
-    this.io = new Server(port, this.config as ConstructorParameters<typeof Server>[1]);
+    this.io = new Server(port, this.config);
     this.connect();
   }
 
@@ -47,7 +45,7 @@ export class SocketServer {
     if (!this.io) return;
 
     this.io.on('connection', (socket) => {
-      const channel = (this.config.channel as string) || SocketIO.partySoftware;
+      const channel = this.config.channel || SocketIO.partySoftware;
       this.socket = socket as unknown as ReturnType<Server['on']>;
       socket.on(channel, async (message: { cmd: string; args: unknown }, callback: (result: unknown) => void) => {
         coreLogger.info('[socket/socketServer] socket id:' + socket.id + ' message cmd: ' + message.cmd);
