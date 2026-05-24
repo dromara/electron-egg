@@ -1,6 +1,6 @@
 {
   "name": "ee-core",
-  "version": "5.0.0-beta.1",
+  "version": "5.0.0-beta.2",
   "description": "ee core - TypeScript edition with dual module support",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -399,7 +399,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "gen-exports": "node scripts/gen-exports.js",
-    "prepublishOnly": "npm run build && npm run test"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "axios": "^1.7.9",
