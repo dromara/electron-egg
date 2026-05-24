@@ -73,8 +73,8 @@ export interface LoggerConfig {
   type: string;
   dir: string;
   level: string;
-  outputJSON: boolean;
   prettyPrint?: boolean;
+  dateFormat?: string;
   appLogName: string;
   coreLogName: string;
   errorLogName: string;

@@ -32,6 +32,7 @@ function buildTransportTargets(
   prettyPrint: boolean,
   frequency: string,
   maxSize: string,
+  dateFormat: string,
 ): pino.TransportTargetOptions[] {
   const targets: pino.TransportTargetOptions[] = [];
 
@@ -42,6 +43,7 @@ function buildTransportTargets(
       file: path.join(logDir, logFileBase),
       extension: logFileExt,
       frequency,
+      dateFormat,
       size: maxSize,
       mkdir: true,
     },
@@ -83,8 +85,9 @@ function createLoggerInstance(
   prettyPrint: boolean,
   frequency: string,
   maxSize: string,
+  dateFormat: string,
 ): pino.Logger {
-  const targets = buildTransportTargets(logDir, logFileBase, logFileExt, level, prettyPrint, frequency, maxSize);
+  const targets = buildTransportTargets(logDir, logFileBase, logFileExt, level, prettyPrint, frequency, maxSize, dateFormat);
   const transport = pino.transport({ targets });
   return pino(opts, transport);
 }
@@ -102,8 +105,7 @@ export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
 
   const logDir = loggerConf.dir || getLogDir();
   const level = normalizeLevel(loggerConf.level || 'info');
-  const outputJSON = loggerConf.outputJSON ?? false;
-  const prettyPrint = outputJSON ? false : (loggerConf.prettyPrint ?? isDev());
+  const prettyPrint = loggerConf.prettyPrint ?? isDev();
   const appLogName = loggerConf.appLogName || 'ee.log';
   const coreLogName = loggerConf.coreLogName || 'ee-core.log';
   const errorLogName = loggerConf.errorLogName || 'ee-error.log';
@@ -115,6 +117,7 @@ export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
     ? `${(loggerConf.maxSize as number) / 1024 / 1024}m`
     : (loggerConf.maxSize as string) || '10m';
   const frequency = mapRotatorToFrequency(loggerConf.rotator || 'day');
+  const dateFormat = loggerConf.dateFormat || 'yyyy-MM-dd';
   const serializers = loggerConf.serializers;
   const customLevels = loggerConf.customLevels;
   const depthLimit = loggerConf.depthLimit ?? 5;
@@ -143,9 +146,9 @@ export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
   const coreParsed = parseLogFileName(coreLogName);
   const errorParsed = parseLogFileName(errorLogName);
 
-  const loggerInstance = createLoggerInstance(baseOpts, logDir, appParsed.base, appParsed.ext, level, prettyPrint, frequency, maxSize);
-  const coreLoggerInstance = createLoggerInstance({ ...baseOpts, name: `${name}-core` }, logDir, coreParsed.base, coreParsed.ext, level, prettyPrint, frequency, maxSize);
-  const errorLoggerInstance = createLoggerInstance({ ...baseOpts, level: 'error', name: `${name}-error` }, logDir, errorParsed.base, errorParsed.ext, 'error', prettyPrint, frequency, maxSize);
+  const loggerInstance = createLoggerInstance(baseOpts, logDir, appParsed.base, appParsed.ext, level, prettyPrint, frequency, maxSize, dateFormat);
+  const coreLoggerInstance = createLoggerInstance({ ...baseOpts, name: `${name}-core` }, logDir, coreParsed.base, coreParsed.ext, level, prettyPrint, frequency, maxSize, dateFormat);
+  const errorLoggerInstance = createLoggerInstance({ ...baseOpts, level: 'error', name: `${name}-error` }, logDir, errorParsed.base, errorParsed.ext, 'error', prettyPrint, frequency, maxSize, dateFormat);
 
   debugLog('[create] level: %s, dir: %s, frequency: %s', level, logDir, frequency);
 
