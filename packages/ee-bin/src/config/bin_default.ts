@@ -1,4 +1,6 @@
-export default {
+import type { BinConfig } from '../types/config.js';
+
+const config: BinConfig = {
   dev: {
     frontend: {
       directory: './frontend',
@@ -149,3 +151,5 @@ export default {
 
   exec: {},
 };
+
+export default config;

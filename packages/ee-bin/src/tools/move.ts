@@ -5,13 +5,6 @@ import { loadConfig, rm } from '../lib/utils.js';
 
 const homeDir = process.cwd();
 
-interface MoveConfig {
-  src?: string;
-  dest?: string;
-  dist?: string;
-  target?: string;
-}
-
 interface MoveOptions {
   config?: string;
   flag?: string;
@@ -21,7 +14,7 @@ export function move(options: MoveOptions = {}): void {
   console.log('[ee-bin] [move] Start moving resources');
   const { config, flag } = options;
   const binCfg = loadConfig(config);
-  const moveConfig = binCfg.move as Record<string, MoveConfig> | undefined;
+  const moveConfig = binCfg.move;
 
   if (!moveConfig || !flag) {
     console.log(chalk.blue('[ee-bin] [move] ') + chalk.red('Error: move config or flag does not exist'));

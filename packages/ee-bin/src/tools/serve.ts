@@ -1,4 +1,4 @@
-import { createDebug, chalk, is, copyDirSync, formatCmds } from '../lib/helpers.js';
+import { createDebug, chalk, copyDirSync, formatCmds } from '../lib/helpers.js';
 import path from 'path';
 import fs from 'fs';
 import { buildSync, BuildOptions } from 'esbuild';
@@ -6,21 +6,10 @@ import chokidar from 'chokidar';
 import kill from 'tree-kill';
 import process from 'process';
 import crossSpawn, { sync as crossSpawnSync } from 'cross-spawn';
-import { loadConfig, getArgumentByName, readJsonSync, writeJsonSync, rm } from '../lib/utils.js';
+import { loadConfig, getArgumentByName, readJsonSync, writeJsonSync, rm, toArray } from '../lib/utils.js';
+import type { ExecConfig, BundleConfig } from '../types/config.js';
 
 const log = createDebug('ee-bin:serve');
-
-interface ExecConfig {
-  directory: string;
-  cmd: string;
-  args?: string[] | string;
-  stdio?: string;
-  sync?: boolean;
-  protocol?: string;
-  watch?: boolean;
-  delay?: number;
-  [key: string]: unknown;
-}
 
 interface ServeOptions {
   config?: string;
@@ -78,7 +67,7 @@ class ServeProcess {
     const { config, serve } = options;
     const binCfg = loadConfig(config);
     const binCmd = 'dev';
-    const binCmdConfig = (binCfg[binCmd] || {}) as Record<string, ExecConfig>;
+    const binCmdConfig = binCfg.dev;
 
     let command = serve;
     if (!command) {
@@ -94,7 +83,7 @@ class ServeProcess {
     if (cmds.indexOf('electron') !== -1) {
       const electronConfig = binCmdConfig.electron;
 
-      const debugging = getArgumentByName('debuger', electronConfig?.args as string[] | undefined) === 'true';
+      const debugging = getArgumentByName('debuger', toArray(electronConfig?.args)) === 'true';
       this._switchPkgMain(debugging);
 
       if (electronConfig?.watch) {
@@ -109,7 +98,7 @@ class ServeProcess {
           }
           debounceTimer = setTimeout(async () => {
             console.log(chalk.blue('[ee-bin] [dev] ') + `Restart ${cmd}`);
-            this.bundle((binCfg.build as Record<string, unknown>)?.electron as Record<string, unknown>);
+            this.bundle(binCfg.build.electron);
             const subProcess = this.execProcess[cmd];
             if (subProcess && subProcess.pid) {
               kill(subProcess.pid, 'SIGKILL', (err) => {
@@ -131,7 +120,7 @@ class ServeProcess {
         });
       }
 
-      this.bundle((binCfg.build as Record<string, unknown>)?.electron as Record<string, unknown>);
+      this.bundle(binCfg.build.electron);
     }
 
     this.multiExec(opt);
@@ -143,7 +132,7 @@ class ServeProcess {
     const binCfg = loadConfig(config);
     const binCmd = 'start';
     const binCmdConfig = {
-      start: binCfg[binCmd] as ExecConfig,
+      start: binCfg.start,
     };
 
     const opt = {
@@ -164,7 +153,9 @@ class ServeProcess {
     process.env.NODE_ENV = env || 'prod';
     const binCfg = loadConfig(config);
     const binCmd = 'build';
-    const binCmdConfig = (binCfg[binCmd] || {}) as Record<string, ExecConfig>;
+    // build.electron is BundleConfig, other entries are ExecConfig;
+    // 'electron' is always removed from commands before multiExec, so this cast is safe
+    const binCmdConfig = binCfg.build as Record<string, ExecConfig>;
 
     if (!cmds || cmds === '') {
       const tip = chalk.bgYellow('Warning') + ' Please modify the ' + chalk.blue('build') + ' property in the bin file';
@@ -174,7 +165,7 @@ class ServeProcess {
 
     const commands = formatCmds(cmds);
     if (commands.indexOf('electron') !== -1) {
-      this.bundle((binCfg.build as Record<string, unknown>)?.electron as Record<string, unknown>);
+      this.bundle(binCfg.build.electron);
       const index = commands.indexOf('electron');
       commands.splice(index, 1);
       cmds = commands.join(',');
@@ -194,7 +185,7 @@ class ServeProcess {
     const { config, cmds } = options;
     const binCfg = loadConfig(config);
     const binCmd = 'exec';
-    const binCmdConfig = (binCfg[binCmd] || {}) as Record<string, ExecConfig>;
+    const binCmdConfig = binCfg.exec;
 
     const opt = {
       binCmd,
@@ -223,17 +214,17 @@ class ServeProcess {
       console.log(chalk.blue(`[ee-bin] [${binCmd}] `) + chalk.magenta('Config:'), JSON.stringify(cfg));
 
       const execDir = path.join(process.cwd(), cfg.directory);
-      const execArgs = is.string(cfg.args) ? [cfg.args] : (cfg.args || []);
-      const stdioOpt: 'inherit' | 'pipe' | 'ignore' = (cfg.stdio as 'inherit' | 'pipe' | 'ignore') || 'inherit';
+      const execArgs = toArray(cfg.args);
+      const stdioOpt: 'inherit' | 'pipe' | 'ignore' = cfg.stdio || 'inherit';
 
       if (cfg.sync) {
-        this.execProcess[cmd] = crossSpawnSync(cfg.cmd, execArgs as string[], {
+        this.execProcess[cmd] = crossSpawnSync(cfg.cmd, execArgs, {
           stdio: stdioOpt,
           cwd: execDir,
           maxBuffer: 1024 * 1024 * 1024,
         }) as unknown as ReturnType<typeof crossSpawn>;
       } else {
-        this.execProcess[cmd] = crossSpawn(cfg.cmd, execArgs as string[], {
+        this.execProcess[cmd] = crossSpawn(cfg.cmd, execArgs, {
           stdio: stdioOpt,
           cwd: execDir,
           maxBuffer: 1024 * 1024 * 1024,
@@ -264,16 +255,16 @@ class ServeProcess {
     }
   }
 
-  bundle(bundleConfig?: Record<string, unknown>): void {
+  bundle(bundleConfig?: BundleConfig): void {
     if (!bundleConfig) return;
-    const bundleType = bundleConfig.bundleType as string | undefined;
+    const bundleType = bundleConfig.bundleType;
     if (bundleType === 'copy') {
       const srcResource = path.join(process.cwd(), this.electronDir);
       const destResource = path.join(process.cwd(), this.bundleDir);
       rm(destResource);
       copyDirSync(srcResource, destResource);
     } else {
-      const type = (bundleConfig.type as string) || 'javascript';
+      const type = bundleConfig.type || 'javascript';
       const esbuildOptions = bundleConfig[type] as Record<string, unknown> | undefined;
       if (esbuildOptions) {
         log('esbuild options:%O', esbuildOptions);
@@ -292,13 +283,13 @@ class ServeProcess {
     }
 
     if (isDebugger && mainFile === 'main.js') {
-      (pkg as Record<string, unknown>).main = this.electronDir + '/' + mainFile;
+      pkg.main = this.electronDir + '/' + mainFile;
       writeJsonSync(pkgPath, pkg);
     } else {
       const bundleMainPath = this.bundleDir + '/' + 'main.js';
 
       if (pkg.main !== bundleMainPath) {
-        (pkg as Record<string, unknown>).main = bundleMainPath;
+        pkg.main = bundleMainPath;
         writeJsonSync(pkgPath, pkg);
       }
     }

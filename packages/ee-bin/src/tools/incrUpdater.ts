@@ -6,19 +6,7 @@ import { zip as compressZip } from 'compressing';
 import globby from 'globby';
 import yaml from 'js-yaml';
 import { loadConfig, writeJsonSync } from '../lib/utils.js';
-
-interface UpdaterConfig {
-  metadata: string;
-  asarFile?: string;
-  output: {
-    directory: string;
-    zip: string;
-    file: string;
-  };
-  extraResources?: string[];
-  asarUnpacked?: string[];
-  cleanCache?: boolean;
-}
+import type { UpdaterConfig } from '../types/config.js';
 
 interface UpdaterOptions {
   config?: string;
@@ -52,7 +40,7 @@ class IncrUpdater {
     console.log('[ee-bin] [updater] Start');
     const { config, asarFile, platform, force } = options;
     const binCfg = loadConfig(config);
-    const cfg = binCfg.updater as Record<string, UpdaterConfig> | undefined;
+    const cfg = binCfg.updater;
     const forceUpdate = force === 'true';
 
     if (!cfg || !platform) {

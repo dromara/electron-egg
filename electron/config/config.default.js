@@ -27,10 +27,16 @@ module.exports = () => {
       icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
     logger: {
-      level: 'INFO',
+      level: 'info', // 'fatal', 'error', 'warn', 'info', 'debug', 'trace' or 'silent'
       prettyPrint: true,
+      rotator: 'daily', // daily, hourly
       dateFormat: 'yyyy-MM-dd',
       maxSize: '10m',
+      redact: [],
+      redactCensor: '[Redacted]',
+      timestamp: true,
+      depthLimit: 5,
+      name: 'ee',
       appLogName: 'ee.log',
       coreLogName: 'ee-core.log',
       errorLogName: 'ee-error.log'

@@ -25,14 +25,7 @@ class IconGen {
   iconOptions: Record<string, unknown>;
   icongen: ((input: string, output: string, options?: Record<string, unknown>) => Promise<string[]>) | null;
 
-  constructor(opts: Record<string, unknown> = {}) {
-    const params: IconGenParams = {
-      input: (opts.input as string) || DEFAULT_PARAMS.input,
-      output: (opts.output as string) || DEFAULT_PARAMS.output,
-      size: (opts.size as string) || DEFAULT_PARAMS.size,
-      clear: opts.clear === true,
-      imagesDir: (opts.images as string) || DEFAULT_PARAMS.imagesDir,
-    };
+  constructor(params: IconGenParams) {
     this.params = params;
 
     try {
@@ -151,7 +144,18 @@ class IconGen {
   }
 }
 
+function extractParams(opts: Record<string, unknown>): IconGenParams {
+  return {
+    input: (opts.input as string) || DEFAULT_PARAMS.input,
+    output: (opts.output as string) || DEFAULT_PARAMS.output,
+    size: (opts.size as string) || DEFAULT_PARAMS.size,
+    clear: opts.clear === true,
+    imagesDir: (opts.images as string) || DEFAULT_PARAMS.imagesDir,
+  };
+}
+
 export function run(opts?: Record<string, unknown>): void {
-  const i = new IconGen(opts || {});
+  const params = extractParams(opts || {});
+  const i = new IconGen(params);
   i.generateIcons();
 }

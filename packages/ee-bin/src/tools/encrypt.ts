@@ -1,29 +1,27 @@
 import path from 'path';
 import fs from 'fs';
-import { chalk, is } from '../lib/helpers.js';
+import { chalk } from '../lib/helpers.js';
 import bytenode from 'bytenode';
 import JavaScriptObfuscator from 'javascript-obfuscator';
 import globby from 'globby';
-import { loadConfig } from '../lib/utils.js';
-import { extend } from '../lib/extend.js';
+import { loadConfig, toArray } from '../lib/utils.js';
+import type { EncryptConfig } from '../types/config.js';
 
 const EncryptTypes = ['bytecode', 'confusion', 'strict'];
-
-interface EncryptConfig {
-  type: string;
-  files?: string[];
-  fileExt?: string[];
-  specificFiles?: string[];
-  encryptDir?: string;
-  confusionOptions?: Record<string, unknown>;
-  bytecodeOptions?: Record<string, unknown>;
-}
 
 interface EncryptOptions {
   config?: string;
   out?: string;
   target?: string;
 }
+
+const DEFAULT_ENCRYPT_CONFIG: EncryptConfig = {
+  type: 'none',
+  fileExt: ['.js'],
+  cleanFiles: [],
+  specificFiles: [],
+  encryptDir: './',
+};
 
 class Encrypt {
   basePath: string;
@@ -43,8 +41,8 @@ class Encrypt {
     this.basePath = process.cwd();
     this.target = target || 'electron';
 
-    const conf = (loadConfig(config).encrypt || {}) as Record<string, EncryptConfig>;
-    this.config = conf[this.target] || ({} as EncryptConfig);
+    const conf = loadConfig(config).encrypt;
+    this.config = conf[this.target] || DEFAULT_ENCRYPT_CONFIG;
     const outputFolder = out || this.config.encryptDir || './';
     this.encryptDir = path.join(this.basePath, outputFolder);
     this.filesExt = this.config.fileExt || ['.js'];
@@ -140,25 +138,17 @@ class Encrypt {
 }
 
 export function encrypt(options: EncryptOptions = {}): void {
-  const electronOpt = extend(
-    true,
-    { target: 'electron' },
-    options as Record<string, unknown>
-  ) as Record<string, unknown>;
-  const electronEpt = new Encrypt(electronOpt as EncryptOptions);
+  const electronOpt: EncryptOptions = { ...options, target: 'electron' };
+  const electronEpt = new Encrypt(electronOpt);
   electronEpt.encrypt();
 
-  const frontendOpt = extend(
-    true,
-    { target: 'frontend' },
-    options as Record<string, unknown>
-  ) as Record<string, unknown>;
-  const frontendEpt = new Encrypt(frontendOpt as EncryptOptions);
+  const frontendOpt: EncryptOptions = { ...options, target: 'frontend' };
+  const frontendEpt = new Encrypt(frontendOpt);
   frontendEpt.encrypt();
 }
 
 export function cleanEncrypt(options: { dir?: string | string[] } = {}): void {
-  const dirs: string[] = options.dir !== undefined ? (is.array(options.dir) ? (options.dir as string[]) : [options.dir as string]) : ['./public/electron'];
+  const dirs = options.dir !== undefined ? toArray(options.dir) : ['./public/electron'];
 
   for (const dir of dirs) {
     const tmpFile = path.join(process.cwd(), dir);

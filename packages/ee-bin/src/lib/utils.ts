@@ -6,12 +6,13 @@ import { is } from './helpers.js';
 import JsonLib from 'json5';
 import defaultConfig from '../config/bin_default.js';
 import { extend } from './extend.js';
+import type { BinConfig } from '../types/config.js';
 
 const log = createDebug('ee-bin:lib:utils');
 const _basePath = process.cwd();
 const userBin = './cmd/bin.js';
 
-export function loadConfig(binFile?: string): Record<string, unknown> {
+export function loadConfig(binFile?: string): BinConfig {
   const binPath = binFile || userBin;
   const userConfig = loadFile(binPath);
   const result = extend(true, { ...defaultConfig }, userConfig);
@@ -102,4 +103,10 @@ export function getPlatform(delimiter = '_', isDiffArch = false): string {
     return 'macos' + delimiter + core;
   }
   return 'linux';
+}
+
+export function toArray(value?: string[] | string): string[] {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value;
+  return [];
 }
