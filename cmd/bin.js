@@ -40,6 +40,8 @@ module.exports = {
       * 'copy'   - 原样复制 electron/ 目录，不做打包（仅用于调试）
       */
       bundleType: 'bundle',
+      /**
+      * 开发者自定义 external 包
       * 框架已内置: electron, better-sqlite3, proxy-agent, pino-roll, pino-pretty
       * 如果你的项目引入了无法打包的库（如 native 模块），在此添加包名
       * 示例: external: ['sharp', 'node-gyp']
