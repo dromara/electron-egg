@@ -6,7 +6,7 @@ import chokidar from 'chokidar';
 import kill from 'tree-kill';
 import process from 'process';
 import crossSpawn, { sync as crossSpawnSync } from 'cross-spawn';
-import { loadConfig, getArgumentByName, readJsonSync, writeJsonSync, rm, toArray } from '../lib/utils.js';
+import { loadConfig, readJsonSync, writeJsonSync, rm, toArray } from '../lib/utils.js';
 import type { ExecConfig, BundleConfig } from '../types/config.js';
 import { controllerRegistryPlugin } from '../plugins/controller_registry_plugin.js';
 import { esbuildPluginPino } from 'esbuild-plugin-pino';
@@ -85,17 +85,8 @@ class ServeProcess {
     if (cmds.indexOf('electron') !== -1) {
       const electronConfig = binCmdConfig.electron;
 
-      const debugging = getArgumentByName('debuger', toArray(electronConfig?.args)) === 'true';
-
-      // In dev mode with debugging, use copy mode for fast iteration
-      if (debugging) {
-        const copyConfig = { ...binCfg.build.electron, bundleType: 'copy' as const };
-        await this.bundle(copyConfig);
-      } else {
-        await this.bundle(binCfg.build.electron);
-      }
-
-      this._switchPkgMain(debugging);
+      await this.bundle(binCfg.build.electron);
+      this._switchPkgMain();
 
       if (electronConfig?.watch) {
         let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -109,12 +100,7 @@ class ServeProcess {
           }
           debounceTimer = setTimeout(async () => {
             console.log(chalk.blue('[ee-bin] [dev] ') + `Restart ${cmd}`);
-            if (debugging) {
-              const copyConfig = { ...binCfg.build.electron, bundleType: 'copy' as const };
-              await this.bundle(copyConfig);
-            } else {
-              await this.bundle(binCfg.build.electron);
-            }
+            await this.bundle(binCfg.build.electron);
             const subProcess = this.execProcess[cmd];
             if (subProcess && subProcess.pid) {
               kill(subProcess.pid, 'SIGKILL', (err) => {
@@ -184,7 +170,7 @@ class ServeProcess {
       commands.splice(index, 1);
       cmds = commands.join(',');
 
-      this._switchPkgMain(false);
+      this._switchPkgMain();
     }
 
     const opt = {
@@ -386,23 +372,14 @@ class ServeProcess {
     console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
   }
 
-  _switchPkgMain(isDebugger = false): void {
+  _switchPkgMain(): void {
     const pkgPath = path.join(process.cwd(), this.pkgPath);
     const pkg = readJsonSync(pkgPath);
-    const maints = path.join(process.cwd(), this.electronDir, 'main.ts');
-    const mainFile = fs.existsSync(maints) ? 'main.ts' : 'main.js';
+    const bundleMainPath = this.bundleDir + '/main.js';
 
-    if (isDebugger && mainFile === 'main.js') {
-      pkg.main = this.electronDir + '/' + mainFile;
+    if (pkg.main !== bundleMainPath) {
+      pkg.main = bundleMainPath;
       writeJsonSync(pkgPath, pkg);
-    } else {
-      // Bundle mode produces main.js
-      const bundleMainPath = this.bundleDir + '/main.js';
-
-      if (pkg.main !== bundleMainPath) {
-        pkg.main = bundleMainPath;
-        writeJsonSync(pkgPath, pkg);
-      }
     }
   }
 
