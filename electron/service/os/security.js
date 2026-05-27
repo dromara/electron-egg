@@ -18,9 +18,9 @@ class SecurityService {
       let isHasDebug = e.includes("--inspect") || e.includes("--inspect-brk") || e.includes("--remote-debugging-port");
       return isHasDebug;
     })
-  
-    // 不允许远程调试
-    if (runWithDebug) {
+
+    // 生产环境不允许远程调试
+    if (runWithDebug && process.env.NODE_ENV === 'prod') {
       logger.error('[error] Remote debugging is not allowed,  runWithDebug:', runWithDebug);
       electronApp.quit();
     }

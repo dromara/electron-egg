@@ -3,76 +3,52 @@
   "version": "1.0.0",
   "configurations": [
     {
-      // 调试配置名称，显示在 VS Code 调试下拉菜单中
-      "name": "Debug Electron",
-
-      // 调试类型，Node.js 程序使用 "node"
+      // 一键启动：前端 + 主进程调试
+      "name": "Debug Full App",
       "type": "node",
-
-      // "launch" = VS Code 主动启动程序并附加调试器
-      // "attach" = 连接到已运行的程序
       "request": "launch",
-
-      // 工作目录，即项目根目录
       "cwd": "${workspaceFolder}",
-
-      // Electron 可执行文件路径，使用项目本地的 electron 二进制
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
-
-      // 传递给 electron 的参数
-      // "." = 加载当前目录下的 package.json 指定的入口
-      // "--env=local" = 使用本地环境配置
-      // "--inspect=9229" = 开启 Node.js 调试协议，监听 9229 端口
       "runtimeArgs": [
+        "--inspect=9229",
         ".",
-        "--env=local",
-        "--inspect=9229"
+        "--env=local"
       ],
-
-      // 环境变量，设为 dev 以启用 inline sourcemap
       "env": {
         "NODE_ENV": "dev"
       },
-
-      // 输出控制台：integratedTerminal = 使用 VS Code 内置终端，可看到 Electron 日志
       "console": "integratedTerminal",
-
-      // 启用 source map 支持，bundle 模式下将打包代码映射回源文件以支持断点
+      "outputCapture": "std",
       "sourceMaps": true,
-
-      // 限制 source map 查找范围，避免误解析其他目录的 .map 文件
-      // electron/       = 源码目录，断点加在这里
-      // public/electron/ = 打包输出目录，包含 inline sourcemap
       "resolveSourceMapLocations": [
         "${workspaceFolder}/electron/**",
         "${workspaceFolder}/public/electron/**"
       ],
-
-      // 调试启动前先执行的任务，定义在 tasks.json 中
-      // 此任务会先打包 electron 代码（使用 dev 环境配置，含 inline sourcemap）
-      "preLaunchTask": "ee-build-dev"
+      "preLaunchTask": "ee-dev-all"
     },
     {
-      // 附加到已运行的 Electron 进程
-      // 使用场景：先用 pnpm dev-electron 启动，再在 VS Code 中附加调试器
-      "name": "Attach Electron",
-
+      // 仅调试主进程（需手动启动前端）
+      "name": "Debug Electron",
       "type": "node",
-
-      // "attach" = 连接到已经运行中的进程
-      "request": "attach",
-
-      // 连接端口，需与 electron 启动时 --inspect 指定的端口一致
-      "port": 9229,
-
-      // 工作目录
+      "request": "launch",
       "cwd": "${workspaceFolder}",
-
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "runtimeArgs": [
+        "--inspect=9229",
+        ".",
+        "--env=local"
+      ],
+      "env": {
+        "NODE_ENV": "dev"
+      },
+      "console": "integratedTerminal",
+      "outputCapture": "std",
       "sourceMaps": true,
       "resolveSourceMapLocations": [
         "${workspaceFolder}/electron/**",
         "${workspaceFolder}/public/electron/**"
-      ]
-    }
+      ],
+      "preLaunchTask": "ee-build-dev"
+    },
   ]
 }

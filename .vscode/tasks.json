@@ -3,23 +3,39 @@
   "version": "2.0.0",
   "tasks": [
     {
-      // 任务名称，被 launch.json 的 preLaunchTask 引用
+      // 构建 electron 主进程（dev 环境，含 inline sourcemap）
       "label": "ee-build-dev",
-
-      // 任务类型：shell = 在终端中执行命令
       "type": "shell",
-
-      // 执行的命令和参数
-      // 等同于运行: pnpm exec ee-bin build --cmds=electron --env=dev
-      // --cmds=electron  只构建 electron 主进程
-      // --env=dev        设置 NODE_ENV=dev，启用 inline sourcemap 以支持断点调试
       "command": "pnpm",
       "args": ["exec", "ee-bin", "build", "--cmds=electron", "--env=dev"],
-
-      // 归类为构建任务，可通过 Ctrl+Shift+B 快捷运行
       "group": "build",
-
-      // 不使用问题匹配器（构建输出不是标准错误格式）
+      "problemMatcher": []
+    },
+    {
+      // 启动前端开发服务器（后台运行）
+      "label": "ee-frontend-dev",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["dev-frontend"],
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE",
+          "endsPattern": "ready in"
+        }
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      // 复合任务：先构建 electron，再并行启动前端 + 调试主进程
+      "label": "ee-dev-all",
+      "dependsOn": ["ee-build-dev", "ee-frontend-dev"],
+      "dependsOrder": "sequence",
       "problemMatcher": []
     }
   ]
