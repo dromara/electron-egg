@@ -140,6 +140,12 @@ export interface TimingItem {
   index: number;
 }
 
+export interface RegistryEntry {
+  fullpath: string;
+  properties: string[];
+  module: unknown;
+}
+
 export interface FileLoaderOptions {
   caseStyle?: 'lower' | 'upper' | 'camel' | ((filepath: string) => string[]);
   directory: string;
@@ -149,6 +155,7 @@ export interface FileLoaderOptions {
   inject?: unknown;
   match?: string | string[] | ((name: string) => boolean);
   ignore?: string | string[] | ((name: string) => boolean);
+  registry?: RegistryEntry[];
 }
 
 export interface AppInfo {

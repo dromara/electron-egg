@@ -30,7 +30,10 @@
       "Bash(find /Users/gsx/www/gofile/src/gowork/ee-dev/node_modules/.pnpm/debug* -name \"*.d.ts\" -not -path \"*/node_modules/@types/*\")",
       "Bash(find /Users/gsx/www/gofile/src/gowork/ee-dev/node_modules/.pnpm/cross-spawn@7* -name \"*.d.ts\" -not -path \"*/node_modules/@types/*\")",
       "Bash(sed -i '' 's/\\(data: { pid: number | undefined }\\)/\\(data: ProcessExitEventData\\)/' /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-core/src/jobs/child/index.ts /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-core/src/jobs/child-pool/index.ts)",
-      "Bash(sed -i '' 's/\\(data: { pid: number }\\)/\\(data: ProcessExitEventData\\)/' /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-core/src/cross/cross.ts)"
+      "Bash(sed -i '' 's/\\(data: { pid: number }\\)/\\(data: ProcessExitEventData\\)/' /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-core/src/cross/cross.ts)",
+      "Bash(gtimeout 10 pnpm start)",
+      "Bash(gtimeout 15 pnpm start)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k\\) for k in d.get\\('dependencies',{}\\)]\")"
     ]
   }
 }

@@ -50,7 +50,17 @@ export function resolveModule(filepath: string): string | undefined {
     if (filepath && (filepath.endsWith('.defalut') || filepath.endsWith('.prod'))) {
       fullpath = filepath + '.jsc';
     } else if (filepath && filepath.endsWith('.js')) {
-      fullpath = filepath + 'c';
+      fullpath = filepath + 'c'; // .js -> .jsc
+    }
+
+    // In bundled mode, require.resolve may fail for files that exist on disk.
+    // Try appending .js / .jsc if the path doesn't resolve to an existing file.
+    if (!fullpath || !fs.existsSync(fullpath)) {
+      if (fs.existsSync(filepath + '.js')) {
+        fullpath = filepath + '.js';
+      } else if (fs.existsSync(filepath + '.jsc')) {
+        fullpath = filepath + '.jsc';
+      }
     }
 
     if (!fs.existsSync(filepath) && (!fullpath || !fs.existsSync(fullpath))) {

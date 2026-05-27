@@ -5,6 +5,7 @@ import { getElectronDir } from '../ps/index.js';
 import { Timing } from '../core/utils/timing.js';
 import { FileLoader, FULLPATH } from '../core/loader/file_loader.js';
 import { isBytecodeClass, callFn } from '../core/utils/index.js';
+import type { RegistryEntry } from '../types/index.js';
 
 const debugLog = debug('ee-core:controller:controller_loader');
 
@@ -21,6 +22,33 @@ export class ControllerLoader {
   load(): Record<string, unknown> {
     this.timing.start('Load Controller');
 
+    const registry = (globalThis as Record<string, unknown>).__EE_CONTROLLER_REGISTRY__ as RegistryEntry[] | undefined;
+    const opt = {
+      caseStyle: 'lower' as const,
+      directory: path.join(getElectronDir(), 'controller'),
+      ...(registry ? { registry } : {}),
+      initializer: (obj: unknown, options: { pathName: string; path: string }) => {
+        if (isClass(obj) || isBytecodeClass(obj)) {
+          (obj as { prototype: Record<string, unknown> }).prototype.pathName = options.pathName;
+          (obj as { prototype: Record<string, unknown> }).prototype.fullPath = options.path;
+          return wrapClass(obj as new (...args: unknown[]) => unknown);
+        }
+        return obj;
+      },
+    };
+    const target = new FileLoader(opt).load();
+    debugLog('[load] controllers (%s): %o', registry ? 'registry' : 'globby', target);
+    this.timing.end('Load Controller');
+    return target;
+  }
+
+  /**
+   * Async version of load() for ESM controller support.
+   * Uses dynamic import() instead of require().
+   */
+  async loadAsync(): Promise<Record<string, unknown>> {
+    this.timing.start('Load Controller');
+
     const opt = {
       caseStyle: 'lower' as const,
       directory: path.join(getElectronDir(), 'controller'),
@@ -33,8 +61,8 @@ export class ControllerLoader {
         return obj;
       },
     };
-    const target = new FileLoader(opt).load();
-    debugLog('[load] controllers: %o', target);
+    const target = await new FileLoader(opt).loadAsync();
+    debugLog('[loadAsync] controllers: %o', target);
     this.timing.end('Load Controller');
     return target;
   }

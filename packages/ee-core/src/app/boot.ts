@@ -77,4 +77,8 @@ export class ElectronEgg {
   run(): void {
     app.run();
   }
+
+  async runAsync(): Promise<void> {
+    await app.runAsync();
+  }
 }

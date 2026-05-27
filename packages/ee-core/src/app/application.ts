@@ -1,4 +1,4 @@
-import { loadController } from '../controller/index.js';
+import { loadController, loadControllerAsync } from '../controller/index.js';
 import { eventBus, Ready } from './events.js';
 import { loadSocket } from '../socket/index.js';
 import { loadElectron } from '../electron/index.js';
@@ -10,6 +10,13 @@ export class Application {
 
   run(): void {
     loadController();
+    loadSocket();
+    eventBus.emitLifecycle(Ready);
+    loadElectron();
+  }
+
+  async runAsync(): Promise<void> {
+    await loadControllerAsync();
     loadSocket();
     eventBus.emitLifecycle(Ready);
     loadElectron();

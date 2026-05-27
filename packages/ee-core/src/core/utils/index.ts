@@ -64,3 +64,30 @@ export function filePatterns(): string[] {
 }
 
 export { extensions };
+
+/**
+ * Async version of loadFile for ESM modules.
+ * Uses dynamic import() which is inherently async.
+ */
+export async function loadFileAsync(filepath: string): Promise<unknown> {
+  try {
+    const extname = path.extname(filepath);
+    // Non-js files: return content buffer (sync is fine here)
+    if (extname && !extensions[extname] && extname !== '.mjs') {
+      return fs.readFileSync(filepath);
+    }
+
+    // Dynamic import for ESM/CJS
+    const obj = await import(filepath);
+    if (!obj) return obj;
+    // Handle ESM default export
+    if (obj.__esModule || (obj as Record<string, unknown>).default !== undefined) {
+      return 'default' in obj ? obj.default : obj;
+    }
+    return obj;
+  } catch (err) {
+    const error = err as Error;
+    error.message = `[ee-core] load file async: ${filepath}, error: ${error.message}`;
+    throw error;
+  }
+}

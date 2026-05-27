@@ -8,6 +8,12 @@ export function loadController(): Record<string, unknown> {
   return controllers;
 }
 
+export async function loadControllerAsync(): Promise<Record<string, unknown>> {
+  const loader = new ControllerLoader();
+  controllers = await loader.loadAsync();
+  return controllers;
+}
+
 export function getControllers(): Record<string, unknown> {
   if (!controllers) {
     loadController();

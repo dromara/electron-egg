@@ -11,8 +11,9 @@ export interface ExecConfig {
 }
 
 export interface BundleConfig {
-  type?: string;
   bundleType?: string;
+  external?: string[];
+  sourcemap?: boolean | 'inline' | 'external';
   [key: string]: unknown;
 }
 
