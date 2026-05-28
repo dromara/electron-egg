@@ -35,7 +35,13 @@
       "Bash(gtimeout 15 pnpm start)",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(k\\) for k in d.get\\('dependencies',{}\\)]\")",
       "Bash(ee-bin build *)",
-      "Bash(npx ee-bin *)"
+      "Bash(npx ee-bin *)",
+      "Bash(gtimeout 25 pnpm dev-electron)",
+      "Bash(pkill -f \"electron .\")",
+      "Bash(pkill -f \"ee-bin dev\")",
+      "Bash(pkill -f \"ee-bin build\")",
+      "Bash(DEBUG=ee-* gtimeout 25 pnpm dev-electron)",
+      "Bash(wait)"
     ]
   }
 }

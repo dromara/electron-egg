@@ -156,12 +156,13 @@ module.exports = {
       ],
       cleanFiles: ['./public/dist'],
       confusionOptions: {
-        compact: true,      
+        compact: true,
         stringArray: true,
         stringArrayEncoding: ['none'],
         stringArrayCallsTransform: true,
         numbersToExpressions: true,
         target: 'browser',
+        silent: true,
       }
     },
     electron: {
@@ -175,13 +176,14 @@ module.exports = {
         './public/electron/preload/bridge.js',
       ],
       confusionOptions: {
-        compact: true,      
+        compact: true,
         stringArray: true,
         stringArrayEncoding: ['none'],
         deadCodeInjection: false,
         stringArrayCallsTransform: true,
         numbersToExpressions: true,
         target: 'node',
+        silent: true,
       }
     }
   },
