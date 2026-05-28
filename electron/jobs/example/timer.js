@@ -4,8 +4,6 @@ const { logger } = require('ee-core/log');
 const { isChildJob, exit } = require('ee-core/ps');
 const { childMessage } = require('ee-core/message');
 const { welcome } = require('./hello');
-const { UserService } = require('../../service/job/user');
-const { sqlitedbService } = require('../../service/database/sqlitedb');
 
 /**
  * example - TimerJob
@@ -18,7 +16,6 @@ class TimerJob {
     this.timeoutTimer = undefined;
     this.number = 0;
     this.countdown = 10; // 倒计时
-    sqlitedbService.init();
   }
 
   /**
@@ -29,22 +26,13 @@ class TimerJob {
     logger.info("[child-process] TimerJob params: ", params);
     const { jobId } = params;
 
-    // 子进程中使用service
-    // 1. 确保引入的 service 中不能有electron 的 api或依赖， electron 不支持
-    const userService = new UserService();
-    userService.hello('job');
-
     // 执行任务
     // 多次运行时，重置倒计时
     this.number = 0;
     this.countdown = 10;
     this.doTimer(jobId);
-
-    // sqlite
-    const userList = await sqlitedbService.getAllTestDataSqlite();
-    logger.info('[child-process] Sqlite userList:', userList);
   }
-  
+
   /**
    * 暂停任务运行
    */
@@ -60,7 +48,7 @@ class TimerJob {
   async resume(jobId, pid) {
     logger.info("[child-process] Resume timerJob, jobId: ", jobId, ", pid: ", pid);
     this.doTimer(jobId);
-  }  
+  }
 
   /**
    * 运行任务

@@ -55,16 +55,11 @@ After `pnpm build-electron`, `public/electron/` contains:
 
 ```
 public/electron/
-├── main.js              # Bundled main process (esbuild bundle:true)
+├── main.js              # Bundled main process (esbuild bundle:true, ee-core is external)
 ├── config/              # Copied as-is (editable post-build)
 ├── jobs/                # Copied as-is (child_process.fork requires separate files)
-├── preload/
-│   └── bridge.js        # Copied as-is (BrowserWindow preload script)
-├── pino-roll.js         # Pino transport worker
-├── pino-worker.js       # Pino worker
-├── pino-file.js         # Pino file transport
-├── pino-pretty.js       # Pino pretty-print transport
-└── thread-stream-worker.js
+└── preload/
+    └── bridge.js        # Copied as-is (BrowserWindow preload script)
 ```
 
 ## Key Patterns
@@ -154,7 +149,7 @@ electron: {
 }
 ```
 
-**Framework-managed externals** (auto, no config needed): `electron`, `better-sqlite3`, `proxy-agent`, `pino-roll`, `pino-pretty`.
+**Framework-managed externals** (auto, no config needed): `ee-core`, `ee-bin`, `electron`, `better-sqlite3`, `proxy-agent`, `pino-roll`, `pino-pretty`.
 
 **Sourcemap behavior**: `false` (default) means auto — dev environment uses `inline`, prod disables. Set explicitly to `'inline'` or `'external'` to override.
 
@@ -166,6 +161,9 @@ Two configurations in `.vscode/launch.json`:
 - **Attach Electron**: Attach to an already-running Electron process on port 9229.
 
 ## Important Notes
+
+- **ee-core and ee-bin are standalone npm packages**: They will be published to npm independently. The current pnpm workspace monorepo (`packages/ee-core`, `packages/ee-bin` with `workspace:*` in root `package.json`) is for local development convenience only. In production use, users install them from npm via `npm install ee-core ee-bin`.
+- **ee-core is bundled into main.js by esbuild**: When `electron/main.js` requires `ee-core/*`, esbuild resolves through `node_modules/ee-core` (workspace symlink) and bundles all ee-core code into `public/electron/main.js`. ee-core is NOT in the external list. ee-bin is a CLI build tool and is never bundled into the Electron app runtime.
 
 - **Package manager**: pnpm only (`.npmrc` has `shamefully-hoist=true` for Electron compatibility)
 - **Registry**: npmmirror configured in `.npmrc`

@@ -30,9 +30,9 @@ function computeProperties(filepath: string): string[] {
  *
  * How it works:
  * 1. onStart: scans electron/controller/ directory for .js and .jsc files
- * 2. onResolve: intercepts virtual module "ee-core:controller-registry"
+ * 2. onResolve: intercepts virtual module "app:controller-registry"
  * 3. onLoad: generates code that require()'s each controller and sets global.__EE_CONTROLLER_REGISTRY__
- * 4. onResolve/onLoad for "ee-core:bundle-entry": generates the virtual entry point
+ * 4. onResolve/onLoad for "app:bundle-entry": generates the virtual entry point
  *    that first loads the registry, then requires the real main.js
  */
 export function controllerRegistryPlugin(
@@ -54,7 +54,7 @@ export function controllerRegistryPlugin(
       });
 
       // Virtual module: controller registry
-      build.onResolve({ filter: /^ee-core:controller-registry$/ }, (args) => {
+      build.onResolve({ filter: /^app:controller-registry$/ }, (args) => {
         return { path: args.path, namespace: 'controller-registry' };
       });
 
@@ -79,7 +79,7 @@ export function controllerRegistryPlugin(
       });
 
       // Virtual module: bundle entry point
-      build.onResolve({ filter: /^ee-core:bundle-entry$/ }, (args) => {
+      build.onResolve({ filter: /^app:bundle-entry$/ }, (args) => {
         return { path: args.path, namespace: 'bundle-entry' };
       });
 
@@ -87,7 +87,7 @@ export function controllerRegistryPlugin(
         const mainRelative = './' + path.basename(mainJsPath);
         const contents = [
           '// Auto-generated bundle entry - do not edit',
-          `require('ee-core:controller-registry');`,
+          `require('app:controller-registry');`,
           `require('${mainRelative}');`,
         ].join('\n');
 

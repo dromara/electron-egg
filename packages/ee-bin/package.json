@@ -46,7 +46,6 @@
     "compressing": "^2.1.1",
     "cross-spawn": "^7.0.6",
     "esbuild": "^0.28.0",
-    "esbuild-plugin-pino": "^2.3.3",
     "globby": "^11.1.0",
     "javascript-obfuscator": "^5.4.3",
     "js-yaml": "^4.1.1",

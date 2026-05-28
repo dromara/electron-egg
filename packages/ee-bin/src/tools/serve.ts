@@ -9,7 +9,6 @@ import crossSpawn, { sync as crossSpawnSync } from 'cross-spawn';
 import { loadConfig, readJsonSync, writeJsonSync, rm, toArray } from '../lib/utils.js';
 import type { ExecConfig, BundleConfig } from '../types/config.js';
 import { controllerRegistryPlugin } from '../plugins/controller_registry_plugin.js';
-import { esbuildPluginPino } from 'esbuild-plugin-pino';
 
 const log = createDebug('ee-bin:serve');
 
@@ -297,9 +296,11 @@ class ServeProcess {
     // Clean output directory
     rm(outdir);
 
-    // Framework-internal externals: packages that ee-core depends on but cannot be bundled
-    // (native modules, worker-thread transports, Electron runtime)
+    // Framework-internal externals: packages that must be loaded from node_modules
+    // (ee-core/ee-bin are npm packages; native modules and worker transports cannot be bundled)
     const frameworkExternal = [
+      'ee-core',
+      'ee-bin',
       'electron',
       'better-sqlite3',
       'proxy-agent',
@@ -311,10 +312,9 @@ class ServeProcess {
     const userExternal = (bundleConfig.external as string[]) || [];
 
     const plugin = controllerRegistryPlugin(controllerDir, entryMain);
-    const pinoPlugin = esbuildPluginPino({ transports: ['pino-roll', 'pino-pretty'] });
 
     const options: BuildOptions = {
-      entryPoints: ['ee-core:bundle-entry'],
+      entryPoints: ['app:bundle-entry'],
       bundle: true,
       platform: 'node',
       target: 'node20',
@@ -326,7 +326,7 @@ class ServeProcess {
       format,
       minify: false,
       sourcemap,
-      plugins: [pinoPlugin, plugin],
+      plugins: [plugin],
       define: {
         'process.env.EE_BUNDLED': "'true'",
       },
@@ -336,14 +336,14 @@ class ServeProcess {
     log('_bundleWithRegistry options:%O', options);
     await build(options);
 
-    // Rename the main entry file to main.js (esbuild-plugin-pino generates it with the virtual module name)
-    const bundleEntryFile = path.join(outdir, 'ee-core:bundle-entry.js');
+    // Rename the main entry file to main.js (esbuild replaces ':' with '_' in virtual module names)
+    const bundleEntryFile = path.join(outdir, 'app_bundle-entry.js');
     if (fs.existsSync(bundleEntryFile)) {
       fs.renameSync(bundleEntryFile, path.join(outdir, 'main.js'));
     }
 
     // Rename the sourcemap file if it exists (external sourcemap mode)
-    const bundleEntryMap = path.join(outdir, 'ee-core:bundle-entry.js.map');
+    const bundleEntryMap = path.join(outdir, 'app_bundle-entry.js.map');
     if (fs.existsSync(bundleEntryMap)) {
       fs.renameSync(bundleEntryMap, path.join(outdir, 'main.js.map'));
     }
