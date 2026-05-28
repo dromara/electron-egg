@@ -256,13 +256,17 @@ class ServeProcess {
 
   async bundle(bundleConfig?: BundleConfig): Promise<void> {
     if (!bundleConfig) return;
-    const bundleType = bundleConfig.bundleType;
-    if (bundleType === 'copy') {
-      const srcResource = path.join(process.cwd(), this.electronDir);
-      const destResource = path.join(process.cwd(), this.bundleDir);
-      rm(destResource);
-      copyDirSync(srcResource, destResource);
+    const cwd = process.cwd();
+    const outdir = path.join(cwd, this.bundleDir);
+
+    // Clean output directory
+    rm(outdir);
+
+    if (bundleConfig.bundleType === 'copy') {
+      // copy模式：保持原目录结构，不打包
+      copyDirSync(path.join(cwd, this.electronDir), outdir);
     } else {
+      // bundle模式：esbuild 打包业务代码，然后复制必要目录
       await this._bundleWithRegistry(bundleConfig);
     }
   }
@@ -292,9 +296,6 @@ class ServeProcess {
       // false or undefined: auto by environment
       sourcemap = isDev ? 'inline' : false;
     }
-
-    // Clean output directory
-    rm(outdir);
 
     // Framework-internal externals: packages that must be loaded from node_modules
     // (ee-core/ee-bin are npm packages; native modules and worker transports cannot be bundled)
