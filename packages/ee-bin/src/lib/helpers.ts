@@ -14,12 +14,6 @@ export const is = {
   class(val: unknown): boolean {
     return typeof val === 'function' && val.toString().startsWith('class ');
   },
-  string(val: unknown): boolean {
-    return typeof val === 'string';
-  },
-  array(val: unknown): boolean {
-    return Array.isArray(val);
-  },
 };
 
 // ─── chalk (ANSI escape codes) ─────────────────────────────
@@ -88,6 +82,7 @@ export function createDebug(namespace: string): (...args: unknown[]) => void {
 
 export function formatCmds(command: string): string[] {
   const cmdString = command.trim();
+  if (cmdString === '') return [];
   if (cmdString.includes(',')) {
     return cmdString.split(',');
   }

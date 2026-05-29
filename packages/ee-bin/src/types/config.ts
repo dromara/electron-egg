@@ -7,7 +7,11 @@ export interface ExecConfig {
   protocol?: string;
   watch?: boolean;
   delay?: number;
-  [key: string]: unknown;
+  hostname?: string;
+  port?: number;
+  indexPath?: string;
+  force?: boolean;
+  loadingPage?: string;
 }
 
 export interface BundleConfig {
@@ -21,6 +25,25 @@ export interface BundleConfig {
   define?: Record<string, string>;
   copy?: string[];
   format?: 'cjs' | 'esm';
+}
+
+export interface ConfusionOptions {
+  compact?: boolean;
+  stringArray?: boolean;
+  stringArrayThreshold?: number;
+  stringArrayEncoding?: string[];
+  stringArrayCallsTransform?: boolean;
+  deadCodeInjection?: boolean;
+  numbersToExpressions?: boolean;
+  target?: 'browser' | 'node';
+  silent?: boolean;
+  [key: string]: unknown;
+}
+
+export interface BytecodeOptions {
+  filename?: string;
+  output?: string;
+  electron?: boolean;
   [key: string]: unknown;
 }
 
@@ -31,8 +54,8 @@ export interface EncryptConfig {
   specificFiles?: string[];
   cleanFiles?: string[];
   encryptDir?: string;
-  confusionOptions?: Record<string, unknown>;
-  bytecodeOptions?: Record<string, unknown>;
+  confusionOptions?: ConfusionOptions;
+  bytecodeOptions?: BytecodeOptions;
 }
 
 export interface MoveConfig {
@@ -68,5 +91,4 @@ export interface BinConfig {
   encrypt: Record<string, EncryptConfig>;
   exec: Record<string, ExecConfig>;
   updater?: Record<string, UpdaterConfig>;
-  [key: string]: unknown;
 }

@@ -1,4 +1,3 @@
-const hasOwn = Object.prototype.hasOwnProperty;
 const toStr = Object.prototype.toString;
 
 export function isPlainObject(obj: unknown): obj is Record<string, unknown> {
@@ -6,23 +5,12 @@ export function isPlainObject(obj: unknown): obj is Record<string, unknown> {
     return false;
   }
 
-  const plainObj = obj as Record<string, unknown>;
-  const hasOwnConstructor = hasOwn.call(plainObj, 'constructor');
-  const hasIsPrototypeOf =
-    plainObj.constructor &&
-    (plainObj.constructor.prototype as Record<string, unknown>) &&
-    hasOwn.call(plainObj.constructor.prototype, 'isPrototypeOf');
+  const proto = Object.getPrototypeOf(obj as object);
+  if (proto === null) return true;
 
-  if (plainObj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) {
-    return false;
-  }
-
-  let key: string | undefined;
-  for (key in plainObj) {
-    // empty
-  }
-
-  return typeof key === 'undefined' || hasOwn.call(plainObj, key);
+  // Object with Object.prototype as direct prototype is plain
+  const Ctor = proto.constructor;
+  return typeof Ctor === 'function' && Ctor === Object;
 }
 
 export function extend<T extends Record<string, unknown>>(
@@ -36,7 +24,8 @@ export function extend<T extends Record<string, unknown>>(
     if (!options) continue;
 
     for (const name of Object.keys(options)) {
-      if (name === '__proto__') continue;
+      // Block prototype pollution keys
+      if (name === '__proto__' || name === 'constructor' || name === 'prototype') continue;
 
       const src = result[name];
       const copy = options[name];

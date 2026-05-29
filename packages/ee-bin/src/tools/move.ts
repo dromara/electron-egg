@@ -28,7 +28,7 @@ export function move(options: MoveOptions = {}): void {
 
     if (!cfg) {
       console.log(chalk.blue('[ee-bin] [move] ') + chalk.red(`Error: ${f} config does not exist`));
-      return;
+      continue;
     }
 
     const { src, dest, dist, target } = cfg;
@@ -37,7 +37,7 @@ export function move(options: MoveOptions = {}): void {
 
     if (!source || !destination) {
       console.log(chalk.blue('[ee-bin] [move] ') + chalk.red(`Error: ${f} config missing src/dest`));
-      return;
+      continue;
     }
 
     console.log(chalk.blue('[ee-bin] [move] ') + chalk.green(`Move flag: ${f}`));
@@ -45,20 +45,24 @@ export function move(options: MoveOptions = {}): void {
 
     const srcResource = path.join(homeDir, source);
     if (!fs.existsSync(srcResource)) {
-      const errorTips = chalk.bgRed('Error') + ` ${source} resource does not exist !`;
-      console.error(errorTips);
-      return;
+      console.log(chalk.yellow('[ee-bin] [move] ') + `Warning: ${source} does not exist, skipping`);
+      continue;
     }
 
     const destResource = path.join(homeDir, destination);
-    if (fs.statSync(srcResource).isDirectory() && !fs.existsSync(destResource)) {
-      fs.mkdirSync(destResource, { recursive: true, mode: 0o777 });
-    } else {
-      rm(destResource);
-      console.log('[ee-bin] [move] Clear history resources:', destResource);
+    // Atomic: backup old, copy new, delete backup
+    const backupDest = destResource + '.bak';
+    if (fs.existsSync(destResource)) {
+      if (fs.existsSync(backupDest)) rm(backupDest);
+      fs.renameSync(destResource, backupDest);
     }
 
     copyDirSync(srcResource, destResource);
+
+    if (fs.existsSync(backupDest)) {
+      rm(backupDest);
+      console.log('[ee-bin] [move] Cleaned previous resources:', destResource);
+    }
 
     console.log(`[ee-bin] [move] Copy ${srcResource} to ${destResource}`);
   }

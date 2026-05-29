@@ -11,6 +11,10 @@ import type { ExecConfig, BundleConfig } from '../types/config.js';
 import { bundleRegistryPlugin } from '../plugins/bundle_registry_plugin.js';
 
 const log = createDebug('ee-bin:serve');
+const MAX_BUFFER = 1024 * 1024 * 1024;
+const ELECTRON_DIR = './electron';
+const BUNDLE_DIR = './public/electron';
+const PKG_PATH = './package.json';
 
 interface ServeOptions {
   config?: string;
@@ -21,19 +25,13 @@ interface ServeOptions {
 
 class ServeProcess {
   execProcess: Record<string, ReturnType<typeof crossSpawn>>;
-  electronDir: string;
-  bundleDir: string;
-  pkgPath: string;
 
   constructor() {
     this.execProcess = {};
-    this.electronDir = './electron';
-    this.bundleDir = './public/electron';
-    this.pkgPath = './package.json';
     this._init();
   }
 
-  _init(): void {
+  private _init(): void {
     process.on('SIGINT', () => {
       console.log(chalk.blue('[ee-bin] ') + 'Received SIGINT. Closing processes...');
       this._closeProcess();
@@ -45,21 +43,16 @@ class ServeProcess {
     });
   }
 
-  async _closeProcess(): Promise<void> {
-    const currentProcess: Array<{ name: string; pid: number }> = [];
+  private async _closeProcess(): Promise<void> {
     const keys = Object.keys(this.execProcess);
     for (const key of keys) {
       const p = this.execProcess[key];
       if (p && p.pid) {
-        currentProcess.push({ name: key, pid: p.pid });
+        kill(p.pid);
+        log('Kill %s server, pid: %d', chalk.blue(key), p.pid);
       }
     }
-
     await this.sleep(500);
-    for (const p of currentProcess) {
-      kill(p.pid);
-      log('Kill %s server, pid: %d', chalk.blue(p.name), p.pid);
-    }
     process.exit(0);
   }
 
@@ -81,7 +74,7 @@ class ServeProcess {
     };
 
     const cmds = formatCmds(command || '');
-    if (cmds.indexOf('electron') !== -1) {
+    if (cmds.includes('electron')) {
       const electronConfig = binCmdConfig.electron;
 
       await this.bundle(binCfg.build.electron);
@@ -90,7 +83,7 @@ class ServeProcess {
       if (electronConfig?.watch) {
         let debounceTimer: ReturnType<typeof setTimeout> | null = null;
         const cmd = 'electron';
-        const watcher = chokidar.watch([this.electronDir], { persistent: true });
+        const watcher = chokidar.watch([ELECTRON_DIR], { persistent: true });
         watcher.on('change', async (f: string) => {
           console.log(chalk.blue('[ee-bin] [dev] ') + `File [${chalk.cyan(f)}] has been changed`);
 
@@ -142,7 +135,7 @@ class ServeProcess {
     this.multiExec(opt);
   }
 
-  sleep(ms: number): Promise<void> {
+  private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
@@ -163,7 +156,7 @@ class ServeProcess {
     }
 
     const commands = formatCmds(cmds);
-    if (commands.indexOf('electron') !== -1) {
+    if (commands.includes('electron')) {
       await this.bundle(binCfg.build.electron);
       const index = commands.indexOf('electron');
       commands.splice(index, 1);
@@ -220,13 +213,13 @@ class ServeProcess {
         this.execProcess[cmd] = crossSpawnSync(cfg.cmd, execArgs, {
           stdio: stdioOpt,
           cwd: execDir,
-          maxBuffer: 1024 * 1024 * 1024,
+          maxBuffer: MAX_BUFFER,
         }) as unknown as ReturnType<typeof crossSpawn>;
       } else {
         this.execProcess[cmd] = crossSpawn(cfg.cmd, execArgs, {
           stdio: stdioOpt,
           cwd: execDir,
-          maxBuffer: 1024 * 1024 * 1024,
+          maxBuffer: MAX_BUFFER,
         });
       }
 
@@ -257,33 +250,31 @@ class ServeProcess {
   async bundle(bundleConfig?: BundleConfig): Promise<void> {
     if (!bundleConfig) return;
     const cwd = process.cwd();
-    const outdir = path.join(cwd, this.bundleDir);
+    const outdir = path.join(cwd, BUNDLE_DIR);
 
     // Clean output directory
     rm(outdir);
 
     if (bundleConfig.bundleType === 'copy') {
-      // copy模式：保持原目录结构，不打包
-      copyDirSync(path.join(cwd, this.electronDir), outdir);
+      copyDirSync(path.join(cwd, ELECTRON_DIR), outdir);
     } else {
-      // bundle模式：esbuild 打包业务代码，然后复制必要目录
       await this._bundleWithRegistry(bundleConfig);
     }
   }
 
-  async _bundleWithRegistry(bundleConfig: BundleConfig): Promise<void> {
+  private async _bundleWithRegistry(bundleConfig: BundleConfig): Promise<void> {
     const cwd = process.cwd();
-    const controllerDir = path.join(cwd, this.electronDir, 'controller');
-    const configDir = path.join(cwd, this.electronDir, 'config');
-    const mainJsPath = path.join(cwd, this.electronDir, 'main.js');
-    const mainTsPath = path.join(cwd, this.electronDir, 'main.ts');
+    const controllerDir = path.join(cwd, ELECTRON_DIR, 'controller');
+    const configDir = path.join(cwd, ELECTRON_DIR, 'config');
+    const mainJsPath = path.join(cwd, ELECTRON_DIR, 'main.js');
+    const mainTsPath = path.join(cwd, ELECTRON_DIR, 'main.ts');
     const isTypeScript = fs.existsSync(mainTsPath);
     const entryMain = isTypeScript ? mainTsPath : mainJsPath;
-    const outdir = path.join(cwd, this.bundleDir);
+    const outdir = path.join(cwd, BUNDLE_DIR);
     const outfile = path.join(outdir, 'main.js');
 
     // Output format: user can choose 'cjs' or 'esm', default is 'cjs' (recommended for Electron)
-    const format: 'cjs' | 'esm' = (bundleConfig.format as 'cjs' | 'esm') || 'cjs';
+    const format: 'cjs' | 'esm' = bundleConfig.format || 'cjs';
 
     // Sourcemap: false = auto by environment (dev→inline, prod→off)
     // Developer can override: 'inline' | 'external' | true(=inline)
@@ -299,7 +290,6 @@ class ServeProcess {
     }
 
     // Framework-internal externals: packages that must be loaded from node_modules
-    // (ee-core/ee-bin are npm packages; native modules and worker transports cannot be bundled)
     const frameworkExternal = [
       'ee-core',
       'ee-bin',
@@ -310,8 +300,7 @@ class ServeProcess {
       'pino-pretty',
     ];
 
-    // Developer-provided externals: packages the app uses that cannot be bundled
-    const userExternal = (bundleConfig.external as string[]) || [];
+    const userExternal = bundleConfig.external || [];
 
     const plugin = bundleRegistryPlugin(controllerDir, entryMain, configDir);
 
@@ -363,11 +352,11 @@ class ServeProcess {
     console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
   }
 
-  _copyUnbundledFiles(cwd: string, outdir: string, bundleConfig: BundleConfig): void {
+  private _copyUnbundledFiles(cwd: string, outdir: string, bundleConfig: BundleConfig): void {
     // Framework-required copies (always present, removing them breaks the framework)
     const copyTargets = ['jobs'];
     for (const target of copyTargets) {
-      const src = path.join(cwd, this.electronDir, target);
+      const src = path.join(cwd, ELECTRON_DIR, target);
       const dest = path.join(outdir, target);
       if (fs.existsSync(src)) {
         copyDirSync(src, dest);
@@ -375,7 +364,7 @@ class ServeProcess {
     }
 
     // Copy preload/bridge.js (BrowserWindow preload script must be a separate file)
-    const bridgeSrc = path.join(cwd, this.electronDir, 'preload', 'bridge.js');
+    const bridgeSrc = path.join(cwd, ELECTRON_DIR, 'preload', 'bridge.js');
     const bridgeDest = path.join(outdir, 'preload', 'bridge.js');
     if (fs.existsSync(bridgeSrc)) {
       fs.mkdirSync(path.dirname(bridgeDest), { recursive: true });
@@ -383,9 +372,9 @@ class ServeProcess {
     }
 
     // Developer-defined additional copies (directories or files from electron/)
-    const userCopyTargets = (bundleConfig.copy as string[] | undefined) || [];
+    const userCopyTargets = bundleConfig.copy || [];
     for (const target of userCopyTargets) {
-      const src = path.join(cwd, this.electronDir, target);
+      const src = path.join(cwd, ELECTRON_DIR, target);
       const dest = path.join(outdir, target);
       if (!fs.existsSync(src)) continue;
       if (fs.statSync(src).isDirectory()) {
@@ -397,10 +386,10 @@ class ServeProcess {
     }
   }
 
-  _switchPkgMain(): void {
-    const pkgPath = path.join(process.cwd(), this.pkgPath);
+  private _switchPkgMain(): void {
+    const pkgPath = path.join(process.cwd(), PKG_PATH);
     const pkg = readJsonSync(pkgPath);
-    const bundleMainPath = this.bundleDir + '/main.js';
+    const bundleMainPath = BUNDLE_DIR + '/main.js';
 
     if (pkg.main !== bundleMainPath) {
       pkg.main = bundleMainPath;
@@ -408,7 +397,7 @@ class ServeProcess {
     }
   }
 
-  }
+}
 
 export const serveProcess = new ServeProcess();
 export { ServeProcess };

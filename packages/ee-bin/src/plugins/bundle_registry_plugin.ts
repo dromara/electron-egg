@@ -52,14 +52,14 @@ export function bundleRegistryPlugin(
       let configEntries: ConfigEntry[] = [];
 
       build.onStart(() => {
-        const controllerFiles = globby.sync(['**/*.js', '**/*.jsc'], { cwd: controllerDir });
+        const controllerFiles = globby.sync(['**/*.js', '**/*.jsc', '**/*.ts'], { cwd: controllerDir });
         registryEntries = controllerFiles.map((filepath) => ({
           fullpath: 'controller/' + filepath.replace(/\\/g, '/'),
           properties: computeProperties(filepath),
           relPath: filepath,
         }));
 
-        const configFiles = globby.sync(['**/*.js', '**/*.jsc'], { cwd: configDir });
+        const configFiles = globby.sync(['**/*.js', '**/*.jsc', '**/*.ts'], { cwd: configDir });
         configEntries = configFiles.map((filepath) => ({
           filename: filepath.replace(/\\/g, '/').substring(0, filepath.lastIndexOf('.')),
           relPath: filepath,
@@ -76,9 +76,9 @@ export function bundleRegistryPlugin(
         lines.push('global.__EE_CONTROLLER_REGISTRY__ = [');
         for (let i = 0; i < registryEntries.length; i++) {
           const entry = registryEntries[i]!;
-          const requirePath = './' + entry.relPath.replace(/\\/g, '/');
+          const requirePath = JSON.stringify('./' + entry.relPath.replace(/\\/g, '/'));
           const comma = i < registryEntries.length - 1 ? ',' : '';
-          lines.push(`  { fullpath: '${entry.fullpath}', properties: ${JSON.stringify(entry.properties)}, get module() { return require('${requirePath}'); } }${comma}`);
+          lines.push(`  { fullpath: ${JSON.stringify(entry.fullpath)}, properties: ${JSON.stringify(entry.properties)}, get module() { return require(${requirePath}); } }${comma}`);
         }
         lines.push('];');
 
@@ -99,9 +99,9 @@ export function bundleRegistryPlugin(
         lines.push('global.__EE_CONFIG_REGISTRY__ = [');
         for (let i = 0; i < configEntries.length; i++) {
           const entry = configEntries[i]!;
-          const requirePath = './' + entry.relPath.replace(/\\/g, '/');
+          const requirePath = JSON.stringify('./' + entry.relPath.replace(/\\/g, '/'));
           const comma = i < configEntries.length - 1 ? ',' : '';
-          lines.push(`  { filename: '${entry.filename}', get module() { return require('${requirePath}'); } }${comma}`);
+          lines.push(`  { filename: ${JSON.stringify(entry.filename)}, get module() { return require(${requirePath}); } }${comma}`);
         }
         lines.push('];');
 
@@ -118,12 +118,12 @@ export function bundleRegistryPlugin(
       });
 
       build.onLoad({ filter: /.*/, namespace: 'bundle-entry' }, () => {
-        const mainRelative = './' + path.basename(mainJsPath);
+        const mainRelative = JSON.stringify('./' + path.basename(mainJsPath));
         const contents = [
           '// Auto-generated bundle entry - do not edit',
           `require('app:config-registry');`,
           `require('app:controller-registry');`,
-          `require('${mainRelative}');`,
+          `require(${mainRelative});`,
         ].join('\n');
 
         return {

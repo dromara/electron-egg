@@ -5,9 +5,9 @@ import bytenode from 'bytenode';
 import JavaScriptObfuscator from 'javascript-obfuscator';
 import globby from 'globby';
 import { loadConfig, toArray } from '../lib/utils.js';
-import type { EncryptConfig } from '../types/config.js';
+import type { EncryptConfig, ConfusionOptions, BytecodeOptions } from '../types/config.js';
 
-const EncryptTypes = ['bytecode', 'confusion', 'strict'];
+const EncryptTypes = ['bytecode', 'confusion', 'strict'] as const;
 
 interface EncryptOptions {
   config?: string;
@@ -30,8 +30,8 @@ class Encrypt {
   encryptDir: string;
   filesExt: string[];
   type: string;
-  bOpt: Record<string, unknown>;
-  cOpt: Record<string, unknown>;
+  bOpt: BytecodeOptions;
+  cOpt: ConfusionOptions;
   patterns: string[] | null;
   specFiles: string[];
   codefiles: string[] | undefined;
@@ -63,10 +63,13 @@ class Encrypt {
   }
 
   encrypt(): void {
-    if (!EncryptTypes.includes(this.type)) return;
-    if (this.target === 'frontend' && (this.type === 'bytecode' || this.type === 'strict')) return;
+    if (!(EncryptTypes as readonly string[]).includes(this.type)) return;
+    if (this.target === 'frontend' && (this.type === 'bytecode' || this.type === 'strict')) {
+      console.log(chalk.blue('[ee-bin] [encrypt] ') + `Skipping frontend ${this.type} (bytecode not supported in renderer)`);
+      return;
+    }
 
-    console.log(chalk.blue('[ee-bin] [encrypt] ') + `start ciphering ${this.target}`);
+    console.log(chalk.blue('[ee-bin] [encrypt] ') + `start encrypting ${this.target}`);
     if (!this.codefiles) return;
 
     for (const file of this.codefiles) {
@@ -80,7 +83,7 @@ class Encrypt {
 
       this.generate(fullpath);
     }
-    console.log(chalk.blue('[ee-bin] [encrypt] ') + 'end ciphering');
+    console.log(chalk.blue('[ee-bin] [encrypt] ') + 'end encrypting');
   }
 
   generate(curPath: string, type?: string): void {

@@ -15,7 +15,7 @@ const userBin = './cmd/bin.js';
 export function loadConfig(binFile?: string): BinConfig {
   const binPath = binFile || userBin;
   const userConfig = loadFile(binPath);
-  const result = extend(true, { ...defaultConfig }, userConfig);
+  const result = extend(true, { ...defaultConfig } as Record<string, unknown>, userConfig) as unknown as BinConfig;
   log('[loadConfig] bin:%j', result);
 
   return result;
@@ -73,36 +73,6 @@ export function writeJsonSync(filepath: string, str: unknown, options?: { space?
   }
 
   fs.writeFileSync(filepath, data);
-}
-
-export function getArgumentByName(name: string, args?: string[]): string | undefined {
-  if (!args) {
-    args = process.argv;
-  }
-  for (let i = 0; i < args.length; i++) {
-    const item = args[i];
-    if (!item) continue;
-    const prefixKey = `--${name}=`;
-    if (item.indexOf(prefixKey) !== -1) {
-      return item.substring(prefixKey.length);
-    }
-  }
-  return undefined;
-}
-
-export function getPlatform(delimiter = '_', isDiffArch = false): string {
-  if (process.platform === 'win32') {
-    let os = 'windows';
-    if (isDiffArch) {
-      os += delimiter + (process.arch === 'x64' ? '64' : '32');
-    }
-    return os;
-  }
-  if (process.platform === 'darwin') {
-    const core = process.arch === 'arm64' ? 'apple' : 'intel';
-    return 'macos' + delimiter + core;
-  }
-  return 'linux';
 }
 
 export function toArray(value?: string[] | string): string[] {

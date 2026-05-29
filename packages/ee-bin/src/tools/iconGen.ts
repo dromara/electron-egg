@@ -36,7 +36,7 @@ class IconGen {
       this.icongen = null;
     }
 
-    console.log('[ee-bin] [icon-gen] icon 当前路径: ', process.cwd());
+    console.log('[ee-bin] [icon-gen] Current working directory: ', process.cwd());
     this.input = path.join(process.cwd(), params.input);
     this.output = path.join(process.cwd(), params.output);
     this.imagesDir = path.join(process.cwd(), params.imagesDir);
@@ -62,10 +62,10 @@ class IconGen {
       return;
     }
 
-    console.log('[ee-bin] [icon-gen] iconGen 开始处理生成logo图片');
+    console.log('[ee-bin] [icon-gen] Start generating logo images');
     if (!fs.existsSync(this.input)) {
-      console.error('[ee-bin] [icon-gen] input: ', this.input);
-      throw new Error('输入的图片不存在或路径错误');
+      console.error('[ee-bin] [icon-gen] Input: ', this.input);
+      throw new Error('Input image does not exist or path is invalid');
     }
     if (!fs.existsSync(this.output)) {
       fs.mkdirSync(this.output, { recursive: true });
@@ -79,13 +79,13 @@ class IconGen {
     }
     this.icongen(this.input, this.output, this.iconOptions)
       .then((results) => {
-        console.log('[ee-bin] [icon-gen] iconGen 已生成下方图片资源');
+        console.log('[ee-bin] [icon-gen] Generated image resources:');
         console.log(results);
         this._renameForEE(results);
       })
       .catch((err) => {
         console.error(err);
-        throw new Error('[ee-bin] [icon-gen] iconGen 生成失败!');
+        throw new Error('[ee-bin] [icon-gen] Image generation failed!');
       });
   }
 
@@ -105,8 +105,8 @@ class IconGen {
     }
   }
 
-  _renameForEE(filesPath: string[]): void {
-    console.log('[ee-bin] [icon-gen] iconGen 开始重新命名logo图片资源');
+  private _renameForEE(filesPath: string[]): void {
+    console.log('[ee-bin] [icon-gen] Start renaming logo image resources');
     try {
       for (const filePath of filesPath) {
         const extname = path.extname(filePath);
@@ -118,7 +118,7 @@ class IconGen {
           if (basename === '16') {
             const newName = 'tray' + extname;
             fs.copyFileSync(filePath, path.join(this.imagesDir, newName));
-            console.log(`${filename}${extname} --> ${this.params.imagesDir}/${newName} 复制成功!`);
+            console.log(`${filename}${extname} --> ${this.params.imagesDir}/${newName} copied successfully!`);
             fs.unlinkSync(filePath);
             continue;
           }
@@ -126,20 +126,20 @@ class IconGen {
           if (basename === '32') {
             const newName = filename + extname;
             fs.copyFileSync(filePath, path.join(this.imagesDir, newName));
-            console.log(`${filename}${extname} --> ${this.params.imagesDir}/${newName} 复制成功!`);
+            console.log(`${filename}${extname} --> ${this.params.imagesDir}/${newName} copied successfully!`);
             continue;
           }
 
           const newName = basename + 'x' + basename + extname;
           const newPath = path.join(dirname, newName);
           fs.renameSync(filePath, newPath);
-          console.log(`${filename}${extname} --> ${newName} 重命名成功!`);
+          console.log(`${filename}${extname} --> ${newName} renamed successfully!`);
         }
       }
-      console.log('[ee-bin] [icon-gen] iconGen 资源处理完成!');
+      console.log('[ee-bin] [icon-gen] Image resource processing completed!');
     } catch (e) {
       console.error('[ee-bin] [icon-gen] ERROR: ', e);
-      throw new Error('重命名logo图片资源失败!!');
+      throw new Error('Renaming logo image resources failed!');
     }
   }
 }

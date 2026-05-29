@@ -84,7 +84,7 @@ class IncrUpdater {
 
     const version = metadataObj.version;
     let platformForFilename = platform;
-    if (platform.indexOf('_') !== -1) {
+    if (platform.includes('_')) {
       const platformArr = platform.split('_');
       platformForFilename = platformArr.join('-');
     }
@@ -138,7 +138,7 @@ class IncrUpdater {
 
     let fullFileInfo: MetadataFile | undefined;
     for (const item of metadataObj.files) {
-      if (item.url.indexOf('.zip') !== -1) {
+      if (item.url.includes('.zip')) {
         continue;
       }
       fullFileInfo = item;
@@ -205,10 +205,12 @@ class IncrUpdater {
 
   generateHash(filepath = '', algorithm = 'sha512', encoding: crypto.BinaryToTextEncoding = 'base64'): string {
     if (filepath.length === 0) {
+      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: empty filepath for ${algorithm}`));
       return '';
     }
 
     if (!fs.existsSync(filepath)) {
+      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: ${filepath} does not exist for ${algorithm}`));
       return '';
     }
 
