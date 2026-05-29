@@ -151,7 +151,7 @@ The `build.electron` section controls esbuild bundling:
 ```js
 electron: {
   bundleType: 'bundle',  // 'bundle' | 'copy'
-  external: [],          // User-defined externals (framework internals auto-handled)
+  external: [],          // User-defined externals (packages: 'external' covers most)
   sourcemap: false,      // 'inline' | 'external' | false; default: dev→inline, prod→off
   minify: false,         // true | false; minify code for production
   drop: undefined,       // ['console', 'debugger']; remove statements for production
@@ -159,12 +159,15 @@ electron: {
   legalComments: undefined, // 'inline' | 'eof' | 'none'; handle license comments
   define: undefined,     // { 'process.env.X': '"value"' }; compile-time constants
   copy: undefined,       // ['assets', 'data/db.json']; extra dirs/files from electron/ to copy
+  format: undefined,     // 'cjs' | 'esm'; default: 'cjs' (recommended for Electron)
 }
 ```
 
-**Framework-managed externals** (auto, no config needed): `ee-core`, `ee-bin`, `electron`, `better-sqlite3`, `proxy-agent`, `pino-roll`, `pino-pretty`.
+**Framework-managed externals** (explicit list for documentation + performance, most already covered by `packages: 'external'`): `ee-core`, `ee-bin`, `electron`, `better-sqlite3`, `proxy-agent`, `pino-roll`, `pino-pretty`.
 
 **Sourcemap behavior**: `false` (default) means auto — dev environment uses `inline`, prod disables. Set explicitly to `'inline'` or `'external'` to override.
+
+**Format behavior**: Default `cjs` is recommended for Electron main process. ESM mode requires all business code (controllers, services, config) to be ESM-compatible.
 
 ## VS Code Debugging
 

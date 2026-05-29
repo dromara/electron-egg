@@ -40,13 +40,13 @@ function computeProperties(filepath: string): string[] {
  * 4. onResolve/onLoad for "app:bundle-entry": generates the virtual entry point
  *    that loads both registries, then requires the real main.js
  */
-export function controllerRegistryPlugin(
+export function bundleRegistryPlugin(
   controllerDir: string,
   mainJsPath: string,
   configDir: string,
 ): Plugin {
   return {
-    name: 'controller-registry',
+    name: 'bundle-registry',
     setup(build: PluginBuild) {
       let registryEntries: RegistryEntry[] = [];
       let configEntries: ConfigEntry[] = [];

@@ -8,7 +8,7 @@ import process from 'process';
 import crossSpawn, { sync as crossSpawnSync } from 'cross-spawn';
 import { loadConfig, readJsonSync, writeJsonSync, rm, toArray } from '../lib/utils.js';
 import type { ExecConfig, BundleConfig } from '../types/config.js';
-import { controllerRegistryPlugin } from '../plugins/controller_registry_plugin.js';
+import { bundleRegistryPlugin } from '../plugins/bundle_registry_plugin.js';
 
 const log = createDebug('ee-bin:serve');
 
@@ -282,8 +282,8 @@ class ServeProcess {
     const outdir = path.join(cwd, this.bundleDir);
     const outfile = path.join(outdir, 'main.js');
 
-    // Auto-detect output format: js → CJS, ts → ESM
-    const format: 'cjs' | 'esm' = isTypeScript ? 'esm' : 'cjs';
+    // Output format: user can choose 'cjs' or 'esm', default is 'cjs' (recommended for Electron)
+    const format: 'cjs' | 'esm' = (bundleConfig.format as 'cjs' | 'esm') || 'cjs';
 
     // Sourcemap: false = auto by environment (dev→inline, prod→off)
     // Developer can override: 'inline' | 'external' | true(=inline)
@@ -313,13 +313,14 @@ class ServeProcess {
     // Developer-provided externals: packages the app uses that cannot be bundled
     const userExternal = (bundleConfig.external as string[]) || [];
 
-    const plugin = controllerRegistryPlugin(controllerDir, entryMain, configDir);
+    const plugin = bundleRegistryPlugin(controllerDir, entryMain, configDir);
 
     const options: BuildOptions = {
       entryPoints: ['app:bundle-entry'],
       bundle: true,
       platform: 'node',
       target: 'node20',
+      packages: 'external',
       outdir,
       external: [
         ...frameworkExternal,
@@ -331,9 +332,11 @@ class ServeProcess {
       ...(bundleConfig.drop ? { drop: bundleConfig.drop } : {}),
       ...(bundleConfig.legalComments ? { legalComments: bundleConfig.legalComments } : {}),
       sourcemap,
+      banner: {
+        js: 'process.env.EE_BUNDLED = "true";',
+      },
       plugins: [plugin],
       define: {
-        'process.env.EE_BUNDLED': "'true'",
         ...(bundleConfig.define || {}),
       },
       logLevel: 'info',

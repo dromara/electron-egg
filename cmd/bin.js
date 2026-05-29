@@ -64,7 +64,7 @@ module.exports = {
       * 移除 console 和 debugger 语句（生产环境推荐）
       * 示例: drop: ['console', 'debugger']
       */
-      drop: undefined,
+      drop: [],
       /**
       * 压缩时保留原始函数/类名（便于定位错误）
       * true  - 保留名称（minify 时推荐开启）
@@ -77,20 +77,27 @@ module.exports = {
       * 'eof'     - 注释移到文件末尾
       * 'none'    - 移除所有注释（默认）
       */
-      legalComments: undefined,
+      legalComments: 'none',
       /**
       * 自定义全局常量（编译时替换）
       * 示例: define: { 'process.env.MY_VERSION': '"1.0.0"' }
       */
-      define: undefined,
+      define: {},
       /**
       * 额外复制 electron/ 下的目录或文件到输出目录
-      * 框架已内置复制: config/, jobs/, preload/bridge.js（不可移除）
+      * 框架已内置复制: jobs/, preload/bridge.js（不可移除）
       * 此属性用于添加你自己的资源，如静态数据、配置模板等
       * 目录示例: copy: ['assets']       → electron/assets/ → public/electron/assets/
       * 文件示例: copy: ['data/db.json']  → electron/data/db.json → public/electron/data/db.json
       */
-      copy: undefined,
+      copy: [],
+      /**
+      * 输出格式
+      * 'cjs' - CommonJS（推荐，Electron 主进程最稳定的方式）
+      * 'esm' - ES Module（需确保业务代码兼容 ESM，如 controller/service 的 registry require() 调用）
+      * 默认: 'cjs'
+      */
+      format: 'cjs',
     },
     win64: {
       cmd: 'electron-builder',

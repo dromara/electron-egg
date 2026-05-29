@@ -20,6 +20,7 @@ export interface BundleConfig {
   legalComments?: 'inline' | 'eof' | 'none';
   define?: Record<string, string>;
   copy?: string[];
+  format?: 'cjs' | 'esm';
   [key: string]: unknown;
 }
 
