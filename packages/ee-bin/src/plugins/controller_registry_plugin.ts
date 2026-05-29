@@ -8,6 +8,11 @@ interface RegistryEntry {
   relPath: string;
 }
 
+interface ConfigEntry {
+  filename: string;
+  relPath: string;
+}
+
 /**
  * Compute properties from filepath, replicating getProperties() + defaultCamelize() with caseStyle: 'lower'.
  * e.g. "foo/bar.js" => ["foo", "bar"]
@@ -26,29 +31,37 @@ function computeProperties(filepath: string): string[] {
 }
 
 /**
- * esbuild plugin that generates a controller registry at build time.
+ * esbuild plugin that generates registries at build time for controllers and config.
  *
  * How it works:
- * 1. onStart: scans electron/controller/ directory for .js and .jsc files
- * 2. onResolve: intercepts virtual module "app:controller-registry"
- * 3. onLoad: generates code that require()'s each controller and sets global.__EE_CONTROLLER_REGISTRY__
+ * 1. onStart: scans electron/controller/ and electron/config/ directories
+ * 2. onResolve/onLoad for "app:controller-registry": generates controller registry
+ * 3. onResolve/onLoad for "app:config-registry": generates config registry
  * 4. onResolve/onLoad for "app:bundle-entry": generates the virtual entry point
- *    that first loads the registry, then requires the real main.js
+ *    that loads both registries, then requires the real main.js
  */
 export function controllerRegistryPlugin(
   controllerDir: string,
   mainJsPath: string,
+  configDir: string,
 ): Plugin {
   return {
     name: 'controller-registry',
     setup(build: PluginBuild) {
       let registryEntries: RegistryEntry[] = [];
+      let configEntries: ConfigEntry[] = [];
 
       build.onStart(() => {
-        const files = globby.sync(['**/*.js', '**/*.jsc'], { cwd: controllerDir });
-        registryEntries = files.map((filepath) => ({
+        const controllerFiles = globby.sync(['**/*.js', '**/*.jsc'], { cwd: controllerDir });
+        registryEntries = controllerFiles.map((filepath) => ({
           fullpath: 'controller/' + filepath.replace(/\\/g, '/'),
           properties: computeProperties(filepath),
+          relPath: filepath,
+        }));
+
+        const configFiles = globby.sync(['**/*.js', '**/*.jsc'], { cwd: configDir });
+        configEntries = configFiles.map((filepath) => ({
+          filename: filepath.replace(/\\/g, '/').substring(0, filepath.lastIndexOf('.')),
           relPath: filepath,
         }));
       });
@@ -60,8 +73,6 @@ export function controllerRegistryPlugin(
 
       build.onLoad({ filter: /.*/, namespace: 'controller-registry' }, () => {
         const lines: string[] = ['// Auto-generated controller registry - do not edit'];
-        // Use lazy getters so controllers are not loaded until the registry is actually read.
-        // This avoids initialization order issues (e.g. services calling getConfig() before ElectronEgg runs).
         lines.push('global.__EE_CONTROLLER_REGISTRY__ = [');
         for (let i = 0; i < registryEntries.length; i++) {
           const entry = registryEntries[i]!;
@@ -78,6 +89,29 @@ export function controllerRegistryPlugin(
         };
       });
 
+      // Virtual module: config registry
+      build.onResolve({ filter: /^app:config-registry$/ }, (args) => {
+        return { path: args.path, namespace: 'config-registry' };
+      });
+
+      build.onLoad({ filter: /.*/, namespace: 'config-registry' }, () => {
+        const lines: string[] = ['// Auto-generated config registry - do not edit'];
+        lines.push('global.__EE_CONFIG_REGISTRY__ = [');
+        for (let i = 0; i < configEntries.length; i++) {
+          const entry = configEntries[i]!;
+          const requirePath = './' + entry.relPath.replace(/\\/g, '/');
+          const comma = i < configEntries.length - 1 ? ',' : '';
+          lines.push(`  { filename: '${entry.filename}', get module() { return require('${requirePath}'); } }${comma}`);
+        }
+        lines.push('];');
+
+        return {
+          contents: lines.join('\n'),
+          loader: 'js',
+          resolveDir: configDir,
+        };
+      });
+
       // Virtual module: bundle entry point
       build.onResolve({ filter: /^app:bundle-entry$/ }, (args) => {
         return { path: args.path, namespace: 'bundle-entry' };
@@ -87,6 +121,7 @@ export function controllerRegistryPlugin(
         const mainRelative = './' + path.basename(mainJsPath);
         const contents = [
           '// Auto-generated bundle entry - do not edit',
+          `require('app:config-registry');`,
           `require('app:controller-registry');`,
           `require('${mainRelative}');`,
         ].join('\n');

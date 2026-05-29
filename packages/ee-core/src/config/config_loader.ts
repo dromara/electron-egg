@@ -3,11 +3,21 @@ import path from 'path';
 import { appName, env, getElectronDir, getBaseDir, getRootDir } from '../ps/index.js';
 import { extend } from '../utils/extend.js';
 import { loadFile } from '../loader/index.js';
+import { isFunction } from '../utils/type_check.js';
 import { Timing } from '../core/utils/timing.js';
 import defaultConfig from './default_config.js';
 import type { AppInfo, Config } from '../types/index.js';
 
 const debugLog = debug('ee-core:config:config_loader');
+
+interface ConfigRegistryEntry {
+  filename: string;
+  module: unknown;
+}
+
+declare global {
+  var __EE_CONFIG_REGISTRY__: ConfigRegistryEntry[] | undefined;
+}
 
 export class ConfigLoader {
   timing: Timing;
@@ -48,6 +58,20 @@ export class ConfigLoader {
       env: env(),
       root: getRootDir(),
     };
+
+    if (globalThis.__EE_CONFIG_REGISTRY__) {
+      // Bundled mode: load from registry
+      const entry = globalThis.__EE_CONFIG_REGISTRY__.find((e) => e.filename === filename);
+      if (!entry) return null;
+      const mod = entry.module;
+      debugLog('[_loadConfig] bundled filename: %s', filename);
+      if (isFunction(mod)) {
+        return (mod as (...args: unknown[]) => Record<string, unknown>)(appInfo);
+      }
+      return mod as Record<string, unknown>;
+    }
+
+    // Dev mode: load from filesystem
     const filepath = path.join(dirpath, 'config', filename);
     const config = loadFile(filepath, appInfo);
     debugLog('[_loadConfig] filepath: %s', filepath);

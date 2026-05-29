@@ -55,8 +55,7 @@ After `pnpm build-electron`, `public/electron/` contains:
 
 ```
 public/electron/
-├── main.js              # Bundled main process (esbuild bundle:true, ee-core is external)
-├── config/              # Copied as-is (editable post-build)
+├── main.js              # Bundled main process (controllers, services, config all bundled in)
 ├── jobs/                # Copied as-is (child_process.fork requires separate files)
 └── preload/
     └── bridge.js        # Copied as-is (BrowserWindow preload script)
@@ -80,7 +79,15 @@ Boot → loadConfig → loadLog → loadDir → loadController → loadSocket �
 
 Main ↔ renderer via `ee-core/cross` (IPC, socket.io, HTTP server). Channels follow pattern `controller/{name}/{method}`.
 
-### Config Layering
+### Config Loading Pipeline
+
+**Build time** (ee-bin): `controllerRegistryPlugin` scans `electron/config/` and generates a virtual module `app:config-registry` that sets `global.__EE_CONFIG_REGISTRY__` with lazy getters.
+
+**Bundle entry** (`app:bundle-entry`): Loads config registry, then controller registry, then the real `main.js`.
+
+**Runtime** (ee-core): `ConfigLoader._loadConfig()` checks `globalThis.__EE_CONFIG_REGISTRY__`. If present (bundle mode), finds the config by filename and calls it with `appInfo`. If absent (dev without bundle), falls back to filesystem `loadFile()`.
+
+### Config Layering (dev mode only)
 
 `config.default.js` → `config.local.js` / `config.prod.js`, merged by ee-core config loader.
 

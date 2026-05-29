@@ -274,6 +274,7 @@ class ServeProcess {
   async _bundleWithRegistry(bundleConfig: BundleConfig): Promise<void> {
     const cwd = process.cwd();
     const controllerDir = path.join(cwd, this.electronDir, 'controller');
+    const configDir = path.join(cwd, this.electronDir, 'config');
     const mainJsPath = path.join(cwd, this.electronDir, 'main.js');
     const mainTsPath = path.join(cwd, this.electronDir, 'main.ts');
     const isTypeScript = fs.existsSync(mainTsPath);
@@ -312,7 +313,7 @@ class ServeProcess {
     // Developer-provided externals: packages the app uses that cannot be bundled
     const userExternal = (bundleConfig.external as string[]) || [];
 
-    const plugin = controllerRegistryPlugin(controllerDir, entryMain);
+    const plugin = controllerRegistryPlugin(controllerDir, entryMain, configDir);
 
     const options: BuildOptions = {
       entryPoints: ['app:bundle-entry'],
@@ -361,7 +362,7 @@ class ServeProcess {
 
   _copyUnbundledFiles(cwd: string, outdir: string, bundleConfig: BundleConfig): void {
     // Framework-required copies (always present, removing them breaks the framework)
-    const copyTargets = ['config', 'jobs'];
+    const copyTargets = ['jobs'];
     for (const target of copyTargets) {
       const src = path.join(cwd, this.electronDir, target);
       const dest = path.join(outdir, target);
@@ -379,7 +380,7 @@ class ServeProcess {
     }
 
     // Developer-defined additional copies (directories or files from electron/)
-    const userCopyTargets = bundleConfig.copy || [];
+    const userCopyTargets = (bundleConfig.copy as string[] | undefined) || [];
     for (const target of userCopyTargets) {
       const src = path.join(cwd, this.electronDir, target);
       const dest = path.join(outdir, target);
