@@ -143,9 +143,14 @@ The `build.electron` section controls esbuild bundling:
 
 ```js
 electron: {
-  bundleType: 'bundle',  // 'bundle'(esbuild) | 'copy'(file copy, debugger only)
-  external: [],          // User-defined unbundlable packages (framework internals auto-handled)
+  bundleType: 'bundle',  // 'bundle' | 'copy'
+  external: [],          // User-defined externals (framework internals auto-handled)
   sourcemap: false,      // 'inline' | 'external' | false; default: dev→inline, prod→off
+  minify: false,         // true | false; minify code for production
+  drop: undefined,       // ['console', 'debugger']; remove statements for production
+  keepNames: false,      // true | false; preserve function/class names when minifying
+  legalComments: undefined, // 'inline' | 'eof' | 'none'; handle license comments
+  define: undefined,     // { 'process.env.X': '"value"' }; compile-time constants
 }
 ```
 
@@ -163,7 +168,7 @@ Two configurations in `.vscode/launch.json`:
 ## Important Notes
 
 - **ee-core and ee-bin are standalone npm packages**: They will be published to npm independently. The current pnpm workspace monorepo (`packages/ee-core`, `packages/ee-bin` with `workspace:*` in root `package.json`) is for local development convenience only. In production use, users install them from npm via `npm install ee-core ee-bin`.
-- **ee-core is bundled into main.js by esbuild**: When `electron/main.js` requires `ee-core/*`, esbuild resolves through `node_modules/ee-core` (workspace symlink) and bundles all ee-core code into `public/electron/main.js`. ee-core is NOT in the external list. ee-bin is a CLI build tool and is never bundled into the Electron app runtime.
+- **ee-core is NOT bundled into main.js**: ee-core is an esbuild external, loaded from `node_modules` at runtime. This allows `child_process.fork()` to find the child process entry (`app.js`) as a real file on disk within `node_modules/ee-core/`. ee-bin is a CLI build tool and is never part of the Electron app runtime.
 
 - **Package manager**: pnpm only (`.npmrc` has `shamefully-hoist=true` for Electron compatibility)
 - **Registry**: npmmirror configured in `.npmrc`

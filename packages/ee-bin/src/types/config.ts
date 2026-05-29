@@ -11,9 +11,14 @@ export interface ExecConfig {
 }
 
 export interface BundleConfig {
-  bundleType?: string;
+  bundleType?: 'bundle' | 'copy';
   external?: string[];
   sourcemap?: boolean | 'inline' | 'external';
+  minify?: boolean;
+  drop?: ('console' | 'debugger')[];
+  keepNames?: boolean;
+  legalComments?: 'inline' | 'eof' | 'none';
+  define?: Record<string, string>;
   [key: string]: unknown;
 }
 

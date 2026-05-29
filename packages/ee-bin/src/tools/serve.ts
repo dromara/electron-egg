@@ -325,11 +325,15 @@ class ServeProcess {
         ...userExternal,
       ],
       format,
-      minify: false,
+      minify: bundleConfig.minify ?? false,
+      keepNames: bundleConfig.keepNames ?? false,
+      ...(bundleConfig.drop ? { drop: bundleConfig.drop } : {}),
+      ...(bundleConfig.legalComments ? { legalComments: bundleConfig.legalComments } : {}),
       sourcemap,
       plugins: [plugin],
       define: {
         'process.env.EE_BUNDLED': "'true'",
+        ...(bundleConfig.define || {}),
       },
       logLevel: 'info',
     };
@@ -349,11 +353,17 @@ class ServeProcess {
       fs.renameSync(bundleEntryMap, path.join(outdir, 'main.js.map'));
     }
 
-    // Copy directories that must remain as separate files
+    // Copy directories and files that must remain separate (not bundled)
+    this._copyUnbundledFiles(cwd, outdir);
+
+    console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
+  }
+
+  _copyUnbundledFiles(cwd: string, outdir: string): void {
     const copyTargets = ['config', 'jobs'];
-    for (const copyTarget of copyTargets) {
-      const src = path.join(cwd, this.electronDir, copyTarget);
-      const dest = path.join(outdir, copyTarget);
+    for (const target of copyTargets) {
+      const src = path.join(cwd, this.electronDir, target);
+      const dest = path.join(outdir, target);
       if (fs.existsSync(src)) {
         copyDirSync(src, dest);
       }
@@ -363,14 +373,9 @@ class ServeProcess {
     const bridgeSrc = path.join(cwd, this.electronDir, 'preload', 'bridge.js');
     const bridgeDest = path.join(outdir, 'preload', 'bridge.js');
     if (fs.existsSync(bridgeSrc)) {
-      const bridgeDestDir = path.dirname(bridgeDest);
-      if (!fs.existsSync(bridgeDestDir)) {
-        fs.mkdirSync(bridgeDestDir, { recursive: true });
-      }
+      fs.mkdirSync(path.dirname(bridgeDest), { recursive: true });
       fs.copyFileSync(bridgeSrc, bridgeDest);
     }
-
-    console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
   }
 
   _switchPkgMain(): void {

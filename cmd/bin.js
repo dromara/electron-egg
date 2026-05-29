@@ -42,7 +42,7 @@ module.exports = {
       bundleType: 'bundle',
       /**
       * 开发者自定义 external 包
-      * 框架已内置: electron, better-sqlite3, proxy-agent, pino-roll, pino-pretty
+      * 框架已内置: ee-core, ee-bin, electron, better-sqlite3, proxy-agent, pino-roll, pino-pretty
       * 如果你的项目引入了无法打包的库（如 native 模块），在此添加包名
       * 示例: external: ['sharp', 'node-gyp']
       */
@@ -51,10 +51,38 @@ module.exports = {
       * Source map 配置（用于断点调试）
       * true | 'inline'  - 源码嵌入 main.js，DevTools/VS Code 开箱即用（开发推荐）
       * 'external'       - 生成 main.js.map 文件，生产环境可单独删除
-      * false            - 不生成 sourcemap
-      * 默认: dev 环境 'inline'，prod 环境 false
+      * false            - 不生成 sourcemap（默认：dev→inline，prod→off）
       */
       sourcemap: false,
+      /**
+      * 压缩代码（生产环境推荐）
+      * true  - 压缩空白、标识符、语法
+      * false - 不压缩（默认）
+      */
+      minify: false,
+      /**
+      * 移除 console 和 debugger 语句（生产环境推荐）
+      * 示例: drop: ['console', 'debugger']
+      */
+      drop: undefined,
+      /**
+      * 压缩时保留原始函数/类名（便于定位错误）
+      * true  - 保留名称（minify 时推荐开启）
+      * false - 不保留（默认）
+      */
+      keepNames: false,
+      /**
+      * 第三方库 license 注释处理
+      * 'inline'  - 注释内联到每个文件
+      * 'eof'     - 注释移到文件末尾
+      * 'none'    - 移除所有注释（默认）
+      */
+      legalComments: undefined,
+      /**
+      * 自定义全局常量（编译时替换）
+      * 示例: define: { 'process.env.MY_VERSION': '"1.0.0"' }
+      */
+      define: undefined,
     },
     win64: {
       cmd: 'electron-builder',
