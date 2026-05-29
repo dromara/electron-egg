@@ -83,6 +83,14 @@ module.exports = {
       * 示例: define: { 'process.env.MY_VERSION': '"1.0.0"' }
       */
       define: undefined,
+      /**
+      * 额外复制 electron/ 下的目录或文件到输出目录
+      * 框架已内置复制: config/, jobs/, preload/bridge.js（不可移除）
+      * 此属性用于添加你自己的资源，如静态数据、配置模板等
+      * 目录示例: copy: ['assets']       → electron/assets/ → public/electron/assets/
+      * 文件示例: copy: ['data/db.json']  → electron/data/db.json → public/electron/data/db.json
+      */
+      copy: undefined,
     },
     win64: {
       cmd: 'electron-builder',

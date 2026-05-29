@@ -151,6 +151,7 @@ electron: {
   keepNames: false,      // true | false; preserve function/class names when minifying
   legalComments: undefined, // 'inline' | 'eof' | 'none'; handle license comments
   define: undefined,     // { 'process.env.X': '"value"' }; compile-time constants
+  copy: undefined,       // ['assets', 'data/db.json']; extra dirs/files from electron/ to copy
 }
 ```
 

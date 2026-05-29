@@ -19,6 +19,7 @@ export interface BundleConfig {
   keepNames?: boolean;
   legalComments?: 'inline' | 'eof' | 'none';
   define?: Record<string, string>;
+  copy?: string[];
   [key: string]: unknown;
 }
 

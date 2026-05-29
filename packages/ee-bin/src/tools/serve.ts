@@ -354,12 +354,13 @@ class ServeProcess {
     }
 
     // Copy directories and files that must remain separate (not bundled)
-    this._copyUnbundledFiles(cwd, outdir);
+    this._copyUnbundledFiles(cwd, outdir, bundleConfig);
 
     console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
   }
 
-  _copyUnbundledFiles(cwd: string, outdir: string): void {
+  _copyUnbundledFiles(cwd: string, outdir: string, bundleConfig: BundleConfig): void {
+    // Framework-required copies (always present, removing them breaks the framework)
     const copyTargets = ['config', 'jobs'];
     for (const target of copyTargets) {
       const src = path.join(cwd, this.electronDir, target);
@@ -375,6 +376,20 @@ class ServeProcess {
     if (fs.existsSync(bridgeSrc)) {
       fs.mkdirSync(path.dirname(bridgeDest), { recursive: true });
       fs.copyFileSync(bridgeSrc, bridgeDest);
+    }
+
+    // Developer-defined additional copies (directories or files from electron/)
+    const userCopyTargets = bundleConfig.copy || [];
+    for (const target of userCopyTargets) {
+      const src = path.join(cwd, this.electronDir, target);
+      const dest = path.join(outdir, target);
+      if (!fs.existsSync(src)) continue;
+      if (fs.statSync(src).isDirectory()) {
+        copyDirSync(src, dest);
+      } else {
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        fs.copyFileSync(src, dest);
+      }
     }
   }
 
