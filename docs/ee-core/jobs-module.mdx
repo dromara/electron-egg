@@ -1,0 +1,222 @@
+---
+title: "Jobs 模块 (后台任务)"
+description: "ee-core 后台任务模块，包含 ChildJob 单进程执行、ChildPoolJob 进程池、LoadBalancer 8 种算法以及 JobProcess 进程通信机制。"
+---
+
+# Jobs 模块
+
+Jobs 模块提供子进程任务管理能力，支持单进程执行、进程池复用和负载均衡调度。
+
+## ChildJob — 单进程执行
+
+每次执行任务创建一个新的子进程，任务完成后进程退出。
+
+```javascript
+import { ChildJob } from 'ee-core/jobs';
+
+const childJob = new ChildJob();
+
+// 执行任务文件
+const proc = childJob.exec('jobs/exampleJob', { taskId: 123 });
+
+// 监听任务返回的消息
+proc.emitter.on('job-result', (data) => {
+  console.log('任务结果:', data);
+});
+
+// 异步执行（等价于 exec）
+const proc = await childJob.execPromise('jobs/exampleJob', params);
+```
+
+### API
+
+| 方法 | 说明 |
+|------|------|
+| `exec(filepath, params, opt)` | 执行任务文件，返回 JobProcess |
+| `execPromise(filepath, params, opt)` | 异步执行（等价于 exec） |
+| `createProcess(opt)` | 创建子进程 |
+| `getPids()` | 获取所有进程 PID |
+
+## ChildPoolJob — 进程池
+
+维护一组子进程，通过负载均衡算法分发任务，避免频繁创建和销毁进程。
+
+### 进程池参数
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `min` | `3` | 最小进程数 |
+| `max` | `6` | 最大进程数 |
+| `strategy` | `'polling'` | 默认负载均衡策略 |
+| `weights` | `[1,1,1,1,1,1]` | 每个进程的权重 |
+
+```javascript
+import { ChildPoolJob } from 'ee-core/jobs';
+
+const pool = new ChildPoolJob();
+
+// 创建 3 个子进程
+const pids = await pool.create(3);
+
+// 执行任务（负载均衡器选择进程）
+const proc = await pool.run('jobs/exampleJob', { taskId: 123 });
+```
+
+### 绑定进程 (boundMap)
+
+同一 `boundId` 始终分配到同一子进程，适用于会话绑定场景：
+
+```javascript
+// 同一用户 ID 始终分配到同一进程
+const proc = await pool.getBoundChild('user-123');
+```
+
+<Note>
+如果绑定进程已退出，`getBoundChild()` 会自动分配新的进程并重新绑定。
+</Note>
+
+### API
+
+| 方法 | 说明 |
+|------|------|
+| `create(number)` | 创建指定数量的子进程 |
+| `run(filepath, params)` | 通过负载均衡选择进程执行任务 |
+| `getBoundChild(boundId)` | 获取绑定的子进程 |
+| `getChild()` | 通过负载均衡获取可用子进程 |
+| `getChildByPid(pid)` | 通过 PID 获取子进程 |
+| `getPids()` | 获取所有进程 PID |
+| `killAll(type)` | 终止所有进程（'parallel' 或 'sequence'） |
+
+## LoadBalancer — 负载均衡器
+
+支持 8 种调度算法，决定进程池中选择哪个子进程执行任务。
+
+### 算法类型
+
+| 算法 | 常量 | 说明 |
+|------|------|------|
+| 轮询 | `AlgorithmType.polling` | 按顺序依次选择 |
+| 权重 | `AlgorithmType.weights` | 按权重比例选择 |
+| 随机 | `AlgorithmType.random` | 随机选择目标 |
+| 指定 | `AlgorithmType.specify` | 指定 ID 选择 |
+| 加权轮询 | `AlgorithmType.weightsPolling` | 结合权重和轮询 |
+| 加权随机 | `AlgorithmType.weightsRandom` | 结合权重和随机 |
+| 最少连接 | `AlgorithmType.minimumConnection` | 选择当前连接数最少的目标 |
+| 加权最少连接 | `AlgorithmType.weightsMinimumConnection` | 结合权重和最少连接 |
+
+```javascript
+import { LoadBalancer, AlgorithmType } from 'ee-core/jobs';
+
+const lb = new LoadBalancer({
+  algorithm: AlgorithmType.polling,
+  targets: [{ id: 1, weight: 1 }, { id: 2, weight: 2 }],
+});
+
+// 选择一个目标
+const target = lb.pickOne();
+
+// 更换算法
+lb.setAlgorithm(AlgorithmType.weights);
+```
+
+### LoadBalancer API
+
+| 方法 | 说明 |
+|------|------|
+| `pickOne(...params)` | 选择单个目标 |
+| `pickMulti(count, ...params)` | 选择多个目标 |
+| `add(task)` | 添加目标 |
+| `del(target)` | 删除目标 |
+| `wipe()` | 清除所有目标 |
+| `setAlgorithm(algorithm)` | 设置算法 |
+| `setTargets(targets)` | 设置目标列表 |
+| `refreshParams(pidMap)` | 更新 CPU/内存占用数据 |
+| `updateParams(object)` | 更新计算参数 |
+
+<Warning>
+`setAlgorithm()` 只接受 `AlgorithmType` 中定义的算法名称，无效算法会抛出错误。
+</Warning>
+
+## JobProcess — 进程通信
+
+`JobProcess` 封装 `child_process.fork()` 的创建和通信逻辑。
+
+### 通信机制
+
+| 方向 | 消息类型 | 格式 |
+|------|---------|------|
+| 主→子 | `JobMessage` | `{ mid, cmd, jobPath, jobParams, jobFunc, jobFuncParams }` |
+| 子→主 | `ProcessMessage` | `{ channel, event, data, eventReceiver }` |
+
+### 事件接收器 (eventReceiver)
+
+| 值 | 分发目标 |
+|----|---------|
+| `forkProcess` | 仅发送到进程内 emitter |
+| `childJob` | 仅发送到宿主 emitter |
+| 默认（all） | 同时发送到两者 |
+
+### 子进程消息通道
+
+| 通道 | 说明 |
+|------|------|
+| `showException` | 异常信息（仅记录） |
+| `sendToMain` | 业务消息（按 eventReceiver 分发） |
+
+### dispatch() / callFunc()
+
+```javascript
+// 发送执行命令
+proc.dispatch('run', '/path/to/job', params);
+
+// 调用任务实例的方法
+proc.callFunc('jobs/myTask', 'handleData', data);
+```
+
+### 子进程编写示例
+
+```javascript
+// electron/jobs/exampleJob.js
+class ExampleJob {
+  async run(params) {
+    // 处理任务
+    const result = await processData(params);
+
+    // 发送结果到主进程
+    process.send({
+      channel: 'sendToMain',
+      event: 'job-result',
+      data: result,
+      eventReceiver: 'childJob',
+    });
+
+    return result;
+  }
+}
+
+module.exports = ExampleJob;
+```
+
+## registerJobManager / killAllJobs — 注册表
+
+`registerJobManager()` 将 ChildJob 或 ChildPoolJob 注册到全局管理列表，应用退出时 `killAllJobs()` 终止所有已注册的子进程：
+
+```javascript
+import { registerJobManager } from 'ee-core/jobs';
+import { ChildJob } from 'ee-core/jobs';
+
+const childJob = new ChildJob();
+registerJobManager(childJob);
+
+// 应用退出时自动调用 killAllJobs()
+```
+
+<Note>
+`killAllJobs()` 在 Electron `before-quit` 事件中自动调用，无需手动触发。
+</Note>
+
+## jobs 配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `messageLog` | `boolean` | `false` | 是否记录子进程通信消息（调试用） |

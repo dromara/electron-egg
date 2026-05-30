@@ -1,0 +1,158 @@
+---
+title: "App 模块 (应用启动)"
+description: "ee-core 应用启动模块，包含 ElectronEgg 启动类、Application 单例编排器、EventBus 事件总线与目录初始化。"
+---
+
+# App 模块
+
+App 模块是 ee-core 框架的启动入口，负责收集运行环境信息、加载基础功能、编排启动流程以及提供生命周期事件机制。
+
+## ElectronEgg 启动类
+
+`ElectronEgg` 是框架的主入口类，由 `electron/main.js` 实例化并调用 `run()` 启动整个应用。
+
+### 构造函数流程
+
+构造函数完成以下工作：
+
+1. 获取 Electron app 路径作为 `baseDir`
+2. 解析命令行参数：`env`（环境标识）和 `debugger`（调试源标志）
+3. 根据 `debugger` 参数决定 `electronDir` 指向打包输出目录还是源码目录
+4. 收集应用信息（名称、版本、路径等）构建 `options`
+5. 在生产+打包模式下，`execDir` 指向可执行文件所在目录
+6. 将关键信息写入 `process.env` 供其他模块读取
+7. 调用 `init()` 加载基础功能
+
+```javascript
+const electronEgg = new ElectronEgg();
+// 构造函数自动完成环境收集和 init() 调用
+```
+
+<Note>
+构造函数会自动调用 `init()`，不需要手动调用。`process.env` 中写入的变量（如 `EE_ENV`、`EE_BASE_DIR`）是其他模块（配置、日志、进程状态）的基础数据来源。
+</Note>
+
+### init() 初始化
+
+加载顺序**不可变更**：
+
+| 顺序 | 函数 | 说明 |
+|------|------|------|
+| 1 | `loadException()` | 注册全局异常处理，确保后续异常被捕获 |
+| 2 | `loadConfig()` | 加载配置文件，后续模块依赖配置 |
+| 3 | `loadDir()` | 创建必要目录（data/logs/db） |
+| 4 | `loadLog()` | 初始化日志系统，依赖配置和目录 |
+
+### register() 注册生命周期钩子
+
+```javascript
+const electronEgg = new ElectronEgg();
+electronEgg.register('ready', () => {
+  console.log('应用已就绪');
+});
+```
+
+<Warning>
+`register()` 必须在 `run()` 之前调用，否则钩子不会被触发。
+</Warning>
+
+### run() / runAsync() 启动应用
+
+两种启动方式对应不同的控制器加载策略：
+
+| 方法 | 控制器加载方式 | 适用场景 |
+|------|---------------|---------|
+| `run()` | 同步 `require()` | CJS 项目 |
+| `runAsync()` | 异步 `import()` | ESM 项目 |
+
+```javascript
+// CJS 项目
+await electronEgg.run();
+
+// ESM 项目
+await electronEgg.runAsync();
+```
+
+## Application 单例
+
+`Application` 是框架启动流程编排器，通过 `app` 单例导出。它协调控制器的加载、通信服务的启动、生命周期事件的发射和 Electron 主进程功能的初始化。
+
+### 启动顺序
+
+```
+loadController → loadSocket → emitLifecycle(Ready) → loadElectron
+```
+
+1. **加载控制器** — 注册所有业务处理函数
+2. **加载通信服务** — 启动 IPC / HTTP / SocketIO 服务
+3. **发射 Ready 生命周期事件**
+4. **加载 Electron 功能** — 创建窗口、注册快捷键等
+
+## EventBus 事件总线
+
+`EventBus` 分为两类事件存储，避免命名冲突：
+
+- **生命周期事件** (`lifecycleEvents`)：由框架内部触发的核心里程碑事件
+- **自定义事件** (`eventsMap`)：业务代码自由使用的事件
+
+### 生命周期事件常量
+
+| 常量 | 值 | 触发时机 |
+|------|----|---------|
+| `Ready` | `'ready'` | 控制器和通信服务加载完成 |
+| `ElectronAppReady` | `'electron-app-ready'` | Electron app.whenReady() 完成 |
+| `WindowReady` | `'window-ready'` | 主窗口创建完成 |
+| `BeforeClose` | `'before-close'` | 窗口关闭前，可用于清理操作 |
+| `Preload` | `'preload'` | preload 脚本注入时机 |
+
+### API
+
+```javascript
+import { eventBus } from 'ee-core/app/events';
+
+// 注册生命周期事件（重复注册会覆盖并输出警告）
+eventBus.register('ready', () => {
+  console.log('框架就绪');
+});
+
+// 注册自定义事件
+eventBus.on('myCustomEvent', (data) => {
+  console.log('自定义事件触发:', data);
+});
+
+// 触发自定义事件
+eventBus.emit('myCustomEvent', { key: 'value' });
+```
+
+<Note>
+EventBus 的 `emitLifecycle()` 和 `emit()` 内置 try/catch，单个处理器异常不会影响其他逻辑。异步处理器返回的 Promise 错误也会被自动捕获并记录。
+</Note>
+
+## loadDir 目录初始化
+
+`loadDir()` 在框架启动时创建必要的运行目录：
+
+| 目录 | 路径 | 用途 |
+|------|------|------|
+| 隐藏应用目录 | `~/.{appName}/` | 存储应用级配置和缓存 |
+| 数据目录 | `{baseDir}/data` 或 `~/.{appName}/data` | 存储业务数据（如 SQLite 文件） |
+| 日志目录 | `{baseDir}/logs` 或 `~/.{appName}/logs` | 存储运行日志文件 |
+
+<Note>
+开发环境目录位于项目根目录下，生产环境目录位于用户主目录的隐藏应用目录下。所有目录权限设置为 `0o755`。
+</Note>
+
+## ElectronEggOptions 类型
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `env` | `string` | 运行环境标识（dev/prod/test） |
+| `baseDir` | `string` | 项目根目录 |
+| `electronDir` | `string` | Electron 主进程源码目录 |
+| `appName` | `string` | 应用名称 |
+| `userHome` | `string` | 用户主目录 |
+| `appData` | `string` | 系统级应用数据目录 |
+| `appUserData` | `string` | Electron 用户数据目录 |
+| `appVersion` | `string` | 应用版本 |
+| `isPackaged` | `boolean` | 是否已打包 |
+| `execDir` | `string` | 可执行文件目录 |

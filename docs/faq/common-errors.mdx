@@ -1,0 +1,370 @@
+---
+title: 常见错误排查
+description: 控制器未找到、IPC 通道不响应、前端加载失败、跨进程服务启动失败、日志目录权限、字节码编译失败等常见错误的原因分析与修复方法
+---
+
+本文档汇总 electron-egg 项目开发中最常见的错误，提供错误信息、原因分析和修复方法。
+
+## 控制器未找到
+
+### 错误信息
+
+```
+[resolveControllerFn] class or function 'user' not exists in path 'controller/user/add'
+```
+
+或 IPC/HTTP 调用返回 `undefined`。
+
+### 原因分析
+
+1. **命名规则错误**：控制器文件名或目录名不符合 caseStyle 规则
+2. **导出格式错误**：文件导出不是类或函数
+3. **文件路径错误**：控制器文件不在 `electron/controller/` 目录下
+4. **bundle 模式下 registry 未更新**：修改控制器后未重新构建
+
+### 修复方法
+
+<Note>
+控制器命名遵循 `caseStyle: 'lower'` 规则。FileLoader 使用 `getProperties()` 将文件路径转换为属性路径：
+- `controller/User.js` → `controller.user`（文件名转为小写）
+- `controller/admin/Login.js` → `controller.admin.login`
+- `controller/my-feature.js` → `controller.myfeature`（去除分隔符）
+</Note>
+
+1. **检查文件名大小写**：控制器文件名会被转为小写，调用时必须使用小写路径
+
+```javascript
+// 正确的 IPC 调用
+ipcRenderer.invoke('controller/user/add', params);      // 小写
+ipcRenderer.invoke('controller/admin/login', params);    // 小写
+
+// 错误的调用
+ipcRenderer.invoke('controller/User/add', params);       // 大写 U 无法匹配
+ipcRenderer.invoke('controller/AdminLogin', params);      // 路径错误
+```
+
+2. **检查导出格式**：控制器文件必须导出类或函数
+
+```javascript
+// 正确导出（类）
+class UserController {
+  async add(args) { return { success: true }; }
+}
+module.exports = UserController;
+
+// 正确导出（函数）
+module.exports = function(args) { return { success: true }; };
+
+// 错误导出（对象）
+module.exports = { add: (args) => { } };  // 直接导出对象不被 IpcServer 识别
+```
+
+3. **bundle 模式下重新构建**：修改控制器后需要重新运行 build
+
+```bash
+pnpm build-electron  # 重新构建以更新 registry
+```
+
+---
+
+## IPC 通道不响应
+
+### 错误信息
+
+渲染进程调用 IPC 通道后返回 `undefined`，或长时间无响应。
+
+### 原因分析
+
+1. **channelSeparator 配置不匹配**：渲染进程使用的分隔符与配置不一致
+2. **控制器方法不是 async**：同步方法在 invoke/handle 模式中可能未正确返回
+3. **preload bridge 配置错误**：preload 脚本未正确暴露 IPC 方法
+
+### 修复方法
+
+1. **确认 channelSeparator 配置**
+
+```javascript
+// config.default.js
+module.exports = {
+  mainServer: {
+    channelSeparator: '/',  // 默认值
+  },
+};
+
+// 渲染进程调用必须使用一致的分隔符
+ipcRenderer.invoke('controller/user/add');  // '/' 分隔
+// 如果 channelSeparator 改为 '.', 则：
+// ipcRenderer.invoke('controller.user.add');
+```
+
+2. **控制器方法返回值**
+
+```javascript
+// 正确：async 方法通过 invoke 返回
+class UserController {
+  async add(args) {
+    return { success: true };  // 必须有返回值
+  }
+}
+
+// 错误：方法没有返回值
+class UserController {
+  async add(args) {
+    console.log('add user');  // 没有 return → invoke 返回 undefined
+  }
+}
+```
+
+3. **preload bridge 检查**
+
+```javascript
+// preload/bridge.js - 确保 contextBridge 正确暴露 API
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  addUser: (params) => ipcRenderer.invoke('controller/user/add', params),
+});
+```
+
+---
+
+## 前端加载失败
+
+### 错误信息
+
+```
+Please check the http://localhost:8080 !
+```
+
+或窗口显示 `failure.html` 失败页面。
+
+### 原因分析
+
+1. **前端开发服务器未启动**：`pnpm dev` 未先启动前端
+2. **端口配置不匹配**：cmd/bin.js 中的前端端口与实际端口不一致
+3. **force 模式配置**：前端未就绪时强制加载导致页面空白
+
+### 修复方法
+
+1. **确保前端先启动**
+
+```bash
+# 完整 dev 流程（前端 + Electron 同时启动）
+pnpm dev
+
+# 或分别启动
+pnpm dev-frontend  # 先启动前端
+pnpm dev-electron   # 再启动 Electron
+```
+
+2. **检查端口配置**
+
+```javascript
+// cmd/bin.js - 前端端口配置
+dev: {
+  frontend: {
+    protocol: 'http://',
+    hostname: 'localhost',
+    port: 8080,  // 确保与 Vite 实际端口一致
+  },
+},
+```
+
+<Note>
+Vite 默认端口为 5173 而非 8080。如果 Vite 配置了自定义端口，需要在 cmd/bin.js 中同步修改。
+</Note>
+
+3. **force 模式说明**
+
+```javascript
+// cmd/bin.js
+dev: {
+  frontend: {
+    force: true,  // 前端未就绪时也尝试加载（仅重试 3 次）
+    // force: false  → 等待 60 秒，超时显示失败页面
+  },
+},
+```
+
+---
+
+## 跨进程服务启动失败
+
+### 错误信息
+
+```
+[ee-core] Please check cross service [goServer] http://127.0.0.1:7072 !
+```
+
+或窗口显示 `cross-failure.html` 页面。
+
+### 原因分析
+
+1. **可执行文件不存在**：Go/Python 编译产物不在正确位置
+2. **端口冲突**：指定端口已被其他服务占用
+3. **enable 配置错误**：cross 配置中 enable 未设为 true
+4. **工作目录错误**：directory 配置指向不存在的目录
+
+### 修复方法
+
+1. **编译 Go/Python 程序**
+
+```bash
+# 编译 Go 程序
+cd go
+go build -o go_server .
+
+# 确保 go_server 在正确位置
+ls go/go_server
+```
+
+2. **检查 cross 配置**
+
+```javascript
+// config.default.js - 确保 enable 为 true
+module.exports = {
+  cross: {
+    goServer: {
+      enable: true,          // 必须为 true
+      name: 'goServer',
+      cmd: 'go_server',      // 可执行文件名
+      directory: 'go',       // 工作目录（开发环境相对于项目根目录）
+      args: ['-port', '7072'],
+      appExit: true,
+    },
+  },
+  mainServer: {
+    takeover: 'goServer',    // 接管服务名称必须与 cross 配置的 key 一致
+  },
+};
+```
+
+3. **检查端口冲突**
+
+```bash
+# 检查端口占用
+lsof -i :7072  # macOS/Linux
+netstat -ano | findstr 7072  # Windows
+
+# 更换端口或清理占用进程
+```
+
+---
+
+## 日志目录权限问题
+
+### 错误信息
+
+```
+Error: EACCES: permission denied, open '/path/to/logs/app.log'
+```
+
+### 原因分析
+
+1. **打包后日志目录路径变化**：生产环境中日志目录可能指向受限位置
+2. **loadDir() 创建目录失败**：数据目录没有写入权限
+
+### 修复方法
+
+1. **检查日志和数据目录**
+
+```javascript
+// ee-core 使用 Electron 的 userData 目录存储日志和数据
+// macOS: ~/Library/Application Support/AppName/
+// Windows: C:\Users\Username\AppData\Roaming\AppName\
+// Linux: ~/.config/AppName/
+
+// 手动检查目录权限
+console.log('userData:', app.getPath('userData'));
+console.log('logsDir:', app.getPath('userData') + '/logs/');
+```
+
+2. **确保 loadDir() 正常工作**
+
+ee-core 的 `loadDir()` 在启动时自动创建必要的目录（logs、data/db）。如果创建失败，检查 userData 路径的权限。
+
+<Note>
+打包后的应用使用 Electron 的 userData 目录，而非项目根目录。日志和数据文件都会存储在 userData 下。
+</Note>
+
+---
+
+## 字节码编译失败
+
+### 错误信息
+
+```
+[ee-bin] [encrypt] Bytecode compilation failed: /path/to/file.jsc was not created, keeping source /path/to/file.js
+```
+
+### 原因分析
+
+1. **Electron 版本不匹配**：编译时的 V8 版本与目标 Electron 版本不一致
+2. **bytenode 配置问题**：bytecodeOptions 中 `electron: true` 未设置
+3. **文件路径问题**：目标文件路径包含特殊字符或路径过长
+
+### 修复方法
+
+1. **确保 Electron 版本一致**
+
+```bash
+# 检查当前 Electron 版本
+node -e "console.log(process.versions.v8)"
+
+# 确保编译时使用的 Electron 版本与运行时一致
+# bytenode 要求编译和运行在同一 V8 版本下
+```
+
+2. **检查 bytecodeOptions 配置**
+
+```javascript
+// cmd/bin.js - 加密配置
+encrypt: {
+  electron: {
+    type: 'bytecode',
+    files: ['./public/electron/**/*.js'],
+    bytecodeOptions: {
+      electron: true,  // 必须设置为 true，使用 Electron 的 V8 版本编译
+    },
+  },
+},
+```
+
+<Warning>
+`bytecodeOptions.electron: true` 是关键配置。bytenode 默认使用 Node.js 的 V8 编译，而 Electron 的 V8 版本可能与系统 Node.js 不同。设置为 true 会使用 Electron 的 V8 版本编译字节码，确保兼容性。
+</Warning>
+
+3. **安全机制说明**
+
+ee-bin 的 Encrypt 模块在编译后会验证 .jsc 文件是否成功生成：
+
+```javascript
+// encrypt.ts - 安全检查
+if (fs.existsSync(jscFile)) {
+  fs.unlinkSync(curPath);  // .jsc 存在 → 删除 .js 源文件
+} else {
+  throw new Error(`Bytecode compilation failed: ${jscFile} was not created, keeping source ${curPath}`);
+  // .jsc 不存在 → 保留 .js 源文件，防止代码丢失
+}
+```
+
+<Note>
+编译失败时源文件会被保留，不会丢失代码。但应用会以未加密的源代码形式运行，需要重新排查编译失败原因。
+</Note>
+
+---
+
+## 常见错误快速排查表
+
+| 错误现象 | 可能原因 | 快速检查 |
+|---------|---------|---------|
+| IPC 返回 undefined | 控制器方法无返回值 | 检查方法是否有 `return` |
+| IPC 返回 undefined | 通道路径错误 | 检查大小写和分隔符 |
+| 页面空白/白屏 | show: false 未配合 loadFile | 检查 windowsOption.show 配置 |
+| 前端加载失败 | 端口不匹配 | 检查 cmd/bin.js 前端端口配置 |
+| 跨进程服务失败 | 可执行文件不存在 | 检查 extraResources 和 cross 配置 |
+| better-sqlite3 错误 | 原生模块未重新编译 | 运行 `pnpm re-sqlite` |
+| 字节码加载失败 | V8 版本不匹配 | 检查 bytecodeOptions.electron |
+| 日志写入失败 | 目录权限问题 | 检查 userData 目录权限 |
+| pnpm install 失败 | 构建脚本被忽略 | 运行 `pnpm approve-builds` |
+| package.json main 错误 | build 中断未恢复 | 手动修复 package.json main 字段 |

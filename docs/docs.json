@@ -1,0 +1,178 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "almond",
+  "name": "electron-egg",
+  "description": "入门简单、跨平台、企业级桌面软件开发框架文档",
+  "colors": {
+    "primary": "#166E3F",
+    "light": "#26BD6C",
+    "dark": "#166E3F"
+  },
+  "favicon": "/favicon.ico",
+  "icons": {
+    "library": "lucide"
+  },
+  "styling": {
+    "eyebrows": "breadcrumbs"
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "assistant",
+      "mcp",
+      "add-mcp"
+    ]
+  },
+  "navigation": {
+    "global": {
+      "anchors": [
+        {
+          "anchor": "主页",
+          "icon": "house",
+          "href": "/"
+        },
+        {
+          "anchor": "GitHub",
+          "icon": "github",
+          "href": "https://github.com/dromara/electron-egg"
+        },
+        {
+          "anchor": "社区交流",
+          "icon": "message-circle",
+          "href": "https://www.kaka996.com/pages/c2720e/"
+        }
+      ]
+    },
+    "directory": "card",
+    "groups": [
+      {
+        "group": "快速开始",
+        "icon": "rocket",
+        "expanded": true,
+        "pages": [
+          "getting-started/introduction",
+          "getting-started/installation",
+          "getting-started/quickstart",
+          "getting-started/project-structure",
+          "getting-started/troubleshooting"
+        ]
+      },
+      {
+        "group": "核心概念",
+        "icon": "brain",
+        "expanded": true,
+        "pages": [
+          "concepts/startup-lifecycle",
+          "concepts/configuration-pipeline",
+          "concepts/controller-loading",
+          "concepts/bundle-vs-dev",
+          "concepts/ipc-communication",
+          "concepts/lifecycle-events"
+        ]
+      },
+      {
+        "group": "ee-core 运行框架",
+        "icon": "cpu",
+        "expanded": true,
+        "pages": [
+          "ee-core/app-module",
+          "ee-core/config-module",
+          "ee-core/controller-module",
+          "ee-core/loader-module",
+          "ee-core/electron-module",
+          "ee-core/socket-module",
+          "ee-core/log-module",
+          "ee-core/cross-module",
+          "ee-core/jobs-module",
+          "ee-core/storage-module",
+          "ee-core/utils-module",
+          "ee-core/ps-module",
+          "ee-core/types-reference"
+        ]
+      },
+      {
+        "group": "ee-bin 构建工具",
+        "icon": "wrench",
+        "expanded": true,
+        "pages": [
+          "ee-bin/cli-commands",
+          "ee-bin/dev-mode",
+          "ee-bin/build-mode",
+          "ee-bin/bundle-config",
+          "ee-bin/encryption",
+          "ee-bin/incremental-update",
+          "ee-bin/icon-generation",
+          "ee-bin/move-resources"
+        ]
+      },
+      {
+        "group": "通信服务",
+        "icon": "network",
+        "expanded": false,
+        "pages": [
+          "communication/ipc-server",
+          "communication/http-server",
+          "communication/socket-server",
+          "communication/cross-process"
+        ]
+      },
+      {
+        "group": "子进程与任务",
+        "icon": "cubes",
+        "expanded": false,
+        "pages": [
+          "jobs/child-job",
+          "jobs/child-pool-job",
+          "jobs/load-balancer",
+          "jobs/child-app"
+        ]
+      },
+      {
+        "group": "高级主题",
+        "icon": "graduation-cap",
+        "expanded": false,
+        "pages": [
+          "advanced/encryption-and-security",
+          "advanced/custom-middleware",
+          "advanced/remote-service",
+          "advanced/window-management",
+          "advanced/esm-support"
+        ]
+      },
+      {
+        "group": "常见问题",
+        "icon": "life-buoy",
+        "expanded": false,
+        "pages": [
+          "faq/pnpm-troubleshooting",
+          "faq/electron-packaging",
+          "faq/common-errors"
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/dromara/electron-egg"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "快速开始",
+      "href": "/getting-started/quickstart"
+    }
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/wallace5303",
+      "github": "https://github.com/dromara/electron-egg"
+    }
+  }
+}

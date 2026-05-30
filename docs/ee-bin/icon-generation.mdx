@@ -1,0 +1,259 @@
+---
+title: 图标生成
+description: ee-bin icon 命令详解：IconGen 工作流程、命令选项（input/output/size/clear/images）、PNG 到多尺寸图标生成、平台图标差异（.ico/.icns/.png）、系统托盘图标与窗口图标、默认路径和尺寸。
+---
+
+ee-bin 的 `icon` 命令从源图片（通常是 PNG）生成各平台所需的图标文件，包括 Windows 的 `.ico`、macOS 的 `.icns`、Linux 的多尺寸 `.png`，以及 Electron 的系统托盘和窗口图标。
+
+## 命令选项
+
+```bash
+ee-bin icon
+ee-bin icon -i ./public/images/logo.png
+ee-bin icon -i ./logo.png -o ./build/icons/ -s 16,32,64,256,512 -c
+ee-bin icon -m ./public/images/
+```
+
+| 选项 | CLI 参数 | 类型 | 默认值 | 说明 |
+|------|----------|------|--------|------|
+| 源图片 | `-i, --input` | string | `/public/images/logo.png` | 源图片文件路径（推荐高分辨率 PNG） |
+| 输出目录 | `-o, --output` | string | `/build/icons/` | 图标文件输出目录 |
+| 图标尺寸 | `-s, --size` | string | `16,32,64,256,512` | 逗号分隔的图标尺寸列表 |
+| 清除目录 | `-c, --clear` | boolean | false | 生成前清除输出目录中的 .ico/.png 文件 |
+| 托盘/窗口图标 | `-m, --images` | string | `/public/images/` | Windows 窗口图标和系统托盘图标的输出路径 |
+
+<Note>
+`icon-gen` 是可选依赖。如果未安装，ee-bin 会提示安装命令：
+
+```bash
+pnpm add icon-gen
+```
+
+`icon-gen` 未安装时，图标生成命令不会执行。
+</Note>
+
+## IconGen 工作流程
+
+<Steps>
+### 检查依赖
+
+检查 `icon-gen` 包是否已安装。未安装时打印提示信息并退出。
+
+```js
+if (!this.icongen) {
+  console.log('[ee-bin] [icon-gen] icon-gen is not installed.');
+  console.log('[ee-bin] [icon-gen] Please run: pnpm add icon-gen');
+  return;
+}
+```
+
+### 验证源图片
+
+检查输入文件是否存在。不存在时报错退出。
+
+```js
+if (!fs.existsSync(this.input)) {
+  throw new Error('Input image does not exist or path is invalid: ' + this.input);
+}
+```
+
+### 准备输出目录
+
+确保输出目录和 images 目录存在。如果 `--clear` 为 true，清除输出目录中的 `.ico` 和 `.png` 文件。
+
+```js
+if (!fs.existsSync(this.output)) {
+  fs.mkdirSync(this.output, { recursive: true });
+} else if (this.params.clear) {
+  this.deleteGenFile(this.output);
+}
+```
+
+清除操作只删除 `.ico` 和 `.png` 文件，保留其他文件和空目录。
+
+### 生成图标
+
+调用 `icon-gen` 生成图标文件，配置如下：
+
+```js
+iconOptions = {
+  report: false,
+  ico: {
+    name: 'icon',         // 输出文件名: icon.ico
+    sizes: [256],          // ICO 内包含 256px 图标
+  },
+  favicon: {
+    name: 'logo-',        // 输出文件名前缀: logo-{size}.png
+    pngSizes: sizeList,   // 各尺寸 PNG
+  },
+};
+```
+
+生成的文件：
+- `build/icons/icon.ico` — Windows 安装包和任务栏图标
+- `build/icons/logo-16.png` — 16px PNG
+- `build/icons/logo-32.png` — 32px PNG
+- `build/icons/logo-64.png` — 64px PNG
+- `build/icons/logo-256.png` — 256px PNG
+- `build/icons/logo-512.png` — 512px PNG（如果指定了 512 尺寸）
+
+### 后处理重命名
+
+`_renameForEE()` 方法按照 electron-egg 的命名约定重命名和复制图标：
+
+- **16px** → 复制到 `public/images/tray.png`（系统托盘图标），删除原 `logo-16.png`
+- **32px** → 复制到 `public/images/logo-32.png`（窗口图标），保留原文件
+- 其他尺寸 → 重命名为 `{N}x{N}.png` 格式（如 `64x64.png`、`256x256.png`）
+</Steps>
+
+## 平台图标差异
+
+不同平台需要不同的图标格式和尺寸：
+
+<Tabs>
+<Tab title="Windows">
+- **安装包图标**: `icon.ico`（包含 256px 图标）
+- **任务栏图标**: 从 `.ico` 文件自动提取
+- **窗口图标**: `public/images/logo-32.png`（32px）
+- **系统托盘图标**: `public/images/tray.png`（16px）
+
+`.ico` 格式是 Windows 的标准图标格式，包含多个尺寸的图标数据。electron-builder 使用 `icon.ico` 作为安装包和应用的图标。
+</Tab>
+<Tab title="macOS">
+- **应用图标**: macOS 需要 `.icns` 格式（icon-gen 生成）
+- **Dock 图标**: 从 `.icns` 自动提取
+- **窗口图标**: `public/images/logo-32.png`（32px）
+
+<Note>
+icon-gen 会自动生成 `.icns` 文件。macOS 的 `.icns` 格式包含多个分辨率图层（包括 Retina 2x），electron-builder 使用它作为 `.app` 包的图标。
+</Note>
+
+macOS 的系统托盘图标同样使用 16px 的 `tray.png`。
+</Tab>
+<Tab title="Linux">
+- **应用图标**: 多尺寸 PNG 文件（`NxN.png` 格式）
+- **窗口图标**: `public/images/logo-32.png`（32px）
+- **系统托盘图标**: `public/images/tray.png`（16px）
+
+Linux 不使用 `.ico` 或 `.icns`，依赖多尺寸 PNG 文件。electron-builder 会从 PNG 图标集生成各桌面环境所需的图标。
+</Tab>
+</Tabs>
+
+## 默认路径和尺寸
+
+ee-bin 使用以下默认路径：
+
+| 资源 | 默认路径 | 说明 |
+|------|----------|------|
+| 源图片 | `/public/images/logo.png` | 项目自带的应用 Logo |
+| 图标输出目录 | `/build/icons/` | electron-builder 读取此目录的图标 |
+| 托盘/窗口图标目录 | `/public/images/` | ee-core 运行时加载此目录的图标 |
+
+默认尺寸列表：`16, 32, 64, 256, 512`
+
+### 图标用途对照
+
+| 尺寸 | 文件名 | 用途 |
+|------|--------|------|
+| 16px | `public/images/tray.png` | 系统托盘图标（Tray） |
+| 32px | `public/images/logo-32.png` | 窗口图标（BrowserWindow icon） |
+| 64px | `build/icons/64x64.png` | Linux 应用图标 |
+| 256px | `build/icons/256x256.png` | Windows ICO 内嵌 / macOS Retina |
+| 512px | `build/icons/512x512.png` | 高分辨率图标 |
+
+## 系统托盘图标
+
+16px 的图标被复制为 `public/images/tray.png`，用于 Electron 的系统托盘（Tray）：
+
+```js
+// ee-core 中 Tray 图标的加载方式
+const trayIconPath = path.join(appDir, 'public/images/tray.png');
+const tray = new Tray(trayIconPath);
+```
+
+系统托盘图标需要较小尺寸（通常 16px 或 24px），以便在任务栏通知区域正确显示。
+
+## 窗口图标
+
+32px 的图标被复制到 `public/images/` 目录，用于 BrowserWindow 的窗口图标：
+
+```js
+// ee-core 中窗口图标的加载方式
+const windowIconPath = path.join(appDir, 'public/images/logo-32.png');
+new BrowserWindow({ icon: windowIconPath });
+```
+
+<Note>
+Windows 平台上，BrowserWindow 的 `icon` 属性优先使用 `.ico` 文件。Linux 和 macOS 使用 PNG 图标。electron-builder 的 `icon.ico` 用于安装包和应用快捷方式。
+</Note>
+
+## 清除输出目录
+
+使用 `--clear` 选项在生成前清除输出目录中的旧图标：
+
+```bash
+ee-bin icon -c
+```
+
+清除操作只删除 `.ico` 和 `.png` 文件，不影响其他文件类型：
+
+```js
+deleteGenFile(dirPath) {
+  const files = fs.readdirSync(dirPath);
+  for (const file of files) {
+    if (['.ico', '.png'].includes(path.extname(curPath))) {
+      fs.unlinkSync(curPath);
+    }
+  }
+}
+```
+
+## 自定义图标尺寸
+
+可以通过 `--size` 选项自定义生成尺寸：
+
+```bash
+# 只生成 16 和 256 尺寸（最小集）
+ee-bin icon -s 16,256
+
+# 生成更多尺寸
+ee-bin icon -s 16,24,32,48,64,128,256,512
+```
+
+<Warning>
+16px 和 32px 是框架必需尺寸（分别用于托盘图标和窗口图标）。如果尺寸列表中不包含这两个尺寸，`_renameForEE()` 不会生成 `tray.png` 和窗口图标。
+</Warning>
+
+## 完整示例
+
+### 基本用法
+
+```bash
+# 使用默认配置生成图标
+ee-bin icon
+```
+
+输出：
+```
+[ee-bin] [icon-gen] Start generating logo images
+[ee-bin] [icon-gen] Generated image resources: [...]
+[ee-bin] [icon-gen] logo-16.png --> /public/images/tray.png copied successfully!
+[ee-bin] [icon-gen] logo-32.png --> /public/images/logo-32.png copied successfully!
+[ee-bin] [icon-gen] logo-64.png --> 64x64.png renamed successfully!
+[ee-bin] [icon-gen] logo-256.png --> 256x256.png renamed successfully!
+[ee-bin] [icon-gen] Image resource processing completed!
+```
+
+### 自定义配置
+
+```bash
+# 使用自定义源图片，清除旧图标，生成特定尺寸
+ee-bin icon -i ./assets/app-logo.png -o ./build/icons/ -s 16,32,256,512 -c
+```
+
+### 更新托盘图标路径
+
+```bash
+# 修改托盘和窗口图标输出目录
+ee-bin icon -m ./public/assets/
+```

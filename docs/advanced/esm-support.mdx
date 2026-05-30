@@ -1,0 +1,335 @@
+---
+title: ESM 支持
+description: runAsync() 异步启动、loadControllerAsync() 动态 import()、loadFileAsync() 异步文件加载、FileLoader.parseAsync()、ESM 项目配置及 CJS/ESM 混合兼容性
+---
+
+electron-egg 框架支持 ESM（ECMAScript Modules）模式运行，为使用 TypeScript 和 ESM 格式的项目提供完整的异步加载能力。框架同时保留了 CJS 同步模式，确保两种模式的平滑切换。
+
+## 异步 vs 同步启动
+
+<Tabs>
+  <Tab title="run() 同步启动（CJS）">
+    默认启动模式，使用 `require()` 加载控制器：
+
+    ```javascript
+    // electron/main.js
+    const { ElectronEgg } = require('ee-core');
+    const electronEgg = new ElectronEgg();
+    electronEgg.register('ready', () => { console.log('App ready'); });
+    await electronEgg.run();
+    ```
+
+    启动流程：
+    ```
+    ElectronEgg.run() → Application.run()
+                      → loadController() (同步 require)
+                      → loadSocket()
+                      → emitLifecycle(Ready)
+                      → loadElectron()
+    ```
+  </Tab>
+  <Tab title="runAsync() 异步启动（ESM）">
+    ESM 启动模式，使用 `import()` 动态加载控制器：
+
+    ```javascript
+    // electron/main.js (ESM)
+    import { ElectronEgg } from 'ee-core';
+    const electronEgg = new ElectronEgg();
+    electronEgg.register('ready', () => { console.log('App ready'); });
+    await electronEgg.runAsync();
+    ```
+
+    启动流程：
+    ```
+    ElectronEgg.runAsync() → Application.runAsync()
+                            → loadControllerAsync() (异步 import)
+                            → loadSocket()
+                            → emitLifecycle(Ready)
+                            → loadElectron()
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+两种启动模式的区别仅在控制器加载步骤：`run()` 使用同步 `require()`，`runAsync()` 使用异步 `import()`。后续的 loadSocket、emitLifecycle、loadElectron 流程完全一致。
+</Note>
+
+## loadControllerAsync()
+
+异步控制器加载使用 `FileLoader.loadAsync()` + `ControllerLoader.loadAsync()`：
+
+```javascript
+// controller/index.ts
+export async function loadControllerAsync(): Promise<Record<string, unknown>> {
+  const loader = new ControllerLoader();
+  return loader.loadAsync();
+}
+```
+
+### ControllerLoader.loadAsync()
+
+```javascript
+async loadAsync(): Promise<Record<string, unknown>> {
+  this.timing.start('Load Controller');
+
+  const registry = globalThis.__EE_CONTROLLER_REGISTRY__;
+  const opt = {
+    caseStyle: 'lower',
+    directory: path.join(getElectronDir(), 'controller'),
+    ...(registry ? { registry } : {}),
+    initializer: (obj, options) => {
+      // 类控制器包装逻辑（与同步模式相同）
+    },
+  };
+
+  // 使用 FileLoader.loadAsync() 异步加载
+  const target = await new FileLoader(opt).loadAsync();
+  this.timing.end('Load Controller');
+  return target;
+}
+```
+
+<Note>
+在 bundle 模式下（registry 存在），loadAsync() 和 load() 的行为相同——都从 registry 加载。只有在非 bundle 的 ESM 开发模式下，两者才有区别：loadAsync() 使用 `import()` 而 load() 使用 `require()`。
+</Note>
+
+## loadFileAsync() 异步文件加载
+
+`loadFileAsync()` 是 `loadFile()` 的异步版本，使用 `import()` 动态加载模块：
+
+```javascript
+// core/utils/index.ts
+export async function loadFileAsync(filepath: string): Promise<unknown> {
+  try {
+    const extname = path.extname(filepath);
+
+    // 非 JS/ESM 文件：使用 fs.promises.readFile
+    if (extname && !extensions[extname] && extname !== '.mjs') {
+      return fs.promises.readFile(filepath);
+    }
+
+    // 动态 import，支持 ESM 和 CJS
+    const obj = await import(filepath);
+    if (!obj) return obj;
+
+    // ESM interop：提取 default 导出
+    if (obj.__esModule) return 'default' in obj ? obj.default : obj;
+    return obj;
+  } catch (err) {
+    error.message = `[ee-core] load file async: ${filepath}, error: ${error.message}`;
+    throw error;
+  }
+}
+```
+
+### 与 loadFile() 的区别
+
+| 特性 | loadFile() | loadFileAsync() |
+|------|-----------|-----------------|
+| 加载方式 | `require()` | `import()` |
+| 支持格式 | CJS、.jsc | CJS、ESM、.mjs |
+| 异步 | 否 | 是 |
+| 文件读取 | `fs.readFileSync` | `fs.promises.readFile` |
+| 适用模式 | CJS 同步启动 | ESM 异步启动 |
+
+<Warning>
+`loadFileAsync()` 使用 `import()` 加载模块，该函数是异步的。在 CJS 同步启动流程中不能使用 loadFileAsync()，否则会导致启动顺序问题。
+</Warning>
+
+## FileLoader.parseAsync()
+
+FileLoader 提供三种加载方法：
+
+| 方法 | 加载方式 | 适用场景 |
+|------|---------|---------|
+| `parse()` | globby.sync + require() | CJS 开发模式 |
+| `parseFromRegistry()` | 直接读取 registry | Bundle 模式 |
+| `parseAsync()` | globby async + import() | ESM 开发模式 |
+
+### parseAsync() 实现
+
+```javascript
+async parseAsync(): Promise<LoaderItem[]> {
+  let files = this.options.match || filePatterns();
+  let directories = Array.isArray(this.options.directory)
+    ? this.options.directory
+    : [this.options.directory];
+
+  const items: LoaderItem[] = [];
+
+  for (const directory of directories) {
+    // 使用 globby 异步扫描
+    const filepaths = await globby(files, { cwd: directory });
+
+    for (const filepath of filepaths) {
+      const fullpath = path.join(directory, filepath);
+      const stat = await fs.promises.stat(fullpath);
+      if (!stat.isFile()) continue;
+
+      const properties = getProperties(filepath, { caseStyle: this.options.caseStyle });
+      const dirName = directory.split(/[/\\]/).slice(-1)[0];
+
+      // 使用 loadFileAsync() 异步加载
+      const exports = await loadFileAsync(fullpath);
+
+      const item = this._processExport(exports, fullpath, properties, dirName);
+      if (item) items.push(item);
+    }
+  }
+
+  return items;
+}
+```
+
+## ESM 项目配置
+
+### package.json 配置
+
+```json
+{
+  "name": "my-esm-app",
+  "type": "module",
+  "main": "electron/main.ts",
+  "scripts": {
+    "dev": "ee-bin dev",
+    "build-electron": "ee-bin build --cmds=electron"
+  }
+}
+```
+
+<Warning>
+设置 `"type": "module"` 后，所有 `.js` 文件都被视为 ESM。如果项目中同时存在 CJS 和 ESM 文件，需要使用 `.cjs` 扩展名明确标记 CJS 文件。
+</Warning>
+
+### build 配置（cmd/bin.js）
+
+```javascript
+// cmd/bin.js - ESM bundle 配置
+module.exports = {
+  build: {
+    electron: {
+      bundleType: 'bundle',
+      format: 'esm',       // ESM 输出格式
+      sourcemap: 'inline',
+      minify: false,
+      external: [],
+    },
+  },
+};
+```
+
+<Note>
+ESM 输出格式要求所有业务代码（控制器、服务、配置）为 ESM 兼容格式。如果项目中存在 CJS 代码（如 `require()`、`module.exports`），建议使用 `format: 'cjs'`。
+</Note>
+
+### Electron 入口文件（ESM）
+
+```javascript
+// electron/main.ts
+import { ElectronEgg } from 'ee-core';
+
+const electronEgg = new ElectronEgg();
+electronEgg.register('ready', () => {
+  console.log('应用已就绪');
+});
+
+// ESM 模式必须使用 runAsync()
+await electronEgg.runAsync();
+```
+
+<Warning>
+ESM 项目必须使用 `runAsync()` 启动。`run()` 使用同步 `require()` 加载控制器，在 ESM 环境下无法正确加载 `.mjs` 或标记为 ESM 的 `.js` 文件。
+</Warning>
+
+### ESM 控制器文件
+
+```typescript
+// electron/controller/user.ts
+export class UserController {
+  async add(args: Record<string, unknown>) {
+    return { success: true, data: args };
+  }
+
+  async get(args: Record<string, unknown>) {
+    return { name: args.name, version: '1.0.0' };
+  }
+}
+```
+
+<Note>
+ESM 控制器文件使用 `export` 导出类或函数，而非 `module.exports`。ee-core 的 FileLoader 支持两种导出格式的自动识别。
+</Note>
+
+## CJS/ESM 混合项目兼容性
+
+### 混合项目场景
+
+项目中可能同时存在 CJS 和 ESM 文件：
+
+- **配置文件**：`config.default.js`（CJS，使用 `module.exports`）
+- **控制器文件**：`controller/user.ts`（ESM，使用 `export`）
+- **服务文件**：`service/db.js`（CJS，使用 `require`）
+
+### 混合模式注意事项
+
+1. **入口文件决定启动模式**：
+   - `electron/main.js`（CJS） → 使用 `run()`
+   - `electron/main.ts`（ESM） → 使用 `runAsync()`
+
+2. **Bundle 格式选择**：
+   - CJS 入口 → `format: 'cjs'`（推荐）
+   - ESM 入口 → `format: 'esm'`
+
+3. **文件扩展名**：
+   - `.js` 文件在 `"type": "module"` 项目中被视为 ESM
+   - `.cjs` 文件始终被视为 CJS
+   - `.mjs` 文件始终被视为 ESM
+   - `.ts` 文件由 esbuild 处理，不受 `type` 字段影响
+
+4. **ESM 导入必须包含扩展名**：
+   ```typescript
+   // ee-core 源码中的 ESM 导入（Module: NodeNext 要求）
+   import { X } from './foo.js';     // 正确
+   import { X } from './foo';        // 错误
+   ```
+
+<Warning>
+ee-core 源码中的 ESM 导入必须包含 `.js` 扩展名（由 TypeScript `module: NodeNext` 配置要求）。这是 Node.js ESM 规范的一部分，不是可选的。
+</Warning>
+
+### Bundle 模式兼容性
+
+在 bundle 模式下，esbuild 将所有代码打包为单一输出文件，CJS 和 ESM 的区别主要体现在输出格式：
+
+| 配置 format | 输出格式 | 入口文件 | 兼容性 |
+|-------------|---------|---------|--------|
+| `cjs` | CommonJS | `main.js` | Electron 推荐 |
+| `esm` | ES Modules | `main.ts` | 需要所有代码 ESM 兼容 |
+
+<Note>
+Electron 主进程推荐使用 CJS 格式（`format: 'cjs'`）。ESM 格式在 Electron 中存在一些兼容性问题（如 `require` 不可用、`__dirname` 不可用等）。除非项目完全使用 ESM，建议保持 CJS 格式。
+</Note>
+
+## Bundle 模式自动检测
+
+esbuild 根据 Electron 入口文件自动检测输出格式：
+
+```javascript
+// ee-bin serve.ts - 格式检测
+const mainJsPath = path.join(cwd, ELECTRON_DIR, 'main.js');
+const mainTsPath = path.join(cwd, ELECTRON_DIR, 'main.ts');
+const isTypeScript = fs.existsSync(mainTsPath);  // TypeScript 入口 → 可能 ESM
+```
+
+- `main.js` 存在 → CJS 输出
+- `main.ts` 存在 → 由 `bundleConfig.format` 决定（默认 cjs）
+
+## 相关源码
+
+- `packages/ee-core/src/app/boot.ts` — ElectronEgg.run() 和 runAsync()
+- `packages/ee-core/src/app/application.ts` — Application.run() 和 runAsync()
+- `packages/ee-core/src/controller/controller_loader.ts` — ControllerLoader.loadAsync()
+- `packages/ee-core/src/controller/index.ts` — loadControllerAsync()
+- `packages/ee-core/src/core/loader/file_loader.ts` — FileLoader.parseAsync() 和 loadAsync()
+- `packages/ee-core/src/core/utils/index.ts` — loadFileAsync()
+- `packages/ee-bin/src/tools/serve.ts` — Bundle 格式检测

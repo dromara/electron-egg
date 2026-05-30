@@ -1,0 +1,362 @@
+---
+title: 自定义中间件
+description: HttpServer 的 koaConfig 配置支持自定义 preMiddleware（认证、日志）、postMiddleware（响应格式化）、errorHandler（错误处理）及内置扩展点（cors、koa-body、filterRequest）
+---
+
+HttpServer 基于 Koa 框架构建，提供了灵活的中间件配置机制。通过 `koaConfig` 配置，开发者可以在请求处理链的各个位置注入自定义中间件，实现认证、日志、响应格式化等功能。
+
+## 中间件链架构
+
+HttpServer 的中间件按固定顺序加载，形成完整的请求处理链：
+
+```
+请求 → errorHandler → preMiddleware → CORS → koa-body → _dispatch → postMiddleware → 响应
+```
+
+<Note>
+中间件加载顺序不可更改。preMiddleware 在 CORS 之前执行，postMiddleware 在 _dispatch 之后执行。这种设计确保了 CORS 和 koa-body 始终在正确的位置，而自定义中间件可以在它们之前或之后介入。
+</Note>
+
+## koaConfig 配置
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    koaConfig: {
+      preMiddleware: [],      // 前置中间件数组
+      postMiddleware: [],     // 后置中间件数组
+      errorHandler: null,     // 自定义错误处理函数
+    },
+  },
+};
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `preMiddleware` | `Function[]` | 在 CORS 之前执行的中间件 |
+| `postMiddleware` | `postMiddleware` | 在 _dispatch 之后执行的中间件 |
+| `errorHandler` | `Function` | 自定义 Koa 错误处理函数 |
+
+## preMiddleware 前置中间件
+
+前置中间件在 CORS 之前执行，适合拦截未授权请求、记录日志等：
+
+### 认证中间件
+
+```javascript
+// electron/middleware/auth.js
+function authMiddleware() {
+  return async (ctx, next) => {
+    const token = ctx.headers['authorization'];
+    if (!token) {
+      ctx.status = 401;
+      ctx.body = { error: 'Unauthorized' };
+      return;
+    }
+
+    // 验证 token
+    try {
+      const decoded = verifyToken(token);
+      ctx.state.user = decoded;  // 存储用户信息供后续使用
+    } catch (err) {
+      ctx.status = 401;
+      ctx.body = { error: 'Invalid token' };
+      return;
+    }
+
+    await next();
+  };
+}
+
+module.exports = authMiddleware;
+```
+
+### 日志中间件
+
+```javascript
+// electron/middleware/logging.js
+function loggingMiddleware() {
+  return async (ctx, next) => {
+    const startTime = Date.now();
+    console.log(`[HTTP] ${ctx.method} ${ctx.url} - Request`);
+
+    await next();
+
+    const duration = Date.now() - startTime;
+    console.log(`[HTTP] ${ctx.method} ${ctx.url} - ${ctx.status} (${duration}ms)`);
+  };
+}
+
+module.exports = loggingMiddleware;
+```
+
+### 配置使用
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    koaConfig: {
+      preMiddleware: [
+        require('../middleware/auth'),
+        require('../middleware/logging'),
+      ],
+    },
+  },
+};
+```
+
+<Note>
+中间件可以是工厂函数（调用后返回 `(ctx, next) => {}` 风格 Koa 中间件）或直接中间件函数。HttpServer 会对无效中间件（非函数类型）输出警告并跳过。
+</Note>
+
+## postMiddleware 后置中间件
+
+后置中间件在 _dispatch 之后执行，适合响应格式化、数据脱敏等：
+
+### 响应格式化中间件
+
+```javascript
+// electron/middleware/responseFormatter.js
+function responseFormatter() {
+  return async (ctx, next) => {
+    await next();
+
+    // 只对成功的请求进行格式化
+    if (ctx.status >= 200 && ctx.status < 300 && ctx.body) {
+      ctx.body = {
+        code: ctx.status,
+        data: ctx.body,
+        timestamp: Date.now(),
+        message: 'success',
+      };
+    }
+  };
+}
+
+module.exports = responseFormatter;
+```
+
+### 数据脱敏中间件
+
+```javascript
+// electron/middleware/sanitize.js
+function sanitizeMiddleware() {
+  return async (ctx, next) => {
+    await next();
+
+    if (ctx.body && typeof ctx.body === 'object') {
+      // 脱敏处理
+      ctx.body = sanitizeSensitiveData(ctx.body);
+    }
+  };
+}
+
+function sanitizeSensitiveData(data) {
+  const sensitiveFields = ['password', 'token', 'secret'];
+  const result = { ...data };
+  for (const field of sensitiveFields) {
+    if (result[field]) {
+      result[field] = '***';
+    }
+  }
+  return result;
+}
+
+module.exports = sanitizeMiddleware;
+```
+
+## errorHandler 自定义错误处理
+
+Koa 默认将错误输出到 stderr，通过 `errorHandler` 可以自定义错误处理逻辑：
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    koaConfig: {
+      errorHandler: (err) => {
+        // 记录详细错误信息
+        coreLogger.error('[HTTP Server Error]', err.stack || err.message);
+
+        // 发送错误通知（可选）
+        // notifyAdmin(err);
+      },
+    },
+  },
+};
+```
+
+<Note>
+errorHandler 只处理 Koa 应用级别的错误（如中间件抛出的异常），不处理控制器方法内部的业务错误。控制器方法中的错误由 _dispatch 的 try-catch 处理，返回 500 + `{ error: 'Internal Server Error' }`。
+</Note>
+
+## 与 _dispatch 路由交互
+
+理解自定义中间件与核心路由分发中间件 `_dispatch` 的交互非常重要：
+
+### preMiddleware 与路由
+
+前置中间件在路由分发之前执行，可以阻止请求进入控制器：
+
+```javascript
+// IP 限制中间件
+function ipRestrictionMiddleware() {
+  return async (ctx, next) => {
+    const allowedIPs = ['127.0.0.1', '192.168.1.100'];
+    const clientIP = ctx.request.ip;
+
+    if (!allowedIPs.includes(clientIP)) {
+      ctx.status = 403;
+      ctx.body = { error: 'Access denied' };
+      return;  // 不调用 next()，请求不会进入 _dispatch
+    }
+
+    await next();  // 允许请求继续
+  };
+}
+```
+
+### postMiddleware 与路由
+
+后置中间件在控制器方法执行之后运行，可以修改控制器返回的响应：
+
+```javascript
+// 响应头中间件
+function headersMiddleware() {
+  return async (ctx, next) => {
+    await next();
+
+    // 为所有响应添加安全头
+    ctx.set('X-Content-Type-Options', 'nosniff');
+    ctx.set('X-Frame-Options', 'DENY');
+    ctx.set('X-XSS-Protection', '1; mode=block');
+  };
+}
+```
+
+## 内置中间件扩展点
+
+HttpServer 内置了三个中间件，开发者可以通过配置扩展它们：
+
+### CORS 跨域配置
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    cors: {
+      origin: '*',                                    // 允许所有来源
+      allowMethods: ['GET', 'POST', 'PUT', 'DELETE'], // 允许的 HTTP 方法
+      allowHeaders: ['Content-Type', 'Authorization'], // 允许的请求头
+      exposeHeaders: ['X-Custom-Header'],             // 暴露的响应头
+      maxAge: 86400,                                  // 预检请求缓存时间
+      credentials: true,                              // 允许携带凭证
+    },
+  },
+};
+```
+
+<Warning>
+生产环境中 `origin: '*'` 可能存在安全风险。建议限制为具体的域名列表，如 `origin: ['https://yourapp.com']`。
+</Warning>
+
+### koa-body 请求体解析配置
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    body: {
+      multipart: true,           // 支持 multipart/form-data
+      formidable: {
+        maxFileSize: 200 * 1024 * 1024,  // 最大文件大小 200MB
+        uploadDir: '/tmp/uploads',       // 临时上传目录
+        keepExtensions: true,            // 保持文件扩展名
+      },
+      jsonLimit: '10mb',         // JSON 请求体大小限制
+      formLimit: '10mb',         // 表单请求体大小限制
+      textLimit: '10mb',         // 文本请求体大小限制
+    },
+  },
+};
+```
+
+### filterRequest 拦截配置
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    filterRequest: {
+      uris: [
+        'favicon.ico',       // 过滤浏览器自动请求
+        '/',                 // 过滤根路径
+        'robots.txt',        // 过滤爬虫请求
+      ],
+      returnData: {
+        status: 'ok',
+        version: '1.0.0',
+      },
+    },
+  },
+};
+```
+
+## 完整配置示例
+
+```javascript
+// config.default.js - HttpServer 完整中间件配置
+module.exports = {
+  httpServer: {
+    enable: true,
+    host: '127.0.0.1',
+    port: 7070,
+    protocol: 'http://',
+
+    cors: {
+      origin: ['https://yourapp.com'],
+      allowMethods: ['GET', 'POST'],
+      credentials: true,
+    },
+
+    body: {
+      multipart: true,
+      formidable: {
+        maxFileSize: 50 * 1024 * 1024,
+      },
+    },
+
+    filterRequest: {
+      uris: ['favicon.ico', '/'],
+      returnData: { status: 'ok' },
+    },
+
+    koaConfig: {
+      preMiddleware: [
+        require('../middleware/auth'),
+        require('../middleware/logging'),
+      ],
+      postMiddleware: [
+        require('../middleware/responseFormatter'),
+        require('../middleware/headers'),
+      ],
+      errorHandler: (err) => {
+        coreLogger.error('[HTTP Error]', err);
+      },
+    },
+
+    https: {
+      enable: false,
+      key: '',
+      cert: '',
+    },
+  },
+};
+```
+
+## 相关源码
+
+- `packages/ee-core/src/socket/httpServer.ts` — HttpServer 中间件加载逻辑
+- `packages/ee-core/src/socket/utils.ts` — resolveControllerFn 工具函数

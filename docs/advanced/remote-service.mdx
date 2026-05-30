@@ -1,0 +1,324 @@
+---
+title: 远程服务
+description: remote 配置启用远程 URL 加载、WebSocket 远程控制面板、远程调试场景、与 SocketServer 集成及远程通信安全（CORS、认证）
+---
+
+electron-egg 框架的远程服务功能支持将 Electron 应用连接到远程服务器，实现远程控制面板、远程调试和跨网络服务集成。通过 `remote` 配置和 SocketServer，开发者可以构建远程管理、远程协作等场景。
+
+## remote 配置
+
+`remote` 配置允许 Electron 窗口直接加载远程 URL，而非本地文件：
+
+```javascript
+// config.default.js
+module.exports = {
+  remote: {
+    enable: false,  // 是否启用远程模式
+    url: 'https://admin.example.com/dashboard',  // 远程 URL
+  },
+};
+```
+
+### 启用远程模式
+
+当 `remote.enable = true` 时，`loadServer()` 会直接加载远程 URL，跳过所有本地加载逻辑：
+
+```javascript
+// loadServer() 中的远程模式判断
+if (remote.enable) {
+  loadMainUrl('remote', remote.url);
+  return;  // 不执行本地加载逻辑
+}
+```
+
+<Warning>
+启用远程模式后，应用窗口直接加载远程 URL。远程服务器必须提供完整的 Web 页面内容。此模式下本地前端代码不会被使用。
+</Warning>
+
+### 远程模式使用场景
+
+- **SaaS 管理端**：Electron 客户端壳 + 远程 Web 管理界面
+- **远程监控面板**：本地 Electron 监控远程服务器状态
+- **远程配置管理**：通过远程服务器下发配置到 Electron 客户端
+
+## WebSocket 远程控制面板
+
+SocketServer 支持 WebSocket 连接，可用于构建远程控制面板：
+
+### 控制面板架构
+
+```
+远程浏览器 ←→ SocketServer ←→ Electron 主进程控制器
+  (WebSocket)     (IPC/HTTP)
+```
+
+远程控制面板通过 SocketIO 客户端连接 Electron 的 SocketServer，发送命令调用主进程控制器方法。
+
+### 控制面板配置
+
+```javascript
+// config.default.js
+module.exports = {
+  socketServer: {
+    enable: true,
+    port: 7071,
+    cors: {
+      origin: ['https://admin.example.com'],  // 只允许特定来源
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
+    transports: ['websocket'],
+    channel: 'remote-control',
+    pingTimeout: 120000,  // 远程连接需要更长超时时间
+  },
+};
+```
+
+### 控制面板客户端
+
+```javascript
+// 远程控制面板前端（浏览器端）
+import { io } from 'socket.io-client';
+
+const socket = io('https://electron-server:7071', {
+  transports: ['websocket'],
+  auth: {
+    token: 'admin-secret-token',
+  },
+});
+
+// 获取系统信息
+socket.emit('remote-control', {
+  cmd: 'controller/os/systemInfo',
+  args: {},
+}, (result) => {
+  console.log('系统信息:', result);
+});
+
+// 执行远程操作
+socket.emit('remote-control', {
+  cmd: 'controller/remote/execute',
+  args: { command: 'backup' },
+}, (result) => {
+  console.log('执行结果:', result);
+});
+```
+
+## 远程调试场景
+
+### 开发环境远程调试
+
+Electron 应用可以配置为接受远程调试连接：
+
+```javascript
+// 启动 Electron 时开启调试端口
+// pnpm dev-electron -- --inspect=9229
+
+// 远程浏览器访问 chrome://inspect 连接调试
+```
+
+### SocketServer 远程日志
+
+通过 SocketServer 可以将 Electron 应用日志实时推送到远程终端：
+
+```javascript
+// 控制器方法：获取实时日志
+class RemoteController {
+  async getLogs(args) {
+    return this.service.readLogFile(args.type);
+  }
+}
+```
+
+远程终端通过 SocketServer 实时拉取日志：
+
+```javascript
+// 远程终端
+socket.emit('remote-control', {
+  cmd: 'controller/remote/getLogs',
+  args: { type: 'error', last: 100 },
+}, (logs) => {
+  console.log('远程日志:', logs);
+});
+```
+
+## 与 SocketServer 集成
+
+远程服务与 SocketServer 的集成架构：
+
+```
+                   ┌─────────────────────┐
+                   │  Electron 主进程      │
+                   │  ┌──────────────┐    │
+                   │  │ SocketServer │◄───┼── 远程浏览器（WebSocket）
+                   │  └──────────────┘    │
+                   │  ┌──────────────┐    │
+                   │  │ HttpServer   │◄───┼── 第三方 HTTP 客户端
+                   │  └──────────────┘    │
+                   │  ┌──────────────┐    │
+                   │  │ IpcServer    │◄───┼── 渲染进程（IPC）
+                   │  └──────────────┘    │
+                   │  ┌──────────────┐    │
+                   │  │ CrossProcess │◄───┼── Go/Python 本地后端
+                   │  └──────────────┘    │
+                   └─────────────────────┘
+```
+
+### 多服务协作示例
+
+```javascript
+// 配置：SocketServer + HttpServer + Go 后端
+module.exports = {
+  mainServer: {
+    takeover: 'goServer',
+    loadingPage: '/public/html/loading.html',
+  },
+  httpServer: {
+    enable: true,
+    port: 7070,
+    cors: { origin: '*' },
+  },
+  socketServer: {
+    enable: true,
+    port: 7071,
+    cors: { origin: '*' },
+    channel: 'remote-control',
+  },
+  cross: {
+    goServer: {
+      enable: true,
+      cmd: 'go_server',
+      args: ['-port', '7072'],
+    },
+  },
+};
+```
+
+## 远程通信安全
+
+远程服务暴露到网络后，安全性至关重要：
+
+### CORS 配置
+
+```javascript
+// 安全的 CORS 配置（限制来源）
+module.exports = {
+  httpServer: {
+    cors: {
+      origin: ['https://admin.example.com', 'https://trusted-site.com'],
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
+  },
+  socketServer: {
+    cors: {
+      origin: ['https://admin.example.com'],
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
+  },
+};
+```
+
+<Warning>
+生产环境中 `origin: '*'` 允许任何来源的请求，存在严重安全风险。必须限制为可信的来源域名列表。
+</Warning>
+
+### 认证中间件
+
+为 HTTP 和 SocketServer 添加认证：
+
+```javascript
+// HTTP 认证中间件
+function authMiddleware() {
+  return async (ctx, next) => {
+    const token = ctx.headers['authorization']?.replace('Bearer ', '');
+
+    if (!token || !validateToken(token)) {
+      ctx.status = 401;
+      ctx.body = { error: 'Unauthorized' };
+      return;
+    }
+
+    ctx.state.user = decodeToken(token);
+    await next();
+  };
+}
+
+// 配置
+module.exports = {
+  httpServer: {
+    koaConfig: {
+      preMiddleware: [authMiddleware],
+    },
+  },
+};
+```
+
+### SocketServer 认证
+
+SocketIO 支持通过 `auth` 参数传递认证信息：
+
+```javascript
+// 客户端发送认证
+const socket = io('https://server:7071', {
+  auth: {
+    token: 'your-auth-token',
+  },
+});
+
+// 服务端验证（需要自定义 middleware）
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (validateToken(token)) {
+    next();
+  } else {
+    next(new Error('Authentication failed'));
+  }
+});
+```
+
+<Note>
+SocketIO 的认证 middleware 需要通过 SocketServer 的 `io` 实例配置。可以通过 `getHttpApp()` 或直接访问 `io` 属性设置 middleware。
+</Note>
+
+### 加密传输
+
+启用 HTTPS 确保通信加密：
+
+```javascript
+// HTTP HTTPS 配置
+module.exports = {
+  httpServer: {
+    https: {
+      enable: true,
+      key: '/ssl/server.key',
+      cert: '/ssl/server.crt',
+    },
+  },
+};
+```
+
+### 网络隔离
+
+对于本地应用（不需要远程访问），建议：
+
+```javascript
+// 本地安全配置
+module.exports = {
+  httpServer: {
+    host: '127.0.0.1',  // 仅监听本地回环地址，不暴露到外部网络
+  },
+  socketServer: {
+    cors: {
+      origin: false,  // 禁止跨域
+    },
+  },
+};
+```
+
+## 相关源码
+
+- `packages/ee-core/src/socket/socketServer.ts` — SocketServer 远程连接管理
+- `packages/ee-core/src/socket/httpServer.ts` — HttpServer CORS 和 HTTPS 配置
+- `packages/ee-core/src/electron/window/index.ts` — remote 配置和 loadServer()

@@ -1,0 +1,142 @@
+---
+title: "Loader 模块 (文件加载)"
+description: "ee-core 文件加载模块，提供 loadFile、requireFile、execFile、resolveModule 和 getFullpath 五个核心函数，支持函数自动执行、字节码回退和路径解析。"
+---
+
+# Loader 模块
+
+Loader 模块是框架的基础依赖，为控制器加载、配置加载和任务执行提供文件加载和路径解析能力。
+
+## loadFile — 自动执行函数导出
+
+加载文件时，如果导出的是普通函数（非类、非字节码类），自动调用该函数并返回执行结果。
+
+```javascript
+import { loadFile } from 'ee-core/loader';
+
+// 加载配置文件（函数导出，自动注入 appInfo）
+const config = loadFile('config/config.default', appInfo);
+// 等价于: const mod = require(filepath); const config = mod(appInfo);
+```
+
+### 特性
+
+- 相对路径基于 `electronDir` 解析为绝对路径
+- 先调用 `resolveModule()` 查找实际文件
+- 函数导出时自动执行并注入 `...inject` 参数
+- 类导出和字节码类导出不会自动执行
+
+<Note>
+`loadFile` 是配置加载的核心机制。`config.default.js` 等配置文件导出函数时，`loadFile` 自动将 `appInfo` 作为参数注入。
+</Note>
+
+## requireFile — 原始模块加载
+
+返回模块导出内容，不做任何处理。适合需要原始模块引用的场景。
+
+```javascript
+import { requireFile } from 'ee-core/loader';
+
+// 加载子进程任务文件（保留原始引用）
+const taskModule = requireFile('/path/to/task.js');
+```
+
+<Warning>
+`requireFile` 只接受绝对路径，不做路径解析或自动执行。
+</Warning>
+
+## execFile — 类实例化 / 函数执行
+
+根据导出类型决定执行方式：
+
+| 导出类型 | 处理方式 |
+|---------|---------|
+| 类 / 字节码类 | `new Controller(...inject)` |
+| 普通函数 | `fn(...inject)` |
+| 其他 | 原样返回 |
+
+```javascript
+import { execFile } from 'ee-core/loader';
+
+// 实例化类
+const instance = execFile('/path/to/service.js', config, logger);
+
+// 执行函数
+const result = execFile('/path/to/handler.js', params);
+```
+
+## resolveModule — 模块路径解析
+
+解析模块的绝对路径，支持字节码（`.jsc`）回退机制：
+
+### 回退规则
+
+| 输入路径 | 尝试顺序 |
+|---------|---------|
+| `config.default` | 先 `require.resolve()`，失败后尝试 `.jsc` |
+| `config.prod` | 同上 |
+| `module.js` | 先 `require.resolve()`，失败后尝试 `module.jsc` |
+| `module`（无后缀） | 先 `require.resolve()`，失败后尝试 `.js` 和 `.jsc` |
+
+```javascript
+import { resolveModule } from 'ee-core/loader';
+
+// 解析字节码回退
+const path = resolveModule('/path/to/controller/user');
+// 可能返回: /path/to/controller/user.js 或 /path/to/controller/user.jsc
+```
+
+<Note>
+字节码回退机制用于加密打包场景。`ee-bin` 的 encrypt 工具可以将 `.js` 文件编译为 `.jsc` 字节码文件，`resolveModule` 自动检测并优先使用字节码版本。
+</Note>
+
+## getFullpath — Electron 目录路径解析
+
+获取 electron 目录下文件的绝对路径，并尝试 `resolveModule` 查找实际文件。
+
+```javascript
+import { getFullpath } from 'ee-core/loader';
+
+// 相对路径基于 electronDir 解析
+const fullPath = getFullpath('jobs/exampleJob');
+// 返回: /project/electron/jobs/exampleJob.js
+
+// 绝对路径直接使用
+const fullPath = getFullpath('/absolute/path/to/file.js');
+```
+
+<Warning>
+`getFullpath` 在文件不存在时抛出错误。这通常用于 ChildJob 的任务文件路径解析，确保任务文件必须存在。
+</Warning>
+
+## 函数对比总结
+
+| 函数 | 路径处理 | 自动执行 | 字节码回退 | 用途 |
+|------|---------|---------|-----------|------|
+| `loadFile` | 相对→绝对 | 函数导出自动执行 | 是 | 配置文件加载 |
+| `requireFile` | 仅绝对 | 否 | 否 | 原始模块引用 |
+| `execFile` | 仅绝对 | 类实例化/函数执行 | 否 | 任务类实例化 |
+| `resolveModule` | 仅绝对 | — | 是 | 路径解析 |
+| `getFullpath` | 相对→绝对 | — | 是 | 任务文件路径 |
+
+## 完整示例
+
+```javascript
+import { loadFile, requireFile, execFile, resolveModule, getFullpath } from 'ee-core/loader';
+
+// 1. 加载配置文件（函数自动执行，注入 appInfo）
+const appInfo = { name: 'myapp', env: 'dev', baseDir: '/project' };
+const config = loadFile('config/config.default', appInfo);
+
+// 2. 获取任务文件的绝对路径
+const jobPath = getFullpath('jobs/myTask');
+
+// 3. 原始加载任务模块（不自动执行）
+const TaskModule = requireFile(jobPath);
+
+// 4. 实例化任务类
+const taskInstance = execFile(jobPath, { taskId: 123 });
+
+// 5. 解析字节码路径
+const bytecodePath = resolveModule('/project/electron/controller/user');
+```

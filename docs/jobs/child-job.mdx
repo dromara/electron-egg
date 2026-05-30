@@ -1,0 +1,249 @@
+---
+title: ChildJob 子任务
+description: ChildJob 类管理单个子进程任务，支持 exec/createProcess 创建子进程、dispatch 发送命令、eventReceiver 事件分发、进程退出清理
+---
+
+ChildJob 是 electron-egg 框架的基础子进程管理类，通过 `child_process.fork()` 创建子进程来执行后台任务。ChildJob 继承 EventEmitter，监听子进程的退出和错误事件，实现自动清理。
+
+## 基本用法
+
+```javascript
+const { ChildJob } = require('ee-core/jobs/child');
+
+const job = new ChildJob();
+
+// 执行任务文件
+const proc = job.exec('service/example/hello', { name: 'Alice' });
+
+// 获取当前所有子进程 PID
+const pids = job.getPids();
+```
+
+## 核心方法
+
+### exec(filepath, params, opt)
+
+执行指定任务文件，自动创建子进程并发送 `run` 命令：
+
+```javascript
+const proc = job.exec('service/example/hello', { name: 'Alice' });
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `filepath` | `string` | 任务文件路径（相对路径自动解析为绝对路径） |
+| `params` | `object` | 任务参数，传递给子进程 |
+| `opt` | `JobProcessOptions` | 子进程创建选项 |
+
+<Note>
+filepath 使用 `getFullpath()` 解析为绝对路径。相对路径基于 `electron/` 目录，如 `'service/example/hello'` 解析为 `'electron/service/example/hello.js'`。
+</Note>
+
+### createProcess(opt)
+
+创建子进程但不立即执行任务，用于需要后续手动控制执行的场景：
+
+```javascript
+const proc = job.createProcess({
+  processArgs: {
+    type: 'childJob',
+  },
+  processOptions: {
+    cwd: '/custom/dir',
+    env: { MY_VAR: 'value' },
+  },
+});
+
+// 手动发送命令
+proc.dispatch('run', 'service/example/hello', { name: 'Alice' });
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `processArgs` | `object` | 传递给子进程的参数对象（序列化为 JSON） |
+| `processOptions` | `ForkOptions` | child_process.fork() 选项 |
+
+### execPromise(filepath, params, opt)
+
+异步执行任务文件，返回 Promise（实际上与 exec 相同，因为子进程创建是同步的）：
+
+```javascript
+const proc = await job.execPromise('service/example/hello', { name: 'Alice' });
+```
+
+## JobProcess 通信机制
+
+ChildJob 创建的子进程是 JobProcess 实例，支持以下通信方式：
+
+### dispatch(cmd, jobPath, params)
+
+主进程向子进程发送命令消息：
+
+```javascript
+const proc = job.exec('service/example/hello', { data: 'test' });
+
+// 发送命令
+proc.dispatch('run', 'service/example/hello2', { extra: 'info' });
+```
+
+消息格式（JobMessage）：
+
+```javascript
+{
+  mid: 'random_string',     // 消息唯一 ID
+  cmd: 'run',               // 命令名称
+  jobPath: '/absolute/path', // 任务文件绝对路径
+  jobParams: [{ data: 'test' }], // 任务参数
+}
+```
+
+### callFunc(jobPath, funcName, params)
+
+调用子进程中任务实例的指定方法：
+
+```javascript
+// 调用任务实例的 doSomething 方法
+proc.callFunc('service/example/timer', 'doSomething', 'param1', 'param2');
+```
+
+<Note>
+`callFunc` 会将 jobPath 解析为绝对路径，然后发送带有 `jobFunc` 和 `jobFuncParams` 的 run 命令。子进程中的 ChildApp 会查找缓存的任务实例并调用指定方法。
+</Note>
+
+### IPC 消息类型
+
+子进程向主进程发送的消息分为两类：
+
+<Tabs>
+  <Tab title="showException">
+    异常消息通道。子进程发生错误时，将错误信息通过 `Processes.showException` 通道发送给主进程，主进程在日志中记录。
+
+    ```javascript
+    // 子进程发送异常
+    process.send({
+      channel: 'showException',
+      data: 'Error: something went wrong',
+      eventReceiver: 'childJob',
+    });
+
+    // 主进程接收
+    child.on('message', (m) => {
+      if (m.channel === Processes.showException) {
+        coreLogger.error(`${m.data}`);
+      }
+    });
+    ```
+  </Tab>
+  <Tab title="sendToMain">
+    业务消息通道。子进程通过 `Processes.sendToMain` 通道将业务数据发送给主进程。
+
+    ```javascript
+    // 子进程发送业务消息
+    process.send({
+      channel: 'sendToMain',
+      event: 'jobComplete',
+      data: { result: 'success' },
+      eventReceiver: 'childJob',
+    });
+    ```
+  </Tab>
+</Tabs>
+
+### eventReceiver 事件分发
+
+子进程消息通过 `eventReceiver` 字段决定分发目标：
+
+| eventReceiver | 分发目标 | 说明 |
+|---------------|---------|------|
+| `forkProcess` | 进程内 emitter | 仅发送到创建该进程的 JobProcess 实例 |
+| `childJob` | 宿主 host emitter | 仅发送到 ChildJob/ChildPoolJob 实例 |
+| `all` / 其他 | 两个 emitter | 同时发送到进程和宿主 |
+
+```javascript
+// 监听特定进程的消息
+proc.emitter.on('jobComplete', (data) => {
+  console.log('任务完成:', data);
+});
+
+// 监听所有 ChildJob 子进程的消息
+job.on('jobComplete', (data) => {
+  console.log('某个任务完成:', data);
+});
+```
+
+## 进程退出清理
+
+ChildJob 自动监听子进程退出和错误事件，从 `jobs` 映射中清理已终止的进程：
+
+```javascript
+// ChildJob._initEvents()
+this.on(Events.childProcessExit, (data) => {
+  delete this.jobs[data.pid];
+});
+this.on(Events.childProcessError, (data) => {
+  delete this.jobs[data.pid];
+});
+```
+
+<Warning>
+ChildJob 只清理内部索引映射，不会自动创建替代进程。如果需要保持进程数量，应使用 ChildPoolJob 进程池。
+</Warning>
+
+## 完整使用示例
+
+```javascript
+// electron/controller/job.js
+const { ChildJob } = require('ee-core/jobs/child');
+
+class JobController {
+  // 执行一次性任务
+  async runTask(args) {
+    const job = new ChildJob();
+    const proc = job.exec('service/example/hello', args);
+
+    // 监听任务结果
+    proc.emitter.on('jobResult', (data) => {
+      console.log('收到任务结果:', data);
+    });
+
+    return { pid: proc.pid };
+  }
+
+  // 创建长运行任务
+  async startBackgroundTask(args) {
+    const job = new ChildJob();
+    const proc = job.exec('service/example/timer', args);
+
+    // 调用任务实例的方法
+    setTimeout(() => {
+      proc.callFunc('service/example/timer', 'pause');
+    }, 5000);
+
+    return { pid: proc.pid };
+  }
+}
+
+module.exports = JobController;
+```
+
+## 配置参考
+
+```javascript
+// config.default.js
+module.exports = {
+  jobs: {
+    messageLog: false,  // 是否记录子进程 IPC 消息日志
+  },
+};
+```
+
+<Note>
+`messageLog: true` 会记录所有子进程的 IPC 消息到日志，用于调试。生产环境建议关闭以避免性能影响。
+</Note>
+
+## 相关源码
+
+- `packages/ee-core/src/jobs/child/index.ts` — ChildJob 类实现
+- `packages/ee-core/src/jobs/child/jobProcess.ts` — JobProcess 通信机制
+- `packages/ee-core/src/jobs/child/app.ts` — ChildApp 子进程入口
+- `packages/ee-core/src/jobs/registry.ts` — 进程注册与清理

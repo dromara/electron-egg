@@ -1,0 +1,271 @@
+---
+title: HttpServer HTTP 服务器
+description: 基于 Koa 的 HTTP/HTTPS 服务器，提供 RESTful API 服务，通过中间件链路由 HTTP 请求到控制器方法
+---
+
+HttpServer 是 electron-egg 框架内置的 HTTP/HTTPS 服务器，基于 Koa 框架构建，将 HTTP 请求路由到对应的控制器方法，为外部程序（前端、第三方服务等）提供 RESTful API 接入能力。
+
+## 架构概述
+
+HttpServer 使用工厂模式创建（`static async create()`），因为初始化需要异步获取可用端口。当配置中 `enable=false` 时，服务不会启动。
+
+## 中间件链
+
+Koa 中间件按以下顺序加载，形成完整的请求处理链：
+
+```
+请求 → errorHandler → preMiddleware → CORS → koa-body → _dispatch → postMiddleware → 响应
+```
+
+1. **errorHandler** — 统一错误处理（可自定义）
+2. **preMiddleware** — 前置中间件（认证、日志等）
+3. **CORS** — 跨域中间件（koa2-cors）
+4. **koa-body** — 请求体解析（支持 multipart/form-data）
+5. **_dispatch** — 核心路由分发中间件
+6. **postMiddleware** — 后置中间件（响应格式化等）
+
+<Note>
+中间件顺序非常重要。koa-body 必须在 _dispatch 之前，否则请求体数据无法在控制器中获取。preMiddleware 在 CORS 之前执行，可以拦截未授权请求。
+</Note>
+
+## 核心路由分发
+
+`_dispatch` 是 HttpServer 的核心中间件，将 HTTP 请求路径映射到控制器方法：
+
+### 路由规则
+
+```javascript
+// URL 路径 → 控制器路径
+// /controller/user/add → controller.user.add
+// /user/add → controller/user/add（自动添加 controller 前缀）
+
+// GET 请求 → 参数从 query 获取
+// POST 请求 → 参数从 body 获取
+```
+
+### 处理流程
+
+1. 移除路径前缀 `/`
+2. 检查路径是否在 `filterRequest` 过滤列表中
+3. 自动添加 `controller` 前缀（路径不以 `controller` 开头时）
+4. 通过 `resolveControllerFn` 查找并调用控制器方法
+5. GET 请求传递 `query` 参数，POST 请求传递 `body` 参数
+
+### 请求示例
+
+```javascript
+// GET 请求
+// curl http://127.0.0.1:7070/controller/user/get?name=Alice
+// → 调用 controller.user.get({ name: 'Alice' })
+
+// POST 请求
+// curl -X POST http://127.0.0.1:7070/controller/user/add \
+//   -H "Content-Type: application/json" \
+//   -d '{"name": "Alice", "age": 25}'
+// → 调用 controller.user.add({ name: 'Alice', age: 25 })
+```
+
+## filterRequest 拦截器
+
+`filterRequest` 配置用于拦截不需要路由到控制器处理的请求，直接返回指定数据：
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    filterRequest: {
+      uris: ['favicon.ico', '/'],  // 需要过滤的 URI
+      returnData: { status: 'ok' },  // 过滤请求的返回数据
+    },
+  },
+};
+```
+
+<Note>
+常见的过滤请求包括 favicon.ico、根路径 `/` 等。这些请求不需要经过控制器处理，直接返回即可，减少不必要的路由开销。
+</Note>
+
+## HTTPS 配置
+
+HttpServer 支持 HTTPS，通过 `https` 配置项启用：
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    https: {
+      enable: true,
+      key: '/ssl/server.key',  // SSL 私钥文件路径（相对于项目根目录）
+      cert: '/ssl/server.crt', // SSL 证书文件路径（相对于项目根目录）
+    },
+  },
+};
+```
+
+<Warning>
+启用 HTTPS 时，SSL 证书文件必须存在。HttpServer 启动时会使用 `assert` 检查 key 和 cert 文件是否存在，缺失文件会导致启动失败。
+</Warning>
+
+启用 HTTPS 后，`protocol` 字段自动切换为 `https://`，HttpServer 会使用 `https.createServer()` 创建服务器。
+
+## koaConfig 自定义中间件
+
+通过 `koaConfig` 配置可以注入自定义中间件到 Koa 中间件链中：
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    koaConfig: {
+      // 前置中间件数组（在 CORS 之前执行）
+      preMiddleware: [
+        authMiddleware,    // 认证中间件
+        loggingMiddleware, // 日志中间件
+      ],
+      // 后置中间件数组（在 _dispatch 之后执行）
+      postMiddleware: [
+        responseFormatter, // 响应格式化中间件
+      ],
+      // 自定义错误处理函数
+      errorHandler: (err) => {
+        console.error('HTTP 服务器错误:', err);
+      },
+    },
+  },
+};
+```
+
+### 中间件编写示例
+
+```javascript
+// 认证中间件
+function authMiddleware() {
+  return async (ctx, next) => {
+    const token = ctx.headers['authorization'];
+    if (!token) {
+      ctx.status = 401;
+      ctx.body = { error: 'Unauthorized' };
+      return;
+    }
+    await next();
+  };
+}
+
+// 响应格式化中间件
+function responseFormatter() {
+  return async (ctx, next) => {
+    await next();
+    if (ctx.body && typeof ctx.body === 'object') {
+      ctx.body = {
+        code: 200,
+        data: ctx.body,
+        timestamp: Date.now(),
+      };
+    }
+  };
+}
+```
+
+<Note>
+中间件可以是工厂函数（调用后返回 `(ctx, next) => {}` 风格中间件）或直接中间件函数。HttpServer 检测到无效中间件时会跳过并输出警告日志。
+</Note>
+
+## 请求体解析
+
+HttpServer 使用 koa-body 解析请求体，支持多种格式：
+
+```javascript
+// config.default.js
+module.exports = {
+  httpServer: {
+    body: {
+      multipart: true,           // 支持 multipart/form-data
+      formidable: {
+        maxFileSize: 200 * 1024 * 1024, // 最大文件大小 200MB
+        uploadDir: '/tmp/uploads',       // 上传目录
+      },
+    },
+  },
+};
+```
+
+### 文件上传示例
+
+```javascript
+// 控制器方法
+class UploadController {
+  async upload(args, ctx) {
+    const files = ctx.request.files;
+    const file = files.file;
+    return {
+      filename: file.name,
+      size: file.size,
+      path: file.path,
+    };
+  }
+}
+```
+
+```bash
+# 前端上传文件
+curl -X POST http://127.0.0.1:7070/controller/upload/upload \
+  -F "file=@/path/to/image.png"
+```
+
+## 端口动态分配
+
+HttpServer 使用 `getPort()` 动态获取可用端口，避免端口冲突：
+
+```javascript
+// 启动时获取可用端口
+const port = await getPort({ port: config.port });
+process.env.EE_HTTP_PORT = String(port);  // 写入环境变量供其他模块使用
+config.port = port;
+```
+
+<Note>
+HTTP 端口会写入 `process.env.EE_HTTP_PORT`，其他模块（如 SocketServer、前端等）可以通过读取该环境变量获取实际端口。
+</Note>
+
+## 配置参考
+
+```javascript
+// config.default.js - HttpServer 完整配置
+module.exports = {
+  httpServer: {
+    enable: true,
+    host: '127.0.0.1',
+    port: 7070,
+    protocol: 'http://',
+    cors: {
+      origin: '*',
+      allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+    },
+    body: {
+      multipart: true,
+      formidable: {
+        maxFileSize: 200 * 1024 * 1024,
+      },
+    },
+    filterRequest: {
+      uris: ['favicon.ico'],
+      returnData: { status: 'ok' },
+    },
+    koaConfig: {
+      preMiddleware: [],
+      postMiddleware: [],
+      errorHandler: null,
+    },
+    https: {
+      enable: false,
+      key: '',
+      cert: '',
+    },
+  },
+};
+```
+
+## 相关源码
+
+- `packages/ee-core/src/socket/httpServer.ts` — HttpServer 实现
+- `packages/ee-core/src/socket/utils.ts` — resolveControllerFn 工具函数

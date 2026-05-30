@@ -1,0 +1,226 @@
+---
+title: ChildPoolJob 进程池
+description: ChildPoolJob 子进程池管理器，维护一组子进程并通过负载均衡算法分发任务，支持进程绑定、自动创建与清理
+---
+
+ChildPoolJob 是 electron-egg 框架的子进程池管理类，维护一组子进程并通过 LoadBalancer 负载均衡算法分发任务。相比 ChildJob 的单进程模式，ChildPoolJob 避免了频繁创建和销毁进程的开销，适合需要持续执行任务的场景。
+
+## 核心特性
+
+- **池化管理**：维护一组子进程，避免频繁创建/销毁开销
+- **负载均衡**：通过 LoadBalancer 算法选择最优进程执行任务
+- **进程绑定**：通过 boundMap 将特定 ID 绑定到固定进程（如会话绑定）
+- **自动清理**：子进程退出/错误时自动从池中移除
+
+## 进程池配置
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `min` | `3` | 最小进程数 |
+| `max` | `6` | 最大进程数 |
+| `strategy` | `'polling'` | 负载均衡策略名称 |
+| `weights` | `[1, 1, 1, ...]` | 每个进程的权重值 |
+
+<Warning>
+进程池大小受 max 限制。创建进程时如果当前进程数已达到 max，多余的创建请求会被限制，不会超出最大值。
+</Warning>
+
+## 基本用法
+
+### 创建进程池
+
+```javascript
+const { ChildPoolJob } = require('ee-core/jobs/child-pool');
+
+const pool = new ChildPoolJob();
+// 创建 3 个子进程（默认值）
+await pool.create(3);
+```
+
+### 执行任务
+
+```javascript
+// 通过负载均衡选择进程执行任务
+const proc = await pool.run('service/example/hello', { name: 'Alice' });
+```
+
+### 获取进程信息
+
+```javascript
+// 获取所有进程 PID
+const pids = pool.getPids();
+
+// 通过 PID 获取特定进程
+const proc = pool.getChildByPid(12345);
+```
+
+## 核心方法详解
+
+### create(number)
+
+创建指定数量的子进程：
+
+```javascript
+const pids = await pool.create(5);  // 创建 5 个子进程
+```
+
+<Note>
+如果当前池中已有进程，实际创建数会调整以确保总数不超过 max。例如 max=6 且当前已有 4 个进程，`create(5)` 只会创建 2 个新进程。
+</Note>
+
+### run(filepath, params)
+
+通过负载均衡选择进程并执行任务：
+
+```javascript
+const proc = await pool.run('service/example/hello', { data: 'test' });
+```
+
+工作流程：
+1. `getFullpath(filepath)` 解析任务文件绝对路径
+2. `getChild()` 通过 LoadBalancer 选择一个进程
+3. `proc.dispatch('run', jobPath, params)` 发送执行命令
+
+### getBoundChild(boundId)
+
+获取绑定到特定 ID 的进程，相同 boundId 始终分配到同一个子进程：
+
+```javascript
+// 会话绑定：同一用户 ID 的任务总是在同一进程执行
+const proc = await pool.getBoundChild('user-123');
+```
+
+<Note>
+如果绑定进程已不存在（已退出或被移除），getBoundChild 会自动通过负载均衡重新分配一个新进程并建立绑定。
+</Note>
+
+### killAll(type)
+
+终止所有子进程，支持两种模式：
+
+```javascript
+// 并行终止（默认）
+pool.killAll('parallel');
+
+// 顺序终止（每秒终止一个）
+pool.killAll('sequence');
+```
+
+| 模式 | 说明 |
+|------|------|
+| `parallel` | 同时终止所有进程 |
+| `sequence` | 每秒终止一个进程，适合需要逐步释放资源的场景 |
+
+## 进程绑定场景
+
+ChildPoolJob 的 boundMap 机制支持会话绑定等场景：
+
+```javascript
+// 电商系统：每个用户的购物车任务绑定到固定进程
+class ShoppingCartController {
+  async processOrder(args) {
+    const pool = new ChildPoolJob();
+    await pool.create(3);
+
+    // 同一用户的任务总是在同一进程执行
+    const proc = await pool.getBoundChild(args.userId);
+    proc.dispatch('run', 'service/order/process', args);
+  }
+}
+```
+
+<Note>
+进程绑定的优势：同一会话的任务在固定进程执行，避免了跨进程的状态同步问题。适合需要维持会话上下文的场景（如用户状态、缓存数据等）。
+</Note>
+
+## 自动清理机制
+
+ChildPoolJob 监听子进程退出和错误事件，自动从池中移除：
+
+```javascript
+// 源码中的事件监听
+this.on(Events.childProcessExit, (data) => {
+  this._removeChild(data.pid);  // 从 children 和 LoadBalancer 中移除
+});
+this.on(Events.childProcessError, (data) => {
+  this._removeChild(data.pid);
+});
+```
+
+移除进程时会同时清理：
+- `children` 映射中的进程记录
+- LoadBalancer 中的进程目标
+
+## ChildPoolJob vs ChildJob 对比
+
+| 特性 | ChildJob | ChildPoolJob |
+|------|---------|-------------|
+| 进程数量 | 按需创建（1 次任务 = 1 个进程） | 固定池大小（min/max） |
+| 任务分发 | 手动指定 | 负载均衡自动选择 |
+| 进程复用 | 否（任务完成后退出） | 是（进程保持在池中） |
+| 会话绑定 | 不支持 | 支持（getBoundChild） |
+| 生命周期 | 一次性 | 持续运行 |
+| 适合场景 | 短任务、一次性执行 | 长任务、高频调用 |
+
+### 选择指南
+
+<Note>
+**使用 ChildJob**：当任务是一次性的（如文件处理、数据转换），完成后进程退出，不需要复用。
+
+**使用 ChildPoolJob**：当任务需要高频执行、需要会话绑定、或需要避免频繁创建/销毁进程的开销时。
+</Note>
+
+## 完整使用示例
+
+```javascript
+// electron/controller/pool.js
+const { ChildPoolJob } = require('ee-core/jobs/child-pool');
+
+// 全局进程池实例
+let pool;
+
+class PoolController {
+  async init() {
+    pool = new ChildPoolJob({ weights: [2, 1, 1] });  // 第一个进程权重更高
+    await pool.create(3);
+    return { pids: pool.getPids(), status: 'initialized' };
+  }
+
+  async runTask(args) {
+    const proc = await pool.run('service/example/hello', args);
+    return { pid: proc.pid };
+  }
+
+  async runBoundTask(args) {
+    // 同一用户的任务绑定到同一进程
+    const proc = await pool.getBoundChild(args.userId);
+    proc.dispatch('run', 'service/example/hello', args);
+    return { pid: proc.pid, boundId: args.userId };
+  }
+
+  async cleanup() {
+    pool.killAll();
+    return { status: 'cleaned' };
+  }
+}
+
+module.exports = PoolController;
+```
+
+## 配置参考
+
+```javascript
+// config.default.js
+module.exports = {
+  jobs: {
+    messageLog: false,  // 是否记录 IPC 消息日志
+  },
+};
+```
+
+## 相关源码
+
+- `packages/ee-core/src/jobs/child-pool/index.ts` — ChildPoolJob 类实现
+- `packages/ee-core/src/jobs/load-balancer/index.ts` — LoadBalancer 负载均衡
+- `packages/ee-core/src/jobs/child/jobProcess.ts` — JobProcess 通信机制
+- `packages/ee-core/src/jobs/registry.ts` — 进程注册与清理

@@ -1,0 +1,236 @@
+---
+title: "类型参考 (Types Reference)"
+description: "ee-core 所有核心接口的类型参考，包括 Config、ElectronEggOptions、各子模块配置类型以及运行时数据结构。"
+---
+
+# 类型参考
+
+本文档列出 ee-core 所有核心接口的字段定义，供开发者在编写配置和业务代码时参考。
+
+## Config — 主配置接口
+
+`Config` 是框架运行时配置的完整类型定义，由 `config.default.js` 导出对象合并后产生。
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `[key: string]` | `unknown` | — | 动态属性，允许自定义配置项 |
+| `openDevTools` | `boolean \| OpenDevToolsOptions` | `false` | DevTools 配置 |
+| `singleLock` | `boolean` | `true` | 单实例锁 |
+| `windowsOption` | `BrowserWindowConstructorOptions` | 见默认配置 | 主窗口选项 |
+| `logger` | `LoggerConfig` | 见默认配置 | 日志配置 |
+| `socketServer` | `SocketServerConfig` | 见默认配置 | SocketIO 配置 |
+| `httpServer` | `HttpServerConfig` | 见默认配置 | HTTP 配置 |
+| `remote` | `RemoteConfig` | `{ enable: false, url: '' }` | 远程服务配置 |
+| `mainServer` | `MainServerConfig` | 见默认配置 | 主窗口服务配置 |
+| `exception` | `ExceptionConfig` | 见默认配置 | 异常处理配置 |
+| `jobs` | `JobsConfig` | `{ messageLog: false }` | 后台任务配置 |
+| `cross` | `CrossConfig` | `{}` | 跨进程配置 |
+
+## ElectronEggOptions — 启动选项
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `env` | `string` | 运行环境标识（dev/prod/test） |
+| `baseDir` | `string` | 项目根目录（package.json 所在） |
+| `electronDir` | `string` | Electron 主进程源码目录 |
+| `appName` | `string` | 应用名称（来自 package.json name） |
+| `userHome` | `string` | 用户主目录（os.homedir()） |
+| `appData` | `string` | 系统级应用数据目录 |
+| `appUserData` | `string` | Electron 用户数据目录 |
+| `appVersion` | `string` | 应用版本 |
+| `isPackaged` | `boolean` | 是否打包为安装程序 |
+| `execDir` | `string` | 可执行文件目录 |
+
+## MainServerConfig — 主窗口服务配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `protocol` | `string` | `'file://'` | 协议：file:// 或 http:// |
+| `indexPath` | `string` | `'/public/dist/index.html'` | 入口文件路径 |
+| `options` | `Record<string, unknown>` | `{}` | loadURL/loadFile 额外选项 |
+| `takeover` | `string` | `''` | 跨进程接管标识 |
+| `loadingPage` | `string` | `''` | 加载页路径（启动页） |
+| `channelSeparator` | `string` | `'/'` | IPC 通道分隔符 |
+
+## SocketServerConfig — SocketIO 配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `enable` | `boolean` | `false` | 是否启用 |
+| `port` | `number` | `7070` | 监听端口 |
+| `path` | `string` | `/socket.io/` | SocketIO 路径 |
+| `connectTimeout` | `number` | `45000` | 连接超时(ms) |
+| `pingTimeout` | `number` | `30000` | 心跳超时(ms) |
+| `pingInterval` | `number` | `25000` | 心搏间隔(ms) |
+| `maxHttpBufferSize` | `number` | `1e8` | 最大消息体大小 |
+| `transports` | `('polling'\|'websocket')[]` | `["polling","websocket"]` | 传输方式 |
+| `cors` | `object` | `{ origin: true }` | 跨域配置 |
+| `channel` | `string` | `SocketIO.partySoftware` | 通信频道名 |
+
+## HttpServerConfig — HTTP 配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `enable` | `boolean` | `false` | 是否启用 |
+| `https` | `HttpsConfig` | 见下方 | HTTPS 配置 |
+| `protocol` | `string` | `'http://'` | 协议类型 |
+| `host` | `string` | `'127.0.0.1'` | 监听地址 |
+| `port` | `number` | `7071` | 监听端口 |
+| `cors` | `{ origin: string }` | `{ origin: '*' }` | 跨域配置 |
+| `body` | `object` | 见默认配置 | 请求体解析配置 |
+| `filterRequest` | `{ uris: string[], returnData: string }` | `{ uris: ['favicon.ico'], returnData: '' }` | 请求过滤 |
+| `koaConfig` | `KoaConfig` | — | Koa 中间件扩展 |
+
+## HttpsConfig — HTTPS 配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `enable` | `boolean` | `false` | 是否启用 HTTPS |
+| `key` | `string` | `/public/ssl/localhost+1.key` | SSL 私钥路径 |
+| `cert` | `string` | `/public/ssl/localhost+1.pem` | SSL 证书路径 |
+
+## KoaConfig — Koa 中间件配置
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `preMiddleware` | `((...args: unknown[]) => unknown)[]` | 前置中间件列表 |
+| `postMiddleware` | `((...args: unknown[]) => unknown)[]` | 后置中间件列表 |
+| `errorHandler` | `((err: Error) => void) \| null` | 自定义错误处理器 |
+
+## LoggerConfig — 日志配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `dir` | `string` | `getLogDir()` | 日志目录 |
+| `level` | `string` | `'info'` | 日志级别 |
+| `prettyPrint` | `boolean` | `isDev()` | 开发彩色输出 |
+| `dateFormat` | `string` | `'yyyy-MM-dd'` | 文件名日期格式 |
+| `appLogName` | `string` | `'ee.log'` | 应用日志文件名 |
+| `coreLogName` | `string` | `'ee-core.log'` | 核心日志文件名 |
+| `errorLogName` | `string` | `'ee-error.log'` | 错误日志文件名 |
+| `rotator` | `'daily'\|'hourly'\|string` | `'day'` | 轮转策略 |
+| `redact` | `string[]` | `[]` | 脱敏字段路径 |
+| `redactCensor` | `string \| function` | `'[Redacted]'` | 脱敏替换值 |
+| `timestamp` | `boolean` | `true` | 包含时间戳 |
+| `name` | `string` | `'ee'` | 日志器名称 |
+| `maxSize` | `number \| string` | `'10m'` | 单文件最大尺寸 |
+| `serializers` | `Record<string, function>` | `{}` | 自定义序列化器 |
+| `customLevels` | `Record<string, number>` | `{}` | 自定义级别 |
+| `depthLimit` | `number` | `5` | 序列化深度 |
+| `safe` | `boolean` | `true` | 安全模式 |
+| `enabled` | `boolean` | `true` | 是否启用 |
+
+## ExceptionConfig — 异常配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `mainExit` | `boolean` | `false` | 主进程异常是否退出 |
+| `childExit` | `boolean` | `false` | 子进程异常是否退出 |
+| `rendererExit` | `boolean` | `true` | 渲染进程异常是否退出 |
+
+## JobsConfig — 任务配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `messageLog` | `boolean` | `false` | 是否记录 IPC 消息 |
+
+## CrossConfig — 跨进程配置集合
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `[key: string]` | `CrossTargetConfig` | 每个键名对应一个跨进程目标 |
+
+## CrossTargetConfig — 跨进程目标配置
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `name` | `string` | 服务名称标识 |
+| `enable` | `boolean` | 是否启用 |
+| `args` | `string[]` | 命令行参数 |
+| `cmd` | `string` | 启动命令 |
+| `directory` | `string` | 子进程工作目录 |
+| `windowsExtname` | `boolean` | Windows 自动加 .exe |
+| `stdio` | `('pipe'\|'ignore'\|'inherit'\|'ipc')[]` | stdio 配置 |
+| `appExit` | `boolean` | 子进程退出时主进程是否退出 |
+| `port` | `number` | 子进程端口 |
+| `url` | `string` | 子进程服务 URL |
+
+## JobChildOptions — 子进程任务选项
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `name` | `string` | 任务名称标识 |
+| `script` | `string` | 子进程入口脚本路径 |
+| `args` | `string[]` | 命令行参数 |
+| `env` | `ProcessEnv` | 环境变量 |
+| `port` | `number` | HTTP 服务端口 |
+
+## FileLoaderOptions — 文件加载选项
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `caseStyle` | `'lower'\|'upper'\|'camel'\|function` | 属性命名风格 |
+| `directory` | `string` | 扫描目录路径 |
+| `initializer` | `function \| null` | 自定义导出处理器 |
+| `call` | `boolean` | 是否自动调用函数导出 |
+| `override` | `boolean` | 是否覆盖同名属性 |
+| `inject` | `unknown` | 函数注入参数 |
+| `match` | `string\|string[]\|function` | 文件匹配模式 |
+| `ignore` | `string\|string[]\|function` | 文件忽略模式 |
+| `registry` | `RegistryEntry[]` | 预注册表（Bundle 模式） |
+
+## AppInfo — 应用元数据
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `name` | `string` | 应用名称 |
+| `baseDir` | `string` | 项目根目录 |
+| `electronDir` | `string` | Electron 源码目录 |
+| `env` | `string` | 运行环境 |
+| `root` | `string` | 运行数据根目录 |
+
+## MessageData — IPC 消息结构
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `channel` | `string` | 通信通道标识 |
+| `event` | `string` | 事件名称 |
+| `data` | `unknown` | 消息数据 |
+
+## RegistryEntry — 注册表条目
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `fullpath` | `string` | 文件完整路径 |
+| `properties` | `string[]` | 属性路径数组 |
+| `module` | `unknown` | 模块（懒加载 getter） |
+
+## RemoteConfig — 远程服务配置
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `enable` | `boolean` | 是否启用远程服务 |
+| `url` | `string` | 远程服务地址 |
+
+## ExtendOptions — 合并选项
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `deep` | `boolean` | 是否深度合并 |
+
+## TimingItem — 性能计时条目
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `name` | `string` | 阶段名称 |
+| `start` | `number` | 开始时间(ms) |
+| `end` | `number \| undefined` | 结束时间 |
+| `duration` | `number \| undefined` | 持续时间 |
+| `pid` | `number` | 进程 PID |
+| `index` | `number` | 执行序号 |
+
+## ProcessExitEventData — 进程退出事件数据
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `pid` | `number \| undefined` | 退出进程的 PID |

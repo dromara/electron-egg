@@ -1,0 +1,318 @@
+---
+title: 代码加密与安全
+description: 代码保护策略（混淆、字节码、组合加密）、Electron 安全最佳实践（WebPreferences、preload 设计、IPC/HTTP 输入验证）、SqliteStorage 路径遍历防御、ChildApp 方法白名单
+---
+
+electron-egg 框架提供多层次的代码保护和安全机制，涵盖代码加密、Electron 安全配置、数据库防护、IPC/HTTP 输入验证和子进程方法白名单。
+
+## 代码保护策略
+
+ee-bin 的 Encrypt 模块支持三种加密模式，按保护强度递增排列：
+
+<Tabs>
+  <Tab title="confusion 混淆">
+    使用 javascript-obfuscator 对 JS 代码进行混淆，适用于前端和 Electron 代码。
+
+    ```javascript
+    // cmd/bin.js 配置
+    build: {
+      encrypt: {
+        electron: {
+          type: 'confusion',
+          files: ['./public/electron/**/*.js'],
+          specificFiles: ['./public/electron/preload/bridge.js'],
+          confusionOptions: {
+            compact: true,
+            stringArray: true,
+            stringArrayThreshold: 1,
+          },
+        },
+      },
+    },
+    ```
+
+    <Note>
+    混淆保护强度最低，但兼容性最好。适用于需要保护代码逻辑但不追求极致安全的场景。
+    </Note>
+  </Tab>
+  <Tab title="bytecode 字节码">
+    使用 bytenode 将 JS 编译为 V8 字节码（.jsc 文件），仅适用于 Electron 主进程。
+
+    ```javascript
+    build: {
+      encrypt: {
+        electron: {
+          type: 'bytecode',
+          files: ['./public/electron/**/*.js'],
+          bytecodeOptions: {
+            electron: true,
+          },
+        },
+      },
+    },
+    ```
+
+    <Warning>
+    字节码不适用于前端渲染进程。渲染进程的 V8 版本与编译时的 V8 版本可能不同，导致字节码无法执行。前端加密必须使用 confusion 模式。
+    </Warning>
+
+    <Note>
+    字节码编译的安全机制：编译后会验证 .jsc 文件是否成功生成，如果 .jsc 未生成则保留源 .js 文件，防止编译失败导致代码丢失。
+    </Note>
+  </Tab>
+  <Tab title="strict 组合加密（最强）">
+    先混淆再编译字节码，双重保护，提供最强代码保护。
+
+    ```javascript
+    build: {
+      encrypt: {
+        electron: {
+          type: 'strict',
+          files: ['./public/electron/**/*.js'],
+          specificFiles: ['./public/electron/preload/bridge.js'],
+        },
+      },
+    },
+    ```
+
+    <Note>
+    strict 模式下，代码先经过 javascript-obfuscator 混淆，再将混淆后的代码编译为字节码。即使字节码被反编译，得到的也是混淆后的代码，大幅增加逆向难度。
+    </Note>
+  </Tab>
+</Tabs>
+
+### specificFiles 强制混淆
+
+某些文件必须使用混淆而非字节码，因为它们需要被外部程序直接读取：
+
+```javascript
+specificFiles: ['./public/electron/preload/bridge.js']
+```
+
+<Warning>
+preload/bridge.js 是 BrowserWindow 的 preload 脚本，Electron 需要直接加载该文件。字节码格式的文件无法被 BrowserWindow 的 preload 机制加载，因此必须保持为可读的 JS 格式（混淆即可）。
+</Warning>
+
+### 加密执行命令
+
+```bash
+# 执行加密
+pnpm encrypt
+
+# 加密内部流程
+# 1. 加载加密配置
+# 2. globby 扫描匹配文件
+# 3. 遍历文件：
+#    - specificFiles → 强制 confusion
+#    - 其他文件 → 按配置的 type 执行
+# 4. 前端字节码 → 自动跳过
+```
+
+## Electron 安全配置
+
+### WebPreferences 安全默认值
+
+electron-egg 框架的 WebPreferences 遵循 Electron 安全最佳实践：
+
+```javascript
+// config.default.js - 推荐的 windowsOption 配置
+module.exports = {
+  windowsOption: {
+    contextIsolation: true,   // 启用上下文隔离（必须）
+    nodeIntegration: false,   // 禁止渲染进程直接访问 Node.js（必须）
+    sandbox: true,            // 启用沙箱模式
+    webSecurity: true,        // 启用 Web 安全策略
+    allowRunningInsecureContent: false,  // 禁止加载不安全内容
+  },
+};
+```
+
+<Warning>
+以下配置项必须保持安全默认值，切勿为了便利而关闭：
+- `contextIsolation: true` — 防止 preload 脚本与渲染进程共享全局对象
+- `nodeIntegration: false` — 防止渲染进程直接调用 Node.js API
+- 关闭这些选项会导致严重的 XSS 和远程代码执行风险
+</Warning>
+
+### Preload 脚本设计原则
+
+preload 脚本在隔离的上下文中运行，是渲染进程与主进程通信的唯一安全桥梁：
+
+```javascript
+// preload/bridge.js - 安全的 preload 设计
+const { ipcRenderer } = require('electron');
+
+// 只暴露必要的 API，不暴露 ipcRenderer 本身
+contextBridge.exposeInMainWorld('electronAPI', {
+  // 使用 invoke（异步，推荐）
+  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+
+  // 仅暴露必要的特定通道
+  getUser: (params) => ipcRenderer.invoke('controller/user/get', params),
+  addUser: (params) => ipcRenderer.invoke('controller/user/add', params),
+});
+
+// ❌ 危险做法：暴露完整的 ipcRenderer
+// contextBridge.exposeInMainWorld('ipcRenderer', ipcRenderer);
+```
+
+### 渲染进程 XSS 防范
+
+1. **启用 contextIsolation**：确保 preload 和渲染页面的全局对象隔离
+2. **不暴露完整 ipcRenderer**：只通过 contextBridge 暴露必要的 API
+3. **输入验证**：在主进程控制器方法中验证所有来自渲染进程的参数
+4. **禁用 eval 和 remote 模块**：避免动态执行不受信任的代码
+
+## SqliteStorage 路径遍历防御
+
+SqliteStorage 在构造函数中验证数据库名称，防止路径遍历攻击：
+
+```javascript
+// SqliteStorage 安全检查
+constructor(name, opt) {
+  // 1. 名称不能为空
+  assert(name, `db name ${name} Cannot be empty`);
+
+  // 2. 禁止路径遍历：名称中不能包含 ".."
+  assert(!name.includes('..'), `db name ${name} contains path traversal`);
+
+  this.name = name;
+  this.mode = this.getMode(name);
+  this.dbDir = this._createDatabaseDir();
+  this.fileName = this._formatFileName(name);
+  this.db = this._initDB(opt);
+}
+```
+
+### 安全的数据库命名示例
+
+```javascript
+// ✅ 安全
+const db1 = new SqliteStorage('app.db');              // 仅名称 → {dataDir}/db/app.db
+const db2 = new SqliteStorage('sub/app.db');           // 相对路径 → {dataDir}/db/sub/app.db
+const db3 = new SqliteStorage(':memory:');             // 内存数据库
+
+// ❌ 路径遍历攻击（被 assert 阻止）
+const db4 = new SqliteStorage('../etc/passwd');        // 包含 ".."
+const db5 = new SqliteStorage('sub/../secret.db');     // 包含 ".."
+```
+
+<Note>
+SqliteStorage 使用 `path.basename()` 提取纯文件名部分，确保即使传入相对路径，数据库文件名也不会包含目录部分，进一步增强了安全性。
+</Note>
+
+## IPC/HTTP 输入验证
+
+### IPC 输入验证
+
+控制器方法接收来自渲染进程的参数，必须在入口处验证：
+
+```javascript
+// 安全的控制器方法
+class UserController {
+  async add(args) {
+    // 验证必填参数
+    if (!args || !args.name) {
+      return { error: 'name is required' };
+    }
+
+    // 验证参数类型
+    if (typeof args.name !== 'string' || args.name.length > 100) {
+      return { error: 'invalid name format' };
+    }
+
+    // 验证参数范围
+    if (args.age && (args.age < 0 || args.age > 150)) {
+      return { error: 'invalid age range' };
+    }
+
+    // 执行业务逻辑
+    return await this.service.addUser(args);
+  }
+}
+```
+
+### HTTP 输入验证
+
+HttpServer 的 `_dispatch` 中间件已内置基础验证，但控制器方法仍需验证业务参数：
+
+```javascript
+// HTTP 控制器方法
+class ApiController {
+  async upload(args, ctx) {
+    // 验证文件类型
+    const file = ctx.request.files?.file;
+    if (!file) return { error: 'no file provided' };
+
+    const allowedTypes = ['image/png', 'image/jpeg', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      ctx.response.status = 400;
+      return { error: 'file type not allowed' };
+    }
+
+    // 验证文件大小
+    if (file.size > 10 * 1024 * 1024) {
+      ctx.response.status = 400;
+      return { error: 'file size exceeds limit' };
+    }
+
+    return { success: true, path: file.path };
+  }
+}
+```
+
+## ChildApp 方法白名单
+
+ChildApp 只处理预定义的命令列表，形成隐式的方法白名单：
+
+```javascript
+// ChildApp 支持的命令列表
+const commands = ['run'];  // 目前只支持 run 命令
+
+_handleMessage(m) {
+  if (commands.indexOf(m.cmd) === -1) return;  // 未知命令直接忽略
+  // ...
+}
+```
+
+<Note>
+虽然 ChildApp 目前只支持 `run` 命令，但任务文件内部的方法调用（通过 `jobFunc` 参数）没有显式白名单限制。建议在任务类中使用 `typeof` 检查而非直接调用任意方法名，避免恶意消息调用不安全的方法。
+</Note>
+
+### 任务方法安全设计
+
+```javascript
+// 安全的任务类设计
+class SafeJob {
+  // 白名单方法映射
+  static ALLOWED_METHODS = ['handle', 'process', 'getResult'];
+
+  handle(...params) {
+    // 默认入口方法
+  }
+
+  // callFunc 调用时检查方法名是否在白名单中
+  // ChildApp 已使用 typeof 检查，业务层可进一步限制
+}
+```
+
+## 安全最佳实践清单
+
+| 类别 | 实践 | 风险等级 |
+|------|------|---------|
+| WebPreferences | contextIsolation=true, nodeIntegration=false | 高 |
+| Preload | 只暴露必要 API，不暴露 ipcRenderer | 高 |
+| IPC | 控制器方法验证所有参数 | 中 |
+| HTTP | 验证请求体、限制文件上传大小/类型 | 中 |
+| SQLite | 禁止路径遍历（自动防御） | 中 |
+| 代码保护 | production 使用 strict 模式加密 | 中 |
+| ChildApp | 命令白名单 + typeof 方法检查 | 低 |
+| 端口安全 | CORS 配置限制来源 | 低 |
+
+## 相关源码
+
+- `packages/ee-bin/src/tools/encrypt.ts` — Encrypt 加密模块
+- `packages/ee-core/src/storage/sqliteStorage.ts` — SqliteStorage 路径遍历防御
+- `packages/ee-core/src/jobs/child/app.ts` — ChildApp 命令白名单
+- `packages/ee-core/src/socket/httpServer.ts` — HTTP 输入验证
+- `packages/ee-core/src/socket/ipcServer.ts` — IPC 通道安全

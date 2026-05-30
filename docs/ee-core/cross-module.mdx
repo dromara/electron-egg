@@ -1,0 +1,220 @@
+---
+title: "Cross 模块 (跨进程通信)"
+description: "ee-core 跨进程通信模块，管理 Go/Python 等外部子进程的创建、端口分配、生命周期和 URL 获取。"
+---
+
+# Cross 模块
+
+Cross 模块负责创建、管理和终止外部子进程（如 Go/Python 后端），并为其动态分配端口。通过 `cross` 单例提供统一的跨进程管理接口。
+
+## Cross 单例
+
+### 运行流程
+
+`run()` 方法的完整执行流程：
+
+```
+1. 从配置读取服务参数
+2. 合并运行时选项
+3. 解析端口参数，动态获取可用端口
+4. 创建 CrossProcess 子进程
+5. 注册到 children 和 childrenMap 双索引
+```
+
+```javascript
+import { cross } from 'ee-core/cross';
+
+// 运行指定服务
+const proc = await cross.run('goServer');
+```
+
+### 双索引设计
+
+Cross 使用两个映射表管理子进程：
+
+| 索引 | 结构 | 用途 |
+|------|------|------|
+| `children` | `{ pid: { name, entity } }` | 通过 PID 查找进程 |
+| `childrenMap` | `{ name: pid }` | 通过名称查找进程 |
+
+<Note>
+当服务名称重复时，Cross 自动追加 `-{pid}` 后缀以避免冲突。例如第二次运行 `goServer` 会变为 `goServer-12345`。
+</Note>
+
+### 端口分配
+
+`run()` 自动解析启动参数中的端口值，通过 `getPort()` 动态获取可用端口并替换参数中的端口值：
+
+```javascript
+// 配置中的端口参数
+config.cross.goServer = {
+  args: ['--port=7072'],
+  port: 7072,
+};
+// run() 时动态获取可用端口并替换
+```
+
+<Warning>
+如果参数中无法解析端口值（`isNaN`），则使用配置中的 `port` 字段。端口为 0 时不进行端口分配。
+</Warning>
+
+## CrossProcess 子进程
+
+`CrossProcess` 封装 `cross-spawn` 创建外部进程的完整生命周期。
+
+### 进程路径解析规则
+
+| 配置情况 | 路径规则 |
+|---------|---------|
+| 有 `cmd` + 有 `directory` | 使用 `cmd` 作为可执行文件路径 |
+| 有 `cmd` + 相对路径 | 开发环境基于项目根，生产环境基于 extraResources |
+| 有 `cmd` + 绝对路径 | 直接使用绝对路径 |
+| 无 `cmd` | 使用 `extraResourcesDir/{name}` |
+| Windows 平台 | 自动添加 `.exe` 扩展名 |
+
+### 标准输出配置
+
+| 环境 | stdio 配置 |
+|------|-----------|
+| 开发环境 | `['inherit', 'inherit', 'inherit', 'ipc']` — 输出到终端 |
+| 打包生产 | `['ignore', 'ignore', 'ignore', 'ipc']` — 隐藏输出 |
+
+可通过 `config.stdio` 自定义覆盖。
+
+### 进程生命周期
+
+```javascript
+// 创建 → 监听 → 退出
+const proc = await cross.run('goServer');
+
+// 监听退出事件
+proc.emitter.on('exit', () => {
+  console.log('子进程已退出');
+});
+
+// 获取服务 URL
+const url = proc.getUrl();  // http://127.0.0.1:7072
+
+// 终止进程（优雅退出 → 强制终止）
+proc.kill();
+```
+
+<Note>
+`kill()` 先发送 SIGINT 信号请求优雅退出，失败后发送 SIGKILL 强制终止。超时后（默认 1000ms）如果进程仍未退出，触发 `_exitElectron` 作为安全兜底。
+</Note>
+
+## API 参考
+
+### cross.run(service, opt?)
+
+```javascript
+// 基本运行
+const proc = await cross.run('goServer');
+
+// 覆盖运行参数
+const proc = await cross.run('goServer', {
+  args: ['--port=9090', '--env=prod'],
+  port: 9090,
+});
+```
+
+### cross.create()
+
+自动启动所有配置中 `enable: true` 的服务：
+
+```javascript
+await cross.create();
+```
+
+### cross.getUrl(name)
+
+获取指定服务的 URL：
+
+```javascript
+const url = cross.getUrl('goServer');
+// http://127.0.0.1:7072 或 https://127.0.0.1:7072
+```
+
+URL 的协议根据启动参数中的 `ssl` 标志决定，主机名根据 `hostname` 参数决定。
+
+### cross.killByName(name) / cross.kill(pid) / cross.killAll()
+
+```javascript
+// 按名称终止
+cross.killByName('goServer');
+
+// 按 PID 终止
+cross.kill(12345);
+
+// 终止所有子进程
+cross.killAll();
+```
+
+### cross.getProcByName(name) / cross.getProc(pid)
+
+```javascript
+const proc = cross.getProcByName('goServer');
+const proc = cross.getProc(12345);
+```
+
+### cross.getPids()
+
+获取所有子进程的 PID 列表：
+
+```javascript
+const pids = cross.getPids();  // ['12345', '12346']
+```
+
+## 配置示例
+
+<CodeGroup>
+
+```javascript [Go 服务]
+// config.default.js
+config.cross = {
+  goServer: {
+    name: 'goServer',
+    enable: true,
+    cmd: 'go_server',            // 可执行文件名
+    directory: 'go',             // 工作目录（相对于项目根）
+    args: ['--port=7072'],       // 启动参数
+    windowsExtname: true,        // Windows 自动添加 .exe
+    appExit: true,               // 子进程退出时主进程也退出
+  },
+};
+```
+
+```javascript [Python 服务]
+// config.default.js
+config.cross = {
+  pythonServer: {
+    name: 'pythonServer',
+    enable: true,
+    cmd: 'python3',
+    directory: 'python',
+    args: ['main.py', '--port=7073'],
+    stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+  },
+};
+```
+
+</CodeGroup>
+
+<Warning>
+配置 `appExit: true` 时，子进程退出会触发主进程退出。这适用于子进程是核心服务、其崩溃需要重启整个应用的场景。
+</Warning>
+
+## CrossTargetConfig 类型
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `name` | `string` | 服务名称标识 |
+| `enable` | `boolean` | 是否启用 |
+| `args` | `string[]` | 命令行参数 |
+| `cmd` | `string` | 启动命令 |
+| `directory` | `string` | 子进程工作目录 |
+| `windowsExtname` | `boolean` | Windows 自动添加 .exe |
+| `stdio` | `array` | stdio 配置 |
+| `appExit` | `boolean` | 子进程退出时是否退出主进程 |
+| `port` | `number` | 子进程监听端口 |
+| `url` | `string` | 子进程服务 URL |

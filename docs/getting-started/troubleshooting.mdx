@@ -1,0 +1,221 @@
+---
+title: 常见问题速查
+description: 首次安装与开发的常见问题概览，快速修复指引，以及详细的 pnpm install 排查指南链接。
+---
+
+## 安装问题概览
+
+以下是 electron-egg 首次安装时最常遇到的 5 个问题。每个问题提供**快速修复**，详细排查步骤请参阅 [pnpm install 常见问题排查指南](/faq/pnpm-troubleshooting)。
+
+---
+
+### 1. Exotic dependency 被阻止
+
+**错误信息**
+
+```
+ERR_PNPM_EXOTIC_SUBDEP — Exotic dependency "@electron/node-gyp" is not allowed
+```
+
+**快速修复**
+
+在 `.npmrc` 中添加：
+
+```ini
+block-exotic-subdeps=false
+```
+
+<Note>
+项目 `.npmrc` 已预置此配置。如果你克隆后未修改 `.npmrc`，此问题不应出现。若仍报错，检查 `.npmrc` 是否被意外覆盖。
+</Note>
+
+[详细排查步骤](/faq/pnpm-troubleshooting)
+
+---
+
+### 2. 镜像源 502 Bad Gateway
+
+**错误信息**
+
+```
+ERR_PNPM_FETCH_502 — GET https://registry.npmmirror.com/ajv: Bad Gateway - 502
+```
+
+**快速修复**
+
+<Steps>
+<Step title="方案 A：重试">
+镜像源故障通常是暂时的：
+
+```bash
+pnpm install
+```
+</Step>
+
+<Step title="方案 B：临时切换官方源">
+
+```bash
+pnpm install --registry https://registry.npmjs.org/
+```
+</Step>
+
+<Step title="方案 C：腾讯云镜像">
+
+```bash
+pnpm install --registry https://mirrors.cloud.tencent.com/npm/
+```
+</Step>
+</Steps>
+
+[详细排查步骤](/faq/pnpm-troubleshooting)
+
+---
+
+### 3. 构建脚本被忽略
+
+**错误信息**
+
+```
+ERR_PNPM_IGNORED_BUILDS — Ignored build scripts: better-sqlite3, electron, esbuild, electron-winstaller
+```
+
+**快速修复**
+
+<Steps>
+<Step title="批准构建脚本">
+
+```bash
+pnpm approve-builds better-sqlite3 electron-winstaller electron esbuild
+```
+</Step>
+
+<Step title="重新构建">
+
+```bash
+pnpm rebuild
+```
+</Step>
+
+<Step title="可选：配置自动批准">
+在 `.npmrc` 中添加：
+
+```ini
+ignore-build-scripts=false
+```
+
+或在 `pnpm-workspace.yaml` 中添加 `allowBuilds` 配置（项目已预置）。
+</Step>
+</Steps>
+
+<Warning>
+检查 `pnpm-workspace.yaml` 中是否有 `ignoredBuiltDependencies` 列表，如果有，应将其注释或移除，否则 pnpm 仍会跳过构建脚本。
+</Warning>
+
+[详细排查步骤](/faq/pnpm-troubleshooting)
+
+---
+
+### 4. ee-bin 链接创建失败
+
+**错误信息**
+
+```
+WARN: Failed to create bin at node_modules/.bin/ee-bin.
+ENOENT: no such file or directory, open 'packages/ee-bin/dist/esm/index.js'
+```
+
+**快速修复**
+
+<Steps>
+<Step title="构建 ee-bin">
+
+```bash
+cd packages/ee-bin
+pnpm run build
+cd ../..
+```
+</Step>
+
+<Step title="重新安装依赖">
+
+```bash
+pnpm install
+```
+</Step>
+</Steps>
+
+<Note>
+这是首次安装**最关键**的步骤。ee-bin 的 `bin` 字段指向构建产物，未构建时 pnpm 无法创建链接。项目安装指南中已将此步骤列为必要前置操作。
+</Note>
+
+[详细排查步骤](/faq/pnpm-troubleshooting)
+
+---
+
+### 5. Electron 二进制下载极慢
+
+**现象**
+
+`node_modules/electron/install.js` 下载进度极慢，ETA 数千秒。
+
+**快速修复**
+
+<Steps>
+<Step title="确认镜像配置">
+`.npmrc` 中应已包含：
+
+```ini
+electron_mirror=https://npmmirror.com/mirrors/electron/
+```
+</Step>
+
+<Step title="使用 rebuild 重新下载">
+
+```bash
+pnpm rebuild
+```
+
+pnpm 会读取 `.npmrc` 中的镜像配置下载 Electron。
+</Step>
+
+<Step title="手动指定镜像（备选）">
+
+```bash
+ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ \
+  node node_modules/electron/install.js
+```
+</Step>
+</Steps>
+
+[详细排查步骤](/faq/pnpm-troubleshooting)
+
+---
+
+## 完整修复流程
+
+如果多个问题同时出现，按以下顺序处理：
+
+```bash
+# 1. 确认 .npmrc 配置正确
+cat .npmrc
+
+# 2. 检查 pnpm-workspace.yaml（移除 ignoredBuiltDependencies）
+cat pnpm-workspace.yaml
+
+# 3. 构建 ee-bin
+cd packages/ee-bin && pnpm run build && cd ../..
+
+# 4. 安装依赖
+pnpm install
+
+# 5. 如仍有包构建被忽略，执行 rebuild
+pnpm rebuild
+
+# 6. 验证安装
+ls node_modules/.bin/ee-bin
+ls node_modules/electron/dist/
+```
+
+<Note>
+以上完整流程的每一步详细说明与排查逻辑，请参阅 [pnpm install 常见问题排查指南](/faq/pnpm-troubleshooting)。
+</Note>

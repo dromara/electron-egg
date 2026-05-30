@@ -1,0 +1,210 @@
+---
+title: "Socket 模块 (通信服务)"
+description: "ee-core 通信服务模块，包含 IpcServer（IPC）、HttpServer（Koa HTTP）和 SocketServer（SocketIO）三种通信模式及其配置。"
+---
+
+# Socket 模块
+
+Socket 模块提供三种通信服务，满足不同场景下主进程与渲染进程、第三方软件之间的通信需求。
+
+## 三个通信服务
+
+| 服务 | 技术 | 通信方向 | 适用场景 |
+|------|------|---------|---------|
+| IpcServer | ipcMain | 主进程 ↔ 渲染进程 | Electron 内部通信 |
+| HttpServer | Koa | 主进程 ↔ HTTP 客户端 | RESTful API、跨进程 HTTP |
+| SocketServer | SocketIO | 主进程 ↔ WebSocket 客户端 | 第三方软件通信 |
+
+### loadSocket() — 创建所有服务
+
+在 `Application.run()` 流程中按顺序创建：
+
+```
+createSocketServer → createHttpServer → createIpcServer
+```
+
+<Note>
+每个服务有独立的 `enable` 开关，设为 `false` 时不会启动。IpcServer 没有 enable 开关，始终创建。
+</Note>
+
+## IpcServer — IPC 通信
+
+IpcServer 为控制器方法自动注册 IPC 通道处理器，使渲染进程能通过 `ipcRenderer` 调用主进程控制器方法。
+
+### 两种通信模型
+
+| 模型 | 渲染进程调用 | 主进程注册 | 返回方式 | 推荐 |
+|------|-------------|-----------|---------|------|
+| send/on | `ipcRenderer.sendSync()` | `ipcMain.on` | `event.returnValue` | 不推荐 |
+| invoke/handle | `ipcRenderer.invoke()` | `ipcMain.handle` | Promise | 推荐 |
+
+<Note>
+`invoke/handle` 模型是推荐方式，基于 Promise，支持同步和异步控制器方法。
+</Note>
+
+### 通道命名规则
+
+将控制器属性路径中的 `.` 替换为 `channelSeparator`（默认 `/`）：
+
+```
+controller.user.add → controller/user/add
+controller.admin.login.auth → controller/admin/login/auth
+```
+
+### 渲染进程调用示例
+
+```javascript
+// 渲染进程 (preload/bridge.js)
+const { ipcRenderer } = require('electron');
+
+// invoke/handle 模型（推荐）
+const result = await ipcRenderer.invoke('controller/user/add', { name: 'test' });
+
+// send/on 模型
+const result = ipcRenderer.sendSync('controller/user/add', { name: 'test' });
+```
+
+## HttpServer — HTTP 服务
+
+基于 Koa 的 HTTP/HTTPS 服务，提供 RESTful API 接口。
+
+### 请求路由规则
+
+1. URL 路径映射到控制器路径：`/controller/user/add` → `controller.user.add`
+2. 路径不以 `controller` 开头时自动添加前缀
+3. GET 请求参数来自 `query`，POST 请求参数来自 `body`
+4. `filterRequest.uris` 中的路径直接返回 `returnData`，不经过控制器
+
+### 中间件加载顺序
+
+```
+1. errorHandler（错误处理器）
+2. preMiddleware（前置中间件）
+3. cors（跨域中间件）
+4. koa-body（请求体解析）
+5. _dispatch（核心路由分发）
+6. postMiddleware（后置中间件）
+```
+
+### KoaConfig 扩展
+
+```javascript
+config.httpServer = {
+  enable: true,
+  port: 7071,
+  koaConfig: {
+    preMiddleware: [authMiddleware],    // 前置中间件数组
+    postMiddleware: [formatMiddleware], // 后置中间件数组
+    errorHandler: (err) => {             // 自定义错误处理
+      console.error(err);
+    },
+  },
+};
+```
+
+### HTTPS 配置
+
+```javascript
+config.httpServer = {
+  enable: true,
+  https: {
+    enable: true,
+    key: '/public/ssl/localhost+1.key',
+    cert: '/public/ssl/localhost+1.pem',
+  },
+};
+```
+
+### HTTP 调用示例
+
+```javascript
+// 渲染进程或外部 HTTP 客户端
+const response = await fetch('http://127.0.0.1:7071/controller/user/add', {
+  method: 'POST',
+  body: JSON.stringify({ name: 'test' }),
+});
+```
+
+## SocketServer — SocketIO 服务
+
+基于 SocketIO 的 WebSocket/HTTP 轮询通信，用于第三方软件与主进程通信。
+
+### 通信协议
+
+客户端发送消息格式：
+
+```javascript
+{
+  cmd: 'controller/user/add',   // 控制器路径
+  args: { name: 'test' }        // 参数
+}
+```
+
+服务端通过回调函数返回执行结果。
+
+### SocketIO 调用示例
+
+```javascript
+// 第三方软件客户端
+import io from 'socket.io-client';
+
+const socket = io('http://127.0.0.1:7070');
+socket.on('connect', () => {
+  socket.emit('socket-channel', {
+    cmd: 'controller/user/add',
+    args: { name: 'test' },
+  }, (result) => {
+    console.log('返回结果:', result);
+  });
+});
+```
+
+<Note>
+默认通信频道名称由 `config.socketServer.channel` 指定，默认值为 `SocketIO.partySoftware`。
+</Note>
+
+## 配置参考
+
+### socketServer 配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `enable` | `boolean` | `false` | 是否启用 |
+| `port` | `number` | `7070` | 监听端口 |
+| `path` | `string` | `/socket.io/` | SocketIO 路径 |
+| `connectTimeout` | `number` | `45000` | 连接超时(ms) |
+| `pingTimeout` | `number` | `30000` | 心跳超时(ms) |
+| `pingInterval` | `number` | `25000` | 心搏间隔(ms) |
+| `maxHttpBufferSize` | `number` | `1e8` | 最大消息体(100MB) |
+| `transports` | `array` | `["polling","websocket"]` | 传输方式 |
+| `cors` | `object` | `{ origin: true }` | 跨域配置 |
+| `channel` | `string` | `SocketIO.partySoftware` | 通信频道 |
+
+### httpServer 配置
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `enable` | `boolean` | `false` | 是否启用 |
+| `protocol` | `string` | `http://` | 协议 |
+| `host` | `string` | `127.0.0.1` | 监听地址 |
+| `port` | `number` | `7071` | 监听端口 |
+| `cors` | `object` | `{ origin: '*' }` | 跨域配置 |
+| `body.multipart` | `boolean` | `true` | 支持文件上传 |
+| `filterRequest.uris` | `array` | `['favicon.ico']` | 过滤路径 |
+| `filterRequest.returnData` | `string` | `''` | 过滤返回数据 |
+
+## API
+
+```javascript
+import { getSocketServer, getHttpServer, getIpcServer } from 'ee-core/socket';
+
+const socketServer = getSocketServer();
+const httpServer = getHttpServer();
+const ipcServer = getIpcServer();
+
+// HttpServer 获取 Koa 实例
+const koaApp = httpServer?.getHttpApp();
+
+// 导出 Koa 和 SocketIO 依赖
+import { Koa, IoServer, IoClient } from 'ee-core/socket';
+```

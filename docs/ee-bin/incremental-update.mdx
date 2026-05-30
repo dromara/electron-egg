@@ -1,0 +1,277 @@
+---
+title: 增量更新
+description: ee-bin updater 命令详解：UpdaterConfig 配置、元数据 YAML、asar 包路径、zip 包生成流程、SHA1/SHA512 校验、JSON 元数据文件、平台差异与 --platform/--force 选项。
+---
+
+增量更新只打包变更部分而非完整安装包，显著减少更新下载量。`ee-bin updater` 命令读取 electron-builder 生成的元数据，打包 asar + extraResources + asarUnpacked，生成 zip 包和 JSON 元数据文件供客户端校验和下载。
+
+## UpdaterConfig 配置参考
+
+```js
+// cmd/bin.js
+module.exports = {
+  updater: {
+    mac: {
+      metadata: './dist/mac/app-mac.yml',        // 元数据 YAML 文件路径
+      asarFile: './dist/mac/app.asar',            // asar 包路径
+      output: {
+        directory: './dist/mac',                   // 输出目录
+        zip: 'updater.zip',                       // zip 文件名模板（平台+版本后缀自动追加）
+        file: 'updater.json',                     // JSON 元数据文件名模板
+      },
+      extraResources: ['./dist/mac/extraResources/**/*'],  // 额外资源 glob 模式
+      asarUnpacked: ['node_modules/better-sqlite3'],       // asarUnpacked 原生模块列表
+      cleanCache: true,                           // 是否清理临时解压目录
+    },
+    win64: {
+      metadata: './dist/win64/app-win64.yml',
+      asarFile: './dist/win64/app.asar',
+      output: {
+        directory: './dist/win64',
+        zip: 'updater.zip',
+        file: 'updater.json',
+      },
+      extraResources: ['./dist/win64/extraResources/**/*'],
+      asarUnpacked: ['node_modules/better-sqlite3'],
+      cleanCache: true,
+    },
+  },
+};
+```
+
+### 字段详解
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `metadata` | `string` | electron-builder 生成的 YAML 元数据文件路径，包含版本号、发布日期、文件列表及 SHA512 哈希 |
+| `asarFile` | `string?` | asar 包路径；可被 CLI `--asar-file` 覆盖 |
+| `output.directory` | `string` | 输出目录 |
+| `output.zip` | `string` | zip 文件名模板，最终文件名为 `{basename}-{platform}-{version}.zip` |
+| `output.file` | `string` | JSON 元数据文件名模板，最终文件名为 `{basename}-{platform}.json` |
+| `extraResources` | `string[]?` | 额外资源文件的 glob 匹配模式 |
+| `asarUnpacked` | `string[]?` | asarUnpacked 原生模块列表（需保持 `app.asar.unpacked/` 路径层级） |
+| `cleanCache` | `boolean?` | 是否清理 electron-builder 临时解压目录 |
+
+## 生成流程
+
+<Steps>
+### 读取元数据 YAML
+
+加载 `metadata` 字段指定的 YAML 文件，获取版本号、发布日期、文件列表和 SHA512 哈希值。
+
+```js
+const metadataObj = yaml.load(fs.readFileSync(metadataPath, 'utf8'));
+// 结构: { version, releaseDate, files: [{ url, sha512, size }] }
+```
+
+YAML 文件由 electron-builder 自动生成，位于打包输出目录中。
+
+### 确定 asar 文件路径
+
+按优先级确定 asar 包路径：
+
+1. CLI `--asar-file` 参数（最高优先级）
+2. 配置中的 `asarFile` 字段
+3. 如果两者都未指定，且文件不存在 → 报错退出
+
+```bash
+# 通过 CLI 指定 asar 路径
+ee-bin updater --platform mac --asar-file ./dist/mac/app.asar
+```
+
+### 创建 zip 包
+
+使用 `compressing` 库创建 zip 压缩包，包含三类内容：
+
+1. **asar 文件本身** — 增量更新的核心，包含完整应用代码
+2. **extraResources** — 通过 glob 匹配额外资源文件（如配置文件、数据文件），保持 `extraResources/` 路径层级
+3. **asarUnpacked** — 原生模块（如 `better-sqlite3`），保持 `app.asar.unpacked/` 路径层级
+
+zip 文件名格式：`{basename}-{platform}-{version}.zip`
+
+```js
+// 示例输出文件名
+// updater-mac-1.0.0.zip
+// updater-mac-arm64-1.0.0.zip
+// updater-win64-1.0.0.zip
+```
+
+<Note>
+配置键名中的下划线会自动转为文件名中的连字符。例如配置键 `mac_arm64` → 文件名 `mac-arm64`。
+</Note>
+
+### 计算哈希值
+
+对生成的 zip 包计算两个哈希：
+
+- **SHA1**（hex 编码）— 用于客户端快速校验增量包完整性
+- **SHA512**（base64 编码）— 用于与元数据中的完整安装包哈希比对
+
+### 校验完整性
+
+从元数据 `files` 中找到完整安装包的 SHA512，与本地生成的 SHA512 比对：
+
+```js
+const generateSha512 = this.generateHash(fullFilePath, 'sha512');
+if (fullFileInfo.sha512 !== generateSha512) {
+  console.log('Error: metadata sha512 is not equal to generateSha512!');
+  return;
+}
+```
+
+如果哈希不匹配，说明本地完整安装包已被篡改或损坏，无法生成可靠的增量更新包。
+
+### 写入 JSON 元数据
+
+生成增量更新 JSON 文件，包含版本、文件名、大小、哈希等信息：
+
+```json
+{
+  "version": "1.0.0",
+  "file": "updater-mac-1.0.0.zip",
+  "size": 5242880,
+  "sha1": "a1b2c3d4...",
+  "fullFile": {
+    "fileName": "app-1.0.0-mac.dmg",
+    "size": 104857600,
+    "sha512": "base64EncodedHash..."
+  },
+  "force": false,
+  "releaseDate": "2024-01-15T10:30:00.000Z"
+}
+```
+
+JSON 文件名格式：`{basename}-{platform}.json`
+
+### 清理临时目录（可选）
+
+如果 `cleanCache` 为 `true`，删除各平台 electron-builder 临时解压目录：
+
+```js
+const tmpAppDirs = ['mac', 'mac-arm64', 'win-unpacked', 'win-ia32-unpacked', 'linux-unpacked'];
+```
+</Steps>
+
+## CLI 选项
+
+```bash
+ee-bin updater --platform mac
+ee-bin updater --platform win64
+ee-bin updater --platform mac --asar-file ./dist/mac/app.asar --force true
+```
+
+| 选项 | 说明 |
+|------|------|
+| `--config <folder>` | 自定义配置文件路径 |
+| `--asar-file <file>` | asar 包路径，覆盖配置中的 `asarFile` |
+| `--platform <flag>` | 目标平台名称，对应 `updater` 配置中的键名（如 `mac`、`win64`、`mac_arm64`） |
+| `--force <flag>` | 设为 `"true"` 启用强制全量更新，JSON 元数据中 `force` 字段为 `true` |
+
+<Warning>
+`--platform` 必须指定，且必须与 `updater` 配置中的键名匹配。未指定时 ee-bin 报错退出。
+</Warning>
+
+## 平台差异
+
+不同平台的增量更新包结构存在差异：
+
+### macOS
+
+```
+dist/mac/
+├── updater-mac-1.0.0.zip       # 增量更新包
+│   ├── app.asar                # 应用代码包
+│   ├── extraResources/         # 额外资源
+│   │   └── config.json
+│   └── app.asar.unpacked/     # 原生模块
+│       └── node_modules/better-sqlite3/
+├── updater-mac.json            # 增量更新元数据
+├── app-mac.yml                 # electron-builder 元数据
+└── app-1.0.0-mac.dmg           # 完整安装包
+```
+
+### Windows
+
+```
+dist/win64/
+├── updater-win64-1.0.0.zip
+│   ├── app.asar
+│   ├── extraResources/
+│   └── app.asar.unpacked/
+├── updater-win64.json
+├── app-win64.yml
+└── app-1.0.0-win64-setup.exe
+```
+
+### Linux
+
+```
+dist/linux/
+├── updater-linux-1.0.0.zip
+│   ├── app.asar
+│   ├── extraResources/
+│   └── app.asar.unpacked/
+├── updater-linux.json
+├── app-linux.yml
+└── app-1.0.0-linux-amd64.deb
+```
+
+## 哈希计算
+
+ee-bin 使用 Node.js `crypto` 模块计算文件哈希：
+
+| 用途 | 算法 | 编码 | 说明 |
+|------|------|------|------|
+| 增量包快速校验 | SHA1 | hex | 客户端下载后快速验证增量包完整性 |
+| 完整包强校验 | SHA512 | base64 | 与元数据比对，确保本地完整包未被篡改 |
+
+```js
+generateHash(filepath, algorithm, encoding) {
+  const buffer = fs.readFileSync(filepath);
+  const fsHash = crypto.createHash(algorithm);
+  fsHash.update(buffer);
+  return fsHash.digest(encoding);
+}
+```
+
+<Note>
+哈希计算对空路径或不存在的文件会抛出错误，而非静默返回空值。这防止空哈希被写入更新元数据，避免客户端校验失败。
+</Note>
+
+## 增量更新完整流程
+
+<Steps>
+### 打包应用
+
+```bash
+ee-bin build --cmds frontend,electron,mac
+```
+
+使用 electron-builder 打包为 macOS 安装包，自动生成 YAML 元数据。
+
+### 执行加密（可选）
+
+```bash
+ee-bin encrypt
+```
+
+如果需要代码保护，在打包前加密 Electron 代码。
+
+### 生成增量更新包
+
+```bash
+ee-bin updater --platform mac
+```
+
+读取元数据，打包 asar + 资源，生成 zip 和 JSON。
+
+### 验证产物
+
+检查输出目录中是否生成了：
+- `updater-mac-1.0.0.zip` — 增量更新包
+- `updater-mac.json` — 更新元数据
+
+### 分发更新
+
+将 zip 和 JSON 文件上传到更新服务器，客户端通过 HTTP 下载 JSON 元数据，校验后下载增量包。
+</Steps>

@@ -1,0 +1,301 @@
+---
+title: ChildApp 子进程应用
+description: ChildApp 运行在子进程中，负责接收主进程命令、加载任务文件、执行任务实例方法，支持类实例缓存和函数直接调用两种执行模式
+---
+
+ChildApp 是 electron-egg 框架中运行在子进程内部的应用类，由 `child_process.fork()` 创建的子进程加载。ChildApp 负责接收主进程的命令消息，加载并执行任务文件，是 ChildJob 和 ChildPoolJob 的底层执行引擎。
+
+## 运行位置
+
+ChildApp 运行在子进程中，而非主进程。它通过 `child_process.fork()` 加载 `ee-core` 包内的 `app.js` 入口文件：
+
+```javascript
+// JobProcess 构造中确定 app.js 入口路径
+const appPath = path.join(path.dirname(currentFilePath), 'app.js');
+this.child = fork(appPath, this.args, options.processOptions);
+```
+
+<Note>
+ChildApp 的入口文件位于 `node_modules/ee-core/` 目录下的 `app.js`，而非项目的 `electron/` 目录。这是 ee-core 不被打包到 main.js 的原因之一——child_process.fork() 需要该文件作为真实文件存在于磁盘上。
+</Note>
+
+## 生命周期
+
+ChildApp 的生命周期分为以下阶段：
+
+1. **初始化**：子进程启动 → 加载 app.js → 解析 processArgs → 接收主进程配置
+2. **创建实例**：`new ChildApp()` → 初始化事件监听 → 创建 jobMap 缓存
+3. **等待命令**：监听 `process.on('message')` 事件
+4. **执行任务**：收到 `run` 命令 → 加载任务文件 → 执行方法
+5. **退出清理**：`process.on('exit')` → 记录退出日志
+
+## 配置传递
+
+ChildApp 通过 `process.argv[2]` 接收主进程传递的配置，避免子进程从文件系统重新加载配置：
+
+```javascript
+// 子进程启动时解析配置
+try {
+  const args = JSON.parse(process.argv[2] || '{}');
+  if (args.eeConfig) {
+    setConfig(args.eeConfig);  // 直接使用主进程的配置
+  }
+} catch {
+  // 如果配置无法解析，使用默认配置
+}
+```
+
+<Warning>
+打包模式下，子进程可能无法从文件系统加载配置文件。因此主进程在创建子进程时通过 processArgs 将完整配置传递过去，确保子进程不需要访问磁盘配置。
+</Warning>
+
+## run() 任务执行
+
+ChildApp 的核心方法是 `run()`，根据任务文件的导出类型采用不同的执行策略：
+
+### 类类型任务（Class）
+
+类类型任务在首次执行时实例化并缓存到 `jobMap`，后续执行复用同一实例：
+
+```javascript
+// 任务文件：electron/jobs/example/hello.js
+class HelloJob {
+  constructor(params) {
+    this.data = params;
+  }
+
+  // 默认入口方法
+  handle(...params) {
+    console.log('处理任务:', params);
+  }
+
+  // 自定义方法
+  doSomething(param1, param2) {
+    return param1 + param2;
+  }
+}
+
+module.exports = HelloJob;
+```
+
+执行流程：
+
+1. 首次执行 → `new HelloJob(params)` → 缓存到 jobMap
+2. 再次执行 → 从 jobMap 取出缓存的实例 → 调用方法
+3. 有 `jobFunc` → 调用指定方法（如 `doSomething`）
+4. 无 `jobFunc` → 调用默认 `handle()` 方法
+
+### 函数类型任务（Function）
+
+函数类型任务每次执行都直接调用，不做缓存：
+
+```javascript
+// 任务文件：electron/jobs/example/transform.js
+module.exports = function(params) {
+  // 处理数据
+  return params.map(item => item.name);
+};
+```
+
+### 字节码类任务（Bytecode Class）
+
+ChildApp 也支持 bytenode 编译的字节码类任务：
+
+```javascript
+// isBytecodeClass() 检测条件
+String(exports).indexOf('[class') !== -1
+```
+
+字节码类的执行逻辑与普通类相同：实例化、缓存、方法调用。
+
+## callFunc() 实例方法调用
+
+主进程通过 JobProcess.callFunc() 调用子进程中任务实例的指定方法：
+
+```javascript
+// 主进程代码
+const proc = job.exec('service/example/timer', { delay: 1000 });
+
+// 调用 timer 实例的 pause 方法
+proc.callFunc('service/example/timer', 'pause', 'arg1', 'arg2');
+```
+
+消息格式：
+
+```javascript
+{
+  mid: 'random_id',
+  cmd: 'run',
+  jobPath: '/absolute/path/to/timer',
+  jobFunc: 'pause',
+  jobFuncParams: ['arg1', 'arg2'],
+}
+```
+
+### hasOwnProperty 安全检查
+
+ChildApp 在调用实例方法时使用 `typeof` 检查而非 `hasOwnProperty`，支持实例方法和原型链方法：
+
+```javascript
+// 源码中的安全检查
+if (jobFunc && typeof instance[jobFunc] === 'function') {
+  instance[jobFunc](...jobFuncParams);
+} else if (typeof instance.handle === 'function') {
+  instance.handle(...jobParams);
+}
+```
+
+<Note>
+使用 `typeof` 检查而非 `hasOwnProperty` 是有意为之。`typeof` 同时支持实例方法和原型链继承的方法，而 `hasOwnProperty` 会遗漏原型链上的方法。
+</Note>
+
+## IPC 消息处理
+
+### 接收消息
+
+ChildApp 只处理 `commands` 列表中定义的命令，忽略未知命令：
+
+```javascript
+const commands = ['run'];  // 目前只支持 run 命令
+
+_handleMessage(m) {
+  if (commands.indexOf(m.cmd) === -1) return;
+  switch (m.cmd) {
+    case 'run':
+      this.run(m);
+      break;
+  }
+}
+```
+
+### 发送消息
+
+子进程通过 `process.send()` 向主进程发送消息，支持 showException 和 sendToMain 两种通道：
+
+```javascript
+// 子进程发送业务消息
+process.send({
+  channel: 'sendToMain',
+  event: 'taskComplete',
+  data: { result: 'success' },
+  eventReceiver: 'childJob',
+});
+
+// 子进程发送异常消息
+process.send({
+  channel: 'showException',
+  data: 'Error: task execution failed',
+  eventReceiver: 'childJob',
+});
+```
+
+## 与 ChildJob/ChildPoolJob 的关系
+
+ChildApp 是 ChildJob 和 ChildPoolJob 的底层执行单元：
+
+```
+主进程                        子进程
+─────────────────────────     ──────────────────────
+ChildJob / ChildPoolJob       ChildApp
+    │                             │
+    │ dispatch(cmd, jobPath)      │
+    │ ─────────────────────────> │ _handleMessage()
+    │                             │ run()
+    │                             │ requireFile(jobPath)
+    │                             │ 实例化/调用
+    │                             │
+    │ process.send(result)        │
+    │ <───────────────────────── │
+    │                             │
+JobProcess._eventEmit()         │
+```
+
+- **ChildJob**：在主进程创建子进程，通过 JobProcess 发送命令
+- **ChildPoolJob**：在主进程管理进程池，通过 LoadBalancer 选择进程
+- **ChildApp**：在子进程接收命令，加载和执行任务文件
+- **JobProcess**：封装 fork() 和 IPC 通信
+
+## 长运行后台服务示例
+
+ChildApp 的类实例缓存机制特别适合长运行后台服务：
+
+```javascript
+// electron/jobs/service/timer.js
+class TimerJob {
+  constructor(params) {
+    this.timer = null;
+    this.count = 0;
+    this.interval = params.interval || 1000;
+  }
+
+  // 默认入口：启动定时器
+  handle() {
+    this.start();
+  }
+
+  // 实例方法：启动定时器
+  start() {
+    this.timer = setInterval(() => {
+      this.count++;
+      process.send({
+        channel: 'sendToMain',
+        event: 'timerTick',
+        data: { count: this.count },
+        eventReceiver: 'forkProcess',
+      });
+    }, this.interval);
+  }
+
+  // 实例方法：暂停定时器
+  pause() {
+    clearInterval(this.timer);
+    this.timer = null;
+  }
+
+  // 实例方法：恢复定时器
+  resume() {
+    this.start();
+  }
+
+  // 实例方法：获取计数
+  getCount() {
+    process.send({
+      channel: 'sendToMain',
+      event: 'timerCount',
+      data: { count: this.count },
+      eventReceiver: 'forkProcess',
+    });
+  }
+}
+
+module.exports = TimerJob;
+```
+
+### 主进程调用示例
+
+```javascript
+// 创建子进程并启动定时器
+const proc = job.exec('service/timer', { interval: 2000 });
+
+// 监听定时器消息
+proc.emitter.on('timerTick', (data) => {
+  console.log('定时器计数:', data.count);
+});
+
+// 暂停定时器
+setTimeout(() => proc.callFunc('service/timer', 'pause'), 5000);
+
+// 恢复定时器
+setTimeout(() => proc.callFunc('service/timer', 'resume'), 10000);
+
+// 获取当前计数
+setTimeout(() => proc.callFunc('service/timer', 'getCount'), 15000);
+```
+
+## 相关源码
+
+- `packages/ee-core/src/jobs/child/app.ts` — ChildApp 类实现
+- `packages/ee-core/src/jobs/child/jobProcess.ts` — JobProcess 通信机制
+- `packages/ee-core/src/jobs/child/index.ts` — ChildJob 类
+- `packages/ee-core/src/jobs/child-pool/index.ts` — ChildPoolJob 类
+- `packages/ee-core/src/loader/index.ts` — requireFile 文件加载

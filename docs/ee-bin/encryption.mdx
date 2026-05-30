@@ -1,0 +1,357 @@
+---
+title: 代码加密
+description: ee-bin 代码加密的四种类型详解：confusion（混淆）、bytecode（字节码）、strict（混淆+字节码）、none（跳过）。前端与 Electron 加密策略差异、ConfusionOptions 配置、bytenode 编译、specificFiles 特殊文件处理、encrypt 和 clean 命令使用。
+---
+
+ee-bin 提供多种代码加密方式保护应用源代码。前端和 Electron 使用不同的加密策略，因为浏览器渲染进程的 V8 版本与编译环境的 V8 版本不同，导致字节码不兼容。
+
+## 加密类型总览
+
+| 类型 | 说明 | 适用范围 | 保护强度 |
+|------|------|----------|----------|
+| `confusion` | 仅混淆（javascript-obfuscator） | 前端 + Electron | 中 |
+| `bytecode` | 仅字节码编译（bytenode） | 仅 Electron | 高 |
+| `strict` | 混淆 + 字节码双重加密 | 仅 Electron | 最高 |
+| `none` | 不加密 | 任意 | 无 |
+
+<Note>
+前端仅支持 `confusion` 类型。字节码编译生成的 V8 字节码与浏览器渲染进程的 V8 版本不兼容，在浏览器中无法执行。
+</Note>
+
+## 加密流程
+
+<Steps>
+### 加载配置
+
+从 `./cmd/bin.js` 加载 `encrypt` 配置段，分别获取 `frontend` 和 `electron` 的加密策略。
+
+### 创建 Encrypt 实例
+
+分别为 `frontend` 和 `electron` 目标创建独立的 `Encrypt` 实例，各自根据 `type` 字段决定加密方式。
+
+### 扫描目标文件
+
+使用 globby 扫描 `files` 字段指定的模式匹配文件列表。
+
+### 遍历加密文件
+
+对每个匹配文件：
+- 如果文件在 `specificFiles` 列表中 → 强制使用 `confusion`
+- 否则 → 使用全局配置的 `type`
+
+### 执行加密
+
+根据加密类型调用不同方法：
+- `confusion` → `generateJSConfuseFile()`（javascript-obfuscator）
+- `bytecode` → `generateBytecodeFile()`（bytenode）
+- `strict` → 先混淆再字节码编译
+</Steps>
+
+## 前端加密策略
+
+前端代码运行在浏览器渲染进程中，V8 版本与编译环境的 V8 可能不同，因此只能使用混淆：
+
+```js
+module.exports = {
+  encrypt: {
+    frontend: {
+      type: 'confusion',
+      files: ['./public/dist/**/*.js'],
+      fileExt: ['.js'],
+      cleanFiles: ['./public/dist'],
+      specificFiles: [],
+      encryptDir: './',
+      confusionOptions: {
+        compact: true,
+        stringArray: true,
+        stringArrayEncoding: ['none'],   // 前端性能敏感，使用 'none' 避免解码开销
+        deadCodeInjection: false,
+        stringArrayCallsTransform: true,
+        numbersToExpressions: true,
+        target: 'browser',
+      },
+    },
+  },
+};
+```
+
+### 前端混淆选项说明
+
+| 选项 | 前端默认值 | 说明 |
+|------|-----------|------|
+| `compact` | `true` | 压缩代码（移除换行） |
+| `stringArray` | `true` | 将字符串提取到数组 |
+| `stringArrayEncoding` | `['none']` | 不编码字符串数组（避免性能开销） |
+| `deadCodeInjection` | `false` | 不注入死代码（增大体积） |
+| `stringArrayCallsTransform` | `true` | 转换字符串数组调用方式 |
+| `numbersToExpressions` | `true` | 将数字转为表达式 |
+| `target` | `'browser'` | 目标运行环境为浏览器 |
+
+<Warning>
+前端代码对性能敏感。`stringArrayEncoding` 使用 `['none']` 而非 `['rc4']`，因为 RC4 解码每次调用字符串时都会执行解密运算，频繁调用会显著影响页面渲染性能。
+</Warning>
+
+## Electron 加密策略
+
+Electron 主进程运行在 Node.js 环境中，V8 版本固定，支持所有加密类型：
+
+### confusion — 仅混淆
+
+```js
+encrypt: {
+  electron: {
+    type: 'confusion',
+    files: ['./public/electron/**/*.js'],
+    confusionOptions: {
+      compact: true,
+      stringArray: true,
+      stringArrayEncoding: ['rc4'],   // Electron 可承受解码开销
+      target: 'node',
+    },
+  },
+}
+```
+
+### bytecode — 仅字节码
+
+```js
+encrypt: {
+  electron: {
+    type: 'bytecode',
+    files: ['./public/electron/**/*.js'],
+  },
+}
+```
+
+将 JS 文件编译为 V8 字节码（`.jsc`），源 `.js` 文件会被删除。字节码无法被反向工程还原为源代码。
+
+### strict — 混淆 + 字节码
+
+```js
+encrypt: {
+  electron: {
+    type: 'strict',
+    files: ['./public/electron/**/*.js'],
+    confusionOptions: {
+      compact: true,
+      stringArray: true,
+      stringArrayEncoding: ['rc4'],
+      target: 'node',
+    },
+  },
+}
+```
+
+先混淆代码（使源代码变得难以理解），再将混淆后的代码编译为字节码。双重保护，恢复难度最高。
+
+### Electron 混淆选项说明
+
+| 选项 | Electron 默认值 | 说明 |
+|------|----------------|------|
+| `compact` | `true` | 压缩代码 |
+| `stringArray` | `true` | 将字符串提取到数组 |
+| `stringArrayEncoding` | `['rc4']` | RC4 加密字符串数组（Electron 可承受解码开销） |
+| `deadCodeInjection` | `false` | 不注入死代码 |
+| `stringArrayCallsTransform` | `true` | 转换字符串数组调用 |
+| `numbersToExpressions` | `true` | 数字转为表达式 |
+| `target` | `'node'` | 目标运行环境为 Node.js |
+
+## ConfusionOptions 完整参考
+
+javascript-obfuscator 混淆配置的详细说明：
+
+| 选项 | 类型 | 说明 |
+|------|------|------|
+| `compact` | `boolean` | 压缩输出代码（移除换行） |
+| `stringArray` | `boolean` | 将字符串常量提取到数组中 |
+| `stringArrayThreshold` | `number` | 字符串移入数组的概率阈值（0~1，1 表示全部） |
+| `stringArrayEncoding` | `Array<'none' \| 'base64' \| 'rc4'>` | 字符串数组编码方式：`none` 不编码、`base64` Base64 编码、`rc4` RC4 加密 |
+| `stringArrayCallsTransform` | `boolean` | 转换字符串数组访问为函数调用形式 |
+| `deadCodeInjection` | `boolean` | 注入永远不会执行的死代码块 |
+| `numbersToExpressions` | `boolean` | 将数字常量转为等价表达式（如 `2` → `1+1`） |
+| `target` | `'browser' \| 'node'` | 混淆目标运行环境 |
+| `silent` | `boolean` | 隐藏混淆器警告信息 |
+
+用户配置与默认值通过 `Object.assign` 合并，用户值覆盖默认值，未设置的字段使用默认值。
+
+## bytenode 字节码编译
+
+bytecode 加密使用 bytenode 库将 `.js` 文件编译为 V8 字节码 `.jsc` 文件：
+
+### 编译参数
+
+```js
+const opt = {
+  filename: curPath,   // 输入 .js 文件路径
+  output: jscFile,     // 输出 .jsc 文件路径（默认为 filename + 'c'）
+  electron: true,      // 编译为 Electron 环境兼容的字节码
+};
+```
+
+<Note>
+`electron: true` 是关键参数。bytenode 使用 Electron 内置的 V8 引擎编译字节码，确保编译产物与 Electron 运行时的 V8 版本兼容。
+</Note>
+
+### 安全机制
+
+字节码编译后，ee-bin 验证 `.jsc` 文件是否成功生成：
+
+```js
+if (fs.existsSync(jscFile)) {
+  fs.unlinkSync(curPath);   // 编译成功，删除源 .js 文件
+} else {
+  throw new Error(`Bytecode compilation failed: ${jscFile} was not created, keeping source ${curPath}`);
+}
+```
+
+如果 `.jsc` 文件未生成（编译失败），源文件会被保留而非删除，防止代码丢失。
+
+<Warning>
+字节码编译仅处理 `.js` 文件，跳过 `.json` 和其他扩展名的文件。确保需要编译的文件扩展名为 `.js`。
+</Warning>
+
+## specificFiles — 特殊文件处理
+
+`specificFiles` 列表中的文件强制使用 `confusion` 加密，即使全局配置为 `bytecode` 或 `strict`：
+
+```js
+encrypt: {
+  electron: {
+    type: 'bytecode',
+    specificFiles: ['./public/electron/preload/bridge.js'],
+    files: ['./public/electron/**/*.js'],
+  },
+}
+```
+
+### 为什么 bridge.js 不能用字节码
+
+`bridge.js` 是 BrowserWindow 的 preload 脚本，Electron 要求它为可读的 `.js` 文件：
+
+1. Electron 通过 `BrowserWindow.webContents` 加载 preload 脚本
+2. preload 脚本运行在渲染进程中，V8 版本可能不同
+3. 字节码在渲染进程中无法正确执行
+
+因此 `bridge.js` 被强制使用混淆保护，而非字节码编译。
+
+## encrypt 命令
+
+```bash
+# 使用默认配置加密
+ee-bin encrypt
+
+# 自定义配置文件
+ee-bin encrypt --config ./cmd/bin.custom.js
+
+# 指定输出目录
+ee-bin encrypt --out ./release
+```
+
+`--out` 选项覆盖配置中的 `encryptDir`，改变加密文件的基准目录。
+
+加密时，ee-bin 同时处理 frontend 和 electron 两个目标：
+
+```js
+// encrypt() 入口函数
+const electronEpt = new Encrypt({ ...options, target: 'electron' });
+electronEpt.encrypt();
+
+const frontendEpt = new Encrypt({ ...options, target: 'frontend' });
+frontendEpt.encrypt();
+```
+
+每个目标独立判断加密类型和是否跳过。前端 `type` 为 `bytecode/strict` 时自动跳过。
+
+## clean 命令
+
+清除加密产物，恢复到构建后未加密的状态：
+
+```bash
+# 清除默认目录
+ee-bin clean
+
+# 清除指定目录
+ee-bin clean -d ./public/electron
+
+# 清除多个目录
+ee-bin clean -d ./public/electron -d ./public/dist
+```
+
+默认清除 `./public/electron`。可以多次使用 `-d` 清除多个目录。
+
+清除操作使用 `fs.rmSync` 递归强制删除，不可恢复。
+
+## 加密配置完整示例
+
+```js
+// cmd/bin.js
+module.exports = {
+  encrypt: {
+    frontend: {
+      type: 'confusion',
+      files: ['./public/dist/**/*.js'],
+      fileExt: ['.js'],
+      cleanFiles: ['./public/dist'],
+      specificFiles: [],
+      encryptDir: './',
+      confusionOptions: {
+        compact: true,
+        stringArray: true,
+        stringArrayEncoding: ['none'],
+        deadCodeInjection: false,
+        stringArrayCallsTransform: true,
+        numbersToExpressions: true,
+        target: 'browser',
+      },
+    },
+    electron: {
+      type: 'strict',
+      files: ['./public/electron/**/*.js'],
+      fileExt: ['.js'],
+      cleanFiles: ['./public/electron'],
+      specificFiles: ['./public/electron/preload/bridge.js'],
+      encryptDir: './',
+      confusionOptions: {
+        compact: true,
+        stringArray: true,
+        stringArrayEncoding: ['rc4'],
+        deadCodeInjection: false,
+        stringArrayCallsTransform: true,
+        numbersToExpressions: true,
+        target: 'node',
+      },
+    },
+  },
+};
+```
+
+## 加密流程建议
+
+<Steps>
+### 构建项目
+
+```bash
+pnpm build
+# 或分步执行
+pnpm build-frontend && pnpm build-electron
+```
+
+### 执行加密
+
+```bash
+pnpm encrypt
+# 或
+ee-bin encrypt
+```
+
+### 验证加密结果
+
+检查加密产物是否正确：
+- `confusion` 类型：文件仍为 `.js`，但内容已被混淆
+- `bytecode` 类型：`.js` 文件被替换为 `.jsc` 文件
+- `strict` 类型：`.js` 文件被替换为 `.jsc` 文件（先混淆再编译）
+</Steps>
+
+<Warning>
+加密是不可逆操作。加密前确保项目已完整构建，且源代码有备份。如需重新构建，先执行 `ee-bin clean` 清除加密产物。
+</Warning>
