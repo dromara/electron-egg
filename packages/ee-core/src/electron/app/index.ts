@@ -5,6 +5,7 @@ import { cross } from '../../cross/index.js';
 import { createMainWindow, setCloseAndQuit, loadServer } from '../window/index.js';
 import { eventBus, ElectronAppReady, BeforeClose, Preload } from '../../app/events.js';
 import { getConfig } from '../../config/index.js';
+import { killAllJobs } from '../../jobs/registry.js';
 
 export { electronApp };
 
@@ -38,5 +39,6 @@ export function createElectron(): void {
     setCloseAndQuit(true);
     eventBus.emitLifecycle(BeforeClose);
     cross.killAll();
+    killAllJobs();
   });
 }

@@ -22,8 +22,8 @@ const Instance: {
 };
 
 // create SocketServer
-export function createSocketServer(): SocketServer {
-  Instance.socketServer = new SocketServer();
+export async function createSocketServer(): Promise<SocketServer> {
+  Instance.socketServer = await SocketServer.create();
   return Instance.socketServer;
 }
 
@@ -33,8 +33,8 @@ export function getSocketServer(): SocketServer | null {
 }
 
 // create Http Server
-export function createHttpServer(): HttpServer {
-  Instance.httpServer = new HttpServer();
+export async function createHttpServer(): Promise<HttpServer> {
+  Instance.httpServer = await HttpServer.create();
   return Instance.httpServer;
 }
 
@@ -55,8 +55,8 @@ export function getIpcServer(): IpcServer | null {
 }
 
 // load socket server
-export function loadSocket(): void {
-  createSocketServer();
-  createHttpServer();
+export async function loadSocket(): Promise<void> {
+  await createSocketServer();
+  await createHttpServer();
   createIpcServer();
 }

@@ -17,7 +17,7 @@ export class Application {
 
   async runAsync(): Promise<void> {
     await loadControllerAsync();
-    loadSocket();
+    await loadSocket();
     eventBus.emitLifecycle(Ready);
     loadElectron();
   }

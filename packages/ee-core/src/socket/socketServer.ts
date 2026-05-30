@@ -16,11 +16,18 @@ export class SocketServer {
   socket: ReturnType<Server['on']> | undefined;
   io: Server | undefined;
 
-  constructor() {
+  private constructor() {
     const config = getConfig();
     this.config = config.socketServer;
     this.channelSeparator = config.mainServer.channelSeparator || '/';
-    this.init();
+    this.socket = undefined;
+    this.io = undefined;
+  }
+
+  static async create(): Promise<SocketServer> {
+    const instance = new SocketServer();
+    await instance.init();
+    return instance;
   }
 
   async init(): Promise<void> {

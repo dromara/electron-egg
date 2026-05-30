@@ -22,12 +22,17 @@ export class HttpServer {
   httpApp: Koa | undefined;
   channelSeparator: string;
 
-  constructor() {
+  private constructor() {
     const config = getConfig();
     this.config = config.httpServer;
     this.channelSeparator = config.mainServer.channelSeparator || '/';
     this.httpApp = undefined;
-    this.init();
+  }
+
+  static async create(): Promise<HttpServer> {
+    const instance = new HttpServer();
+    await instance.init();
+    return instance;
   }
 
   async init(): Promise<void> {

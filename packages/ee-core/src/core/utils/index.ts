@@ -4,7 +4,13 @@ import path from 'path';
 import fs from 'fs';
 import { createRequire } from 'module';
 
-const requireMod = createRequire(__filename);
+// In CJS environments __filename is available; in pure ESM without a bundler,
+// fall back to the current working directory for createRequire.
+const requireMod = createRequire(
+  typeof __filename !== 'undefined'
+    ? __filename
+    : path.join(process.cwd(), '__virtual__.js')
+);
 const Module = requireMod('module');
 
 // Module._extensions:
