@@ -76,8 +76,7 @@ class IncrUpdater {
     const forceUpdate = force === 'true';
 
     if (!cfg || !platform) {
-      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: updater config or platform does not exist`));
-      return;
+      throw new Error('[ee-bin] [updater] Error: updater config or platform does not exist');
     }
 
     await this.generateFile(cfg, asarFile, platform, forceUpdate);
@@ -102,8 +101,7 @@ class IncrUpdater {
   async generateFile(config: Record<string, UpdaterConfig>, asarFile: string | undefined, platform: string, force = false): Promise<void> {
     const cfg = config[platform];
     if (!cfg) {
-      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: ${platform} config does not exist`));
-      return;
+      throw new Error(`[ee-bin] [updater] Error: ${platform} config does not exist`);
     }
 
     const homeDir = process.cwd();
@@ -112,8 +110,7 @@ class IncrUpdater {
     // Read metadata YAML (electron-builder-generated version info file)
     const metadataPath = path.join(homeDir, cfg.metadata);
     if (!fs.existsSync(metadataPath)) {
-      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: ${metadataPath} does not exist!`));
-      return;
+      throw new Error(`[ee-bin] [updater] Error: ${metadataPath} does not exist!`);
     }
     const metadataObj = yaml.load(fs.readFileSync(metadataPath, 'utf8')) as Metadata;
 
@@ -126,8 +123,7 @@ class IncrUpdater {
     }
 
     if (!asarFilePath || !fs.existsSync(asarFilePath)) {
-      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: ${asarFilePath} does not exist`));
-      return;
+      throw new Error(`[ee-bin] [updater] Error: ${asarFilePath || '(empty path)'} does not exist`);
     }
 
     const version = metadataObj.version;
@@ -206,8 +202,7 @@ class IncrUpdater {
     }
 
     if (!fullFileInfo) {
-      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red('Error: fullFileInfo not found in metadata'));
-      return;
+      throw new Error('[ee-bin] [updater] Error: fullFileInfo not found in metadata');
     }
 
     // Verify SHA512: ensure the local full package hash matches the metadata record.
@@ -217,13 +212,11 @@ class IncrUpdater {
     const fullFilePath = path.normalize(path.join(homeDir, cfg.output.directory, fullFileName));
     const generateSha512 = this.generateHash(fullFilePath, 'sha512');
     if (fullFileInfo.sha512 !== generateSha512) {
-      console.log(
-        chalk.blue('[ee-bin] [updater] ') +
-          chalk.red(`Error: metadata sha512 is not equal to generateSha512 !
-      at metadata sha512: ${fullFileInfo.sha512}
-      at generate Sha512: ${generateSha512}`)
+      throw new Error(
+        `[ee-bin] [updater] Error: metadata sha512 is not equal to generateSha512!\n` +
+        `  at metadata sha512: ${fullFileInfo.sha512}\n` +
+        `  at generate  sha512: ${generateSha512}`
       );
-      return;
     }
 
     // Build and write incremental update JSON metadata

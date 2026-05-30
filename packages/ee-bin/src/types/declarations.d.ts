@@ -45,9 +45,9 @@ declare module 'cross-spawn' {
   /** Launch a child process asynchronously, returns ChildProcess instance (supports event listeners, pid access) */
   export function spawn(command: string, args?: string[], options?: CrossSpawnOptions): ChildProcess;
   /** Launch a child process synchronously, returns result object (already completed, no event listening) */
-  export function sync(command: string, args?: string[], options?: CrossSpawnOptions): { status: number | null; output: string[]; stdout: string | Buffer; stderr: string | Buffer; signal: string | null; pid: number };
+  export function sync(command: string, args?: string[], options?: CrossSpawnOptions): { status: number | null; output: string[]; stdout: string | Buffer; stderr: string | Buffer; signal: string | null; pid: number; error?: Error };
   /** Alias for spawnSync */
-  export function spawnSync(command: string, args?: string[], options?: CrossSpawnOptions): { status: number | null; output: string[]; stdout: string | Buffer; stderr: string | Buffer; signal: string | null; pid: number };
+  export function spawnSync(command: string, args?: string[], options?: CrossSpawnOptions): { status: number | null; output: string[]; stdout: string | Buffer; stderr: string | Buffer; signal: string | null; pid: number; error?: Error };
   export default spawn;
 }
 

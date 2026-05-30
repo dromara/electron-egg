@@ -48,7 +48,8 @@
       "Bash(mintlify dev *)",
       "Bash(npx tsc *)",
       "Bash(/Users/gsx/www/gofile/src/gowork/ee-dev/node_modules/typescript/bin/tsc --noEmit)",
-      "Bash(ln -s ../../../node_modules/typescript /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-core/node_modules/typescript)"
+      "Bash(ln -s ../../../node_modules/typescript /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-core/node_modules/typescript)",
+      "Bash(/Users/gsx/www/gofile/src/gowork/ee-dev/node_modules/typescript/bin/tsc *)"
     ]
   }
 }

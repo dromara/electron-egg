@@ -104,8 +104,18 @@ export function move(options: MoveOptions = {}): void {
       fs.renameSync(destResource, backupDest);
     }
 
-    // Copy source to destination
-    copyDirSync(srcResource, destResource);
+    // Copy source to destination; restore backup if copy fails
+    try {
+      copyDirSync(srcResource, destResource);
+    } catch (copyErr) {
+      // Restore backup on copy failure to avoid leaving broken state
+      if (fs.existsSync(backupDest)) {
+        if (fs.existsSync(destResource)) rm(destResource);
+        fs.renameSync(backupDest, destResource);
+        console.log(chalk.yellow('[ee-bin] [move] ') + `Copy failed, restored previous destination: ${destResource}`);
+      }
+      throw copyErr;
+    }
 
     // Clean up backup (old destination) after successful copy
     if (fs.existsSync(backupDest)) {

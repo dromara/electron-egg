@@ -149,25 +149,29 @@ class ServeProcess {
             clearTimeout(debounceTimer);
           }
           debounceTimer = setTimeout(async () => {
-            console.log(chalk.blue('[ee-bin] [dev] ') + `Restart ${cmd}`);
-            await this.bundle(binCfg.build.electron);
-            const subProcess = this.execProcess[cmd];
-            if (subProcess && subProcess.pid) {
-              // Kill old Electron process (SIGKILL for forced termination), then re-spawn on success
-              kill(subProcess.pid, 'SIGKILL', (err) => {
-                if (err) {
-                  console.log(chalk.red('[ee-bin] [dev] ') + `Restart failed, error: ${err}`);
-                  process.exit(-1);
-                }
-                delete this.execProcess[cmd];
+            try {
+              console.log(chalk.blue('[ee-bin] [dev] ') + `Restart ${cmd}`);
+              await this.bundle(binCfg.build.electron);
+              const subProcess = this.execProcess[cmd];
+              if (subProcess && subProcess.pid) {
+                // Kill old Electron process (SIGKILL for forced termination), then re-spawn on success
+                kill(subProcess.pid, 'SIGKILL', (err) => {
+                  if (err) {
+                    console.log(chalk.red('[ee-bin] [dev] ') + `Restart failed, error: ${err}`);
+                    process.exit(-1);
+                  }
+                  delete this.execProcess[cmd];
 
-                const onlyElectronOpt = {
-                  binCmd,
-                  binCmdConfig,
-                  command: cmd,
-                };
-                this.multiExec(onlyElectronOpt);
-              });
+                  const onlyElectronOpt = {
+                    binCmd,
+                    binCmdConfig,
+                    command: cmd,
+                  };
+                  this.multiExec(onlyElectronOpt);
+                });
+              }
+            } catch (e) {
+              console.log(chalk.red('[ee-bin] [dev] ') + `Re-bundle failed: ${e instanceof Error ? e.message : e}`);
             }
           }, electronConfig.delay);
         });
@@ -303,11 +307,17 @@ class ServeProcess {
 
       if (cfg.sync) {
         // Sync execution: blocks until the command completes, no process tracking needed
-        crossSpawnSync(cfg.cmd, execArgs, {
+        const syncResult = crossSpawnSync(cfg.cmd, execArgs, {
           stdio: stdioOpt,
           cwd: execDir,
           maxBuffer: MAX_BUFFER,
         });
+        if (syncResult.error) {
+          throw new Error(`[ee-bin] [${binCmd}] Command "${cfg.cmd}" failed to spawn: ${syncResult.error.message}`);
+        }
+        if (syncResult.status !== 0 && syncResult.status !== null) {
+          throw new Error(`[ee-bin] [${binCmd}] Command "${cfg.cmd} ${execArgs.join(' ')}" exited with code ${syncResult.status}`);
+        }
       } else {
         // Async execution: starts a child process and tracks it for SIGINT/SIGTERM kill
         const childProc = crossSpawn(cfg.cmd, execArgs, {
@@ -316,6 +326,11 @@ class ServeProcess {
           maxBuffer: MAX_BUFFER,
         });
         this.execProcess[cmd] = childProc;
+
+        childProc.on('error', (err) => {
+          console.log(chalk.red(`[ee-bin] [${binCmd}] `) + `Command "${cmd}" failed to spawn: ${err.message}`);
+          delete this.execProcess[cmd];
+        });
 
         childProc.on('exit', () => {
           if (binCmd === 'dev') {

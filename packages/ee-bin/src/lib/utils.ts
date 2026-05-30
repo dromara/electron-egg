@@ -84,6 +84,11 @@ export function loadFile(filepath: string): Record<string, unknown> {
   if (is.function(result) && !is.class(result)) {
     result = (result as () => unknown)();
   }
+  // Warn if the config file exports an unrecognized value (null, undefined, primitive)
+  // that will be treated as empty config — the user's config is effectively ignored.
+  if (result === null || result === undefined) {
+    console.log(chalk.yellow('[ee-bin] [loadFile] ') + `Warning: ${configFile} exports ${result}, treating as empty config`);
+  }
   return (result as Record<string, unknown>) || {};
 }
 

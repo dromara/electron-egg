@@ -22,6 +22,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { chalk } from '../lib/helpers.js';
 
 /** Parameters controlling icon generation, derived from CLI options with defaults */
 interface IconGenParams {
@@ -65,12 +66,16 @@ class IconGen {
 
     // Attempt to load icon-gen as an optional dependency.
     // If not installed, set to null and provide a helpful message later.
+    // If installed but fails to load (e.g. native module error), log the real error.
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports -- optional dependency lazy load
       const mod = require('icon-gen');
       this.icongen = typeof mod.default === 'function' ? mod.default : mod;
-    } catch {
+    } catch (e) {
       this.icongen = null;
+      if (e instanceof Error && !e.message.includes("Cannot find module")) {
+        console.log(chalk.yellow('[ee-bin] [icon-gen] ') + `icon-gen failed to load: ${e.message}`);
+      }
     }
 
     console.log('[ee-bin] [icon-gen] Current working directory: ', process.cwd());

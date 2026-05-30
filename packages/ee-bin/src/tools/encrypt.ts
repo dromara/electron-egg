@@ -130,6 +130,10 @@ class Encrypt {
       const fullpath = path.join(this.encryptDir, file);
       if (!fs.statSync(fullpath).isFile()) continue;
 
+      // Filter by file extension (fileExt config option)
+      const ext = path.extname(file);
+      if (!this.filesExt.includes(ext)) continue;
+
       // Files in specificFiles are forced to use confusion (e.g. preload/bridge.js
       // must remain in a readable format for BrowserWindow to load; bytecode won't work)
       if (this.specFiles.includes(file)) {
