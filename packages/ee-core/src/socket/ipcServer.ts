@@ -46,21 +46,18 @@ export class IpcServer {
       const channel = tmpChannel.split('.').join(this.channelSeparator);
       debugLog('[register] channel %s', channel);
 
-      // send/on model
-      // Note: event.returnValue must be set synchronously in Electron.
-      // If the controller method is async, we set returnValue to undefined
-      // and send the result via event.reply() for the renderer to receive.
+      // send/on model (synchronous)
+      // IMPORTANT: ipcMain.on + event.returnValue is synchronous only.
+      // Async controller methods are incompatible with sendSync from the renderer.
+      // Use ipcRenderer.invoke / ipcMain.handle for async methods instead.
       ipcMain.on(channel, (event, params) => {
         try {
           const fn = resolveControllerFn(controller, channel, this.channelSeparator);
           if (!fn) return;
           const result = fn.call(controller, params, event);
           if (result instanceof Promise) {
+            coreLogger.warn(`[socket/IpcServer] async controller method '${channel}' called via send/on model (sendSync). Use invoke/handle model instead.`);
             event.returnValue = undefined;
-            result.then(
-              (value) => { event.reply(channel, value); },
-              (err: unknown) => { coreLogger.error('[socket/IpcServer] async on handler error:', err); }
-            );
           } else {
             event.returnValue = result;
           }

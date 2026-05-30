@@ -62,7 +62,7 @@ class ChildApp {
       }
 
       // 如果指定了函数名，则调用指定的函数
-      if (jobFunc && Object.prototype.hasOwnProperty.call(Object.getPrototypeOf(instance), jobFunc) && typeof instance[jobFunc] === 'function') {
+      if (jobFunc && typeof instance[jobFunc] === 'function') {
         (instance[jobFunc] as (...args: unknown[]) => unknown)(...(jobFuncParams || []));
       } else if (typeof instance.handle === 'function') {
         instance.handle(...(jobParams || []));

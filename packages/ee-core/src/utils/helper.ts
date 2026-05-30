@@ -156,6 +156,15 @@ export function getValueFromArgv(argv: string[], key: string): unknown {
   if (Object.prototype.hasOwnProperty.call(argvObj, key)) {
     return argvObj[key];
   }
+  // Fallback: scan for bare key=value patterns without -- prefix
+  const searchKey = key + '=';
+  for (const item of argv) {
+    if (!item) continue;
+    const pos = item.indexOf(searchKey);
+    if (pos !== -1) {
+      return item.substring(pos + searchKey.length);
+    }
+  }
   return undefined;
 }
 

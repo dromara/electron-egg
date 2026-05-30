@@ -10,7 +10,7 @@ export function resolveControllerFn(
   cmd: string,
   separator: string,
 ): ((...args: unknown[]) => unknown) | null {
-  if (!cmd) return null;
+  if (typeof cmd !== 'string') return null;
 
   const actions = cmd.split(separator);
   let obj: Record<string, unknown> = { controller };
