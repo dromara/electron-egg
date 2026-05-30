@@ -11,12 +11,8 @@ export default function weightsMinimumConnection(
 ): LoadBalancerTarget | null {
   if (!tasks.length) return null;
 
-  const first = tasks[0];
-  if (!first) return null;
-
-  let min = first.weight || 0;
+  let min = Infinity;
   let minIndex = 0;
-  let sum: number;
 
   const connectionsTotal = tasks.reduce((total, cur) => {
     total += connectionsMap[cur.id] || 0;
@@ -26,11 +22,11 @@ export default function weightsMinimumConnection(
   for (let i = 0; i < tasks.length; i++) {
     const task = tasks[i];
     if (!task) continue;
-    sum =
+    const sum =
       (task.weight || 0) +
       Math.random() * weightTotal +
       (((connectionsMap[task.id] || 0) * weightTotal) / (connectionsTotal || 1));
-    if (sum <= min) {
+    if (sum < min) {
       min = sum;
       minIndex = i;
     }

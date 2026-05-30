@@ -26,19 +26,9 @@ export function getLoggers(): PinoLoggers {
   return loggers!;
 }
 
-function _getLogger(): pino.Logger {
+function _getLoggerBy(prop: 'logger' | 'coreLogger' | 'errorLogger'): pino.Logger {
   if (!loggers) { loadLog(); }
-  return loggers!.logger;
-}
-
-function _getCoreLogger(): pino.Logger {
-  if (!loggers) { loadLog(); }
-  return loggers!.coreLogger;
-}
-
-function _getErrorLogger(): pino.Logger {
-  if (!loggers) { loadLog(); }
-  return loggers!.errorLogger;
+  return loggers![prop];
 }
 
 const LOG_METHODS = new Set(['trace', 'debug', 'info', 'warn', 'error', 'fatal']);
@@ -85,6 +75,6 @@ function createLoggerProxy(getter: () => pino.Logger): EeLogger {
   });
 }
 
-export const logger: EeLogger = createLoggerProxy(_getLogger);
-export const coreLogger: EeLogger = createLoggerProxy(_getCoreLogger);
-export const errorLogger: EeLogger = createLoggerProxy(_getErrorLogger);
+export const logger: EeLogger = createLoggerProxy(() => _getLoggerBy('logger'));
+export const coreLogger: EeLogger = createLoggerProxy(() => _getLoggerBy('coreLogger'));
+export const errorLogger: EeLogger = createLoggerProxy(() => _getLoggerBy('errorLogger'));

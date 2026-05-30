@@ -3,6 +3,7 @@ import { getConfig } from '../config/index.js';
 import { getValueFromArgv, replaceArgsValue } from '../utils/helper.js';
 import { CrossProcess } from './crossProcess.js';
 import type { CrossTargetConfig } from '../types/index.js';
+import type { CrossHost } from './crossProcess.js';
 import { Events } from '../const/channel.js';
 import { extend } from '../utils/extend.js';
 import { getPort } from '../utils/port/index.js';
@@ -14,7 +15,7 @@ export interface CrossRunOptions {
   port?: number;
 }
 
-export class Cross {
+export class Cross implements CrossHost {
   emitter: EventEmitter | undefined;
 
   // pid唯一
@@ -39,7 +40,7 @@ export class Cross {
     for (const key of Object.keys(crossCfg)) {
       const val = crossCfg[key];
       if (val && val.enable === true) {
-        this.run(key);
+        await this.run(key);
       }
     }
   }
@@ -103,11 +104,12 @@ export class Cross {
     }
   }
 
-  getUrl(name: string): string {
-    const entity = this.getProcByName(name);
-    const url = entity.getUrl();
-
-    return url;
+  getUrl(name: string): string | undefined {
+    const pid = this.childrenMap[name];
+    if (!pid) return undefined;
+    const child = this.children[String(pid)];
+    if (!child) return undefined;
+    return child.entity.getUrl();
   }
 
   // 获取 proc

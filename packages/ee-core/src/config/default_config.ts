@@ -14,6 +14,10 @@ export default function defaultConfig(): Config {
       minWidth: 400,
       minHeight: 300,
       webPreferences: {
+        // SECURITY WARNING: contextIsolation=false + nodeIntegration=true allows
+        // renderer processes full access to Node.js APIs. Any XSS vulnerability
+        // in the renderer can lead to remote code execution. For new projects,
+        // consider setting contextIsolation=true and using preload scripts instead.
         contextIsolation: false,
         nodeIntegration: true,
       },

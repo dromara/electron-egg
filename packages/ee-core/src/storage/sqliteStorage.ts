@@ -14,6 +14,7 @@ export class SqliteStorage {
 
   constructor(name: string, opt: Record<string, unknown> = {}) {
     assert(name, `db name ${name} Cannot be empty`);
+    assert(!name.includes('..'), `db name ${name} contains path traversal`);
 
     this.name = name;
     this.mode = this.getMode(name);

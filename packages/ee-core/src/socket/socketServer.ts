@@ -1,5 +1,4 @@
 import debug from 'debug';
-import { isString } from '../utils/type_check.js';
 import { Server } from 'socket.io';
 import { coreLogger } from '../log/index.js';
 import { getConfig } from '../config/index.js';
@@ -7,6 +6,7 @@ import { SocketIO } from '../const/channel.js';
 import { getController } from '../controller/index.js';
 import { getPort } from '../utils/port/index.js';
 import type { SocketServerConfig } from '../types/index.js';
+import { resolveControllerFn } from './utils.js';
 
 const debugLog = debug('ee-core:socket:socketServer');
 
@@ -53,18 +53,8 @@ export class SocketServer {
         try {
           const cmd = message.cmd;
           const args = message.args;
-          let fn: ((...args: unknown[]) => unknown) | null = null;
           debugLog('[socket] channel %s', cmd);
-          if (isString(cmd)) {
-            const actions = cmd.split(this.channelSeparator);
-            debugLog('[findFn] channel %o', actions);
-            let obj: Record<string, unknown> = { controller };
-            actions.forEach((key) => {
-              obj = obj[key] as Record<string, unknown>;
-              if (!obj) throw new Error(`class or function '${key}' not exists`);
-            });
-            fn = obj as unknown as (...args: unknown[]) => unknown;
-          }
+          const fn = resolveControllerFn(controller, cmd, this.channelSeparator);
           if (!fn) throw new Error('function not exists');
 
           const result = await fn.call(controller, args);

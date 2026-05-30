@@ -16,6 +16,32 @@ import { cross } from '../../cross/index.js';
 
 const debugLog = debug('ee-core:electron:window');
 
+/**
+ * Wait for a URL to become reachable via HTTP GET.
+ * Returns true if the URL responded within the retry limit, false otherwise.
+ */
+async function waitForUrl(url: string, options: { retries: number; intervalMs: number; timeoutMs: number }): Promise<boolean> {
+  let count = 0;
+  let ready = false;
+  while (!ready && count < options.retries) {
+    await sleep(options.intervalMs);
+    try {
+      await axios({
+        method: 'get',
+        url,
+        timeout: options.timeoutMs,
+        proxy: false,
+        headers: { 'Accept': 'text/html, application/json, text/plain, */*' },
+      });
+      ready = true;
+    } catch {
+      // ignore
+    }
+    count++;
+  }
+  return ready;
+}
+
 const Instance: {
   mainWindow: BrowserWindow | null;
   closeAndQuit: boolean;
@@ -119,27 +145,8 @@ export async function loadServer(): Promise<void> {
 
       // check frontend is ready
       const retryTimes = frontendConf.force === true ? 3 : 60;
-      let count = 0;
-      let frontendReady = false;
-      while (!frontendReady && count < retryTimes) {
-        await sleep(1 * 1000);
-        try {
-          await axios({
-            method: 'get',
-            url,
-            timeout: 1000,
-            proxy: false,
-            headers: {
-              'Accept': 'text/html, application/json, text/plain, */*',
-            },
-          });
-          frontendReady = true;
-        } catch (err) {
-          // ignore
-        }
-        count++;
-      }
-      debugLog('it takes %d seconds to start the frontend', count);
+      const frontendReady = await waitForUrl(url, { retries: retryTimes, intervalMs: 1000, timeoutMs: 1000 });
+      debugLog('frontend ready: %s', frontendReady);
 
       if (frontendReady === false && frontendConf.force !== true) {
         const bootFailurePage = getHtmlFilepath('failure.html');
@@ -237,30 +244,15 @@ async function crossTakeover(): Promise<void> {
   const entityName = serviceConf.name || service;
   const url = cross.getUrl(entityName);
 
+  if (!url) {
+    throw new Error(`[ee-core] Cannot get URL for cross service [${service}], process may not be running`);
+  }
+
   // 循环检查
-  let count = 0;
-  let serviceReady = false;
   const times = isDev() ? 20 : 100;
   const sleeptime = isDev() ? 1000 : 200;
-  while (!serviceReady && count < times) {
-    await sleep(sleeptime);
-    try {
-      await axios({
-        method: 'get',
-        url,
-        timeout: 100,
-        proxy: false,
-        headers: {
-          'Accept': 'text/html, application/json, text/plain, */*',
-        },
-      });
-      serviceReady = true;
-    } catch {
-      // ignore
-    }
-    count++;
-  }
-  debugLog('it takes %d seconds to start the cross service', count * sleeptime);
+  const serviceReady = await waitForUrl(url, { retries: times, intervalMs: sleeptime, timeoutMs: 100 });
+  debugLog('cross service ready: %s', serviceReady);
 
   if (!serviceReady) {
     const bootFailurePage = getHtmlFilepath('cross-failure.html');

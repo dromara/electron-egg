@@ -72,9 +72,9 @@ export { extensions };
 export async function loadFileAsync(filepath: string): Promise<unknown> {
   try {
     const extname = path.extname(filepath);
-    // Non-js files: return content buffer (sync is fine here)
+    // Non-js files: return content buffer
     if (extname && !extensions[extname] && extname !== '.mjs') {
-      return fs.readFileSync(filepath);
+      return fs.promises.readFile(filepath);
     }
 
     // Dynamic import for ESM/CJS

@@ -4,10 +4,10 @@ export { Application, app } from './app/application.js';
 export { loadConfig, getConfig } from './config/index.js';
 export { Processes, SocketIO, Events, Receiver } from './const/channel.js';
 export { ControllerLoader } from './controller/controller_loader.js';
-export { loadController, getControllers, getController } from './controller/index.js';
+export { loadController, loadControllerAsync, getControllers, getController } from './controller/index.js';
 export { Cross, cross } from './cross/index.js';
 export { Timing } from './core/utils/timing.js';
-export { loadFile, callFn, getResolvedFilename, isBytecodeClass, filePatterns, extensions } from './core/utils/index.js';
+export { loadFile, loadFileAsync, callFn, getResolvedFilename, isBytecodeClass, filePatterns, extensions } from './core/utils/index.js';
 export { FileLoader, FULLPATH, EXPORTS } from './core/loader/file_loader.js';
 export { electronApp, createElectron, getMainWindow, createMainWindow, restoreMainWindow, setCloseAndQuit, getCloseAndQuit, loadServer } from './electron/index.js';
 export { loadException } from './exception/index.js';
@@ -25,7 +25,7 @@ export { getPackage, getMAC, isMAC, isFileProtocol, isWebProtocol, isJsProject, 
 export { parseArgv } from './utils/pargv.js';
 export { getProperties, defaultCamelize } from './utils/wrap.js';
 export { fnDebounce, getRandomString, mkdir, chmodPath, compareVersion, stringify, validValue, checkConfig, sleep, systemSleep, replaceArgsValue, getValueFromArgv, fileIsExist } from './utils/helper.js';
-export { getPort } from './utils/port/index.js';
+export { getPort, releasePortLocks } from './utils/port/index.js';
 export { allEnv, env, isProd, isDev, isRenderer, isMain, isForkedChild, processType, appName, appVersion, getDataDir, getLogDir, getBundleDir, getElectronCodeDir, getFrontendCodeDir, getRootDir, getBaseDir, getElectronDir, getPublicDir, getExtraResourcesDir, getAppUserDataDir, getExecDir, getUserHomeDir, getUserHomeHiddenAppDir, getUserHomeAppDir, getSocketPort, getHttpPort, isPackaged, exit, makeMessage, exitChildJob, isChildJob, isChildPoolJob, getArgumentByName } from './ps/index.js';
 
 export type {
@@ -63,5 +63,6 @@ export type {
 
 export type { PidInfo } from './jobs/load-balancer/types.js';
 export type { CrossRunOptions } from './cross/cross.js';
+export type { CrossProcessOptions, CrossHost } from './cross/crossProcess.js';
 export type { EeLogger } from './log/index.js';
 export type { PinoLoggers } from './log/logger.js';

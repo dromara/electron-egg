@@ -129,3 +129,16 @@ export async function getPort(options?: GetPortOptions): Promise<number> {
 
   throw new Error('No available ports found');
 }
+
+/**
+ * Clear the port lock interval and release all locked ports.
+ * Call this when shutting down to ensure clean resource cleanup.
+ */
+export function releasePortLocks(): void {
+  if (interval !== undefined) {
+    clearInterval(interval);
+    interval = undefined;
+  }
+  lockedPorts.old.clear();
+  lockedPorts.young.clear();
+}

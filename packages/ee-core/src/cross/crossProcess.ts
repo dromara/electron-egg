@@ -137,13 +137,20 @@ export class CrossProcess {
         );
         tkill(this.pid, 'SIGKILL');
       }
+      // Fallback: if the exit event hasn't fired within timeout,
+      // trigger _exitElectron as a safety net
       setTimeout(() => {
-        this._exitElectron();
+        if (this.child && !this.child.killed) {
+          this._exitElectron();
+        }
       }, timeout);
     });
   }
 
   getUrl(): string {
+    if (!this.port) {
+      coreLogger.warn(`[cross/process] getUrl called with port 0, pid:${this.pid}`);
+    }
     const ssl = getValueFromArgv(this.config.args || [], 'ssl');
     let hostname = getValueFromArgv(this.config.args || [], 'hostname') as string | undefined;
     let protocol = 'http://';

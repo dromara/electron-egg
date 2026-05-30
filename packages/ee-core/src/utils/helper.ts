@@ -10,28 +10,26 @@ export function fnDebounce(): (
   isImediate?: boolean,
   args?: unknown
 ) => void {
-  const fnObject: Record<string, { delayTime: number; timer: NodeJS.Timeout }> = {};
-  let timer: NodeJS.Timeout;
+  const fnMap = new Map<(...args: unknown[]) => void, { delayTime: number; timer: NodeJS.Timeout }>();
 
   return (fn, delayTime, isImediate, args) => {
     const setTimer = () => {
-      timer = setTimeout(() => {
+      const timer = setTimeout(() => {
         fn(args);
         clearTimeout(timer);
-        delete fnObject[fn as unknown as string];
+        fnMap.delete(fn);
       }, delayTime);
 
-      fnObject[fn as unknown as string] = { delayTime: delayTime || 0, timer };
+      fnMap.set(fn, { delayTime: delayTime || 0, timer });
     };
 
     if (!delayTime || isImediate) return fn(args);
 
-    if (fnObject[fn as unknown as string]) {
-      clearTimeout(timer);
-      setTimer();
-    } else {
-      setTimer();
+    const existing = fnMap.get(fn);
+    if (existing) {
+      clearTimeout(existing.timer);
     }
+    setTimer();
   };
 }
 
@@ -158,22 +156,13 @@ export function getValueFromArgv(argv: string[], key: string): unknown {
   if (Object.prototype.hasOwnProperty.call(argvObj, key)) {
     return argvObj[key];
   }
-
-  const searchKey = key + '=';
-  let value: string | undefined;
-  for (let i = 0; i < argv.length; i++) {
-    const item = argv[i];
-    if (!item) continue;
-    const pos = item.indexOf(searchKey);
-    if (pos !== -1) {
-      value = item.substring(pos + searchKey.length);
-      break;
-    }
-  }
-
-  return value;
+  return undefined;
 }
 
 export function fileIsExist(filepath: string): boolean {
-  return fs.existsSync(filepath) && fs.statSync(filepath).isFile();
+  try {
+    return fs.statSync(filepath).isFile();
+  } catch {
+    return false;
+  }
 }

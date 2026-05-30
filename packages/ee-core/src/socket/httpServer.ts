@@ -1,6 +1,6 @@
 import debug from 'debug';
 import assert from 'assert';
-import { isFunction, isObject, isArray, isString } from '../utils/type_check.js';
+import { isFunction, isObject, isArray } from '../utils/type_check.js';
 import Koa from 'koa';
 import cors from 'koa2-cors';
 import koaBody from 'koa-body';
@@ -13,6 +13,7 @@ import { getController } from '../controller/index.js';
 import { getConfig } from '../config/index.js';
 import { getPort } from '../utils/port/index.js';
 import type { HttpServerConfig, KoaConfig } from '../types/index.js';
+import { resolveControllerFn } from './utils.js';
 
 const debugLog = debug('ee-core:socket:httpServer');
 
@@ -132,16 +133,7 @@ export class HttpServer {
       const cmd = uriPath.split('/').join(this.channelSeparator);
       debugLog('[request] uri %s', cmd);
       const args = method === 'POST' ? body : params;
-      let fn: ((...args: unknown[]) => unknown) | null = null;
-      if (isString(cmd)) {
-        const actions = cmd.split(this.channelSeparator);
-        let obj: Record<string, unknown> = { controller };
-        actions.forEach((key) => {
-          obj = obj[key] as Record<string, unknown>;
-          if (!obj) throw new Error(`class or function '${key}' not exists`);
-        });
-        fn = obj as unknown as (...args: unknown[]) => unknown;
-      }
+      const fn = resolveControllerFn(controller, cmd, this.channelSeparator);
       if (!fn) throw new Error('function not exists');
 
       const result = await fn.call(controller, args, ctx);
