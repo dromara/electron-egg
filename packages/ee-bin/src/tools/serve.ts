@@ -4,6 +4,7 @@ import fs from 'fs';
 import { build, BuildOptions } from 'esbuild';
 import chokidar from 'chokidar';
 import kill from 'tree-kill';
+import { ChildProcess } from 'child_process';
 import process from 'process';
 import crossSpawn, { sync as crossSpawnSync } from 'cross-spawn';
 import { loadConfig, readJsonSync, writeJsonSync, rm, toArray } from '../lib/utils.js';
@@ -24,10 +25,12 @@ interface ServeOptions {
 }
 
 class ServeProcess {
-  execProcess: Record<string, ReturnType<typeof crossSpawn>>;
+  execProcess: Record<string, ChildProcess>;
+  private originalPkgMain: string | undefined;
 
   constructor() {
     this.execProcess = {};
+    this.originalPkgMain = undefined;
     this._init();
   }
 
@@ -52,6 +55,12 @@ class ServeProcess {
         log('Kill %s server, pid: %d', chalk.blue(key), p.pid);
       }
     }
+
+    this._restorePkgMain();
+
+    // NOTE: We send kill signals then wait 500ms before process.exit(0).
+    // Ideally we'd listen for each child's 'exit' event, but that's complex
+    // to implement correctly. The 500ms sleep is a pragmatic compromise.
     await this.sleep(500);
     process.exit(0);
   }
@@ -171,6 +180,7 @@ class ServeProcess {
       command: cmds || '',
     };
     this.multiExec(opt);
+    this._restorePkgMain();
   }
 
   exec(options: ServeOptions = {}): void {
@@ -210,28 +220,20 @@ class ServeProcess {
       const stdioOpt: 'inherit' | 'pipe' | 'ignore' = cfg.stdio || 'inherit';
 
       if (cfg.sync) {
-        this.execProcess[cmd] = crossSpawnSync(cfg.cmd, execArgs, {
-          stdio: stdioOpt,
-          cwd: execDir,
-          maxBuffer: MAX_BUFFER,
-        }) as unknown as ReturnType<typeof crossSpawn>;
-      } else {
-        this.execProcess[cmd] = crossSpawn(cfg.cmd, execArgs, {
+        crossSpawnSync(cfg.cmd, execArgs, {
           stdio: stdioOpt,
           cwd: execDir,
           maxBuffer: MAX_BUFFER,
         });
-      }
+      } else {
+        const childProc = crossSpawn(cfg.cmd, execArgs, {
+          stdio: stdioOpt,
+          cwd: execDir,
+          maxBuffer: MAX_BUFFER,
+        });
+        this.execProcess[cmd] = childProc;
 
-      console.log(
-        chalk.blue(`[ee-bin] [${binCmd}] `) +
-          'The ' +
-          chalk.green(`${cmd}`) +
-          ` command is ${cfg.sync ? 'run completed' : 'running'}`
-      );
-
-      if (!cfg.sync) {
-        this.execProcess[cmd].on('exit', () => {
+        childProc.on('exit', () => {
           if (binCmd === 'dev') {
             console.log(chalk.blue(`[ee-bin] [${binCmd}] `) + `The ${chalk.green(cmd)} process is exiting`);
             if (process.platform === 'win32' && cmd === 'electron') {
@@ -244,6 +246,13 @@ class ServeProcess {
           );
         });
       }
+
+      console.log(
+        chalk.blue(`[ee-bin] [${binCmd}] `) +
+          'The ' +
+          chalk.green(`${cmd}`) +
+          ` command is ${cfg.sync ? 'run completed' : 'running'}`
+      );
     }
   }
 
@@ -392,8 +401,19 @@ class ServeProcess {
     const bundleMainPath = BUNDLE_DIR + '/main.js';
 
     if (pkg.main !== bundleMainPath) {
+      this.originalPkgMain = pkg.main as string | undefined;
       pkg.main = bundleMainPath;
       writeJsonSync(pkgPath, pkg);
+    }
+  }
+
+  private _restorePkgMain(): void {
+    if (this.originalPkgMain !== undefined) {
+      const pkgPath = path.join(process.cwd(), PKG_PATH);
+      const pkg = readJsonSync(pkgPath);
+      pkg.main = this.originalPkgMain;
+      writeJsonSync(pkgPath, pkg);
+      this.originalPkgMain = undefined;
     }
   }
 

@@ -83,8 +83,8 @@ program
   .option('-s, --size <flag>', 'generate size default 16,32,64,256,512')
   .option('-c, --clear', 'clear output directory first')
   .option('-m, --images <flag>', 'Win window icon/tray image generation path default /public/images/')
-  .action(function (this: Command) {
-    iconGenRun(this.opts());
+  .action(async function (this: Command) {
+    await iconGenRun(this.opts());
   });
 
 program

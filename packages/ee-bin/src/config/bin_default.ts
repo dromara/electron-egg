@@ -93,7 +93,7 @@ const config: BinConfig = {
   encrypt: {
     frontend: {
       type: 'none',
-      files: ['./public/dist/**/*.(js|json)'],
+      files: ['./public/dist/**/*.js'],
       fileExt: ['.js'],
       cleanFiles: ['./public/dist'],
       specificFiles: [],
@@ -110,7 +110,7 @@ const config: BinConfig = {
     },
     electron: {
       type: 'none',
-      files: ['./public/electron/**/*.(js|json)'],
+      files: ['./public/electron/**/*.js'],
       fileExt: ['.js'],
       cleanFiles: ['./public/electron'],
       specificFiles: ['./public/electron/preload/bridge.js'],

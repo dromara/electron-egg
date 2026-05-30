@@ -55,7 +55,7 @@ class IconGen {
     };
   }
 
-  generateIcons(): void {
+  async generateIcons(): Promise<void> {
     if (!this.icongen) {
       console.log('[ee-bin] [icon-gen] icon-gen is not installed.');
       console.log('[ee-bin] [icon-gen] Please run: pnpm add icon-gen');
@@ -65,7 +65,7 @@ class IconGen {
     console.log('[ee-bin] [icon-gen] Start generating logo images');
     if (!fs.existsSync(this.input)) {
       console.error('[ee-bin] [icon-gen] Input: ', this.input);
-      throw new Error('Input image does not exist or path is invalid');
+      throw new Error('Input image does not exist or path is invalid: ' + this.input);
     }
     if (!fs.existsSync(this.output)) {
       fs.mkdirSync(this.output, { recursive: true });
@@ -77,16 +77,15 @@ class IconGen {
     if (!fs.existsSync(this.imagesDir)) {
       fs.mkdirSync(this.imagesDir, { recursive: true });
     }
-    this.icongen(this.input, this.output, this.iconOptions)
-      .then((results) => {
-        console.log('[ee-bin] [icon-gen] Generated image resources:');
-        console.log(results);
-        this._renameForEE(results);
-      })
-      .catch((err) => {
-        console.error(err);
-        throw new Error('[ee-bin] [icon-gen] Image generation failed!');
-      });
+    try {
+      const results = await this.icongen(this.input, this.output, this.iconOptions);
+      console.log('[ee-bin] [icon-gen] Generated image resources:');
+      console.log(results);
+      this._renameForEE(results);
+    } catch (err) {
+      console.error(err);
+      throw new Error('[ee-bin] [icon-gen] Image generation failed!');
+    }
   }
 
   deleteGenFile(dirPath: string): void {
@@ -154,8 +153,8 @@ function extractParams(opts: Record<string, unknown>): IconGenParams {
   };
 }
 
-export function run(opts?: Record<string, unknown>): void {
+export async function run(opts?: Record<string, unknown>): Promise<void> {
   const params = extractParams(opts || {});
   const i = new IconGen(params);
-  i.generateIcons();
+  await i.generateIcons();
 }

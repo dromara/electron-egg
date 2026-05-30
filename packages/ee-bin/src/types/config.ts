@@ -1,7 +1,7 @@
 export interface ExecConfig {
   directory: string;
   cmd: string;
-  args?: string[] | string;
+  args?: string[];
   stdio?: 'inherit' | 'pipe' | 'ignore';
   sync?: boolean;
   protocol?: string;
@@ -31,24 +31,22 @@ export interface ConfusionOptions {
   compact?: boolean;
   stringArray?: boolean;
   stringArrayThreshold?: number;
-  stringArrayEncoding?: string[];
+  stringArrayEncoding?: Array<'none' | 'base64' | 'rc4'>;
   stringArrayCallsTransform?: boolean;
   deadCodeInjection?: boolean;
   numbersToExpressions?: boolean;
   target?: 'browser' | 'node';
   silent?: boolean;
-  [key: string]: unknown;
 }
 
 export interface BytecodeOptions {
   filename?: string;
   output?: string;
   electron?: boolean;
-  [key: string]: unknown;
 }
 
 export interface EncryptConfig {
-  type: string;
+  type: 'confusion' | 'bytecode' | 'strict' | 'none';
   files?: string[];
   fileExt?: string[];
   specificFiles?: string[];
@@ -59,8 +57,8 @@ export interface EncryptConfig {
 }
 
 export interface MoveConfig {
-  src?: string;
-  dest?: string;
+  src: string;
+  dest: string;
   dist?: string;
   target?: string;
 }
@@ -80,7 +78,7 @@ export interface UpdaterConfig {
 
 export interface BuildConfig {
   electron: BundleConfig;
-  [key: string]: ExecConfig | BundleConfig;
+  [key: string]: ExecConfig | BundleConfig | undefined;
 }
 
 export interface BinConfig {

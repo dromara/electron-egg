@@ -8,6 +8,7 @@ import { loadConfig, toArray } from '../lib/utils.js';
 import type { EncryptConfig, ConfusionOptions, BytecodeOptions } from '../types/config.js';
 
 const EncryptTypes = ['bytecode', 'confusion', 'strict'] as const;
+type EncryptType = 'confusion' | 'bytecode' | 'strict' | 'none';
 
 interface EncryptOptions {
   config?: string;
@@ -29,7 +30,7 @@ class Encrypt {
   config: EncryptConfig;
   encryptDir: string;
   filesExt: string[];
-  type: string;
+  type: EncryptType;
   bOpt: BytecodeOptions;
   cOpt: ConfusionOptions;
   patterns: string[] | null;
@@ -51,15 +52,13 @@ class Encrypt {
     this.cOpt = this.config.confusionOptions || {};
     this.patterns = this.config.files || null;
     this.specFiles = this.config.specificFiles || [];
-
-    this.codefiles = this._initCodeFiles();
   }
 
-  _initCodeFiles(): string[] | undefined {
+  private _getCodeFiles(): string[] | undefined {
+    if (this.codefiles !== undefined) return this.codefiles;
     if (!this.patterns) return undefined;
-
-    const files = globby.sync(this.patterns, { cwd: this.basePath });
-    return files;
+    this.codefiles = globby.sync(this.patterns, { cwd: this.basePath });
+    return this.codefiles;
   }
 
   encrypt(): void {
@@ -70,9 +69,10 @@ class Encrypt {
     }
 
     console.log(chalk.blue('[ee-bin] [encrypt] ') + `start encrypting ${this.target}`);
-    if (!this.codefiles) return;
+    const files = this._getCodeFiles();
+    if (!files) return;
 
-    for (const file of this.codefiles) {
+    for (const file of files) {
       const fullpath = path.join(this.encryptDir, file);
       if (!fs.statSync(fullpath).isFile()) continue;
 
@@ -136,7 +136,11 @@ class Encrypt {
     );
 
     bytenode.compileFile(opt);
-    fs.rmSync(curPath, { recursive: true, force: true });
+    if (fs.existsSync(jscFile)) {
+      fs.unlinkSync(curPath);
+    } else {
+      throw new Error(`[ee-bin] [encrypt] Bytecode compilation failed: ${jscFile} was not created, keeping source ${curPath}`);
+    }
   }
 }
 

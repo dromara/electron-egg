@@ -203,28 +203,20 @@ class IncrUpdater {
     }
   }
 
-  generateHash(filepath = '', algorithm = 'sha512', encoding: crypto.BinaryToTextEncoding = 'base64'): string {
+  generateHash(filepath: string, algorithm = 'sha512', encoding: crypto.BinaryToTextEncoding = 'base64'): string {
     if (filepath.length === 0) {
-      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: empty filepath for ${algorithm}`));
-      return '';
+      throw new Error(`[ee-bin] [updater] Empty filepath for ${algorithm}`);
     }
 
     if (!fs.existsSync(filepath)) {
-      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: ${filepath} does not exist for ${algorithm}`));
-      return '';
+      throw new Error(`[ee-bin] [updater] ${filepath} does not exist for ${algorithm}`);
     }
 
     console.log(chalk.blue('[ee-bin] [updater] ') + `generate ${algorithm} for filepath:${filepath}`);
-    try {
-      const buffer = fs.readFileSync(filepath);
-      const fsHash = crypto.createHash(algorithm);
-      fsHash.update(buffer);
-      return fsHash.digest(encoding);
-    } catch (error) {
-      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: generate ${algorithm} error!`));
-      console.log(chalk.blue('[ee-bin] [updater] ') + chalk.red(`Error: ${error}`));
-    }
-    return '';
+    const buffer = fs.readFileSync(filepath);
+    const fsHash = crypto.createHash(algorithm);
+    fsHash.update(buffer);
+    return fsHash.digest(encoding);
   }
 }
 

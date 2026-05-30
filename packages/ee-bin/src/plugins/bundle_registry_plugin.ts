@@ -74,8 +74,7 @@ export function bundleRegistryPlugin(
       build.onLoad({ filter: /.*/, namespace: 'controller-registry' }, () => {
         const lines: string[] = ['// Auto-generated controller registry - do not edit'];
         lines.push('global.__EE_CONTROLLER_REGISTRY__ = [');
-        for (let i = 0; i < registryEntries.length; i++) {
-          const entry = registryEntries[i]!;
+        for (const [i, entry] of registryEntries.entries()) {
           const requirePath = JSON.stringify('./' + entry.relPath.replace(/\\/g, '/'));
           const comma = i < registryEntries.length - 1 ? ',' : '';
           lines.push(`  { fullpath: ${JSON.stringify(entry.fullpath)}, properties: ${JSON.stringify(entry.properties)}, get module() { return require(${requirePath}); } }${comma}`);
@@ -97,8 +96,7 @@ export function bundleRegistryPlugin(
       build.onLoad({ filter: /.*/, namespace: 'config-registry' }, () => {
         const lines: string[] = ['// Auto-generated config registry - do not edit'];
         lines.push('global.__EE_CONFIG_REGISTRY__ = [');
-        for (let i = 0; i < configEntries.length; i++) {
-          const entry = configEntries[i]!;
+        for (const [i, entry] of configEntries.entries()) {
           const requirePath = JSON.stringify('./' + entry.relPath.replace(/\\/g, '/'));
           const comma = i < configEntries.length - 1 ? ',' : '';
           lines.push(`  { filename: ${JSON.stringify(entry.filename)}, get module() { return require(${requirePath}); } }${comma}`);

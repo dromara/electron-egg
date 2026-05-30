@@ -12,7 +12,7 @@ export const is = {
     return typeof val === 'function';
   },
   class(val: unknown): boolean {
-    return typeof val === 'function' && val.toString().startsWith('class ');
+    return typeof val === 'function' && val.toString().startsWith('class ') && !!val.prototype;
   },
 };
 
@@ -63,16 +63,24 @@ function _copyDirRecursive(src: string, dest: string): void {
 // ─── debug ─────────────────────────────────────────────────
 
 export function createDebug(namespace: string): (...args: unknown[]) => void {
-  const enabled = () => {
-    const dbg = process.env.DEBUG || '';
-    return dbg === '*' || dbg.split(',').some((ns) => {
-      if (ns.endsWith(':*')) return namespace.startsWith(ns.slice(0, -1));
-      return ns === namespace;
-    });
+  let cachedDebugEnv: string | undefined;
+  let cachedEnabled = false;
+
+  const checkEnabled = () => {
+    const currentEnv = process.env.DEBUG;
+    if (currentEnv !== cachedDebugEnv) {
+      cachedDebugEnv = currentEnv;
+      const dbg = currentEnv || '';
+      cachedEnabled = dbg === '*' || dbg.split(',').some((ns) => {
+        if (ns.endsWith(':*')) return namespace.startsWith(ns.slice(0, -1));
+        return ns === namespace;
+      });
+    }
+    return cachedEnabled;
   };
 
   return (...args: unknown[]) => {
-    if (enabled()) {
+    if (checkEnabled()) {
       console.log(namespace, ...args);
     }
   };
@@ -84,7 +92,7 @@ export function formatCmds(command: string): string[] {
   const cmdString = command.trim();
   if (cmdString === '') return [];
   if (cmdString.includes(',')) {
-    return cmdString.split(',');
+    return cmdString.split(',').map(s => s.trim()).filter(s => s.length > 0);
   }
   return [cmdString];
 }

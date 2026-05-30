@@ -4,15 +4,15 @@
   "description": "ee-bin typescript version",
   "main": "./dist/esm/index.js",
   "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/esm/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/types/index.d.ts",
+        "types": "./dist/esm/index.d.ts",
         "default": "./dist/esm/index.js"
       },
       "require": {
-        "types": "./dist/types/index.d.ts",
+        "types": "./dist/esm/index.d.ts",
         "default": "./dist/cjs/index.js"
       }
     },
