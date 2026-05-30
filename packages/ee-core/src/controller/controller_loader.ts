@@ -49,9 +49,11 @@ export class ControllerLoader {
   async loadAsync(): Promise<Record<string, unknown>> {
     this.timing.start('Load Controller');
 
+    const registry = (globalThis as Record<string, unknown>).__EE_CONTROLLER_REGISTRY__ as RegistryEntry[] | undefined;
     const opt = {
       caseStyle: 'lower' as const,
       directory: path.join(getElectronDir(), 'controller'),
+      ...(registry ? { registry } : {}),
       initializer: (obj: unknown, options: { pathName: string; path: string }) => {
         if (isClass(obj) || isBytecodeClass(obj)) {
           (obj as { prototype: Record<string, unknown> }).prototype.pathName = options.pathName;
@@ -62,7 +64,7 @@ export class ControllerLoader {
       },
     };
     const target = await new FileLoader(opt).loadAsync();
-    debugLog('[loadAsync] controllers: %o', target);
+    debugLog('[loadAsync] controllers (%s): %o', registry ? 'registry' : 'globby', target);
     this.timing.end('Load Controller');
     return target;
   }

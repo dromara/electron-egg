@@ -9,18 +9,9 @@ import { getValueFromArgv, getRandomString } from '../utils/helper.js';
 import { parseArgv } from '../utils/pargv.js';
 import * as is from '../utils/is.js';
 import { electronApp } from '../electron/app/index.js';
+import type { CrossTargetConfig } from '../types/index.js';
 
-export interface CrossTargetConfig {
-  name: string;
-  args?: string[];
-  cmd?: string;
-  directory?: string;
-  windowsExtname?: boolean;
-  stdio?: ('pipe' | 'ignore' | 'inherit' | 'ipc')[];
-  appExit?: boolean;
-  port?: number;
-  enable?: boolean;
-}
+export type { CrossTargetConfig };
 
 export interface CrossProcessOptions {
   targetConf: CrossTargetConfig;

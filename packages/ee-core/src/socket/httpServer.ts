@@ -12,7 +12,7 @@ import { getBaseDir } from '../ps/index.js';
 import { getController } from '../controller/index.js';
 import { getConfig } from '../config/index.js';
 import { getPort } from '../utils/port/index.js';
-import type { HttpServerConfig } from '../types/index.js';
+import type { HttpServerConfig, KoaConfig } from '../types/index.js';
 
 const debugLog = debug('ee-core:socket:httpServer');
 
@@ -45,10 +45,10 @@ export class HttpServer {
 
   async _create(): Promise<void> {
     const config = this.config;
-    const koaConfig = (config as unknown as Record<string, unknown>).koaConfig as Record<string, unknown> || {};
-    const preMiddleware = (koaConfig.preMiddleware as unknown[]) || [];
-    const postMiddleware = (koaConfig.postMiddleware as unknown[]) || [];
-    const errorHandler = koaConfig.errorHandler as ((err: Error) => void) | null;
+    const koaConfig: KoaConfig = config.koaConfig || {};
+    const preMiddleware = koaConfig.preMiddleware || [];
+    const postMiddleware = koaConfig.postMiddleware || [];
+    const errorHandler = koaConfig.errorHandler || null;
     const isHttps = config.https.enable === true;
     const sslOptions: { key?: Buffer; cert?: Buffer } = {};
 
@@ -148,6 +148,8 @@ export class HttpServer {
       ctx.response.body = result;
     } catch (err) {
       coreLogger.error('[httpServer] throw error:', err);
+      ctx.response.status = 500;
+      ctx.response.body = { error: 'Internal Server Error' };
     }
 
     await next();

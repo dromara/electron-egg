@@ -81,9 +81,7 @@ export async function loadFileAsync(filepath: string): Promise<unknown> {
     const obj = await import(filepath);
     if (!obj) return obj;
     // Handle ESM default export
-    if (obj.__esModule || (obj as Record<string, unknown>).default !== undefined) {
-      return 'default' in obj ? obj.default : obj;
-    }
+    if (obj.__esModule) return 'default' in obj ? obj.default : obj;
     return obj;
   } catch (err) {
     const error = err as Error;

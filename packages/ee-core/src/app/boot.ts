@@ -16,8 +16,8 @@ export class ElectronEgg {
 
   constructor() {
     const baseDir = electronApp.getAppPath();
-    const environmet = getArgumentByName('env') || 'prod';
-    const debugging = getArgumentByName('debuger') === 'true';
+    const environment = getArgumentByName('env') || 'prod';
+    const debugging = getArgumentByName('debugger') === 'true';
 
     // Debugging source code
     let electronDir = getBundleDir(baseDir);
@@ -26,7 +26,7 @@ export class ElectronEgg {
     }
 
     const options: ElectronEggOptions = {
-      env: environmet,
+      env: environment,
       baseDir,
       electronDir,
       appName: electronApp.getName(),
@@ -39,12 +39,12 @@ export class ElectronEgg {
     };
 
     // exec directory (exe dmg dep) for prod
-    if (environmet === 'prod' && options.isPackaged) {
+    if (environment === 'prod' && options.isPackaged) {
       options.execDir = path.dirname(electronApp.getPath('exe'));
     }
 
     // normalize env
-    process.env.EE_ENV = environmet;
+    process.env.EE_ENV = environment;
     process.env.EE_APP_NAME = options.appName;
     process.env.EE_APP_VERSION = options.appVersion;
     process.env.EE_BASE_DIR = options.baseDir;

@@ -10,7 +10,6 @@ function hasKey(obj: Record<string, unknown>, keys: string[]): boolean {
 }
 
 function isNumber(x: string): boolean {
-  if (typeof x === 'number') return true;
   if (/^0x[0-9a-f]+$/i.test(x)) return true;
   return /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(e[-+]?\d+)?$/.test(x);
 }

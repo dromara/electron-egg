@@ -50,14 +50,13 @@ export class IpcServer {
       const channel = tmpChannel.split('.').join(this.channelSeparator);
       debugLog('[register] channel %s', channel);
 
-      // send/on model
-      ipcMain.on(channel, async (event, params) => {
+      // send/on model (synchronous return)
+      ipcMain.on(channel, (event, params) => {
         try {
           const fn = this.findFn(controller, channel);
           if (!fn) return;
-          const result = await fn.call(controller, params, event);
+          const result = fn.call(controller, params, event);
           event.returnValue = result;
-          event.reply(channel, result);
         } catch (e) {
           coreLogger.error('[socket/IpcServer] send/on throw error:', e);
         }

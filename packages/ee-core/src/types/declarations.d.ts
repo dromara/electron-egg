@@ -49,56 +49,6 @@ declare module 'javascript-obfuscator' {
   export function obfuscate(sourceCode: string, options?: Record<string, unknown>): { getObfuscatedCode(): string };
 }
 
-declare module 'koa' {
-  import * as events from 'events';
-  import * as http from 'http';
-
-  interface ContextDelegatedRequest {
-    query: Record<string, unknown>;
-    body?: unknown;
-    path: string;
-    method: string;
-  }
-
-  interface ContextDelegatedResponse {
-    status: number;
-    body: unknown;
-  }
-
-  interface Request extends ContextDelegatedRequest {
-    query: Record<string, unknown>;
-    body: unknown;
-    path: string;
-    method: string;
-  }
-
-  interface Response extends ContextDelegatedResponse {
-    status: number;
-    body: unknown;
-  }
-
-  interface Context extends ContextDelegatedRequest, ContextDelegatedResponse {
-    request: Request;
-    response: Response;
-  }
-
-  type Next = () => Promise<unknown>;
-  type Middleware = (ctx: Context, next: Next) => Promise<unknown> | unknown;
-
-  class Application extends events.EventEmitter {
-    use(fn: Middleware): this;
-    listen(port?: number, hostname?: string, backlog?: number, callback?: () => void): http.Server;
-    listen(port?: number, hostname?: string, callback?: () => void): http.Server;
-    listen(port?: number, callback?: () => void): http.Server;
-    listen(callback?: () => void): http.Server;
-    listen(options: { host?: string; port?: number }, callback?: () => void): http.Server;
-    callback(): (req: http.IncomingMessage, res: http.ServerResponse) => void;
-  }
-
-  export = Application;
-  export { Context, Next, Middleware, Request, Response };
-}
-
 declare module 'koa2-cors' {
   import type { Middleware } from 'koa';
   function cors(options?: Record<string, unknown>): Middleware;

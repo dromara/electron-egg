@@ -31,7 +31,7 @@ module.exports = () => {
       prettyPrint: true,
       rotator: 'daily', // daily, hourly
       dateFormat: 'yyyy-MM-dd',
-      maxSize: '10m',
+      maxSize: '100m',
       redact: [],
       redactCensor: '[Redacted]',
       timestamp: true,

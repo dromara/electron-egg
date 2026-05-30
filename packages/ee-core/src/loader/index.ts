@@ -33,9 +33,9 @@ export function requireFile(filepath: string): unknown {
 export function execFile(filepath: string, ...inject: unknown[]): unknown {
   let ret = coreLoadFile(filepath);
   if (isClass(ret) || isBytecodeClass(ret)) {
-    ret = new (ret as new (...args: unknown[]) => unknown)(inject);
+    ret = new (ret as new (...args: unknown[]) => unknown)(...inject);
   } else if (isFunction(ret)) {
-    ret = (ret as (...args: unknown[]) => unknown)(inject);
+    ret = (ret as (...args: unknown[]) => unknown)(...inject);
   }
   return ret;
 }
@@ -47,7 +47,7 @@ export function resolveModule(filepath: string): string | undefined {
     fullpath = require.resolve(filepath);
   } catch {
     // 特殊后缀处理
-    if (filepath && (filepath.endsWith('.defalut') || filepath.endsWith('.prod'))) {
+    if (filepath && (filepath.endsWith('.default') || filepath.endsWith('.prod'))) {
       fullpath = filepath + '.jsc';
     } else if (filepath && filepath.endsWith('.js')) {
       fullpath = filepath + 'c'; // .js -> .jsc

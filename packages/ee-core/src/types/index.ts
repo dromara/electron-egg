@@ -67,19 +67,26 @@ export interface HttpServerConfig {
     uris: string[];
     returnData: string;
   };
+  koaConfig?: KoaConfig;
+}
+
+export interface KoaConfig {
+  preMiddleware?: ((...args: unknown[]) => unknown)[];
+  postMiddleware?: ((...args: unknown[]) => unknown)[];
+  errorHandler?: ((err: Error) => void) | null;
 }
 
 export interface LoggerConfig {
   dir: string;
-  level: string;
+  level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | string;
   prettyPrint?: boolean;
   dateFormat?: string;
   appLogName: string;
   coreLogName: string;
   errorLogName: string;
-  rotator: string;
+  rotator: 'daily' | 'hourly' | string;
   redact?: string[];
-  redactCensor?: string;
+  redactCensor?: string | ((value: unknown, path: string[]) => unknown);
   timestamp?: boolean;
   name?: string;
   maxSize?: number | string;
@@ -100,8 +107,21 @@ export interface JobsConfig {
   messageLog: boolean;
 }
 
+export interface CrossTargetConfig {
+  name: string;
+  enable?: boolean;
+  args?: string[];
+  cmd?: string;
+  directory?: string;
+  windowsExtname?: boolean;
+  stdio?: ('pipe' | 'ignore' | 'inherit' | 'ipc')[];
+  appExit?: boolean;
+  port?: number;
+  url?: string;
+}
+
 export interface CrossConfig {
-  [key: string]: unknown;
+  [key: string]: CrossTargetConfig;
 }
 
 export interface Config {

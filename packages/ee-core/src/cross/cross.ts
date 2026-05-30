@@ -1,7 +1,8 @@
 import EventEmitter from 'events';
 import { getConfig } from '../config/index.js';
 import { getValueFromArgv, replaceArgsValue } from '../utils/helper.js';
-import { CrossProcess, CrossTargetConfig } from './crossProcess.js';
+import { CrossProcess } from './crossProcess.js';
+import type { CrossTargetConfig } from '../types/index.js';
 import { Events } from '../const/channel.js';
 import { extend } from '../utils/extend.js';
 import { getPort } from '../utils/port/index.js';
@@ -33,9 +34,8 @@ export class Cross {
 
   async create(): Promise<void> {
     // boot services
-    const crossCfg = getConfig().cross as Record<string, CrossTargetConfig>;
-    //await sleep(5 * 1000);
-    
+    const crossCfg = getConfig().cross;
+
     for (const key of Object.keys(crossCfg)) {
       const val = crossCfg[key];
       if (val && val.enable === true) {
@@ -46,7 +46,7 @@ export class Cross {
 
   // run
   async run(service: string, opt: CrossRunOptions = {}): Promise<CrossProcess> {
-    const crossConf = getConfig().cross as Record<string, CrossTargetConfig>;
+    const crossConf = getConfig().cross;
     const defaultOpt = crossConf[service] || {};
     const targetConf = extend(true, {}, defaultOpt, opt) as unknown as CrossTargetConfig;
     if (Object.keys(targetConf).length === 0) {

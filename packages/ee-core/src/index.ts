@@ -35,9 +35,11 @@ export type {
   SocketServerConfig,
   HttpsConfig,
   HttpServerConfig,
+  KoaConfig,
   LoggerConfig,
   ExceptionConfig,
   JobsConfig,
+  CrossTargetConfig,
   CrossConfig,
   Config,
   JobChildOptions,
@@ -46,6 +48,7 @@ export type {
   FileLoaderOptions,
   AppInfo,
   MessageData,
+  ProcessExitEventData,
 } from './types/index.js';
 
 export type {
@@ -57,3 +60,8 @@ export type {
   ProcessMessage,
   ChildPoolOptions,
 } from './jobs/index.js';
+
+export type { PidInfo } from './jobs/load-balancer/types.js';
+export type { CrossRunOptions } from './cross/cross.js';
+export type { EeLogger } from './log/index.js';
+export type { PinoLoggers } from './log/logger.js';

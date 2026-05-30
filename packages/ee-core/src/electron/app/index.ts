@@ -24,6 +24,7 @@ export function createElectron(): void {
     createMainWindow();
     eventBus.emitLifecycle(Preload);
     loadServer();
+    eventBus.emitLifecycle(ElectronAppReady);
   });
 
   electronApp.on('window-all-closed', () => {
@@ -38,6 +39,4 @@ export function createElectron(): void {
     eventBus.emitLifecycle(BeforeClose);
     cross.killAll();
   });
-
-  eventBus.emitLifecycle(ElectronAppReady);
 }
