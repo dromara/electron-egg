@@ -1,33 +1,33 @@
 /**
  * @module jobs/load-balancer/consts
- * @description 负载均衡算法类型常量。
+ * @description Load balancing algorithm type constants.
  *
- * 支持的算法：
- * - polling：轮询，依次选择
- * - weights：加权，按权重选择
- * - random：随机选择
- * - specify：指定 ID 选择
- * - weightsPolling：加权轮询
- * - weightsRandom：加权随机
- * - minimumConnection：最小连接数
- * - weightsMinimumConnection：加权最小连接数
+ * Supported algorithms:
+ * - polling: Round-robin, select in sequence
+ * - weights: Weighted, select by weight
+ * - random: Random selection
+ * - specify: Select by specified ID
+ * - weightsPolling: Weighted round-robin
+ * - weightsRandom: Weighted random
+ * - minimumConnection: Least connections
+ * - weightsMinimumConnection: Weighted least connections
  */
 export const AlgorithmType = {
-  /** 轮询：依次选择下一个目标 */
+  /** Polling: select the next target in sequence */
   polling: 'polling',
-  /** 加权：按权重比例选择 */
+  /** Weighted: select by weight ratio */
   weights: 'weights',
-  /** 随机：随机选择一个目标 */
+  /** Random: randomly select a target */
   random: 'random',
-  /** 指定：按 ID 选择指定目标 */
+  /** Specify: select a target by ID */
   specify: 'specify',
-  /** 加权轮询：结合权重和轮询 */
+  /** Weighted polling: combines weight and round-robin */
   weightsPolling: 'weightsPolling',
-  /** 加权随机：结合权重和随机 */
+  /** Weighted random: combines weight and random selection */
   weightsRandom: 'weightsRandom',
-  /** 最小连接数：选择当前连接数最少的目标 */
+  /** Least connections: select the target with the fewest current connections */
   minimumConnection: 'minimumConnection',
-  /** 加权最小连接数：结合权重和最小连接数 */
+  /** Weighted least connections: combines weight and least connections */
   weightsMinimumConnection: 'weightsMinimumConnection',
 } as const;
 

@@ -1,17 +1,18 @@
 /**
  * @module config/config_loader
- * @description 配置加载器。负责加载和合并框架默认配置与业务自定义配置。
+ * @description Configuration loader. Responsible for loading and merging framework default configuration
+ * with business custom configuration.
  *
- * 配置加载流程：
- * 1. 加载框架内置默认配置（defaultConfig）
- * 2. 加载业务配置：先加载 config.default（全量默认），再加载 config.{env}（环境特定）
- * 3. 深度合并：业务配置覆盖默认配置
+ * Configuration loading flow:
+ * 1. Load framework built-in default configuration (defaultConfig)
+ * 2. Load business configuration: first load config.default (full defaults), then load config.{env} (environment-specific)
+ * 3. Deep merge: business configuration overrides default configuration
  *
- * 支持两种加载模式：
- * - 打包模式：从 globalThis.__EE_CONFIG_REGISTRY__ 读取预注册的配置模块
- * - 开发模式：从文件系统按路径加载配置文件
+ * Supports two loading modes:
+ * - Bundle mode: Reads pre-registered configuration modules from globalThis.__EE_CONFIG_REGISTRY__
+ * - Dev mode: Loads configuration files from the filesystem by path
  *
- * 配置文件支持函数导出，函数会接收 appInfo 参数，可根据环境动态返回配置。
+ * Configuration files support function exports. The function receives an appInfo parameter and can dynamically return configuration based on environment.
  */
 import debug from 'debug';
 import path from 'path';
@@ -25,11 +26,11 @@ import type { AppInfo, Config } from '../types/index.js';
 
 const debugLog = debug('ee-core:config:config_loader');
 
-/** 打包模式下配置注册表条目的结构 */
+/** Structure of a configuration registry entry in bundle mode */
 interface ConfigRegistryEntry {
-  /** 配置文件名（不含扩展名），如 'config.default'、'config.prod' */
+  /** Configuration filename (without extension), e.g. 'config.default', 'config.prod' */
   filename: string;
-  /** 配置模块，可以是对象或函数（函数接收 appInfo 参数） */
+  /** Configuration module, can be an object or function (function receives appInfo parameter) */
   module: unknown;
 }
 
@@ -38,11 +39,11 @@ declare global {
 }
 
 /**
- * ConfigLoader 配置加载器
+ * ConfigLoader — Configuration loader
  *
- * 将默认配置与业务配置深度合并，生成最终运行时配置。
- * 加载顺序：defaultConfig（框架内置） → config.default（业务默认） → config.{env}（环境特定）
- * 后加载的配置覆盖先加载的同名属性。
+ * Deep merges default configuration with business configuration to produce the final runtime configuration.
+ * Loading order: defaultConfig (framework built-in) -> config.default (business defaults) -> config.{env} (environment-specific)
+ * Later-loaded configuration overrides same-named properties of earlier-loaded configuration.
  */
 export class ConfigLoader {
   timing: Timing;
@@ -52,18 +53,18 @@ export class ConfigLoader {
   }
 
   /**
-   * 加载并合并配置
+   * Load and merge configuration
    *
-   * @returns 合并后的完整运行时配置
+   * @returns Merged complete runtime configuration
    */
   load(): Config {
     this.timing.start('Load Config');
 
-    // 加载业务自定义配置（config.default + config.{env}）
+    // Load business custom configuration (config.default + config.{env})
     const appConfig = this._AppConfig();
-    // 加载框架默认配置
+    // Load framework default configuration
     const defaultConf = defaultConfig();
-    // 深度合并：业务配置覆盖默认配置
+    // Deep merge: business configuration overrides default configuration
     const config = extend(true, defaultConf as Record<string, unknown>, appConfig) as Config;
     debugLog('[load] config: %o', config);
 
@@ -72,12 +73,12 @@ export class ConfigLoader {
   }
 
   /**
-   * 加载业务自定义配置
+   * Load business custom configuration
    *
-   * 按顺序加载 config.default 和 config.{env}，后者覆盖前者。
-   * 开发环境加载 config.local，生产环境加载 config.prod。
+   * Loads config.default and config.{env} in order; the latter overrides the former.
+   * In development, loads config.local; in production, loads config.prod.
    *
-   * @returns 合并后的业务配置
+   * @returns Merged business configuration
    */
   private _AppConfig(): Record<string, unknown> {
     const names = ['config.default', `config.${env()}`];
@@ -92,20 +93,20 @@ export class ConfigLoader {
   }
 
   /**
-   * 加载单个配置文件
+   * Load a single configuration file
    *
-   * 支持两种模式：
-   * - 打包模式：从 __EE_CONFIG_REGISTRY__ 查找对应文件名的配置模块
-   * - 开发模式：从文件系统 loadFile() 加载
+   * Supports two modes:
+   * - Bundle mode: Finds the configuration module by filename from __EE_CONFIG_REGISTRY__
+   * - Dev mode: Loads from filesystem via loadFile()
    *
-   * 配置文件可导出函数，函数接收 appInfo 参数用于动态配置。
+   * Configuration files can export functions; the function receives an appInfo parameter for dynamic configuration.
    *
-   * @param dirpath - 配置文件所在目录（electron 目录）
-   * @param filename - 配置文件名（不含扩展名）
-   * @returns 配置对象，加载失败返回 null
+   * @param dirpath - Directory containing the configuration file (electron directory)
+   * @param filename - Configuration filename (without extension)
+   * @returns Configuration object, or null if loading fails
    */
   private _loadConfig(dirpath: string, filename: string): Record<string, unknown> | null {
-    // 构建 appInfo 供配置函数使用
+    // Build appInfo for use by configuration functions
     const appInfo: AppInfo = {
       name: appName(),
       baseDir: getBaseDir(),
@@ -115,19 +116,19 @@ export class ConfigLoader {
     };
 
     if (globalThis.__EE_CONFIG_REGISTRY__) {
-      // 打包模式：从注册表查找配置模块
+      // Bundle mode: find configuration module from registry
       const entry = globalThis.__EE_CONFIG_REGISTRY__.find((e) => e.filename === filename);
       if (!entry) return null;
       const mod = entry.module;
       debugLog('[_loadConfig] bundled filename: %s', filename);
-      // 配置文件可导出函数，接收 appInfo 动态生成配置
+      // Configuration file may export a function, receiving appInfo to dynamically generate configuration
       if (isFunction(mod)) {
         return (mod as (...args: unknown[]) => Record<string, unknown>)(appInfo);
       }
       return mod as Record<string, unknown>;
     }
 
-    // 开发模式：从文件系统加载
+    // Dev mode: load from filesystem
     const filepath = path.join(dirpath, 'config', filename);
     const config = loadFile(filepath, appInfo);
     debugLog('[_loadConfig] filepath: %s', filepath);

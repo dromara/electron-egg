@@ -1,13 +1,13 @@
 /**
  * @module electron/window
- * @description 主窗口管理模块。负责创建 BrowserWindow、加载页面内容、
- * 处理开发/生产环境下的页面加载逻辑。
+ * @description Main window management module. Responsible for creating BrowserWindow, loading page content,
+ * and handling page loading logic in development/production environments.
  *
- * 页面加载策略：
- * - 远程模式（remote.enable=true）：加载远程 URL
- * - 开发模式：加载前端 dev server（http://localhost:8080），等待服务就绪
- * - 生产模式 + cross 接管：等待跨进程服务就绪后加载其 URL
- * - 生产模式（默认）：加载本地打包的 HTML 文件
+ * Page loading strategy:
+ * - Remote mode (remote.enable=true): Load remote URL
+ * - Development mode: Load frontend dev server (http://localhost:8080), wait for service to be ready
+ * - Production mode + cross takeover: Wait for cross-process service to be ready then load its URL
+ * - Production mode (default): Load locally packaged HTML file
  */
 import debug from 'debug';
 import { isObject } from '../../utils/type_check.js';
@@ -28,17 +28,17 @@ import { cross } from '../../cross/index.js';
 const debugLog = debug('ee-core:electron:window');
 
 /**
- * 等待 URL 可达
+ * Wait for URL to be reachable
  *
- * 通过 HTTP GET 请求轮询检查服务是否就绪。
- * 用于等待前端 dev server 或跨进程服务启动完成。
+ * Polls via HTTP GET request to check if service is ready.
+ * Used to wait for frontend dev server or cross-process service to finish starting.
  *
- * @param url - 待检查的 URL
- * @param options - 轮询选项
- * @param options.retries - 最大重试次数
- * @param options.intervalMs - 重试间隔（毫秒）
- * @param options.timeoutMs - 单次请求超时（毫秒）
- * @returns URL 是否在重试次数内可达
+ * @param url - URL to check
+ * @param options - Polling options
+ * @param options.retries - Maximum number of retries
+ * @param options.intervalMs - Retry interval (milliseconds)
+ * @param options.timeoutMs - Single request timeout (milliseconds)
+ * @returns Whether the URL is reachable within the retry count
  */
 async function waitForUrl(url: string, options: { retries: number; intervalMs: number; timeoutMs: number }): Promise<boolean> {
   let count = 0;
@@ -55,14 +55,14 @@ async function waitForUrl(url: string, options: { retries: number; intervalMs: n
       });
       ready = true;
     } catch {
-      // 服务未就绪，继续重试
+      // Service not ready, continue retrying
     }
     count++;
   }
   return ready;
 }
 
-/** 主窗口实例和退出标志 */
+/** Main window instance and exit flag */
 const Instance: {
   mainWindow: BrowserWindow | null;
   closeAndQuit: boolean;
@@ -72,22 +72,22 @@ const Instance: {
 };
 
 /**
- * 获取主窗口实例
+ * Get main window instance
  *
- * @returns BrowserWindow 实例，未创建时返回 null
+ * @returns BrowserWindow instance, or null if not created
  */
 export function getMainWindow(): BrowserWindow | null {
   return Instance.mainWindow;
 }
 
 /**
- * 创建主应用窗口
+ * Create main application window
  *
- * 使用 config.windowsOption 配置创建 BrowserWindow。
- * 配置中 openDevTools=true 时自动打开开发者工具。
- * 窗口创建后发射 WindowReady 生命周期事件。
+ * Creates BrowserWindow using config.windowsOption configuration.
+ * When openDevTools=true in config, automatically opens developer tools.
+ * After window creation, emits WindowReady lifecycle event.
  *
- * @returns BrowserWindow 实例
+ * @returns BrowserWindow instance
  */
 export function createMainWindow(): BrowserWindow {
   const { openDevTools, windowsOption } = getConfig() as {
@@ -97,7 +97,7 @@ export function createMainWindow(): BrowserWindow {
   const win = new BrowserWindow(windowsOption);
   Instance.mainWindow = win;
 
-  // 开发者工具
+  // Developer tools
   if (isObject(openDevTools)) {
     win.webContents.openDevTools(openDevTools as unknown as Electron.OpenDevToolsOptions);
   } else if (openDevTools === true) {
@@ -109,10 +109,10 @@ export function createMainWindow(): BrowserWindow {
 }
 
 /**
- * 恢复主窗口
+ * Restore main window
  *
- * 如果窗口被最小化则恢复，然后显示并聚焦。
- * 用于第二个实例启动时激活已有实例的窗口。
+ * If window is minimized, restores it, then shows and focuses it.
+ * Used when a second instance starts to activate the existing instance's window.
  */
 export function restoreMainWindow(): void {
   if (Instance.mainWindow) {
@@ -125,29 +125,29 @@ export function restoreMainWindow(): void {
 }
 
 /**
- * 设置关闭并退出标志
+ * Set close and quit flag
  *
- * @param flag - true 表示应用将在窗口关闭后退出
+ * @param flag - true means the application will quit after window closes
  */
 export function setCloseAndQuit(flag: boolean): void {
   Instance.closeAndQuit = flag;
 }
 
 /**
- * 获取关闭并退出标志
+ * Get close and quit flag
  */
 export function getCloseAndQuit(): boolean {
   return Instance.closeAndQuit;
 }
 
 /**
- * 加载服务页面
+ * Load service page
  *
- * 根据配置和环境选择页面加载策略：
- * 1. 远程模式（remote.enable=true）→ 加载远程 URL
- * 2. 开发环境 → 加载前端 dev server（等待就绪），先显示启动页
- * 3. 生产环境 + cross 接管 → 等待跨进程服务就绪后加载
- * 4. 生产环境（默认）→ 加载本地打包文件
+ * Selects page loading strategy based on configuration and environment:
+ * 1. Remote mode (remote.enable=true) → Load remote URL
+ * 2. Development environment → Load frontend dev server (wait for ready), show startup page first
+ * 3. Production environment + cross takeover → Wait for cross-process service to be ready then load
+ * 4. Production environment (default) → Load locally packaged file
  */
 export async function loadServer(): Promise<void> {
   const { remote, mainServer } = getConfig() as {
@@ -157,13 +157,13 @@ export async function loadServer(): Promise<void> {
   const win = getMainWindow();
   if (!win) return;
 
-  // 远程模式：直接加载远程 URL
+  // Remote mode: load remote URL directly
   if (remote.enable) {
     loadMainUrl('remote', remote.url);
     return;
   }
 
-  // 开发环境
+  // Development environment
   if (isDev()) {
     const binFile = path.join(getBaseDir(), './cmd/bin.js');
     const binConfig = loadFile(binFile) as Record<string, { frontend?: Record<string, unknown>; electron?: Record<string, unknown> }>;
@@ -181,28 +181,28 @@ export async function loadServer(): Promise<void> {
 
     let url = (frontendConf.protocol as string) + (frontendConf.hostname as string) + ':' + (frontendConf.port as number);
     let load: 'url' | 'file' = 'url';
-    // file:// 协议直接加载本地文件
+    // file:// protocol loads local file directly
     if (isFileProtocol(frontendConf.protocol as string)) {
       url = path.join(getBaseDir(), frontendConf.directory as string, frontendConf.indexPath as string);
       load = 'file';
     }
 
-    // HTTP 模式：先显示启动页，等待前端 dev server 就绪
+    // HTTP mode: show startup page first, wait for frontend dev server to be ready
     if (load === 'url') {
-      // 加载启动页
+      // Load startup page
       let lp = getHtmlFilepath('boot.html');
       if (electronConf.loadingPage) {
         lp = path.join(getBaseDir(), electronConf.loadingPage as string);
       }
       _loadingPage(lp);
 
-      // 轮询检查前端 dev server 是否就绪
+      // Poll to check if frontend dev server is ready
       const retryTimes = frontendConf.force === true ? 3 : 60;
       const frontendReady = await waitForUrl(url, { retries: retryTimes, intervalMs: 1000, timeoutMs: 1000 });
       debugLog('frontend ready: %s', frontendReady);
 
       if (frontendReady === false && frontendConf.force !== true) {
-        // 前端服务未就绪，显示失败页面
+        // Frontend service not ready, show failure page
         const bootFailurePage = getHtmlFilepath('failure.html');
         const win = getMainWindow();
         if (win) {
@@ -217,13 +217,13 @@ export async function loadServer(): Promise<void> {
     return;
   }
 
-  // 生产环境：cross 接管模式
+  // Production environment: cross takeover mode
   if (mainServer.takeover && mainServer.takeover.length > 0) {
     await crossTakeover();
     return;
   }
 
-  // 生产环境：加载本地文件
+  // Production environment: load local file
   const indexPath = mainServer.indexPath;
   let prodUrl = path.join(getBaseDir(), indexPath);
   if (!isFileProtocol(mainServer.protocol)) {
@@ -233,11 +233,11 @@ export async function loadServer(): Promise<void> {
 }
 
 /**
- * 加载主页面 URL 或文件
+ * Load main page URL or file
  *
- * @param type - 加载类型（remote / spa）
- * @param url - URL 或文件路径
- * @param load - 加载方式：'url' 使用 loadURL，'file' 使用 loadFile
+ * @param type - Load type (remote / spa)
+ * @param url - URL or file path
+ * @param load - Load method: 'url' uses loadURL, 'file' uses loadFile
  */
 function loadMainUrl(type: string, url: string, load = 'url'): void {
   const { mainServer } = getConfig() as { mainServer: { options: Electron.LoadURLOptions & Electron.LoadFileOptions } };
@@ -263,11 +263,11 @@ function loadMainUrl(type: string, url: string, load = 'url'): void {
 }
 
 /**
- * 加载启动页面
+ * Load startup page
  *
- * 在等待前端服务就绪期间显示，避免白屏。
+ * Displayed while waiting for frontend service to be ready, avoiding blank screen.
  *
- * @param filepath - 启动页 HTML 文件路径
+ * @param filepath - Startup page HTML file path
  */
 function _loadingPage(filepath: string): void {
   const win = getMainWindow();
@@ -279,26 +279,26 @@ function _loadingPage(filepath: string): void {
 }
 
 /**
- * 跨进程服务接管页面加载
+ * Cross-process service takeover page loading
  *
- * 等待指定的跨进程服务（如 Go/Python 后端）就绪后，加载其提供的 URL。
- * 流程：
- * 1. 显示加载页面（如配置了 loadingPage）
- * 2. 检查跨进程服务配置是否正确
- * 3. 轮询等待服务 URL 可达
- * 4. 就绪后加载服务 URL，超时则显示失败页面
+ * Waits for the specified cross-process service (e.g., Go/Python backend) to be ready, then loads the URL it provides.
+ * Flow:
+ * 1. Show loading page (if loadingPage is configured)
+ * 2. Check if cross-process service configuration is correct
+ * 3. Poll and wait for service URL to be reachable
+ * 4. Load service URL when ready, show failure page on timeout
  */
 async function crossTakeover(): Promise<void> {
   const crossConf = getConfig().cross as Record<string, { enable?: boolean; name?: string; [key: string]: unknown }>;
   const mainConf = getConfig().mainServer as { takeover: string; loadingPage: string };
 
-  // 显示加载页面
+  // Show loading page
   if (mainConf.loadingPage && mainConf.loadingPage.length > 0) {
     const lp = path.join(getBaseDir(), mainConf.loadingPage);
     _loadingPage(lp);
   }
 
-  // 获取跨进程服务的 URL
+  // Get the URL of the cross-process service
   const service = mainConf.takeover;
   if (!Object.prototype.hasOwnProperty.call(crossConf, service)) {
     throw new Error(`[ee-core] Please Check the value of mainServer.takeover in the config file !`);
@@ -316,14 +316,14 @@ async function crossTakeover(): Promise<void> {
     throw new Error(`[ee-core] Cannot get URL for cross service [${service}], process may not be running`);
   }
 
-  // 轮询等待服务就绪
+  // Poll and wait for service to be ready
   const times = isDev() ? 20 : 100;
   const sleeptime = isDev() ? 1000 : 200;
   const serviceReady = await waitForUrl(url, { retries: times, intervalMs: sleeptime, timeoutMs: 100 });
   debugLog('cross service ready: %s', serviceReady);
 
   if (!serviceReady) {
-    // 服务未就绪，显示失败页面
+    // Service not ready, show failure page
     const bootFailurePage = getHtmlFilepath('cross-failure.html');
     const mainWindow = getMainWindow();
     if (mainWindow) {

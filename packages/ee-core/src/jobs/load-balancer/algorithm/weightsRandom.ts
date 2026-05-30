@@ -1,7 +1,7 @@
 import type { LoadBalancerTarget } from '../types.js';
 
 /**
- * 权重随机算法
+ * Weighted random algorithm
  */
 export default function weightsRandom(
   tasks: LoadBalancerTarget[],

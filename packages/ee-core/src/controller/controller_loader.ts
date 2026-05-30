@@ -1,23 +1,23 @@
 /**
  * @module controller/controller_loader
- * @description 控制器加载器。扫描 electron/controller/ 目录下的所有文件，
- * 将导出的类转为方法映射对象，将导出的函数直接注册。
+ * @description Controller loader. Scans all files under the electron/controller/ directory,
+ * converts exported classes to method mapping objects, and registers exported functions directly.
  *
- * 加载模式：
- * - 打包模式（registry）：从 globalThis.__EE_CONTROLLER_REGISTRY__ 读取预注册的控制器模块
- * - 开发模式（globby）：扫描文件系统，使用 globby 匹配文件
+ * Loading modes:
+ * - Bundle mode (registry): Reads pre-registered controller modules from globalThis.__EE_CONTROLLER_REGISTRY__
+ * - Dev mode (globby): Scans the filesystem, using globby to match files
  *
- * 类控制器处理流程：
- * 1. 类被 wrapClass() 包装，遍历原型链上的所有方法
- * 2. 每个方法被 methodToMiddleware() 转为中间件函数
- * 3. 每次调用中间件都会创建新的控制器实例，保证并发安全
- * 4. 方法属性挂载 pathName 和 fullPath，用于 IPC 通道路由
+ * Class controller processing flow:
+ * 1. The class is wrapped by wrapClass(), which traverses all methods on the prototype chain
+ * 2. Each method is converted to a middleware function by methodToMiddleware()
+ * 3. Each middleware invocation creates a new controller instance, ensuring concurrency safety
+ * 4. Method properties have pathName and fullPath attached for IPC channel routing
  *
- * 导出结构示例：
+ * Export structure example:
  * ```
  * controller/
- *   user.js          → { controller: { user: { add: fn, delete: fn } } }
- *   admin/login.js   → { controller: { admin: { login: { auth: fn } } } }
+ *   user.js          -> { controller: { user: { add: fn, delete: fn } } }
+ *   admin/login.js   -> { controller: { admin: { login: { auth: fn } } } }
  * ```
  */
 import debug from 'debug';
@@ -32,10 +32,10 @@ import type { RegistryEntry } from '../types/index.js';
 const debugLog = debug('ee-core:controller:controller_loader');
 
 /**
- * ControllerLoader 控制器加载器
+ * ControllerLoader — Controller loader
  *
- * 负责加载 electron/controller/ 目录下的所有控制器文件，
- * 并将类方法包装为可调用的中间件函数。
+ * Responsible for loading all controller files under the electron/controller/ directory
+ * and wrapping class methods into callable middleware functions.
  */
 export class ControllerLoader {
   timing: Timing;
@@ -45,11 +45,11 @@ export class ControllerLoader {
   }
 
   /**
-   * 同步加载控制器
+   * Load controllers synchronously
    *
-   * 优先使用 registry（打包模式），否则使用 globby 文件扫描（开发模式）。
+   * Uses registry first (bundle mode), otherwise falls back to globby file scanning (dev mode).
    *
-   * @returns 控制器方法映射对象，结构为 { controller: { module: { method: fn } } }
+   * @returns Controller method mapping object, structured as { controller: { module: { method: fn } } }
    */
   load(): Record<string, unknown> {
     this.timing.start('Load Controller');
@@ -75,12 +75,12 @@ export class ControllerLoader {
   }
 
   /**
-   * 异步加载控制器（ESM 支持）
+   * Load controllers asynchronously (ESM support)
    *
-   * 使用动态 import() 替代 require()，支持 ESM 格式的控制器文件。
-   * 流程与 load() 相同，但文件加载和解析均为异步操作。
+   * Uses dynamic import() instead of require(), supporting ESM format controller files.
+   * Same flow as load(), but file loading and parsing are asynchronous operations.
    *
-   * @returns 控制器方法映射对象
+   * @returns Controller method mapping object
    */
   async loadAsync(): Promise<Record<string, unknown>> {
     this.timing.start('Load Controller');
@@ -107,27 +107,27 @@ export class ControllerLoader {
 }
 
 /**
- * 包装控制器类，提取原型链上的所有方法
+ * Wrap a controller class, extracting all methods from the prototype chain
  *
- * 遍历类的原型链，将每个方法名映射为中间件函数。
- * 子类方法不会被父类同名方法覆盖（hasOwnProperty 保护）。
- * getter/setter 和非函数属性会被跳过。
+ * Traverses the class prototype chain, mapping each method name to a middleware function.
+ * Subclass methods are not overridden by parent class methods of the same name (hasOwnProperty guard).
+ * Getters/setters and non-function properties are skipped.
  *
- * @param Controller - 控制器类构造函数
- * @returns 方法名到中间件函数的映射对象
+ * @param Controller - Controller class constructor
+ * @returns Mapping of method names to middleware functions
  */
 function wrapClass(Controller: new (...args: unknown[]) => unknown): Record<string, unknown> {
   let proto = (Controller as unknown as { prototype: Record<string, unknown> }).prototype;
   const ret: Record<string, unknown> = {};
 
-  // 追溯原型链，收集所有层级的方法
+  // Trace the prototype chain, collecting methods from all levels
   while (proto !== Object.prototype) {
     const keys = Object.getOwnPropertyNames(proto);
     for (const key of keys) {
-      // 跳过构造函数
+      // Skip constructor
       if (key === 'constructor') continue;
       const d = Object.getOwnPropertyDescriptor(proto, key);
-      // 跳过 getter/setter 和非函数属性；子类已定义的方法不被父类覆盖
+      // Skip getter/setter and non-function properties; methods already defined in subclass are not overridden by parent
       if (isFunction(d?.value) && !Object.prototype.hasOwnProperty.call(ret, key)) {
         ret[key] = methodToMiddleware(Controller, key);
         (ret[key] as Record<symbol, string>)[FULLPATH] =
@@ -141,15 +141,15 @@ function wrapClass(Controller: new (...args: unknown[]) => unknown): Record<stri
 }
 
 /**
- * 将控制器方法转为中间件函数
+ * Convert a controller method to a middleware function
  *
- * 关键设计：每次调用都创建新的控制器实例。
- * 这样做的原因是保证并发安全 — 多个请求同时到达时，
- * 每个请求拥有独立的控制器实例，避免状态共享导致的竞态问题。
+ * Key design: a new controller instance is created on each invocation.
+ * This is done to ensure concurrency safety — when multiple requests arrive simultaneously,
+ * each request has its own controller instance, avoiding race conditions caused by shared state.
  *
- * @param Controller - 控制器类构造函数
- * @param key - 方法名
- * @returns 中间件函数，调用时创建新实例并执行对应方法
+ * @param Controller - Controller class constructor
+ * @param key - Method name
+ * @returns Middleware function that creates a new instance and executes the corresponding method on invocation
  */
 function methodToMiddleware(Controller: new (...args: unknown[]) => unknown, key: string) {
   return function classControllerMiddleware(...args: unknown[]): unknown {

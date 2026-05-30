@@ -1,7 +1,7 @@
 import type { LoadBalancerTarget } from '../types.js';
 
 /**
- * 随机算法
+ * Random selection algorithm
  */
 export default function random(tasks: LoadBalancerTarget[]): LoadBalancerTarget | null {
   const length = tasks.length;

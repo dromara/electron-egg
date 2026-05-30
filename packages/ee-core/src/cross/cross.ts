@@ -1,14 +1,14 @@
 /**
  * @module cross/cross
- * @description 跨进程通信管理器。负责创建、管理和终止外部子进程（如 Go/Python 后端），
- * 并为子进程动态分配端口。
+ * @description Cross-process communication manager. Responsible for creating, managing, and terminating
+ * external child processes (e.g., Go/Python backends), and dynamically allocating ports for them.
  *
- * 核心概念：
- * - children：以 pid 为键的进程映射，存储 CrossProcess 实例
- * - childrenMap：以 name 为键的映射，通过名称快速查找进程
- * - 事件监听：子进程退出/错误时自动从映射中清理
+ * Core concepts:
+ * - children: Process mapping keyed by pid, storing CrossProcess instances
+ * - childrenMap: Mapping keyed by name, for quick process lookup by name
+ * - Event listening: Automatically cleans up from mappings when child processes exit/error
  *
- * 使用方式：
+ * Usage:
  * ```ts
  * const proc = await cross.run('goServer');
  * const url = cross.getUrl('goServer');
@@ -26,29 +26,29 @@ import { extend } from '../utils/extend.js';
 import { getPort } from '../utils/port/index.js';
 import type { ProcessExitEventData } from '../types/index.js';
 
-/** 运行子进程时的额外选项 */
+/** Additional options when running a child process */
 export interface CrossRunOptions {
   [key: string]: unknown;
-  /** 覆盖启动参数 */
+  /** Override startup arguments */
   args?: string[];
-  /** 指定端口号 */
+  /** Specify port number */
   port?: number;
 }
 
 /**
- * Cross 跨进程通信管理器
+ * Cross - cross-process communication manager
  *
- * 实现了 CrossHost 接口，为子进程提供事件通知能力。
- * 通过 children 和 childrenMap 双索引管理进程，支持按 pid 或 name 操作。
+ * Implements the CrossHost interface, providing event notification capability for child processes.
+ * Manages processes via children and childrenMap dual indexes, supporting operations by pid or name.
  */
 export class Cross implements CrossHost {
-  /** 事件发射器，用于接收子进程的退出/错误事件 */
+  /** Event emitter for receiving child process exit/error events */
   emitter: EventEmitter | undefined;
 
-  /** pid 索引：{ pid: { name, entity } } */
+  /** pid index: { pid: { name, entity } } */
   private children: Record<string, { name: string; entity: CrossProcess }>;
 
-  /** name 索引：{ name: pid } */
+  /** name index: { name: pid } */
   private childrenMap: Record<string, number>;
 
   constructor() {
@@ -59,9 +59,9 @@ export class Cross implements CrossHost {
   }
 
   /**
-   * 创建并启动所有配置中 enable=true 的跨进程服务
+   * Create and start all cross-process services with enable=true in config
    *
-   * 遍历 config.cross 配置，对每个 enable=true 的服务调用 run()。
+   * Iterates over config.cross configuration, calling run() for each service with enable=true.
    */
   async create(): Promise<void> {
     const crossCfg = getConfig().cross;
@@ -75,18 +75,18 @@ export class Cross implements CrossHost {
   }
 
   /**
-   * 运行指定的跨进程服务
+   * Run the specified cross-process service
    *
-   * 流程：
-   * 1. 从配置中获取服务配置，与运行时选项合并
-   * 2. 解析端口参数，若指定则动态获取可用端口
-   * 3. 创建 CrossProcess 子进程
-   * 4. 注册到 children 和 childrenMap 索引
+   * Flow:
+   * 1. Get service configuration from config, merge with runtime options
+   * 2. Parse port parameter, dynamically acquire available port if specified
+   * 3. Create CrossProcess child process
+   * 4. Register in children and childrenMap indexes
    *
-   * @param service - 服务名称（对应 config.cross 中的键名）
-   * @param opt - 运行时选项，可覆盖配置中的参数
-   * @returns CrossProcess 实例
-   * @throws 服务配置不存在时抛出错误
+   * @param service - Service name (corresponding to key name in config.cross)
+   * @param opt - Runtime options, can override configuration parameters
+   * @returns CrossProcess instance
+   * @throws Throws error when service configuration does not exist
    */
   async run(service: string, opt: CrossRunOptions = {}): Promise<CrossProcess> {
     const crossConf = getConfig().cross;
@@ -96,24 +96,24 @@ export class Cross implements CrossHost {
       throw new Error(`[ee-core] [cross] The service [${service}] config does not exit`);
     }
 
-    // 解析并分配端口
+    // Parse and allocate port
     const tmpArgs = targetConf.args || [];
     let confPort = parseInt(String(getValueFromArgv(tmpArgs, 'port') || '0'), 10);
-    // 某些程序传入不存在的参数会报错，此时使用配置中的 port 字段
+    // Some programs error when passed non-existent arguments, in which case use the port field from config
     if (isNaN(confPort) && (targetConf.port || 0) > 0) {
       confPort = targetConf.port || 0;
     }
     if (confPort > 0) {
-      // 动态获取可用端口
+      // Dynamically acquire available port
       confPort = await getPort({ port: confPort });
-      // 替换参数中的端口号
+      // Replace port number in arguments
       targetConf.args = replaceArgsValue(tmpArgs, 'port', String(confPort));
     }
 
-    // 创建子进程
+    // Create child process
     const subProcess = new CrossProcess(this, { targetConf, port: confPort });
     let uniqueName = targetConf.name;
-    // 同名服务追加 pid 后缀避免冲突
+    // Append pid suffix for duplicate service names to avoid conflicts
     if (Object.prototype.hasOwnProperty.call(this.childrenMap, uniqueName)) {
       uniqueName = uniqueName + '-' + String(subProcess.pid);
     }
@@ -127,14 +127,14 @@ export class Cross implements CrossHost {
     return subProcess;
   }
 
-  /** 终止所有子进程 */
+  /** Terminate all child processes */
   killAll(): void {
     Object.keys(this.children).forEach((pid) => {
       this.kill(pid);
     });
   }
 
-  /** 按 pid 终止子进程 */
+  /** Terminate child process by pid */
   kill(pid: string | number): void {
     const entity = this.getProc(pid);
     if (entity) {
@@ -142,7 +142,7 @@ export class Cross implements CrossHost {
     }
   }
 
-  /** 按名称终止子进程 */
+  /** Terminate child process by name */
   killByName(name: string): void {
     const entity = this.getProcByName(name);
     if (entity) {
@@ -151,10 +151,10 @@ export class Cross implements CrossHost {
   }
 
   /**
-   * 获取指定服务的 URL
+   * Get the URL of the specified service
    *
-   * @param name - 服务名称
-   * @returns 服务 URL，进程不存在时返回 undefined
+   * @param name - Service name
+   * @returns Service URL, or undefined if process does not exist
    */
   getUrl(name: string): string | undefined {
     const pid = this.childrenMap[name];
@@ -165,11 +165,11 @@ export class Cross implements CrossHost {
   }
 
   /**
-   * 按名称获取进程实例
+   * Get process instance by name
    *
-   * @param name - 服务名称
-   * @returns CrossProcess 实例
-   * @throws 进程不存在时抛出错误
+   * @param name - Service name
+   * @returns CrossProcess instance
+   * @throws Throws error when process does not exist
    */
   getProcByName(name: string): CrossProcess {
     const pid = this.childrenMap[name];
@@ -182,11 +182,11 @@ export class Cross implements CrossHost {
   }
 
   /**
-   * 按 pid 获取进程实例
+   * Get process instance by pid
    *
-   * @param pid - 进程 ID
-   * @returns CrossProcess 实例
-   * @throws 进程不存在时抛出错误
+   * @param pid - Process ID
+   * @returns CrossProcess instance
+   * @throws Throws error when process does not exist
    */
   getProc(pid: string | number): CrossProcess {
     const child = this.children[String(pid)];
@@ -197,16 +197,16 @@ export class Cross implements CrossHost {
     return child.entity;
   }
 
-  /** 获取所有子进程的 pid 列表 */
+  /** Get list of all child process pids */
   getPids(): string[] {
     const pids = Object.keys(this.children);
     return pids;
   }
 
   /**
-   * 初始化事件监听
+   * Initialize event listeners
    *
-   * 监听子进程的退出和错误事件，自动从索引中清理已终止的进程。
+   * Listens for child process exit and error events, automatically cleaning up terminated processes from indexes.
    */
   _initEventEmitter(): void {
     this.emitter = new EventEmitter();
@@ -227,5 +227,5 @@ export class Cross implements CrossHost {
   }
 }
 
-/** Cross 管理器单例 */
+/** Cross manager singleton */
 export const cross = new Cross();

@@ -1,435 +1,439 @@
 /**
  * @module types
- * @description 框架核心类型定义。集中定义 ee-core 所有公共接口和配置类型，
- * 供框架各模块及业务代码引用，确保类型安全和接口一致性。
+ * @description Framework core type definitions. Centralizes all public interface and configuration
+ * types for ee-core, referenced by framework modules and business code to ensure type safety
+ * and interface consistency.
  *
- * 包含：
- * - ElectronEggOptions：框架启动参数
- * - Config 系列：运行时配置（主服务、Socket、HTTP、日志、异常、任务、跨进程）
- * - JobChildOptions：子进程任务参数
- * - FileLoaderOptions：文件加载器配置
- * - AppInfo：应用元信息
- * - MessageData：IPC 消息结构
- * - TimingItem：性能计时条目
- * - RegistryEntry：打包模式注册表条目
+ * Includes:
+ * - ElectronEggOptions: framework startup parameters
+ * - Config series: runtime configuration (main service, Socket, HTTP, logging, exception, jobs, cross-process)
+ * - JobChildOptions: child process job parameters
+ * - FileLoaderOptions: file loader configuration
+ * - AppInfo: application metadata
+ * - MessageData: IPC message structure
+ * - TimingItem: performance timing entry
+ * - RegistryEntry: bundle mode registry entry
  */
 import type { BrowserWindowConstructorOptions, OpenDevToolsOptions } from 'electron';
 
 /**
- * ElectronEgg 启动选项
+ * ElectronEgg startup options
  *
- * 框架初始化时由 boot 模块构造，包含应用运行环境的基础信息。
- * 这些值一旦确定，在应用生命周期内不会改变。
+ * Constructed by the boot module during framework initialization, containing basic information
+ * about the application runtime environment. These values, once determined, do not change
+ * throughout the application lifecycle.
  */
 export interface ElectronEggOptions {
-  /** 运行环境标识，如 'dev'、'prod'、'test' */
+  /** Runtime environment identifier, e.g. 'dev', 'prod', 'test' */
   env: string;
-  /** 项目根目录（package.json 所在目录） */
+  /** Project root directory (where package.json is located) */
   baseDir: string;
-  /** Electron 主进程源码目录（如 electron/） */
+  /** Electron main process source directory (e.g. electron/) */
   electronDir: string;
-  /** 应用名称，取自 package.json 的 name 字段 */
+  /** Application name, taken from the name field in package.json */
   appName: string;
-  /** 用户主目录（os.homedir()） */
+  /** User home directory (os.homedir()) */
   userHome: string;
-  /** 系统级应用数据目录（macOS: ~/Library/Application Support，Windows: %APPDATA%） */
+  /** System-level application data directory (macOS: ~/Library/Application Support, Windows: %APPDATA%) */
   appData: string;
-  /** Electron 用户数据目录（appData/appName） */
+  /** Electron user data directory (appData/appName) */
   appUserData: string;
-  /** 应用版本号，取自 package.json 的 version 字段 */
+  /** Application version, taken from the version field in package.json */
   appVersion: string;
-  /** 是否已打包为安装包（app.isPackaged） */
+  /** Whether packaged as an installer (app.isPackaged) */
   isPackaged: boolean;
-  /** 可执行文件所在目录（打包后为 exe 路径，开发时为 node_modules/electron 路径） */
+  /** Executable directory (after packaging: exe path; during development: node_modules/electron path) */
   execDir: string;
 }
 
 /**
- * 远程服务配置
+ * Remote service configuration
  *
- * 用于配置远程调试或远程控制服务地址。
- * 启用后，主进程可通过 WebSocket 连接到远程服务。
+ * Used to configure remote debugging or remote control service addresses.
+ * When enabled, the main process can connect to the remote service via WebSocket.
  */
 export interface RemoteConfig {
-  /** 是否启用远程服务 */
+  /** Whether to enable remote service */
   enable: boolean;
-  /** 远程服务地址（如 ws://remote-host:port） */
+  /** Remote service address (e.g. ws://remote-host:port) */
   url: string;
 }
 
 /**
- * 主窗口服务配置
+ * Main window service configuration
  *
- * 定义主窗口加载内容的方式（本地文件或远程 URL）及加载行为。
+ * Defines how the main window loads content (local file or remote URL) and loading behavior.
  */
 export interface MainServerConfig {
-  /** 协议类型：'file://' 加载本地文件，'http://'/'https://' 加载远程页面 */
+  /** Protocol type: 'file://' loads local file, 'http://'/'https://' loads remote page */
   protocol: string;
-  /** 入口文件路径（file 协议时为 HTML 文件路径，http 协议时为 URL 路径） */
+  /** Entry file path (HTML file path for file protocol, URL path for http protocol) */
   indexPath: string;
-  /** 传递给 protocol.handle 或 loadURL 的额外选项 */
+  /** Extra options passed to protocol.handle or loadURL */
   options?: Record<string, unknown>;
-  /** 加载策略：'start'（启动时加载）或 'ready'（app ready 后加载），默认 'start' */
+  /** Loading strategy: 'start' (load on startup) or 'ready' (load after app ready), default 'start' */
   takeover?: string;
-  /** 预加载页面路径。在主页面加载前先展示此页面，用于显示启动画面 */
+  /** Preload page path. Displayed before the main page loads, used for splash screens */
   loadingPage?: string;
-  /** IPC 通道分隔符，默认 '/'。如 'controller/user/info' 中的 '/' */
+  /** IPC channel separator, default '/'. E.g. '/' in 'controller/user/info' */
   channelSeparator?: string;
 }
 
 /**
- * Socket.IO 服务配置
+ * Socket.IO service configuration
  *
- * 定义主进程与渲染进程之间的 WebSocket 通信参数。
- * 使用 socket.io 实现，支持轮询和 WebSocket 两种传输方式。
+ * Defines WebSocket communication parameters between main process and renderer process.
+ * Implemented with socket.io, supporting both polling and WebSocket transports.
  */
 export interface SocketServerConfig {
-  /** 是否启用 Socket 服务 */
+  /** Whether to enable Socket service */
   enable: boolean;
-  /** Socket 服务监听端口 */
+  /** Socket service listening port */
   port: number;
-  /** Socket.IO 路径（默认 /socket.io） */
+  /** Socket.IO path (default /socket.io) */
   path: string;
-  /** 连接超时时间（毫秒），超时后断开连接 */
+  /** Connection timeout (ms), disconnect after timeout */
   connectTimeout: number;
-  /** 心跳超时时间（毫秒），未收到 pong 则断开 */
+  /** Heartbeat timeout (ms), disconnect if no pong received */
   pingTimeout: number;
-  /** 心跳发送间隔（毫秒） */
+  /** Heartbeat send interval (ms) */
   pingInterval: number;
-  /** 单次 HTTP 消息体最大字节数，防止过大消息导致内存问题 */
+  /** Maximum bytes per HTTP message body, prevents oversized messages causing memory issues */
   maxHttpBufferSize: number;
-  /** 传输方式列表，支持 'polling'（长轮询）和 'websocket' */
+  /** Transport list, supports 'polling' (long polling) and 'websocket' */
   transports: ('polling' | 'websocket')[];
-  /** 跨域配置，遵循 socket.io CORS 规则 */
+  /** CORS configuration, follows socket.io CORS rules */
   cors: {
     origin: boolean | string | RegExp | string[] | ((origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => void);
   };
-  /** 自定义通信频道名称，用于区分不同的 socket 通信组 */
+  /** Custom communication channel name, used to distinguish different socket communication groups */
   channel: string;
 }
 
 /**
- * HTTPS 证书配置
+ * HTTPS certificate configuration
  *
- * 为 HTTP 服务提供 SSL/TLS 证书，启用 HTTPS 支持。
+ * Provides SSL/TLS certificates for HTTP service, enabling HTTPS support.
  */
 export interface HttpsConfig {
-  /** 是否启用 HTTPS */
+  /** Whether to enable HTTPS */
   enable: boolean;
-  /** SSL 私钥文件路径 */
+  /** SSL private key file path */
   key: string;
-  /** SSL 证书文件路径 */
+  /** SSL certificate file path */
   cert: string;
 }
 
 /**
- * HTTP 服务配置
+ * HTTP service configuration
  *
- * 定义内置 Koa HTTP 服务的参数，提供 RESTful API 接口。
- * 主要用于渲染进程通过 HTTP 方式与主进程通信。
+ * Defines parameters for the built-in Koa HTTP service, providing RESTful API interfaces.
+ * Primarily used for renderer process to communicate with main process via HTTP.
  */
 export interface HttpServerConfig {
-  /** 是否启用 HTTP 服务 */
+  /** Whether to enable HTTP service */
   enable: boolean;
-  /** HTTPS 证书配置 */
+  /** HTTPS certificate configuration */
   https: HttpsConfig;
-  /** 协议类型：'http' 或 'https' */
+  /** Protocol type: 'http' or 'https' */
   protocol: string;
-  /** 监听主机地址，默认 '127.0.0.1'（仅本地访问） */
+  /** Listening host address, default '127.0.0.1' (local access only) */
   host: string;
-  /** 监听端口 */
+  /** Listening port */
   port: number;
-  /** 跨域配置 */
+  /** CORS configuration */
   cors: {
-    /** 允许的来源，如 '*' 或具体域名 */
+    /** Allowed origins, e.g. '*' or specific domain */
     origin: string;
   };
-  /** 请求体解析配置 */
+  /** Request body parsing configuration */
   body: {
-    /** 是否支持 multipart/form-data（文件上传） */
+    /** Whether to support multipart/form-data (file upload) */
     multipart: boolean;
-    /** formidable 文件上传处理配置 */
+    /** formidable file upload handling configuration */
     formidable: {
-      /** 是否保留上传文件的原扩展名 */
+      /** Whether to keep original file extensions for uploaded files */
       keepExtensions: boolean;
     };
   };
-  /** 请求过滤配置，对匹配的 URI 返回固定数据（用于屏蔽或拦截特定请求） */
+  /** Request filter configuration, returns fixed data for matched URIs (used to block or intercept specific requests) */
   filterRequest: {
-    /** 需要过滤的 URI 列表 */
+    /** List of URIs to filter */
     uris: string[];
-    /** 对过滤 URI 统一返回的数据 */
+    /** Data to return for filtered URIs */
     returnData: string;
   };
-  /** Koa 中间件扩展配置 */
+  /** Koa middleware extension configuration */
   koaConfig?: KoaConfig;
 }
 
 /**
- * Koa 中间件配置
+ * Koa middleware configuration
  *
- * 允许业务代码在 Koa HTTP 服务的中间件链中插入自定义逻辑。
+ * Allows business code to insert custom logic into the Koa HTTP service middleware chain.
  */
 export interface KoaConfig {
-  /** 前置中间件列表，在路由处理之前执行（如鉴权、日志） */
+  /** Pre-middleware list, executed before route handling (e.g. auth, logging) */
   preMiddleware?: ((...args: unknown[]) => unknown)[];
-  /** 后置中间件列表，在路由处理之后执行（如错误包装、响应格式化） */
+  /** Post-middleware list, executed after route handling (e.g. error wrapping, response formatting) */
   postMiddleware?: ((...args: unknown[]) => unknown)[];
-  /** 自定义错误处理器，替换框架默认的 Koa 错误处理逻辑 */
+  /** Custom error handler, replaces framework's default Koa error handling logic */
   errorHandler?: ((err: Error) => void) | null;
 }
 
 /**
- * 日志配置
+ * Logger configuration
  *
- * 基于 Pino 日志库的完整配置项。框架内置三种日志实例：
- * - appLogName：应用日志，记录业务输出
- * - coreLogName：核心日志，记录框架内部运行
- * - errorLogName：错误日志，仅记录 error/fatal
+ * Complete configuration for the Pino logging library. The framework has three built-in log instances:
+ * - appLogName: application log, records business output
+ * - coreLogName: core log, records framework internal operations
+ * - errorLogName: error log, only records error/fatal
  */
 export interface LoggerConfig {
-  /** 日志文件存储目录 */
+  /** Log file storage directory */
   dir: string;
-  /** 最低日志级别，低于此级别的日志将被忽略 */
+  /** Minimum log level, logs below this level will be ignored */
   level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | string;
-  /** 是否启用 pino-pretty 美化输出（仅开发环境建议开启） */
+  /** Whether to enable pino-pretty output (recommended for development only) */
   prettyPrint?: boolean;
-  /** 时间戳日期格式（如 'yyyy-MM-dd hh:mm:ss'） */
+  /** Timestamp date format (e.g. 'yyyy-MM-dd hh:mm:ss') */
   dateFormat?: string;
-  /** 应用日志文件名（如 app.log） */
+  /** Application log filename (e.g. app.log) */
   appLogName: string;
-  /** 核心日志文件名（如 core.log） */
+  /** Core log filename (e.g. core.log) */
   coreLogName: string;
-  /** 错误日志文件名（如 error.log） */
+  /** Error log filename (e.g. error.log) */
   errorLogName: string;
-  /** 日志轮转周期：'daily'（每天）或 'hourly'（每小时） */
+  /** Log rotation period: 'daily' (every day) or 'hourly' (every hour) */
   rotator: 'daily' | 'hourly' | string;
-  /** 需要脱敏的字段路径列表（Pino redact 功能，如 ['password', 'token']） */
+  /** Field paths to redact (Pino redact feature, e.g. ['password', 'token']) */
   redact?: string[];
-  /** 脱敏替换值，可以是固定字符串或自定义替换函数 */
+  /** Redaction replacement value, can be a fixed string or custom replacement function */
   redactCensor?: string | ((value: unknown, path: string[]) => unknown);
-  /** 日志是否包含时间戳，默认 true */
+  /** Whether logs include timestamps, default true */
   timestamp?: boolean;
-  /** 日志记录器名称，在日志条目中显示 */
+  /** Logger name, displayed in log entries */
   name?: string;
-  /** 单个日志文件最大大小，超过后自动轮转（如 '10m' 表示 10MB） */
+  /** Maximum size of a single log file, auto-rotates when exceeded (e.g. '10m' for 10MB) */
   maxSize?: number | string;
-  /** 自定义序列化器，用于格式化特定类型的值（如 err、req、res） */
+  /** Custom serializers for formatting specific value types (e.g. err, req, res) */
   serializers?: Record<string, (value: unknown) => unknown>;
-  /** 自定义日志级别映射（如 { verbose: 30 }） */
+  /** Custom log level mapping (e.g. { verbose: 30 }) */
   customLevels?: Record<string, number>;
-  /** 对象序列化深度限制，防止循环引用或过大对象导致性能问题 */
+  /** Object serialization depth limit, prevents circular references or oversized objects from causing performance issues */
   depthLimit?: number;
-  /** 安全模式：日志写入失败时不抛出异常，而是静默处理 */
+  /** Safe mode: when log write fails, no exception is thrown but silently handled */
   safe?: boolean;
-  /** 是否启用日志功能，false 时所有日志输出将被禁用 */
+  /** Whether to enable logging, false disables all log output */
   enabled?: boolean;
 }
 
 /**
- * 异常处理配置
+ * Exception handling configuration
  *
- * 定义各进程异常退出时的处理策略。
- * 退出分为两种行为：true 表示进程退出，false 表示仅记录日志。
+ * Defines handling strategies when processes exit abnormally.
+ * Exit behavior: true means process exits, false means only log.
  */
 export interface ExceptionConfig {
-  /** 主进程异常是否退出应用。true：主进程崩溃则退出，false：仅记录错误 */
+  /** Whether main process exception exits the application. true: exit on main process crash, false: only log error */
   mainExit: boolean;
-  /** 子进程（Job）异常退出时是否终止主进程 */
+  /** Whether child process (Job) abnormal exit terminates the main process */
   childExit: boolean;
-  /** 渲染进程异常退出时的处理策略 */
+  /** Handling strategy for renderer process abnormal exit */
   rendererExit: boolean;
 }
 
 /**
- * 后台任务（Job）配置
+ * Background job (Job) configuration
  *
- * 控制子进程任务的全局行为。
+ * Controls global behavior of child process jobs.
  */
 export interface JobsConfig {
-  /** 是否记录子进程通信消息日志。true 时所有 IPC 消息将被记录，便于调试 */
+  /** Whether to log child process communication messages. When true, all IPC messages are logged for debugging */
   messageLog: boolean;
 }
 
 /**
- * 跨进程目标配置
+ * Cross-process target configuration
  *
- * 定义一个外部进程的启动参数和通信方式。
- * 支持子进程 fork、Go/Python 后端进程启动等场景。
+ * Defines startup parameters and communication methods for an external process.
+ * Supports child process fork, Go/Python backend process startup, and other scenarios.
  */
 export interface CrossTargetConfig {
-  /** 目标进程名称标识（如 'go'、'python'） */
+  /** Target process name identifier (e.g. 'go', 'python') */
   name: string;
-  /** 是否启用此跨进程目标 */
+  /** Whether to enable this cross-process target */
   enable?: boolean;
-  /** 传递给子进程的命令行参数 */
+  /** Command line arguments passed to the child process */
   args?: string[];
-  /** 启动命令（如 'go'、'python3'），为空则使用 script 直接 fork */
+  /** Startup command (e.g. 'go', 'python3'), empty means use script for direct fork */
   cmd?: string;
-  /** 子进程工作目录，默认为项目根目录 */
+  /** Child process working directory, defaults to project root directory */
   directory?: string;
-  /** Windows 下是否自动添加 .exe 扩展名 */
+  /** Whether to automatically add .exe extension on Windows */
   windowsExtname?: boolean;
-  /** 子进程标准 IO 配置（同 child_process.fork 的 stdio 选项） */
+  /** Child process stdio configuration (same as child_process.fork stdio option) */
   stdio?: ('pipe' | 'ignore' | 'inherit' | 'ipc')[];
-  /** 子进程退出时是否同时退出主应用 */
+  /** Whether to exit the main application when the child process exits */
   appExit?: boolean;
-  /** 子进程监听端口（Go/Python HTTP 服务端口） */
+  /** Child process listening port (Go/Python HTTP service port) */
   port?: number;
-  /** 子进程服务 URL（如 http://localhost:port） */
+  /** Child process service URL (e.g. http://localhost:port) */
   url?: string;
 }
 
 /**
- * 跨进程配置集合
+ * Cross-process configuration collection
  *
- * 键名为目标进程标识，值为此进程的启动参数。
- * 支持同时配置多个外部进程（Go、Python、自定义子进程等）。
+ * Key names are target process identifiers, values are startup parameters for each process.
+ * Supports configuring multiple external processes simultaneously (Go, Python, custom child processes, etc.).
  */
 export interface CrossConfig {
-  /** 动态键名对应各跨进程目标配置 */
+  /** Dynamic key names corresponding to each cross-process target configuration */
   [key: string]: CrossTargetConfig;
 }
 
 /**
- * 框架主配置接口
+ * Framework main configuration interface
  *
- * 整合所有子模块配置，是 config.default.js 导出对象的类型定义。
- * 运行时由 ConfigLoader 加载并合并后提供给各模块使用。
+ * Integrates all sub-module configurations, serves as the type definition for the object
+ * exported by config.default.js. Loaded and merged by ConfigLoader at runtime, then
+ * provided to each module.
  */
 export interface Config {
-  /** 动态属性，允许用户自定义配置项 */
+  /** Dynamic properties, allows user-defined configuration items */
   [key: string]: unknown;
-  /** 开发者工具配置：true 打开 DevTools，false 关闭，或传入 OpenDevToolsOptions 精细控制 */
+  /** DevTools configuration: true opens DevTools, false closes, or pass OpenDevToolsOptions for fine control */
   openDevTools: boolean | OpenDevToolsOptions;
-  /** 单实例锁：true 时只允许运行一个应用实例，后续启动会激活已有窗口 */
+  /** Single instance lock: true allows only one application instance, subsequent launches activate existing window */
   singleLock: boolean;
-  /** BrowserWindow 构造选项，直接传递给 Electron BrowserWindow */
+  /** BrowserWindow constructor options, passed directly to Electron BrowserWindow */
   windowsOption: BrowserWindowConstructorOptions;
-  /** 日志配置 */
+  /** Logger configuration */
   logger: LoggerConfig;
-  /** Socket.IO 服务配置 */
+  /** Socket.IO service configuration */
   socketServer: SocketServerConfig;
-  /** HTTP 服务配置 */
+  /** HTTP service configuration */
   httpServer: HttpServerConfig;
-  /** 远程服务配置 */
+  /** Remote service configuration */
   remote: RemoteConfig;
-  /** 主窗口服务配置 */
+  /** Main window service configuration */
   mainServer: MainServerConfig;
-  /** 异常处理配置 */
+  /** Exception handling configuration */
   exception: ExceptionConfig;
-  /** 后台任务配置 */
+  /** Background jobs configuration */
   jobs: JobsConfig;
-  /** 跨进程配置 */
+  /** Cross-process configuration */
   cross: CrossConfig;
 }
 
 /**
- * 子进程任务（Job）启动选项
+ * Child process job (Job) startup options
  *
- * 定义 ChildJob / ChildPoolJob 创建子进程时的参数。
+ * Defines parameters for ChildJob / ChildPoolJob to create child processes.
  */
 export interface JobChildOptions {
-  /** 任务名称标识，用于日志和 IPC 路由 */
+  /** Job name identifier, used for logging and IPC routing */
   name: string;
-  /** 子进程入口脚本路径（child_process.fork 的第一个参数） */
+  /** Child process entry script path (first argument of child_process.fork) */
   script: string;
-  /** 传递给子进程的命令行参数 */
+  /** Command line arguments passed to the child process */
   args?: string[];
-  /** 子进程环境变量，会与 process.env 合并 */
+  /** Child process environment variables, merged with process.env */
   env?: NodeJS.ProcessEnv;
-  /** 子进程 HTTP 服务端口（如 Go/Python 子进程的监听端口） */
+  /** Child process HTTP service port (e.g. Go/Python child process listening port) */
   port?: number;
 }
 
 /**
- * extend() 合并选项
+ * extend() merge options
  *
- * 控制对象合并时是否执行深度合并。
+ * Controls whether deep merging is performed during object merging.
  */
 export interface ExtendOptions {
-  /** 是否深度合并。true 时嵌套对象递归合并，false 时浅层覆盖 */
+  /** Whether to deep merge. When true, nested objects are recursively merged; when false, shallow overwrite */
   deep?: boolean;
 }
 
 /**
- * 性能计时条目
+ * Performance timing entry
  *
- * 记录框架启动流程中每个阶段的耗时信息，用于性能分析。
+ * Records duration information for each stage in the framework startup process, used for performance analysis.
  */
 export interface TimingItem {
-  /** 阶段名称（如 'loadConfig'、'loadController'） */
+  /** Stage name (e.g. 'loadConfig', 'loadController') */
   name: string;
-  /** 阶段开始时间（毫秒时间戳） */
+  /** Stage start time (ms timestamp) */
   start: number;
-  /** 阶段结束时间（毫秒时间戳），未结束时为 undefined */
+  /** Stage end time (ms timestamp), undefined when not finished */
   end: number | undefined;
-  /** 阶段耗时（毫秒），未结束时为 undefined */
+  /** Stage duration (ms), undefined when not finished */
   duration: number | undefined;
-  /** 执行该阶段的进程 PID */
+  /** PID of the process executing this stage */
   pid: number;
-  /** 条目序号，标识启动阶段的执行顺序 */
+  /** Entry sequence number, indicating the execution order of startup stages */
   index: number;
 }
 
 /**
- * 注册表条目
+ * Registry entry
  *
- * 打包模式下，esbuild 插件将文件信息预注册到全局变量，
- * 每个条目对应一个被扫描到的模块文件。
+ * In bundle mode, the esbuild plugin pre-registers file information to a global variable.
+ * Each entry corresponds to a scanned module file.
  */
 export interface RegistryEntry {
-  /** 文件的完整路径（如 'controller/user.js'） */
+  /** Full file path (e.g. 'controller/user.js') */
   fullpath: string;
-  /** 属性路径数组，由文件路径转换而来（如 ['user'] 或 ['admin', 'login']） */
+  /** Property path array, converted from file path (e.g. ['user'] or ['admin', 'login']) */
   properties: string[];
-  /** 懒加载模块：访问时才 require，避免初始化顺序问题 */
+  /** Lazily loaded module: requires only on access, avoiding initialization order issues */
   module: unknown;
 }
 
 /**
- * FileLoader 加载选项
+ * FileLoader loading options
  *
- * 控制文件加载器如何扫描目录、转换属性名、处理导出内容。
+ * Controls how the file loader scans directories, converts property names, and processes exports.
  */
 export interface FileLoaderOptions {
   /**
-   * 属性命名风格，决定文件路径到属性名的转换规则：
-   * - 'lower'：首字母小写（控制器使用，如 UserController → userController）
-   * - 'upper'：首字母大写
-   * - 'camel'：驼峰式（默认）
-   * - 函数：完全自定义转换逻辑
+   * Property naming style, determines file path to property name conversion rules:
+   * - 'lower': first letter lowercase (used by controllers, e.g. UserController -> userController)
+   * - 'upper': first letter uppercase
+   * - 'camel': camelCase (default)
+   * - function: fully custom conversion logic
    */
   caseStyle?: 'lower' | 'upper' | 'camel' | ((filepath: string) => string[]);
-  /** 要扫描的目录路径，可以是单个目录或目录数组 */
+  /** Directory path(s) to scan, can be a single directory or an array of directories */
   directory: string;
   /**
-   * 自定义初始化器，对文件导出内容进行额外处理。
-   * 接受导出值和路径信息，返回处理后的值。
+   * Custom initializer for additional processing of file exports.
+   * Accepts the export value and path info, returns the processed value.
    */
   initializer?: ((obj: unknown, options: { pathName: string; path: string }) => unknown) | null;
-  /** 函数类型导出是否自动调用。true 时普通函数导出会被执行，返回值作为最终导出 */
+  /** Whether to auto-call function-type exports. When true, plain function exports are executed and the return value is used as the final export */
   call?: boolean;
-  /** 是否覆盖同名属性。true 时后加载的同名模块会覆盖先加载的 */
+  /** Whether to override same-name properties. When true, later-loaded modules with the same name override earlier ones */
   override?: boolean;
-  /** 函数自动调用时的注入参数 */
+  /** Injection parameters for auto-called functions */
   inject?: unknown;
-  /** 文件匹配模式（globby 格式），仅加载匹配的文件 */
+  /** File match pattern (globby format), only loads matching files */
   match?: string | string[] | ((name: string) => boolean);
-  /** 文件忽略模式，匹配的文件将被跳过 */
+  /** File ignore pattern, matched files will be skipped */
   ignore?: string | string[] | ((name: string) => boolean);
   /**
-   * 预注册表条目数组。打包模式下由全局变量 __EE_CONTROLLER_REGISTRY__ 提供，
-   * 存在时跳过文件系统扫描，直接从注册表加载模块
+   * Pre-registry entry array. In bundle mode, provided by global variable __EE_CONTROLLER_REGISTRY__;
+   * when present, skips filesystem scanning and loads modules directly from the registry
    */
   registry?: RegistryEntry[];
 }
 
 /**
- * 应用元信息
+ * Application metadata
  *
- * 配置文件加载时，框架将此对象作为参数传入配置函数，
- * 供配置文件根据环境信息动态返回不同配置。
+ * During configuration file loading, the framework passes this object as a parameter to the
+ * configuration function, allowing config files to dynamically return different configurations
+ * based on environment information.
  *
  * @example
  * ```js
@@ -442,39 +446,39 @@ export interface FileLoaderOptions {
  * ```
  */
 export interface AppInfo {
-  /** 应用名称 */
+  /** Application name */
   name: string;
-  /** 项目根目录 */
+  /** Project root directory */
   baseDir: string;
-  /** Electron 源码目录 */
+  /** Electron source directory */
   electronDir: string;
-  /** 运行环境（'dev' / 'prod' / 'test'） */
+  /** Runtime environment ('dev' / 'prod' / 'test') */
   env: string;
-  /** 日志和运行时数据根目录（通常为 appUserData） */
+  /** Log and runtime data root directory (usually appUserData) */
   root: string;
 }
 
 /**
- * IPC 消息数据结构
+ * IPC message data structure
  *
- * 主进程与渲染进程之间通信的标准化消息格式。
- * 通过 socket.io 或 Electron IPC 传输。
+ * Standardized message format for communication between main process and renderer process.
+ * Transmitted via socket.io or Electron IPC.
  */
 export interface MessageData {
-  /** 通信频道标识（如 'controller/user/info'） */
+  /** Communication channel identifier (e.g. 'controller/user/info') */
   channel: string;
-  /** 事件名称 */
+  /** Event name */
   event: string;
-  /** 消息负载数据 */
+  /** Message payload data */
   data: unknown;
 }
 
 /**
- * 进程退出事件数据
+ * Process exit event data
  *
- * 当子进程或渲染进程异常退出时，携带的进程标识信息。
+ * Process identification information carried when a child process or renderer process exits abnormally.
  */
 export interface ProcessExitEventData {
-  /** 退出进程的 PID，undefined 表示无法获取 */
+  /** PID of the exited process, undefined if unavailable */
   pid: number | undefined;
 }

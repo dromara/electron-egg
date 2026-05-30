@@ -1,37 +1,37 @@
 /**
  * @module const/channel
- * @description IPC 通信频道和事件常量定义。
- * 统一管理框架内部使用的频道名和事件名，避免硬编码字符串。
+ * @description IPC communication channel and event constant definitions.
+ * Centrally manages channel names and event names used internally by the framework, avoiding hardcoded strings.
  */
 
-/** 进程间通信频道 */
+/** Inter-process communication channels */
 export const Processes = {
-  /** 异常展示频道：渲染进程收到此频道消息后显示异常弹窗 */
+  /** Exception display channel: renderer process displays an exception dialog upon receiving this channel message */
   showException: 'ee#showException',
-  /** 子进程向主进程发送消息的频道 */
+  /** Channel for child process to send messages to the main process */
   sendToMain: 'ee#sendToMain',
 } as const;
 
-/** SocketIO 通信频道 */
+/** SocketIO communication channels */
 export const SocketIO = {
-  /** 第三方软件通信频道（默认 SocketIO 通信使用的频道名） */
+  /** Third-party software communication channel (default SocketIO communication channel name) */
   partySoftware: 'socket-channel',
 } as const;
 
-/** 进程生命周期事件 */
+/** Process lifecycle events */
 export const Events = {
-  /** 子进程退出事件 */
+  /** Child process exit event */
   childProcessExit: 'ee#childProcess#exit',
-  /** 子进程错误事件 */
+  /** Child process error event */
   childProcessError: 'ee#childProcess#error',
 } as const;
 
-/** 消息接收者类型 */
+/** Message receiver types */
 export const Receiver = {
-  /** ChildJob 类型的子进程 */
+  /** ChildJob-type child process */
   childJob: 'job',
-  /** Fork 进程（通用任务） */
+  /** Fork process (generic task) */
   forkProcess: 'task',
-  /** 所有接收者 */
+  /** All receivers */
   all: 'all',
 } as const;

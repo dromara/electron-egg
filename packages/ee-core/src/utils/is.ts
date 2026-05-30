@@ -1,144 +1,145 @@
 /**
  * @module utils/is
- * @description Electron 运行环境检测工具。提供一系列函数用于判断当前进程类型、
- * 操作系统平台和处理器架构，便于框架代码针对不同环境执行不同逻辑。
+ * @description Electron runtime environment detection utility. Provides a set of functions
+ * for determining the current process type, operating system platform, and processor
+ * architecture, enabling framework code to execute different logic for different environments.
  *
- * 使用方式：
+ * Usage:
  * ```ts
  * import { main, osx, all } from './is.js';
- * if (all(main, osx)) { /* 主进程 + macOS *\/ }
+ * if (all(main, osx)) { /* main process + macOS *\/ }
  * ```
  */
 /**
- * 检测当前是否运行在渲染进程中
+ * Detect whether currently running in the renderer process
  *
- * Electron 中 process.type 的值：
- * - 'renderer'：渲染进程
- * - 'browser'：主进程
- * - 'worker'：Worker 进程
+ * Electron process.type values:
+ * - 'renderer': renderer process
+ * - 'browser': main process
+ * - 'worker': Worker process
  *
- * @returns true 表示当前在渲染进程中
+ * @returns true if currently in the renderer process
  */
 export function renderer(): boolean {
   return process.type === 'renderer';
 }
 
 /**
- * 检测当前是否运行在主进程中
+ * Detect whether currently running in the main process
  *
- * Electron 主进程的 process.type 为 'browser'。
+ * The main process's process.type is 'browser' in Electron.
  *
- * @returns true 表示当前在主进程中
+ * @returns true if currently in the main process
  */
 export function main(): boolean {
   return process.type === 'browser';
 }
 
 /**
- * 检测当前操作系统是否为 macOS
+ * Detect whether the current operating system is macOS
  *
- * 基于 process.platform === 'darwin' 判断。
- * macOS、iOS 等苹果系统的 platform 均为 'darwin'。
+ * Based on process.platform === 'darwin'.
+ * macOS, iOS, and other Apple systems all have platform 'darwin'.
  *
- * @returns true 表示当前在 macOS 上运行
+ * @returns true if currently running on macOS
  */
 export function osx(): boolean {
   return process.platform === 'darwin';
 }
 
 /**
- * 检测当前操作系统是否为 macOS（osx 的别名）
+ * Detect whether the current operating system is macOS (alias for osx)
  *
- * @returns true 表示当前在 macOS 上运行
+ * @returns true if currently running on macOS
  */
 export function macOS(): boolean {
   return osx();
 }
 
 /**
- * 检测当前操作系统是否为 Windows
+ * Detect whether the current operating system is Windows
  *
- * 基于 process.platform === 'win32' 判断。
- * 注意：64 位 Windows 的 platform 也是 'win32'。
+ * Based on process.platform === 'win32'.
+ * Note: 64-bit Windows also has platform 'win32'.
  *
- * @returns true 表示当前在 Windows 上运行
+ * @returns true if currently running on Windows
  */
 export function windows(): boolean {
   return process.platform === 'win32';
 }
 
 /**
- * 检测当前操作系统是否为 Linux
+ * Detect whether the current operating system is Linux
  *
- * @returns true 表示当前在 Linux 上运行
+ * @returns true if currently running on Linux
  */
 export function linux(): boolean {
   return process.platform === 'linux';
 }
 
 /**
- * 检测处理器架构是否为 x86（32 位）
+ * Detect whether the processor architecture is x86 (32-bit)
  *
- * 基于 process.arch === 'ia32' 判断。
+ * Based on process.arch === 'ia32'.
  *
- * @returns true 表示 32 位 x86 架构
+ * @returns true for 32-bit x86 architecture
  */
 export function x86(): boolean {
   return process.arch === 'ia32';
 }
 
 /**
- * 检测处理器架构是否为 x64（64 位）
+ * Detect whether the processor architecture is x64 (64-bit)
  *
- * 基于 process.arch === 'x64' 判断。
+ * Based on process.arch === 'x64'.
  *
- * @returns true 表示 64 位 x86 架构
+ * @returns true for 64-bit x86 architecture
  */
 export function x64(): boolean {
   return process.arch === 'x64';
 }
 
 /**
- * 检测应用是否运行在 macOS 沙箱环境中
+ * Detect whether the app is running in a macOS sandbox environment
  *
- * macOS 沙箱应用在环境变量中包含 APP_SANDBOX_CONTAINER_ID。
+ * macOS sandbox apps contain APP_SANDBOX_CONTAINER_ID in environment variables.
  *
- * @returns true 表示在沙箱环境中运行
+ * @returns true if running in a sandbox environment
  */
 export function sandbox(): boolean {
   return 'APP_SANDBOX_CONTAINER_ID' in process.env;
 }
 
 /**
- * 检测应用是否为 Mac App Store 构建
+ * Detect whether the app is a Mac App Store build
  *
- * Electron 的 process.mas 属性在 MAS 构建中为 true。
+ * Electron's process.mas property is true in MAS builds.
  *
- * @returns true 表示 MAS 构建
+ * @returns true for MAS build
  */
 export function mas(): boolean {
   return process.mas === true;
 }
 
 /**
- * 检测应用是否为 Windows Store (appx) 构建
+ * Detect whether the app is a Windows Store (appx) build
  *
- * Electron 的 process.windowsStore 属性在 Windows Store 构建中为 true。
+ * Electron's process.windowsStore property is true in Windows Store builds.
  *
- * @returns true 表示 Windows Store 构建
+ * @returns true for Windows Store build
  */
 export function windowsStore(): boolean {
   return process.windowsStore === true;
 }
 
 /**
- * 判断所有条件函数是否都为真
+ * Determine if all condition functions are true
  *
- * 接受多个返回布尔值的函数，逐一执行并检查结果。
- * 遇到第一个 false 即返回 false，全部为 true 才返回 true。
+ * Accepts multiple functions returning boolean values, executes each and checks the result.
+ * Returns false at the first false result; returns true only if all are true.
  *
- * @param isFunctions - 条件判断函数列表
- * @returns 全部为 true 返回 true，任一为 false 返回 false，无参数返回 undefined
+ * @param isFunctions - List of condition functions
+ * @returns true if all are true, false if any is false, undefined if no arguments
  */
 export function all(...isFunctions: Array<() => boolean>): boolean | undefined {
   if (!isFunctions.length) return undefined;
@@ -149,13 +150,13 @@ export function all(...isFunctions: Array<() => boolean>): boolean | undefined {
 }
 
 /**
- * 判断所有条件函数是否都为假
+ * Determine if all condition functions are false
  *
- * 接受多个返回布尔值的函数，逐一执行并检查结果。
- * 遇到第一个 true 即返回 false，全部为 false 才返回 true。
+ * Accepts multiple functions returning boolean values, executes each and checks the result.
+ * Returns false at the first true result; returns true only if all are false.
  *
- * @param isFunctions - 条件判断函数列表
- * @returns 全部为 false 返回 true，任一为 true 返回 false，无参数返回 undefined
+ * @param isFunctions - List of condition functions
+ * @returns true if all are false, false if any is true, undefined if no arguments
  */
 export function none(...isFunctions: Array<() => boolean>): boolean | undefined {
   if (!isFunctions.length) return undefined;
@@ -166,13 +167,13 @@ export function none(...isFunctions: Array<() => boolean>): boolean | undefined 
 }
 
 /**
- * 判断是否有至少一个条件函数为真
+ * Determine if at least one condition function is true
  *
- * 接受多个返回布尔值的函数，逐一执行并检查结果。
- * 遇到第一个 true 即返回 true，全部为 false 才返回 false。
+ * Accepts multiple functions returning boolean values, executes each and checks the result.
+ * Returns true at the first true result; returns false only if all are false.
  *
- * @param isFunctions - 条件判断函数列表
- * @returns 任一为 true 返回 true，全部为 false 返回 false，无参数返回 undefined
+ * @param isFunctions - List of condition functions
+ * @returns true if any is true, false if all are false, undefined if no arguments
  */
 export function one(...isFunctions: Array<() => boolean>): boolean | undefined {
   if (!isFunctions.length) return undefined;

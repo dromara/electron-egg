@@ -1,35 +1,36 @@
 /**
  * @module utils/pargv
- * @description 轻量级命令行参数解析器。提供 parseArgv() 函数，将字符串数组解析为
- * 结构化的键值对象，支持短选项、长选项、别名、布尔标志、嵌套属性等功能。
+ * @description Lightweight command line argument parser. Provides parseArgv() function that
+ * parses a string array into a structured key-value object, supporting short options,
+ * long options, aliases, boolean flags, nested properties, and more.
  *
- * 解析步骤：
- * 1. 初始化阶段：处理 boolean/string/alias/default 配置，构建标志映射
- * 2. 分割阶段：以 '--' 为界将参数分为选项部分和非选项部分
- * 3. 逐项解析阶段：
- *    - `--key=value`：长选项带等号赋值
- *    - `--no-key`：长选项否定形式（布尔 false）
- *    - `--key value`：长选项后跟值
- *    - `-abc`：短选项组合（每个字母为独立选项）
- *    - 裸值：存入 argv._ 数组
- * 4. 默认值填充：对未出现的键填充默认值
- * 5. 非选项参数处理：根据 '--' 选项决定存入 argv['--'] 还是 argv._
+ * Parsing steps:
+ * 1. Initialization phase: process boolean/string/alias/default configuration, build flag mappings
+ * 2. Split phase: separate arguments into options and non-options parts using '--' as delimiter
+ * 3. Item-by-item parsing phase:
+ *    - `--key=value`: long option with equals sign assignment
+ *    - `--no-key`: long option negation form (boolean false)
+ *    - `--key value`: long option followed by value
+ *    - `-abc`: short option combination (each letter is a separate option)
+ *    - Bare values: stored in argv._ array
+ * 4. Default value filling: fill default values for keys that did not appear
+ * 5. Non-option argument handling: based on '--' option, store in argv['--'] or argv._
  *
- * 安全防护：自动跳过 __proto__ 和 constructor 属性，防止原型链污染。
+ * Security: automatically skips __proto__ and constructor properties, preventing prototype chain pollution.
  */
 
 /**
- * 检查对象是否拥有指定的嵌套键路径
+ * Check if an object has the specified nested key path
  *
- * 沿键路径逐级深入，最后一层仅检查键是否存在（不取值）。
+ * Traverses down the key path, only checking key existence at the last level (not retrieving value).
  *
- * @param obj - 目标对象
- * @param keys - 键路径数组（如 ['a', 'b', 'c']）
- * @returns true 表示键路径存在
+ * @param obj - Target object
+ * @param keys - Key path array (e.g. ['a', 'b', 'c'])
+ * @returns true if the key path exists
  */
 function hasKey(obj: Record<string, unknown>, keys: string[]): boolean {
   let o: Record<string, unknown> = obj;
-  // 逐级取值到倒数第二层
+  // Traverse to second-to-last level, retrieving values
   keys.slice(0, -1).forEach(function (key) {
     o = (o[key] as Record<string, unknown>) || {};
   });
@@ -40,12 +41,12 @@ function hasKey(obj: Record<string, unknown>, keys: string[]): boolean {
 }
 
 /**
- * 判断字符串是否为数值格式
+ * Determine if a string is in numeric format
  *
- * 支持十六进制（0x 前缀）、十进制整数和小数、科学计数法。
+ * Supports hexadecimal (0x prefix), decimal integers and decimals, scientific notation.
  *
- * @param x - 待判断的字符串
- * @returns true 表示是合法的数值格式
+ * @param x - String to check
+ * @returns true if the string is a valid numeric format
  */
 function isNumber(x: string): boolean {
   if (/^0x[0-9a-f]+$/i.test(x)) return true;
@@ -53,54 +54,54 @@ function isNumber(x: string): boolean {
 }
 
 /**
- * 检测键名是否为 constructor 或 __proto__
+ * Detect if a key name is constructor or __proto__
  *
- * 用于防止原型链污染攻击，这些特殊属性不应被设置。
+ * Used to prevent prototype chain pollution attacks; these special properties should not be set.
  *
- * @param obj - 目标对象
- * @param key - 键名
- * @returns true 表示是危险属性
+ * @param obj - Target object
+ * @param key - Key name
+ * @returns true if the key is a dangerous property
  */
 function isConstructorOrProto(obj: Record<string, unknown>, key: string): boolean {
   return (key === 'constructor' && typeof obj[key] === 'function') || key === '__proto__';
 }
 
-/** 命令行解析选项 */
+/** Command line parsing options */
 export interface ParseArgvOptions {
-  /** 声明布尔类型参数。true 时所有 --flag 视为布尔，或指定参数名列表 */
+  /** Declare boolean-type parameters. When true, all --flags are treated as boolean; or specify a list of parameter names */
   boolean?: boolean | string[];
-  /** 参数别名映射，如 { h: 'help', v: 'version' } */
+  /** Parameter alias mapping, e.g. { h: 'help', v: 'version' } */
   alias?: Record<string, string | string[]>;
-  /** 声明字符串类型参数，这些参数不会被自动转为数字 */
+  /** Declare string-type parameters; these parameters will not be auto-converted to numbers */
   string?: string | string[];
-  /** 参数默认值映射 */
+  /** Parameter default value mapping */
   default?: Record<string, unknown>;
-  /** 未知参数处理函数，返回 false 可阻止该参数被解析 */
+  /** Unknown argument handler function; returning false prevents the argument from being parsed */
   unknown?: (arg: string) => boolean | void;
-  /** 遇到第一个非选项参数时停止解析，后续全部放入 _ 数组 */
+  /** Stop parsing when the first non-option argument is encountered; remaining arguments go into _ array */
   stopEarly?: boolean;
-  /** 是否将 '--' 后的参数放入 argv['--'] 数组，而非 argv._ */
+  /** Whether to put arguments after '--' into argv['--'] array instead of argv._ */
   '--'?: boolean;
 }
 
-/** 解析结果对象 */
+/** Parsed result object */
 export interface ParsedArgv {
-  /** 非选项参数列表（裸值和位置参数） */
+  /** Non-option argument list (bare values and positional arguments) */
   _: (string | number)[];
-  /** '--' 分隔符后的参数列表（仅当 opts['--'] 为 true 时存在） */
+  /** Argument list after '--' separator (only present when opts['--'] is true) */
   '--'?: string[];
-  /** 解析出的键值对，键名支持点号嵌套（如 'a.b' → { a: { b: ... } }） */
+  /** Parsed key-value pairs; key names support dot notation nesting (e.g. 'a.b' -> { a: { b: ... } }) */
   [key: string]: unknown;
 }
 
 /**
- * 解析命令行参数数组
+ * Parse command line argument array
  *
- * 将 process.argv 风格的字符串数组解析为结构化的键值对象。
+ * Parses a process.argv-style string array into a structured key-value object.
  *
- * @param args - 参数数组（通常为 process.argv.slice(2)）
- * @param opts - 解析选项
- * @returns 解析结果对象
+ * @param args - Argument array (typically process.argv.slice(2))
+ * @param opts - Parsing options
+ * @returns Parsed result object
  *
  * @example
  * ```ts
@@ -115,7 +116,7 @@ export interface ParsedArgv {
 export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
   if (!opts) opts = {};
 
-  // 步骤 1：构建标志映射，记录哪些参数是布尔型或字符串型
+  // Step 1: Build flag mapping, recording which parameters are boolean or string type
   const flags: {
     bools: Record<string, boolean>;
     strings: Record<string, boolean>;
@@ -131,24 +132,24 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
     flags.unknownFn = opts.unknown;
   }
 
-  // boolean 选项为 true 时，所有 --flag 形式的参数都视为布尔
+  // When boolean option is true, all --flag form arguments are treated as boolean
   if (typeof opts.boolean === 'boolean' && opts.boolean) {
     flags.allBools = true;
   } else {
-    // 否则只将指定的参数名标记为布尔型
+    // Otherwise only mark specified parameter names as boolean
     ([] as string[]).concat(opts.boolean || []).filter(Boolean).forEach(function (key) {
       flags.bools[key] = true;
     });
   }
 
-  // 步骤 2：构建别名双向映射
+  // Step 2: Build bidirectional alias mapping
   const aliases: Record<string, string[]> = {};
 
   /**
-   * 检查指定键的别名中是否有布尔型
+   * Check if any alias of the specified key is boolean
    *
-   * @param key - 参数键名
-   * @returns true 表示该键的某个别名是布尔型
+   * @param key - Parameter key name
+   * @returns true if any alias of the key is boolean
    */
   function aliasIsBoolean(key: string): boolean {
     return aliases[key]?.some(function (x) {
@@ -156,7 +157,7 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
     }) ?? false;
   }
 
-  // 构建双向别名映射：每个别名都能映射到所有其他别名和原始键
+  // Build bidirectional alias mapping: each alias can map to all other aliases and the original key
   const aliasOpts = opts.alias || {};
   Object.keys(aliasOpts).forEach(function (key) {
     const aliasValue = aliasOpts[key];
@@ -164,7 +165,7 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
     const aliasList = ([] as string[]).concat(aliasValue);
     aliases[key] = aliasList;
     aliasList.forEach(function (x) {
-      // 每个别名映射到原始键 + 其他别名（排除自身）
+      // Each alias maps to the original key + other aliases (excluding itself)
       const filtered = aliasList.filter(function (y) {
         return x !== y;
       });
@@ -172,7 +173,7 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
     });
   });
 
-  // 步骤 3：将 string 选项标记到标志映射中（别名也需要同步标记）
+  // Step 3: Mark string options in the flag mapping (aliases also need to be synced)
   const stringOpts = opts.string || [];
   const stringList = ([] as string[]).concat(stringOpts).filter(Boolean);
   stringList.forEach(function (key) {
@@ -184,22 +185,22 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
     }
   });
 
-  // 步骤 4：提取默认值，在解析完成后填充
+  // Step 4: Extract default values, fill after parsing is complete
   const defaults = opts.default || {};
 
-  // 初始化结果对象
+  // Initialize result object
   const argv: ParsedArgv = { _: [] };
 
   /**
-   * 判断参数键是否已被定义（通过标志或别名）
+   * Determine if a parameter key has been defined (via flags or aliases)
    *
-   * @param key - 参数键名
-   * @param arg - 原始参数字符串
-   * @returns true 表示该键已声明
+   * @param key - Parameter key name
+   * @param arg - Original argument string
+   * @returns true if the key has been declared
    */
   function argDefined(key: string, arg: string): boolean {
     return (
-      // allBools 模式下 --flag 形式都视为已定义
+      // In allBools mode, --flag form arguments are all considered defined
       (!!flags.allBools && /^--[^=]+$/.test(arg)) ||
       !!flags.strings[key] ||
       !!flags.bools[key] ||
@@ -208,25 +209,25 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
   }
 
   /**
-   * 沿嵌套键路径设置值
+   * Set a value along a nested key path
    *
-   * 支持点号分隔的嵌套属性，如 'a.b.c' → obj.a.b.c = value。
-   * 若值已存在，相同键的重复参数会被收集为数组。
+   * Supports dot-separated nested properties, e.g. 'a.b.c' -> obj.a.b.c = value.
+   * If the value already exists, repeated arguments with the same key are collected as an array.
    *
-   * @param obj - 目标对象
-   * @param keys - 键路径数组
-   * @param value - 要设置的值
+   * @param obj - Target object
+   * @param keys - Key path array
+   * @param value - Value to set
    */
   function setKey(obj: Record<string, unknown>, keys: string[], value: unknown): void {
     let o: Record<string, unknown> = obj;
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i];
-      // 跳过危险属性，防止原型链污染
+      // Skip dangerous properties, preventing prototype chain pollution
       if (!key || isConstructorOrProto(o, key)) return;
-      // 中间层级不存在则自动创建对象
+      // Auto-create object if intermediate level doesn't exist
       if (o[key] === undefined) o[key] = {};
       const oValue = o[key];
-      // 防止覆盖内置原型对象
+      // Prevent overwriting built-in prototype objects
       if (
         oValue === Object.prototype ||
         oValue === Number.prototype ||
@@ -239,89 +240,89 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
     }
 
     const lastKey = keys[keys.length - 1];
-    // 最后一层也检查危险属性
+    // Last level also checks for dangerous properties
     if (!lastKey || isConstructorOrProto(o, lastKey)) return;
     if ((o as unknown) === Object.prototype || (o as unknown) === Number.prototype || (o as unknown) === String.prototype) {
       o = {};
     }
     if ((o as unknown) === Array.prototype) o = {};
     if (o[lastKey] === undefined || flags.bools[lastKey] || typeof o[lastKey] === 'boolean') {
-      // 首次赋值或布尔型参数：直接设置
+      // First assignment or boolean parameter: set directly
       o[lastKey] = value;
     } else if (Array.isArray(o[lastKey])) {
-      // 已有数组：追加值
+      // Existing array: append value
       (o[lastKey] as unknown[]).push(value);
     } else {
-      // 已有单值：转为数组
+      // Existing single value: convert to array
       o[lastKey] = [o[lastKey], value];
     }
   }
 
   /**
-   * 设置参数值并同步到所有别名
+   * Set parameter value and sync to all aliases
    *
-   * @param key - 参数键名
-   * @param val - 参数值
-   * @param arg - 原始参数字符串（用于 unknown 检查）
+   * @param key - Parameter key name
+   * @param val - Parameter value
+   * @param arg - Original argument string (for unknown check)
    */
   function setArg(key: string, val: unknown, arg?: string): void {
-    // 未知参数检查：如果参数未声明且 unknown 函数返回 false，则跳过
+    // Unknown argument check: if argument is undeclared and unknown function returns false, skip it
     if (arg && flags.unknownFn && !argDefined(key, arg)) {
       if (flags.unknownFn(arg) === false) return;
     }
 
-    // 非字符串型参数且值为数字格式时自动转换为数值
+    // Non-string-type parameters with numeric format values are auto-converted to numbers
     const value = !flags.strings[key] && isNumber(val as string) ? Number(val) : val;
     setKey(argv, key.split('.'), value);
 
-    // 同步设置所有别名的值
+    // Sync value to all aliases
     (aliases[key] || []).forEach(function (x) {
       setKey(argv, x.split('.'), value);
     });
   }
 
-  // 步骤 5：预设置布尔型参数的默认值（未指定时为 false）
+  // Step 5: Pre-set default values for boolean parameters (false when unspecified)
   Object.keys(flags.bools).forEach(function (key) {
     setArg(key, defaults[key] === undefined ? false : defaults[key]);
   });
 
   let notFlags: string[] = [];
 
-  // 步骤 6：分割 '--' 前后的参数
+  // Step 6: Split arguments before and after '--'
   const dashIndex = args.indexOf('--');
   if (dashIndex !== -1) {
-    // '--' 之后的所有参数视为非选项参数
+    // All arguments after '--' are treated as non-option arguments
     notFlags = args.slice(dashIndex + 1);
     args = args.slice(0, dashIndex);
   }
 
-  // 步骤 7：逐项解析参数
+  // Step 7: Parse arguments item by item
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (!arg) continue;
     let next: string | undefined;
 
-    // 情况 1：--key=value 长选项带等号赋值
+    // Case 1: --key=value long option with equals sign assignment
     if (/^--.+?=/.test(arg)) {
       const m = arg.match(/^--([^=]+)=([\s\S]*)$/);
       if (!m) continue;
       const argKey = m[1];
       if (!argKey) continue;
       let value = m[2];
-      // 布尔型参数的值只认 true/false
+      // Boolean parameter values only recognize true/false
       if (flags.bools[argKey]) {
         value = value !== 'false' ? 'true' : 'false';
       }
       setArg(argKey, value, arg);
     } else if (/^--no-.+/.test(arg)) {
-      // 情况 2：--no-key 否定形式，等价于 --key=false
+      // Case 2: --no-key negation form, equivalent to --key=false
       const m = arg.match(/^--no-(.+)$/);
       if (!m) continue;
       const argKey = m[1];
       if (!argKey) continue;
       setArg(argKey, false, arg);
     } else if (/^--.+/.test(arg)) {
-      // 情况 3：--key [value] 长选项后跟可选值
+      // Case 3: --key [value] long option followed by optional value
       const m = arg.match(/^--(.+)$/);
       if (!m) continue;
       const argKey = m[1];
@@ -334,19 +335,19 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
         !flags.allBools &&
         (aliases[argKey] ? !aliasIsBoolean(argKey) : true)
       ) {
-        // 下一个参数是值而非新选项
+        // Next argument is a value, not a new option
         setArg(argKey, next, arg);
         i += 1;
       } else if (next && /^(true|false)$/.test(next)) {
-        // 显式布尔值
+        // Explicit boolean value
         setArg(argKey, next === 'true', arg);
         i += 1;
       } else {
-        // 无值时，字符串型设为空串，布尔型设为 true
+        // No value: string type set to empty string, boolean type set to true
         setArg(argKey, flags.strings[argKey] ? '' : true, arg);
       }
     } else if (/^-[^-]+/.test(arg)) {
-      // 情况 4：-abc 短选项组合
+      // Case 4: -abc short option combination
       const letters = arg.slice(1, -1).split('');
 
       let broken = false;
@@ -360,14 +361,14 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
           continue;
         }
 
-        // -a=value 形式
+        // -a=value form
         if (/[A-Za-z]/.test(letter) && next && next[0] === '=') {
           setArg(letter, next.slice(1), arg);
           broken = true;
           break;
         }
 
-        // -a123 形式（字母后跟数字）
+        // -a123 form (letter followed by digits)
         if (/[A-Za-z]/.test(letter) && next && /-?\d+(\.\d*)?(e-?\d+)?$/.test(next)) {
           setArg(letter, next, arg);
           broken = true;
@@ -376,17 +377,17 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
 
         const nextLetter = letters[j + 1];
         if (nextLetter && nextLetter.match(/\W/)) {
-          // 非字母数字字符视为值的开始
+          // Non-alphanumeric character treated as start of value
           setArg(letter, arg.slice(j + 2), arg);
           broken = true;
           break;
         } else {
-          // 普通短选项标志
+          // Regular short option flag
           setArg(letter, flags.strings[letter] ? '' : true, arg);
         }
       }
 
-      // 处理短选项组合的最后一个字符，它可能需要取下一个参数作为值
+      // Handle the last character of a short option combination, which may need the next argument as value
       const lastChar = arg.slice(-1);
       const shortKey = lastChar;
       if (!broken && shortKey !== '-') {
@@ -407,11 +408,11 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
         }
       }
     } else {
-      // 情况 5：裸值参数，存入 _ 数组
+      // Case 5: bare value argument, store in _ array
       if (!flags.unknownFn || flags.unknownFn(arg) !== false) {
         argv._.push((flags.strings._ || !isNumber(arg) ? arg : Number(arg)) as string | number);
       }
-      // stopEarly 模式下，后续参数全部放入 _ 数组
+      // In stopEarly mode, all subsequent arguments go into _ array
       if (opts.stopEarly) {
         argv._.push.apply(argv._, args.slice(i + 1) as unknown as (string | number)[]);
         break;
@@ -419,7 +420,7 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
     }
   }
 
-  // 步骤 8：填充默认值（仅对解析中未出现的键）
+  // Step 8: Fill default values (only for keys not present in parsing)
   Object.keys(defaults).forEach(function (k) {
     if (!hasKey(argv, k.split('.'))) {
       setKey(argv, k.split('.'), defaults[k]);
@@ -430,12 +431,12 @@ export function parseArgv(args: string[], opts?: ParseArgvOptions): ParsedArgv {
     }
   });
 
-  // 步骤 9：处理 '--' 分隔符后的非选项参数
+  // Step 9: Handle non-option arguments after '--' separator
   if (opts['--']) {
-    // 存入专门的 argv['--'] 数组
+    // Store in dedicated argv['--'] array
     argv['--'] = notFlags.slice();
   } else {
-    // 追加到 _ 数组
+    // Append to _ array
     notFlags.forEach(function (k) {
       argv._.push(k);
     });

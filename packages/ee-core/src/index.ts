@@ -1,80 +1,80 @@
 /**
  * @module ee-core
- * @description electron-egg 框架核心库入口。
+ * @description electron-egg framework core library entry point.
  *
- * 导出框架的所有公共 API，按模块分组：
- * - app：应用启动和生命周期
- * - config：配置加载和获取
- * - const：常量定义
- * - controller：控制器加载
- * - cross：跨进程通信
- * - core：核心工具（文件加载、计时器）
- * - electron：Electron 应用和窗口管理
- * - exception：全局异常处理
- * - html：HTML 文件路径
- * - loader：文件加载工具
- * - log：日志系统
- * - message：子进程消息
- * - socket：通信服务（IPC/HTTP/SocketIO）
- * - storage：数据存储
- * - jobs：后台任务和负载均衡
- * - utils：工具函数集
- * - ps：进程状态和路径
- * - types：TypeScript 类型定义
+ * Exports all public APIs of the framework, grouped by module:
+ * - app: application startup and lifecycle
+ * - config: configuration loading and retrieval
+ * - const: constant definitions
+ * - controller: controller loading
+ * - cross: cross-process communication
+ * - core: core utilities (file loading, timer)
+ * - electron: Electron app and window management
+ * - exception: global exception handling
+ * - html: HTML file paths
+ * - loader: file loading utilities
+ * - log: logging system
+ * - message: child process messages
+ * - socket: communication services (IPC/HTTP/SocketIO)
+ * - storage: data storage
+ * - jobs: background jobs and load balancing
+ * - utils: utility function collection
+ * - ps: process state and paths
+ * - types: TypeScript type definitions
  */
 
-// ─── app 模块 ───
+// --- app module ---
 export { ElectronEgg } from './app/boot.js';
 export { eventBus, EventBus, Ready, ElectronAppReady, WindowReady, BeforeClose, Preload } from './app/events.js';
 export { Application, app } from './app/application.js';
 
-// ─── config 模块 ───
+// --- config module ---
 export { loadConfig, getConfig } from './config/index.js';
 
-// ─── const 常量 ───
+// --- const constants ---
 export { Processes, SocketIO, Events, Receiver } from './const/channel.js';
 
-// ─── controller 模块 ───
+// --- controller module ---
 export { ControllerLoader } from './controller/controller_loader.js';
 export { loadController, loadControllerAsync, getControllers, getController } from './controller/index.js';
 
-// ─── cross 跨进程通信 ───
+// --- cross cross-process communication ---
 export { Cross, cross } from './cross/index.js';
 
-// ─── core 核心工具 ───
+// --- core utilities ---
 export { Timing } from './core/utils/timing.js';
 export { loadFile, loadFileAsync, callFn, getResolvedFilename, isBytecodeClass, filePatterns, extensions } from './core/utils/index.js';
 export { FileLoader, FULLPATH, EXPORTS } from './core/loader/file_loader.js';
 
-// ─── electron 主进程 ───
+// --- electron main process ---
 export { electronApp, createElectron, getMainWindow, createMainWindow, restoreMainWindow, setCloseAndQuit, getCloseAndQuit, loadServer } from './electron/index.js';
 
-// ─── exception 异常处理 ───
+// --- exception handling ---
 export { loadException } from './exception/index.js';
 
-// ─── html 文件路径 ───
+// --- html file paths ---
 export { getHtmlFilepath } from './html/index.js';
 
-// ─── loader 文件加载 ───
+// --- loader file loading ---
 export { loadFile as loaderLoadFile, requireFile, execFile, resolveModule, getFullpath } from './loader/index.js';
 
-// ─── log 日志系统 ───
+// --- log logging system ---
 export { loadLog, getLoggers, coreLogger } from './log/index.js';
 
-// ─── message 子进程消息 ───
+// --- message child process messages ---
 export { ChildMessage, childMessage } from './message/index.js';
 
-// ─── socket 通信服务 ───
+// --- socket communication services ---
 export { SocketServer, HttpServer, IpcServer, loadSocket, createSocketServer, createHttpServer, createIpcServer, getSocketServer, getHttpServer, getIpcServer } from './socket/index.js';
 
-// ─── storage 数据存储 ───
+// --- storage data storage ---
 export { SqliteStorage } from './storage/index.js';
 
-// ─── jobs 后台任务 ───
+// --- jobs background tasks ---
 export { ChildJob, ChildPoolJob, LoadBalancer, AlgorithmType } from './jobs/index.js';
 export { registerJobManager, killAllJobs } from './jobs/registry.js';
 
-// ─── utils 工具函数 ───
+// --- utils utility functions ---
 export { extend } from './utils/extend.js';
 export * as is from './utils/is.js';
 export { strictParse, readSync, writeSync, read, write } from './utils/json.js';
@@ -84,10 +84,10 @@ export { getProperties, defaultCamelize } from './utils/wrap.js';
 export { fnDebounce, getRandomString, mkdir, chmodPath, compareVersion, stringify, validValue, checkConfig, sleep, systemSleep, replaceArgsValue, getValueFromArgv, fileIsExist } from './utils/helper.js';
 export { getPort, releasePortLocks } from './utils/port/index.js';
 
-// ─── ps 进程状态和路径 ───
+// --- ps process state and paths ---
 export { allEnv, env, isProd, isDev, isRenderer, isMain, isForkedChild, processType, appName, appVersion, getDataDir, getLogDir, getBundleDir, getElectronCodeDir, getFrontendCodeDir, getRootDir, getBaseDir, getElectronDir, getPublicDir, getExtraResourcesDir, getAppUserDataDir, getExecDir, getUserHomeDir, getUserHomeHiddenAppDir, getUserHomeAppDir, getSocketPort, getHttpPort, isPackaged, exit, makeMessage, exitChildJob, isChildJob, isChildPoolJob, getArgumentByName } from './ps/index.js';
 
-// ─── 类型导出 ───
+// --- type exports ---
 export type {
   ElectronEggOptions,
   RemoteConfig,

@@ -1,23 +1,23 @@
 /**
  * @module config
- * @description 配置模块入口。提供配置的加载和获取功能。
+ * @description Configuration module entry point. Provides configuration loading and retrieval functionality.
  *
- * 使用方式：
- * - loadConfig()：在框架启动时调用一次，加载并合并配置
- * - getConfig()：获取最终合并后的运行时配置
- * - getAppInfo()：获取应用基础信息（名称、路径、环境等）
+ * Usage:
+ * - loadConfig(): Called once during framework startup to load and merge configuration
+ * - getConfig(): Retrieve the final merged runtime configuration
+ * - getAppInfo(): Retrieve application basic info (name, paths, environment, etc.)
  */
 import { ConfigLoader } from './config_loader.js';
 import type { AppInfo, Config } from '../types/index.js';
 
-/** 运行时配置（启动后赋值） */
+/** Runtime configuration (assigned after startup) */
 let config: Config | null = null;
 
 /**
- * 加载配置
+ * Load configuration
  *
- * 使用 ConfigLoader 加载并合并默认配置与业务配置。
- * 在框架启动流程中由 boot.ts 的 init() 调用。
+ * Uses ConfigLoader to load and merge default configuration with business configuration.
+ * Called by init() in boot.ts during the framework startup flow.
  */
 export function loadConfig(): void {
   const loader = new ConfigLoader();
@@ -25,12 +25,12 @@ export function loadConfig(): void {
 }
 
 /**
- * 获取运行时配置
+ * Get runtime configuration
  *
- * 若配置尚未加载，会自动触发加载。
- * 通常在框架启动后使用，确保配置已就绪。
+ * If configuration has not been loaded yet, loading is automatically triggered.
+ * Typically used after framework startup to ensure configuration is ready.
  *
- * @returns 完整的运行时配置对象
+ * @returns Complete runtime configuration object
  */
 export function getConfig(): Config {
   if (!config) {
@@ -40,9 +40,9 @@ export function getConfig(): Config {
 }
 
 /**
- * 获取应用基础信息
+ * Get application basic info
  *
- * @returns 包含应用名称、目录、环境等信息对象
+ * @returns Object containing application name, directories, environment, and other info
  */
 export function getAppInfo(): AppInfo {
   return {

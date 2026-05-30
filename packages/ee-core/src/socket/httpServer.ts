@@ -1,21 +1,21 @@
 /**
  * @module socket/httpServer
- * @description HTTP/HTTPS 服务器。基于 Koa 框架提供 RESTful API 服务，
- * 将 HTTP 请求路由到对应的控制器方法。
+ * @description HTTP/HTTPS server. Provides RESTful API services based on the Koa framework,
+ * routing HTTP requests to corresponding controller methods.
  *
- * 请求路由规则：
- * - URL 路径映射到控制器路径，如 /controller/user/add → controller.user.add
- * - GET 请求参数从 query 获取，POST 请求参数从 body 获取
- * - 以 controller 开头的路径直接使用，否则自动添加 controller 前缀
- * - filterRequest 中配置的 URI 直接返回指定数据，不经过控制器
+ * Request routing rules:
+ * - URL path maps to controller path, e.g., /controller/user/add → controller.user.add
+ * - GET request parameters from query, POST request parameters from body
+ * - Paths starting with 'controller' are used directly, otherwise 'controller' prefix is added automatically
+ * - URIs in filterRequest return specified data directly without going through controllers
  *
- * 中间件加载顺序：
- * 1. 错误处理器（errorHandler）
- * 2. 前置中间件（preMiddleware）
- * 3. CORS 跨域中间件
- * 4. koa-body 请求体解析中间件
- * 5. 核心路由分发中间件（_dispatch）
- * 6. 后置中间件（postMiddleware）
+ * Middleware loading order:
+ * 1. Error handler (errorHandler)
+ * 2. Pre-middleware (preMiddleware)
+ * 3. CORS cross-origin middleware
+ * 4. koa-body request body parsing middleware
+ * 5. Core routing dispatch middleware (_dispatch)
+ * 6. Post-middleware (postMiddleware)
  */
 import debug from 'debug';
 import assert from 'assert';
@@ -37,17 +37,17 @@ import { resolveControllerFn } from './utils.js';
 const debugLog = debug('ee-core:socket:httpServer');
 
 /**
- * HttpServer HTTP 服务器
+ * HttpServer - HTTP server
  *
- * 使用工厂模式创建（static create()），因为初始化需要异步获取端口。
- * 配置中 enable=false 时，创建后不会启动服务。
+ * Created using factory pattern (static create()), because initialization requires async port acquisition.
+ * When enable=false in config, the service will not start after creation.
  */
 export class HttpServer {
-  /** HTTP 服务器配置 */
+  /** HTTP server configuration */
   config: HttpServerConfig;
-  /** Koa 应用实例 */
+  /** Koa application instance */
   httpApp: Koa | undefined;
-  /** 通道分隔符 */
+  /** Channel separator */
   channelSeparator: string;
 
   private constructor() {
@@ -58,9 +58,9 @@ export class HttpServer {
   }
 
   /**
-   * 工厂方法：创建并初始化 HttpServer
+   * Factory method: create and initialize HttpServer
    *
-   * @returns 初始化完成的 HttpServer 实例
+   * @returns Fully initialized HttpServer instance
    */
   static async create(): Promise<HttpServer> {
     const instance = new HttpServer();
@@ -69,10 +69,10 @@ export class HttpServer {
   }
 
   /**
-   * 初始化 HTTP 服务器
+   * Initialize HTTP server
    *
-   * 获取可用端口后创建 Koa 应用并启动监听。
-   * 端口号写入 process.env.EE_HTTP_PORT 供其他模块获取。
+   * Acquires an available port then creates a Koa application and starts listening.
+   * The port number is written to process.env.EE_HTTP_PORT for other modules to access.
    */
   async init(): Promise<void> {
     if (this.config.enable === false) {
@@ -89,9 +89,9 @@ export class HttpServer {
   }
 
   /**
-   * 创建 Koa 应用并启动 HTTP/HTTPS 服务
+   * Create Koa application and start HTTP/HTTPS service
    *
-   * 按顺序加载中间件，处理 HTTPS 配置，启动监听。
+   * Loads middleware in order, handles HTTPS configuration, and starts listening.
    */
   async _create(): Promise<void> {
     const config = this.config;
@@ -119,16 +119,16 @@ export class HttpServer {
 
     const koaApp = new Koa();
 
-    // 设置错误处理器，便于统一错误代码处理
+    // Set up error handler for unified error code handling
     this._setupErrorHandler(koaApp, errorHandler);
-    // 加载前置中间件
+    // Load pre-middleware
     this._loadMiddlewares(koaApp, preMiddleware, 'pre');
 
-    // 核心中间件
+    // Core middleware
     koaApp.use(cors(corsOptions as Parameters<typeof cors>[0]));
     koaApp.use(koaBody(config.body));
     koaApp.use(this._dispatch.bind(this));
-    // 加载后置中间件
+    // Load post-middleware
     this._loadMiddlewares(koaApp, postMiddleware, 'post');
 
     let msg = '[socket/http] server is: ' + url;
@@ -154,16 +154,16 @@ export class HttpServer {
   }
 
   /**
-   * 核心路由分发中间件
+   * Core routing dispatch middleware
    *
-   * 将 HTTP 请求路径映射到控制器方法：
-   * 1. 去除路径开头的 '/'
-   * 2. 检查是否在过滤列表中（如 favicon.ico）
-   * 3. 确保路径以 'controller' 开头
-   * 4. 通过 resolveControllerFn 查找并调用控制器方法
-   * 5. GET 请求传 query 参数，POST 请求传 body 参数
+   * Maps HTTP request paths to controller methods:
+   * 1. Remove leading '/' from path
+   * 2. Check if path is in filter list (e.g., favicon.ico)
+   * 3. Ensure path starts with 'controller'
+   * 4. Find and call controller method via resolveControllerFn
+   * 5. GET requests pass query params, POST requests pass body params
    *
-   * 错误处理：控制器方法抛出异常时返回 500 + { error: 'Internal Server Error' }
+   * Error handling: When controller method throws an exception, returns 500 + { error: 'Internal Server Error' }
    */
   async _dispatch(ctx: Koa.Context, next: Koa.Next): Promise<void> {
     const controller = getController();
@@ -171,30 +171,30 @@ export class HttpServer {
     let uriPath = ctx.request.path;
     const method = ctx.request.method;
     let params = ctx.request.query;
-    // 深拷贝 query 对象，避免 Express/Koa 的代理对象问题
+    // Deep copy query object to avoid Express/Koa proxy object issues
     params = isObject(params) ? JSON.parse(JSON.stringify(params)) : {};
     const body = ctx.request.body;
 
     ctx.response.status = 200;
 
     try {
-      // 去除开头的 '/'
+      // Remove leading '/'
       if (uriPath.indexOf('/') === 0) {
         uriPath = uriPath.substring(1);
       }
-      // 过滤无需路由的请求
+      // Filter requests that don't need routing
       if (filterRequest.uris.includes(uriPath)) {
         ctx.response.body = filterRequest.returnData;
         await next();
         return;
       }
-      // 自动补充 controller 前缀
+      // Automatically add 'controller' prefix
       if (uriPath.slice(0, 10) !== 'controller') {
         uriPath = 'controller/' + uriPath;
       }
       const cmd = uriPath.split('/').join(this.channelSeparator);
       debugLog('[request] uri %s', cmd);
-      // GET 用 query，POST 用 body
+      // GET uses query, POST uses body
       const args = method === 'POST' ? body : params;
       const fn = resolveControllerFn(controller, cmd, this.channelSeparator);
       if (!fn) throw new Error('function not exists');
@@ -211,19 +211,19 @@ export class HttpServer {
   }
 
   /**
-   * 获取 Koa 应用实例
+   * Get Koa application instance
    *
-   * @returns Koa 实例，未启用 HTTP 服务时返回 undefined
+   * @returns Koa instance, or undefined if HTTP service is not enabled
    */
   getHttpApp(): Koa | undefined {
     return this.httpApp;
   }
 
   /**
-   * 设置 Koa 错误处理器
+   * Set up Koa error handler
    *
-   * @param app - Koa 应用实例
-   * @param errorHandler - 错误处理函数，接收 Error 参数
+   * @param app - Koa application instance
+   * @param errorHandler - Error handler function that receives an Error parameter
    */
   _setupErrorHandler(app: Koa, errorHandler: ((err: Error) => void) | null): void {
     if (isFunction(errorHandler)) {
@@ -232,20 +232,20 @@ export class HttpServer {
   }
 
   /**
-   * 加载前置/后置中间件
+   * Load pre/post middleware
    *
-   * 中间件可以是工厂函数（调用后返回 Koa 中间件）或直接的中间件函数。
-   * 无效中间件会被跳过并输出警告。
+   * Middleware can be factory functions (called to return Koa middleware) or direct middleware functions.
+   * Invalid middleware will be skipped with a warning.
    *
-   * @param app - Koa 应用实例
-   * @param middlewares - 中间件数组
-   * @param type - 类型标识（pre/post），用于警告信息
+   * @param app - Koa application instance
+   * @param middlewares - Middleware array
+   * @param type - Type identifier (pre/post), used for warning messages
    */
   _loadMiddlewares(app: Koa, middlewares: unknown[] = [], type = 'pre'): void {
     if (isArray(middlewares)) {
       middlewares.forEach((middleware) => {
         if (isFunction(middleware)) {
-          // middleware 是工厂函数，调用后返回 (ctx, next) => {} 形式的中间件
+          // middleware is a factory function, called to return (ctx, next) => {} style middleware
           app.use((middleware as () => Koa.Middleware)());
         } else {
           coreLogger.warn(`[ee-core/httpServer] Invalid ${type} middleware detected, skipping.`);

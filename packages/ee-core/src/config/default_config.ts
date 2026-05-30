@@ -1,7 +1,8 @@
 /**
  * @module config/default_config
- * @description 框架内置默认配置。所有配置项在此定义默认值，业务配置可覆盖。
- * 配置项按功能分组：窗口、日志、通信服务、主服务器、异常处理、任务、跨进程。
+ * @description Framework built-in default configuration. All configuration items have default values defined here;
+ * business configuration can override them. Configuration items are grouped by function:
+ * window, logging, communication services, main server, exception handling, jobs, cross-process.
  */
 import path from 'path';
 import { isDev, getBaseDir, getLogDir } from '../ps/index.js';
@@ -9,18 +10,18 @@ import { SocketIO } from '../const/channel.js';
 import type { Config } from '../types/index.js';
 
 /**
- * 生成框架默认配置
+ * Generate framework default configuration
  *
- * @returns 完整的默认配置对象
+ * @returns Complete default configuration object
  */
 export default function defaultConfig(): Config {
   return {
-    /** 是否打开开发者工具（仅开发环境有效） */
+    /** Whether to open DevTools (only effective in development environment) */
     openDevTools: false,
-    /** 是否启用单实例锁（防止同时运行多个应用实例） */
+    /** Whether to enable single-instance lock (prevents running multiple app instances simultaneously) */
     singleLock: true,
 
-    /** 主窗口配置 */
+    /** Main window configuration */
     windowsOption: {
       title: 'electron-egg',
       width: 980,
@@ -28,161 +29,161 @@ export default function defaultConfig(): Config {
       minWidth: 400,
       minHeight: 300,
       webPreferences: {
-        // 安全警告：contextIsolation=false + nodeIntegration=true 允许渲染进程
-        // 完全访问 Node.js API。渲染进程中的任何 XSS 漏洞都可能导致远程代码执行。
-        // 新项目建议设置 contextIsolation=true 并使用 preload 脚本。
+        // Security warning: contextIsolation=false + nodeIntegration=true allows the renderer process
+        // full access to Node.js APIs. Any XSS vulnerability in the renderer could lead to remote code execution.
+        // New projects are recommended to set contextIsolation=true and use a preload script.
         contextIsolation: false,
         nodeIntegration: true,
       },
-      /** 是否显示原生窗口边框 */
+      /** Whether to show native window frame */
       frame: true,
-      /** 创建时是否立即显示窗口（false 可先加载内容再显示，避免白屏） */
+      /** Whether to show the window immediately on creation (false allows loading content first to avoid blank screen) */
       show: false,
-      /** 应用图标路径 */
+      /** Application icon path */
       icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
 
-    /** 日志配置 */
+    /** Logging configuration */
     logger: {
-      /** 日志文件存储目录 */
+      /** Log file storage directory */
       dir: getLogDir(),
-      /** 日志级别：trace < debug < info < warn < error < fatal */
+      /** Log level: trace < debug < info < warn < error < fatal */
       level: 'info',
-      /** 开发环境是否使用 pretty 格式输出 */
+      /** Whether to use pretty format output in development environment */
       prettyPrint: isDev(),
-      /** 日志文件名日期格式 */
+      /** Log filename date format */
       dateFormat: 'yyyy-MM-dd',
-      /** 应用日志文件名 */
+      /** Application log filename */
       appLogName: 'ee.log',
-      /** 框架核心日志文件名 */
+      /** Framework core log filename */
       coreLogName: 'ee-core.log',
-      /** 错误日志文件名 */
+      /** Error log filename */
       errorLogName: 'ee-error.log',
-      /** 日志轮转策略：day（按天）、hour（按小时） */
+      /** Log rotation strategy: day (daily), hour (hourly) */
       rotator: 'day',
-      /** 需要脱敏的字段路径列表 */
+      /** List of field paths that need to be redacted */
       redact: [],
-      /** 脱敏替换值 */
+      /** Redaction replacement value */
       redactCensor: '[Redacted]',
-      /** 是否包含时间戳 */
+      /** Whether to include timestamp */
       timestamp: true,
-      /** pino logger 名称 */
+      /** pino logger name */
       name: 'ee',
-      /** 单个日志文件最大大小 */
+      /** Maximum size of a single log file */
       maxSize: '10m',
-      /** pino 序列化器 */
+      /** pino serializers */
       serializers: {},
-      /** 自定义日志级别 */
+      /** Custom log levels */
       customLevels: {},
-      /** 对象序列化深度限制 */
+      /** Object serialization depth limit */
       depthLimit: 5,
-      /** 安全模式：日志写入失败时不抛异常 */
+      /** Safe mode: do not throw exceptions when log writing fails */
       safe: true,
-      /** 是否启用日志 */
+      /** Whether to enable logging */
       enabled: true,
     },
 
-    /** SocketIO 服务器配置 */
+    /** SocketIO server configuration */
     socketServer: {
       enable: false,
-      /** 默认端口（端口被占用时自动随机选择） */
+      /** Default port (automatically selects a random port when occupied) */
       port: 7070,
-      /** SocketIO 路径 */
+      /** SocketIO path */
       path: "/socket.io/",
-      /** 客户端连接超时时间（毫秒） */
+      /** Client connection timeout (milliseconds) */
       connectTimeout: 45000,
-      /** 心跳检测超时时间（毫秒） */
+      /** Heartbeat check timeout (milliseconds) */
       pingTimeout: 30000,
-      /** 心跳检测间隔（毫秒） */
+      /** Heartbeat check interval (milliseconds) */
       pingInterval: 25000,
-      /** 每条消息最大数据大小（100MB） */
+      /** Maximum data size per message (100MB) */
       maxHttpBufferSize: 1e8,
-      /** 传输方式：polling（HTTP 轮询）和 websocket */
+      /** Transport methods: polling (HTTP long-polling) and websocket */
       transports: ["polling", "websocket"],
       cors: {
-        /** 跨域来源设置 */
+        /** Cross-origin origin setting */
         origin: true,
       },
-      /** SocketIO 通信频道 */
+      /** SocketIO communication channel */
       channel: SocketIO.partySoftware,
     },
 
-    /** HTTP 服务器配置 */
+    /** HTTP server configuration */
     httpServer: {
       enable: false,
-      /** HTTPS 配置 */
+      /** HTTPS configuration */
       https: {
         enable: false,
-        /** SSL 私钥路径 */
+        /** SSL private key path */
         key: '/public/ssl/localhost+1.key',
-        /** SSL 证书路径 */
+        /** SSL certificate path */
         cert: '/public/ssl/localhost+1.pem',
       },
-      /** 协议前缀 */
+      /** Protocol prefix */
       protocol: 'http://',
-      /** 监听地址 */
+      /** Listen address */
       host: '127.0.0.1',
-      /** 默认端口（端口被占用时自动随机选择） */
+      /** Default port (automatically selects a random port when occupied) */
       port: 7071,
       cors: {
         origin: '*',
       },
-      /** 请求体解析配置（基于 koa-body） */
+      /** Request body parsing configuration (based on koa-body) */
       body: {
-        /** 是否支持 multipart/form-data（文件上传） */
+        /** Whether to support multipart/form-data (file upload) */
         multipart: true,
         formidable: {
-          /** 是否保留上传文件的扩展名 */
+          /** Whether to keep uploaded file extensions */
           keepExtensions: true,
         },
       },
-      /** 请求过滤规则：匹配的 URI 直接返回指定数据，不经过控制器 */
+      /** Request filter rules: matching URIs return specified data directly without going through controllers */
       filterRequest: {
         uris: ['favicon.ico'],
         returnData: '',
       },
     },
 
-    /** 远程服务配置 */
+    /** Remote service configuration */
     remote: {
       enable: false,
-      /** 远程服务地址 */
+      /** Remote service URL */
       url: '',
     },
 
-    /** 主服务器配置（控制渲染进程加载方式） */
+    /** Main server configuration (controls how the renderer process loads content) */
     mainServer: {
-      /** 协议：file:// 加载本地文件，http:// 加载远程服务 */
+      /** Protocol: file:// loads local files, http:// loads remote service */
       protocol: 'file://',
-      /** 首页文件路径 */
+      /** Home page file path */
       indexPath: '/public/dist/index.html',
-      /** BrowserWindow.loadURL 的额外选项 */
+      /** Additional options for BrowserWindow.loadURL */
       options: {},
-      /** 跨进程接管标识：非空时由 Cross 模块提供 URL */
+      /** Cross-process takeover identifier: when non-empty, the Cross module provides the URL */
       takeover: '',
-      /** 加载页面路径：窗口创建后先显示此页面，主页面加载完成后切换 */
+      /** Loading page path: shown first after window creation, switches to main page once loaded */
       loadingPage: '',
-      /** IPC 通道分隔符，用于拼接控制器路径 */
+      /** IPC channel separator, used for concatenating controller paths */
       channelSeparator: '/',
     },
 
-    /** 异常处理配置 */
+    /** Exception handling configuration */
     exception: {
-      /** 主进程异常是否退出 */
+      /** Whether to exit on main process exception */
       mainExit: false,
-      /** 子进程异常是否退出 */
+      /** Whether to exit on child process exception */
       childExit: false,
-      /** 渲染进程异常是否退出 */
+      /** Whether to exit on renderer process exception */
       rendererExit: true,
     },
 
-    /** 后台任务配置 */
+    /** Background job configuration */
     jobs: {
-      /** 是否记录任务消息日志 */
+      /** Whether to log job messages */
       messageLog: false,
     },
 
-    /** 跨进程通信配置（动态添加） */
+    /** Cross-process communication configuration (dynamically added) */
     cross: {},
   };
 }

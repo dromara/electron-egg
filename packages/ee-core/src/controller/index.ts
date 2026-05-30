@@ -1,33 +1,33 @@
 /**
  * @module controller
- * @description 控制器模块入口。提供控制器的加载和获取功能。
+ * @description Controller module entry point. Provides controller loading and retrieval functionality.
  *
- * 控制器是业务逻辑的核心，每个前端 IPC 请求最终路由到对应的控制器方法。
+ * Controllers are the core of business logic; each frontend IPC request is ultimately routed to a corresponding controller method.
  *
- * 使用方式：
- * - loadController()：同步加载（CJS 项目）
- * - loadControllerAsync()：异步加载（ESM 项目）
- * - getController() / getControllers()：获取已加载的控制器映射
+ * Usage:
+ * - loadController(): Synchronous loading (CJS projects)
+ * - loadControllerAsync(): Asynchronous loading (ESM projects)
+ * - getController() / getControllers(): Retrieve loaded controller mapping
  *
- * 线程安全：loading 标志防止同步和异步加载同时进行，
- * 异步加载期间调用同步方法会抛出错误。
+ * Thread safety: The loading flag prevents concurrent synchronous and asynchronous loading;
+ * calling a synchronous method during async loading throws an error.
  */
 import { ControllerLoader } from './controller_loader.js';
 
-/** 已加载的控制器方法映射 */
+/** Loaded controller method mapping */
 let controllers: Record<string, unknown> | null = null;
 
-/** 异步加载进行中的标志，防止同步/异步加载竞争 */
+/** Flag indicating async loading is in progress, preventing sync/async load race conditions */
 let loading = false;
 
 /**
- * 同步加载控制器
+ * Load controllers synchronously
  *
- * 使用 require() 加载所有控制器文件，适用于 CJS 项目。
- * 如果异步加载正在进行中，调用此方法会抛出错误。
+ * Uses require() to load all controller files, suitable for CJS projects.
+ * If async loading is in progress, calling this method throws an error.
  *
- * @returns 控制器方法映射对象
- * @throws 异步加载进行中时抛出错误
+ * @returns Controller method mapping object
+ * @throws Throws an error when async loading is in progress
  */
 export function loadController(): Record<string, unknown> {
   if (loading) {
@@ -39,12 +39,12 @@ export function loadController(): Record<string, unknown> {
 }
 
 /**
- * 异步加载控制器
+ * Load controllers asynchronously
  *
- * 使用 import() 异步加载所有控制器文件，适用于 ESM 项目。
- * 加载期间设置 loading 标志，阻止同步加载操作。
+ * Uses import() to asynchronously load all controller files, suitable for ESM projects.
+ * Sets the loading flag during loading to prevent synchronous loading operations.
  *
- * @returns 控制器方法映射对象
+ * @returns Controller method mapping object
  */
 export async function loadControllerAsync(): Promise<Record<string, unknown>> {
   loading = true;
@@ -58,13 +58,13 @@ export async function loadControllerAsync(): Promise<Record<string, unknown>> {
 }
 
 /**
- * 获取所有已加载的控制器
+ * Get all loaded controllers
  *
- * 若控制器尚未加载，会自动触发同步加载。
- * 异步加载进行中时调用会抛出错误。
+ * If controllers have not been loaded yet, synchronous loading is automatically triggered.
+ * Calling during async loading throws an error.
  *
- * @returns 控制器方法映射对象
- * @throws 异步加载进行中时抛出错误
+ * @returns Controller method mapping object
+ * @throws Throws an error when async loading is in progress
  */
 export function getControllers(): Record<string, unknown> {
   if (loading) {
@@ -77,9 +77,9 @@ export function getControllers(): Record<string, unknown> {
 }
 
 /**
- * 获取控制器（getControllers 的别名）
+ * Get controllers (alias for getControllers)
  *
- * @returns 控制器方法映射对象
+ * @returns Controller method mapping object
  */
 export function getController(): Record<string, unknown> {
   return getControllers();

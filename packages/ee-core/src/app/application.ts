@@ -1,8 +1,9 @@
 /**
  * @module app/application
- * @description 应用核心类，编排框架的启动流程。
- * 负责按顺序加载控制器、通信服务，发射生命周期事件，最后加载 Electron 主进程功能。
- * 由 boot.ts 中的 ElectronEgg 类持有并调用。
+ * @description Application core class that orchestrates the framework startup flow.
+ * Responsible for sequentially loading controllers, communication services,
+ * emitting lifecycle events, and finally loading Electron main process features.
+ * Held and invoked by the ElectronEgg class in boot.ts.
  */
 import { loadController, loadControllerAsync } from '../controller/index.js';
 import { eventBus, Ready } from './events.js';
@@ -10,37 +11,37 @@ import { loadSocket } from '../socket/index.js';
 import { loadElectron } from '../electron/index.js';
 
 /**
- * Application 类 — 框架启动流程编排器
+ * Application class — Framework startup flow orchestrator
  *
- * 职责：
- * - register(): 注册生命周期事件钩子
- * - run(): 同步启动流程（CJS 控制器加载）
- * - runAsync(): 异步启动流程（ESM 控制器加载）
+ * Responsibilities:
+ * - register(): Register lifecycle event hooks
+ * - run(): Synchronous startup flow (CJS controller loading)
+ * - runAsync(): Asynchronous startup flow (ESM controller loading)
  *
- * 启动顺序：
- * 1. 加载控制器（Controller）— 注册所有业务处理函数
- * 2. 加载通信服务（Socket）— 启动 IPC/HTTP/SocketIO 服务
- * 3. 发射 Ready 生命周期事件
- * 4. 加载 Electron 功能 — 创建窗口、注册快捷键等
+ * Startup order:
+ * 1. Load Controllers — Register all business handler functions
+ * 2. Load Communication Services (Socket) — Start IPC/HTTP/SocketIO services
+ * 3. Emit Ready lifecycle event
+ * 4. Load Electron features — Create windows, register shortcuts, etc.
  */
 export class Application {
   /**
-   * 注册生命周期事件处理器
-   * @param eventName - 事件名（如 'ready'、'before-close'）
-   * @param handler - 事件处理函数
+   * Register a lifecycle event handler
+   * @param eventName - Event name (e.g. 'ready', 'before-close')
+   * @param handler - Event handler function
    */
   register(eventName: string, handler: (...args: unknown[]) => void): void {
     eventBus.register(eventName, handler);
   }
 
   /**
-   * 同步方式启动应用
+   * Start the application synchronously
    *
-   * 流程：
-   * 1. loadController() — 同步加载控制器（使用 require()）
-   * 2. loadSocket() — 启动 IPC/HTTP/SocketIO 通信服务
-   * 3. emitLifecycle(Ready) — 触发 ready 生命周期事件
-   * 4. loadElectron() — 初始化 Electron 主进程（创建窗口等）
+   * Flow:
+   * 1. loadController() — Synchronously load controllers (using require())
+   * 2. loadSocket() — Start IPC/HTTP/SocketIO communication services
+   * 3. emitLifecycle(Ready) — Trigger ready lifecycle event
+   * 4. loadElectron() — Initialize Electron main process (create windows, etc.)
    */
   async run(): Promise<void> {
     loadController();
@@ -50,9 +51,9 @@ export class Application {
   }
 
   /**
-   * 异步方式启动应用
+   * Start the application asynchronously
    *
-   * 流程与 run() 相同，但控制器使用动态 import() 异步加载，支持 ESM 模块。
+   * Same flow as run(), but controllers are loaded asynchronously using dynamic import(), supporting ESM modules.
    */
   async runAsync(): Promise<void> {
     await loadControllerAsync();
@@ -62,5 +63,5 @@ export class Application {
   }
 }
 
-/** 应用单例 */
+/** Application singleton */
 export const app = new Application();

@@ -1,7 +1,8 @@
 /**
  * @module core/utils/timing
- * @description 计时器工具。用于记录框架各阶段加载耗时，便于性能分析和调试。
- * 在 ConfigLoader 和 ControllerLoader 中使用，记录 "Load Config"、"Load Controller" 等阶段的时间。
+ * @description Timing utility. Used to record the loading duration of each framework stage for
+ * performance analysis and debugging. Used in ConfigLoader and ControllerLoader to record
+ * timing for stages like "Load Config", "Load Controller", etc.
  */
 import type { TimingItem } from '../../types/index.js';
 
@@ -9,24 +10,24 @@ const MAP = Symbol('Timing#map');
 const LIST = Symbol('Timing#list');
 
 /**
- * Timing 计时器
+ * Timing — Timer
  *
- * 使用方式：
+ * Usage:
  * ```ts
  * const timing = new Timing();
  * timing.start('Load Controller');
- * // ... 执行加载
+ * // ... perform loading
  * timing.end('Load Controller');
- * const items = timing.toJSON(); // 获取所有计时记录
+ * const items = timing.toJSON(); // Get all timing records
  * ```
  *
- * 支持嵌套计时，重复 start 同名计时项会自动先 end 之前的。
+ * Supports nested timing. Repeatedly calling start with the same name will automatically end the previous one first.
  */
 export class Timing {
   private _enable = true;
-  /** 计时项名称到计时项的映射，用于快速查找和 end() */
+  /** Mapping of timing item names to timing items, for quick lookup and end() */
   private [MAP]: Map<string, TimingItem>;
-  /** 按时间顺序排列的计时项列表 */
+  /** Chronologically ordered list of timing items */
   private [LIST]: TimingItem[];
 
   constructor() {
@@ -36,14 +37,14 @@ export class Timing {
   }
 
   /**
-   * 初始化：记录进程启动时间和脚本开始执行时间
+   * Initialize: record process start time and script start execution time
    */
   init(): void {
-    // 记录 Node.js 进程启动时间（当前时间 - 进程运行时长）
+    // Record Node.js process start time (current time - process uptime)
     this.start('Process Start', Date.now() - Math.floor(process.uptime() * 1000));
     this.end('Process Start');
 
-    // 如果存在 scriptStartTime（部分运行时提供），记录脚本开始时间
+    // If scriptStartTime exists (provided by some runtimes), record script start time
     const proc = process as unknown as { scriptStartTime?: number };
     if (typeof proc.scriptStartTime === 'number') {
       this.start('Script Start', proc.scriptStartTime);
@@ -52,16 +53,16 @@ export class Timing {
   }
 
   /**
-   * 开始计时
+   * Start timing
    *
-   * @param name - 计时项名称
-   * @param start - 自定义起始时间戳（毫秒），不传则使用当前时间
-   * @returns 计时项对象；同名项已存在时先自动结束之前的
+   * @param name - Timing item name
+   * @param start - Custom start timestamp (milliseconds); uses current time if not provided
+   * @returns Timing item object; if an item with the same name already exists, the previous one is ended first
    */
   start(name: string, start?: number): TimingItem | undefined {
     if (!name || !this._enable) return undefined;
 
-    // 同名计时项已存在，先结束之前的
+    // If a timing item with the same name already exists, end the previous one first
     if (this[MAP].has(name)) this.end(name);
 
     const item: TimingItem = {
@@ -78,11 +79,11 @@ export class Timing {
   }
 
   /**
-   * 结束计时
+   * End timing
    *
-   * @param name - 计时项名称（必须先 start）
-   * @returns 计时项对象（含 duration）
-   * @throws 计时项不存在时抛出错误
+   * @param name - Timing item name (must be started first)
+   * @returns Timing item object (including duration)
+   * @throws Throws an error when the timing item does not exist
    */
   end(name: string): TimingItem | undefined {
     if (!name || !this._enable) return undefined;
@@ -96,26 +97,26 @@ export class Timing {
     return item;
   }
 
-  /** 启用计时 */
+  /** Enable timing */
   enable(): void {
     this._enable = true;
   }
 
-  /** 禁用计时 */
+  /** Disable timing */
   disable(): void {
     this._enable = false;
   }
 
-  /** 清除所有计时记录 */
+  /** Clear all timing records */
   clear(): void {
     this[MAP].clear();
     this[LIST] = [];
   }
 
   /**
-   * 导出为 JSON 格式的计时记录
+   * Export as JSON-formatted timing records
    *
-   * @returns 按时间顺序排列的计时项列表
+   * @returns Chronologically ordered list of timing items
    */
   toJSON(): TimingItem[] {
     return this[LIST];

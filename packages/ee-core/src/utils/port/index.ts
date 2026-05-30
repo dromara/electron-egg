@@ -1,27 +1,28 @@
 /**
  * @module utils/port
- * @description 端口分配工具。提供 getPort() 函数，在指定范围内查找可用的 TCP 端口，
- * 并通过锁定机制防止同一进程内的并发端口冲突。
+ * @description Port allocation utility. Provides getPort() function to find available TCP ports
+ * within a specified range, with a locking mechanism to prevent concurrent port conflicts
+ * within the same process.
  *
- * 端口分配策略：
- * 1. 创建临时 TCP 服务器监听目标端口，验证端口是否可用
- * 2. 检查端口是否在锁定集合中（防止并发分配同一端口）
- * 3. 若端口不可用或已锁定，自动递增端口号继续尝试
- * 4. 端口 0 表示让操作系统自动分配随机可用端口
+ * Port allocation strategy:
+ * 1. Create a temporary TCP server listening on the target port to verify availability
+ * 2. Check if the port is in the locked set (prevents concurrent allocation of the same port)
+ * 3. If the port is unavailable or locked, automatically increment the port number and retry
+ * 4. Port 0 means let the OS automatically assign a random available port
  *
- * 锁定机制：
- * - 使用 old 和 young 两个 Set 维护已分配端口
- * - 每 15 秒轮转一次：young → old，old 被清空释放
- * - 两级锁确保端口在分配后的短时间内不会被重复分配
- * - 调用 releasePortLocks() 可手动清理所有锁定
+ * Locking mechanism:
+ * - Uses old and young Sets to maintain allocated ports
+ * - Rotates every 15 seconds: young -> old, old is cleared and released
+ * - Two-level locking ensures ports are not re-allocated shortly after being assigned
+ * - Call releasePortLocks() to manually clear all locks
  */
 import net from 'net';
 import os from 'os';
 
 /**
- * 端口锁定错误
+ * Port locked error
  *
- * 当指定端口已被锁定（正在使用中）时抛出此错误。
+ * Thrown when the specified port is locked (in use).
  */
 class Locked extends Error {
   constructor(port: number) {
@@ -29,39 +30,39 @@ class Locked extends Error {
   }
 }
 
-/** 已锁定端口集合，分 old 和 young 两级 */
+/** Locked port sets, split into old and young levels */
 const lockedPorts = {
-  /** 上一轮锁定的端口，即将被释放 */
+  /** Previously locked ports, about to be released */
   old: new Set<number>(),
-  /** 当前轮锁定的端口 */
+  /** Currently locked ports */
   young: new Set<number>(),
 };
 
 /**
- * 端口锁定轮转间隔（毫秒）
+ * Port lock rotation interval (ms)
  *
- * 每隔此时间，old 集合被丢弃（端口释放），
- * young 集合移入 old，新的 young 集合创建。
- * 两级轮转确保端口至少被锁定 15 秒。
+ * Every this interval, the old set is discarded (ports released),
+ * the young set moves into old, and a new young set is created.
+ * Two-level rotation ensures ports are locked for at least 15 seconds.
  */
 const releaseOldLockedPortsIntervalMs = 1000 * 15;
 
-/** 轮转定时器引用，延迟创建，避免空载时占用资源 */
+/** Rotation timer reference, lazily created to avoid resource usage when idle */
 let interval: NodeJS.Timeout | undefined;
 
 /**
- * 获取本机所有网络接口地址
+ * Get all local network interface addresses
  *
- * 收集所有网络接口的 IP 地址，并添加 undefined（表示使用默认主机）
- * 和 '0.0.0.0'（表示监听所有 IPv4 接口）。
- * 当未指定 host 时，需要在所有接口上验证端口可用性。
+ * Collects IP addresses of all network interfaces, and adds undefined (represents using default host)
+ * and '0.0.0.0' (represents listening on all IPv4 interfaces).
+ * When host is not specified, port availability needs to be verified on all interfaces.
  *
- * @returns 主机地址集合
+ * @returns Set of host addresses
  */
 const getLocalHosts = (): Set<string | undefined> => {
   const interfaces = os.networkInterfaces();
-  // undefined 让 createServer 使用默认主机；
-  // '0.0.0.0' 是 IPv4 通配地址，防止 createServer 默认使用 IPv6
+  // undefined lets createServer use default host;
+  // '0.0.0.0' is IPv4 wildcard address, prevents createServer defaulting to IPv6
   const results = new Set<string | undefined>([undefined, '0.0.0.0']);
 
   for (const _interface of Object.values(interfaces)) {
@@ -75,18 +76,19 @@ const getLocalHosts = (): Set<string | undefined> => {
 };
 
 /**
- * 检查单个端口在指定主机上是否可用
+ * Check if a single port is available on the specified host
  *
- * 创建临时 TCP 服务器尝试监听，成功则端口可用，失败则端口被占用。
- * 使用 server.unref() 确保临时服务器不会阻止进程退出。
+ * Creates a temporary TCP server to attempt listening; if successful, the port is available;
+ * if failed, the port is occupied. Uses server.unref() to ensure the temporary server
+ * doesn't prevent process exit.
  *
- * @param options - net.ListenOptions，包含 port 和 host
- * @returns 可用端口号
+ * @param options - net.ListenOptions, containing port and host
+ * @returns Available port number
  */
 const checkAvailablePort = (options: net.ListenOptions): Promise<number> =>
   new Promise((resolve, reject) => {
     const server = net.createServer();
-    // 不阻止进程退出
+    // Don't prevent process exit
     server.unref();
     server.on('error', reject);
 
@@ -100,29 +102,29 @@ const checkAvailablePort = (options: net.ListenOptions): Promise<number> =>
   });
 
 /**
- * 在多个主机上验证端口可用性
+ * Verify port availability across multiple hosts
  *
- * 当未指定 host 时，需要逐一在所有本机网络接口上验证端口可用，
- * 确保端口在所有接口上都未被占用。
- * EADDRNOTAVAIL 和 EINVAL 错误表示该接口不支持此端口，可跳过。
+ * When host is not specified, port availability must be verified on each local network interface
+ * individually, ensuring the port is not occupied on any interface.
+ * EADDRNOTAVAIL and EINVAL errors indicate the interface doesn't support this port and can be skipped.
  *
- * @param options - 监听选项
- * @param hosts - 主机地址集合
- * @returns 可用端口号
+ * @param options - Listen options
+ * @param hosts - Host address set
+ * @returns Available port number
  */
 const getAvailablePort = async (options: net.ListenOptions, hosts: Set<string | undefined>): Promise<number> => {
-  // 指定了 host 或端口为 0（系统自动分配）时，只需检查一次
+  // When host is specified or port is 0 (OS auto-assign), only need to check once
   if (options.host || options.port === 0) {
     return checkAvailablePort(options);
   }
 
-  // 未指定 host 时，在所有接口上逐一验证
+  // When host is not specified, verify on all interfaces individually
   for (const host of hosts) {
     try {
       await checkAvailablePort({ port: options.port, host });
     } catch (error) {
       const err = error as NodeJS.ErrnoException;
-      // 地址不可用或无效：该接口不支持此端口，跳过继续检查
+      // Address unavailable or invalid: this interface doesn't support this port, skip and continue checking
       if (!['EADDRNOTAVAIL', 'EINVAL'].includes(err.code || '')) {
         throw error;
       }
@@ -133,13 +135,13 @@ const getAvailablePort = async (options: net.ListenOptions, hosts: Set<string | 
 };
 
 /**
- * 生成端口检查序列
+ * Generate port check sequence
  *
- * 按用户指定的端口列表顺序逐一尝试，若全部不可用则回退到端口 0
- * （由操作系统自动分配随机可用端口）。
+ * Tries user-specified port list in order; if all are unavailable, falls back to port 0
+ * (OS auto-assigns a random available port).
  *
- * @param ports - 用户指定的端口列表
- * @yields 待检查的端口号
+ * @param ports - User-specified port list
+ * @yields Port number to check
  */
 function* portCheckSequence(ports?: number[]): Generator<number> {
   if (ports) {
@@ -148,46 +150,47 @@ function* portCheckSequence(ports?: number[]): Generator<number> {
     }
   }
 
-  // 所有指定端口都不可用时，回退到系统自动分配
+  // When all specified ports are unavailable, fall back to OS auto-assign
   yield 0;
 }
 
-/** getPort 函数选项 */
+/** getPort function options */
 export interface GetPortOptions {
   /**
-   * 首选端口号或端口范围数组。
-   * - 数字：尝试指定端口，不可用则递增
-   * - 数组：按顺序尝试，全部不可用则系统自动分配
-   * - 不指定：系统自动分配随机可用端口
+   * Preferred port number or port range array.
+   * - Number: try specified port, increment if unavailable
+   * - Array: try in order, OS auto-assigns if all unavailable
+   * - Unspecified: OS auto-assigns a random available port
    */
   port?: number | number[];
-  /** 绑定的主机地址，不指定则检查所有接口 */
+  /** Bound host address; if unspecified, checks all interfaces */
   host?: string;
 }
 
 /**
- * 获取一个可用的 TCP 端口
+ * Get an available TCP port
  *
- * 在指定端口范围内查找可用端口，并通过两级锁定机制防止并发分配冲突。
- * 查找流程：
- * 1. 按端口检查序列逐一尝试绑定
- * 2. 检查端口是否在锁定集合中（old 或 young）
- * 3. 锁定冲突时，若指定了端口号则抛出 Locked，否则自动获取新端口
- * 4. 找到可用端口后加入 young 锁定集合并返回
+ * Finds an available port within the specified range, with a two-level locking mechanism
+ * to prevent concurrent allocation conflicts.
+ * Search flow:
+ * 1. Try binding one by one according to the port check sequence
+ * 2. Check if the port is in the locked set (old or young)
+ * 3. On lock conflict: if a specific port was requested, throw Locked; otherwise auto-get a new port
+ * 4. After finding an available port, add it to the young locked set and return
  *
- * @param options - 端口查找选项
- * @returns 可用端口号
- * @throws Error - 所有端口都不可用时抛出
+ * @param options - Port search options
+ * @returns Available port number
+ * @throws Error - Throws when all ports are unavailable
  *
  * @example
  * ```ts
- * // 获取系统自动分配的随机端口
+ * // Get a system auto-assigned random port
  * const port = await getPort();
  *
- * // 尝试指定端口，不可用时自动寻找下一个
+ * // Try a specific port, auto-find next if unavailable
  * const port = await getPort({ port: 3000 });
  *
- * // 尝试多个候选端口
+ * // Try multiple candidate ports
  * const port = await getPort({ port: [3000, 3001, 3002] });
  * ```
  */
@@ -198,15 +201,15 @@ export async function getPort(options?: GetPortOptions): Promise<number> {
     ports = typeof options.port === 'number' ? [options.port] : options.port;
   }
 
-  // 延迟创建轮转定时器，首次调用时初始化
+  // Lazily create rotation timer, initialize on first call
   if (interval === undefined) {
     interval = setInterval(() => {
-      // 轮转锁定集合：young → old，old 被清空释放
+      // Rotate locked sets: young -> old, old is cleared and released
       lockedPorts.old = lockedPorts.young;
       lockedPorts.young = new Set();
     }, releaseOldLockedPortsIntervalMs);
 
-    // unref 确保定时器不会阻止进程退出（Electron/Jest 等环境可能没有 unref）
+    // unref ensures the timer doesn't prevent process exit (Electron/Jest environments may not have unref)
     if (interval.unref) {
       interval.unref();
     }
@@ -217,23 +220,23 @@ export async function getPort(options?: GetPortOptions): Promise<number> {
   for (const port of portCheckSequence(ports)) {
     try {
       let availablePort = await getAvailablePort({ ...options, port }, hosts);
-      // 检查端口是否在锁定集合中，防止并发分配同一端口
+      // Check if port is in locked set, preventing concurrent allocation of the same port
       while (lockedPorts.old.has(availablePort) || lockedPorts.young.has(availablePort)) {
-        // 指定了端口号但被锁定 → 抛出异常让调用方知道
+        // Specified port number is locked -> throw exception to let caller know
         if (port !== 0) {
           throw new Locked(port);
         }
 
-        // 系统自动分配的端口被锁定 → 再请求一个新端口
+        // OS auto-assigned port is locked -> request a new one
         availablePort = await getAvailablePort({ ...options, port: 0 }, hosts);
       }
 
-      // 找到可用端口，加入 young 锁定集合
+      // Found available port, add to young locked set
       lockedPorts.young.add(availablePort);
       return availablePort;
     } catch (error) {
       const err = error as NodeJS.ErrnoException;
-      // EADDRINUSE（端口被占用）和 EACCES（权限不足）是预期错误，继续尝试下一个端口
+      // EADDRINUSE (port occupied) and EACCES (insufficient permissions) are expected errors, try next port
       if (!['EADDRINUSE', 'EACCES'].includes(err.code || '') && !(error instanceof Locked)) {
         throw error;
       }
@@ -244,10 +247,10 @@ export async function getPort(options?: GetPortOptions): Promise<number> {
 }
 
 /**
- * 清理端口锁定资源
+ * Clean up port lock resources
  *
- * 清除轮转定时器并释放所有锁定端口。
- * 在应用关闭时调用，确保资源清理干净，避免定时器泄漏。
+ * Clears the rotation timer and releases all locked ports.
+ * Call during application shutdown to ensure resources are cleaned up, preventing timer leaks.
  */
 export function releasePortLocks(): void {
   if (interval !== undefined) {

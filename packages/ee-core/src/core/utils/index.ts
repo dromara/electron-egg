@@ -1,7 +1,7 @@
 /**
  * @module core/utils
- * @description 核心工具函数集。提供文件加载、函数调用、字节码类检测等基础能力，
- * 是 FileLoader 和其他模块的底层依赖。
+ * @description Core utility functions. Provides file loading, function invocation, bytecode class detection,
+ * and other foundational capabilities. Serves as a low-level dependency for FileLoader and other modules.
  */
 import 'bytenode';
 import { isFunction as isFunctionCheck } from '../../utils/type_check.js';
@@ -9,7 +9,7 @@ import path from 'path';
 import fs from 'fs';
 import { createRequire } from 'module';
 
-// CJS 环境下 __filename 可用；纯 ESM 无打包器时，使用 cwd 作为 createRequire 的基路径
+// __filename is available in CJS; in pure ESM without a bundler, use cwd as the base path for createRequire
 const requireMod = createRequire(
   typeof __filename !== 'undefined'
     ? __filename
@@ -17,33 +17,33 @@ const requireMod = createRequire(
 );
 const Module = requireMod('module');
 
-// Node.js 原生支持的文件扩展名（含 bytenode 注册的 .jsc）
+// File extensions natively supported by Node.js (including .jsc registered by bytenode)
 const extensions: NodeJS.RequireExtensions = Module._extensions;
 
 /**
- * 同步加载文件
+ * Load a file synchronously
  *
- * 执行流程：
- * 1. 非 JS 文件（不在 Module._extensions 中的扩展名）→ 返回文件内容 Buffer
- * 2. JS/CJS/JSC 文件 → 使用 require() 加载模块
- * 3. ESM 模块（带 __esModule 标记）→ 提取 default 导出
+ * Execution flow:
+ * 1. Non-JS files (extensions not in Module._extensions) -> return file content as Buffer
+ * 2. JS/CJS/JSC files -> load module using require()
+ * 3. ESM modules (with __esModule marker) -> extract default export
  *
- * @param filepath - 文件绝对路径
- * @returns 文件内容（Buffer）或模块导出值
- * @throws 文件加载失败时抛出包含文件路径的错误
+ * @param filepath - Absolute file path
+ * @returns File content (Buffer) or module export value
+ * @throws Throws an error containing the file path when file loading fails
  */
 export function loadFile(filepath: string): unknown {
   try {
-    // 非 JS 模块，直接返回文件内容
+    // Non-JS module, return file content directly
     const extname = path.extname(filepath);
     if (extname && !extensions[extname]) {
       return fs.readFileSync(filepath);
     }
 
-    // 加载 JS 模块
+    // Load JS module
     const obj = requireMod(filepath);
     if (!obj) return obj;
-    // ESM 互操作：提取 default 导出
+    // ESM interop: extract default export
     if (obj.__esModule) return 'default' in obj ? obj.default : obj;
     return obj;
   } catch (err) {
@@ -54,12 +54,12 @@ export function loadFile(filepath: string): unknown {
 }
 
 /**
- * 调用函数并绑定上下文
+ * Call a function with bound context
  *
- * @param fn - 待调用的函数
- * @param args - 函数参数列表
- * @param ctx - 函数执行上下文（this 指向），不传则直接调用
- * @returns 函数返回值；fn 不是函数时返回 undefined
+ * @param fn - Function to call
+ * @param args - Function argument list
+ * @param ctx - Function execution context (this binding); if not provided, calls directly
+ * @returns Function return value; returns undefined if fn is not a function
  */
 export async function callFn(fn: (...args: unknown[]) => unknown, args?: unknown[], ctx?: unknown): Promise<unknown> {
   args = args || [];
@@ -68,13 +68,13 @@ export async function callFn(fn: (...args: unknown[]) => unknown, args?: unknown
 }
 
 /**
- * 获取文件的相对路径名
+ * Get the relative path name of a file
  *
- * 将绝对路径转为基于 baseDir 的相对路径，统一使用正斜杠分隔。
+ * Converts an absolute path to a relative path based on baseDir, using forward slashes as separators.
  *
- * @param filepath - 文件绝对路径
- * @param baseDir - 基准目录
- * @returns 相对路径（正斜杠分隔）
+ * @param filepath - Absolute file path
+ * @param baseDir - Base directory
+ * @returns Relative path (forward slash separated)
  */
 export function getResolvedFilename(filepath: string, baseDir: string): string {
   const reg = /[/\\]/g;
@@ -82,13 +82,13 @@ export function getResolvedFilename(filepath: string, baseDir: string): string {
 }
 
 /**
- * 判断导出是否为字节码类
+ * Determine if an export is a bytecode class
  *
- * 通过 toString() 结果中是否包含 '[class' 来判断。
- * bytenode 编译的 .jsc 文件的类在 Node.js 中会显示为 '[class XXX]'。
+ * Checks whether the toString() result contains '[class'.
+ * Classes from bytenode-compiled .jsc files appear as '[class XXX]' in Node.js.
  *
- * @param exports - 待检测的导出值
- * @returns 是否为字节码类
+ * @param exports - Export value to check
+ * @returns Whether it is a bytecode class
  */
 export function isBytecodeClass(exports: unknown): boolean {
   if (!exports) return false;
@@ -96,11 +96,11 @@ export function isBytecodeClass(exports: unknown): boolean {
 }
 
 /**
- * 获取支持的文件匹配模式
+ * Get supported file match patterns
  *
- * 用于 globby 扫描目录时过滤文件类型。
+ * Used for filtering file types when globby scans directories.
  *
- * @returns 文件模式列表（.js 和 .jsc）
+ * @returns File pattern list (.js and .jsc)
  */
 export function filePatterns(): string[] {
   return ['**/*.js', '**/*.jsc'];
@@ -109,27 +109,27 @@ export function filePatterns(): string[] {
 export { extensions };
 
 /**
- * 异步加载文件（ESM 支持）
+ * Load a file asynchronously (ESM support)
  *
- * 与 loadFile 功能相同，但使用动态 import() 加载模块，
- * 支持 ESM 格式的文件。非 JS 文件使用 fs.promises.readFile 读取。
+ * Same functionality as loadFile, but uses dynamic import() to load modules,
+ * supporting ESM format files. Non-JS files are read using fs.promises.readFile.
  *
- * @param filepath - 文件绝对路径
- * @returns 文件内容（Buffer）或模块导出值
- * @throws 文件加载失败时抛出包含文件路径的错误
+ * @param filepath - Absolute file path
+ * @returns File content (Buffer) or module export value
+ * @throws Throws an error containing the file path when file loading fails
  */
 export async function loadFileAsync(filepath: string): Promise<unknown> {
   try {
     const extname = path.extname(filepath);
-    // 非 JS/ESM 文件：返回内容 Buffer
+    // Non-JS/ESM files: return content as Buffer
     if (extname && !extensions[extname] && extname !== '.mjs') {
       return fs.promises.readFile(filepath);
     }
 
-    // 动态 import，同时支持 ESM 和 CJS
+    // Dynamic import, supporting both ESM and CJS
     const obj = await import(filepath);
     if (!obj) return obj;
-    // ESM 互操作：提取 default 导出
+    // ESM interop: extract default export
     if (obj.__esModule) return 'default' in obj ? obj.default : obj;
     return obj;
   } catch (err) {

@@ -1,7 +1,7 @@
 import type { LoadBalancerTarget, LoadBalancerParams } from '../types.js';
 
 /**
- * 权重最小连接数算法
+ * Weighted least connections algorithm
  */
 export default function weightsMinimumConnection(
   tasks: LoadBalancerTarget[],

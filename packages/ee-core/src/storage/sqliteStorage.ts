@@ -1,26 +1,26 @@
 /**
  * @module storage/sqliteStorage
- * @description SQLite 数据库存储模块。基于 better-sqlite3 提供同步的数据库操作能力，
- * 支持三种数据库文件定位模式（仅名称、相对路径、绝对路径）以及内存数据库（:memory:）。
+ * @description SQLite database storage module. Based on better-sqlite3, provides synchronous database operations,
+ * supporting three database file location modes (name only, relative path, absolute path) and in-memory database (:memory:).
  *
- * 核心职责：
- * - 根据数据库名称自动判断存储模式（onlyName / relative / absolute / memory）
- * - 自动创建数据库所在目录（确保目录存在后再打开数据库文件）
- * - 防止路径穿越攻击（构造时校验名称中不允许出现 ".."）
- * - 提供统一的数据库文件路径获取接口
+ * Core responsibilities:
+ * - Automatically determine storage mode based on database name (onlyName / relative / absolute / memory)
+ * - Automatically create the database directory (ensures the directory exists before opening the database file)
+ * - Prevent path traversal attacks (validates that ".." is not present in the name during construction)
+ * - Provide a unified interface for obtaining database file paths
  *
- * 使用示例：
+ * Usage examples:
  * ```ts
- * // 仅名称模式：文件存放在 {dataDir}/db/{name}.db
+ * // Name-only mode: file stored at {dataDir}/db/{name}.db
  * const db1 = new SqliteStorage('myapp.db');
  *
- * // 相对路径模式：文件存放在 {dataDir}/db/sub/myapp.db
+ * // Relative path mode: file stored at {dataDir}/db/sub/myapp.db
  * const db2 = new SqliteStorage('sub/myapp.db');
  *
- * // 绝对路径模式：文件存放在指定路径
+ * // Absolute path mode: file stored at the specified path
  * const db3 = new SqliteStorage('/tmp/data/myapp.db');
  *
- * // 内存模式：不落盘，进程退出后数据丢失
+ * // In-memory mode: not persisted, data is lost when the process exits
  * const db4 = new SqliteStorage(':memory:');
  * ```
  */
@@ -32,58 +32,59 @@ import { mkdir } from '../utils/helper.js';
 import { getDataDir } from '../ps/index.js';
 
 /**
- * SqliteStorage — SQLite 数据库存储类
+ * SqliteStorage - SQLite database storage class
  *
- * 封装 better-sqlite3 的数据库实例创建流程，根据传入的数据库名称
- * 自动推断存储模式并完成目录创建、文件路径计算等初始化工作。
+ * Encapsulates the database instance creation flow of better-sqlite3, automatically inferring
+ * the storage mode based on the provided database name and completing initialization tasks
+ * such as directory creation and file path calculation.
  *
- * 存储模式说明：
- * - memory：内存数据库，名称为 ":memory:"，不落盘
- * - onlyName：仅文件名（如 "app.db"），存放在 {dataDir}/db/ 下
- * - relative：相对路径（如 "sub/app.db"），相对于 {dataDir}/db/ 解析
- * - absolute：绝对路径（如 "/tmp/app.db"），直接使用指定路径
+ * Storage modes:
+ * - memory: In-memory database, name is ":memory:", not persisted to disk
+ * - onlyName: Filename only (e.g. "app.db"), stored under {dataDir}/db/
+ * - relative: Relative path (e.g. "sub/app.db"), resolved relative to {dataDir}/db/
+ * - absolute: Absolute path (e.g. "/tmp/app.db"), uses the specified path directly
  *
- * 安全说明：
- * 构造函数中对数据库名称进行路径穿越校验，禁止名称中包含 ".."，
- * 防止恶意输入导致访问预期目录之外的文件。
+ * Security:
+ * The constructor validates the database name for path traversal, disallowing ".." in the name
+ * to prevent malicious input from accessing files outside the intended directory.
  */
 export class SqliteStorage {
-  /** 数据库名称（原始传入值） */
+  /** Database name (original input value) */
   name: string;
 
-  /** 存储模式：memory / onlyName / relative / absolute */
+  /** Storage mode: memory / onlyName / relative / absolute */
   mode: string;
 
-  /** 数据库文件所在目录的绝对路径 */
+  /** Absolute path of the directory containing the database file */
   dbDir: string;
 
-  /** 数据库文件名（仅文件名部分，不含目录） */
+  /** Database filename (only the filename part, excluding directory) */
   fileName: string;
 
-  /** better-sqlite3 数据库实例 */
+  /** better-sqlite3 database instance */
   db: Database.Database;
 
   /**
-   * 创建 SqliteStorage 实例
+   * Create a SqliteStorage instance
    *
-   * 初始化流程：
-   * 1. 校验名称非空且不含路径穿越字符 ".."
-   * 2. 根据名称推断存储模式（getMode）
-   * 3. 创建数据库文件所在目录（_createDatabaseDir）
-   * 4. 提取文件名部分（_formatFileName）
-   * 5. 打开数据库连接（_initDB）
+   * Initialization flow:
+   * 1. Validate that the name is non-empty and does not contain path traversal characters ".."
+   * 2. Infer storage mode from the name (getMode)
+   * 3. Create the database file directory (_createDatabaseDir)
+   * 4. Extract the filename part (_formatFileName)
+   * 5. Open the database connection (_initDB)
    *
-   * @param name - 数据库名称或路径。支持以下格式：
-   *   - ":memory:" — 内存数据库
-   *   - "app.db" — 仅文件名，存放于 {dataDir}/db/
-   *   - "sub/app.db" — 相对路径，相对于 {dataDir}/db/
-   *   - "/tmp/app.db" — 绝对路径
-   * @param opt - better-sqlite3 数据库选项，默认合并 timeout: 5000
-   * @throws 名称 为空或包含 ".." 路径穿越字符时抛出断言错误
+   * @param name - Database name or path. Supports the following formats:
+   *   - ":memory:" - In-memory database
+   *   - "app.db" - Filename only, stored under {dataDir}/db/
+   *   - "sub/app.db" - Relative path, relative to {dataDir}/db/
+   *   - "/tmp/app.db" - Absolute path
+   * @param opt - better-sqlite3 database options, defaults merged with timeout: 5000
+   * @throws Asserts error if name is empty or contains ".." path traversal characters
    */
   constructor(name: string, opt: Record<string, unknown> = {}) {
     assert(name, `db name ${name} Cannot be empty`);
-    // 防止路径穿越攻击：禁止名称中包含 ".." 以避免目录回溯
+    // Prevent path traversal attacks: disallow ".." in the name to avoid directory backtracking
     assert(!name.includes('..'), `db name ${name} contains path traversal`);
 
     this.name = name;
@@ -94,23 +95,23 @@ export class SqliteStorage {
   }
 
   /**
-   * 初始化数据库连接
+   * Initialize the database connection
    *
-   * 根据存储模式决定数据库路径：
-   * - memory 模式：使用 ":memory:" 作为路径，better-sqlite3 在内存中创建数据库
-   * - 文件模式：使用 getFilePath() 获取完整的数据库文件路径
+   * Determines the database path based on storage mode:
+   * - memory mode: Uses ":memory:" as the path, better-sqlite3 creates the database in memory
+   * - file mode: Uses getFilePath() to get the full database file path
    *
-   * 文件模式下会额外校验数据库文件是否成功创建，
-   * 若文件不存在则抛出断言错误（可能因目录权限不足等原因导致）。
+   * In file mode, additionally validates that the database file was created successfully.
+   * If the file does not exist, throws an assertion error (possibly due to insufficient directory permissions, etc.).
    *
-   * @param opt - better-sqlite3 数据库选项，默认合并 { timeout: 5000 }
-   * @returns better-sqlite3 Database 实例
-   * @throws 文件模式下数据库文件未成功创建时抛出断言错误
+   * @param opt - better-sqlite3 database options, defaults merged with { timeout: 5000 }
+   * @returns better-sqlite3 Database instance
+   * @throws Asserts error if the database file was not created successfully in file mode
    */
   _initDB(opt: Record<string, unknown> = {}): Database.Database {
     const options = Object.assign({ timeout: 5000 }, opt);
 
-    // 存储类型：db文件、内存(:memory:)
+    // Storage type: db file, in-memory (:memory:)
     let dbPath = this.name;
     if (this.mode !== 'memory') {
       dbPath = this.getFilePath();
@@ -118,7 +119,7 @@ export class SqliteStorage {
 
     const db = new Database(dbPath, options as Database.Options);
 
-    // 如果是文件类型，判断文件是否创建成功
+    // For file mode, check if the file was created successfully
     if (this.mode !== 'memory') {
       assert(fs.existsSync(dbPath), `error: db ${dbPath} not exists`);
     }
@@ -127,13 +128,13 @@ export class SqliteStorage {
   }
 
   /**
-   * 提取数据库文件名
+   * Extract the database filename
    *
-   * - memory 模式：直接返回 ":memory:" 原始名称
-   * - 文件模式：使用 path.basename 提取纯文件名部分，去除目录前缀
+   * - memory mode: Returns the ":memory:" original name directly
+   * - file mode: Uses path.basename to extract the pure filename part, removing directory prefix
    *
-   * @param name - 数据库原始名称
-   * @returns 文件名部分（memory 模式返回 ":memory:"，文件模式返回纯文件名）
+   * @param name - Original database name
+   * @returns Filename part (returns ":memory:" for memory mode, pure filename for file mode)
    */
   _formatFileName(name: string): string {
     if (this.mode === 'memory') {
@@ -143,20 +144,21 @@ export class SqliteStorage {
   }
 
   /**
-   * 创建数据库文件所在目录
+   * Create the directory for the database file
    *
-   * 目录路径根据存储模式决定：
-   * - absolute 模式：使用数据库名称中的目录部分（path.dirname）
-   * - 其他模式：使用 {dataDir}/db 作为默认目录
+   * The directory path is determined by storage mode:
+   * - absolute mode: Uses the directory part from the database name (path.dirname)
+   * - Other modes: Uses {dataDir}/db as the default directory
    *
-   * 若目录不存在则自动创建，权限为 0o755（所有者可读写执行，其他人可读执行）。
+   * If the directory does not exist, it is created automatically with permission 0o755
+   * (owner can read/write/execute, others can read/execute).
    *
-   * @returns 数据库文件所在目录的绝对路径
+   * @returns Absolute path of the directory containing the database file
    */
   _createDatabaseDir(): string {
     let dbDir = path.join(getDataDir(), 'db');
     if (this.mode === 'absolute') {
-      // 绝对路径模式：目录取自名称中的路径部分，而非默认的 data/db
+      // Absolute path mode: directory is taken from the path part of the name, not the default data/db
       dbDir = path.dirname(this.name);
     }
 
@@ -168,29 +170,29 @@ export class SqliteStorage {
   }
 
   /**
-   * 根据数据库名称推断存储模式
+   * Infer storage mode from the database name
    *
-   * 推断逻辑：
-   * 1. 名称为 ":memory:" → memory 模式
-   * 2. 文件扩展名必须为 ".db"，否则抛出断言错误
-   * 3. 名称中含路径分隔符（/ 或 \）：
-   *    - 绝对路径 → absolute 模式
-   *    - 相对路径 → relative 模式
-   * 4. 名称中无路径分隔符 → onlyName 模式
+   * Inference logic:
+   * 1. Name is ":memory:" -> memory mode
+   * 2. File extension must be ".db", otherwise throws assertion error
+   * 3. Name contains path separators (/ or \):
+   *    - Absolute path -> absolute mode
+   *    - Relative path -> relative mode
+   * 4. Name contains no path separators -> onlyName mode
    *
-   * @param name - 数据库名称或路径
-   * @returns 存储模式字符串：memory / onlyName / relative / absolute
-   * @throws 文件扩展名不为 ".db" 时抛出断言错误
+   * @param name - Database name or path
+   * @returns Storage mode string: memory / onlyName / relative / absolute
+   * @throws Asserts error if file extension is not ".db"
    */
   getMode(name: string): string {
-    // 内存模式
+    // Memory mode
     if (name === ':memory:') {
       return 'memory';
     }
 
     assert(path.extname(name) === '.db', `error: db ${name} file ext name must be .db`);
 
-    // 路径模式
+    // Path mode
     const normalized = name.replace(/[/\\]/g, '/');
     if (normalized.indexOf('/') !== -1) {
       return path.isAbsolute(name) ? 'absolute' : 'relative';
@@ -200,21 +202,21 @@ export class SqliteStorage {
   }
 
   /**
-   * 获取数据库文件所在目录
+   * Get the directory containing the database file
    *
-   * @returns 数据库目录的绝对路径
+   * @returns Absolute path of the database directory
    */
   getDbDir(): string {
     return this.dbDir;
   }
 
   /**
-   * 获取数据库文件的完整路径
+   * Get the full path of the database file
    *
-   * 由 dbDir 和 fileName 拼接而成，仅文件模式有意义
-   * （memory 模式下此路径无实际用途）。
+   * Composed by joining dbDir and fileName, only meaningful for file modes
+   * (in memory mode this path has no practical use).
    *
-   * @returns 数据库文件的绝对路径
+   * @returns Absolute path of the database file
    */
   getFilePath(): string {
     return path.join(this.dbDir, this.fileName);

@@ -1,57 +1,59 @@
 /**
  * @module utils/ip
- * @description 公网 IP 地址查询工具。通过 DNS 解析或 HTTPS 请求获取本机的公网 IPv4/IPv6 地址。
+ * @description Public IP address query utility. Obtains the machine's public IPv4/IPv6 address
+ * via DNS resolution or HTTPS requests.
  *
- * 支持三种查询方式：
- * - DNS 查询：通过 OpenDNS 的特殊域名 myip.opendns.com 解析获取
- * - HTTPS 查询：通过第三方 IP 查询服务（icanhazip、ipify）获取
- * - 组合查询（all）：先尝试 DNS，失败后回退到 HTTPS
+ * Supports three query methods:
+ * - DNS query: resolves via OpenDNS special domain myip.opendns.com
+ * - HTTPS query: obtains via third-party IP query services (icanhazip, ipify)
+ * - Combined query (all): tries DNS first, falls back to HTTPS on failure
  *
- * 所有查询方法返回的 Promise 都附带 cancel() 方法，可随时取消查询。
+ * All query methods return Promises with an attached cancel() method, allowing cancellation at any time.
  */
 import dgram from 'dgram';
 import { isIPv6, isIPv4 } from 'net';
 import dnsSocket from 'dns-socket';
 import { request as urllibRequest } from 'urllib';
 
-/** 空字符串常量，表示查询失败无结果 */
+/** Empty string constant, indicates query failure with no result */
 const emptyIP = '';
 
-/** 默认查询选项 */
+/** Default query options */
 const defaults = {
-  /** 查询超时时间（毫秒） */
+  /** Query timeout (ms) */
   timeout: 3000,
-  /** 查询方式：'http' 使用 HTTPS 接口，'dns' 使用 DNS 解析，'all' 先 DNS 后 HTTPS */
+  /** Query method: 'http' uses HTTPS interface, 'dns' uses DNS resolution, 'all' tries DNS then HTTPS */
   type: 'http' as 'http' | 'dns' | 'all',
 };
 
-/** DNS 服务器配置结构 */
+/** DNS server configuration structure */
 interface DnsServerConfig {
-  /** IPv4 DNS 服务器配置 */
+  /** IPv4 DNS server configuration */
   v4: {
-    /** DNS 服务器地址列表 */
+    /** DNS server address list */
     servers: string[];
-    /** 查询域名 */
+    /** Query domain name */
     name: string;
-    /** DNS 记录类型 */
+    /** DNS record type */
     type: string;
   };
-  /** IPv6 DNS 服务器配置 */
+  /** IPv6 DNS server configuration */
   v6: {
-    /** DNS 服务器地址列表 */
+    /** DNS server address list */
     servers: string[];
-    /** 查询域名 */
+    /** Query domain name */
     name: string;
-    /** DNS 记录类型 */
+    /** DNS record type */
     type: string;
   };
 }
 
 /**
- * 预配置的 DNS 服务器列表
+ * Pre-configured DNS server list
  *
- * 使用 OpenDNS 的公共 DNS 服务器，通过查询 myip.opendns.com 的 A/AAAA 记录
- * 获取本机公网 IP。OpenDNS 会将查询者的 IP 地址作为响应返回。
+ * Uses OpenDNS public DNS servers, obtains the machine's public IP by querying
+ * the A/AAAA records of myip.opendns.com. OpenDNS returns the querier's IP
+ * address as the response.
  */
 const dnsServers: DnsServerConfig[] = [
   {
@@ -76,19 +78,19 @@ const dnsServers: DnsServerConfig[] = [
   },
 ];
 
-/** IP 版本对应的查询配置 */
+/** Query configuration per IP version */
 interface IpTypeConfig {
-  /** DNS 服务器和查询参数列表 */
+  /** DNS server and query parameter list */
   dnsServers: { servers: string[]; question: { name: string; type: string } }[];
-  /** HTTPS IP 查询服务 URL 列表 */
+  /** HTTPS IP query service URL list */
   httpsUrls: string[];
 }
 
 /**
- * 按协议版本组织的查询配置
+ * Query configuration organized by protocol version
  *
- * IPv4 和 IPv6 各自使用不同的 DNS 记录类型（A/AAAA）
- * 和不同的 HTTPS 查询端点。
+ * IPv4 and IPv6 each use different DNS record types (A/AAAA)
+ * and different HTTPS query endpoints.
  */
 const ipType: Record<string, IpTypeConfig> = {
   v4: {
@@ -113,32 +115,32 @@ const ipType: Record<string, IpTypeConfig> = {
   },
 };
 
-/** IP 查询选项 */
+/** IP query options */
 interface IpOptions {
-  /** 查询超时时间（毫秒） */
+  /** Query timeout (ms) */
   timeout?: number;
-  /** 查询方式 */
+  /** Query method */
   type?: 'http' | 'dns' | 'all';
-  /** 备用 HTTPS URL 列表，在默认 URL 都失败时使用 */
+  /** Fallback HTTPS URL list, used when default URLs all fail */
   fallbackUrls?: string[];
 }
 
 /**
- * 通过 DNS 查询公网 IP
+ * Query public IP via DNS
  *
- * 向 OpenDNS 服务器发送特殊域名查询，OpenDNS 会将查询者的 IP 地址
- * 作为 DNS 响应返回。逐个尝试服务器列表直到成功。
+ * Sends a special domain query to OpenDNS servers; OpenDNS returns the querier's
+ * IP address as the DNS response. Tries servers in the list sequentially until success.
  *
- * @param version - IP 版本，'v4' 或 'v6'
- * @param options - 查询选项
- * @returns IP 地址字符串的 Promise，附带 cancel() 方法可取消查询
+ * @param version - IP version, 'v4' or 'v6'
+ * @param options - Query options
+ * @returns Promise of IP address string, with cancel() method to cancel the query
  */
 function queryDns(version: 'v4' | 'v6', options: Required<IpOptions>): Promise<string> & { cancel?: () => void } {
   const data = ipType[version]!;
   const socket = dnsSocket({
     retries: 0,
     maxQueries: 1,
-    // IPv6 使用 udp6 Socket，IPv4 使用 udp4 Socket
+    // IPv6 uses udp6 Socket, IPv4 uses udp4 Socket
     socket: dgram.createSocket(version === 'v6' ? 'udp6' : 'udp4'),
     timeout: options.timeout,
   });
@@ -147,7 +149,7 @@ function queryDns(version: 'v4' | 'v6', options: Required<IpOptions>): Promise<s
     for (const dnsServerInfo of data.dnsServers) {
       const { servers, question } = dnsServerInfo;
       for (const server of servers) {
-        // Socket 已被取消则直接返回空
+        // If socket has been cancelled, return empty immediately
         if (socket.destroyed) {
           return emptyIP;
         }
@@ -161,7 +163,7 @@ function queryDns(version: 'v4' | 'v6', options: Required<IpOptions>): Promise<s
 
           const response = (typeof answer.data === 'string' ? answer.data : answer.data.toString()).trim();
           const ip = response;
-          // 验证返回的 IP 格式是否合法
+          // Validate the returned IP format
           const method = version === 'v6' ? isIPv6 : isIPv4;
 
           if (ip && method(ip)) {
@@ -169,7 +171,7 @@ function queryDns(version: 'v4' | 'v6', options: Required<IpOptions>): Promise<s
             return ip;
           }
         } catch {
-          // 单个服务器查询失败不影响后续尝试
+          // Single server query failure does not affect subsequent attempts
         }
       }
     }
@@ -178,7 +180,7 @@ function queryDns(version: 'v4' | 'v6', options: Required<IpOptions>): Promise<s
     return emptyIP;
   })() as Promise<string> & { cancel?: () => void };
 
-  // 提供 cancel 方法，允许外部取消正在进行的 DNS 查询
+  // Provide cancel method, allowing external cancellation of ongoing DNS queries
   promise.cancel = () => {
     socket.destroy();
   };
@@ -187,14 +189,14 @@ function queryDns(version: 'v4' | 'v6', options: Required<IpOptions>): Promise<s
 }
 
 /**
- * 通过 HTTPS 接口查询公网 IP
+ * Query public IP via HTTPS interface
  *
- * 向第三方 IP 查询服务发送 HTTP GET 请求，响应体即为公网 IP 地址。
- * 逐个尝试 URL 列表直到成功。
+ * Sends HTTP GET requests to third-party IP query services; the response body is the public IP address.
+ * Tries URLs in the list sequentially until success.
  *
- * @param version - IP 版本，'v4' 或 'v6'
- * @param options - 查询选项
- * @returns IP 地址字符串的 Promise，附带 cancel() 方法
+ * @param version - IP version, 'v4' or 'v6'
+ * @param options - Query options
+ * @returns Promise of IP address string, with cancel() method
  */
 function queryHttps(version: 'v4' | 'v6', options: Required<IpOptions>): Promise<string> & { cancel?: () => void } {
   let cancelFn: (() => void) | undefined;
@@ -206,7 +208,7 @@ function queryHttps(version: 'v4' | 'v6', options: Required<IpOptions>): Promise
       dataType: 'text' as const,
     };
 
-    // 合并默认 URL 和用户提供的备用 URL
+    // Combine default URLs with user-provided fallback URLs
     const urls = [
       ...ipType[version]!.httpsUrls,
       ...(options.fallbackUrls ?? []),
@@ -218,14 +220,14 @@ function queryHttps(version: 'v4' | 'v6', options: Required<IpOptions>): Promise
         const result = response.res.status === 200 ? response.data.toString() : '';
         const ip = result.trim();
 
-        // 验证返回的 IP 格式是否合法
+        // Validate the returned IP format
         const method = version === 'v6' ? isIPv6 : isIPv4;
 
         if (ip && method(ip)) {
           return ip;
         }
       } catch {
-        // 单个 URL 请求失败不影响后续尝试
+        // Single URL request failure does not affect subsequent attempts
       }
     }
 
@@ -240,27 +242,27 @@ function queryHttps(version: 'v4' | 'v6', options: Required<IpOptions>): Promise
 }
 
 /**
- * 组合查询公网 IP（先 DNS 后 HTTPS）
+ * Combined query for public IP (DNS first, then HTTPS)
  *
- * 优先尝试 DNS 查询，DNS 失败时自动回退到 HTTPS 查询，
- * 确保在网络环境受限时仍能获取公网 IP。
+ * Tries DNS query first; when DNS fails, automatically falls back to HTTPS query,
+ * ensuring the public IP can still be obtained in restricted network environments.
  *
- * @param version - IP 版本，'v4' 或 'v6'
- * @param options - 查询选项
- * @returns IP 地址字符串的 Promise，附带 cancel() 方法
+ * @param version - IP version, 'v4' or 'v6'
+ * @param options - Query options
+ * @returns Promise of IP address string, with cancel() method
  */
 function queryAll(version: 'v4' | 'v6', options: Required<IpOptions>): Promise<string> & { cancel?: () => void } {
   let cancelFn: (() => void) | undefined;
 
   const promise = (async (): Promise<string> => {
     let response: string;
-    // 先尝试 DNS 查询
+    // Try DNS query first
     const dnsPromise = queryDns(version, options);
     cancelFn = dnsPromise.cancel ?? (() => {});
     try {
       response = await dnsPromise;
     } catch {
-      // DNS 查询失败，回退到 HTTPS
+      // DNS query failed, fall back to HTTPS
       const httpsPromise = queryHttps(version, options);
       cancelFn = httpsPromise.cancel ?? (() => {});
       response = await httpsPromise;
@@ -277,16 +279,16 @@ function queryAll(version: 'v4' | 'v6', options: Required<IpOptions>): Promise<s
 }
 
 /**
- * 查询公网 IPv4 地址
+ * Query public IPv4 address
  *
- * @param options - 查询选项（type、timeout、fallbackUrls）
- * @returns IPv4 地址字符串的 Promise，附带 cancel() 方法可取消查询
+ * @param options - Query options (type, timeout, fallbackUrls)
+ * @returns Promise of IPv4 address string, with cancel() method to cancel the query
  *
  * @example
  * ```ts
  * const p = publicIpv4({ type: 'http', timeout: 5000 });
  * const ip = await p;
- * // 或取消查询
+ * // Or cancel the query
  * p.cancel();
  * ```
  */
@@ -304,15 +306,15 @@ export function publicIpv4(options?: IpOptions): Promise<string> & { cancel?: ()
     return queryDns('v4', merged);
   }
 
-  // type === 'all'：先 DNS 后 HTTPS
+  // type === 'all': DNS first, then HTTPS
   return queryAll('v4', merged);
 }
 
 /**
- * 查询公网 IPv6 地址
+ * Query public IPv6 address
  *
- * @param options - 查询选项（type、timeout、fallbackUrls）
- * @returns IPv6 地址字符串的 Promise，附带 cancel() 方法可取消查询
+ * @param options - Query options (type, timeout, fallbackUrls)
+ * @returns Promise of IPv6 address string, with cancel() method to cancel the query
  *
  * @example
  * ```ts

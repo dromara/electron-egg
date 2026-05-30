@@ -1,46 +1,46 @@
 /**
  * @module jobs/load-balancer/types
- * @description 负载均衡器相关类型定义。
+ * @description Load balancer type definitions.
  */
 
-/** 负载均衡目标（子进程） */
+/** Load balancer target (child process) */
 export interface LoadBalancerTarget {
-  /** 目标标识（通常是子进程 PID） */
+  /** Target identifier (usually child process PID) */
   id: string | number;
-  /** 权重值（用于加权算法） */
+  /** Weight value (used by weighted algorithms) */
   weight?: number;
 }
 
-/** 负载均衡器运行时参数 */
+/** Load balancer runtime parameters */
 export interface LoadBalancerParams {
-  /** 当前轮询索引 */
+  /** Current polling index */
   currentIndex: number;
-  /** 当前权重索引（加权轮询用） */
+  /** Current weight index (for weighted round-robin) */
   weightIndex: number;
-  /** 所有权重总和 */
+  /** Sum of all weights */
   weightTotal: number;
-  /** 连接数映射：pid → 当前连接数 */
+  /** Connections map: pid -> current connection count */
   connectionsMap: Record<string | number, number>;
-  /** CPU 占用率映射：pid → CPU 使用率 */
+  /** CPU occupancy map: pid -> CPU usage */
   cpuOccupancyMap: Record<string | number, number>;
-  /** 内存占用映射：pid → 内存使用量 */
+  /** Memory occupancy map: pid -> memory usage */
   memoryOccupancyMap: Record<string | number, number>;
 }
 
-/** 负载均衡器配置选项 */
+/** Load balancer configuration options */
 export interface LoadBalancerOptions {
-  /** 目标列表 */
+  /** Target list */
   targets: LoadBalancerTarget[];
-  /** 算法名称（默认 polling） */
+  /** Algorithm name (default: polling) */
   algorithm?: string;
 }
 
-/** 进程信息（CPU/内存） */
+/** Process info (CPU/memory) */
 export interface PidInfo {
-  /** 进程 ID */
+  /** Process ID */
   pid: string | number;
-  /** CPU 使用率 */
+  /** CPU usage */
   cpu: number;
-  /** 内存使用量 */
+  /** Memory usage */
   memory: number;
 }

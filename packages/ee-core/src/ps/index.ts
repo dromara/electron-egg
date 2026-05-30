@@ -1,48 +1,48 @@
 /**
  * @module ps
- * @description 进程状态与路径工具模块。提供环境判断、进程类型检测、
- * 路径获取等功能，是框架各模块获取运行环境信息的基础依赖。
+ * @description Process state and path utility module. Provides environment detection, process type checking,
+ * and path retrieval functions, serving as the foundational dependency for other modules to obtain runtime environment information.
  *
- * 所有路径信息来自 boot.ts 中设置的 process.env 环境变量。
+ * All path information comes from process.env environment variables set in boot.ts.
  */
 import path from 'path';
 
-/** 获取当前进程的所有环境变量 */
+/** Get all environment variables of the current process */
 export function allEnv(): NodeJS.ProcessEnv {
   return process.env;
 }
 
-/** 获取当前运行环境名称（dev / local / prod） */
+/** Get the current environment name (dev / local / prod) */
 export function env(): string {
   return process.env.EE_ENV || '';
 }
 
-/** 是否为生产环境 */
+/** Whether this is a production environment */
 export function isProd(): boolean {
   return process.env.EE_ENV === 'prod';
 }
 
-/** 是否为开发环境（dev 或 local） */
+/** Whether this is a development environment (dev or local) */
 export function isDev(): boolean {
   return process.env.EE_ENV === 'dev' || process.env.EE_ENV === 'local';
 }
 
-/** 是否为渲染进程 */
+/** Whether this is a renderer process */
 export function isRenderer(): boolean {
   return typeof process === 'undefined' || !process || process.type === 'renderer';
 }
 
-/** 是否为主进程（browser） */
+/** Whether this is the main process (browser) */
 export function isMain(): boolean {
   return typeof process !== 'undefined' && process.type === 'browser';
 }
 
-/** 是否为 node 子进程（通过 child_process.fork 创建，ELECTRON_RUN_AS_NODE=1） */
+/** Whether this is a Node child process (created via child_process.fork, ELECTRON_RUN_AS_NODE=1) */
 export function isForkedChild(): boolean {
   return Number(process.env.ELECTRON_RUN_AS_NODE) === 1;
 }
 
-/** 获取当前进程类型（browser / renderer / child） */
+/** Get the current process type (browser / renderer / child) */
 export function processType(): string {
   let type = '';
   if (isMain()) {
@@ -55,21 +55,21 @@ export function processType(): string {
   return type;
 }
 
-/** 获取应用名称 */
+/** Get the application name */
 export function appName(): string {
   return process.env.EE_APP_NAME || '';
 }
 
-/** 获取应用版本号 */
+/** Get the application version */
 export function appVersion(): string {
   return process.env.EE_APP_VERSION || '';
 }
 
 /**
- * 获取数据存储路径
+ * Get the data storage path
  *
- * 开发环境：{baseDir}/data
- * 生产环境：{userHome}/.{appName}/data
+ * Development: {baseDir}/data
+ * Production: {userHome}/.{appName}/data
  */
 export function getDataDir(): string {
   const base = isDev() ? getBaseDir() : getUserHomeHiddenAppDir();
@@ -77,10 +77,10 @@ export function getDataDir(): string {
 }
 
 /**
- * 获取日志存储路径
+ * Get the log storage path
  *
- * 开发环境：{baseDir}/logs
- * 生产环境：{userHome}/.{appName}/logs
+ * Development: {baseDir}/logs
+ * Production: {userHome}/.{appName}/logs
  */
 export function getLogDir(): string {
   const base = isDev() ? getBaseDir() : getUserHomeHiddenAppDir();
@@ -88,9 +88,9 @@ export function getLogDir(): string {
 }
 
 /**
- * 获取打包输出目录
+ * Get the build output directory
  *
- * @param basePath - 基础路径，默认为 cwd
+ * @param basePath - Base path, defaults to cwd
  * @returns {basePath}/public/electron
  */
 export function getBundleDir(basePath?: string): string {
@@ -99,9 +99,9 @@ export function getBundleDir(basePath?: string): string {
 }
 
 /**
- * 获取 electron 源码目录
+ * Get the electron source directory
  *
- * @param basePath - 基础路径，默认为 cwd
+ * @param basePath - Base path, defaults to cwd
  * @returns {basePath}/electron
  */
 export function getElectronCodeDir(basePath?: string): string {
@@ -110,9 +110,9 @@ export function getElectronCodeDir(basePath?: string): string {
 }
 
 /**
- * 获取 frontend 源码目录
+ * Get the frontend source directory
  *
- * @param basePath - 基础路径，默认为 cwd
+ * @param basePath - Base path, defaults to cwd
  * @returns {basePath}/frontend
  */
 export function getFrontendCodeDir(basePath?: string): string {
@@ -120,29 +120,29 @@ export function getFrontendCodeDir(basePath?: string): string {
   return path.join(base, 'frontend');
 }
 
-/** 获取项目根目录（baseDir） */
+/** Get the project root directory (baseDir) */
 export function getBaseDir(): string {
   return process.env.EE_BASE_DIR || '';
 }
 
-/** 获取 electron 目录（业务代码所在目录） */
+/** Get the electron directory (where business code resides) */
 export function getElectronDir(): string {
   return process.env.EE_ELECTRON_DIR || '';
 }
 
-/** 获取 public 静态资源目录 */
+/** Get the public static assets directory */
 export function getPublicDir(): string {
   return path.join(getBaseDir(), 'public');
 }
 
 /**
- * 获取额外资源目录
+ * Get the extra resources directory
  *
- * 打包后路径因平台不同而不同：
- * - Windows/Linux：{execDir}/resources/extraResources
- * - macOS：{execDir}/../Resources/extraResources
+ * Path differs by platform after packaging:
+ * - Windows/Linux: {execDir}/resources/extraResources
+ * - macOS: {execDir}/../Resources/extraResources
  *
- * 打包前：{execDir}/build/extraResources
+ * Before packaging: {execDir}/build/extraResources
  */
 export function getExtraResourcesDir(): string {
   const execDir = getExecDir();
@@ -151,7 +151,7 @@ export function getExtraResourcesDir(): string {
   let dir = '';
   if (packaged) {
     dir = path.join(execDir, 'resources', 'extraResources');
-    // macOS 应用包结构：exe 在 Contents/MacOS/，资源在 Contents/Resources/
+    // macOS app bundle structure: exe is in Contents/MacOS/, resources are in Contents/Resources/
     if (process.platform === 'darwin') {
       dir = path.join(execDir, '..', 'Resources', 'extraResources');
     }
@@ -162,70 +162,70 @@ export function getExtraResourcesDir(): string {
 }
 
 /**
- * 获取 root 目录
+ * Get the root directory
  *
- * 开发环境：项目根目录（baseDir）
- * 生产环境：app user data 目录
+ * Development: Project root directory (baseDir)
+ * Production: App user data directory
  */
 export function getRootDir(): string {
   return isDev() ? getBaseDir() : getAppUserDataDir();
 }
 
-/** 获取 Electron appUserData 目录 */
+/** Get the Electron appUserData directory */
 export function getAppUserDataDir(): string {
   return process.env.EE_APP_USER_DATA || '';
 }
 
-/** 获取可执行文件所在目录（execDir） */
+/** Get the executable directory (execDir) */
 export function getExecDir(): string {
   return process.env.EE_EXEC_DIR || '';
 }
 
-/** 获取操作系统用户主目录 */
+/** Get the OS user home directory */
 export function getUserHomeDir(): string {
   return process.env.EE_USER_HOME || '';
 }
 
 /**
- * 获取用户主目录下的隐藏应用目录
+ * Get the hidden app directory under the user home directory
  *
- * 路径格式：{userHome}/.{appName}/
- * 用于生产环境下存储数据、日志等持久化文件。
+ * Path format: {userHome}/.{appName}/
+ * Used for storing data, logs, and other persistent files in production.
  */
 export function getUserHomeHiddenAppDir(): string {
   return path.join(getUserHomeDir(), '.' + appName());
 }
 
-/** 获取用户主目录下的应用目录（非隐藏）：{userHome}/{appName}/ */
+/** Get the app directory under the user home directory (not hidden): {userHome}/{appName}/ */
 export function getUserHomeAppDir(): string {
   return path.join(getUserHomeDir(), appName());
 }
 
-/** 获取内置 Socket 服务端口号 */
+/** Get the built-in Socket server port number */
 export function getSocketPort(): number {
   return parseInt(process.env.EE_SOCKET_PORT || '0') || 0;
 }
 
-/** 获取内置 HTTP 服务端口号 */
+/** Get the built-in HTTP server port number */
 export function getHttpPort(): number {
   return parseInt(process.env.EE_HTTP_PORT || '0') || 0;
 }
 
-/** 是否已打包（生产环境） */
+/** Whether the app is packaged (production environment) */
 export function isPackaged(): boolean {
   return process.env.EE_IS_PACKAGED === 'true';
 }
 
-/** 退出当前进程 */
+/** Exit the current process */
 export function exit(code = 0): never {
   return process.exit(code);
 }
 
 /**
- * 格式化 IPC 消息
+ * Format an IPC message
  *
- * @param msg - 部分消息字段
- * @returns 完整的消息对象，缺失字段使用默认值填充
+ * @param msg - Partial message fields
+ * @returns Complete message object, with missing fields filled using default values
  */
 export function makeMessage(msg: Partial<{ channel: string; event: string; data: unknown }> = {}): {
   channel: string;
@@ -236,10 +236,10 @@ export function makeMessage(msg: Partial<{ channel: string; event: string; data:
 }
 
 /**
- * 退出 ChildJob 类型的子进程
+ * Exit a ChildJob-type child process
  *
- * 通过检查 argv[2] 中的 type 字段判断是否为 ChildJob 进程。
- * 仅 ChildJob 进程会执行退出，其他类型的子进程不受影响。
+ * Checks the type field in argv[2] to determine if this is a ChildJob process.
+ * Only ChildJob processes will exit; other types of child processes are not affected.
  */
 export function exitChildJob(code = 0): void {
   try {
@@ -253,9 +253,9 @@ export function exitChildJob(code = 0): void {
 }
 
 /**
- * 判断当前进程是否为 ChildJob 类型
+ * Determine whether the current process is of ChildJob type
  *
- * 通过检查进程启动参数中的 type 字段判断。
+ * Checks the type field in the process startup arguments.
  */
 export function isChildJob(): boolean {
   try {
@@ -267,7 +267,7 @@ export function isChildJob(): boolean {
 }
 
 /**
- * 判断当前进程是否为 ChildPoolJob 类型
+ * Determine whether the current process is of ChildPoolJob type
  */
 export function isChildPoolJob(): boolean {
   try {
@@ -279,13 +279,13 @@ export function isChildPoolJob(): boolean {
 }
 
 /**
- * 从命令行参数中获取指定名称的参数值
+ * Get the value of a named argument from command line arguments
  *
- * 查找格式：--name=value
+ * Search format: --name=value
  *
- * @param name - 参数名（不含 -- 前缀）
- * @param args - 参数数组，默认为 process.argv
- * @returns 参数值，未找到返回 undefined
+ * @param name - Argument name (without the -- prefix)
+ * @param args - Arguments array, defaults to process.argv
+ * @returns Argument value, or undefined if not found
  */
 export function getArgumentByName(name: string, args?: string[]): string | undefined {
   const searchArgs = args || process.argv;

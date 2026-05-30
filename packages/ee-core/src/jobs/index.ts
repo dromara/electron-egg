@@ -1,12 +1,12 @@
 /**
  * @module jobs
- * @description 后台任务模块入口。提供子进程任务管理和负载均衡能力。
+ * @description Background task module entry. Provides child process task management and load balancing capabilities.
  *
- * 核心组件：
- * - ChildJob：单次任务执行，每次创建新子进程
- * - ChildPoolJob：进程池，复用子进程，通过负载均衡分配任务
- * - LoadBalancer：负载均衡器，支持多种调度算法
- * - AlgorithmType：算法类型常量
+ * Core components:
+ * - ChildJob: Single task execution, creates a new child process each time
+ * - ChildPoolJob: Process pool, reuses child processes, distributes tasks via load balancing
+ * - LoadBalancer: Load balancer, supports multiple scheduling algorithms
+ * - AlgorithmType: Algorithm type constants
  */
 export { ChildJob } from './child/index.js';
 export { ChildPoolJob } from './child-pool/index.js';

@@ -1,9 +1,9 @@
 /**
  * @module exception
- * @description 全局异常处理模块。注册 uncaughtException 和 unhandledRejection 处理器，
- * 捕获未处理的异常和 Promise rejection，记录日志并根据配置决定是否退出进程。
+ * @description Global exception handling module. Registers uncaughtException and unhandledRejection handlers,
+ * catches unhandled exceptions and Promise rejections, logs them, and decides whether to exit the process based on configuration.
  *
- * 在框架启动时由 boot.ts 的 init() 最先调用，确保后续流程的异常能被捕获。
+ * Called first during framework startup by boot.ts's init(), ensuring that exceptions in subsequent flows can be caught.
  */
 import { coreLogger } from '../log/index.js';
 import { isForkedChild, isRenderer, isDev, isMain } from '../ps/index.js';
@@ -11,10 +11,10 @@ import { getConfig } from '../config/index.js';
 import { childMessage } from '../message/index.js';
 
 /**
- * 加载异常处理器
+ * Load exception handlers
  *
- * 注册全局 uncaughtException 和 unhandledRejection 监听器。
- * 应在应用启动最早阶段调用。
+ * Registers global uncaughtException and unhandledRejection listeners.
+ * Should be called at the earliest stage of application startup.
  */
 export function loadException(): void {
   uncaughtExceptionHandler();
@@ -22,11 +22,11 @@ export function loadException(): void {
 }
 
 /**
- * 未捕获异常处理器
+ * Uncaught exception handler
  *
- * 当进程抛出异常且未被 try/catch 捕获时触发。
- * 记录错误日志，开发模式下的子进程还会向终端发送错误信息。
- * 根据异常配置决定是否退出进程。
+ * Triggered when the process throws an exception that is not caught by try/catch.
+ * Logs the error, and in development mode, child processes also send error information to the terminal.
+ * Decides whether to exit the process based on exception configuration.
  */
 function uncaughtExceptionHandler(): void {
   process.on('uncaughtException', function (err: unknown) {
@@ -43,10 +43,10 @@ function uncaughtExceptionHandler(): void {
 }
 
 /**
- * 未捕获异常监控器
+ * Uncaught exception monitor
  *
- * 与 uncaughtException 不同，此处理器在异常被捕获前触发，
- * 可用于异常监控和上报，不影响后续异常处理流程。
+ * Unlike uncaughtException, this handler is triggered before the exception is caught,
+ * and can be used for exception monitoring and reporting without affecting the subsequent exception handling flow.
  */
 export function uncaughtExceptionMonitorHandler(): void {
   process.on('uncaughtExceptionMonitor', function (err: unknown) {
@@ -56,16 +56,16 @@ export function uncaughtExceptionMonitorHandler(): void {
 }
 
 /**
- * 未处理的 Promise rejection 处理器
+ * Unhandled Promise rejection handler
  *
- * 当 Promise 被 reject 且没有 .catch() 处理时触发。
- * 尝试从非 Error 类型的 rejection 中提取 name/message/stack 信息。
+ * Triggered when a Promise is rejected and there is no .catch() handler.
+ * Attempts to extract name/message/stack information from non-Error type rejections.
  */
 function unhandledRejectionHandler(): void {
   process.on('unhandledRejection', function (err: unknown) {
     let error: Error;
     if (!(err instanceof Error)) {
-      // 非 Error 类型：尝试提取错误信息
+      // Non-Error type: attempt to extract error information
       const newError = new Error(String(err));
       if (err && typeof err === 'object') {
         const objErr = err as Record<string, unknown>;
@@ -88,10 +88,10 @@ function unhandledRejectionHandler(): void {
 }
 
 /**
- * 开发环境下子进程向终端发送错误信息
+ * Send error information to the terminal from child process in development environment
  *
- * 仅在 forked 子进程 + 开发环境下生效，
- * 方便在终端中直接看到子进程的异常信息。
+ * Only effective in forked child processes + development environment,
+ * making it convenient to see child process exception information directly in the terminal.
  */
 function _devError(err: Error): void {
   if (isForkedChild() && isDev()) {
@@ -100,12 +100,12 @@ function _devError(err: Error): void {
 }
 
 /**
- * 根据异常配置决定是否退出进程
+ * Decide whether to exit the process based on exception configuration
  *
- * 配置项：
- * - mainExit: 主进程异常退出
- * - childExit: 子进程异常退出
- * - rendererExit: 渲染进程异常退出
+ * Configuration options:
+ * - mainExit: Main process exits on exception
+ * - childExit: Child process exits on exception
+ * - rendererExit: Renderer process exits on exception
  */
 function _exit(): void {
   const exceptionConfig = getConfig().exception as { mainExit: boolean; childExit: boolean; rendererExit: boolean };
@@ -121,10 +121,10 @@ function _exit(): void {
 }
 
 /**
- * 延迟退出进程
+ * Delay process exit
  *
- * 等待 1500ms 让日志等异步写入完成后再退出，
- * 避免最后的日志丢失。
+ * Waits 1500ms for async operations like log writes to complete before exiting,
+ * avoiding loss of the last log entries.
  */
 function _delayExit(): void {
   setTimeout(() => {

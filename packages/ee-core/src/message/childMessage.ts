@@ -1,55 +1,57 @@
 /**
  * @module message/childMessage
- * @description 子进程消息通信模块。提供子进程（通过 child_process.fork 创建）
- * 向主进程发送消息的能力，是框架 IPC 通信机制在子进程侧的核心实现。
+ * @description Child process message communication module. Provides the ability for child processes
+ * (created via child_process.fork) to send messages to the main process, serving as the core
+ * implementation of the framework's IPC communication mechanism on the child process side.
  *
- * 子进程无法直接访问 Electron 的 ipcRenderer/ipcMain，
- * 因此通过 Node.js 内置的 process.send() 方法与主进程通信。
- * 主进程通过监听子进程的 message 事件接收并分发这些消息。
+ * Child processes cannot directly access Electron's ipcRenderer/ipcMain,
+ * so they communicate with the main process via Node.js built-in process.send() method.
+ * The main process receives and dispatches these messages by listening to the child process's message event.
  *
- * 消息格式遵循框架统一的 IPC 协议：
+ * Message format follows the framework's unified IPC protocol:
  * ```
  * {
- *   channel: string,      // 通信频道，如 'ee#sendToMain'
- *   eventReceiver: string, // 接收者类型，如 'job' / 'task'
- *   event: string,        // 事件名称
- *   data: object          // 事件数据
+ *   channel: string,      // Communication channel, e.g. 'ee#sendToMain'
+ *   eventReceiver: string, // Receiver type, e.g. 'job' / 'task'
+ *   event: string,        // Event name
+ *   data: object          // Event data
  * }
  * ```
  *
- * 使用示例：
+ * Usage examples:
  * ```ts
- * // 在子进程中向主进程的 ChildJob 实例发送消息
+ * // Send a message to the ChildJob instance in the main process from a child process
  * childMessage.sendToMain('taskComplete', { result: 42 });
  *
- * // 在子进程中向主进程的 Fork 进程实例发送消息
+ * // Send a message to the Fork process instance in the main process from a child process
  * childMessage.send('dataReady', { items: [...] });
  *
- * // 发送错误信息到终端
+ * // Send error information to the terminal
  * childMessage.sendErrorToTerminal(new Error('Something went wrong'));
  * ```
  */
 import { Receiver, Processes } from '../const/channel.js';
 
 /**
- * ChildMessage — 子进程消息通信类
+ * ChildMessage - Child process message communication class
  *
- * 封装子进程向主进程发送消息的方法，区分不同的接收者类型
- * （ChildJob / ForkProcess），并提供错误信息转发能力。
+ * Encapsulates methods for child processes to send messages to the main process,
+ * distinguishing different receiver types (ChildJob / ForkProcess),
+ * and provides error information forwarding capability.
  *
- * 该类在子进程环境中运行，依赖 process.send() 进行通信，
- * 若当前进程不支持 process.send（非 fork 创建的进程），则返回 false。
+ * This class runs in the child process environment, relies on process.send() for communication,
+ * and returns false if the current process does not support process.send (non-forked process).
  */
 export class ChildMessage {
   /**
-   * 向主进程的 ChildJob 实例发送消息
+   * Send a message to the ChildJob instance in the main process
    *
-   * 使用 Receiver.childJob 作为接收者类型，主进程收到消息后
-   * 会将事件路由到对应的 ChildJob 处理器。
+   * Uses Receiver.childJob as the receiver type. After the main process receives the message,
+   * it routes the event to the corresponding ChildJob handler.
    *
-   * @param eventName - 事件名称，主进程据此分发到对应的处理函数
-   * @param params - 事件参数，默认为空对象
-   * @returns 发送成功返回 true，当前进程不支持 process.send 时返回 false
+   * @param eventName - Event name, the main process dispatches to the corresponding handler based on this
+   * @param params - Event parameters, defaults to an empty object
+   * @returns Returns true if sent successfully, false if the current process does not support process.send
    */
   sendToMain(eventName: string, params: Record<string, unknown> = {}): boolean {
     const receiver = Receiver.childJob;
@@ -57,17 +59,17 @@ export class ChildMessage {
   }
 
   /**
-   * 向主进程发送消息（通用方法）
+   * Send a message to the main process (generic method)
    *
-   * 构造符合框架 IPC 协议的消息对象，通过 process.send() 发送到主进程。
-   * 若未指定接收者，默认使用 Receiver.forkProcess（通用任务进程）。
+   * Constructs a message object conforming to the framework's IPC protocol and sends it to the main process via process.send().
+   * If no receiver is specified, defaults to Receiver.forkProcess (generic task process).
    *
-   * @param eventName - 事件名称
-   * @param params - 事件参数，默认为空对象
-   * @param receiver - 接收者类型，默认为 Receiver.forkProcess
-   *   - 'job'：ChildJob 类型的子进程
-   *   - 'task'：Fork 进程（通用任务）
-   * @returns 发送成功返回 true，当前进程不支持 process.send 时返回 false
+   * @param eventName - Event name
+   * @param params - Event parameters, defaults to an empty object
+   * @param receiver - Receiver type, defaults to Receiver.forkProcess
+   *   - 'job': ChildJob-type child process
+   *   - 'task': Fork process (generic task)
+   * @returns Returns true if sent successfully, false if the current process does not support process.send
    */
   send(eventName: string, params: Record<string, unknown> = {}, receiver?: string): boolean {
     const eventReceiver = receiver || Receiver.forkProcess;
@@ -82,28 +84,28 @@ export class ChildMessage {
   }
 
   /**
-   * 退出当前子进程
+   * Exit the current child process
    *
-   * @param code - 退出码，默认为 0（正常退出）
-   * @throws 永不返回（process.exit 会终止进程）
+   * @param code - Exit code, defaults to 0 (normal exit)
+   * @throws Never returns (process.exit terminates the process)
    */
   exit(code = 0): never {
     return process.exit(code);
   }
 
   /**
-   * 向主进程发送错误信息并在渲染进程展示异常弹窗
+   * Send error information to the main process and display an exception dialog in the renderer process
    *
-   * 使用 Processes.showException 频道发送，主进程收到后
-   * 会通过 IPC 转发到渲染进程，由渲染进程弹窗显示错误信息。
-   * 错误信息会附加提示语，引导用户查看日志文件获取详细信息。
+   * Sends via the Processes.showException channel. After the main process receives it,
+   * it forwards it to the renderer process via IPC, which displays a dialog with the error information.
+   * The error message includes a tip guiding the user to check the log file for details.
    *
-   * @param err - 错误对象
-   * @returns 发送成功返回 true，当前进程不支持 process.send 时返回 false
+   * @param err - Error object
+   * @returns Returns true if sent successfully, false if the current process does not support process.send
    */
   sendErrorToTerminal(err: Error): boolean {
     let errTips = err && typeof err === 'object' ? err.toString() : '';
-    // 附加提示语，引导用户查看日志文件获取完整的错误堆栈
+    // Append a tip guiding the user to check the log file for the full error stack
     errTips += ' Error !!! Please See file ee-core.log or ee-error-xxx.log for details !';
     const message = {
       channel: Processes.showException,
@@ -113,5 +115,5 @@ export class ChildMessage {
   }
 }
 
-/** 子进程消息通信单例，供子进程代码直接使用 */
+/** Child process message communication singleton, for direct use by child process code */
 export const childMessage = new ChildMessage();

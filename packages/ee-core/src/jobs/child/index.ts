@@ -23,7 +23,7 @@ export class ChildJob extends EventEmitter {
   }
 
   /**
-   * 初始化监听
+   * Initialize event listeners
    */
   _initEvents(): void {
     this.on(Events.childProcessExit, (data: ProcessExitEventData) => {
@@ -39,7 +39,7 @@ export class ChildJob extends EventEmitter {
   }
 
   /**
-   * 执行一个job文件
+   * Execute a job file
    */
   exec(filepath: string, params: Record<string, unknown> = {}, opt: JobProcessOptions = {}): JobProcess {
     const jobPath = getFullpath(filepath);
@@ -51,7 +51,7 @@ export class ChildJob extends EventEmitter {
   }
 
   /**
-   * 创建子进程
+   * Create a child process
    */
   createProcess(opt: JobProcessOptions = {}): JobProcess {
     const options: JobProcessOptions = {
@@ -72,14 +72,14 @@ export class ChildJob extends EventEmitter {
   }
 
   /**
-   * 获取当前pids
+   * Get current PIDs
    */
   getPids(): string[] {
     return Object.keys(this.jobs);
   }
 
   /**
-   * 异步执行一个job文件
+   * Asynchronously execute a job file
    */
   async execPromise(filepath: string, params: Record<string, unknown> = {}, opt: JobProcessOptions = {}): Promise<JobProcess> {
     return this.exec(filepath, params, opt);

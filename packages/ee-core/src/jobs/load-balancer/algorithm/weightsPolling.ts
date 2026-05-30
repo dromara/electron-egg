@@ -1,7 +1,7 @@
 import type { LoadBalancerTarget, LoadBalancerParams } from '../types.js';
 
 /**
- * 权重轮询算法
+ * Weighted round-robin algorithm
  */
 export default function weightsPolling(
   tasks: LoadBalancerTarget[],

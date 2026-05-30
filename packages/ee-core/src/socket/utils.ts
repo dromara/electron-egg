@@ -1,28 +1,28 @@
 /**
  * @module socket/utils
- * @description Socket 模块共享工具函数。
- * 提供控制器函数解析能力，被 HttpServer、IpcServer、SocketServer 共同使用。
+ * @description Shared utility functions for the socket module.
+ * Provides controller function resolution, used by HttpServer, IpcServer, and SocketServer.
  */
 import { isFunction } from '../utils/type_check.js';
 import { coreLogger } from '../log/index.js';
 
 /**
- * 从通道/命令路径字符串解析控制器函数
+ * Resolve controller function from channel/command path string
  *
- * 将 cmd 按 separator 分割后，逐级在 controller 对象树中查找对应的函数。
- * 例如：cmd='controller/user/add', separator='/' → 查找 controller.user.add
+ * Splits cmd by separator, then traverses the controller object tree level by level to find the corresponding function.
+ * Example: cmd='controller/user/add', separator='/' → looks up controller.user.add
  *
- * @param controller - 控制器方法映射对象
- * @param cmd - 通道/命令路径字符串（非字符串类型直接返回 null）
- * @param separator - 路径分隔符
- * @returns 控制器方法函数，解析失败返回 null
+ * @param controller - Controller method mapping object
+ * @param cmd - Channel/command path string (non-string types return null directly)
+ * @param separator - Path separator
+ * @returns Controller method function, or null if resolution fails
  */
 export function resolveControllerFn(
   controller: Record<string, unknown>,
   cmd: string,
   separator: string,
 ): ((...args: unknown[]) => unknown) | null {
-  // 防御：非字符串类型（如 WebSocket 传入的数字等）直接返回
+  // Guard: non-string types (e.g., numbers passed via WebSocket) return directly
   if (typeof cmd !== 'string') return null;
 
   const actions = cmd.split(separator);

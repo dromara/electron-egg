@@ -1,7 +1,7 @@
 import type { LoadBalancerTarget, LoadBalancerParams } from '../types.js';
 
 /**
- * 权重算法
+ * Weighted algorithm
  */
 export default function weights(
   tasks: LoadBalancerTarget[],

@@ -1,104 +1,105 @@
 /**
  * @module utils/type_check
- * @description 运行时类型检查工具。提供一组类型守卫（Type Guard）函数，
- * 用于在运行时判断值的类型，配合 TypeScript 的类型窄化使用。
+ * @description Runtime type checking utility. Provides a set of Type Guard functions
+ * for determining value types at runtime, used with TypeScript's type narrowing.
  *
- * 与 utils/is.ts 的区别：is.ts 检测 Electron 运行环境（进程类型、操作系统），
- * 本模块检测 JavaScript 值的类型（函数、类、对象等）。
+ * Difference from utils/is.ts: is.ts detects Electron runtime environment (process type, OS),
+ * while this module detects JavaScript value types (functions, classes, objects, etc.).
  */
 
 /**
- * 判断值是否为函数
+ * Determine if a value is a function
  *
- * 涵盖普通函数、箭头函数、类构造函数、async 函数等所有可调用类型。
+ * Covers all callable types including regular functions, arrow functions, class constructors, and async functions.
  *
- * @param val - 待检查的值
- * @returns true 表示值是函数类型，同时 TypeScript 会将 val 窄化为函数类型
+ * @param val - Value to check
+ * @returns true if the value is a function type, TypeScript will also narrow val to function type
  */
 export function isFunction(val: unknown): val is (...args: unknown[]) => unknown {
   return typeof val === 'function';
 }
 
 /**
- * 判断值是否为 ES6 类（class）
+ * Determine if a value is an ES6 class
  *
- * 通过检查函数的 toString() 输出是否以 'class' 关键字开头来区分类和普通函数。
- * 注意：通过 function 声明的构造函数不会被识别为类。
+ * Distinguishes classes from regular functions by checking if the function's toString() output
+ * starts with the 'class' keyword.
+ * Note: constructor functions declared with function are not recognized as classes.
  *
- * @param val - 待检查的值
- * @returns true 表示值是 class 声明的类
+ * @param val - Value to check
+ * @returns true if the value is a class declared with class
  */
 export function isClass(val: unknown): val is new (...args: unknown[]) => unknown {
   return typeof val === 'function' && /^\s*class\b/.test(val.toString());
 }
 
 /**
- * 判断值是否为字符串
+ * Determine if a value is a string
  *
- * @param val - 待检查的值
- * @returns true 表示值是 string 类型
+ * @param val - Value to check
+ * @returns true if the value is of type string
  */
 export function isString(val: unknown): val is string {
   return typeof val === 'string';
 }
 
 /**
- * 判断值是否为纯对象
+ * Determine if a value is a plain object
  *
- * 纯对象指通过 {} 或 new Object() 创建的对象。
- * 排除 null、数组和类实例。
+ * A plain object is one created via {} or new Object().
+ * Excludes null, arrays, and class instances.
  *
- * @param val - 待检查的值
- * @returns true 表示值是非 null、非数组的普通对象
+ * @param val - Value to check
+ * @returns true if the value is a non-null, non-array ordinary object
  */
 export function isObject(val: unknown): val is Record<string, unknown> {
   return typeof val === 'object' && val !== null && !Array.isArray(val);
 }
 
 /**
- * 判断值是否为数组
+ * Determine if a value is an array
  *
- * @param val - 待检查的值
- * @returns true 表示值是 Array 实例
+ * @param val - Value to check
+ * @returns true if the value is an Array instance
  */
 export function isArray(val: unknown): val is unknown[] {
   return Array.isArray(val);
 }
 
 /**
- * 判断值是否为原始类型
+ * Determine if a value is a primitive type
  *
- * 原始类型包括：null、undefined、string、number、boolean、symbol、bigint。
- * 即非对象且非函数的值。
+ * Primitive types include: null, undefined, string, number, boolean, symbol, bigint.
+ * That is, values that are neither objects nor functions.
  *
- * @param val - 待检查的值
- * @returns true 表示值是原始类型
+ * @param val - Value to check
+ * @returns true if the value is a primitive type
  */
 export function isPrimitive(val: unknown): boolean {
   return val === null || (typeof val !== 'object' && typeof val !== 'function');
 }
 
 /**
- * 判断值是否为生成器函数（function*）
+ * Determine if a value is a generator function (function*)
  *
- * 通过检查函数构造器的名称是否为 'GeneratorFunction' 来判断。
- * 生成器函数使用 function* 声明，返回 Generator 对象。
+ * Determines by checking if the function constructor's name is 'GeneratorFunction'.
+ * Generator functions are declared with function* and return Generator objects.
  *
- * @param val - 待检查的值
- * @returns true 表示值是生成器函数
+ * @param val - Value to check
+ * @returns true if the value is a generator function
  */
 export function isGeneratorFunction(val: unknown): boolean {
   return typeof val === 'function' && val.constructor?.name === 'GeneratorFunction';
 }
 
 /**
- * 判断值是否为异步函数（async function）
+ * Determine if a value is an async function (async function)
  *
- * 通过检查函数构造器的名称是否为 'AsyncFunction' 来判断。
- * 异步函数使用 async 关键字声明，返回 Promise。
+ * Determines by checking if the function constructor's name is 'AsyncFunction'.
+ * Async functions are declared with the async keyword and return Promises.
  *
- * @param val - 待检查的值
- * @returns true 表示值是异步函数
+ * @param val - Value to check
+ * @returns true if the value is an async function
  */
 export function isAsyncFunction(val: unknown): boolean {
   return typeof val === 'function' && val.constructor?.name === 'AsyncFunction';

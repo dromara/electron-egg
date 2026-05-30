@@ -1,17 +1,17 @@
 /**
  * @module utils
- * @description 工具模块入口。统一导出所有子模块的公共 API，供框架其他模块
- * 和业务代码通过 `import { xxx } from 'ee-core/utils'` 引用。
+ * @description Utility module entry point. Uniformly exports all sub-module public APIs for
+ * other framework modules and business code to reference via `import { xxx } from 'ee-core/utils'`.
  *
- * 导出来源：
- * - extend：对象深度合并
- * - is：Electron 运行环境检测（进程类型、操作系统、架构）
- * - json：JSON 文件同步/异步读写
- * - pargv：命令行参数解析
- * - wrap：文件路径到属性路径转换
- * - helper：通用工具函数（防抖、休眠、版本比较等）
- * - port：TCP 端口分配
- * - ip：公网 IP 查询
+ * Export sources:
+ * - extend: object deep merge
+ * - is: Electron runtime environment detection (process type, OS, architecture)
+ * - json: JSON file synchronous/asynchronous read/write
+ * - pargv: command line argument parsing
+ * - wrap: file path to property path conversion
+ * - helper: common utility functions (debounce, sleep, version comparison, etc.)
+ * - port: TCP port allocation
+ * - ip: public IP query
  */
 export * from './extend.js';
 export * from './is.js';
@@ -33,21 +33,21 @@ import * as is from './is.js';
 
 const { platform } = process;
 
-/** Windows 注册表二进制路径（区分 32 位和 64 位架构） */
+/** Windows registry binary paths (distinguishing 32-bit and 64-bit architectures) */
 const win32RegBinPath: Record<string, string> = {
-  /** 原生架构（64 位系统上的 64 位 Node） */
+  /** Native architecture (64-bit Node on 64-bit system) */
   native: '%windir%\\System32',
-  /** 混合架构（64 位系统上的 32 位 Node，需通过 sysnative 重定向） */
+  /** Mixed architecture (32-bit Node on 64-bit system, needs sysnative redirect) */
   mixed: '%windir%\\sysnative\\cmd.exe /c %windir%\\System32',
 };
 
 /**
- * 各平台获取机器唯一标识的命令
+ * Commands to get machine unique identifiers per platform
  *
- * - macOS：通过 ioreg 读取 IOPlatformUUID
- * - Windows：通过注册表读取 MachineGuid
- * - Linux：读取 /var/lib/dbus/machine-id 或 /etc/machine-id
- * - FreeBSD：通过 kenv 或 sysctl 读取 UUID
+ * - macOS: reads IOPlatformUUID via ioreg
+ * - Windows: reads MachineGuid from registry
+ * - Linux: reads /var/lib/dbus/machine-id or /etc/machine-id
+ * - FreeBSD: reads UUID via kenv or sysctl
  */
 const MachineGuid: Record<string, string> = {
   darwin: 'ioreg -rd1 -c IOPlatformExpertDevice',
@@ -59,12 +59,12 @@ const MachineGuid: Record<string, string> = {
 };
 
 /**
- * 获取项目根目录的 package.json 内容
+ * Get package.json content from the project root directory
  *
- * 读取项目根目录下 package.json 文件并解析为对象，
- * 用于获取应用名称、版本号等元信息。
+ * Reads and parses the package.json file in the project root directory,
+ * used to obtain application name, version number, and other metadata.
  *
- * @returns package.json 解析后的对象
+ * @returns Parsed package.json object
  */
 export function getPackage(): unknown {
   const json = readSync(path.join(getBaseDir(), 'package.json'));
@@ -72,20 +72,20 @@ export function getPackage(): unknown {
 }
 
 /**
- * 获取第一个有效的 MAC 地址
+ * Get the first valid MAC address
  *
- * 遍历本机网络接口，返回第一个非零 MAC 地址。
- * 零值 MAC（00:00:00:00:00:00）通常表示虚拟接口，会被跳过。
+ * Traverses local network interfaces, returns the first non-zero MAC address.
+ * Zero MAC addresses (00:00:00:00:00:00) typically indicate virtual interfaces and are skipped.
  *
- * @param iface - 指定网络接口名称，不传则遍历所有接口
- * @returns 第一个有效的 MAC 地址字符串
- * @throws Error - 指定接口不存在、无有效 MAC 或全局无有效 MAC 时抛出
+ * @param iface - Specify network interface name; if omitted, all interfaces are traversed
+ * @returns First valid MAC address string
+ * @throws Error - Throws when specified interface doesn't exist, has no valid MAC, or no valid MAC globally
  */
 export function getMAC(iface?: string): string {
   const zeroRegex = /(?:[0]{1,2}[:-]){5}[0]{1,2}/;
   const list = os.networkInterfaces();
   if (iface) {
-    // 在指定接口中查找
+    // Search in the specified interface
     const parts = list[iface];
     if (!parts) {
       throw new Error(`interface ${iface} was not found`);
@@ -97,7 +97,7 @@ export function getMAC(iface?: string): string {
     }
     throw new Error(`interface ${iface} had no valid mac addresses`);
   } else {
-    // 遍历所有接口查找第一个有效 MAC
+    // Traverse all interfaces to find the first valid MAC
     for (const [, parts] of Object.entries(list)) {
       if (!parts) continue;
       for (const part of parts) {
@@ -111,13 +111,13 @@ export function getMAC(iface?: string): string {
 }
 
 /**
- * 检查输入是否为有效的 MAC 地址格式
+ * Check if input is a valid MAC address format
  *
- * MAC 地址格式：XX:XX:XX:XX:XX:XX 或 XX-XX-XX-XX-XX-XX，
- * 每段 1-2 位十六进制字符。
+ * MAC address format: XX:XX:XX:XX:XX:XX or XX-XX-XX-XX-XX-XX,
+ * each segment 1-2 hexadecimal characters.
  *
- * @param macAddress - 待检查的字符串
- * @returns true 表示符合 MAC 地址格式
+ * @param macAddress - String to check
+ * @returns true if it matches MAC address format
  */
 export function isMAC(macAddress: string): boolean {
   const macRegex = /(?:[a-z0-9]{1,2}[:-]){5}[a-z0-9]{1,2}/i;
@@ -125,33 +125,33 @@ export function isMAC(macAddress: string): boolean {
 }
 
 /**
- * 检查协议是否为文件协议
+ * Check if protocol is a file protocol
  *
- * @param protocol - 协议字符串
- * @returns true 表示是 file:// 协议
+ * @param protocol - Protocol string
+ * @returns true if it is file:// protocol
  */
 export function isFileProtocol(protocol: string): boolean {
   return protocol === 'file://';
 }
 
 /**
- * 检查协议是否为 Web 协议（http 或 https）
+ * Check if protocol is a web protocol (http or https)
  *
- * @param protocol - 协议字符串
- * @returns true 表示是 http:// 或 https:// 协议
+ * @param protocol - Protocol string
+ * @returns true if it is http:// or https:// protocol
  */
 export function isWebProtocol(protocol: string): boolean {
   return ['http://', 'https://'].includes(protocol);
 }
 
 /**
- * 检查项目是否为 JavaScript 项目（非 TypeScript）
+ * Check if the project is a JavaScript project (not TypeScript)
  *
- * 通过检查入口文件 main.js 或 index.js 是否存在来判断。
- * TypeScript 项目使用 main.ts 作为入口。
+ * Determines by checking if the entry file main.js or index.js exists.
+ * TypeScript projects use main.ts as the entry point.
  *
- * @param baseDir - 项目根目录
- * @returns true 表示是 JS 项目
+ * @param baseDir - Project root directory
+ * @returns true if it is a JS project
  */
 export function isJsProject(baseDir: string): boolean {
   const entryFile1 = path.join(baseDir, 'electron', 'main.js');
@@ -160,14 +160,14 @@ export function isJsProject(baseDir: string): boolean {
 }
 
 /**
- * 同步获取机器唯一标识（哈希值）
+ * Synchronously get machine unique identifier (hash value)
  *
- * 通过执行平台特定的命令获取机器标识，默认返回 SHA-256 哈希值。
- * 设置 original 为 true 可返回原始值。
+ * Obtains machine identifier by executing platform-specific commands, returns SHA-256 hash by default.
+ * Set original to true to return the raw value.
  *
- * @param original - 是否返回原始值而非哈希值，默认 false
- * @returns 机器唯一标识字符串
- * @throws Error - 不支持的操作系统平台
+ * @param original - Whether to return the original value instead of hash, default false
+ * @returns Machine unique identifier string
+ * @throws Error - Unsupported OS platform
  */
 export function machineIdSync(original = false): string {
   const cmd = MachineGuid[platform];
@@ -179,14 +179,14 @@ export function machineIdSync(original = false): string {
 }
 
 /**
- * 异步获取机器唯一标识（哈希值）
+ * Asynchronously get machine unique identifier (hash value)
  *
- * 通过异步执行平台特定的命令获取机器标识，默认返回 SHA-256 哈希值。
- * 适用于不希望阻塞事件循环的场景。
+ * Obtains machine identifier by asynchronously executing platform-specific commands, returns SHA-256 hash by default.
+ * Suitable for scenarios where blocking the event loop is undesirable.
  *
- * @param original - 是否返回原始值而非哈希值，默认 false
- * @returns 机器唯一标识字符串的 Promise
- * @throws Error - 不支持的操作系统平台或命令执行失败
+ * @param original - Whether to return the original value instead of hash, default false
+ * @returns Promise of machine unique identifier string
+ * @throws Error - Unsupported OS platform or command execution failure
  */
 export function machineId(original = false): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -205,13 +205,13 @@ export function machineId(original = false): Promise<string> {
 }
 
 /**
- * 获取平台标识字符串
+ * Get platform identifier string
  *
- * 返回当前操作系统和架构的组合标识，用于构建产物命名和平台判断。
+ * Returns a combined identifier of current OS and architecture, used for build artifact naming and platform detection.
  *
- * @param delimiter - 分隔符，默认 '_'
- * @param isDiffArch - 是否区分架构位数（仅 Windows 有效），默认 false
- * @returns 平台标识（如 'windows_64'、'macos_apple'、'linux'）
+ * @param delimiter - Separator, default '_'
+ * @param isDiffArch - Whether to distinguish architecture bitness (only effective on Windows), default false
+ * @returns Platform identifier (e.g. 'windows_64', 'macos_apple', 'linux')
  */
 export function getPlatform(delimiter = '_', isDiffArch = false): string {
   if (process.platform === 'win32') {
@@ -222,7 +222,7 @@ export function getPlatform(delimiter = '_', isDiffArch = false): string {
     return os;
   }
   if (process.platform === 'darwin') {
-    // macOS 区分 Intel (x64) 和 Apple Silicon (arm64)
+    // macOS distinguishes Intel (x64) and Apple Silicon (arm64)
     const core = process.arch === 'arm64' ? 'apple' : 'intel';
     return 'macos' + delimiter + core;
   }
@@ -230,19 +230,19 @@ export function getPlatform(delimiter = '_', isDiffArch = false): string {
 }
 
 /**
- * 检测 Windows 下 Node.js 进程架构是否为混合模式
+ * Detect if Node.js process architecture is mixed mode on Windows
  *
- * 在 64 位 Windows 上运行 32 位 Node.js 时为 'mixed'，
- * 其他情况为 'native'。
- * 用于确定访问注册表的正确系统路径。
+ * Returns 'mixed' when running 32-bit Node.js on 64-bit Windows,
+ * 'native' otherwise.
+ * Used to determine the correct system path for registry access.
  *
- * @returns 'mixed'（32 位 Node on 64 位 Windows）或 'native'
+ * @returns 'mixed' (32-bit Node on 64-bit Windows) or 'native'
  */
 function _isWindowsProcessMixedOrNativeArchitecture(): string {
   if (process.platform !== 'win32') {
     return '';
   }
-  // 32 位 Node 在 64 位 Windows 上运行时，环境变量中存在 PROCESSOR_ARCHITEW6432
+  // When 32-bit Node runs on 64-bit Windows, PROCESSOR_ARCHITEW6432 exists in environment variables
   if (process.arch === 'ia32' && process.env.hasOwnProperty('PROCESSOR_ARCHITEW6432')) {
     return 'mixed';
   }
@@ -250,30 +250,31 @@ function _isWindowsProcessMixedOrNativeArchitecture(): string {
 }
 
 /**
- * 对机器标识进行 SHA-256 哈希
+ * SHA-256 hash the machine identifier
  *
- * 将原始标识哈希后返回，避免暴露真实机器信息。
+ * Hashes the original identifier before returning, to avoid exposing real machine information.
  *
- * @param guid - 原始机器标识字符串
- * @returns SHA-256 哈希后的十六进制字符串
+ * @param guid - Original machine identifier string
+ * @returns SHA-256 hashed hexadecimal string
  */
 function _hash(guid: string): string {
   return createHash('sha256').update(guid).digest('hex');
 }
 
 /**
- * 从命令输出中提取机器标识
+ * Extract machine identifier from command output
  *
- * 各平台命令输出格式不同，此函数负责解析并提取纯标识值。
+ * Command output format varies by platform; this function is responsible for parsing and
+ * extracting the pure identifier value.
  *
- * @param result - 命令执行输出字符串
- * @returns 清理后的机器标识字符串
- * @throws Error - 不支持的平台
+ * @param result - Command execution output string
+ * @returns Cleaned machine identifier string
+ * @throws Error - Unsupported platform
  */
 function _expose(result: string): string {
   switch (platform) {
     case 'darwin': {
-      // ioreg 输出中 IOPlatformUUID 后面跟的是 UUID 值
+      // In ioreg output, IOPlatformUUID is followed by the UUID value
       const parts = result.split('IOPlatformUUID');
       const part = parts[1];
       if (!part) return '';
@@ -283,7 +284,7 @@ function _expose(result: string): string {
       return line.replace(/\=|\s+|"/gi, '').toLowerCase();
     }
     case 'win32': {
-      // REG QUERY 输出中 REG_SZ 后面跟的是值
+      // In REG QUERY output, REG_SZ is followed by the value
       const parts = result.toString().split('REG_SZ');
       const part = parts[1];
       if (!part) return '';
@@ -298,5 +299,5 @@ function _expose(result: string): string {
   }
 }
 
-/** 导出 is 模块的所有环境检测函数，供外部直接使用 */
+/** Export all environment detection functions from the is module for external use */
 export { is };

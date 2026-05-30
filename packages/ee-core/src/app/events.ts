@@ -1,52 +1,53 @@
 /**
  * @module app/events
- * @description 事件总线模块，提供框架内的生命周期事件和自定义事件机制。
+ * @description Event bus module, providing lifecycle events and custom event mechanisms within the framework.
  *
- * 两种事件类型：
- * - 生命周期事件（lifecycleEvents）：框架核心节点触发，如 ready、electron-app-ready、window-ready
- * - 自定义事件（eventsMap）：业务代码通过 on/emit 自由使用
+ * Two event types:
+ * - Lifecycle events (lifecycleEvents): Triggered at framework core milestones, e.g. ready, electron-app-ready, window-ready
+ * - Custom events (eventsMap): Freely used by business code via on/emit
  *
- * 事件处理器支持同步和异步函数，异步错误会被捕获并记录日志，不会导致进程崩溃。
+ * Event handlers support both synchronous and asynchronous functions. Async errors are caught and logged
+ * without causing the process to crash.
  */
 import { coreLogger } from '../log/index.js';
 
-/** 生命周期：框架基础功能加载完成（控制器、通信服务已就绪） */
+/** Lifecycle: Framework foundational features loaded (controllers, communication services ready) */
 export const Ready = 'ready';
-/** 生命周期：Electron app.whenReady() 完成 */
+/** Lifecycle: Electron app.whenReady() completed */
 export const ElectronAppReady = 'electron-app-ready';
-/** 生命周期：主窗口创建完成 */
+/** Lifecycle: Main window created */
 export const WindowReady = 'window-ready';
-/** 生命周期：窗口关闭前，可用于执行清理操作 */
+/** Lifecycle: Before window closes, can be used for cleanup operations */
 export const BeforeClose = 'before-close';
-/** 生命周期：预加载脚本注入时机 */
+/** Lifecycle: Preload script injection timing */
 export const Preload = 'preload';
 
 type EventHandler = (...args: unknown[]) => unknown;
 
 /**
- * EventBus 事件总线
+ * EventBus — Event bus
  *
- * 设计要点：
- * - 生命周期事件与自定义事件分离存储，避免命名冲突
- * - register() 注册生命周期事件，on() 注册自定义事件
- * - 重复注册同一事件名会覆盖并输出警告（而非静默忽略）
- * - emit 系列方法内置 try/catch，保证单个处理器异常不影响其他逻辑
- * - 异步处理器返回的 Promise 会被自动捕获错误
+ * Design highlights:
+ * - Lifecycle events and custom events are stored separately to avoid naming conflicts
+ * - register() registers lifecycle events, on() registers custom events
+ * - Re-registering the same event name overwrites the previous handler and outputs a warning (rather than silently ignoring)
+ * - emit methods have built-in try/catch, ensuring a single handler exception does not affect other logic
+ * - Promises returned by async handlers have errors automatically caught
  */
 export class EventBus {
-  /** 生命周期事件处理器映射 */
+  /** Lifecycle event handler mapping */
   private lifecycleEvents: Record<string, EventHandler> = {};
-  /** 自定义事件处理器映射 */
+  /** Custom event handler mapping */
   private eventsMap: Record<string, EventHandler> = {};
 
   /**
-   * 注册生命周期事件处理器
+   * Register a lifecycle event handler
    *
-   * 生命周期事件由框架内部触发，业务代码通过此方法注册钩子。
-   * 若事件名已注册，会覆盖旧处理器并输出警告。
+   * Lifecycle events are triggered internally by the framework; business code registers hooks via this method.
+   * If the event name is already registered, the old handler is overwritten and a warning is logged.
    *
-   * @param eventName - 生命周期事件名（Ready / ElectronAppReady / WindowReady / BeforeClose / Preload）
-   * @param handler - 事件处理函数，支持同步或异步
+   * @param eventName - Lifecycle event name (Ready / ElectronAppReady / WindowReady / BeforeClose / Preload)
+   * @param handler - Event handler function, supports sync or async
    */
   register(eventName: string, handler: EventHandler): void {
     if (this.lifecycleEvents[eventName]) {
@@ -56,19 +57,19 @@ export class EventBus {
   }
 
   /**
-   * 触发生命周期事件
+   * Emit a lifecycle event
    *
-   * 调用对应的事件处理器，自动捕获同步异常和异步 rejection。
+   * Invokes the corresponding event handler, automatically catching synchronous exceptions and async rejections.
    *
-   * @param eventName - 生命周期事件名
-   * @param args - 传递给处理器的参数
+   * @param eventName - Lifecycle event name
+   * @param args - Arguments passed to the handler
    */
   emitLifecycle(eventName: string, ...args: unknown[]): void {
     const eventFn = this.lifecycleEvents[eventName];
     if (eventFn) {
       try {
         const result = eventFn(...args);
-        // 异步处理器：捕获 rejection 防止 UnhandledPromiseRejection
+        // Async handler: catch rejection to prevent UnhandledPromiseRejection
         if (result instanceof Promise) {
           result.catch((err: unknown) => {
             coreLogger.error(`[EventBus] Async lifecycle handler '${eventName}' error:`, err);
@@ -81,13 +82,13 @@ export class EventBus {
   }
 
   /**
-   * 注册自定义事件处理器
+   * Register a custom event handler
    *
-   * 业务代码可通过此方法注册自定义事件，由业务代码自行触发。
-   * 若事件名已注册，会覆盖旧处理器并输出警告。
+   * Business code can register custom events via this method, triggered by business code itself.
+   * If the event name is already registered, the old handler is overwritten and a warning is logged.
    *
-   * @param eventName - 自定义事件名
-   * @param handler - 事件处理函数，支持同步或异步
+   * @param eventName - Custom event name
+   * @param handler - Event handler function, supports sync or async
    */
   on(eventName: string, handler: EventHandler): void {
     if (this.eventsMap[eventName]) {
@@ -97,12 +98,12 @@ export class EventBus {
   }
 
   /**
-   * 触发自定义事件
+   * Emit a custom event
    *
-   * 调用对应的事件处理器，自动捕获同步异常和异步 rejection。
+   * Invokes the corresponding event handler, automatically catching synchronous exceptions and async rejections.
    *
-   * @param eventName - 自定义事件名
-   * @param args - 传递给处理器的参数
+   * @param eventName - Custom event name
+   * @param args - Arguments passed to the handler
    */
   emit(eventName: string, ...args: unknown[]): void {
     const eventFn = this.eventsMap[eventName];
@@ -121,5 +122,5 @@ export class EventBus {
   }
 }
 
-/** 事件总线单例，全局共享 */
+/** Event bus singleton, globally shared */
 export const eventBus = new EventBus();

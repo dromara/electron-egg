@@ -1,27 +1,27 @@
 /**
  * @module html
- * @description HTML 静态资源路径工具模块。提供获取 public 目录下
- * HTML 文件绝对路径的能力，供 BrowserWindow 加载本地页面时使用。
+ * @description HTML static resource path utility module. Provides the ability to get absolute paths
+ * of HTML files under the public directory, for use by BrowserWindow when loading local pages.
  *
- * 该模块需要兼容 CJS 和 ESM 两种模块格式：
- * - CJS 环境下可直接使用 __dirname 获取当前文件所在目录
- * - ESM 环境下 __dirname 不可用，回退到 process.cwd()
+ * This module needs to be compatible with both CJS and ESM module formats:
+ * - In CJS environment, __dirname can be used directly to get the current file's directory
+ * - In ESM environment, __dirname is not available, falls back to process.cwd()
  *
- * 注意：ESM 下的回退策略是尽力而为的（best-effort），因为 ESM 中
- * 无法在不引入额外 API（如 import.meta.url + fileURLToPath）的情况下
- * 可靠地获取 __dirname。此模块选择回退到 cwd 作为折中方案，
- * 在打包后的生产环境中通常能满足需求。
+ * Note: The ESM fallback strategy is best-effort, because in ESM it is not possible
+ * to reliably obtain __dirname without introducing additional APIs (such as import.meta.url + fileURLToPath).
+ * This module chooses to fall back to cwd as a compromise, which typically works in
+ * packaged production environments.
  */
 import path from 'path';
 
 /**
- * 获取当前模块所在目录
+ * Get the directory of the current module
  *
- * 兼容双模块格式（CJS + ESM）的目录获取方法：
- * - CJS：使用内置的 __dirname 变量
- * - ESM：回退到当前工作目录（process.cwd() 的简写）
+ * Directory retrieval method compatible with dual module formats (CJS + ESM):
+ * - CJS: Uses the built-in __dirname variable
+ * - ESM: Falls back to the current working directory (shorthand for process.cwd())
  *
- * @returns 当前目录的绝对路径
+ * @returns Absolute path of the current directory
  */
 function getCurrentDir(): string {
   // In CJS, __dirname is available
@@ -31,23 +31,23 @@ function getCurrentDir(): string {
 }
 
 /**
- * 获取 HTML 文件的绝对路径
+ * Get the absolute path of an HTML file
  *
- * 根据传入的文件名，拼接当前目录生成完整的文件路径。
- * 通常用于 BrowserWindow 的 loadFile() 方法加载本地 HTML 页面。
+ * Joins the current directory with the provided filename to generate the full file path.
+ * Typically used with BrowserWindow's loadFile() method to load local HTML pages.
  *
- * 使用示例：
+ * Usage examples:
  * ```ts
- * // 获取 public 目录下的 index.html 路径
+ * // Get the path of index.html in the public directory
  * const htmlPath = getHtmlFilepath('index.html');
- * // 例如返回：/path/to/app/public/electron/index.html
+ * // e.g. returns: /path/to/app/public/electron/index.html
  *
- * // 获取子目录下的页面
+ * // Get a page in a subdirectory
  * const subPath = getHtmlFilepath('sub/page.html');
  * ```
  *
- * @param name - HTML 文件名或相对路径（相对于当前模块目录）
- * @returns HTML 文件的绝对路径
+ * @param name - HTML filename or relative path (relative to the current module directory)
+ * @returns Absolute path of the HTML file
  */
 export function getHtmlFilepath(name: string): string {
   return path.join(getCurrentDir(), name);

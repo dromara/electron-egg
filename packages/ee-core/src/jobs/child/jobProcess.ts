@@ -1,13 +1,13 @@
 /**
  * @module jobs/child/jobProcess
- * @description 子进程管理器。封装 child_process.fork() 的创建和通信逻辑，
- * 为主进程提供创建子进程、发送消息、终止进程的能力。
+ * @description Child process manager. Encapsulates child_process.fork() creation and communication logic,
+ * providing the main process with the ability to create child processes, send messages, and terminate processes.
  *
- * 通信机制：
- * - 主进程通过 child.send() 发送 JobMessage 到子进程
- * - 子进程通过 process.send() 发送 ProcessMessage 到主进程
- * - 消息按 channel 分类：showException（异常）、sendToMain（业务消息）
- * - 消息按 eventReceiver 分发：childJob（全局）、forkProcess（进程内）、all（两者都发）
+ * Communication mechanism:
+ * - Main process sends JobMessage to child process via child.send()
+ * - Child process sends ProcessMessage to main process via process.send()
+ * - Messages are categorized by channel: showException (exception), sendToMain (business message)
+ * - Messages are dispatched by eventReceiver: childJob (global), forkProcess (per-process), all (both)
  */
 import path from 'path';
 import { EventEmitter } from 'events';
@@ -21,68 +21,68 @@ import { getFullpath } from '../../loader/index.js';
 import { extend } from '../../utils/extend.js';
 import type { JobsConfig, MessageData, ProcessExitEventData } from '../../types/index.js';
 
-/** 创建 JobProcess 时的选项 */
+/** Options when creating a JobProcess */
 export interface JobProcessOptions {
-  /** 传递给子进程的参数对象 */
+  /** Arguments object passed to the child process */
   processArgs?: Record<string, unknown>;
-  /** fork 选项（cwd、env、stdio 等） */
+  /** Fork options (cwd, env, stdio, etc.) */
   processOptions?: ForkOptions;
 }
 
-/** 主进程 → 子进程的消息格式 */
+/** Message format: Main process -> Child process */
 export interface JobMessage {
-  /** 消息 ID */
+  /** Message ID */
   mid: string;
-  /** 命令（如 'run'） */
+  /** Command (e.g. 'run') */
   cmd: string;
-  /** 任务文件路径 */
+  /** Task file path */
   jobPath?: string;
-  /** 任务构造函数参数 */
+  /** Task constructor arguments */
   jobParams?: unknown[];
-  /** 要调用的实例方法名 */
+  /** Instance method name to call */
   jobFunc?: string;
-  /** 实例方法参数 */
+  /** Instance method arguments */
   jobFuncParams?: unknown[];
 }
 
-/** 子进程 → 主进程的消息格式 */
+/** Message format: Child process -> Main process */
 export interface ProcessMessage extends MessageData {
-  /** 消息接收者类型 */
+  /** Message receiver type */
   eventReceiver: string;
 }
 
 /**
- * JobProcess 子进程管理器
+ * JobProcess - Child process manager
  *
- * 封装了 fork 创建子进程的完整逻辑：
- * 1. 确定 app.js 入口路径（node_modules/ee-core 中的子进程入口）
- * 2. 配置工作目录和环境变量
- * 3. fork 子进程并注册事件监听
- * 4. 提供 dispatch() 和 callFunc() 发送消息
- * 5. 提供 kill() 终止进程
+ * Encapsulates the complete logic of forking a child process:
+ * 1. Determine app.js entry path (child process entry within node_modules/ee-core)
+ * 2. Configure working directory and environment variables
+ * 3. Fork the child process and register event listeners
+ * 4. Provide dispatch() and callFunc() for sending messages
+ * 5. Provide kill() for terminating the process
  */
 export class JobProcess {
-  /** 进程内事件发射器（forkProcess 级别消息） */
+  /** In-process event emitter (forkProcess-level messages) */
   emitter: EventEmitter;
-  /** 宿主事件发射器（ChildJob/ChildPoolJob，childJob 级别消息） */
+  /** Host event emitter (ChildJob/ChildPoolJob, childJob-level messages) */
   host: EventEmitter;
-  /** 传递给子进程的参数数组 */
+  /** Arguments array passed to the child process */
   args: string[];
-  /** 子进程是否处于休眠状态 */
+  /** Whether the child process is in a sleeping state */
   sleeping: boolean;
-  /** child_process.fork() 返回的子进程对象 */
+  /** Child process object returned by child_process.fork() */
   child: ChildProcess;
-  /** 子进程 PID */
+  /** Child process PID */
   pid: number | undefined;
-  /** 任务配置 */
+  /** Task configuration */
   config: JobsConfig;
 
   constructor(host: EventEmitter, opt: JobProcessOptions = {}, config: JobsConfig = { messageLog: false }) {
     let cwd = getBaseDir();
-    // 定位 app.js 入口：ee-core 包内的子进程启动文件
+    // Locate app.js entry: child process startup file within the ee-core package
     const currentFilePath = typeof __filename !== 'undefined' ? __filename : '';
     const appPath = path.join(path.dirname(currentFilePath), 'app.js');
-    // 打包后 cwd 需要在 app.asar 外（子进程需要访问 node_modules）
+    // After packaging, cwd must be outside app.asar (child processes need access to node_modules)
     if (isPackaged()) {
       cwd = path.join(getBaseDir(), '..');
     }
@@ -108,7 +108,7 @@ export class JobProcess {
     this.sleeping = false;
     this.config = config;
 
-    // 将参数序列化后传递给子进程
+    // Serialize arguments and pass them to the child process
     this.args.push(JSON.stringify(options.processArgs));
 
     this.child = fork(appPath, this.args, options.processOptions ?? {});
@@ -117,12 +117,12 @@ export class JobProcess {
   }
 
   /**
-   * 初始化子进程事件监听
+   * Initialize child process event listeners
    *
-   * 监听三种事件：
-   * - message：处理子进程发来的消息（异常展示、业务消息转发）
-   * - exit：子进程退出，通知宿主清理
-   * - error：子进程错误，通知宿主清理
+   * Listens for three types of events:
+   * - message: Process messages from the child process (exception display, business message forwarding)
+   * - exit: Child process exited, notify host to clean up
+   * - error: Child process error, notify host to clean up
    */
   _init(): void {
     const { messageLog } = this.config;
@@ -131,12 +131,12 @@ export class JobProcess {
         coreLogger.info(`[jobs/child] received a message from child-process, message: ${serialize(m)}`);
       }
 
-      // 异常消息：记录到日志
+      // Exception message: log it
       if (m.channel === Processes.showException) {
         coreLogger.error(`${m.data}`);
       }
 
-      // 业务消息：根据 eventReceiver 分发
+      // Business message: dispatch based on eventReceiver
       if (m.channel === Processes.sendToMain) {
         this._eventEmit(m);
       }
@@ -156,11 +156,11 @@ export class JobProcess {
   }
 
   /**
-   * 根据 eventReceiver 分发消息到不同的事件发射器
+   * Dispatch messages to different event emitters based on eventReceiver
    *
-   * - forkProcess：仅发送到进程内 emitter
-   * - childJob：仅发送到宿主 host
-   * - all / 其他：同时发送到两者
+   * - forkProcess: send only to in-process emitter
+   * - childJob: send only to host emitter
+   * - all / others: send to both
    */
   _eventEmit(m: ProcessMessage): void {
     switch (m.eventReceiver) {
@@ -178,11 +178,11 @@ export class JobProcess {
   }
 
   /**
-   * 向子进程发送调度消息
+   * Send a dispatch message to the child process
    *
-   * @param cmd - 命令（如 'run'）
-   * @param jobPath - 任务文件路径
-   * @param params - 任务参数
+   * @param cmd - Command (e.g. 'run')
+   * @param jobPath - Task file path
+   * @param params - Task parameters
    */
   dispatch(cmd: string, jobPath = '', ...params: unknown[]): void {
     const mid = getRandomString();
@@ -197,13 +197,13 @@ export class JobProcess {
   }
 
   /**
-   * 调用子进程中任务实例的指定方法
+   * Call a specified method on the task instance in the child process
    *
-   * 解析任务文件路径后，发送 run 命令指定函数名。
+   * Resolves the task file path, then sends a run command with the specified function name.
    *
-   * @param jobPath - 任务文件路径（相对路径会被解析为绝对路径）
-   * @param funcName - 要调用的方法名
-   * @param params - 方法参数
+   * @param jobPath - Task file path (relative paths are resolved to absolute paths)
+   * @param funcName - Method name to call
+   * @param params - Method arguments
    */
   callFunc(jobPath = '', funcName = '', ...params: unknown[]): void {
     const fullPath = getFullpath(jobPath);
@@ -220,11 +220,11 @@ export class JobProcess {
   }
 
   /**
-   * 终止子进程
+   * Terminate the child process
    *
-   * 先发送 SIGINT 尝试优雅退出，超时后发送 SIGKILL 强制终止。
+   * First sends SIGINT for graceful exit, then sends SIGKILL to force termination after timeout.
    *
-   * @param timeout - 等待优雅退出的超时时间（毫秒）
+   * @param timeout - Timeout in milliseconds to wait for graceful exit
    */
   kill(timeout = 1000): void {
     this.child.kill('SIGINT');

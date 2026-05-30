@@ -1,15 +1,15 @@
 /**
  * @module log/logger
- * @description 日志创建器。基于 pino 日志库创建三个日志实例：
- * - logger：应用日志（ee.log），记录业务代码日志
- * - coreLogger：框架核心日志（ee-core.log），记录框架内部日志
- * - errorLogger：错误日志（ee-error.log），仅记录 error 级别及以上
+ * @description Logger creator. Creates three log instances based on the pino logging library:
+ * - logger: Application log (ee.log), records business code logs
+ * - coreLogger: Framework core log (ee-core.log), records framework internal logs
+ * - errorLogger: Error log (ee-error.log), only records error level and above
  *
- * 特性：
- * - 基于 pino-roll 实现日志文件轮转（按天/按小时）
- * - 开发环境支持 pino-pretty 彩色格式化输出
- * - 支持字段脱敏（redact）、自定义日志级别、自定义序列化器
- * - 安全模式：日志写入失败时不抛异常
+ * Features:
+ * - Log file rotation based on pino-roll (daily/hourly)
+ * - pino-pretty colorized output in development environment
+ * - Supports field redaction (redact), custom log levels, custom serializers
+ * - Safe mode: does not throw exceptions when log write fails
  */
 import pino from 'pino';
 import path from 'path';
@@ -22,45 +22,45 @@ import type { LoggerConfig } from '../types/index.js';
 
 const debugLog = debug('ee-core:log:logger');
 
-/** 三个 pino 日志实例的集合 */
+/** Collection of three pino log instances */
 export interface PinoLoggers {
-  /** 应用日志实例 */
+  /** Application log instance */
   logger: pino.Logger;
-  /** 框架核心日志实例 */
+  /** Framework core log instance */
   coreLogger: pino.Logger;
-  /** 错误日志实例（仅 error 级别及以上） */
+  /** Error log instance (error level and above only) */
   errorLogger: pino.Logger;
 }
 
-/** 日志级别名映射（兼容大小写） */
+/** Log level name mapping (case-insensitive) */
 const LEVEL_MAP: Record<string, string> = {
   DEBUG: 'debug', INFO: 'info', WARN: 'warn',
   ERROR: 'error', FATAL: 'fatal', TRACE: 'trace',
 };
 
 /**
- * 标准化日志级别名称
+ * Normalize log level name
  *
- * 将大写级别名转为小写，不区分大小写输入。
+ * Converts uppercase level names to lowercase, case-insensitive input.
  */
 function normalizeLevel(level: string): string {
   return LEVEL_MAP[level.toUpperCase()] || level.toLowerCase();
 }
 
 /**
- * 构建 pino transport 目标列表
+ * Build pino transport target list
  *
- * 至少包含一个 pino-roll 文件输出目标，
- * 开发环境下额外添加 pino-pretty 终端输出目标。
+ * At minimum includes one pino-roll file output target;
+ * in development environment, additionally adds pino-pretty terminal output target.
  *
- * @param logDir - 日志目录
- * @param logFileBase - 日志文件基本名（不含扩展名）
- * @param logFileExt - 日志文件扩展名
- * @param level - 日志级别
- * @param prettyPrint - 是否启用终端彩色输出
- * @param frequency - 轮转频率（daily/hourly）
- * @param maxSize - 单文件最大大小
- * @param dateFormat - 文件名日期格式
+ * @param logDir - Log directory
+ * @param logFileBase - Log file base name (without extension)
+ * @param logFileExt - Log file extension
+ * @param level - Log level
+ * @param prettyPrint - Whether to enable terminal colorized output
+ * @param frequency - Rotation frequency (daily/hourly)
+ * @param maxSize - Maximum single file size
+ * @param dateFormat - File name date format
  */
 function buildTransportTargets(
   logDir: string,
@@ -74,7 +74,7 @@ function buildTransportTargets(
 ): pino.TransportTargetOptions[] {
   const targets: pino.TransportTargetOptions[] = [];
 
-  // 文件输出目标：使用 pino-roll 实现日志轮转
+  // File output target: uses pino-roll for log rotation
   targets.push({
     target: 'pino-roll',
     level,
@@ -88,7 +88,7 @@ function buildTransportTargets(
     },
   });
 
-  // 开发环境：终端彩色输出
+  // Development environment: terminal colorized output
   if (prettyPrint) {
     targets.push({
       target: 'pino-pretty',
@@ -105,10 +105,10 @@ function buildTransportTargets(
 }
 
 /**
- * 解析日志文件名，分离基本名和扩展名
+ * Parse log file name, separating base name and extension
  *
- * @param fileName - 日志文件名（如 'ee.log'）
- * @returns { base: 基本名, ext: 扩展名 }
+ * @param fileName - Log file name (e.g., 'ee.log')
+ * @returns { base: base name, ext: extension }
  */
 function parseLogFileName(fileName: string): { base: string; ext: string } {
   const ext = path.extname(fileName);
@@ -117,10 +117,10 @@ function parseLogFileName(fileName: string): { base: string; ext: string } {
 }
 
 /**
- * 将配置中的 rotator 值映射为 pino-roll 支持的 frequency
+ * Map the rotator value from config to pino-roll supported frequency
  *
- * @param rotator - 轮转策略配置值
- * @returns 'daily' 或 'hourly'
+ * @param rotator - Rotation strategy config value
+ * @returns 'daily' or 'hourly'
  */
 function mapRotatorToFrequency(rotator: string): string {
   if (rotator === 'day' || rotator === 'daily') return 'daily';
@@ -129,18 +129,18 @@ function mapRotatorToFrequency(rotator: string): string {
 }
 
 /**
- * 创建单个 pino 日志实例
+ * Create a single pino log instance
  *
  * @param opts - pino LoggerOptions
- * @param logDir - 日志目录
- * @param logFileBase - 日志文件基本名
- * @param logFileExt - 日志文件扩展名
- * @param level - 日志级别
- * @param prettyPrint - 是否启用彩色输出
- * @param frequency - 轮转频率
- * @param maxSize - 单文件最大大小
- * @param dateFormat - 文件名日期格式
- * @returns pino Logger 实例
+ * @param logDir - Log directory
+ * @param logFileBase - Log file base name
+ * @param logFileExt - Log file extension
+ * @param level - Log level
+ * @param prettyPrint - Whether to enable colorized output
+ * @param frequency - Rotation frequency
+ * @param maxSize - Maximum single file size
+ * @param dateFormat - File name date format
+ * @returns pino Logger instance
  */
 function createLoggerInstance(
   opts: pino.LoggerOptions,
@@ -159,24 +159,24 @@ function createLoggerInstance(
 }
 
 /**
- * 创建三个日志实例（logger / coreLogger / errorLogger）
+ * Create three log instances (logger / coreLogger / errorLogger)
  *
- * 合并默认配置和用户配置，为每个日志文件创建独立的 pino 实例。
- * errorLogger 的级别固定为 error，其余使用配置中的级别。
+ * Merges default configuration and user configuration, creating independent pino instances for each log file.
+ * errorLogger level is fixed to error; others use the configured level.
  *
- * @param config - 自定义日志配置（可选，覆盖系统配置）
- * @returns 包含三个日志实例的 PinoLoggers 对象
+ * @param config - Custom log configuration (optional, overrides system configuration)
+ * @returns PinoLoggers object containing three log instances
  */
 export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
   const defaults = defaultConfig().logger;
   let loggerConf: LoggerConfig;
 
   if (Object.keys(config).length === 0) {
-    // 无自定义配置：使用系统配置覆盖默认值
+    // No custom configuration: use system configuration to override defaults
     const sysConfig = getConfig();
     loggerConf = extend(true, { ...defaults } as unknown as Record<string, unknown>, sysConfig.logger as unknown as Record<string, unknown>) as unknown as LoggerConfig;
   } else {
-    // 有自定义配置：使用自定义配置覆盖默认值
+    // Has custom configuration: use custom configuration to override defaults
     loggerConf = extend(true, { ...defaults } as unknown as Record<string, unknown>, config as unknown as Record<string, unknown>) as unknown as LoggerConfig;
   }
 
@@ -190,7 +190,7 @@ export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
   const redactCensor = loggerConf.redactCensor || '[Redacted]';
   const name = loggerConf.name || 'ee';
   const timestamp = loggerConf.timestamp ?? true;
-  // 将 maxSize 统一为 pino-roll 支持的字符串格式（如 '10m'）
+  // Unify maxSize to string format supported by pino-roll (e.g., '10m')
   const maxSize = typeof loggerConf.maxSize === 'number'
     ? `${(loggerConf.maxSize as number) / 1024 / 1024}m`
     : (loggerConf.maxSize as string) || '10m';
@@ -202,7 +202,7 @@ export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
   const safe = loggerConf.safe ?? true;
   const enabled = loggerConf.enabled ?? true;
 
-  // 构建 pino 基础配置
+  // Build pino base configuration
   const baseOpts: pino.LoggerOptions = {
     level,
     name,
@@ -221,15 +221,15 @@ export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
     baseOpts.redact = { paths: redact, censor: redactCensor };
   }
 
-  // 解析日志文件名
+  // Parse log file names
   const appParsed = parseLogFileName(appLogName);
   const coreParsed = parseLogFileName(coreLogName);
   const errorParsed = parseLogFileName(errorLogName);
 
-  // 创建三个独立的日志实例
+  // Create three independent log instances
   const loggerInstance = createLoggerInstance(baseOpts, logDir, appParsed.base, appParsed.ext, level, prettyPrint, frequency, maxSize, dateFormat);
   const coreLoggerInstance = createLoggerInstance({ ...baseOpts, name: `${name}-core` }, logDir, coreParsed.base, coreParsed.ext, level, prettyPrint, frequency, maxSize, dateFormat);
-  // errorLogger 固定为 error 级别
+  // errorLogger is fixed to error level
   const errorLoggerInstance = createLoggerInstance({ ...baseOpts, level: 'error', name: `${name}-error` }, logDir, errorParsed.base, errorParsed.ext, 'error', prettyPrint, frequency, maxSize, dateFormat);
 
   debugLog('[create] level: %s, dir: %s, frequency: %s', level, logDir, frequency);

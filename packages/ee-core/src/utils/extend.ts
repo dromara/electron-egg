@@ -1,15 +1,15 @@
 /**
  * @module utils/extend
- * @description 对象深度合并工具。提供 extend() 函数，支持浅合并和深度递归合并，
- * 用于框架配置层的合并（config.default → config.local → config.prod）以及
- * 其他需要合并对象的场景。
+ * @description Object deep merge utility. Provides extend() function supporting shallow merge
+ * and deep recursive merge, used for framework configuration layer merging
+ * (config.default -> config.local -> config.prod) and other object merging scenarios.
  *
- * 深度合并逻辑：
- * - 当 deep=true 且目标属性和源属性都是纯对象时，递归合并而非覆盖
- * - 非 undefined 的源属性会覆盖目标属性（浅合并或非纯对象情况）
- * - 自动跳过 __proto__ 属性，防止原型链污染攻击
- * - 自动跳过 undefined 值，不会将目标属性设为 undefined
- * - 检测自引用（target === val），防止无限递归循环
+ * Deep merge logic:
+ * - When deep=true and both target and source properties are plain objects, recursively merge instead of overwrite
+ * - Non-undefined source properties overwrite target properties (shallow merge or non-plain-object cases)
+ * - Automatically skips __proto__ property, preventing prototype chain pollution attacks
+ * - Automatically skips undefined values, will not set target properties to undefined
+ * - Detects self-references (target === val), preventing infinite recursion loops
  */
 import type { ExtendOptions } from '../types/index.js';
 
@@ -17,18 +17,18 @@ const hasOwn = Object.prototype.hasOwnProperty;
 const toStr = Object.prototype.toString;
 
 /**
- * 判断值是否为纯对象（Plain Object）
+ * Determine if a value is a plain object
  *
- * 纯对象指通过 {}、new Object() 或 Object.create(null) 创建的对象。
- * 排除内置类型实例（Date、RegExp、Buffer 等）和自定义类实例。
+ * A plain object is one created via {}, new Object(), or Object.create(null).
+ * Excludes built-in type instances (Date, RegExp, Buffer, etc.) and custom class instances.
  *
- * 判断依据：
- * 1. toString 返回 '[object Object]'
- * 2. 没有 own constructor 或 constructor.prototype 上有 isPrototypeOf
- * 3. 最后一个可枚举属性是 own 属性（利用 JS 引擎先枚举 own 属性的特性）
+ * Judgment criteria:
+ * 1. toString returns '[object Object]'
+ * 2. No own constructor or constructor.prototype has isPrototypeOf
+ * 3. Last enumerable property is an own property (leveraging JS engine behavior of enumerating own properties first)
  *
- * @param obj - 待检查的值
- * @returns true 表示是纯对象
+ * @param obj - Value to check
+ * @returns true if the value is a plain object
  */
 function isPlainObject(obj: unknown): obj is Record<string, unknown> {
   if (!obj || toStr.call(obj) !== '[object Object]') {
@@ -42,49 +42,49 @@ function isPlainObject(obj: unknown): obj is Record<string, unknown> {
     (plainObj.constructor.prototype as Record<string, unknown>) &&
     hasOwn.call(plainObj.constructor.prototype, 'isPrototypeOf');
 
-  // 若有 constructor 但不是 own 属性，且原型链上没有 isPrototypeOf，
-  // 说明 constructor 来自原型链继承，不是纯对象
+  // If has constructor but it's not an own property, and no isPrototypeOf on the prototype chain,
+  // the constructor comes from prototype chain inheritance, not a plain object
   if (plainObj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) {
     return false;
   }
 
-  // 利用 JS 引擎先枚举 own 属性再枚举继承属性的特性：
-  // 如果最后一个可枚举属性是 own 的，说明所有可枚举属性都是 own 的
+  // Leverage JS engine behavior of enumerating own properties before inherited ones:
+  // If the last enumerable property is own, then all enumerable properties are own
   let key: string | undefined;
   for (key in plainObj) {
-    // 遍历到最后一项
+    // Iterate to the last item
   }
 
   return typeof key === 'undefined' || hasOwn.call(plainObj, key);
 }
 
 /**
- * 合并对象属性
+ * Merge object properties
  *
- * 将多个源对象的属性合并到目标对象上，支持浅合并和深度合并。
- * 是框架配置层合并的核心实现。
+ * Merges properties from multiple source objects into the target object, supporting shallow and deep merge.
+ * This is the core implementation for framework configuration layer merging.
  *
- * 合并规则：
- * - 浅合并（deep=false）：源属性直接覆盖目标属性
- * - 深度合并（deep=true）：纯对象递归合并，非纯对象直接覆盖
- * - 跳过 __proto__ 属性，防止原型链污染
- * - 跳过 undefined 值，不会用 undefined 覆盖已有属性
- * - 检测自引用（target === val），防止无限递归
+ * Merge rules:
+ * - Shallow merge (deep=false): source properties directly overwrite target properties
+ * - Deep merge (deep=true): plain objects are recursively merged, non-plain-objects are directly overwritten
+ * - Skip __proto__ property, preventing prototype chain pollution
+ * - Skip undefined values, will not overwrite existing properties with undefined
+ * - Detect self-references (target === val), preventing infinite recursion
  *
- * @param deep - 是否深度合并，可以是布尔值或包含 deep 属性的对象
- * @param target - 目标对象，合并结果将写入此对象
- * @param sources - 一个或多个源对象，按顺序合并到 target
- * @returns 合并后的目标对象
+ * @param deep - Whether to deep merge, can be a boolean or an object with a deep property
+ * @param target - Target object, merge result will be written to this object
+ * @param sources - One or more source objects, merged into target in order
+ * @returns Merged target object
  *
  * @example
  * ```ts
- * // 浅合并
+ * // Shallow merge
  * extend(false, { a: 1 }, { a: 2, b: 3 }); // { a: 2, b: 3 }
  *
- * // 深度合并
+ * // Deep merge
  * extend(true, { a: { x: 1 } }, { a: { y: 2 } }); // { a: { x: 1, y: 2 } }
  *
- * // 使用选项对象
+ * // Using options object
  * extend({ deep: true }, { a: { x: 1 } }, { a: { y: 2 } }); // { a: { x: 1, y: 2 } }
  * ```
  */
@@ -93,27 +93,27 @@ export function extend(
   target: Record<string, unknown>,
   ...sources: Array<Record<string, unknown> | undefined | null>
 ): Record<string, unknown> {
-  // 解析 deep 参数：布尔值直接使用，对象则取其 deep 属性，默认浅合并
+  // Parse deep parameter: boolean used directly, object takes its deep property, defaults to shallow merge
   const isDeep = typeof deep === 'boolean' ? deep : deep?.deep ?? false;
 
   for (const source of sources) {
-    // 跳过 null 和 undefined 源
+    // Skip null and undefined sources
     if (!source) continue;
 
     for (const key of Object.keys(source)) {
-      // 阻止原型链污染：__proto__ 属性不参与合并
+      // Prevent prototype chain pollution: __proto__ property is not merged
       if (key === '__proto__') continue;
       const val = source[key];
       const src = target[key];
-      // 检测自引用：target 和 val 是同一引用时跳过，防止无限递归
+      // Detect self-reference: skip when target and val are the same reference, preventing infinite recursion
       if (target === val) continue;
-      // 深度合并：当值是纯对象时递归合并而非覆盖
+      // Deep merge: when value is a plain object, recursively merge instead of overwrite
       if (isDeep && val && isPlainObject(val)) {
-        // 若目标对应属性也是纯对象，在原对象上递归合并；否则创建新对象
+        // If target's corresponding property is also a plain object, recursively merge on the original object; otherwise create a new object
         const clone = src && isPlainObject(src) ? src : {};
         target[key] = extend(true, clone as Record<string, unknown>, val as Record<string, unknown>);
       } else if (typeof val !== 'undefined') {
-        // 非 undefined 值直接覆盖；undefined 值不覆盖已有属性
+        // Non-undefined values directly overwrite; undefined values do not overwrite existing properties
         target[key] = val;
       }
     }

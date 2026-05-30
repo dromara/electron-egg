@@ -3,8 +3,8 @@ import { Scheduler } from './scheduler.js';
 import type { LoadBalancerTarget, LoadBalancerParams, LoadBalancerOptions, PidInfo } from './types.js';
 
 /**
- * 负载均衡器
- * @intro 参考electron-re项目，并做了一些改动
+ * Load Balancer
+ * @intro Based on the electron-re project with some modifications
  * @since 1.0.0
  */
 export class LoadBalancer {
@@ -17,9 +17,9 @@ export class LoadBalancer {
   memoParams: Record<string, (...args: unknown[]) => unknown[]>;
 
   /**
-   * @param options - 配置选项
-   * @param options.targets - 负载均衡目标列表 [{id: 1, weight: 1}, {id: 2, weight: 2}]
-   * @param options.algorithm - 算法名称
+   * @param options - Configuration options
+   * @param options.targets - Load balancing target list [{id: 1, weight: 1}, {id: 2, weight: 2}]
+   * @param options.algorithm - Algorithm name
    */
   constructor(options: LoadBalancerOptions) {
     this.targets = options.targets;
@@ -38,7 +38,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 算法参数
+   * Algorithm parameters
    */
   memorizedParams(): Record<string, (...args: unknown[]) => unknown[]> {
     return {
@@ -54,7 +54,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 刷新参数
+   * Refresh parameters
    */
   refreshParams(pidMap: Record<string | number, PidInfo>): void {
     const infos = Object.values(pidMap);
@@ -65,7 +65,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 选举出一个进程
+   * Elect a single process
    */
   pickOne(...params: unknown[]): LoadBalancerTarget | null {
     const memoFn = this.memoParams[this.algorithm];
@@ -79,14 +79,14 @@ export class LoadBalancer {
   }
 
   /**
-   * 选举出多个进程
+   * Elect multiple processes
    */
   pickMulti(count = 1, ...params: unknown[]): (LoadBalancerTarget | null)[] {
     return new Array(count).fill(null).map(() => this.pickOne(...params));
   }
 
   /**
-   * 计算权重
+   * Calculate weights
    */
   calculateWeightIndex(): void {
     this.params.weightTotal = this.targets.reduce((total, cur) => total + (cur.weight || 0), 0);
@@ -96,7 +96,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 计算索引
+   * Calculate index
    */
   calculateIndex(): void {
     if (this.params.currentIndex >= this.targets.length) {
@@ -105,7 +105,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 清除data
+   * Clean data
    */
   clean(id?: string | number): void {
     if (id !== undefined) {
@@ -125,7 +125,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 添加一个进程信息
+   * Add a process entry
    */
   add(task: LoadBalancerTarget): void {
     if (this.targets.find(target => target.id === task.id)) {
@@ -137,7 +137,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 删除一个进程信息
+   * Delete a process entry
    */
   del(target: LoadBalancerTarget): void {
     let found = false;
@@ -160,7 +160,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 擦除
+   * Wipe all data
    */
   wipe(): void {
     this.targets = [];
@@ -169,7 +169,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 更新计算参数
+   * Update calculation parameters
    */
   updateParams(object: Partial<LoadBalancerParams>): void {
     Object.entries(object).forEach(([key, value]) => {
@@ -180,7 +180,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 设置targets
+   * Set targets
    */
   setTargets(targets: LoadBalancerTarget[]): void {
     const targetsMap = targets.reduce<Record<string | number, number>>((total, cur) => {
@@ -198,7 +198,7 @@ export class LoadBalancer {
   }
 
   /**
-   * 设置算法
+   * Set algorithm
    */
   setAlgorithm(algorithm: string): void {
     if (algorithm in AlgorithmType) {

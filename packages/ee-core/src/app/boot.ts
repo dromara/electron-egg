@@ -1,8 +1,9 @@
 /**
  * @module app/boot
- * @description ElectronEgg 框架引导模块。负责初始化运行环境、收集应用配置信息、
- * 设置全局环境变量，并依次加载框架基础功能（异常处理、配置、目录、日志）。
- * 这是整个框架的入口类，由 electron/main.js 创建实例并调用 run() 启动应用。
+ * @description ElectronEgg framework boot module. Responsible for initializing the runtime environment,
+ * collecting application configuration, setting global environment variables, and sequentially
+ * loading framework foundational features (exception handling, configuration, directories, logging).
+ * This is the entry class of the entire framework, instantiated and started via run() from electron/main.js.
  */
 import debug from 'debug';
 import path from 'path';
@@ -18,15 +19,15 @@ import type { ElectronEggOptions } from '../types/index.js';
 const debugLog = debug('ee-core:app:boot');
 
 /**
- * ElectronEgg 框架主类
+ * ElectronEgg framework main class
  *
- * 职责：
- * 1. 收集 Electron 运行环境信息（应用名、版本、路径等）
- * 2. 设置全局环境变量（EE_ENV、EE_BASE_DIR 等）
- * 3. 初始化框架基础功能（异常处理 → 配置 → 目录 → 日志）
- * 4. 提供 register() 注册生命周期钩子，run()/runAsync() 启动应用
+ * Responsibilities:
+ * 1. Collect Electron runtime environment info (app name, version, paths, etc.)
+ * 2. Set global environment variables (EE_ENV, EE_BASE_DIR, etc.)
+ * 3. Initialize framework foundational features (exception handling -> config -> directories -> logging)
+ * 4. Provide register() for lifecycle hooks, run()/runAsync() to start the application
  *
- * 使用方式：
+ * Usage:
  * ```ts
  * const electronEgg = new ElectronEgg();
  * electronEgg.register('ready', () => { ... });
@@ -37,23 +38,23 @@ export class ElectronEgg {
   options: ElectronEggOptions;
 
   /**
-   * 构造函数 — 收集环境信息并初始化框架
+   * Constructor — Collects environment info and initializes the framework
    *
-   * 执行流程：
-   * 1. 获取 Electron 应用路径作为 baseDir
-   * 2. 解析命令行参数：env（环境）和 debugger（调试源码标记）
-   * 3. 根据 debugger 标记决定 electronDir 指向打包目录还是源码目录
-   * 4. 收集应用信息（名称、版本、路径等）构建 options
-   * 5. 生产环境 + 已打包时，execDir 指向可执行文件所在目录
-   * 6. 将关键信息写入 process.env 供其他模块读取
-   * 7. 调用 init() 加载基础功能
+   * Execution flow:
+   * 1. Get Electron app path as baseDir
+   * 2. Parse command-line arguments: env (environment) and debugger (debug source flag)
+   * 3. Based on debugger flag, decide whether electronDir points to bundle output or source directory
+   * 4. Collect application info (name, version, paths, etc.) to build options
+   * 5. In production + packaged mode, execDir points to the executable's directory
+   * 6. Write key info to process.env for other modules to read
+   * 7. Call init() to load foundational features
    */
   constructor() {
     const baseDir = electronApp.getAppPath();
     const environment = getArgumentByName('env') || 'prod';
     const debugging = getArgumentByName('debugger') === 'true';
 
-    // 调试模式下指向源码目录，否则指向打包输出目录
+    // In debug mode, point to source directory; otherwise point to bundle output directory
     let electronDir = getBundleDir(baseDir);
     if (debugging) {
       electronDir = getElectronCodeDir(baseDir);
@@ -72,12 +73,12 @@ export class ElectronEgg {
       execDir: baseDir,
     };
 
-    // 生产环境且已打包时，execDir 为可执行文件所在目录（exe/dmg 同级目录）
+    // In production and packaged mode, execDir is the directory of the executable (same level as exe/dmg)
     if (environment === 'prod' && options.isPackaged) {
       options.execDir = path.dirname(electronApp.getPath('exe'));
     }
 
-    // 将运行环境信息写入全局变量，供配置加载、日志等模块使用
+    // Write runtime environment info to global variables for use by config loading, logging, and other modules
     process.env.EE_ENV = environment;
     process.env.EE_APP_NAME = options.appName;
     process.env.EE_APP_VERSION = options.appVersion;
@@ -97,13 +98,13 @@ export class ElectronEgg {
   }
 
   /**
-   * 初始化框架基础功能
+   * Initialize framework foundational features
    *
-   * 加载顺序（不可调换）：
-   * 1. loadException — 注册全局异常处理，确保后续流程的异常能被捕获
-   * 2. loadConfig — 加载配置文件，后续模块依赖配置
-   * 3. loadDir — 创建数据/日志等必要目录
-   * 4. loadLog — 初始化日志系统，依赖配置和目录
+   * Loading order (must not be changed):
+   * 1. loadException — Register global exception handling to ensure subsequent exceptions are caught
+   * 2. loadConfig — Load configuration files; subsequent modules depend on configuration
+   * 3. loadDir — Create necessary directories for data/logs
+   * 4. loadLog — Initialize logging system; depends on configuration and directories
    */
   init(): void {
     loadException();
@@ -113,29 +114,29 @@ export class ElectronEgg {
   }
 
   /**
-   * 注册生命周期事件处理器
-   * @param eventName - 生命周期事件名（如 'ready'、'electron-app-ready'）
-   * @param handler - 事件处理函数
+   * Register a lifecycle event handler
+   * @param eventName - Lifecycle event name (e.g. 'ready', 'electron-app-ready')
+   * @param handler - Event handler function
    */
   register(eventName: string, handler: (...args: unknown[]) => void): void {
     app.register(eventName, handler);
   }
 
   /**
-   * 同步方式启动应用
+   * Start the application synchronously
    *
-   * 执行流程：loadController → loadSocket → emitLifecycle(ready) → loadElectron
-   * 控制器使用同步 require() 加载，适用于 CJS 项目
+   * Execution flow: loadController -> loadSocket -> emitLifecycle(ready) -> loadElectron
+   * Controllers are loaded using synchronous require(), suitable for CJS projects
    */
   async run(): Promise<void> {
     await app.run();
   }
 
   /**
-   * 异步方式启动应用
+   * Start the application asynchronously
    *
-   * 执行流程：loadControllerAsync → loadSocket → emitLifecycle(ready) → loadElectron
-   * 控制器使用动态 import() 加载，适用于 ESM 项目
+   * Execution flow: loadControllerAsync -> loadSocket -> emitLifecycle(ready) -> loadElectron
+   * Controllers are loaded using dynamic import(), suitable for ESM projects
    */
   async runAsync(): Promise<void> {
     await app.runAsync();

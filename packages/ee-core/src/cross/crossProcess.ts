@@ -1,18 +1,19 @@
 /**
  * @module cross/crossProcess
- * @description 跨进程子进程管理。封装 cross-spawn 创建外部进程的逻辑，
- * 处理进程路径解析、平台差异、生命周期监听和优雅退出。
+ * @description Cross-process child process management. Encapsulates the logic of using cross-spawn
+ * to create external processes, handling process path resolution, platform differences,
+ * lifecycle monitoring, and graceful exit.
  *
- * 支持的外部程序类型：
- * - Go 编译的二进制文件
- * - Python 脚本
- * - 其他可执行程序
+ * Supported external program types:
+ * - Go compiled binaries
+ * - Python scripts
+ * - Other executable programs
  *
- * 进程路径解析规则：
- * - 配置中有 cmd → 使用 cmd 作为可执行文件路径
- * - 配置中无 cmd → 使用 extraResourcesDir/{name} 作为路径
- * - Windows 平台自动补充 .exe 扩展名
- * - 开发环境相对于项目根目录，生产环境相对于 extraResources 目录
+ * Process path resolution rules:
+ * - Config has cmd → use cmd as executable file path
+ * - Config has no cmd → use extraResourcesDir/{name} as path
+ * - Windows platform automatically adds .exe extension
+ * - Dev environment relative to project root, production relative to extraResources directory
  */
 import EventEmitter from 'events';
 import path from 'path';
@@ -29,36 +30,36 @@ import type { CrossTargetConfig } from '../types/index.js';
 
 export type { CrossTargetConfig };
 
-/** 创建 CrossProcess 时的选项 */
+/** Options when creating a CrossProcess */
 export interface CrossProcessOptions {
-  /** 目标服务配置 */
+  /** Target service configuration */
   targetConf: CrossTargetConfig;
-  /** 分配的端口号 */
+  /** Allocated port number */
   port: number;
 }
 
 /**
- * CrossProcess 子进程实例
+ * CrossProcess - child process instance
  *
- * 封装了一个外部进程的完整生命周期：
- * 创建 → 运行 → 监听事件 → 终止
+ * Encapsulates the complete lifecycle of an external process:
+ * Create → Run → Listen for events → Terminate
  *
- * 通过 host 的 emitter 将子进程事件（退出/错误）通知给 Cross 管理器。
+ * Notifies the Cross manager of child process events (exit/error) via the host's emitter.
  */
 export class CrossProcess {
-  /** 事件发射器 */
+  /** Event emitter */
   emitter: EventEmitter;
-  /** 宿主（Cross 管理器），用于通知进程事件 */
+  /** Host (Cross manager), used to notify process events */
   host: CrossHost;
-  /** cross-spawn 返回的子进程对象 */
+  /** Child process object returned by cross-spawn */
   child: ReturnType<typeof crossSpawn> | undefined;
-  /** 子进程 PID */
+  /** Child process PID */
   pid: number;
-  /** 分配的端口号 */
+  /** Allocated port number */
   port: number;
-  /** 服务唯一名称（可能被 Cross 管理器重写以避免冲突） */
+  /** Unique service name (may be rewritten by Cross manager to avoid conflicts) */
   name: string;
-  /** 服务配置 */
+  /** Service configuration */
   config: CrossTargetConfig;
 
   constructor(host: CrossHost, opt: CrossProcessOptions = { targetConf: { name: '' }, port: 0 }) {
@@ -73,28 +74,28 @@ export class CrossProcess {
   }
 
   /**
-   * 初始化子进程
+   * Initialize child process
    *
-   * 执行流程：
-   * 1. 保存配置和端口
-   * 2. 解析可执行文件路径（处理 cmd/directory 配置和平台差异）
-   * 3. 设置标准输出模式（开发环境继承，生产环境忽略）
-   * 4. 使用 cross-spawn 启动子进程
-   * 5. 监听 exit 和 error 事件
+   * Execution flow:
+   * 1. Save configuration and port
+   * 2. Resolve executable file path (handle cmd/directory configuration and platform differences)
+   * 3. Set standard output mode (inherit in dev environment, ignore in production)
+   * 4. Start child process using cross-spawn
+   * 5. Listen for exit and error events
    */
   _init(options: CrossProcessOptions = { targetConf: { name: '' }, port: 0 }): void {
     const { targetConf, port } = options;
     this.config = targetConf;
     this.port = port;
 
-    // 该名称如果在 childrenMap 重复，会被 Cross 管理器重写
+    // This name may be rewritten by the Cross manager if duplicated in childrenMap
     this.name = targetConf.name;
 
-    // 解析可执行文件路径
+    // Resolve executable file path
     let cmdPath = '';
     const cmdArgs = targetConf.args || [];
     let execDir = getExtraResourcesDir();
-    // 标准输出配置：开发环境继承终端输出，生产环境忽略
+    // Standard output configuration: inherit terminal output in dev, ignore in production
     let standardOutput: ('pipe' | 'ignore' | 'inherit' | 'ipc')[] = ['inherit', 'inherit', 'inherit', 'ipc'];
     if (isPackaged()) {
       standardOutput = ['ignore', 'ignore', 'ignore', 'ipc'];
@@ -104,29 +105,29 @@ export class CrossProcess {
     }
 
     const { cmd, directory } = targetConf;
-    // 优先使用 cmd 配置
+    // Prefer cmd configuration
     if (cmd) {
       if (!directory) {
         throw new Error(`[ee-core] [cross] The config [directory] attribute does not exist`);
       }
       cmdPath = cmd;
-      // 非开发环境下，相对路径基于 extraResources 解析
+      // In non-dev environments, relative paths are resolved based on extraResources
       if (!path.isAbsolute(cmd) && !isDev()) {
         cmdPath = path.join(getExtraResourcesDir(), cmd);
       }
     } else {
-      // 无 cmd 时，使用 extraResourcesDir/{name} 作为可执行文件路径
+      // Without cmd, use extraResourcesDir/{name} as the executable file path
       cmdPath = path.join(getExtraResourcesDir(), targetConf.name);
     }
 
-    // Windows 平台自动补充 .exe 扩展名
+    // Windows platform automatically adds .exe extension
     if (is.windows() && path.extname(cmdPath) !== '.exe') {
       if (targetConf.windowsExtname === true || !isDev()) {
         cmdPath += '.exe';
       }
     }
 
-    // 解析工作目录
+    // Resolve working directory
     if (directory && path.isAbsolute(directory)) {
       execDir = directory;
     } else if (directory && !path.isAbsolute(directory)) {
@@ -148,7 +149,7 @@ export class CrossProcess {
     this.child = coreProcess;
     this.pid = coreProcess.pid || 0;
 
-    // 监听子进程退出：外部终止或内部错误导致退出
+    // Listen for child process exit: caused by external termination or internal error
     coreProcess.on('exit', (code: number | null, signal: NodeJS.Signals | null) => {
       const data = { pid: this.pid };
       this.host.emitter?.emit(Events.childProcessExit, data);
@@ -158,7 +159,7 @@ export class CrossProcess {
       this._exitElectron();
     });
 
-    // 监听子进程错误
+    // Listen for child process errors
     coreProcess.on('error', (err: Error) => {
       const data = { pid: this.pid };
       this.host.emitter?.emit(Events.childProcessError, data);
@@ -170,12 +171,12 @@ export class CrossProcess {
   }
 
   /**
-   * 终止子进程
+   * Terminate child process
    *
-   * 先发送 SIGINT 信号尝试优雅退出，失败则发送 SIGKILL 强制终止。
-   * 超时后如果进程仍未退出，触发 _exitElectron 作为安全网。
+   * First sends SIGINT signal for graceful exit, then sends SIGKILL for forced termination if it fails.
+   * If the process still hasn't exited after timeout, triggers _exitElectron as a safety net.
    *
-   * @param timeout - 等待退出的超时时间（毫秒）
+   * @param timeout - Timeout for waiting exit (milliseconds)
    */
   kill(timeout = 1000): void {
     tkill(this.pid, 'SIGINT', (err: Error | undefined) => {
@@ -183,10 +184,10 @@ export class CrossProcess {
         coreLogger.error(
           `[cross/process] kill cross-process, error: ${err}, pid:${this.pid}`
         );
-        // SIGINT 失败，使用 SIGKILL 强制终止
+        // SIGINT failed, use SIGKILL for forced termination
         tkill(this.pid, 'SIGKILL');
       }
-      // 超时安全网：如果 exit 事件未在 timeout 内触发，手动调用 _exitElectron
+      // Timeout safety net: if exit event is not triggered within timeout, manually call _exitElectron
       setTimeout(() => {
         if (this.child && !this.child.killed) {
           this._exitElectron();
@@ -196,12 +197,12 @@ export class CrossProcess {
   }
 
   /**
-   * 获取子进程的服务 URL
+   * Get the service URL of the child process
    *
-   * 从启动参数中解析 hostname 和 ssl 标志，构造 HTTP/HTTPS URL。
-   * 端口为 0 时输出警告（可能服务未正确绑定端口）。
+   * Parses hostname and ssl flag from startup arguments, constructs HTTP/HTTPS URL.
+   * Outputs warning when port is 0 (service may not have bound port correctly).
    *
-   * @returns 服务 URL，如 http://127.0.0.1:7070
+   * @returns Service URL, e.g., http://127.0.0.1:7070
    */
   getUrl(): string {
     if (!this.port) {
@@ -220,9 +221,9 @@ export class CrossProcess {
   }
 
   /**
-   * 获取启动参数的键值对对象
+   * Get key-value object of startup arguments
    *
-   * @returns 解析后的参数对象
+   * @returns Parsed arguments object
    */
   getArgsObj(): Record<string, unknown> {
     const obj = parseArgv(this.config.args || []);
@@ -230,18 +231,18 @@ export class CrossProcess {
   }
 
   /**
-   * 设置端口号
+   * Set port number
    *
-   * @param port - 端口号（字符串会被转为数字）
+   * @param port - Port number (strings will be converted to numbers)
    */
   setPort(port: string | number): void {
     this.port = typeof port === 'string' ? parseInt(port, 10) : port;
   }
 
   /**
-   * 生成唯一 ID
+   * Generate unique ID
    *
-   * @returns 格式为 'node:{pid}:{randomString}' 的唯一标识
+   * @returns Unique identifier in the format 'node:{pid}:{randomString}'
    */
   _generateId(): string {
     const rid = getRandomString();
@@ -249,11 +250,11 @@ export class CrossProcess {
   }
 
   /**
-   * 子进程退出时触发 Electron 主进程退出
+   * Trigger Electron main process exit when child process exits
    *
-   * 仅当配置 appExit=true 时生效，确保子进程崩溃时主进程也随之退出。
+   * Only effective when appExit=true is configured, ensuring the main process also exits when the child process crashes.
    *
-   * @param timeout - 延迟退出时间（毫秒），等待资源释放
+   * @param timeout - Delayed exit time (milliseconds), waiting for resource release
    */
   _exitElectron(timeout = 1000): void {
     if (this.config.appExit) {
@@ -265,10 +266,10 @@ export class CrossProcess {
 }
 
 /**
- * CrossHost 接口
+ * CrossHost interface
  *
- * CrossProcess 通过此接口与宿主（Cross 管理器）通信，
- * 发送子进程的退出和错误事件。
+ * CrossProcess communicates with the host (Cross manager) through this interface,
+ * sending child process exit and error events.
  */
 export interface CrossHost {
   emitter: EventEmitter | undefined;

@@ -4,7 +4,7 @@ import type { AlgorithmFn } from './algorithm/index.js';
 import type { LoadBalancerTarget } from './types.js';
 
 /**
- * 算法调度器
+ * Algorithm scheduler
  */
 export class Scheduler {
   private algorithm: string;
@@ -14,7 +14,7 @@ export class Scheduler {
   }
 
   /**
-   * 计算
+   * Calculate
    */
   calculate(tasks: LoadBalancerTarget[], params: unknown[]): LoadBalancerTarget | null {
     const algo = algorithms[this.algorithm] as AlgorithmFn;
@@ -22,7 +22,7 @@ export class Scheduler {
   }
 
   /**
-   * 设置算法
+   * Set algorithm
    */
   setAlgorithm(algorithm: string): void {
     if (algorithm in AlgorithmType) {

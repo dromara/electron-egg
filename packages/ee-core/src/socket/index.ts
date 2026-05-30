@@ -1,14 +1,14 @@
 /**
  * @module socket
- * @description 通信服务模块入口。提供三种通信方式的创建和管理：
+ * @description Communication service module entry point. Provides creation and management of three communication modes:
  *
- * - SocketServer：SocketIO 服务器，供第三方软件通过 WebSocket 通信
- * - HttpServer：HTTP/HTTPS 服务器，供 RESTful API 调用
- * - IpcServer：Electron IPC 服务器，供渲染进程通过 ipcRenderer 通信
+ * - SocketServer: SocketIO server for third-party software communication via WebSocket
+ * - HttpServer: HTTP/HTTPS server for RESTful API calls
+ * - IpcServer: Electron IPC server for renderer process communication via ipcRenderer
  *
- * 使用方式：
- * - loadSocket()：在框架启动时调用，创建并初始化所有通信服务
- * - getSocketServer() / getHttpServer() / getIpcServer()：获取服务实例
+ * Usage:
+ * - loadSocket(): Called during framework startup to create and initialize all communication services
+ * - getSocketServer() / getHttpServer() / getIpcServer(): Get service instances
  */
 export { SocketServer } from './socketServer.js';
 export { HttpServer } from './httpServer.js';
@@ -23,7 +23,7 @@ import { IpcServer } from './ipcServer.js';
 
 export { Koa, IoServer, IoClient };
 
-/** 服务实例存储 */
+/** Service instance storage */
 const Instance: {
   socketServer: SocketServer | null;
   httpServer: HttpServer | null;
@@ -35,9 +35,9 @@ const Instance: {
 };
 
 /**
- * 创建 SocketIO 服务器
+ * Create SocketIO server
  *
- * @returns SocketServer 实例
+ * @returns SocketServer instance
  */
 export async function createSocketServer(): Promise<SocketServer> {
   Instance.socketServer = await SocketServer.create();
@@ -45,16 +45,16 @@ export async function createSocketServer(): Promise<SocketServer> {
 }
 
 /**
- * 获取 SocketIO 服务器实例
+ * Get SocketIO server instance
  */
 export function getSocketServer(): SocketServer | null {
   return Instance.socketServer;
 }
 
 /**
- * 创建 HTTP 服务器
+ * Create HTTP server
  *
- * @returns HttpServer 实例
+ * @returns HttpServer instance
  */
 export async function createHttpServer(): Promise<HttpServer> {
   Instance.httpServer = await HttpServer.create();
@@ -62,16 +62,16 @@ export async function createHttpServer(): Promise<HttpServer> {
 }
 
 /**
- * 获取 HTTP 服务器实例
+ * Get HTTP server instance
  */
 export function getHttpServer(): HttpServer | null {
   return Instance.httpServer;
 }
 
 /**
- * 创建 IPC 服务器
+ * Create IPC server
  *
- * @returns IpcServer 实例
+ * @returns IpcServer instance
  */
 export function createIpcServer(): IpcServer {
   Instance.ipcServer = new IpcServer();
@@ -79,17 +79,17 @@ export function createIpcServer(): IpcServer {
 }
 
 /**
- * 获取 IPC 服务器实例
+ * Get IPC server instance
  */
 export function getIpcServer(): IpcServer | null {
   return Instance.ipcServer;
 }
 
 /**
- * 加载并初始化所有通信服务
+ * Load and initialize all communication services
  *
- * 按顺序创建：SocketIO → HTTP → IPC
- * 在框架启动流程中由 Application.run() 调用。
+ * Created in order: SocketIO → HTTP → IPC
+ * Called by Application.run() during the framework startup flow.
  */
 export async function loadSocket(): Promise<void> {
   await createSocketServer();

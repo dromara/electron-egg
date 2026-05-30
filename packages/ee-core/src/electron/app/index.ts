@@ -1,12 +1,12 @@
 /**
  * @module electron/app
- * @description Electron 应用生命周期管理。负责创建应用实例、注册系统事件、
- * 管理单实例锁，以及处理窗口关闭和应用退出的清理工作。
+ * @description Electron application lifecycle management. Responsible for creating application instances,
+ * registering system events, managing single instance locks, and handling cleanup on window close and app exit.
  *
- * 生命周期：
- * 1. createElectron() — 检查单实例锁 → app.whenReady() → 创建主窗口 → 加载页面
- * 2. window-all-closed — 非 macOS 平台退出应用
- * 3. before-quit — 清理跨进程服务和子任务
+ * Lifecycle:
+ * 1. createElectron() — Check single instance lock → app.whenReady() → Create main window → Load page
+ * 2. window-all-closed — Quit app on non-macOS platforms
+ * 3. before-quit — Clean up cross-process services and child tasks
  */
 import { app as electronApp } from 'electron';
 import { coreLogger } from '../../log/index.js';
@@ -20,25 +20,25 @@ import { killAllJobs } from '../../jobs/registry.js';
 export { electronApp };
 
 /**
- * 创建并启动 Electron 应用
+ * Create and start Electron application
  *
- * 执行流程：
- * 1. 检查单实例锁（配置 singleLock=true 时，阻止同时运行多个实例）
- * 2. 等待 app.whenReady() 完成
- * 3. 创建主窗口、发射 Preload 事件、加载服务页面、发射 ElectronAppReady 事件
- * 4. 注册系统事件监听：window-all-closed、before-quit
+ * Execution flow:
+ * 1. Check single instance lock (when singleLock=true is configured, prevents running multiple instances simultaneously)
+ * 2. Wait for app.whenReady() to complete
+ * 3. Create main window, emit Preload event, load service page, emit ElectronAppReady event
+ * 4. Register system event listeners: window-all-closed, before-quit
  */
 export function createElectron(): void {
   const { singleLock } = getConfig() as { singleLock: boolean };
-  // 请求单实例锁
+  // Request single instance lock
   const gotTheLock = electronApp.requestSingleInstanceLock();
   if (singleLock && !gotTheLock) {
-    // 已有实例运行，退出当前实例
+    // Another instance is already running, quit current instance
     electronApp.quit();
     return;
   }
 
-  // Electron app 就绪后创建窗口并加载页面
+  // After Electron app is ready, create window and load page
   electronApp.whenReady().then(() => {
     createMainWindow();
     eventBus.emitLifecycle(Preload);
@@ -46,7 +46,7 @@ export function createElectron(): void {
     eventBus.emitLifecycle(ElectronAppReady);
   });
 
-  // 所有窗口关闭时退出应用（macOS 除外，macOS 应用通常保持运行）
+  // Quit app when all windows are closed (except on macOS, where apps typically stay running)
   electronApp.on('window-all-closed', () => {
     if (!is.macOS()) {
       coreLogger.info('[lib/eeApp] window-all-closed quit');
@@ -54,13 +54,13 @@ export function createElectron(): void {
     }
   });
 
-  // 应用退出前清理资源
+  // Clean up resources before app quits
   electronApp.on('before-quit', () => {
     setCloseAndQuit(true);
     eventBus.emitLifecycle(BeforeClose);
-    // 终止所有跨进程服务（Go/Python 后端等）
+    // Terminate all cross-process services (Go/Python backends, etc.)
     cross.killAll();
-    // 终止所有子任务进程
+    // Terminate all child task processes
     killAllJobs();
   });
 }

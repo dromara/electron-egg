@@ -1,16 +1,16 @@
 /**
  * @module jobs/child/app
- * @description 子进程入口应用。运行在 child_process.fork() 创建的子进程中，
- * 负责接收主进程的消息并执行对应的任务文件。
+ * @description Child process entry application. Runs in child processes created by child_process.fork(),
+ * responsible for receiving messages from the main process and executing corresponding task files.
  *
- * 子进程生命周期：
- * 1. 主进程 fork 子进程，加载此模块
- * 2. 子进程监听 message 事件，等待主进程指令
- * 3. 收到 run 命令后加载任务文件并执行
- * 4. 类类型的任务文件：首次执行时实例化并缓存，后续复用同一实例
- * 5. 函数类型的任务文件：每次执行直接调用
+ * Child process lifecycle:
+ * 1. Main process forks a child process and loads this module
+ * 2. Child process listens for message events, waiting for main process instructions
+ * 3. Upon receiving a run command, loads and executes the task file
+ * 4. Class-type task files: instantiated and cached on first execution, reused thereafter
+ * 5. Function-type task files: called directly on each execution
  *
- * 注意：子进程独立于主进程，需单独加载异常处理（loadException）
+ * Note: Child processes are independent from the main process and must load exception handling separately (loadException)
  */
 import { isClass, isFunction } from '../../utils/type_check.js';
 import { loadException } from '../../exception/index.js';
@@ -19,20 +19,20 @@ import { coreLogger } from '../../log/index.js';
 import { isBytecodeClass } from '../../core/utils/index.js';
 import type { JobMessage } from './jobProcess.js';
 
-// 子进程必须独立加载异常处理
+// Child process must independently load exception handling
 loadException();
 
-/** 支持的命令列表 */
+/** Supported command list */
 const commands = ['run'];
 
 /**
- * ChildApp 子进程应用
+ * ChildApp - Child process application
  *
- * 在子进程中运行，接收主进程的 run 命令执行任务文件。
- * 类类型的任务实例会被缓存在 jobMap 中复用。
+ * Runs in the child process, receives run commands from the main process to execute task files.
+ * Class-type task instances are cached in jobMap for reuse.
  */
 class ChildApp {
-  /** 任务实例缓存：{ jobPath: instance }，同一任务文件只实例化一次 */
+  /** Task instance cache: { jobPath: instance }, same task file is instantiated only once */
   jobMap: Map<string, unknown>;
 
   constructor() {
@@ -41,9 +41,9 @@ class ChildApp {
   }
 
   /**
-   * 初始化事件监听
+   * Initialize event listeners
    *
-   * 监听主进程消息和子进程退出事件。
+   * Listen for main process messages and child process exit events.
    */
   _initEvents(): void {
     process.on('message', this._handleMessage.bind(this));
@@ -53,9 +53,9 @@ class ChildApp {
   }
 
   /**
-   * 处理主进程消息
+   * Handle main process messages
    *
-   * 仅处理 commands 列表中的命令，忽略未知命令。
+   * Only processes commands in the commands list, ignoring unknown commands.
    */
   _handleMessage(m: JobMessage): void {
     if (commands.indexOf(m.cmd) === -1) {
@@ -72,15 +72,15 @@ class ChildApp {
   }
 
   /**
-   * 运行任务
+   * Run a task
    *
-   * 根据任务文件导出类型执行不同逻辑：
-   * - 类/字节码类：首次实例化并缓存（jobMap），后续复用实例
-   *   - 若指定 jobFunc：调用实例的指定方法
-   *   - 否则调用实例的 handle() 方法（默认入口）
-   * - 普通函数：直接调用，传入 jobParams
+   * Executes different logic based on the task file's export type:
+   * - Class/bytecode class: instantiated and cached on first run (jobMap), reused thereafter
+   *   - If jobFunc is specified: call the specified method on the instance
+   *   - Otherwise call the instance's handle() method (default entry)
+   * - Plain function: called directly with jobParams
    *
-   * @param msg - 任务消息，包含文件路径、参数和函数名
+   * @param msg - Task message containing file path, parameters, and function name
    */
   run(msg: JobMessage = { mid: '', cmd: '' }): void {
     const { jobPath, jobParams, jobFunc, jobFuncParams } = msg;
@@ -90,16 +90,16 @@ class ChildApp {
     if (isClass(mod) || isBytecodeClass(mod)) {
       let instance: Record<string, unknown>;
       if (!this.jobMap.has(jobPath)) {
-        // 首次执行：实例化并缓存
+        // First execution: instantiate and cache
         instance = new (mod as new (...args: unknown[]) => Record<string, unknown>)(...(jobParams || []));
         this.jobMap.set(jobPath, instance);
       } else {
-        // 后续执行：复用缓存实例
+        // Subsequent execution: reuse cached instance
         instance = this.jobMap.get(jobPath) as Record<string, unknown>;
       }
 
-      // 调用指定方法或默认 handle 方法
-      // 注意：使用 typeof 检查而非 hasOwnProperty，以支持实例方法和原型方法
+      // Call the specified method or default handle method
+      // Note: Use typeof check instead of hasOwnProperty to support instance and prototype methods
       if (jobFunc && typeof instance[jobFunc] === 'function') {
         (instance[jobFunc] as (...args: unknown[]) => unknown)(...(jobFuncParams || []));
       } else if (typeof instance.handle === 'function') {
@@ -111,5 +111,5 @@ class ChildApp {
   }
 }
 
-// 子进程启动时创建 ChildApp 实例
+// Create ChildApp instance when child process starts
 new ChildApp();

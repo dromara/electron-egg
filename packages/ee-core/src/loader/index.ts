@@ -1,14 +1,14 @@
 /**
  * @module loader
- * @description 文件加载模块。提供多种文件加载和执行方式，
- * 是控制器加载、配置加载、任务执行的基础依赖。
+ * @description File loading module. Provides multiple file loading and execution methods,
+ * serving as the foundational dependency for controller loading, config loading, and task execution.
  *
- * 核心函数：
- * - loadFile：加载文件，若导出为函数则自动执行
- * - requireFile：加载文件，不自动执行
- * - execFile：加载文件，类则实例化，函数则执行
- * - resolveModule：解析模块绝对路径
- * - getFullpath：获取 electron 目录下文件的绝对路径
+ * Core functions:
+ * - loadFile: Load a file, automatically execute if the export is a function
+ * - requireFile: Load a file without auto-execution
+ * - execFile: Load a file, instantiate if class, execute if function
+ * - resolveModule: Resolve the absolute path of a module
+ * - getFullpath: Get the absolute path of a file under the electron directory
  */
 import { isFunction, isClass } from '../utils/type_check.js';
 import fs from 'fs';
@@ -17,15 +17,15 @@ import { loadFile as coreLoadFile, isBytecodeClass } from '../core/utils/index.j
 import { getElectronDir } from '../ps/index.js';
 
 /**
- * 加载文件并自动执行函数导出
+ * Load a file and automatically execute function exports
  *
- * 若文件导出为普通函数（非类、非字节码类），自动调用该函数并返回执行结果。
- * 适用于配置文件等需要根据 appInfo 动态返回内容的场景。
+ * If the file exports a plain function (not a class or bytecode class), automatically calls that function
+ * and returns the execution result. Suitable for config files that need to dynamically return content based on appInfo.
  *
- * @param filepath - 文件路径（相对路径基于 electronDir）
- * @param inject - 传递给函数导出的参数（展开传入）
- * @returns 文件导出内容或函数执行结果
- * @throws 文件不存在时抛出错误
+ * @param filepath - File path (relative paths are based on electronDir)
+ * @param inject - Arguments passed to the function export (spread into the call)
+ * @returns File export content or function execution result
+ * @throws Throws an error if the file does not exist
  */
 export function loadFile(filepath: string, ...inject: unknown[]): unknown {
   let fullpath = filepath;
@@ -40,7 +40,7 @@ export function loadFile(filepath: string, ...inject: unknown[]): unknown {
   }
 
   let ret = coreLoadFile(fullpath);
-  // 普通函数导出：自动执行，注入参数（如 appInfo）
+  // Plain function export: auto-execute, inject arguments (e.g. appInfo)
   if (isFunction(ret) && !isClass(ret) && !isBytecodeClass(ret)) {
     ret = (ret as (...args: unknown[]) => unknown)(...inject);
   }
@@ -48,29 +48,29 @@ export function loadFile(filepath: string, ...inject: unknown[]): unknown {
 }
 
 /**
- * 加载文件（不自动执行）
+ * Load a file (without auto-execution)
  *
- * 直接返回模块导出内容，不做任何处理。
- * 适用于需要获取原始模块引用的场景（如子进程任务加载）。
+ * Returns the module export content directly, without any processing.
+ * Suitable for scenarios where the original module reference is needed (e.g. child process task loading).
  *
- * @param filepath - 文件绝对路径
- * @returns 模块导出内容
+ * @param filepath - Absolute file path
+ * @returns Module export content
  */
 export function requireFile(filepath: string): unknown {
   return coreLoadFile(filepath);
 }
 
 /**
- * 加载并运行文件
+ * Load and run a file
  *
- * 根据导出类型决定执行方式：
- * - 类/字节码类 → 使用 new 实例化，inject 作为构造函数参数
- * - 普通函数 → 直接调用，inject 作为函数参数
- * - 其他 → 直接返回
+ * Determines execution method based on export type:
+ * - Class/bytecode class -> Instantiate with new, inject as constructor arguments
+ * - Plain function -> Call directly, inject as function arguments
+ * - Other -> Return as-is
  *
- * @param filepath - 文件绝对路径
- * @param inject - 传递给构造函数或函数的参数（展开传入）
- * @returns 实例化的类对象或函数执行结果
+ * @param filepath - Absolute file path
+ * @param inject - Arguments passed to the constructor or function (spread into the call)
+ * @returns Instantiated class object or function execution result
  */
 export function execFile(filepath: string, ...inject: unknown[]): unknown {
   let ret = coreLoadFile(filepath);
@@ -83,29 +83,29 @@ export function execFile(filepath: string, ...inject: unknown[]): unknown {
 }
 
 /**
- * 解析模块的绝对路径
+ * Resolve the absolute path of a module
  *
- * 先尝试 require.resolve()，失败后按后缀规则尝试：
- * - .default / .prod → 尝试 .jsc（字节码版本）
- * - .js → 尝试 .jsc
- * - 无后缀 → 尝试 .js 和 .jsc
+ * First tries require.resolve(), then falls back to suffix-based rules:
+ * - .default / .prod -> Try .jsc (bytecode version)
+ * - .js -> Try .jsc
+ * - No suffix -> Try .js and .jsc
  *
- * @param filepath - 模块路径
- * @returns 模块绝对路径，无法解析时返回 undefined
+ * @param filepath - Module path
+ * @returns Absolute path of the module, or undefined if it cannot be resolved
  */
 export function resolveModule(filepath: string): string | undefined {
   let fullpath: string | undefined;
   try {
     fullpath = require.resolve(filepath);
   } catch {
-    // 特殊后缀处理：配置文件名如 config.default、config.prod
+    // Special suffix handling: config filenames like config.default, config.prod
     if (filepath && (filepath.endsWith('.default') || filepath.endsWith('.prod'))) {
       fullpath = filepath + '.jsc';
     } else if (filepath && filepath.endsWith('.js')) {
       fullpath = filepath + 'c'; // .js → .jsc
     }
 
-    // 打包模式下 require.resolve 可能失败，尝试直接检查文件是否存在
+    // In packaged mode, require.resolve may fail; try checking if the file exists directly
     if (!fullpath || !fs.existsSync(fullpath)) {
       if (fs.existsSync(filepath + '.js')) {
         fullpath = filepath + '.js';
@@ -124,13 +124,13 @@ export function resolveModule(filepath: string): string | undefined {
 }
 
 /**
- * 获取 electron 目录下文件的绝对路径
+ * Get the absolute path of a file under the electron directory
  *
- * 相对路径基于 electronDir 解析，同时尝试 resolveModule 查找实际文件。
+ * Relative paths are resolved based on electronDir, and resolveModule is also attempted to find the actual file.
  *
- * @param filepath - 文件路径（相对或绝对）
- * @returns 文件的绝对路径
- * @throws 文件不存在时抛出错误
+ * @param filepath - File path (relative or absolute)
+ * @returns Absolute path of the file
+ * @throws Throws an error if the file does not exist
  */
 export function getFullpath(filepath: string): string {
   let fullpath: string | undefined;

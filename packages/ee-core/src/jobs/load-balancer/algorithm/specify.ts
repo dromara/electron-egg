@@ -1,7 +1,7 @@
 import type { LoadBalancerTarget } from '../types.js';
 
 /**
- * 指定绑定算法
+ * Specify (bind by ID) algorithm
  */
 export default function specify(
   tasks: LoadBalancerTarget[],

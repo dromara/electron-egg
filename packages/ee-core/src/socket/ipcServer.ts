@@ -1,19 +1,19 @@
 /**
  * @module socket/ipcServer
- * @description Electron IPC 服务器。将控制器方法注册为 IPC 通道处理器，
- * 使渲染进程能通过 ipcRenderer 调用主进程的控制器方法。
+ * @description Electron IPC server. Registers controller methods as IPC channel handlers,
+ * enabling renderer processes to call main process controller methods via ipcRenderer.
  *
- * 支持两种通信模型：
- * - send/on 模型（同步）：渲染进程使用 ipcRenderer.sendSync()，
- *   主进程通过 event.returnValue 返回结果。
- *   ⚠️ 仅支持同步控制器方法，异步方法会返回 undefined 并输出警告。
+ * Supports two communication models:
+ * - send/on model (synchronous): Renderer uses ipcRenderer.sendSync(),
+ *   main process returns results via event.returnValue.
+ *   ⚠️ Only supports synchronous controller methods; async methods return undefined with a warning.
  *
- * - invoke/handle 模型（异步）：渲染进程使用 ipcRenderer.invoke()，
- *   主进程通过 ipcMain.handle() 返回 Promise。
- *   ✅ 推荐使用此模型，支持同步和异步控制器方法。
+ * - invoke/handle model (asynchronous): Renderer uses ipcRenderer.invoke(),
+ *   main process returns a Promise via ipcMain.handle().
+ *   ✅ Recommended model, supports both synchronous and asynchronous controller methods.
  *
- * 通道命名规则：将控制器路径中的 '.' 替换为 channelSeparator（默认 '/'）
- * 例如：controller.user.add → controller/user/add
+ * Channel naming rule: Replace '.' in controller path with channelSeparator (default '/')
+ * Example: controller.user.add → controller/user/add
  */
 import debug from 'debug';
 import { ipcMain } from 'electron';
@@ -26,15 +26,15 @@ import { resolveControllerFn } from './utils.js';
 const debugLog = debug('ee-core:socket:ipcServer');
 
 /**
- * IpcServer IPC 服务器
+ * IpcServer - IPC server
  *
- * 遍历控制器对象树，为每个导出方法注册 ipcMain 通道处理器。
- * 使用递归 loop() 遍历嵌套的控制器目录结构。
+ * Traverses the controller object tree and registers ipcMain channel handlers for each exported method.
+ * Uses recursive loop() to traverse nested controller directory structures.
  */
 export class IpcServer {
-  /** 通道分隔符，默认 '/' */
+  /** Channel separator, default '/' */
   channelSeparator: string;
-  /** 控制器目录名（用于生成属性路径前缀） */
+  /** Controller directory name (used to generate property path prefix) */
   directory: string;
 
   constructor() {
@@ -44,7 +44,7 @@ export class IpcServer {
   }
 
   /**
-   * 初始化：遍历控制器树并注册所有 IPC 通道
+   * Initialize: traverse controller tree and register all IPC channels
    */
   init(): void {
     const controller = getController();
@@ -52,14 +52,14 @@ export class IpcServer {
   }
 
   /**
-   * 递归遍历控制器对象树
+   * Recursively traverse the controller object tree
    *
-   * 通过 EXPORTS symbol 标记区分：
-   * - 带有 EXPORTS 标记的对象 → 叶子节点（控制器方法集合），调用 register()
-   * - 不带标记的对象 → 中间节点（目录/命名空间），继续递归
+   * Distinguished by EXPORTS symbol marker:
+   * - Objects with EXPORTS marker → leaf nodes (controller method collections), call register()
+   * - Objects without marker → intermediate nodes (directory/namespace), continue recursion
    *
-   * @param obj - 当前遍历的对象
-   * @param pathname - 当前属性路径
+   * @param obj - Current object being traversed
+   * @param pathname - Current property path
    */
   loop(obj: Record<string, unknown>, pathname: string): void {
     const keys = Object.keys(obj);
@@ -68,7 +68,7 @@ export class IpcServer {
 
       const subObj = obj[key];
       const propertyChain = pathname + '.' + key;
-      // EXPORTS symbol 标记表示这是控制器方法集合（叶子节点）
+      // EXPORTS symbol marker indicates this is a controller method collection (leaf node)
       if (subObj && (subObj as Record<symbol, unknown>)[EXPORTS] === true) {
         this.register(subObj as Record<string, unknown>, propertyChain);
       } else if (typeof subObj === 'object') {
@@ -78,14 +78,14 @@ export class IpcServer {
   }
 
   /**
-   * 注册控制器方法为 IPC 通道处理器
+   * Register controller methods as IPC channel handlers
    *
-   * 为每个方法注册两种处理器：
-   * 1. ipcMain.on（同步模型）：设置 event.returnValue，异步方法返回 undefined
-   * 2. ipcMain.handle（异步模型）：返回 Promise，推荐使用
+   * Registers two handlers for each method:
+   * 1. ipcMain.on (synchronous model): Sets event.returnValue, async methods return undefined
+   * 2. ipcMain.handle (asynchronous model): Returns Promise, recommended
    *
-   * @param exportObj - 控制器方法集合对象
-   * @param propertyChain - 属性路径（如 'controller.user'）
+   * @param exportObj - Controller method collection object
+   * @param propertyChain - Property path (e.g., 'controller.user')
    */
   register(exportObj: Record<string, unknown>, propertyChain: string): void {
     const controller = getController();
@@ -95,9 +95,9 @@ export class IpcServer {
       const channel = tmpChannel.split('.').join(this.channelSeparator);
       debugLog('[register] channel %s', channel);
 
-      // send/on 模型（同步）
-      // ⚠️ ipcMain.on + event.returnValue 仅支持同步。
-      // 异步控制器方法与此模型不兼容，需使用 invoke/handle 模型。
+      // send/on model (synchronous)
+      // ⚠️ ipcMain.on + event.returnValue only supports synchronous.
+      // Async controller methods are incompatible with this model; use invoke/handle model instead.
       ipcMain.on(channel, (event, params) => {
         try {
           const fn = resolveControllerFn(controller, channel, this.channelSeparator);
@@ -114,7 +114,7 @@ export class IpcServer {
         }
       });
 
-      // invoke/handle 模型（异步，推荐）
+      // invoke/handle model (asynchronous, recommended)
       ipcMain.handle(channel, async (event, params) => {
         try {
           const fn = resolveControllerFn(controller, channel, this.channelSeparator);
