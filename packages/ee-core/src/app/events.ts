@@ -59,25 +59,24 @@ export class EventBus {
   /**
    * Emit a lifecycle event
    *
-   * Invokes the corresponding event handler, automatically catching synchronous exceptions and async rejections.
+   * Invokes the corresponding event handler. Errors are NOT silently swallowed —
+   * sync errors propagate to the caller, async errors are re-thrown as unhandled rejections
+   * (caught by the global exception handler).
    *
    * @param eventName - Lifecycle event name
    * @param args - Arguments passed to the handler
    */
   emitLifecycle(eventName: string, ...args: unknown[]): void {
     const eventFn = this.lifecycleEvents[eventName];
-    if (eventFn) {
-      try {
-        const result = eventFn(...args);
-        // Async handler: catch rejection to prevent UnhandledPromiseRejection
-        if (result instanceof Promise) {
-          result.catch((err: unknown) => {
-            coreLogger.error(`[EventBus] Async lifecycle handler '${eventName}' error:`, err);
-          });
-        }
-      } catch (err) {
-        coreLogger.error(`[EventBus] Lifecycle handler '${eventName}' error:`, err);
-      }
+    if (!eventFn) return;
+
+    const result = eventFn(...args);
+    // Async handler: re-throw as unhandled rejection so the global handler catches it
+    if (result instanceof Promise) {
+      result.catch((err: unknown) => {
+        coreLogger.error(`[EventBus] Async lifecycle handler '${eventName}' error:`, err);
+        throw err;
+      });
     }
   }
 
