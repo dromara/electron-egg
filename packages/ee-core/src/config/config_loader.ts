@@ -129,8 +129,15 @@ export class ConfigLoader {
     }
 
     // Dev mode: load from filesystem
+    // Silently skip if file not found (e.g. child process where bundle dir lacks config files)
     const filepath = path.join(dirpath, 'config', filename);
-    const config = loadFile(filepath, appInfo);
+    let config: unknown;
+    try {
+      config = loadFile(filepath, appInfo);
+    } catch {
+      debugLog('[_loadConfig] file not found, skipping: %s', filepath);
+      return null;
+    }
     debugLog('[_loadConfig] filepath: %s', filepath);
     if (!config) return null;
 

@@ -5,19 +5,33 @@
  *
  * Child process lifecycle:
  * 1. Main process forks a child process and loads this module
- * 2. Child process listens for message events, waiting for main process instructions
- * 3. Upon receiving a run command, loads and executes the task file
- * 4. Class-type task files: instantiated and cached on first execution, reused thereafter
- * 5. Function-type task files: called directly on each execution
+ * 2. Child process receives config from main process via processArgs, avoiding filesystem config loading
+ * 3. Child process listens for message events, waiting for main process instructions
+ * 4. Upon receiving a run command, loads and executes the task file
+ * 5. Class-type task files: instantiated and cached on first execution, reused thereafter
+ * 6. Function-type task files: called directly on each execution
  *
  * Note: Child processes are independent from the main process and must load exception handling separately (loadException)
  */
 import { isClass, isFunction } from '../../utils/type_check.js';
 import { loadException } from '../../exception/index.js';
+import { setConfig } from '../../config/index.js';
 import { requireFile } from '../../loader/index.js';
 import { coreLogger } from '../../log/index.js';
 import { isBytecodeClass } from '../../core/utils/index.js';
+import type { Config } from '../../types/index.js';
 import type { JobMessage } from './jobProcess.js';
+
+// Receive config from main process via processArgs, so child process
+// doesn't need to load config from filesystem (which may fail in bundled mode)
+try {
+  const args = JSON.parse(process.argv[2] || '{}');
+  if (args.eeConfig) {
+    setConfig(args.eeConfig as Config);
+  }
+} catch {
+  // If config can't be parsed, child process will use default config
+}
 
 // Child process must independently load exception handling
 loadException();
@@ -86,27 +100,31 @@ class ChildApp {
     const { jobPath, jobParams, jobFunc, jobFuncParams } = msg;
     if (!jobPath) return;
 
-    const mod = requireFile(jobPath);
-    if (isClass(mod) || isBytecodeClass(mod)) {
-      let instance: Record<string, unknown>;
-      if (!this.jobMap.has(jobPath)) {
-        // First execution: instantiate and cache
-        instance = new (mod as new (...args: unknown[]) => Record<string, unknown>)(...(jobParams || []));
-        this.jobMap.set(jobPath, instance);
-      } else {
-        // Subsequent execution: reuse cached instance
-        instance = this.jobMap.get(jobPath) as Record<string, unknown>;
-      }
+    try {
+      const mod = requireFile(jobPath);
+      if (isClass(mod) || isBytecodeClass(mod)) {
+        let instance: Record<string, unknown>;
+        if (!this.jobMap.has(jobPath)) {
+          // First execution: instantiate and cache
+          instance = new (mod as new (...args: unknown[]) => Record<string, unknown>)(...(jobParams || []));
+          this.jobMap.set(jobPath, instance);
+        } else {
+          // Subsequent execution: reuse cached instance
+          instance = this.jobMap.get(jobPath) as Record<string, unknown>;
+        }
 
-      // Call the specified method or default handle method
-      // Note: Use typeof check instead of hasOwnProperty to support instance and prototype methods
-      if (jobFunc && typeof instance[jobFunc] === 'function') {
-        (instance[jobFunc] as (...args: unknown[]) => unknown)(...(jobFuncParams || []));
-      } else if (typeof instance.handle === 'function') {
-        instance.handle(...(jobParams || []));
+        // Call the specified method or default handle method
+        // Note: Use typeof check instead of hasOwnProperty to support instance and prototype methods
+        if (jobFunc && typeof instance[jobFunc] === 'function') {
+          (instance[jobFunc] as (...args: unknown[]) => unknown)(...(jobFuncParams || []));
+        } else if (typeof instance.handle === 'function') {
+          instance.handle(...(jobParams || []));
+        }
+      } else if (isFunction(mod)) {
+        (mod as (...args: unknown[]) => unknown)(jobParams);
       }
-    } else if (isFunction(mod)) {
-      (mod as (...args: unknown[]) => unknown)(jobParams);
+    } catch (e) {
+      coreLogger.error('[jobs/child] run error:', e);
     }
   }
 }

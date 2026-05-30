@@ -41,7 +41,9 @@
       "Bash(pkill -f \"ee-bin dev\")",
       "Bash(pkill -f \"ee-bin build\")",
       "Bash(DEBUG=ee-* gtimeout 25 pnpm dev-electron)",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(git checkout *)",
+      "Bash(awk 'BEGIN{} {depth=gsub\\(/\\\\//,\"/\"\\); indent=\"\"; for\\(i=0;i<depth;i++\\) indent=indent\"  \"; split\\($0,a,\"/\"\\); print indent a[length\\(a\\)]}')"
     ]
   }
 }

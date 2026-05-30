@@ -40,6 +40,19 @@ export function getConfig(): Config {
 }
 
 /**
+ * Set runtime configuration directly
+ *
+ * Used by child processes to receive config from the main process,
+ * avoiding filesystem loading which may fail in child processes
+ * (e.g. bundle output directory lacks config files).
+ *
+ * @param cfg - Configuration object to set
+ */
+export function setConfig(cfg: Config): void {
+  config = cfg;
+}
+
+/**
  * Get application basic info
  *
  * @returns Object containing application name, directories, environment, and other info

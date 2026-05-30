@@ -36,7 +36,13 @@ function uncaughtExceptionHandler(): void {
       error.name = 'unhandledExceptionError';
     }
 
-    coreLogger.error(error);
+    try {
+      coreLogger.error(error);
+    } catch {
+      // Logger may fail in child processes (e.g. pino transport unavailable);
+      // fall back to console so the error is never silently swallowed.
+      console.error('[ee-core] uncaughtException:', error);
+    }
     _devError(error);
     _exit();
   });
@@ -81,7 +87,11 @@ function unhandledRejectionHandler(): void {
     if (error.name === 'Error') {
       error.name = 'unhandledRejectionError';
     }
-    coreLogger.error(error);
+    try {
+      coreLogger.error(error);
+    } catch {
+      console.error('[ee-core] unhandledRejection:', error);
+    }
     _devError(error);
     _exit();
   });

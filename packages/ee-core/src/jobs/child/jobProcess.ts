@@ -15,6 +15,7 @@ import { fork, type ChildProcess, type Serializable, type ForkOptions } from 'ch
 import serialize from 'serialize-javascript';
 import { coreLogger } from '../../log/index.js';
 import { getBaseDir, isPackaged, allEnv } from '../../ps/index.js';
+import { getConfig } from '../../config/index.js';
 import { Processes, Events, Receiver } from '../../const/channel.js';
 import { getRandomString } from '../../utils/helper.js';
 import { getFullpath } from '../../loader/index.js';
@@ -88,11 +89,15 @@ export class JobProcess {
     }
 
     const defaultOptions: JobProcessOptions = {
-      processArgs: {},
+      processArgs: {
+        type: 'childJob',
+        // Pass main process config to child process so it doesn't need to load from filesystem
+        eeConfig: getConfig(),
+      },
       processOptions: {
         cwd,
         env: allEnv(),
-        stdio: 'ignore',
+        stdio: ['ignore', 'pipe', 'pipe', 'ipc'] as ForkOptions['stdio'],
       },
     };
 
@@ -141,6 +146,20 @@ export class JobProcess {
         this._eventEmit(m);
       }
     });
+
+    // Capture child process stdout/stderr for debugging
+    const stdout = this.child.stdout;
+    const stderr = this.child.stderr;
+    if (stdout) {
+      stdout.on('data', (data: Buffer) => {
+        coreLogger.info(`[jobs/child] stdout: ${data.toString().trim()}`);
+      });
+    }
+    if (stderr) {
+      stderr.on('data', (data: Buffer) => {
+        coreLogger.error(`[jobs/child] stderr: ${data.toString().trim()}`);
+      });
+    }
 
     this.child.on('exit', (code: number | null, signal: string | null) => {
       const data: ProcessExitEventData = { pid: this.pid };

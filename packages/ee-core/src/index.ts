@@ -29,7 +29,7 @@ export { eventBus, EventBus, Ready, ElectronAppReady, WindowReady, BeforeClose, 
 export { Application, app } from './app/application.js';
 
 // --- config module ---
-export { loadConfig, getConfig } from './config/index.js';
+export { loadConfig, getConfig, setConfig } from './config/index.js';
 
 // --- const constants ---
 export { Processes, SocketIO, Events, Receiver } from './const/channel.js';

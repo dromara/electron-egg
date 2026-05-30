@@ -6,7 +6,8 @@
  * Supports two communication models:
  * - send/on model (synchronous): Renderer uses ipcRenderer.sendSync(),
  *   main process returns results via event.returnValue.
- *   ⚠️ Only supports synchronous controller methods; async methods return undefined with a warning.
+ *   Supports both sync and async controller methods (Electron's sendSync enters a nested
+ *   message loop that processes microtasks, so event.returnValue set after await is received).
  *
  * - invoke/handle model (asynchronous): Renderer uses ipcRenderer.invoke(),
  *   main process returns a Promise via ipcMain.handle().
@@ -81,7 +82,7 @@ export class IpcServer {
    * Register controller methods as IPC channel handlers
    *
    * Registers two handlers for each method:
-   * 1. ipcMain.on (synchronous model): Sets event.returnValue, async methods return undefined
+   * 1. ipcMain.on (synchronous model): Sets event.returnValue, supports async methods
    * 2. ipcMain.handle (asynchronous model): Returns Promise, recommended
    *
    * @param exportObj - Controller method collection object
@@ -96,21 +97,17 @@ export class IpcServer {
       debugLog('[register] channel %s', channel);
 
       // send/on model (synchronous)
-      // ⚠️ ipcMain.on + event.returnValue only supports synchronous.
-      // Async controller methods are incompatible with this model; use invoke/handle model instead.
-      ipcMain.on(channel, (event, params) => {
+      // Electron's sendSync enters a nested message loop that processes microtasks,
+      // so event.returnValue set after await IS received by sendSync.
+      ipcMain.on(channel, async (event, params) => {
         try {
           const fn = resolveControllerFn(controller, channel, this.channelSeparator);
           if (!fn) return;
-          const result = fn.call(controller, params, event);
-          if (result instanceof Promise) {
-            coreLogger.warn(`[socket/IpcServer] async controller method '${channel}' called via send/on model (sendSync). Use invoke/handle model instead.`);
-            event.returnValue = undefined;
-          } else {
-            event.returnValue = result;
-          }
+          const result = await fn.call(controller, params, event);
+          event.returnValue = result;
         } catch (e) {
           coreLogger.error('[socket/IpcServer] send/on throw error:', e);
+          event.returnValue = undefined;
         }
       });
 

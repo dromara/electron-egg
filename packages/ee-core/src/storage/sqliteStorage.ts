@@ -174,23 +174,19 @@ export class SqliteStorage {
    *
    * Inference logic:
    * 1. Name is ":memory:" -> memory mode
-   * 2. File extension must be ".db", otherwise throws assertion error
-   * 3. Name contains path separators (/ or \):
+   * 2. Name contains path separators (/ or \):
    *    - Absolute path -> absolute mode
    *    - Relative path -> relative mode
-   * 4. Name contains no path separators -> onlyName mode
+   * 3. Name contains no path separators -> onlyName mode
    *
    * @param name - Database name or path
    * @returns Storage mode string: memory / onlyName / relative / absolute
-   * @throws Asserts error if file extension is not ".db"
    */
   getMode(name: string): string {
     // Memory mode
     if (name === ':memory:') {
       return 'memory';
     }
-
-    assert(path.extname(name) === '.db', `error: db ${name} file ext name must be .db`);
 
     // Path mode
     const normalized = name.replace(/[/\\]/g, '/');
