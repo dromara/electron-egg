@@ -205,6 +205,8 @@ export class HttpServer {
       coreLogger.error('[httpServer] throw error:', err);
       ctx.response.status = 500;
       ctx.response.body = { error: 'Internal Server Error' };
+      // Attach original error to ctx for downstream error-reporting middleware
+      (ctx as Record<string, unknown>).__ee_error = err;
     }
 
     await next();

@@ -249,15 +249,15 @@ function loadMainUrl(type: string, url: string, load = 'url'): void {
   debugLog('[loadMainUrl] type:%s, url:%s', type, url);
   if (load === 'file') {
     win.loadFile(url, mainServer.options)
-      .then()
       .catch((err) => {
         coreLogger.error(`Please check the ${url} !`, err);
+        throw err;
       });
   } else {
     win.loadURL(url, mainServer.options)
-      .then()
       .catch((err) => {
         coreLogger.error(`Please check the ${url} !`, err);
+        throw err;
       });
   }
 }

@@ -29,6 +29,7 @@ export function registerJobManager(job: Killable): void {
  * Prefers killAll(), falls back to killing individual processes.
  */
 export function killAllJobs(): void {
+  const failed: unknown[] = [];
   for (const job of registeredJobs) {
     try {
       if ('killAll' in job && typeof job.killAll === 'function') {
@@ -41,6 +42,10 @@ export function killAllJobs(): void {
       }
     } catch (err) {
       coreLogger.error('[jobs/registry] error killing job manager:', err);
+      failed.push(err);
     }
+  }
+  if (failed.length > 0) {
+    coreLogger.error(`[jobs/registry] ${failed.length} job manager(s) failed to kill, processes may be orphaned`);
   }
 }

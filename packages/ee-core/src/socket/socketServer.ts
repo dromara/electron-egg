@@ -114,6 +114,10 @@ export class SocketServer {
           }
         } catch (err) {
           coreLogger.error('[socket/socketServer] throw error:', err);
+          // Return error to client so it's not silently lost
+          if (callback) {
+            callback({ __EE_ERROR__: true, message: err instanceof Error ? err.message : String(err) });
+          }
         }
       });
     });

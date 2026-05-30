@@ -19,6 +19,7 @@ import { setConfig } from '../../config/index.js';
 import { requireFile } from '../../loader/index.js';
 import { coreLogger } from '../../log/index.js';
 import { isBytecodeClass } from '../../core/utils/index.js';
+import { Processes } from '../../const/channel.js';
 import type { Config } from '../../types/index.js';
 import type { JobMessage } from './jobProcess.js';
 
@@ -125,6 +126,10 @@ class ChildApp {
       }
     } catch (e) {
       coreLogger.error('[jobs/child] run error:', e);
+      // Propagate error back to main process so it's not silently lost
+      if (process.send) {
+        process.send({ channel: Processes.showException, data: String(e) });
+      }
     }
   }
 }

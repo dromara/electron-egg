@@ -107,20 +107,17 @@ export class IpcServer {
           event.returnValue = result;
         } catch (e) {
           coreLogger.error('[socket/IpcServer] send/on throw error:', e);
-          event.returnValue = undefined;
+          // Send error info back so renderer can distinguish errors from legitimate undefined
+          event.returnValue = { __EE_ERROR__: true, message: e instanceof Error ? e.message : String(e) };
         }
       });
 
       // invoke/handle model (asynchronous, recommended)
+      // Throw error so renderer's ipcRenderer.invoke() rejects, allowing try/catch on renderer side
       ipcMain.handle(channel, async (event, params) => {
-        try {
-          const fn = resolveControllerFn(controller, channel, this.channelSeparator);
-          if (!fn) return undefined;
-          return await fn.call(controller, params, event);
-        } catch (e) {
-          coreLogger.error('[socket/IpcServer] invoke/handle throw error:', e);
-          return undefined;
-        }
+        const fn = resolveControllerFn(controller, channel, this.channelSeparator);
+        if (!fn) return undefined;
+        return await fn.call(controller, params, event);
       });
     }
   }
