@@ -1,183 +1,184 @@
 /**
- * ee-bin 配置类型定义
+ * ee-bin Configuration Type Definitions
  *
- * 定义了 ee-bin CLI 工具的完整配置体系类型。配置层级为：
- *   BinConfig（顶层）→ ExecConfig / BuildConfig / MoveConfig / EncryptConfig / UpdaterConfig（各子配置）
+ * Defines the complete type system for the ee-bin CLI tool's configuration.
+ * Configuration hierarchy:
+ *   BinConfig (top-level) → ExecConfig / BuildConfig / MoveConfig / EncryptConfig / UpdaterConfig (sub-configs)
  *
- * 用户通过 `./cmd/bin.js` 提供自定义配置，ee-bin 会将其与 bin_default.ts 中的默认配置
- * 通过 extend() 深合并，生成最终的 BinConfig 实例。
+ * Users provide custom config via `./cmd/bin.js`, which ee-bin deep-merges with
+ * the defaults in bin_default.ts via extend() to produce the final BinConfig instance.
  */
 
-/** 命令执行配置 — 定义单个子进程的启动参数 */
+/** Command execution config — defines parameters for launching a single subprocess */
 export interface ExecConfig {
-  /** 进程工作目录（相对于项目根目录） */
+  /** Process working directory (relative to project root) */
   directory: string;
-  /** 要执行的命令，如 'npm'、'electron'、'electron-builder' */
+  /** Command to execute, e.g. 'npm', 'electron', 'electron-builder' */
   cmd: string;
-  /** 命令参数数组 */
+  /** Command argument array */
   args?: string[];
-  /** 子进程 stdio 模式，默认 'inherit'（直接输出到终端） */
+  /** Child process stdio mode, default 'inherit' (output goes directly to terminal) */
   stdio?: 'inherit' | 'pipe' | 'ignore';
-  /** 是否同步执行。同步模式会阻塞直到命令完成，结果不存入 execProcess */
+  /** Whether to execute synchronously. Sync mode blocks until command completes; result is not stored in execProcess */
   sync?: boolean;
-  /** 前端服务协议，用于开发模式判断是否跳过（'file://' 时跳过前端启动） */
+  /** Frontend service protocol, used in dev mode to decide whether to skip startup ('file://' means skip frontend launch) */
   protocol?: string;
-  /** 是否监听文件变化并自动重启（仅 dev 模式下 electron 支持） */
+  /** Whether to watch for file changes and auto-restart (only supported for electron in dev mode) */
   watch?: boolean;
-  /** watch 模式下的防抖延迟（毫秒），避免短时间内多次重建 */
+  /** Debounce delay in watch mode (milliseconds), prevents rapid successive rebuilds from file changes */
   delay?: number;
-  /** 前端开发服务器主机名 */
+  /** Frontend dev server hostname */
   hostname?: string;
-  /** 前端开发服务器端口 */
+  /** Frontend dev server port */
   port?: number;
-  /** 前端首页文件名 */
+  /** Frontend index page filename */
   indexPath?: string;
-  /** 是否强制刷新页面 */
+  /** Whether to force-refresh the page */
   force?: boolean;
-  /** Electron 加载页路径（启动时先显示加载页再跳转主页） */
+  /** Electron loading page path (shows a loading page first, then redirects to the main page) */
   loadingPage?: string;
 }
 
-/** esbuild 打包配置 — 控制 Electron 主进程代码的打包行为 */
+/** esbuild bundle config — controls Electron main process code bundling behavior */
 export interface BundleConfig {
-  /** 打包模式：'bundle' 用 esbuild 打包为单文件，'copy' 直接复制整个目录 */
+  /** Bundle mode: 'bundle' uses esbuild to bundle into a single file, 'copy' copies the directory as-is */
   bundleType?: 'bundle' | 'copy';
-  /** 用户自定义的 esbuild external 包名列表（框架 external 由 _bundleWithRegistry 自动添加） */
+  /** User-defined esbuild external package names (framework externals are added automatically by _bundleWithRegistry) */
   external?: string[];
-  /** sourcemap 配置：
-   *  - false/undefined: 自动模式（dev→inline, prod→off）
-   *  - 'inline': 强制内联 sourcemap
-   *  - 'external': 生成独立 .map 文件
-   *  - true: 等同于 'inline'
+  /** Sourcemap configuration:
+   *  - false/undefined: Auto mode (dev→inline, prod→off)
+   *  - 'inline': Force inline sourcemap
+   *  - 'external': Generate separate .map file
+   *  - true: Equivalent to 'inline'
    */
   sourcemap?: boolean | 'inline' | 'external';
-  /** 是否压缩代码（生产环境建议启用） */
+  /** Whether to minify code (recommended for production) */
   minify?: boolean;
-  /** 移除指定语句类型：'console' 删除 console.*，'debugger' 删除 debugger 语句 */
+  /** Statement types to remove: 'console' deletes console.*, 'debugger' deletes debugger statements */
   drop?: ('console' | 'debugger')[];
-  /** minify 时是否保留函数/类名（便于调试） */
+  /** Whether to preserve function/class names when minifying (helpful for debugging) */
   keepNames?: boolean;
-  /** 许可证注释处理方式：'inline' 保留在代码中，'eof' 移到文件末尾，'none' 删除 */
+  /** License comment handling: 'inline' keeps in code, 'eof' moves to end of file, 'none' removes */
   legalComments?: 'inline' | 'eof' | 'none';
-  /** 编译时常量定义，如 { 'process.env.CUSTOM': '"value"' } */
+  /** Compile-time constant definitions, e.g. { 'process.env.CUSTOM': '"value"' } */
   define?: Record<string, string>;
-  /** 需要从 electron/ 目录额外复制到打包输出的文件或目录列表（如 'assets'、'data/db.json'） */
+  /** Extra files/directories from electron/ to copy to the bundle output (e.g. 'assets', 'data/db.json') */
   copy?: string[];
-  /** 输出格式：'cjs' 推荐用于 Electron 主进程，'esm' 要求所有业务代码为 ESM 兼容 */
+  /** Output format: 'cjs' recommended for Electron main process, 'esm' requires all business code to be ESM-compatible */
   format?: 'cjs' | 'esm';
 }
 
-/** javascript-obfuscator 混淆选项 — 对应 javascript-obfuscator 库的配置参数 */
+/** javascript-obfuscator obfuscation options — corresponds to the javascript-obfuscator library config parameters */
 export interface ConfusionOptions {
   compact?: boolean;
   stringArray?: boolean;
-  /** 字符串数组编码阈值（0~1，1 表示所有字符串都进入数组） */
+  /** String array encoding threshold (0~1, 1 means all strings go into the array) */
   stringArrayThreshold?: number;
-  /** 字符串数组编码方式：'none' 不编码，'base64' Base64 编码，'rc4' RC4 加密 */
+  /** String array encoding method: 'none' no encoding, 'base64' Base64 encoding, 'rc4' RC4 encryption */
   stringArrayEncoding?: Array<'none' | 'base64' | 'rc4'>;
   stringArrayCallsTransform?: boolean;
   deadCodeInjection?: boolean;
   numbersToExpressions?: boolean;
-  /** 混淆目标运行环境：'browser' 用于前端代码，'node' 用于 Node.js/Electron 代码 */
+  /** Obfuscation target runtime: 'browser' for frontend code, 'node' for Node.js/Electron code */
   target?: 'browser' | 'node';
   silent?: boolean;
 }
 
-/** bytenode 字节码编译选项 — 对应 bytenode.compileFile() 的参数 */
+/** bytenode bytecode compilation options — corresponds to bytenode.compileFile() parameters */
 export interface BytecodeOptions {
-  /** 输入源文件路径（默认由 encrypt 自动设置） */
+  /** Input source file path (automatically set by encrypt module) */
   filename?: string;
-  /** 输出 .jsc 文件路径（默认为 filename + 'c'） */
+  /** Output .jsc file path (defaults to filename + 'c') */
   output?: string;
-  /** 是否为 Electron 环境编译（启用 V8 字节码兼容） */
+  /** Whether to compile for Electron environment (enables V8 bytecode compatibility) */
   electron?: boolean;
 }
 
-/** 加密配置 — 定义某个目标（frontend 或 electron）的加密策略 */
+/** Encryption config — defines the encryption strategy for a target (frontend or electron) */
 export interface EncryptConfig {
-  /** 加密类型：
-   *  - 'confusion': 仅混淆（javascript-obfuscator）
-   *  - 'bytecode': 仅字节码（bytenode，仅 electron 支持）
-   *  - 'strict': 混淆 + 字节码组合
-   *  - 'none': 不加密（跳过处理）
+  /** Encryption type:
+   *  - 'confusion': Obfuscation only (javascript-obfuscator)
+   *  - 'bytecode': Bytecode only (bytenode, electron only)
+   *  - 'strict': Obfuscation + bytecode combined
+   *  - 'none': No encryption (skip processing)
    */
   type: 'confusion' | 'bytecode' | 'strict' | 'none';
-  /** globby 匹配模式，指定要加密的文件路径（如 ['./public/electron/**/*.js']） */
+  /** globby match patterns specifying files to encrypt (e.g. ['./public/electron/**\/*.js']) */
   files?: string[];
-  /** 仅处理这些扩展名的文件（默认 ['.js']） */
+  /** Only process files with these extensions (default ['.js']) */
   fileExt?: string[];
-  /** 需要单独使用 confusion 模式加密的文件（即使全局配置是 bytecode，这些文件仍用混淆） */
+  /** Files that must use confusion mode even when global config is bytecode (e.g. preload/bridge.js) */
   specificFiles?: string[];
-  /** 加密完成后要清理的目录路径 */
+  /** Directory paths to clean after encryption completes */
   cleanFiles?: string[];
-  /** 加密操作的基准目录（默认 './'，即项目根目录） */
+  /** Base directory for encryption operations (default './', i.e. project root) */
   encryptDir?: string;
   confusionOptions?: ConfusionOptions;
   bytecodeOptions?: BytecodeOptions;
 }
 
-/** 资源移动配置 — 定义文件/目录的源路径和目标路径
- *  src 和 dest 为必填项，因为移动操作必须明确方向
+/** Resource move config — defines source and destination paths for file/directory copying.
+ *  src and dest are required since the move direction must be explicit.
  */
 export interface MoveConfig {
-  /** 源路径（相对于项目根目录） */
+  /** Source path (relative to project root) */
   src: string;
-  /** 目标路径（相对于项目根目录） */
+  /** Destination path (relative to project root) */
   dest: string;
-  /** 替代 src 的路径（若设置则优先使用 dist 而非 src） */
+  /** Override for src (if set, takes priority over src) */
   dist?: string;
-  /** 替代 dest 的路径（若设置则优先使用 target 而非 dest） */
+  /** Override for dest (if set, takes priority over dest) */
   target?: string;
 }
 
-/** 增量更新配置 — 定义增量更新包的生成参数 */
+/** Incremental update config — defines parameters for generating incremental update packages */
 export interface UpdaterConfig {
-  /** metadata YAML 文件路径（包含版本号、releaseDate、files 等信息） */
+  /** Path to the metadata YAML file (contains version, releaseDate, files, SHA512 hashes) */
   metadata: string;
-  /** asar 包文件路径（可被 CLI --asar-file 参数覆盖） */
+  /** Path to the asar package file (can be overridden by CLI --asar-file argument) */
   asarFile?: string;
-  /** 输出配置 */
+  /** Output configuration */
   output: {
-    /** 输出目录 */
+    /** Output directory */
     directory: string;
-    /** zip 文件名模板（自动追加平台和版本后缀） */
+    /** Zip filename template (platform and version suffixes are auto-appended) */
     zip: string;
-    /** JSON 元数据文件名模板（自动追加平台后缀） */
+    /** JSON metadata filename template (platform suffix is auto-appended) */
     file: string;
   };
-  /** 需要打包进 zip 的额外资源 glob 模式列表 */
+  /** Glob patterns for extra resource files to include in the zip */
   extraResources?: string[];
-  /** 要从 asarUnpacked 打包进 zip 的原生模块列表 */
+  /** Native module list from asarUnpacked to include in the zip */
   asarUnpacked?: string[];
-  /** 是否在生成后清理各平台临时解压目录 */
+  /** Whether to clean per-platform temporary extraction directories after generation */
   cleanCache?: boolean;
 }
 
-/** 构建配置 — build 段的顶层结构
- *  electron 键固定为 BundleConfig（打包配置），
- *  其他键（frontend、win32、win64 等）为 ExecConfig（命令执行配置）。
- *  索引签名含 undefined 以允许未定义的键。
+/** Build config — top-level structure for the "build" section.
+ *  The "electron" key is always BundleConfig (bundling config),
+ *  all other keys (frontend, win32, win64, etc.) are ExecConfig (command execution config).
+ *  Index signature includes undefined to allow undefined keys.
  */
 export interface BuildConfig {
-  /** Electron 主进程打包配置（唯一必须为 BundleConfig 的键） */
+  /** Electron main process bundle config (the only key that must be BundleConfig) */
   electron: BundleConfig;
   [key: string]: ExecConfig | BundleConfig | undefined;
 }
 
-/** ee-bin 顶层配置 — 对应 ./cmd/bin.js 的完整结构 */
+/** ee-bin top-level config — corresponds to the full structure of ./cmd/bin.js */
 export interface BinConfig {
-  /** 开发模式配置（各子命令如 frontend、electron） */
+  /** Dev mode configuration (sub-commands like frontend, electron) */
   dev: Record<string, ExecConfig>;
-  /** 构建配置（electron 为 BundleConfig，其他为 ExecConfig） */
+  /** Build configuration (electron is BundleConfig, others are ExecConfig) */
   build: BuildConfig;
-  /** 资源移动配置（如前端 dist → public/dist） */
+  /** Resource move configuration (e.g. frontend dist → public/dist) */
   move: Record<string, MoveConfig>;
-  /** 生产启动配置 */
+  /** Production start configuration */
   start: ExecConfig;
-  /** 加密配置（frontend 和 electron 各有独立策略） */
+  /** Encryption configuration (frontend and electron each have independent strategies) */
   encrypt: Record<string, EncryptConfig>;
-  /** 自定义命令配置 */
+  /** Custom command configuration */
   exec: Record<string, ExecConfig>;
-  /** 增量更新配置（可选，按平台配置） */
+  /** Incremental update configuration (optional, per-platform) */
   updater?: Record<string, UpdaterConfig>;
 }

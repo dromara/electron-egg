@@ -1,12 +1,14 @@
 /**
- * 核心工具函数 — 配置加载、文件 I/O、路径处理
+ * Core Utility Functions — config loading, file I/O, path handling
  *
- * 本模块是 ee-bin 配置系统的核心，负责完整的配置加载管道：
- *   loadConfig(binFile) → 加载用户 ./cmd/bin.js
- *     → loadFile(binFile) → 解析 .js/.json/.json5 配置文件
- *     → extend(true, defaultConfig, userConfig) → 与默认配置深合并
+ * This module is the heart of the ee-bin configuration system. It implements the
+ * full configuration loading pipeline:
+ *   loadConfig(binFile) → loads user ./cmd/bin.js
+ *     → loadFile(binFile) → parses .js/.json/.json5 config files
+ *     → extend(true, defaultConfig, userConfig) → deep merges with default config
  *
- * 另外提供 JSON 文件读写、目录删除、数组规范化等基础 I/O 工具。
+ * Also provides basic I/O utilities: JSON file read/write, directory deletion,
+ * and array normalization.
  */
 
 import { createDebug } from './helpers.js';
@@ -24,14 +26,14 @@ const _basePath = process.cwd();
 const userBin = './cmd/bin.js';
 
 /**
- * 加载并合并 ee-bin 配置
+ * Load and merge ee-bin configuration
  *
- * 两阶段合并策略：
- *   1. 从 ./cmd/bin.js 加载用户配置（支持 .js/.json/.json5 格式）
- *   2. 将用户配置深合并到默认配置之上（用户配置覆盖默认值）
+ * Two-phase merge strategy:
+ *   1. Load user config from ./cmd/bin.js (supports .js/.json/.json5 formats)
+ *   2. Deep merge user config on top of default config (user values override defaults)
  *
- * @param binFile - 自定义配置文件路径（默认 './cmd/bin.js'）
- * @returns 合并后的完整 BinConfig
+ * @param binFile - Custom config file path (defaults to './cmd/bin.js')
+ * @returns Fully merged BinConfig
  */
 export function loadConfig(binFile?: string): BinConfig {
   const binPath = binFile || userBin;
@@ -43,18 +45,20 @@ export function loadConfig(binFile?: string): BinConfig {
 }
 
 /**
- * 加载配置文件 — 支持 .json5/.json/.js/.cjs 格式
+ * Load a configuration file — supports .json5/.json/.js/.cjs formats
  *
- * 各格式的处理差异：
- *   - .json5/.json: 用 json5 解析器读取文本内容（JSON5 支持注释、尾逗号等扩展语法）
- *   - .js/.cjs: 用 require() 加载模块，提取导出值
- *     - 若导出为普通函数（非 class），视为配置工厂函数并调用它获取配置对象
- *     - 若导出为 class，直接使用类实例作为配置（不调用）
- *     - 若导出为 ESModule（含 default 属性），提取 .default 值
+ * Format-specific handling:
+ *   - .json5/.json: Read text content and parse with the json5 parser
+ *     (JSON5 supports comments, trailing commas, and other extended syntax)
+ *   - .js/.cjs: Load the module via require() and extract the export value
+ *     - If the export is a plain function (not a class), treat it as a config
+ *       factory function and call it to obtain the config object
+ *     - If the export is a class, use the class directly as config (do not call it)
+ *     - If the export is an ESModule (has a default property), extract the .default value
  *
- * @param filepath - 配置文件路径（相对于项目根目录）
- * @returns 配置对象（Record<string, unknown>）
- * @throws 文件不存在时抛出带路径提示的错误
+ * @param filepath - Config file path (relative to project root)
+ * @returns Config object (Record<string, unknown>)
+ * @throws Error with path hint if the file does not exist
  */
 export function loadFile(filepath: string): Record<string, unknown> {
   const configFile = path.join(_basePath, filepath);
@@ -69,20 +73,21 @@ export function loadFile(filepath: string): Record<string, unknown> {
     return JsonLib.parse(data) as Record<string, unknown>;
   }
   if (configFile.endsWith('.js') || configFile.endsWith('.cjs')) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports -- 动态用户配置加载
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- dynamic user config loading
     const mod = require(configFile);
-    // 处理 ESM default 导出：require() 加载 ESM 模块时返回 { default: ... }
+    // Handle ESM default export: require() on an ESM module returns { default: ... }
     result = mod.default != null ? mod.default : mod;
   }
-  // 配置工厂模式：若导出为普通函数（非 class），调用它获取配置对象
-  // 区分函数和类的原因：class 导出本身就是配置类，不需要再调用
+  // Config factory pattern: if the export is a plain function (not a class),
+  // call it to obtain the config object. Classes are used directly because
+  // a class export is itself the config class, not a factory function.
   if (is.function(result) && !is.class(result)) {
     result = (result as () => unknown)();
   }
   return (result as Record<string, unknown>) || {};
 }
 
-/** 递归强制删除目录或文件（类似 rm -rf） */
+/** Recursively force-delete a directory or file (similar to rm -rf) */
 export function rm(name: string): void {
   if (!fs.existsSync(name)) {
     return;
@@ -91,8 +96,8 @@ export function rm(name: string): void {
 }
 
 /**
- * 同步读取 JSON 文件并解析为对象
- * @throws 文件不存在时抛出错误
+ * Synchronously read a JSON file and parse it into an object
+ * @throws Error if the file does not exist
  */
 export function readJsonSync(filepath: string, encoding: BufferEncoding = 'utf8'): Record<string, unknown> {
   if (!fs.existsSync(filepath)) {
@@ -102,11 +107,11 @@ export function readJsonSync(filepath: string, encoding: BufferEncoding = 'utf8'
 }
 
 /**
- * 同步写入 JSON 文件，自动创建目录和格式化输出
+ * Synchronously write a JSON file with auto-created directories and formatted output
  *
- * @param filepath - 目标文件路径
- * @param str - 要写入的数据（对象自动 JSON.stringify，其他类型转为字符串）
- * @param options - 可选参数：space 控制缩进（默认 2），replacer 控制序列化过滤
+ * @param filepath - Target file path
+ * @param str - Data to write (objects are auto JSON.stringify'd; other types are converted to string)
+ * @param options - Optional parameters: space controls indentation (default 2), replacer controls serialization filtering
  */
 export function writeJsonSync(filepath: string, str: unknown, options?: { space?: number; replacer?: (key: string, value: unknown) => unknown }): void {
   const opt = options || {};
@@ -114,7 +119,7 @@ export function writeJsonSync(filepath: string, str: unknown, options?: { space?
     opt.space = 2;
   }
 
-  // 自动创建目标目录（避免因目录不存在导致写入失败）
+  // Auto-create target directory (prevents write failure from missing directory)
   fs.mkdirSync(path.dirname(filepath), { recursive: true });
   let data: string;
   if (typeof str === 'object') {
@@ -127,8 +132,8 @@ export function writeJsonSync(filepath: string, str: unknown, options?: { space?
 }
 
 /**
- * 将 string | string[] | undefined 规范化为 string[]
- * 用于处理配置中 args 字段的不同格式输入
+ * Normalize string | string[] | undefined to string[]
+ * Used to handle the "args" config field which accepts different input formats
  */
 export function toArray(value?: string[] | string): string[] {
   if (typeof value === 'string') return [value];

@@ -1,60 +1,62 @@
 /**
- * 第三方模块类型声明
+ * Third-Party Module Type Declarations
  *
- * 为没有官方 @types 包或类型定义不完整的第三方依赖提供手动类型声明。
- * 这些库在 ee-bin 中有具体的使用场景：
- *   - json5: 用于解析 JSON5 格式的配置文件
- *   - bytenode: 用于将 JS 编译为 V8 字节码 (.jsc)，实现代码加密
- *   - cross-spawn: 用于跨平台子进程启动（解决 Windows 上的 shell 兼容问题）
- *   - chokidar: 用于开发模式下监听 electron 目录文件变化
- *   - tree-kill: 用于跨平台终止子进程树（杀掉父进程及其所有子进程）
- *   - javascript-obfuscator: 用于 JS 代码混淆加密
- *   - js-yaml: 用于解析 YAML 格式的更新元数据文件
- *   - globby: 用于基于 glob 模式扫描文件系统
+ * Provides manual type declarations for third-party dependencies that lack official
+ * @types packages or have incomplete type definitions. Each library has a specific
+ * usage context within ee-bin:
+ *   - json5: For parsing JSON5-format configuration files
+ *   - bytenode: For compiling JS to V8 bytecode (.jsc) for code encryption
+ *   - cross-spawn: For cross-platform child process launching (resolves Windows shell compatibility)
+ *   - chokidar: For watching electron directory file changes in dev mode
+ *   - tree-kill: For cross-platform process tree termination (kills parent + all child processes)
+ *   - javascript-obfuscator: For JS code obfuscation encryption
+ *   - js-yaml: For parsing YAML-format update metadata files
+ *   - globby: For filesystem scanning based on glob patterns
  */
 
 declare module 'json5' {
   const json5: {
-    /** 解析 JSON5 文本为 JS 值（支持注释、尾逗号等扩展语法） */
+    /** Parse JSON5 text into a JS value (supports comments, trailing commas, and other extended syntax) */
     parse(text: string, reviver?: (key: string, value: unknown) => unknown): unknown;
-    /** 将 JS 值序列化为 JSON5 文本 */
+    /** Serialize a JS value to JSON5 text */
     stringify(value: unknown, replacer?: (key: string, value: unknown) => unknown | string[] | number[], space?: string | number): string;
   };
   export default json5;
 }
 
 declare module 'bytenode' {
-  /** 将 JS 文件编译为 V8 字节码 (.jsc)，electron 模式下启用 V8 兼容 */
+  /** Compile a JS file to V8 bytecode (.jsc); enable electron mode for V8 compatibility */
   export function compileFile(args: {
-    /** 输入 .js 源文件路径 */
+    /** Input .js source file path */
     filename: string;
-    /** 输出 .jsc 字节码文件路径 */
+    /** Output .jsc bytecode file path */
     output: string;
-    /** 是否为 Electron 的 V8 引擎编译（Electron 版本可能与 Node 版本不同） */
+    /** Whether to compile for Electron's V8 engine (Electron V8 version may differ from Node's) */
     electron?: boolean;
   }): void;
 }
 
 declare module 'cross-spawn' {
   import { SpawnOptions, ChildProcess } from 'child_process';
-  /** 扩展 SpawnOptions，增加 maxBuffer 用于大输出量的命令 */
+  /** Extended SpawnOptions with maxBuffer for high-output commands */
   interface CrossSpawnOptions extends SpawnOptions {
     maxBuffer?: number;
   }
-  /** 异步启动子进程，返回 ChildProcess 实例（可监听事件、获取 pid） */
+  /** Launch a child process asynchronously, returns ChildProcess instance (supports event listeners, pid access) */
   export function spawn(command: string, args?: string[], options?: CrossSpawnOptions): ChildProcess;
-  /** 同步启动子进程，返回结果对象（已执行完毕，无事件监听能力） */
+  /** Launch a child process synchronously, returns result object (already completed, no event listening) */
   export function sync(command: string, args?: string[], options?: CrossSpawnOptions): { status: number | null; output: string[]; stdout: string | Buffer; stderr: string | Buffer; signal: string | null; pid: number };
-  /** spawnSync 的别名 */
+  /** Alias for spawnSync */
   export function spawnSync(command: string, args?: string[], options?: CrossSpawnOptions): { status: number | null; output: string[]; stdout: string | Buffer; stderr: string | Buffer; signal: string | null; pid: number };
   export default spawn;
 }
 
 declare module 'chokidar' {
   /**
-   * chokidar 的 FSWatcher 接口（不是 Node.js fs.FSWatcher）
-   * Node fs.FSWatcher 仅监听单个文件，而 chokidar.FSWatcher 支持目录递归监听、
-   * add/unwatch 等操作，两者 API 完全不同，因此不能混用。
+   * chokidar's FSWatcher interface (not Node.js fs.FSWatcher).
+   * Node's fs.FSWatcher only watches a single file, whereas chokidar.FSWatcher supports
+   * recursive directory watching, add/unwatch operations, etc. The two APIs are completely
+   * different and cannot be used interchangeably.
    */
   interface ChokidarFSWatcher {
     on(event: 'change' | 'add' | 'unlink' | 'error' | 'ready' | 'all', handler: (path: string, ...args: unknown[]) => void): ChokidarFSWatcher;
@@ -64,7 +66,7 @@ declare module 'chokidar' {
     unwatch(paths: string | string[]): ChokidarFSWatcher;
   }
 
-  /** chokidar watch 选项 — 仅包含 ee-bin 实际使用的字段 */
+  /** chokidar watch options — only includes fields actually used by ee-bin */
   interface ChokidarWatchOptions {
     persistent?: boolean;
     ignoreInitial?: boolean;
@@ -73,14 +75,14 @@ declare module 'chokidar' {
     depth?: number;
   }
 
-  /** 启动文件系统监听器 */
+  /** Start a filesystem watcher */
   export function watch(paths: string | string[], options?: ChokidarWatchOptions): ChokidarFSWatcher;
 }
 
 declare module 'tree-kill' {
   /**
-   * 终止进程树（杀掉 pid 及其所有子进程）
-   * callback 中 error 为 null 表示成功，非 null 表示失败
+   * Terminate a process tree (kill pid and all its child processes).
+   * callback error is null on success, non-null on failure.
    */
   export default function kill(pid: number, signal?: string | number, callback?: (error: Error | null) => void): void;
 }
@@ -90,43 +92,43 @@ declare module 'javascript-obfuscator' {
     getObfuscatedCode(): string;
   }
   /**
-   * 混淆 JS 源代码
-   * options 直接引用 ConfusionOptions 类型而非 Record<string, unknown>，
-   * 确保与 ee-bin 的配置类型一致，避免类型漂移
+   * Obfuscate JS source code.
+   * options references ConfusionOptions type directly instead of Record<string, unknown>,
+   * ensuring type consistency with ee-bin's config types and preventing type drift.
    */
   export function obfuscate(sourceCode: string, options?: import('../types/config.js').ConfusionOptions): ObfuscationResult;
 }
 
 declare module 'js-yaml' {
-  /** 解析 YAML 文本为 JS 值（用于读取 electron-builder 生成的更新元数据） */
+  /** Parse YAML text into a JS value (used for reading electron-builder-generated update metadata) */
   export function load(str: string, opts?: Record<string, unknown>): unknown;
-  /** 将 JS 值序列化为 YAML 文本 */
+  /** Serialize a JS value to YAML text */
   export function dump(obj: unknown, opts?: Record<string, unknown>): string;
 }
 
 declare module 'globby' {
-  /** globby 通用选项 */
+  /** globby common options */
   interface GlobbyOptions {
     cwd?: string;
-    /** 排除匹配的文件/目录 */
+    /** Exclude matched files/directories */
     ignore?: string | string[];
-    /** 是否匹配点号文件（如 .env） */
+    /** Whether to match dotfiles (e.g. .env) */
     dot?: boolean;
-    /** 仅返回文件路径 */
+    /** Only return file paths */
     onlyFiles?: boolean;
-    /** 仅返回目录路径 */
+    /** Only return directory paths */
     onlyDirectories?: boolean;
   }
 
   /**
-   * globby callable interface — 同时支持异步调用和 .sync() 方法
-   * 使用 interface 而非单独 export function 是因为 globby 的 default export
-   * 是一个可调用函数，同时该函数对象上还挂载了 sync 静态方法。
+   * globby callable interface — supports both async invocation and .sync() method.
+   * Uses interface instead of separate exported functions because globby's default export
+   * is a callable function that also has a sync static method attached to it.
    */
   interface Globby {
-    /** 异步扫描文件系统，返回匹配的路径列表 */
+    /** Asynchronously scan the filesystem, returning matched path list */
     (patterns: string | string[], options?: GlobbyOptions): Promise<string[]>;
-    /** 同步扫描文件系统，返回匹配的路径列表 */
+    /** Synchronously scan the filesystem, returning matched path list */
     sync(patterns: string | string[], options?: GlobbyOptions): string[];
   }
 

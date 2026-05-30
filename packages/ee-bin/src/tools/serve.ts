@@ -1,22 +1,23 @@
 /**
- * 开发/构建/启动管理器 — ee-bin 的核心调度器
+ * Dev/Build/Start Manager — ee-bin's core dispatcher
  *
- * ServeProcess 类管理 dev/build/start/exec 全流程，是 ee-bin CLI 最复杂的模块。
- * 核心职责：
- *   1. dev  — 启动前端开发服务器 + Electron 进程，可选 watch 模式自动重建
- *   2. build — 打包 Electron 代码 + 执行 electron-builder 各平台构建命令
- *   3. start — 以生产模式启动 Electron
- *   4. exec  — 执行用户自定义命令
+ * The ServeProcess class manages the full dev/build/start/exec lifecycle and is the
+ * most complex module in ee-bin. Core responsibilities:
+ *   1. dev  — Start frontend dev server + Electron process, optional watch mode with auto-rebuild
+ *   2. build — Bundle Electron code + execute electron-builder platform build commands
+ *   3. start — Start Electron in production mode
+ *   4. exec  — Execute user-defined custom commands
  *
- * 进程管理策略：
- *   - execProcess 仅跟踪异步 ChildProcess（同步执行的结果不存入，因为进程已结束无需管理）
- *   - SIGINT/SIGTERM 信号时关闭所有子进程并恢复 package.json main 字段
- *   - watch 模式下用 debounce 防抖 + tree-kill 终止旧 Electron 进程再重新启动
+ * Process management strategy:
+ *   - execProcess only tracks async ChildProcess instances (sync executions are already
+ *     complete, so there's no process to manage)
+ *   - SIGINT/SIGTERM signal handlers close all child processes and restore package.json main field
+ *   - In watch mode, debounce + tree-kill terminate the old Electron process before restarting
  *
- * 打包策略：
- *   - bundle 模式：esbuild 打包为单文件 + 虚拟注册表插件
- *   - copy 模式：直接复制整个 electron/ 目录（适用于不打包的场景）
- *   - 打包后切换 package.json main 字段指向 ./public/electron/main.js
+ * Bundling strategy:
+ *   - bundle mode: esbuild bundles into a single file + virtual registry plugin
+ *   - copy mode: directly copies the entire electron/ directory (for non-bundling scenarios)
+ *   - After bundling, switches package.json main field to point to ./public/electron/main.js
  */
 
 import { createDebug, chalk, copyDirSync, formatCmds } from '../lib/helpers.js';
@@ -33,13 +34,13 @@ import type { ExecConfig, BundleConfig } from '../types/config.js';
 import { bundleRegistryPlugin } from '../plugins/bundle_registry_plugin.js';
 
 const log = createDebug('ee-bin:serve');
-/** 子进程最大缓冲区大小（1GB），防止大输出量的构建命令被截断 */
+/** Maximum buffer size for child processes (1GB), prevents large-output build commands from being truncated */
 const MAX_BUFFER = 1024 * 1024 * 1024;
 const ELECTRON_DIR = './electron';
 const BUNDLE_DIR = './public/electron';
 const PKG_PATH = './package.json';
 
-/** ServeProcess 方法通用选项 — 对应 Commander CLI 参数 */
+/** Common options for ServeProcess methods — corresponds to Commander CLI parameters */
 interface ServeOptions {
   config?: string;
   serve?: string;
@@ -48,9 +49,9 @@ interface ServeOptions {
 }
 
 class ServeProcess {
-  /** 异步子进程引用表（仅存异步 ChildProcess，同步进程执行完毕无需跟踪） */
+  /** Async child process reference table (only async ChildProcess instances; sync processes are already complete and don't need tracking) */
   execProcess: Record<string, ChildProcess>;
-  /** package.json main 字段的原始值（用于 _restorePkgMain 恢复） */
+  /** Original value of package.json main field (used by _restorePkgMain to restore) */
   private originalPkgMain: string | undefined;
 
   constructor() {
@@ -59,7 +60,7 @@ class ServeProcess {
     this._init();
   }
 
-  /** 注册 SIGINT/SIGTERM 信号处理器，确保退出时关闭子进程并恢复配置 */
+  /** Register SIGINT/SIGTERM signal handlers to ensure child processes are closed and config is restored on exit */
   private _init(): void {
     process.on('SIGINT', () => {
       console.log(chalk.blue('[ee-bin] ') + 'Received SIGINT. Closing processes...');
@@ -73,11 +74,12 @@ class ServeProcess {
   }
 
   /**
-   * 关闭所有子进程并恢复 package.json，然后退出
+   * Close all child processes, restore package.json, then exit
    *
-   * 流程：kill 所有子进程 → 恢复 pkgMain → sleep 500ms → process.exit(0)
-   * NOTE: 500ms sleep 是折中方案。理想做法是监听每个子进程的 exit 事件再退出，
-   * 但实现复杂度高（多子进程竞争、嵌套进程等）。若子进程关闭超时可能被遗弃。
+   * Flow: kill all child processes → restore pkgMain → sleep 500ms → process.exit(0)
+   * NOTE: The 500ms sleep is a compromise. The ideal approach would be to listen for each
+   * child process's exit event before exiting, but that's complex to implement (multi-process
+   * racing, nested processes, etc.). If a child process doesn't close in time, it may be orphaned.
    */
   private async _closeProcess(): Promise<void> {
     const keys = Object.keys(this.execProcess);
@@ -96,17 +98,17 @@ class ServeProcess {
   }
 
   /**
-   * 开发模式 — 启动前端开发服务器 + Electron 进程
+   * Dev mode — start frontend dev server + Electron process
    *
-   * 完整流程：
-   *   1. 设置 NODE_ENV=dev
-   *   2. 加载配置，解析要启动的命令名
-   *   3. 若包含 electron 命令：
-   *      a. 先打包 Electron 代码（bundle）
-   *      b. 切换 package.json main 字段
-   *      c. 若 electron.watch=true，监听 electron/ 目录变化
-   *         → 变化时 debounce → 重新 bundle → kill 旧进程 → 重新 spawn
-   *   4. multiExec 启动所有命令（前端 + Electron）
+   * Complete flow:
+   *   1. Set NODE_ENV=dev
+   *   2. Load config, parse command names to start
+   *   3. If electron command is included:
+   *      a. First bundle Electron code (via esbuild)
+   *      b. Switch package.json main field
+   *      c. If electron.watch=true, watch electron/ directory for changes
+   *         → on change: debounce → re-bundle → kill old process → re-spawn
+   *   4. multiExec starts all commands (frontend + Electron)
    */
   async dev(options: ServeOptions = {}): Promise<void> {
     process.env.NODE_ENV = 'dev';
@@ -115,7 +117,7 @@ class ServeProcess {
     const binCmd = 'dev';
     const binCmdConfig = binCfg.dev;
 
-    // 未指定命令时默认启动所有 dev 配置中的命令
+    // Default to starting all commands defined in dev config when none specified
     let command = serve;
     if (!command) {
       command = Object.keys(binCmdConfig).join(',');
@@ -130,11 +132,11 @@ class ServeProcess {
     if (cmds.includes('electron')) {
       const electronConfig = binCmdConfig.electron;
 
-      // Electron 进程需要打包后的代码，所以先 bundle 再启动
+      // Electron process needs bundled code, so bundle first before starting
       await this.bundle(binCfg.build.electron);
       this._switchPkgMain();
 
-      // watch 模式：监听 electron 目录变化，自动重建+重启
+      // Watch mode: monitor electron directory for changes, auto-rebuild + restart
       if (electronConfig?.watch) {
         let debounceTimer: ReturnType<typeof setTimeout> | null = null;
         const cmd = 'electron';
@@ -142,7 +144,7 @@ class ServeProcess {
         watcher.on('change', async (f: string) => {
           console.log(chalk.blue('[ee-bin] [dev] ') + `File [${chalk.cyan(f)}] has been changed`);
 
-          // debounce 防抖：短时间内多次文件变动只触发一次重建
+          // Debounce: rapid successive file changes only trigger one rebuild
           if (debounceTimer) {
             clearTimeout(debounceTimer);
           }
@@ -151,7 +153,7 @@ class ServeProcess {
             await this.bundle(binCfg.build.electron);
             const subProcess = this.execProcess[cmd];
             if (subProcess && subProcess.pid) {
-              // kill 旧 Electron 进程（SIGKILL 强制终止），成功后重新 spawn
+              // Kill old Electron process (SIGKILL for forced termination), then re-spawn on success
               kill(subProcess.pid, 'SIGKILL', (err) => {
                 if (err) {
                   console.log(chalk.red('[ee-bin] [dev] ') + `Restart failed, error: ${err}`);
@@ -176,8 +178,8 @@ class ServeProcess {
   }
 
   /**
-   * 生产模式启动 — 直接运行 Electron 进程（不做打包）
-   * 前提：项目已通过 build 命令完成打包
+   * Production start — directly run the Electron process (no bundling)
+   * Prerequisite: the project has already been built via the build command
    */
   async start(options: ServeOptions = {}): Promise<void> {
     process.env.NODE_ENV = 'prod';
@@ -196,21 +198,22 @@ class ServeProcess {
     this.multiExec(opt);
   }
 
+  /** Helper: sleep for the specified number of milliseconds */
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
-   * 构建模式 — 打包 Electron 代码 + 执行各平台构建命令
+   * Build mode — bundle Electron code + execute platform build commands
    *
-   * 完整流程：
-   *   1. 设置 NODE_ENV=prod（或用户指定环境）
-   *   2. 若 cmds 包含 'electron'：先打包 → 从命令列表移除 electron → 切换 pkgMain
-   *   3. multiExec 执行剩余命令（如 frontend、win64、mac 等）
-   *   4. 构建完成后恢复 package.json main 字段
+   * Complete flow:
+   *   1. Set NODE_ENV=prod (or user-specified environment)
+   *   2. If cmds includes 'electron': bundle first → remove electron from command list → switch pkgMain
+   *   3. multiExec executes remaining commands (e.g. frontend, win64, mac, etc.)
+   *   4. After build completes, restore package.json main field
    *
-   * electron 命令仅触发打包，不启动 Electron 进程，
-   * 所以从命令列表中移除后不再由 multiExec 处理
+   * The 'electron' command only triggers bundling, not an Electron process launch,
+   * so it's removed from the command list and not processed by multiExec
    */
   async build(options: ServeOptions = {}): Promise<void> {
     const { config, env } = options;
@@ -218,8 +221,8 @@ class ServeProcess {
     process.env.NODE_ENV = env || 'prod';
     const binCfg = loadConfig(config);
     const binCmd = 'build';
-    // build.electron 是 BundleConfig，其他键是 ExecConfig；
-    // electron 总是从 commands 移除后再传入 multiExec，所以这个 cast 安全
+    // build.electron is BundleConfig; other keys are ExecConfig.
+    // electron is always removed from commands before passing to multiExec, so this cast is safe
     const binCmdConfig = binCfg.build as Record<string, ExecConfig>;
 
     if (!cmds || cmds === '') {
@@ -231,6 +234,8 @@ class ServeProcess {
     const commands = formatCmds(cmds);
     if (commands.includes('electron')) {
       await this.bundle(binCfg.build.electron);
+      // Remove 'electron' from the command list — it only triggers bundling,
+      // not a subprocess launch
       const index = commands.indexOf('electron');
       commands.splice(index, 1);
       cmds = commands.join(',');
@@ -244,11 +249,11 @@ class ServeProcess {
       command: cmds || '',
     };
     this.multiExec(opt);
-    // 构建完成后恢复 package.json（dev 模式在 SIGINT/SIGTERM 时恢复）
+    // Restore package.json after build completes (dev mode restores on SIGINT/SIGTERM)
     this._restorePkgMain();
   }
 
-  /** 执行用户自定义命令 */
+  /** Execute user-defined custom commands from the "exec" config section */
   exec(options: ServeOptions = {}): void {
     const { config, cmds } = options;
     const binCfg = loadConfig(config);
@@ -264,13 +269,13 @@ class ServeProcess {
   }
 
   /**
-   * 执行多个命令 — 遍历命令列表，为每个命令启动子进程
+   * Execute multiple commands — iterate the command list and start a subprocess for each
    *
-   * 设计要点：
-   *   - 前端 file:// 协议在 dev 模式下跳过（前端已通过 HTTP 服务提供，不需要单独启动）
-   *   - sync 模式使用 crossSpawnSync 同步执行，结果不存入 execProcess（进程已结束）
-   *   - async 模式使用 crossSpawn 异步启动，存入 execProcess 便于后续 kill
-   *   - async 进程监听 exit 事件，dev 模式下输出退出提示
+   * Design decisions:
+   *   - Frontend file:// protocol is skipped in dev mode (frontend is already served via HTTP)
+   *   - sync mode uses crossSpawnSync for blocking execution; result is not stored in execProcess (process already complete)
+   *   - async mode uses crossSpawn for non-blocking execution; stored in execProcess for later kill
+   *   - async processes listen for exit events; in dev mode, a message is logged when a process exits
    */
   multiExec(opt: { binCmd: string; binCmdConfig: Record<string, ExecConfig>; command: string }): void {
     const { binCmd, binCmdConfig, command } = opt;
@@ -283,8 +288,8 @@ class ServeProcess {
         continue;
       }
 
-      // dev 模式下，前端配置 protocol='file://' 时跳过启动
-      // （前端文件已通过 HTTP 服务器提供，无需额外 file:// 进程）
+      // In dev mode, skip frontend startup when protocol is 'file://'
+      // (frontend files are already served via HTTP dev server, no separate file:// process needed)
       if (binCmd === 'dev' && cmd === 'frontend' && cfg.protocol === 'file://') {
         continue;
       }
@@ -297,14 +302,14 @@ class ServeProcess {
       const stdioOpt: 'inherit' | 'pipe' | 'ignore' = cfg.stdio || 'inherit';
 
       if (cfg.sync) {
-        // 同步执行：阻塞直到命令完成，不需要跟踪进程
+        // Sync execution: blocks until the command completes, no process tracking needed
         crossSpawnSync(cfg.cmd, execArgs, {
           stdio: stdioOpt,
           cwd: execDir,
           maxBuffer: MAX_BUFFER,
         });
       } else {
-        // 异步执行：启动子进程并跟踪，便于 SIGINT/SIGTERM 时 kill
+        // Async execution: starts a child process and tracks it for SIGINT/SIGTERM kill
         const childProc = crossSpawn(cfg.cmd, execArgs, {
           stdio: stdioOpt,
           cwd: execDir,
@@ -315,6 +320,8 @@ class ServeProcess {
         childProc.on('exit', () => {
           if (binCmd === 'dev') {
             console.log(chalk.blue(`[ee-bin] [${binCmd}] `) + `The ${chalk.green(cmd)} process is exiting`);
+            // On Windows, Electron exit doesn't always terminate the parent process,
+            // so remind the user to press Ctrl+C
             if (process.platform === 'win32' && cmd === 'electron') {
               console.log(chalk.blue(`[ee-bin] [${binCmd}] `) + chalk.green('Press "CTRL+C" to exit'));
             }
@@ -336,19 +343,20 @@ class ServeProcess {
   }
 
   /**
-   * 打包 Electron 主进程代码
+   * Bundle Electron main process code
    *
-   * 两种模式：
-   *   - 'bundle': 使用 esbuild + bundleRegistryPlugin 打包为单文件
-   *   - 'copy':   直接复制整个 electron/ 目录到 public/electron/
+   * Two modes:
+   *   - 'bundle': Use esbuild + bundleRegistryPlugin to bundle into a single file
+   *   - 'copy':   Directly copy the entire electron/ directory to public/electron/
    *
-   * 打包前会清空输出目录（rm outdir），确保每次构建结果干净
+   * Clears the output directory (rm outdir) before bundling to ensure a clean build
    */
   async bundle(bundleConfig?: BundleConfig): Promise<void> {
     if (!bundleConfig) return;
     const cwd = process.cwd();
     const outdir = path.join(cwd, BUNDLE_DIR);
 
+    // Clean output directory to ensure fresh build results
     rm(outdir);
 
     if (bundleConfig.bundleType === 'copy') {
@@ -359,19 +367,19 @@ class ServeProcess {
   }
 
   /**
-   * 使用 esbuild + 注册表插件打包 Electron 代码
+   * Bundle Electron code using esbuild + registry plugin
    *
-   * esbuild 配置策略：
-   *   - entryPoints: 虚拟模块 'app:bundle-entry'（由插件生成）
-   *   - format: 默认 cjs（推荐 Electron），可选 esm
-   *   - sourcemap: 自动推断（dev→inline, prod→off），可用户覆盖
-   *   - external: 框架 external（ee-core/electron/better-sqlite3 等）+ 用户自定义
-   *   - banner: 注入 process.env.EE_BUNDLED = "true"，让 ee-core 检测打包模式
-   *   - packages: 'external' 让 esbuild 自动排除所有 node_modules 包
+   * esbuild configuration strategy:
+   *   - entryPoints: Virtual module 'app:bundle-entry' (generated by the plugin)
+   *   - format: Default cjs (recommended for Electron), optional esm
+   *   - sourcemap: Auto-inferred (dev→inline, prod→off), user can override
+   *   - external: Framework externals (ee-core/electron/better-sqlite3 etc.) + user-defined
+   *   - banner: Injects process.env.EE_BUNDLED = "true" so ee-core detects bundle mode
+   *   - packages: 'external' tells esbuild to automatically exclude all node_modules packages
    *
-   * 打包后还需：
-   *   1. 重命名输出文件（app_bundle-entry.js → main.js）
-   *   2. 复制不可打包的文件（jobs 目录、preload/bridge.js、用户自定义 copy）
+   * Post-bundle steps:
+   *   1. Rename output file (app_bundle-entry.js → main.js)
+   *   2. Copy non-bundlable files (jobs directory, preload/bridge.js, user-defined copy targets)
    */
   private async _bundleWithRegistry(bundleConfig: BundleConfig): Promise<void> {
     const cwd = process.cwd();
@@ -379,7 +387,7 @@ class ServeProcess {
     const configDir = path.join(cwd, ELECTRON_DIR, 'config');
     const mainJsPath = path.join(cwd, ELECTRON_DIR, 'main.js');
     const mainTsPath = path.join(cwd, ELECTRON_DIR, 'main.ts');
-    // 检测是否为 TypeScript 入口（影响 esbuild 解析和输出格式推断）
+    // Detect TypeScript entry (affects esbuild resolution and output format inference)
     const isTypeScript = fs.existsSync(mainTsPath);
     const entryMain = isTypeScript ? mainTsPath : mainJsPath;
     const outdir = path.join(cwd, BUNDLE_DIR);
@@ -394,12 +402,15 @@ class ServeProcess {
     } else if (bundleConfig.sourcemap === 'external') {
       sourcemap = true;
     } else {
+      // Auto mode: dev → inline sourcemap for debugging, prod → disabled for smaller output
       sourcemap = isDev ? 'inline' : false;
     }
 
-    // 框架 internal external：这些包必须从 node_modules 加载而非打包进 main.js
-    // 原因：ee-core 是 child_process.fork() 入口点需要独立文件；electron/better-sqlite3
-    // 是 native 模块；pino-roll/pino-pretty 需要 fs 操作在打包后不可用
+    // Framework internal externals: these packages must be loaded from node_modules at runtime,
+    // not bundled into main.js. Reasons:
+    //   - ee-core: child_process.fork() needs its entry point as a real file on disk
+    //   - electron/better-sqlite3: native modules that cannot be bundled by esbuild
+    //   - pino-roll/pino-pretty: rely on fs operations that don't work after bundling
     const frameworkExternal = [
       'ee-core',
       'ee-bin',
@@ -419,7 +430,8 @@ class ServeProcess {
       bundle: true,
       platform: 'node',
       target: 'node20',
-      // packages: 'external' 让 esbuild 将所有 npm 包视为 external（已通过 explicit external 列表细化）
+      // packages: 'external' tells esbuild to treat all npm packages as external
+      // (already refined by the explicit external list above)
       packages: 'external',
       outdir,
       external: [
@@ -432,7 +444,8 @@ class ServeProcess {
       ...(bundleConfig.drop ? { drop: bundleConfig.drop } : {}),
       ...(bundleConfig.legalComments ? { legalComments: bundleConfig.legalComments } : {}),
       sourcemap,
-      // banner 注入 EE_BUNDLED 标记，ee-core 检测到此值时使用注册表而非文件系统扫描
+      // Banner injects EE_BUNDLED marker: ee-core checks this value to use the registry
+      // instead of filesystem scanning when in bundle mode
       banner: {
         js: 'process.env.EE_BUNDLED = "true";',
       },
@@ -446,33 +459,35 @@ class ServeProcess {
     log('_bundleWithRegistry options:%O', options);
     await build(options);
 
-    // esbuild 将虚拟模块名 'app:bundle-entry' 中的 ':' 替换为 '_',
-    // 所以输出文件名为 'app_bundle-entry.js'，需要重命名为 'main.js'
+    // esbuild replaces ':' in virtual module name 'app:bundle-entry' with '_',
+    // so the output file is named 'app_bundle-entry.js' — rename it to 'main.js'
     const bundleEntryFile = path.join(outdir, 'app_bundle-entry.js');
     if (fs.existsSync(bundleEntryFile)) {
       fs.renameSync(bundleEntryFile, path.join(outdir, 'main.js'));
     }
 
+    // Also rename the sourcemap file if it exists
     const bundleEntryMap = path.join(outdir, 'app_bundle-entry.js.map');
     if (fs.existsSync(bundleEntryMap)) {
       fs.renameSync(bundleEntryMap, path.join(outdir, 'main.js.map'));
     }
 
-    // 复制不可打包的文件（child_process.fork 和 BrowserWindow preload 需要独立文件）
+    // Copy non-bundlable files (child_process.fork and BrowserWindow preload need separate files)
     this._copyUnbundledFiles(cwd, outdir, bundleConfig);
 
     console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
   }
 
   /**
-   * 复制不可打包的文件 — 三层复制策略
+   * Copy non-bundlable files — three-tier copy strategy
    *
-   * 1. 框架必需复制：jobs/ 目录（child_process.fork() 要求独立文件）
-   * 2. preload/bridge.js（BrowserWindow preload 脚本必须为独立文件，由 Electron 直接加载）
-   * 3. 用户自定义复制（bundleConfig.copy 中指定的额外资源）
+   * 1. Framework-required copies: jobs/ directory (child_process.fork() requires separate files)
+   * 2. preload/bridge.js (BrowserWindow preload script must be a separate file, loaded directly by Electron)
+   * 3. User-defined copies (extra resources specified in bundleConfig.copy)
    */
   private _copyUnbundledFiles(cwd: string, outdir: string, bundleConfig: BundleConfig): void {
-    // 框架必需：jobs/ 目录（child_process.fork 无法从打包文件中找到子进程入口点）
+    // Framework-required: jobs/ directory (child_process.fork cannot find child process
+    // entry points from a bundled file — they must exist as separate files on disk)
     const copyTargets = ['jobs'];
     for (const target of copyTargets) {
       const src = path.join(cwd, ELECTRON_DIR, target);
@@ -482,8 +497,9 @@ class ServeProcess {
       }
     }
 
-    // preload/bridge.js：BrowserWindow 的 preload 脚本由 Electron 直接从磁盘加载，
-    // 不能打包进 main.js（打包后路径不对且 Electron 要求 preload 为独立文件）
+    // preload/bridge.js: BrowserWindow's preload script is loaded directly from disk by Electron.
+    // It cannot be bundled into main.js (bundled path would be wrong, and Electron requires
+    // preload scripts to be separate files)
     const bridgeSrc = path.join(cwd, ELECTRON_DIR, 'preload', 'bridge.js');
     const bridgeDest = path.join(outdir, 'preload', 'bridge.js');
     if (fs.existsSync(bridgeSrc)) {
@@ -491,7 +507,7 @@ class ServeProcess {
       fs.copyFileSync(bridgeSrc, bridgeDest);
     }
 
-    // 用户自定义：额外资源（如 assets 目录、data/db.json 等）
+    // User-defined: extra resources (e.g. assets directory, data/db.json)
     const userCopyTargets = bundleConfig.copy || [];
     for (const target of userCopyTargets) {
       const src = path.join(cwd, ELECTRON_DIR, target);
@@ -507,10 +523,11 @@ class ServeProcess {
   }
 
   /**
-   * 切换 package.json main 字段
+   * Switch package.json main field
    *
-   * 打包后 Electron 启动需要指向 ./public/electron/main.js 而非 ./electron/main.js，
-   * 因为打包产物在 public/electron/ 目录下。切换前保存原始值以便恢复。
+   * After bundling, Electron needs to point to ./public/electron/main.js instead of
+   * ./electron/main.js, because the bundle output is in the public/electron/ directory.
+   * The original value is saved before switching so it can be restored later.
    */
   private _switchPkgMain(): void {
     const pkgPath = path.join(process.cwd(), PKG_PATH);
@@ -525,10 +542,10 @@ class ServeProcess {
   }
 
   /**
-   * 恢复 package.json main 字段
+   * Restore package.json main field
    *
-   * 构建完成后或 SIGINT/SIGTERM 时恢复原始 main 值，
-   * 避免 package.json 被永久修改影响后续开发
+   * Restores the original main value after build completes or on SIGINT/SIGTERM,
+   * preventing package.json from being permanently modified (which would break dev mode)
    */
   private _restorePkgMain(): void {
     if (this.originalPkgMain !== undefined) {
