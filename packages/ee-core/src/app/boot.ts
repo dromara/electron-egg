@@ -74,8 +74,8 @@ export class ElectronEgg {
     app.register(eventName, handler);
   }
 
-  run(): void {
-    app.run();
+  async run(): Promise<void> {
+    await app.run();
   }
 
   async runAsync(): Promise<void> {

@@ -8,9 +8,9 @@ export class Application {
     eventBus.register(eventName, handler);
   }
 
-  run(): void {
+  async run(): Promise<void> {
     loadController();
-    loadSocket();
+    await loadSocket();
     eventBus.emitLifecycle(Ready);
     loadElectron();
   }
