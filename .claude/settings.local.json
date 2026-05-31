@@ -101,7 +101,8 @@
       "Bash(cat tsconfig.json)",
       "Bash(npx vitest *)",
       "Bash(./node_modules/.bin/vitest run *)",
-      "Bash(echo \"---TYPECHECK EXIT: $?---\")"
+      "Bash(echo \"---TYPECHECK EXIT: $?---\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\),indent=2\\)\\)\")"
     ]
   }
 }

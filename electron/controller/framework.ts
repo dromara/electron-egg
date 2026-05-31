@@ -29,7 +29,7 @@ interface SqlitedbOperationArgs {
 
 interface SqlitedbOperationResult {
   action: string;
-  result: boolean | string | null;
+  result: boolean | string | UserRow[] | null;
   all_list: UserRow[];
   code: number;
 }
@@ -78,7 +78,7 @@ class FrameworkController {
         data.result = await sqlitedbService.updateTestDataSqlite(update_name, update_age);
         break;
       case 'get' :
-        data.all_list = await sqlitedbService.getTestDataSqlite(search_age);
+        data.result = await sqlitedbService.getTestDataSqlite(search_age);
         break;
       case 'getDataDir' :
         data.result = await sqlitedbService.getDataDir();

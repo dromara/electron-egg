@@ -65,7 +65,7 @@ export default (): Partial<Config> => {
         key: '/public/ssl/localhost+1.key',
         cert: '/public/ssl/localhost+1.pem'
       },
-      protocol: 'http',
+      protocol: 'http://',
       host: '127.0.0.1',
       port: 7071,
       cors: { origin: '*' },

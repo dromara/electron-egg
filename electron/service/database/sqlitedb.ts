@@ -84,9 +84,9 @@ class SqlitedbService extends BasedbService {
   /*
    * all Test data (sqlite)
    */
-  async getAllTestDataSqlite(): Promise<UserRow[]> {
+  async getAllTestDataSqlite(): Promise<any[]> {
     const selectAllUser = this.db.prepare(`SELECT * FROM ${this.userTableName} `);
-    const allUser = selectAllUser.all() as UserRow[];
+    const allUser =  selectAllUser.all();
     return allUser;
   }
   
