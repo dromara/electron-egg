@@ -50,13 +50,15 @@
     "javascript-obfuscator": "^5.4.3",
     "js-yaml": "^4.1.1",
     "json5": "^2.2.3",
-    "tree-kill": "^1.2.2"
+    "tree-kill": "^1.2.2",
+    "wait-on": "^8.0.5"
   },
   "optionalDependencies": {
     "icon-gen": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
+    "@types/wait-on": "^5.3.4",
     "@typescript-eslint/eslint-plugin": "^8.59.4",
     "@typescript-eslint/parser": "^8.59.4",
     "eslint": "^9.39.4",
