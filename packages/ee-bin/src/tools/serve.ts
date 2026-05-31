@@ -29,6 +29,7 @@ import kill from 'tree-kill';
 import { ChildProcess } from 'child_process';
 import process from 'process';
 import crossSpawn, { sync as crossSpawnSync } from 'cross-spawn';
+import waitOn from 'wait-on';
 import { loadConfig, readJsonSync, writeJsonSync, rm, toArray } from '../lib/utils.js';
 import type { ExecConfig, BundleConfig } from '../types/config.js';
 import { bundleRegistryPlugin } from '../plugins/bundle_registry_plugin.js';
@@ -189,7 +190,48 @@ class ServeProcess {
       }
     }
 
-    this.multiExec(opt);
+    // Coordinate startup order: when both frontend and electron are launched over
+    // HTTP, start the frontend dev server first and wait until it is reachable
+    // before launching electron. This eliminates the white-screen race where
+    // electron's loadURL runs before Vite is ready. Other cases (single service,
+    // or frontend served via file://) fall through to the original parallel start.
+    const frontendCfg = binCmdConfig.frontend;
+    const splitStart =
+      cmds.includes('frontend') &&
+      cmds.includes('electron') &&
+      !!frontendCfg &&
+      (frontendCfg.protocol || 'http://').startsWith('http');
+
+    if (splitStart) {
+      // 1. start frontend only
+      this.multiExec({ binCmd, binCmdConfig, command: 'frontend' });
+      // 2. wait for the frontend dev server to be ready (warns, never throws)
+      await this._waitForFrontend(frontendCfg);
+      // 3. start the remaining services (everything except frontend, typically electron)
+      const rest = cmds.filter((c) => c !== 'frontend').join(',');
+      this.multiExec({ binCmd, binCmdConfig, command: rest });
+    } else {
+      this.multiExec(opt);
+    }
+  }
+
+  /**
+   * Wait for the frontend dev server to be ready before launching Electron,
+   * eliminating the white-screen race where Electron loadURL runs before Vite is up.
+   * On timeout it warns and returns (Electron starts anyway) rather than throwing.
+   */
+  private async _waitForFrontend(frontendCfg: ExecConfig): Promise<void> {
+    const hostname = frontendCfg.hostname || 'localhost';
+    const port = frontendCfg.port || 8080;
+    const timeout = frontendCfg.waitTimeout ?? 30000;
+    const resource = `http-get://${hostname}:${port}`;
+    console.log(chalk.blue('[ee-bin] [dev] ') + `Waiting for frontend: ${chalk.cyan(`http://${hostname}:${port}`)}`);
+    try {
+      await waitOn({ resources: [resource], timeout, validateStatus: () => true });
+      console.log(chalk.blue('[ee-bin] [dev] ') + chalk.green('Frontend is ready'));
+    } catch {
+      console.log(chalk.bgYellow('Warning') + ` Frontend not ready in ${timeout}ms, starting electron anyway`);
+    }
   }
 
   /**
