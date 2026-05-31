@@ -23,7 +23,7 @@
 import { createDebug, chalk, copyDirSync, formatCmds } from '../lib/helpers.js';
 import path from 'path';
 import fs from 'fs';
-import { build, BuildOptions } from 'esbuild';
+import { build, context, BuildOptions, BuildContext } from 'esbuild';
 import chokidar from 'chokidar';
 import kill from 'tree-kill';
 import { ChildProcess } from 'child_process';
@@ -53,6 +53,8 @@ class ServeProcess {
   execProcess: Record<string, ChildProcess>;
   /** Original value of package.json main field (used by _restorePkgMain to restore) */
   private originalPkgMain: string | undefined;
+  /** dev mode esbuild incremental build context (created once, reused for rebuilds, disposed on exit) */
+  private bundleCtx: BuildContext | null = null;
 
   constructor() {
     this.execProcess = {};
@@ -89,6 +91,11 @@ class ServeProcess {
         kill(p.pid);
         log('Kill %s server, pid: %d', chalk.blue(key), p.pid);
       }
+    }
+
+    if (this.bundleCtx) {
+      await this.bundleCtx.dispose();
+      this.bundleCtx = null;
     }
 
     this._restorePkgMain();
@@ -133,7 +140,7 @@ class ServeProcess {
       const electronConfig = binCmdConfig.electron;
 
       // Electron process needs bundled code, so bundle first before starting
-      await this.bundle(binCfg.build.electron);
+      await this._devBundle(binCfg.build.electron);
       this._switchPkgMain();
 
       // Watch mode: monitor electron directory for changes, auto-rebuild + restart
@@ -151,7 +158,7 @@ class ServeProcess {
           debounceTimer = setTimeout(async () => {
             try {
               console.log(chalk.blue('[ee-bin] [dev] ') + `Restart ${cmd}`);
-              await this.bundle(binCfg.build.electron);
+              await this._devBundle(binCfg.build.electron);
               const subProcess = this.execProcess[cmd];
               if (subProcess && subProcess.pid) {
                 // Kill old Electron process (SIGKILL for forced termination), then re-spawn on success
@@ -397,6 +404,41 @@ class ServeProcess {
    *   2. Copy non-bundlable files (jobs directory, preload/bridge.js, user-defined copy targets)
    */
   private async _bundleWithRegistry(bundleConfig: BundleConfig): Promise<void> {
+    const { options, outdir } = this._buildBundleOptions(bundleConfig);
+    log('_bundleWithRegistry options:%O', options);
+    await build(options);
+    this._postBundle(process.cwd(), outdir, bundleConfig);
+  }
+
+  /**
+   * Dev mode incremental bundling: create the esbuild context once and cache it,
+   * then reuse rebuild() (incremental, fast) on subsequent calls. The 'copy' bundle
+   * type does not use a context — it falls back to the one-shot bundle().
+   */
+  private async _devBundle(bundleConfig?: BundleConfig): Promise<void> {
+    if (!bundleConfig) return;
+    if (bundleConfig.bundleType === 'copy') {
+      await this.bundle(bundleConfig);
+      return;
+    }
+
+    const { options, outdir } = this._buildBundleOptions(bundleConfig);
+    // Clean output dir only on first run (before creating the context) for a clean build
+    if (!this.bundleCtx) {
+      rm(outdir);
+      this.bundleCtx = await context(options);
+    }
+    await this.bundleCtx.rebuild();
+    this._postBundle(process.cwd(), outdir, bundleConfig);
+  }
+
+  /**
+   * Build the esbuild options + resolve outdir for the registry bundle.
+   *
+   * Extracted so both the one-shot build path (_bundleWithRegistry) and the
+   * incremental dev path (_devBundle) construct identical esbuild options.
+   */
+  private _buildBundleOptions(bundleConfig: BundleConfig): { options: BuildOptions; outdir: string } {
     const cwd = process.cwd();
     const controllerDir = path.join(cwd, ELECTRON_DIR, 'controller');
     const configDir = path.join(cwd, ELECTRON_DIR, 'config');
@@ -470,10 +512,7 @@ class ServeProcess {
       logLevel: 'info',
     };
 
-    log('_bundleWithRegistry options:%O', options);
-    await build(options);
-
-    this._postBundle(cwd, outdir, bundleConfig);
+    return { options, outdir };
   }
 
   /**
