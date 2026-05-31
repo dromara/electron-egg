@@ -47,6 +47,4 @@ class BasedbService {
 }  
 (BasedbService as any).toString = () => '[class BasedbService]';
 
-export {
-  BasedbService,
-};
+export { BasedbService };

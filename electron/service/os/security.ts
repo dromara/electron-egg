@@ -26,6 +26,4 @@ class SecurityService {
 }
 (SecurityService as any).toString = () => '[class SecurityService]';
 
-export {
-  securityService: new SecurityService()
-};
+export const securityService = new SecurityService();

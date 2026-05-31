@@ -159,7 +159,4 @@ class FrameworkService {
 }
 (FrameworkService as any).toString = () => '[class FrameworkService]';
 
-export {
-  FrameworkService,
-  frameworkService: new FrameworkService()
-};  
+export const frameworkService = new FrameworkService();  

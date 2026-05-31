@@ -28,10 +28,11 @@ class TrayService {
 
     const cfg = this.config;
     const mainWindow = getMainWindow();
+    if (!mainWindow) return;
 
     // tray icon
     const iconPath = path.join(getBaseDir(), cfg.icon);
-  
+
     // 托盘菜单功能列表
     const trayMenuTemplate: any[] = [
       {
@@ -47,7 +48,7 @@ class TrayService {
         }
       }
     ]
-  
+
     // 设置一个标识，点击关闭，最小化到托盘
     setCloseAndQuit(false);
     mainWindow.on('close', (event: any) => {
@@ -57,7 +58,7 @@ class TrayService {
       mainWindow.hide();
       event.preventDefault();
     });
-    
+
     // 实例化托盘
     this.tray = new Tray(iconPath);
     this.tray.setToolTip(cfg.title);
@@ -71,6 +72,4 @@ class TrayService {
 }
 (TrayService as any).toString = () => '[class TrayService]';
 
-export {
-  trayService: new TrayService()
-};
+export const trayService = new TrayService();

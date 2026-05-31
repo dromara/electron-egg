@@ -21,6 +21,7 @@ class Lifecycle {
     // When double clicking the icon, display the opened window
     electronApp.on('second-instance', () => {
       const win = getMainWindow();
+      if (!win) return;
       if (win.isMinimized()) {
         win.restore();
       }
@@ -36,9 +37,10 @@ class Lifecycle {
     logger.info('[lifecycle] window-ready');
 
     const win = getMainWindow();
+    if (!win) return;
 
     // The window is centered and scaled proportionally
-    // Obtain the size information of the main screen, calculate the width and height of the window as a percentage of the screen, 
+    // Obtain the size information of the main screen, calculate the width and height of the window as a percentage of the screen,
     // and calculate the coordinates of the upper left corner when the window is centered
     const mainScreen = screen.getPrimaryDisplay();
     const { width, height } = mainScreen.workAreaSize;

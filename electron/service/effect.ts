@@ -22,7 +22,4 @@ class EffectService {
 }
 (EffectService as any).toString = () => '[class EffectService]';
 
-export {
-  EffectService,
-  effectService: new EffectService()
-};  
+export const effectService = new EffectService();  

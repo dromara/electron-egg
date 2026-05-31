@@ -135,6 +135,7 @@ class AutoUpdaterService {
     const textJson = JSON.stringify(content);
     const channel = 'custom/app/updater';
     const win = getMainWindow();
+    if (!win) return;
     win.webContents.send(channel, textJson);
   }
   
@@ -165,6 +166,4 @@ class AutoUpdaterService {
 }
 (AutoUpdaterService as any).toString = () => '[class AutoUpdaterService]';
 
-export {
-  autoUpdaterService: new AutoUpdaterService()
-};
+export const autoUpdaterService = new AutoUpdaterService();

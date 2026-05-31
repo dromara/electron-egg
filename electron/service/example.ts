@@ -22,7 +22,4 @@ class ExampleService {
 }
 (ExampleService as any).toString = () => '[class ExampleService]';
 
-export {
-  ExampleService,
-  exampleService: new ExampleService()
-};
+export const exampleService = new ExampleService();

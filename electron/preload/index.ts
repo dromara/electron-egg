@@ -23,9 +23,4 @@ export function preload() {
   sqlitedbService.init();
 }
 
-/**
-* 预加载模块入口
-*/
-export {
-  preload
-}
+

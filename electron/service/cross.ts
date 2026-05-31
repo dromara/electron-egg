@@ -143,7 +143,4 @@ class CrossService {
 }
 (CrossService as any).toString = () => '[class CrossService]';
 
-export {
-  CrossService,
-  crossService: new CrossService()
-};  
+export const crossService = new CrossService();  

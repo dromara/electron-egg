@@ -19,6 +19,4 @@ class UserService {
 }
 (UserService as any).toString = () => '[class UserService]';
 
-export {
-  UserService
-};  
+export { UserService };  

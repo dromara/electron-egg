@@ -106,7 +106,4 @@ class SqlitedbService extends BasedbService {
 }
 (SqlitedbService as any).toString = () => '[class SqlitedbService]';
 
-export {
-  SqlitedbService,
-  sqlitedbService: new SqlitedbService()
-};
+export const sqlitedbService = new SqlitedbService();
