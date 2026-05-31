@@ -37,6 +37,8 @@ export interface ExecConfig {
   force?: boolean;
   /** Electron loading page path (shows a loading page first, then redirects to the main page) */
   loadingPage?: string;
+  /** wait-on 等待前端 dev server URL 的超时毫秒数（dev 模式启动协调用），默认 30000 */
+  waitTimeout?: number;
 }
 
 /** esbuild bundle config — controls Electron main process code bundling behavior */
