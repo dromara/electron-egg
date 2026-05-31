@@ -26,7 +26,6 @@ export default (): Partial<Config> => {
       icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
     logger: {
-      dir: '',
       level: 'info', // 'fatal', 'error', 'warn', 'info', 'debug', 'trace' or 'silent'
       prettyPrint: true,
       rotator: 'daily', // daily, hourly

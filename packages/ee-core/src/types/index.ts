@@ -190,8 +190,8 @@ export interface KoaConfig {
  * - errorLogName: error log, only records error/fatal
  */
 export interface LoggerConfig {
-  /** Log file storage directory */
-  dir: string;
+  /** Log file storage directory, defaults to appUserData/logs if not set */
+  dir?: string;
   /** Minimum log level, logs below this level will be ignored */
   level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | string;
   /** Whether to enable pino-pretty output (recommended for development only) */
