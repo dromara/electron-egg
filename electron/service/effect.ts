@@ -5,11 +5,12 @@ import { logger } from 'ee-core/log';
  * @class
  */
 class EffectService {
+  static toString() { return '[class EffectService]'; }
 
   /**
    * hello
    */
-  async hello(args: any): Promise<any> {
+  async hello(args: unknown): Promise<{ status: string; params: unknown }> {
     let obj = {
       status:'ok',
       params: args
@@ -20,6 +21,4 @@ class EffectService {
   }
 
 }
-(EffectService as any).toString = () => '[class EffectService]';
-
 export const effectService = new EffectService();  

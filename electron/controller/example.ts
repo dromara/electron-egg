@@ -3,6 +3,7 @@
  * @class
  */
 class ExampleController {
+  static toString() { return '[class ExampleController]'; }
 
   /**
    * test
@@ -11,6 +12,4 @@ class ExampleController {
     return 'hello electron-egg';
   }
 }
-(ExampleController as any).toString = () => '[class ExampleController]';
-
 export default ExampleController;

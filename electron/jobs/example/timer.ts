@@ -8,8 +8,9 @@ import { welcome } from './hello';
  * @class
  */
 class TimerJob {
-  private timer: NodeJS.Timer | undefined;
-  private timeoutTimer: NodeJS.Timer | undefined;
+  static toString() { return '[class TimerJob]'; }
+  private timer: NodeJS.Timeout | undefined;
+  private timeoutTimer: NodeJS.Timeout | undefined;
   private number: number;
   private countdown: number;
 
@@ -69,7 +70,7 @@ class TimerJob {
     // 用 setTimeout 模拟任务运行时长
     this.timeoutTimer = setTimeout(() => {
       // 关闭计时器模拟任务
-      clearInterval(this.timer as NodeJS.Timer);
+      clearInterval(this.timer);
 
       // 任务结束，重置前端显示
       childMessage.send(eventName, {jobId, number:0, pid:0, end: true});
@@ -83,5 +84,4 @@ class TimerJob {
   }
 }
 
-(TimerJob as any).toString = () => '[class TimerJob]';
 export default TimerJob;

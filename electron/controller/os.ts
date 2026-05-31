@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import {
-  app as electronApp, dialog, shell, Notification, 
+  app as electronApp, dialog, shell, Notification, IpcMainEvent,
+  NotificationConstructorOptions,
 } from 'electron';
 import { windowService } from '../service/os/window';
 
@@ -10,6 +11,7 @@ import { windowService } from '../service/os/window';
  * @class
  */
 class OsController {
+  static toString() { return '[class OsController]'; }
 
   /**
    * All methods receive two parameters
@@ -76,7 +78,7 @@ class OsController {
     if (path.isAbsolute(id)) {
       dir = id;
     } else {
-      dir = electronApp.getPath(id as any);
+    dir = electronApp.getPath(id as Parameters<typeof electronApp.getPath>[0]);
     }
 
     shell.openPath(dir);
@@ -111,7 +113,7 @@ class OsController {
   /**
    * Open a new window
    */
-  createWindow(args: any): number {
+  createWindow(args: { type: string; content: string; windowName: string; windowTitle: string }): number {
     const wcid = windowService.createWindow(args);
     return wcid;
   }
@@ -119,7 +121,7 @@ class OsController {
   /**
    * Get Window contents id
    */
-  getWCid(args: { windowName: string }): number {
+  getWCid(args: { windowName: string }): number | null {
     const wcid = windowService.getWCid(args);
     return wcid;
   }
@@ -127,40 +129,40 @@ class OsController {
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window1ToWindow2(args: any, event: any): void {
-    windowService.communicate(args, event);
+  window1ToWindow2(args: { receiver: string; content: unknown }, _event: IpcMainEvent): void {
+    windowService.communicate(args);
     return;
   }
 
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window2ToWindow1(args: any, event: any): void {
-    windowService.communicate(args, event);
+  window2ToWindow1(args: { receiver: string; content: unknown }, _event: IpcMainEvent): void {
+    windowService.communicate(args);
     return;
   }
 
   /**
    * Create system notifications
    */
-  sendNotification(args: { title?: string; subtitle?: string; body?: string; silent?: boolean }, event: any): boolean | string {
+  sendNotification(args: { title?: string; subtitle?: string; body?: string; silent?: boolean }, event: IpcMainEvent): boolean | string {
     const { title, subtitle, body, silent} = args;
 
     if (!Notification.isSupported()) {
       return '当前系统不支持通知';
     }
 
-    let options: any = {};
-    if (!title) {
+    const options: NotificationConstructorOptions = {};
+    if (title) {
       options.title = title;
     }
-    if (!subtitle) {
+    if (subtitle) {
       options.subtitle = subtitle;
     }
-    if (!body) {
+    if (body) {
       options.body = body;
     }
-    if (!silent) {
+    if (silent !== undefined) {
       options.silent = silent;
     }
     windowService.createNotification(options, event);
@@ -168,6 +170,4 @@ class OsController {
     return true
   }   
 }
-(OsController as any).toString = () => '[class OsController]';
-
 export default OsController;

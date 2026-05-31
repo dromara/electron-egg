@@ -6,6 +6,7 @@ import { getMainWindow } from 'ee-core/electron';
  * @class
  */
 class EffectController {
+  static toString() { return '[class EffectController]'; }
 
   /**
    * select file
@@ -60,6 +61,4 @@ class EffectController {
     win.focus();
   }   
 }
-(EffectController as any).toString = () => '[class EffectController]';
-
 export default EffectController;

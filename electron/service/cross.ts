@@ -4,19 +4,21 @@ import path from "path";
 import axios from 'axios';
 import { is } from 'ee-core/utils';
 import { cross } from 'ee-core/cross';
+import type { CrossTargetConfig } from 'ee-core';
 
 /**
  * cross
  * @class
  */
 class CrossService {
+  static toString() { return '[class CrossService]'; }
 
   info(): string {
     const pids = cross.getPids();
     logger.info('cross pids:', pids);
 
     let num = 1;
-    pids.forEach((pid: any) => {
+    pids.forEach((pid: string) => {
       let entity = cross.getProc(pid);
       logger.info(`server-${num} name:${entity.name}`);
       logger.info(`server-${num} config:`, entity.config);
@@ -50,7 +52,7 @@ class CrossService {
 
     // method 2: Use custom configuration
     const serviceName = "go";
-    const opt: any = {
+    const opt: CrossTargetConfig = {
       name: 'goapp',
       cmd: path.join(getExtraResourcesDir(), 'goapp'),
       directory: getExtraResourcesDir(),
@@ -71,7 +73,7 @@ class CrossService {
   async createJavaServer(): Promise<void> {
     const serviceName = "java";
     const jarPath = path.join(getExtraResourcesDir(), 'java-app.jar');
-    const opt: any = {
+    const opt: CrossTargetConfig = {
       name: 'javaapp',
       cmd: path.join(getExtraResourcesDir(), 'jre1.8.0_201/bin/javaw.exe'),
       directory: getExtraResourcesDir(),
@@ -105,7 +107,7 @@ class CrossService {
 
     // method 2: Use custom configuration
     const serviceName = "python";
-    const opt: any = {
+    const opt: CrossTargetConfig = {
       name: 'pyapp',
       cmd: path.join(getExtraResourcesDir(), 'py', 'pyapp'),
       directory: path.join(getExtraResourcesDir(), 'py'),
@@ -121,7 +123,7 @@ class CrossService {
     return;
   }
 
-  async requestApi(name: string, urlPath: string, params?: any): Promise<any> {
+  async requestApi(name: string, urlPath: string, params?: Record<string, unknown>): Promise<unknown> {
     const serverUrl = cross.getUrl(name);
     const apiHello = serverUrl + urlPath;
     console.log('Server Url:', serverUrl);
@@ -141,6 +143,4 @@ class CrossService {
     return null;
   }  
 }
-(CrossService as any).toString = () => '[class CrossService]';
-
 export const crossService = new CrossService();  

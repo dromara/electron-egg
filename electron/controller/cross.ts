@@ -5,6 +5,7 @@ import { crossService } from '../service/cross';
  * @class
  */
 class CrossController {
+  static toString() { return '[class CrossController]'; }
 
   /**
    * View process service information
@@ -52,12 +53,10 @@ class CrossController {
   /**
    * Access the api for the cross service
    */
-  async requestApi(args: { name: string; urlPath: string; params?: any }): Promise<any> {
+  async requestApi(args: { name: string; urlPath: string; params?: Record<string, unknown> }): Promise<unknown> {
     const { name, urlPath, params} = args;
     const data = await crossService.requestApi(name, urlPath, params);
     return data;
   }
 }
-(CrossController as any).toString = () => '[class CrossController]';
-
 export default CrossController;

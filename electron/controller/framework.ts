@@ -2,19 +2,40 @@ import dayjs from 'dayjs';
 import path from 'path';
 import fs from 'fs';
 import { exec } from 'child_process';
-import { app as electronApp, shell } from 'electron';
+import { app as electronApp, shell, IpcMainEvent } from 'electron';
 import { getExtraResourcesDir } from 'ee-core/ps';
 import { logger } from 'ee-core/log';
 import { getConfig } from 'ee-core/config';
+import type { Config } from 'ee-core';
 import { frameworkService } from '../service/framework';
 import { sqlitedbService } from '../service/database/sqlitedb';
+import type { UserRow } from '../service/database/sqlitedb';
 import { autoUpdaterService } from '../service/os/auto_updater';
+import type { Context } from 'koa';
 
 /**
  * framework - demo
  * @class
  */
+interface SqlitedbOperationArgs {
+  action: string;
+  info?: { name: string; age: number };
+  delete_name?: string;
+  update_name?: string;
+  update_age?: number;
+  search_age?: number;
+  data_dir?: string;
+}
+
+interface SqlitedbOperationResult {
+  action: string;
+  result: boolean | string | null;
+  all_list: UserRow[];
+  code: number;
+}
+
 class FrameworkController {
+  static toString() { return '[class FrameworkController]'; }
 
   /**
    * 所有方法接收两个参数
@@ -25,10 +46,10 @@ class FrameworkController {
   /**
    * sqlite数据库操作
    */   
-  async sqlitedbOperation(args: any): Promise<any> {
+  async sqlitedbOperation(args: SqlitedbOperationArgs): Promise<SqlitedbOperationResult> {
     const { action, info, delete_name, update_name, update_age, search_age, data_dir } = args;
 
-    const data: any = {
+    const data: SqlitedbOperationResult = {
       action,
       result: null,
       all_list: [],
@@ -46,7 +67,9 @@ class FrameworkController {
 
     switch (action) {
       case 'add' :
-        data.result = await sqlitedbService.addTestDataSqlite(info);;
+        if (info) {
+          data.result = await sqlitedbService.addTestDataSqlite(info);
+        }
         break;
       case 'del' :
         data.result = await sqlitedbService.delTestDataSqlite(delete_name);;
@@ -55,13 +78,15 @@ class FrameworkController {
         data.result = await sqlitedbService.updateTestDataSqlite(update_name, update_age);
         break;
       case 'get' :
-        data.result = await sqlitedbService.getTestDataSqlite(search_age);
+        data.all_list = await sqlitedbService.getTestDataSqlite(search_age);
         break;
       case 'getDataDir' :
         data.result = await sqlitedbService.getDataDir();
         break;
       case 'setDataDir' :
-        data.result = await sqlitedbService.setCustomDataDir(data_dir);
+        if (data_dir) {
+          await sqlitedbService.setCustomDataDir(data_dir);
+        }
         break;            
     }
 
@@ -96,8 +121,8 @@ class FrameworkController {
   /**
    * 检测http服务是否开启
    */ 
-  async checkHttpServer(): Promise<any> {
-    const { enable, protocol, host, port } = (getConfig() as any).httpServer;
+  async checkHttpServer(): Promise<{ enable: boolean; server: string }> {
+    const { enable, protocol, host, port } = (getConfig() as Config).httpServer;
     const url = protocol + host + ':' + port;
     console.log('[checkHttpServer] url:', url);
     const data = {
@@ -111,8 +136,8 @@ class FrameworkController {
    * 一个 http 请求
    * args 是 前端传的参数
    * ctx 是 koa 的 ctx 对象
-   */ 
-  async doHttpRequest(args: { id: string }, ctx: any): Promise<boolean> {
+   */
+  async doHttpRequest(args: { id: string }, ctx: Context & { request: { body?: unknown } }): Promise<boolean> {
     const httpInfo = {
       args,
       method: ctx.request.method,
@@ -125,21 +150,21 @@ class FrameworkController {
     if (!id) {
       return false;
     }
-    const dir = electronApp.getPath(id);
+    const dir = electronApp.getPath(id as Parameters<typeof electronApp.getPath>[0]);
     shell.openPath(dir);
-    
+
     return true;
-  } 
- 
+  }
+
   /**
    * 一个socket io请求访问此方法
-   */ 
+   */
   async doSocketRequest(args: { id: string }): Promise<boolean> {
     const { id } = args;
     if (!id) {
       return false;
     }
-    const dir = electronApp.getPath(id);
+    const dir = electronApp.getPath(id as Parameters<typeof electronApp.getPath>[0]);
     shell.openPath(dir);
     
     return true;
@@ -168,7 +193,7 @@ class FrameworkController {
   /**
    * 双向异步通信
    */
-  ipcSendMsg(args: { type: string; content: string }, event: any): any {
+  ipcSendMsg(args: { type: string; content: string }, event: IpcMainEvent): string {
     const { type, content } = args;
     const data = frameworkService.bothWayMessage(type, content, event);
 
@@ -177,10 +202,10 @@ class FrameworkController {
 
   /**
    * 任务
-   */ 
-  someJob(args: { jobId: string; action: string }, event: any): any {
+   */
+  someJob(args: { jobId: string; action: string }, event: IpcMainEvent): { jobId: string; action: string; result: Record<string, unknown> | undefined } {
     const { jobId, action} = args;
-    let result: any;
+    let result: Record<string, unknown> | undefined;
 
     switch (action) {
       case 'create':
@@ -209,7 +234,7 @@ class FrameworkController {
   /**
    * 创建任务池
    */ 
-  async createPool(args: { number: number }, event: any): Promise<void> {
+  async createPool(args: { number: number }, event: IpcMainEvent): Promise<void> {
     let num = args.number;
     frameworkService.doCreatePool(num, event);
 
@@ -222,9 +247,9 @@ class FrameworkController {
   /**
    * 通过进程池执行任务
    */
-  async someJobByPool(args: { jobId: string; action: string }, event: any): Promise<any> {
+  async someJobByPool(args: { jobId: string; action: string }, event: IpcMainEvent): Promise<{ jobId: string; action: string; result: Record<string, unknown> }> {
     const { jobId, action } = args;
-    let result: any;
+    let result: Record<string, unknown> = {};
     switch (action) {
       case 'run':
         result = await frameworkService.doJobByPool(jobId, action, event);
@@ -259,10 +284,8 @@ class FrameworkController {
   /**
    * 测试接口
    */ 
-  hello(args: any): void {
+  hello(args: unknown): void {
     logger.info('hello ', args);
   }   
 }
-(FrameworkController as any).toString = () => '[class FrameworkController]';
-
 export default FrameworkController;

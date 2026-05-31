@@ -4,7 +4,14 @@ import { BasedbService } from './basedb';
  * sqlite数据存储
  * @class
  */
+export interface UserRow {
+  id: number;
+  name: string;
+  age: number;
+}
+
 class SqlitedbService extends BasedbService {
+  static toString() { return '[class SqlitedbService]'; }
   private userTableName: string;
 
   constructor () {
@@ -68,18 +75,18 @@ class SqlitedbService extends BasedbService {
   /*
    * 查 Test data (sqlite)
    */
-  async getTestDataSqlite(age = 0): Promise<any[]> {
+  async getTestDataSqlite(age = 0): Promise<UserRow[]> {
     const selectUser = this.db.prepare(`SELECT * FROM ${this.userTableName} WHERE age = @age`);
-    const users = selectUser.all({age: age});
+    const users = selectUser.all({age: age}) as UserRow[];
     return users;
   }  
   
   /*
    * all Test data (sqlite)
    */
-  async getAllTestDataSqlite(): Promise<any[]> {
+  async getAllTestDataSqlite(): Promise<UserRow[]> {
     const selectAllUser = this.db.prepare(`SELECT * FROM ${this.userTableName} `);
-    const allUser =  selectAllUser.all();
+    const allUser = selectAllUser.all() as UserRow[];
     return allUser;
   }
   
@@ -104,6 +111,4 @@ class SqlitedbService extends BasedbService {
     return;
   }
 }
-(SqlitedbService as any).toString = () => '[class SqlitedbService]';
-
 export const sqlitedbService = new SqlitedbService();

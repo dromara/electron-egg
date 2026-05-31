@@ -1,20 +1,21 @@
 import { SqliteStorage } from 'ee-core/storage';
 import { getDataDir } from 'ee-core/ps';
 import path from 'path';
+import type Database from 'better-sqlite3';
 
 /**
  * sqlite数据存储
  * @class
  */
 class BasedbService {
+  static toString() { return '[class BasedbService]'; }
   protected dbname: string;
-  protected db: any;
-  protected storage: any;
+  protected db!: Database.Database;
+  protected storage!: SqliteStorage;
 
   constructor(options: { dbname: string }) {
     const { dbname } = options;
     this.dbname = dbname;
-    this.db = undefined;
   }
 
   /*
@@ -45,6 +46,4 @@ class BasedbService {
     this.db = this.storage.db;   
   }
 }  
-(BasedbService as any).toString = () => '[class BasedbService]';
-
 export { BasedbService };

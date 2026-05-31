@@ -1,4 +1,4 @@
-import { Tray, Menu, app as electronApp, BrowserWindow } from 'electron';
+import { Tray, Menu, app as electronApp, BrowserWindow, MenuItemConstructorOptions, Event } from 'electron';
 import path from 'path';
 import { getBaseDir } from 'ee-core/ps';
 import { logger } from 'ee-core/log';
@@ -9,6 +9,7 @@ import { getMainWindow, getCloseAndQuit, setCloseAndQuit } from 'ee-core/electro
  * @class
  */
 class TrayService {
+  static toString() { return '[class TrayService]'; }
   private tray: Tray | null;
   private config: { title: string; icon: string };
 
@@ -34,7 +35,7 @@ class TrayService {
     const iconPath = path.join(getBaseDir(), cfg.icon);
 
     // 托盘菜单功能列表
-    const trayMenuTemplate: any[] = [
+    const trayMenuTemplate: MenuItemConstructorOptions[] = [
       {
         label: '显示',
         click: function () {
@@ -51,7 +52,7 @@ class TrayService {
 
     // 设置一个标识，点击关闭，最小化到托盘
     setCloseAndQuit(false);
-    mainWindow.on('close', (event: any) => {
+    mainWindow.on('close', (event: Event) => {
       if (getCloseAndQuit()) {
         return;
       }
@@ -70,6 +71,4 @@ class TrayService {
     })
   }
 }
-(TrayService as any).toString = () => '[class TrayService]';
-
 export const trayService = new TrayService();

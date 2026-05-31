@@ -6,6 +6,7 @@ import { app as electronApp } from 'electron';
  * @class
  */
 class SecurityService {
+  static toString() { return '[class SecurityService]'; }
 
   /**
    * 创建
@@ -24,6 +25,4 @@ class SecurityService {
     }
   }
 }
-(SecurityService as any).toString = () => '[class SecurityService]';
-
 export const securityService = new SecurityService();

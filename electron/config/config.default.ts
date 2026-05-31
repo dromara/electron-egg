@@ -1,10 +1,11 @@
 import path from 'path';
 import { getBaseDir } from 'ee-core/ps';
+import type { Config } from 'ee-core';
 
 /**
  * 默认配置
  */
-export default () => {
+export default (): Partial<Config> => {
   return {
     openDevTools: false,
     singleLock: true,
@@ -25,6 +26,7 @@ export default () => {
       icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
     logger: {
+      dir: '',
       level: 'info', // 'fatal', 'error', 'warn', 'info', 'debug', 'trace' or 'silent'
       prettyPrint: true,
       rotator: 'daily', // daily, hourly
@@ -60,14 +62,25 @@ export default () => {
     httpServer: {
       enable: true,
       https: {
-        enable: false, 
+        enable: false,
         key: '/public/ssl/localhost+1.key',
         cert: '/public/ssl/localhost+1.pem'
       },
+      protocol: 'http',
       host: '127.0.0.1',
       port: 7071,
+      cors: { origin: '*' },
+      body: {
+        multipart: false,
+        formidable: { keepExtensions: false }
+      },
+      filterRequest: {
+        uris: [],
+        returnData: ''
+      },
     },
     mainServer: {
+      protocol: 'file://',
       indexPath: '/public/dist/index.html',
       channelSeparator: '/',
     }

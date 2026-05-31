@@ -4,6 +4,7 @@ import { getConfig } from 'ee-core/config';
 import { getMainWindow } from 'ee-core/electron';
 
 class Lifecycle {
+  static toString() { return '[class Lifecycle]'; }
 
   /**
    * core app have been loaded
@@ -51,7 +52,7 @@ class Lifecycle {
     win.setBounds({ x, y, width: windowWidth, height: windowHeight })
 
     // Delayed loading, no white screen
-    const { windowsOption } = getConfig() as any;
+    const { windowsOption } = getConfig();
     if (windowsOption.show == false) {
       win.once('ready-to-show', () => {
         win.show();
@@ -67,8 +68,6 @@ class Lifecycle {
     logger.info('[lifecycle] before-close');
   }
 }
-(Lifecycle as any).toString = () => '[class Lifecycle]';
-
 export {
   Lifecycle
 };

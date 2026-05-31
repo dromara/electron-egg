@@ -5,11 +5,12 @@ import { logger } from 'ee-core/log';
  * @class
  */
 class ExampleService {
+  static toString() { return '[class ExampleService]'; }
 
   /**
    * test
    */
-  async test(args: any): Promise<any> {
+  async test(args: unknown): Promise<{ status: string; params: unknown }> {
     let obj = {
       status:'ok',
       params: args
@@ -20,6 +21,4 @@ class ExampleService {
     return obj;
   }
 }
-(ExampleService as any).toString = () => '[class ExampleService]';
-
 export const exampleService = new ExampleService();

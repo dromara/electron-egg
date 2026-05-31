@@ -1,5 +1,7 @@
 import { app as electronApp } from 'electron';
 import { autoUpdater } from "electron-updater";
+import type { ProgressInfo } from 'electron-updater';
+import type { GenericServerOptions } from 'builder-util-runtime';
 import { is } from 'ee-core/utils';
 import { logger } from 'ee-core/log';
 import { getMainWindow, setCloseAndQuit } from 'ee-core/electron';
@@ -8,8 +10,16 @@ import { getMainWindow, setCloseAndQuit } from 'ee-core/electron';
  * 自动升级
  * @class
  */
+interface UpdaterConfig {
+  windows: boolean;
+  macOS: boolean;
+  linux: boolean;
+  options: GenericServerOptions;
+}
+
 class AutoUpdaterService {
-  private config: any;
+  static toString() { return '[class AutoUpdaterService]'; }
+  private config: UpdaterConfig;
 
   constructor() {
     this.config = {
@@ -17,7 +27,7 @@ class AutoUpdaterService {
       macOS: false,
       linux: false,
       options: {
-        provider: 'generic', 
+        provider: 'generic' as const,
         url: 'http://kodo.qiniu.com/'
       },
     }
@@ -50,10 +60,10 @@ class AutoUpdaterService {
     let server = cfg.options.url;
     let lastChar = server.substring(server.length - 1);
     server = lastChar === '/' ? server : server + "/";
-    cfg.options.url = server;
-  
+    const feedOptions: GenericServerOptions = { ...cfg.options, url: server };
+
     try {
-      autoUpdater.setFeedURL(cfg.options);
+      autoUpdater.setFeedURL(feedOptions);
     } catch (error) {
       logger.error('[autoUpdater] setFeedURL error : ', error);
     }
@@ -75,15 +85,15 @@ class AutoUpdaterService {
       }
       this.sendStatusToWindow(data);
     })
-    autoUpdater.on('error', (err: any) => {
+    autoUpdater.on('error', (err: Error) => {
       const data = {
         status: status.error,
         desc: err
       }
       this.sendStatusToWindow(data);
     })
-    autoUpdater.on('download-progress', (progressObj: any) => {
-      const percentNumber = parseInt(progressObj.percent);
+    autoUpdater.on('download-progress', (progressObj: ProgressInfo) => {
+      const percentNumber = Math.floor(progressObj.percent);
       const totalSize = this.bytesChange(progressObj.total);
       const transferredSize = this.bytesChange(progressObj.transferred);
       let text = '已下载 ' + percentNumber + '%';
@@ -131,7 +141,7 @@ class AutoUpdaterService {
   /**
    * 向前端发消息
    */
-  sendStatusToWindow(content: any = {}) {
+  sendStatusToWindow(content: Record<string, unknown> = {}): void {
     const textJson = JSON.stringify(content);
     const channel = 'custom/app/updater';
     const win = getMainWindow();
@@ -164,6 +174,4 @@ class AutoUpdaterService {
     return size;
   }  
 }
-(AutoUpdaterService as any).toString = () => '[class AutoUpdaterService]';
-
 export const autoUpdaterService = new AutoUpdaterService();
