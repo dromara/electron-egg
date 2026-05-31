@@ -406,7 +406,6 @@ class ServeProcess {
     const isTypeScript = fs.existsSync(mainTsPath);
     const entryMain = isTypeScript ? mainTsPath : mainJsPath;
     const outdir = path.join(cwd, BUNDLE_DIR);
-    const outfile = path.join(outdir, 'main.js');
 
     const format: 'cjs' | 'esm' = bundleConfig.format || 'cjs';
 
@@ -474,21 +473,29 @@ class ServeProcess {
     log('_bundleWithRegistry options:%O', options);
     await build(options);
 
-    // esbuild replaces ':' in virtual module name 'app:bundle-entry' with '_',
-    // so the output file is named 'app_bundle-entry.js' — rename it to 'main.js'
+    this._postBundle(outdir, bundleConfig);
+  }
+
+  /**
+   * Bundle 后处理（dev 增量与 build 全量共用）
+   *   1. 把 esbuild 产出的 app_bundle-entry.js 重命名为 main.js（sourcemap 同理）
+   *   2. 复制非打包文件（jobs/、preload/bridge.js、用户自定义 copy）
+   *   3. 打印输出路径
+   */
+  private _postBundle(outdir: string, bundleConfig: BundleConfig): void {
+    const outfile = path.join(outdir, 'main.js');
+
     const bundleEntryFile = path.join(outdir, 'app_bundle-entry.js');
     if (fs.existsSync(bundleEntryFile)) {
       fs.renameSync(bundleEntryFile, path.join(outdir, 'main.js'));
     }
 
-    // Also rename the sourcemap file if it exists
     const bundleEntryMap = path.join(outdir, 'app_bundle-entry.js.map');
     if (fs.existsSync(bundleEntryMap)) {
       fs.renameSync(bundleEntryMap, path.join(outdir, 'main.js.map'));
     }
 
-    // Copy non-bundlable files (child_process.fork and BrowserWindow preload need separate files)
-    this._copyUnbundledFiles(cwd, outdir, bundleConfig);
+    this._copyUnbundledFiles(process.cwd(), outdir, bundleConfig);
 
     console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
   }
