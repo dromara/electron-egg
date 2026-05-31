@@ -39,7 +39,7 @@ const config: BinConfig = {
       args: ['.', '--env=local'],
       loadingPage: '/public/html/loading.html',
       // Whether to watch the electron directory for changes and auto-rebuild + restart
-      watch: true,
+      watch: false,
       sync: false,
       // Debounce delay in watch mode (milliseconds). Prevents rapid successive
       // file changes from triggering multiple rebuilds.

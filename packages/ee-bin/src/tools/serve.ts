@@ -23,13 +23,12 @@
 import { createDebug, chalk, copyDirSync, formatCmds } from '../lib/helpers.js';
 import path from 'path';
 import fs from 'fs';
-import { build, context, BuildOptions, BuildContext } from 'esbuild';
+import { build, BuildOptions } from 'esbuild';
 import chokidar from 'chokidar';
 import kill from 'tree-kill';
 import { ChildProcess } from 'child_process';
 import process from 'process';
 import crossSpawn, { sync as crossSpawnSync } from 'cross-spawn';
-import waitOn from 'wait-on';
 import { loadConfig, readJsonSync, writeJsonSync, rm, toArray } from '../lib/utils.js';
 import type { ExecConfig, BundleConfig } from '../types/config.js';
 import { bundleRegistryPlugin } from '../plugins/bundle_registry_plugin.js';
@@ -54,8 +53,6 @@ class ServeProcess {
   execProcess: Record<string, ChildProcess>;
   /** Original value of package.json main field (used by _restorePkgMain to restore) */
   private originalPkgMain: string | undefined;
-  /** dev mode esbuild incremental build context (created once, reused for rebuilds, disposed on exit) */
-  private bundleCtx: BuildContext | null = null;
 
   constructor() {
     this.execProcess = {};
@@ -95,15 +92,6 @@ class ServeProcess {
     }
 
     this._restorePkgMain();
-
-    if (this.bundleCtx) {
-      try {
-        await this.bundleCtx.dispose();
-      } catch {
-        // ignore dispose errors during shutdown — the process is exiting anyway
-      }
-      this.bundleCtx = null;
-    }
 
     await this.sleep(500);
     process.exit(0);
@@ -145,7 +133,7 @@ class ServeProcess {
       const electronConfig = binCmdConfig.electron;
 
       // Electron process needs bundled code, so bundle first before starting
-      await this._devBundle(binCfg.build.electron);
+      await this.bundle(binCfg.build.electron);
       this._switchPkgMain();
 
       // Watch mode: monitor electron directory for changes, auto-rebuild + restart
@@ -163,7 +151,7 @@ class ServeProcess {
           debounceTimer = setTimeout(async () => {
             try {
               console.log(chalk.blue('[ee-bin] [dev] ') + `Restart ${cmd}`);
-              await this._devBundle(binCfg.build.electron);
+              await this.bundle(binCfg.build.electron);
               const subProcess = this.execProcess[cmd];
               if (subProcess && subProcess.pid) {
                 // Kill old Electron process (SIGKILL for forced termination), then re-spawn on success
@@ -190,48 +178,7 @@ class ServeProcess {
       }
     }
 
-    // Coordinate startup order: when both frontend and electron are launched over
-    // HTTP, start the frontend dev server first and wait until it is reachable
-    // before launching electron. This eliminates the white-screen race where
-    // electron's loadURL runs before Vite is ready. Other cases (single service,
-    // or frontend served via file://) fall through to the original parallel start.
-    const frontendCfg = binCmdConfig.frontend;
-    const splitStart =
-      cmds.includes('frontend') &&
-      cmds.includes('electron') &&
-      !!frontendCfg &&
-      (frontendCfg.protocol || 'http://').startsWith('http');
-
-    if (splitStart) {
-      // 1. start frontend only
-      this.multiExec({ binCmd, binCmdConfig, command: 'frontend' });
-      // 2. wait for the frontend dev server to be ready (warns, never throws)
-      await this._waitForFrontend(frontendCfg);
-      // 3. start the remaining services (everything except frontend, typically electron)
-      const rest = cmds.filter((c) => c !== 'frontend').join(',');
-      this.multiExec({ binCmd, binCmdConfig, command: rest });
-    } else {
-      this.multiExec(opt);
-    }
-  }
-
-  /**
-   * Wait for the frontend dev server to be ready before launching Electron,
-   * eliminating the white-screen race where Electron loadURL runs before Vite is up.
-   * On timeout it warns and returns (Electron starts anyway) rather than throwing.
-   */
-  private async _waitForFrontend(frontendCfg: ExecConfig): Promise<void> {
-    const hostname = frontendCfg.hostname || 'localhost';
-    const port = frontendCfg.port || 8080;
-    const timeout = frontendCfg.waitTimeout ?? 30000;
-    const resource = `http-get://${hostname}:${port}`;
-    console.log(chalk.blue('[ee-bin] [dev] ') + `Waiting for frontend: ${chalk.cyan(`http://${hostname}:${port}`)}`);
-    try {
-      await waitOn({ resources: [resource], timeout, validateStatus: () => true });
-      console.log(chalk.blue('[ee-bin] [dev] ') + chalk.green('Frontend is ready'));
-    } catch {
-      console.log(chalk.bgYellow('Warning') + ` Frontend not ready in ${timeout}ms, starting electron anyway`);
-    }
+    this.multiExec(opt);
   }
 
   /**
@@ -450,41 +397,6 @@ class ServeProcess {
    *   2. Copy non-bundlable files (jobs directory, preload/bridge.js, user-defined copy targets)
    */
   private async _bundleWithRegistry(bundleConfig: BundleConfig): Promise<void> {
-    const { options, outdir } = this._buildBundleOptions(bundleConfig);
-    log('_bundleWithRegistry options:%O', options);
-    await build(options);
-    this._postBundle(process.cwd(), outdir, bundleConfig);
-  }
-
-  /**
-   * Dev mode incremental bundling: create the esbuild context once and cache it,
-   * then reuse rebuild() (incremental, fast) on subsequent calls. The 'copy' bundle
-   * type does not use a context — it falls back to the one-shot bundle().
-   */
-  private async _devBundle(bundleConfig?: BundleConfig): Promise<void> {
-    if (!bundleConfig) return;
-    if (bundleConfig.bundleType === 'copy') {
-      await this.bundle(bundleConfig);
-      return;
-    }
-
-    const { options, outdir } = this._buildBundleOptions(bundleConfig);
-    // Clean output dir only on first run (before creating the context) for a clean build
-    if (!this.bundleCtx) {
-      rm(outdir);
-      this.bundleCtx = await context(options);
-    }
-    await this.bundleCtx.rebuild();
-    this._postBundle(process.cwd(), outdir, bundleConfig);
-  }
-
-  /**
-   * Build the esbuild options + resolve outdir for the registry bundle.
-   *
-   * Extracted so both the one-shot build path (_bundleWithRegistry) and the
-   * incremental dev path (_devBundle) construct identical esbuild options.
-   */
-  private _buildBundleOptions(bundleConfig: BundleConfig): { options: BuildOptions; outdir: string } {
     const cwd = process.cwd();
     const controllerDir = path.join(cwd, ELECTRON_DIR, 'controller');
     const configDir = path.join(cwd, ELECTRON_DIR, 'config');
@@ -494,6 +406,7 @@ class ServeProcess {
     const isTypeScript = fs.existsSync(mainTsPath);
     const entryMain = isTypeScript ? mainTsPath : mainJsPath;
     const outdir = path.join(cwd, BUNDLE_DIR);
+    const outfile = path.join(outdir, 'main.js');
 
     const format: 'cjs' | 'esm' = bundleConfig.format || 'cjs';
 
@@ -558,28 +471,23 @@ class ServeProcess {
       logLevel: 'info',
     };
 
-    return { options, outdir };
-  }
+    log('_bundleWithRegistry options:%O', options);
+    await build(options);
 
-  /**
-   * Bundle post-processing (shared by both dev incremental and build full bundling)
-   *   1. Rename esbuild output app_bundle-entry.js → main.js (and its sourcemap)
-   *   2. Copy non-bundlable files (jobs/, preload/bridge.js, user-defined copy targets)
-   *   3. Log the output path
-   */
-  private _postBundle(cwd: string, outdir: string, bundleConfig: BundleConfig): void {
-    const outfile = path.join(outdir, 'main.js');
-
+    // esbuild replaces ':' in virtual module name 'app:bundle-entry' with '_',
+    // so the output file is named 'app_bundle-entry.js' — rename it to 'main.js'
     const bundleEntryFile = path.join(outdir, 'app_bundle-entry.js');
     if (fs.existsSync(bundleEntryFile)) {
       fs.renameSync(bundleEntryFile, path.join(outdir, 'main.js'));
     }
 
+    // Also rename the sourcemap file if it exists
     const bundleEntryMap = path.join(outdir, 'app_bundle-entry.js.map');
     if (fs.existsSync(bundleEntryMap)) {
       fs.renameSync(bundleEntryMap, path.join(outdir, 'main.js.map'));
     }
 
+    // Copy non-bundlable files (child_process.fork and BrowserWindow preload need separate files)
     this._copyUnbundledFiles(cwd, outdir, bundleConfig);
 
     console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
