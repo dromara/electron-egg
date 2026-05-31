@@ -1,14 +1,16 @@
-const { app: electronApp } = require('electron');
-const { autoUpdater } = require("electron-updater");
-const { is } = require('ee-core/utils');
-const { logger } = require('ee-core/log');
-const { getMainWindow, setCloseAndQuit } = require('ee-core/electron');
+import { app as electronApp } from 'electron';
+import { autoUpdater } from "electron-updater";
+import { is } from 'ee-core/utils';
+import { logger } from 'ee-core/log';
+import { getMainWindow, setCloseAndQuit } from 'ee-core/electron';
 
 /**
  * 自动升级
  * @class
  */
 class AutoUpdaterService {
+  private config: any;
+
   constructor() {
     this.config = {
       windows: false,
@@ -24,7 +26,7 @@ class AutoUpdaterService {
   /**
    * 创建
    */
-  create () {
+  create (): void {
     logger.info('[autoUpdater] load');
     const cfg = this.config;
     if ((is.windows() && cfg.windows) || (is.macOS() && cfg.macOS) || (is.linux() && cfg.linux)) {
@@ -73,14 +75,14 @@ class AutoUpdaterService {
       }
       this.sendStatusToWindow(data);
     })
-    autoUpdater.on('error', (err) => {
+    autoUpdater.on('error', (err: any) => {
       const data = {
         status: status.error,
         desc: err
       }
       this.sendStatusToWindow(data);
     })
-    autoUpdater.on('download-progress', (progressObj) => {
+    autoUpdater.on('download-progress', (progressObj: any) => {
       const percentNumber = parseInt(progressObj.percent);
       const totalSize = this.bytesChange(progressObj.total);
       const transferredSize = this.bytesChange(progressObj.transferred);
@@ -115,21 +117,21 @@ class AutoUpdaterService {
   /**
    * 检查更新
    */
-  checkUpdate () {
+  checkUpdate (): void {
     autoUpdater.checkForUpdates();
   }
   
   /**
    * 下载更新
    */
-  download () {
+  download (): void {
     autoUpdater.downloadUpdate();
   }
 
   /**
    * 向前端发消息
    */
-  sendStatusToWindow(content = {}) {
+  sendStatusToWindow(content: any = {}) {
     const textJson = JSON.stringify(content);
     const channel = 'custom/app/updater';
     const win = getMainWindow();
@@ -139,7 +141,7 @@ class AutoUpdaterService {
   /**
    * 单位转换
    */
-  bytesChange (limit) {
+  bytesChange (limit: number): string {
     let size = "";
     if(limit < 0.1 * 1024){                            
       size = limit.toFixed(2) + "B";
@@ -161,8 +163,8 @@ class AutoUpdaterService {
     return size;
   }  
 }
-AutoUpdaterService.toString = () => '[class AutoUpdaterService]';
+(AutoUpdaterService as any).toString = () => '[class AutoUpdaterService]';
 
-module.exports = {
+export {
   autoUpdaterService: new AutoUpdaterService()
 };

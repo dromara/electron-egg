@@ -1,12 +1,10 @@
-'use strict';
-
-const path = require('path');
-const { getBaseDir } = require('ee-core/ps');
+import path from 'path';
+import { getBaseDir } from 'ee-core/ps';
 
 /**
  * 默认配置
  */
-module.exports = () => {
+export default () => {
   return {
     openDevTools: false,
     singleLock: true,

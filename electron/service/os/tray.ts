@@ -1,15 +1,16 @@
-const { Tray, Menu } = require('electron');
-const path = require('path');
-const { getBaseDir } = require('ee-core/ps');
-const { logger } = require('ee-core/log');
-const { app: electronApp } = require('electron');
-const { getMainWindow, getCloseAndQuit, setCloseAndQuit } = require('ee-core/electron');
+import { Tray, Menu, app as electronApp, BrowserWindow } from 'electron';
+import path from 'path';
+import { getBaseDir } from 'ee-core/ps';
+import { logger } from 'ee-core/log';
+import { getMainWindow, getCloseAndQuit, setCloseAndQuit } from 'ee-core/electron';
 
 /**
  * 托盘
  * @class
  */
 class TrayService {
+  private tray: Tray | null;
+  private config: { title: string; icon: string };
 
   constructor() {
     this.tray = null;
@@ -22,7 +23,7 @@ class TrayService {
   /**
    * 创建托盘
    */
-  create () {
+  create (): void {
     logger.info('[tray] load');
 
     const cfg = this.config;
@@ -32,7 +33,7 @@ class TrayService {
     const iconPath = path.join(getBaseDir(), cfg.icon);
   
     // 托盘菜单功能列表
-    const trayMenuTemplate = [
+    const trayMenuTemplate: any[] = [
       {
         label: '显示',
         click: function () {
@@ -49,7 +50,7 @@ class TrayService {
   
     // 设置一个标识，点击关闭，最小化到托盘
     setCloseAndQuit(false);
-    mainWindow.on('close', (event) => {
+    mainWindow.on('close', (event: any) => {
       if (getCloseAndQuit()) {
         return;
       }
@@ -68,8 +69,8 @@ class TrayService {
     })
   }
 }
-TrayService.toString = () => '[class TrayService]';
+(TrayService as any).toString = () => '[class TrayService]';
 
-module.exports = {
+export {
   trayService: new TrayService()
 };

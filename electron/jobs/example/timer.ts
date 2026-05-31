@@ -1,15 +1,17 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
-const { isChildJob, exit } = require('ee-core/ps');
-const { childMessage } = require('ee-core/message');
-const { welcome } = require('./hello');
+import { logger } from 'ee-core/log';
+import { isChildJob, exit } from 'ee-core/ps';
+import { childMessage } from 'ee-core/message';
+import { welcome } from './hello';
 
 /**
  * example - TimerJob
  * @class
  */
 class TimerJob {
+  private timer: NodeJS.Timer | undefined;
+  private timeoutTimer: NodeJS.Timer | undefined;
+  private number: number;
+  private countdown: number;
 
   constructor() {
     this.timer = undefined;
@@ -22,7 +24,7 @@ class TimerJob {
    * handle()方法是必要的，且会被自动调用
    * params 传递的参数
    */
-  async handle(params) {
+  async handle(params: { jobId: string }): Promise<void> {
     logger.info("[child-process] TimerJob params: ", params);
     const { jobId } = params;
 
@@ -36,7 +38,7 @@ class TimerJob {
   /**
    * 暂停任务运行
    */
-  async pause(jobId) {
+  async pause(jobId: string): Promise<void> {
     logger.info("[child-process] Pause timerJob, jobId: ", jobId);
     clearInterval(this.timer);
     clearInterval(this.timeoutTimer);
@@ -45,7 +47,7 @@ class TimerJob {
   /**
    * 恢复任务运行
    */
-  async resume(jobId, pid) {
+  async resume(jobId: string, pid: number): Promise<void> {
     logger.info("[child-process] Resume timerJob, jobId: ", jobId, ", pid: ", pid);
     this.doTimer(jobId);
   }
@@ -53,7 +55,7 @@ class TimerJob {
   /**
    * 运行任务
    */
-  async doTimer(jobId) {
+  async doTimer(jobId: string): Promise<void> {
     // 计时器模拟任务
     const eventName = 'job-timer-progress-' + jobId;
     this.timer = setInterval(() => {
@@ -67,7 +69,7 @@ class TimerJob {
     // 用 setTimeout 模拟任务运行时长
     this.timeoutTimer = setTimeout(() => {
       // 关闭计时器模拟任务
-      clearInterval(this.timer);
+      clearInterval(this.timer as NodeJS.Timer);
 
       // 任务结束，重置前端显示
       childMessage.send(eventName, {jobId, number:0, pid:0, end: true});
@@ -81,5 +83,5 @@ class TimerJob {
   }
 }
 
-TimerJob.toString = () => '[class TimerJob]';
-module.exports = TimerJob;
+(TimerJob as any).toString = () => '[class TimerJob]';
+export default TimerJob;

@@ -1,9 +1,7 @@
-'use strict';
-
 /**
  * Development environment configuration, coverage config.default.js
  */
-module.exports = () => {
+export default () => {
   return {
     openDevTools: {
       mode: 'bottom'

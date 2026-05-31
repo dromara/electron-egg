@@ -1,7 +1,5 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
-const { app: electronApp } = require('electron');
+import { logger } from 'ee-core/log';
+import { app as electronApp } from 'electron';
 
 /**
  * 安全
@@ -12,9 +10,9 @@ class SecurityService {
   /**
    * 创建
    */
-  create () {
+  create (): void {
     logger.info('[security] load');
-    const runWithDebug = process.argv.find(function(e){
+    const runWithDebug = process.argv.find(function(e: string){
       let isHasDebug = e.includes("--inspect") || e.includes("--inspect-brk") || e.includes("--remote-debugging-port");
       return isHasDebug;
     })
@@ -26,8 +24,8 @@ class SecurityService {
     }
   }
 }
-SecurityService.toString = () => '[class SecurityService]';
+(SecurityService as any).toString = () => '[class SecurityService]';
 
-module.exports = {
+export {
   securityService: new SecurityService()
 };

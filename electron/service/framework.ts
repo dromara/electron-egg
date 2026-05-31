@@ -1,13 +1,15 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
-const { ChildJob, ChildPoolJob } = require('ee-core/jobs');
+import { logger } from 'ee-core/log';
+import { ChildJob, ChildPoolJob } from 'ee-core/jobs';
 
 /**
  * framework
  * @class
  */
 class FrameworkService {
+  private myTimer: NodeJS.Timer | null;
+  private myJob: any;
+  private myJobPool: any;
+  private taskForJob: Record<string, any>;
 
   constructor() {
     // 在构造函数中初始化一些变量
@@ -20,7 +22,7 @@ class FrameworkService {
   /**
    * test
    */
-  async test(args) {
+  async test(args: any): Promise<any> {
     let obj = {
       status:'ok',
       params: args
@@ -32,7 +34,7 @@ class FrameworkService {
   /**
    * ipc通信(双向)
    */
-  bothWayMessage(type, content, event) {
+  bothWayMessage(type: string, content: string, event: any): string {
     // 前端ipc频道 channel
     const channel = 'controller/framework/ipcSendMsg';
 
@@ -47,7 +49,7 @@ class FrameworkService {
 
       return '开始了'
     } else if (type == 'end') {
-      clearInterval(this.myTimer);
+      clearInterval(this.myTimer as any);
       return '停止了'    
     } else {
       return 'ohther'
@@ -57,16 +59,16 @@ class FrameworkService {
   /**
    * 执行任务
    */ 
-  doJob(jobId, action, event) {
-    let res = {};
-    let oneTask;
+  doJob(jobId: string, action: string, event: any): any {
+    let res: any = {};
+    let oneTask: any;
     const channel = 'controller/framework/timerJobProgress';
   
     if (action == 'create') {
       // 执行任务及监听进度
       let eventName = 'job-timer-progress-' + jobId;
       const timerTask = this.myJob.exec('./jobs/example/timer', {jobId});
-      timerTask.emitter.on(eventName, (data) => {
+      timerTask.emitter.on(eventName, (data: any) => {
         logger.info('[main-process] timerTask, from TimerJob data:', data);
         // 发送数据到渲染进程
         event.sender.send(`${channel}`, data)
@@ -106,9 +108,9 @@ class FrameworkService {
   /**
    * 创建pool
    */ 
-  doCreatePool(num, event) {
+  doCreatePool(num: number, event: any): void {
     const channel = 'controller/framework/createPoolNotice';
-    this.myJobPool.create(num).then(pids => {
+    this.myJobPool.create(num).then((pids: any) => {
       event.reply(`${channel}`, pids);
     });
   }
@@ -116,8 +118,8 @@ class FrameworkService {
   /**
    * 通过进程池执行任务
    */
-  async doJobByPool(jobId, action, event) {
-    let res = {};
+  async doJobByPool(jobId: string, action: string, event: any): Promise<any> {
+    let res: any = {};
     const channel = 'controller/framework/timerJobProgress';
     if (action == 'run') {
       // 异步-执行任务及监听进度
@@ -126,7 +128,7 @@ class FrameworkService {
       // 监听器名称唯一，否则会出现重复监听。
       // 任务完成时，需要移除监听器，防止内存泄漏
       let eventName = 'job-timer-progress-' + jobId;
-      task.emitter.on(eventName, (data) => {
+      task.emitter.on(eventName, (data: any) => {
         logger.info('[main-process] [ChildPoolJob] timerTask, from TimerJob data:', data);
 
         // 发送数据到渲染进程
@@ -146,7 +148,7 @@ class FrameworkService {
   /**
    * 获取正在运行的 job 进程 
    */ 
-  monitorJob() {
+  monitorJob(): void {
     setInterval(() => {
       let jobPids = this.myJob.getPids();
       let jobPoolPids = this.myJobPool.getPids();
@@ -155,9 +157,9 @@ class FrameworkService {
   }
 
 }
-FrameworkService.toString = () => '[class FrameworkService]';
+(FrameworkService as any).toString = () => '[class FrameworkService]';
 
-module.exports = {
+export {
   FrameworkService,
   frameworkService: new FrameworkService()
 };  

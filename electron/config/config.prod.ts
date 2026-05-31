@@ -1,9 +1,7 @@
-'use strict';
-
 /**
  *  coverage config.default.js
  */
-module.exports = () => {
+export default () => {
   return {
     openDevTools: false,
   };

@@ -1,23 +1,21 @@
-'use strict';
-
-const { app: electronApp, screen } = require('electron');
-const { logger } = require('ee-core/log');
-const { getConfig } = require('ee-core/config');
-const { getMainWindow } = require('ee-core/electron');
+import { app as electronApp, screen } from 'electron';
+import { logger } from 'ee-core/log';
+import { getConfig } from 'ee-core/config';
+import { getMainWindow } from 'ee-core/electron';
 
 class Lifecycle {
 
   /**
    * core app have been loaded
    */
-  async ready() {
+  async ready(): Promise<void> {
     logger.info('[lifecycle] ready');
   }
 
   /**
    * electron app ready
    */
-  async electronAppReady() {
+  async electronAppReady(): Promise<void> {
     logger.info('[lifecycle] electron-app-ready');
 
     // When double clicking the icon, display the opened window
@@ -34,7 +32,7 @@ class Lifecycle {
   /**
    * main window have been loaded
    */
-  async windowReady() {
+  async windowReady(): Promise<void> {
     logger.info('[lifecycle] window-ready');
 
     const win = getMainWindow();
@@ -51,7 +49,7 @@ class Lifecycle {
     win.setBounds({ x, y, width: windowWidth, height: windowHeight })
 
     // Delayed loading, no white screen
-    const { windowsOption } = getConfig();
+    const { windowsOption } = getConfig() as any;
     if (windowsOption.show == false) {
       win.once('ready-to-show', () => {
         win.show();
@@ -63,12 +61,12 @@ class Lifecycle {
   /**
    * before app close
    */  
-  async beforeClose() {
+  async beforeClose(): Promise<void> {
     logger.info('[lifecycle] before-close');
   }
 }
-Lifecycle.toString = () => '[class Lifecycle]';
+(Lifecycle as any).toString = () => '[class Lifecycle]';
 
-module.exports = {
+export {
   Lifecycle
 };

@@ -1,16 +1,17 @@
-'use strict';
-
-const { SqliteStorage } = require('ee-core/storage');
-const { getDataDir } = require('ee-core/ps');
-const path = require('path');
+import { SqliteStorage } from 'ee-core/storage';
+import { getDataDir } from 'ee-core/ps';
+import path from 'path';
 
 /**
  * sqlite数据存储
  * @class
  */
 class BasedbService {
+  protected dbname: string;
+  protected db: any;
+  protected storage: any;
 
-  constructor(options) {
+  constructor(options: { dbname: string }) {
     const { dbname } = options;
     this.dbname = dbname;
     this.db = undefined;
@@ -19,7 +20,7 @@ class BasedbService {
   /*
    * 初始化
    */
-  _init() {
+  _init(): void {
     // 定义数据文件
     const dbFile = path.join(getDataDir(), "db", this.dbname);
     const sqliteOptions = {
@@ -33,7 +34,7 @@ class BasedbService {
   /*
    * change data dir (sqlite)
    */
-  changeDataDir(dir) {
+  changeDataDir(dir: string): void {
     // the absolute path of the db file
     const dbFile = path.join(dir, this.dbname);
     const sqliteOptions = {
@@ -44,8 +45,8 @@ class BasedbService {
     this.db = this.storage.db;   
   }
 }  
-BasedbService.toString = () => '[class BasedbService]';
+(BasedbService as any).toString = () => '[class BasedbService]';
 
-module.exports = {
+export {
   BasedbService,
 };

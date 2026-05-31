@@ -1,6 +1,4 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
+import { logger } from 'ee-core/log';
 
 // The service used in the job should not rely on Electron's API, as it may cause errors
 class UserService {
@@ -8,7 +6,7 @@ class UserService {
   /**
    * hello
    */
-  async hello(args) {
+  async hello(args: any): Promise<any> {
     let obj = {
       status:'ok',
       params: args
@@ -19,8 +17,8 @@ class UserService {
   }
 
 }
-UserService.toString = () => '[class UserService]';
+(UserService as any).toString = () => '[class UserService]';
 
-module.exports = {
+export {
   UserService
 };  
