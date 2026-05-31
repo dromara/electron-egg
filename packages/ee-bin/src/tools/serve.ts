@@ -93,12 +93,16 @@ class ServeProcess {
       }
     }
 
+    this._restorePkgMain();
+
     if (this.bundleCtx) {
-      await this.bundleCtx.dispose();
+      try {
+        await this.bundleCtx.dispose();
+      } catch {
+        // ignore dispose errors during shutdown — the process is exiting anyway
+      }
       this.bundleCtx = null;
     }
-
-    this._restorePkgMain();
 
     await this.sleep(500);
     process.exit(0);
