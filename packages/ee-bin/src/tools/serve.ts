@@ -473,16 +473,16 @@ class ServeProcess {
     log('_bundleWithRegistry options:%O', options);
     await build(options);
 
-    this._postBundle(outdir, bundleConfig);
+    this._postBundle(cwd, outdir, bundleConfig);
   }
 
   /**
-   * Bundle 后处理（dev 增量与 build 全量共用）
-   *   1. 把 esbuild 产出的 app_bundle-entry.js 重命名为 main.js（sourcemap 同理）
-   *   2. 复制非打包文件（jobs/、preload/bridge.js、用户自定义 copy）
-   *   3. 打印输出路径
+   * Bundle post-processing (shared by both dev incremental and build full bundling)
+   *   1. Rename esbuild output app_bundle-entry.js → main.js (and its sourcemap)
+   *   2. Copy non-bundlable files (jobs/, preload/bridge.js, user-defined copy targets)
+   *   3. Log the output path
    */
-  private _postBundle(outdir: string, bundleConfig: BundleConfig): void {
+  private _postBundle(cwd: string, outdir: string, bundleConfig: BundleConfig): void {
     const outfile = path.join(outdir, 'main.js');
 
     const bundleEntryFile = path.join(outdir, 'app_bundle-entry.js');
@@ -495,7 +495,7 @@ class ServeProcess {
       fs.renameSync(bundleEntryMap, path.join(outdir, 'main.js.map'));
     }
 
-    this._copyUnbundledFiles(process.cwd(), outdir, bundleConfig);
+    this._copyUnbundledFiles(cwd, outdir, bundleConfig);
 
     console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
   }
