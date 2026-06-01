@@ -9,18 +9,15 @@ hero:
     alt: Electron-Egg
   actions:
     - theme: brand
-      text: ⛵️ v4.2.0 文档
+      text: ⛵️ v5.0.0 文档
       link: /pages/987b1c/
     - theme: alt
       text: 快速开始
       link: /pages/909757/
-    - theme: alt
-      text: GitHub
-      link: https://github.com/dromara/electron-egg
 features:
   - icon: 🧬
     title: 入门简单
-    details: 支持 js、ts
+    details: 支持 Javascript、Typescript、CommonJS、ESM
   - icon: 🧩
     title: 跨平台
     details: windows、Mac、Linux
@@ -31,9 +28,9 @@ features:
 
 ## 🍬 特性
 
-- **跨平台**：一套代码，可以打包成 windows 版、Mac 版、Linux 版、国产 UOS、Deepin、麒麟等。
+- **跨平台**：一套代码，可以打包成 windows 版、Mac 版、鸿蒙OS、Linux 版、国产 UOS、Deepin、麒麟等。
 - **架构**：单业务进程/模块化/多任务(进程，线程，渲染进程)，让开发大型项目变的简单。
-- **简单高效**：支持 js、ts。
+- **简单高效**：支持 Javascript、Typescript、CommonJS、ESM。
 - **前端独立**：支持任何前端技术，如：vue、react、html、vite 等等。
 - **工程化**：可以用前端、服务端的开发思维，来编写桌面软件。
 - **高性能**：事件驱动、非阻塞式 IO。
