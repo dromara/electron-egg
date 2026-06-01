@@ -62,7 +62,12 @@ export interface BundleConfig {
   legalComments?: 'inline' | 'eof' | 'none';
   /** Compile-time constant definitions, e.g. { 'process.env.CUSTOM': '"value"' } */
   define?: Record<string, string>;
-  /** Extra files/directories from electron/ to copy to the bundle output (e.g. 'assets', 'data/db.json') */
+  /** Extra files/directories from electron/ to copy to the bundle output, with smart per-file handling:
+   *  - script files (.ts/.js/.mts/.cts/.tsx/.jsx) are transpiled to Node-loadable CJS .js
+   *    (bundle:false, so relative imports and ee-core/* stay as runtime require() calls)
+   *  - all other files (e.g. .json, images) are copied verbatim
+   *  Directory structure is preserved. Use this for resources kept out of main.js — static assets,
+   *  or source loaded via require()/child_process.fork() at runtime. (e.g. 'assets', 'workers', 'data/db.json') */
   copy?: string[];
   /** Output format: 'cjs' recommended for Electron main process, 'esm' requires all business code to be ESM-compatible */
   format?: 'cjs' | 'esm';
@@ -81,7 +86,6 @@ export interface ConfusionOptions {
   numbersToExpressions?: boolean;
   /** Obfuscation target runtime: 'browser' for frontend code, 'node' for Node.js/Electron code */
   target?: 'browser' | 'node';
-  silent?: boolean;
 }
 
 /** bytenode bytecode compilation options — corresponds to bytenode.compileFile() parameters */
@@ -113,6 +117,8 @@ export interface EncryptConfig {
   cleanFiles?: string[];
   /** Base directory for encryption operations (default './', i.e. project root) */
   encryptDir?: string;
+  /** Suppress javascript-obfuscator's promotional "Pro" banner during confusion (default false) */
+  silent?: boolean;
   confusionOptions?: ConfusionOptions;
   bytecodeOptions?: BytecodeOptions;
 }

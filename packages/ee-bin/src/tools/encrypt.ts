@@ -42,9 +42,37 @@ interface EncryptOptions {
   target?: string;
 }
 
+/**
+ * Run a function while optionally suppressing javascript-obfuscator's "Pro" advertisement banner.
+ *
+ * javascript-obfuscator (v5.x) prints a promotional banner via console.log when stdout
+ * is a TTY and not in CI. There is no official option to disable it, so when `silent` is
+ * true we temporarily wrap console.log to drop only those advertisement lines, then restore
+ * it. When `silent` is false the function runs untouched.
+ */
+function withSuppressedObfuscatorAd<T>(silent: boolean, fn: () => T): T {
+  if (!silent) return fn();
+
+  const original = console.log;
+  console.log = (...args: unknown[]): void => {
+    const first = args[0];
+    if (
+      typeof first === 'string' &&
+      (first.includes('JavaScript Obfuscator Pro') || first.includes('obfuscator.io'))
+    ) {
+      return;
+    }
+    original.apply(console, args as []);
+  };
+  try {
+    return fn();
+  } finally {
+    console.log = original;
+  }
+}
+
 /** Default encryption config (type='none' means no encryption is performed) */
-const DEFAULT_ENCRYPT_CONFIG: EncryptConfig = {
-  type: 'none',
+const DEFAULT_ENCRYPT_CONFIG: EncryptConfig = {  type: 'none',
   fileExt: ['.js'],
   cleanFiles: [],
   specificFiles: [],
@@ -64,6 +92,8 @@ class Encrypt {
   bOpt: BytecodeOptions;
   /** javascript-obfuscator obfuscation options */
   cOpt: ConfusionOptions;
+  /** Whether to suppress javascript-obfuscator's promotional "Pro" banner */
+  silent: boolean;
   /** globby match patterns (from the "files" field in config) */
   patterns: string[] | null;
   /** Files that must be processed with confusion only (e.g. preload/bridge.js) */
@@ -86,6 +116,7 @@ class Encrypt {
     this.type = this.config.type || 'none';
     this.bOpt = this.config.bytecodeOptions || {};
     this.cOpt = this.config.confusionOptions || {};
+    this.silent = this.config.silent ?? false;
     this.patterns = this.config.files || null;
     this.specFiles = this.config.specificFiles || [];
     // codefiles is not initialized in the constructor (deferred until encrypt() is called
@@ -192,7 +223,9 @@ class Encrypt {
     );
 
     const code = fs.readFileSync(file, 'utf8');
-    const result = JavaScriptObfuscator.obfuscate(code, opt);
+    const result = withSuppressedObfuscatorAd(this.silent, () =>
+      JavaScriptObfuscator.obfuscate(code, opt)
+    );
     // Write obfuscated result back to the original file (in-place replacement)
     fs.writeFileSync(file, result.getObfuscatedCode(), 'utf8');
   }

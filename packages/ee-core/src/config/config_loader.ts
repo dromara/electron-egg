@@ -119,7 +119,12 @@ export class ConfigLoader {
       // Bundle mode: find configuration module from registry
       const entry = globalThis.__EE_CONFIG_REGISTRY__.find((e) => e.filename === filename);
       if (!entry) return null;
-      const mod = entry.module;
+      // ESM interop: esbuild wraps config modules as { __esModule: true, default: fn }.
+      // Unwrap .default only when the __esModule marker is present, matching FileLoader.parseFromRegistry().
+      let mod = entry.module;
+      if (mod && (mod as Record<string, unknown>).__esModule && 'default' in (mod as Record<string, unknown>)) {
+        mod = (mod as { default: unknown }).default;
+      }
       debugLog('[_loadConfig] bundled filename: %s', filename);
       // Configuration file may export a function, receiving appInfo to dynamically generate configuration
       if (isFunction(mod)) {
