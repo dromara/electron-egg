@@ -176,6 +176,27 @@ Two configurations in `.vscode/launch.json`:
 - **Debug Electron** (F5): Pre-launch task bundles with `--env=dev` (inline sourcemap), then launches Electron with `--inspect=9229`. Breakpoints go in `electron/` source files — sourcemap maps back from `public/electron/main.js`.
 - **Attach Electron**: Attach to an already-running Electron process on port 9229.
 
+## Troubleshooting
+
+**When diagnosing startup or runtime issues, enable DEBUG logging first.** ee-core uses the `debug` library with namespaced loggers (`ee-core:config:*`, `ee-core:controller:*`, `ee-core:core:loader:*`, etc.). Turning these on surfaces the actual runtime state (merged config, loaded registries, resolved paths) directly, which is far faster than reading source and inferring behavior.
+
+```bash
+pnpm debug-electron                      # all ee-* namespaces (DEBUG=ee-*)
+pnpm debug-dev                           # all ee-* namespaces, full dev (frontend + electron)
+DEBUG='ee-core:config:*' pnpm dev-electron     # scope to one subsystem, e.g. config loading
+```
+
+Recommended workflow for "service/feature didn't start" type bugs:
+1. **Rebuild the packages first so the running code is current.** ee-core and ee-bin run from `node_modules/*/dist` (symlinked to `packages/*`), so stale `dist` is a common cause of "my fix had no effect" confusion — rebuild both before investigating:
+   ```bash
+   (cd packages/ee-core && pnpm run build) && (cd packages/ee-bin && pnpm run build)
+   ```
+2. Reproduce with the narrowest relevant DEBUG namespace and read what the runtime actually printed (e.g. the merged config object) before forming a hypothesis.
+3. If two related things fail together (e.g. http + socket servers both silent), suspect a shared upstream (config/registry loading), not each implementation.
+4. After any further ee-core/ee-bin source edit, rebuild the affected package again before re-testing — otherwise you'll run stale code.
+
+See `docs/bugfix/` for concrete worked examples.
+
 ## Important Notes
 
 - **ee-core and ee-bin are standalone npm packages**: They will be published to npm independently. The current pnpm workspace monorepo (`packages/ee-core`, `packages/ee-bin` with `workspace:*` in root `package.json`) is for local development convenience only. In production use, users install them from npm via `npm install ee-core ee-bin`.
