@@ -16,12 +16,10 @@ const head: any[] = [
 
 const navZh = [
   { text: '首页', link: '/' },
-  { text: 'v4', link: '/pages/909757/' },
+  { text: 'v5', link: '/pages/909757/' },
   { text: '插件', link: '/pages/300556/' },
   { text: 'API', link: '/pages/a99b72/' },
   { text: 'demo', link: '/pages/132909/' },
-  { text: '支持', link: '/pages/cce31f/' },
-  { text: '知识点', link: '/pages/1f0f51/' },
   { text: '案例', link: '/pages/eadf46/' },
   { text: '交流', link: '/pages/c2720e/' },
   {
@@ -35,11 +33,10 @@ const navZh = [
 
 const navEn = [
   { text: 'Home', link: '/en/' },
-  { text: 'v4', link: '/en/pages/909757/' },
+  { text: 'v5', link: '/en/pages/909757/' },
   { text: 'Plugins', link: '/en/pages/300556/' },
   { text: 'API', link: '/en/pages/a99b72/' },
   { text: 'demo', link: '/en/pages/132909/' },
-  { text: 'Support', link: '/en/pages/cce31f/' },
   { text: 'Tips', link: '/en/pages/1f0f51/' },
   { text: 'Cases', link: '/en/pages/eadf46/' },
   {

@@ -20,7 +20,7 @@ features:
     details: 支持 Javascript、Typescript、CommonJS、ESM
   - icon: 🧩
     title: 跨平台
-    details: windows、Mac、Linux
+    details: windows、Mac、鸿蒙、Linux
   - icon: 🍱
     title: 开源免费
     details: GitHub、Gitee
@@ -34,7 +34,7 @@ features:
 - **前端独立**：支持任何前端技术，如：vue、react、html、vite 等等。
 - **工程化**：可以用前端、服务端的开发思维，来编写桌面软件。
 - **高性能**：事件驱动、非阻塞式 IO。
-- **功能丰富**：配置、通信、任务、插件、数据库、升级、打包、工具... 应有尽有。
+- **功能丰富**：配置、通信、任务、插件、数据库、升级、打包、工具...等等。
 - **安全**：支持字节码加密、压缩混淆加密。
 - **业务扩展**：业务可以扩展其它语言，如 c/c++、python、go、java 等。
 

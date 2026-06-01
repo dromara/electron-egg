@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DOCS = path.resolve(__dirname, '../docs')
 
 // Top-level content dirs, in display order (numeric prefix drives sort anyway).
-const INCLUDE_DIRS = ['00.v4', '08.插件', '09.api-v4', '07.功能', '06.支持', '05.知识点', '04.其它']
+const INCLUDE_DIRS = ['00.文档', '08.插件', '09.api', '07.功能', '06.支持', '04.其它']
 
 const stripPrefix = (name) => name.replace(/^\d+\./, '')
 const numPrefix = (name) => {
@@ -48,11 +48,15 @@ function buildGroup(absDir, collapsed = true) {
 
 function buildSidebar() {
   const sidebar = []
+  let isFirst = true
   for (const dir of INCLUDE_DIRS) {
     const abs = path.join(DOCS, dir)
     if (!fs.existsSync(abs)) continue
     const items = buildGroup(abs)
-    if (items.length) sidebar.push({ text: stripPrefix(dir), collapsed: false, items })
+    if (items.length) {
+      sidebar.push({ text: stripPrefix(dir), collapsed: !isFirst, items })
+      isFirst = false
+    }
   }
   return sidebar
 }
