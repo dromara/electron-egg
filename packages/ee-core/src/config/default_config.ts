@@ -144,6 +144,15 @@ export default function defaultConfig(): Config {
         uris: ['favicon.ico'],
         returnData: '',
       },
+      /** Koa middleware extension: pre/post middleware chains and a custom error handler (all optional, empty by default) */
+      koaConfig: {
+        /** Middleware executed before route handling (e.g. auth, logging) */
+        preMiddleware: [],
+        /** Middleware executed after route handling (e.g. response formatting) */
+        postMiddleware: [],
+        /** Custom Koa error handler; null falls back to the framework default */
+        errorHandler: null,
+      },
     },
 
     /** Remote service configuration */

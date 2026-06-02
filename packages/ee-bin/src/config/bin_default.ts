@@ -60,7 +60,14 @@ const config: BinConfig = {
     electron: {
       bundleType: 'bundle', // 'bundle' uses esbuild to bundle into a single file, 'copy' copies the directory as-is
       external: [],         // User-defined esbuild external packages (framework externals are added automatically by the bundler)
-      sourcemap: false,     // false = auto mode (dev→inline sourcemap, prod→disabled)
+      sourcemap: false,     // false = auto mode (dev→inline sourcemap, prod→disabled); 'inline' | 'external' to force
+      minify: false,        // Minify whitespace/identifiers/syntax (recommended for production)
+      keepNames: false,     // Preserve original function/class names when minifying (eases error tracing)
+      drop: [],             // Statement types to strip, e.g. ['console', 'debugger'] for production
+      legalComments: 'none',// License comment handling: 'inline' | 'eof' | 'none'
+      define: {},           // Compile-time global constants, e.g. { 'process.env.MY_VERSION': '"1.0.0"' }
+      copy: [],             // Extra electron/ dirs/files copied to output (kept out of main.js); scripts transpiled, others verbatim
+      format: 'cjs',        // Output format: 'cjs' (recommended for Electron main process) | 'esm'
     },
     // Platform packaging commands — executed via electron-builder.
     // Each platform has its own builder config file in ./cmd/.
@@ -134,6 +141,8 @@ const config: BinConfig = {
       cleanFiles: ['./public/dist'],
       specificFiles: [],
       encryptDir: './',
+      // Suppress javascript-obfuscator's promotional banner during confusion
+      silent: false,
       confusionOptions: {
         compact: true,
         stringArray: true,
@@ -156,6 +165,8 @@ const config: BinConfig = {
       // so it is specifically listed to use confusion instead of bytecode.
       specificFiles: ['./public/electron/preload/bridge.js'],
       encryptDir: './',
+      // Suppress javascript-obfuscator's promotional banner during confusion
+      silent: false,
       confusionOptions: {
         compact: true,
         stringArray: true,
@@ -165,6 +176,11 @@ const config: BinConfig = {
         stringArrayCallsTransform: true,
         numbersToExpressions: true,
         target: 'node',
+      },
+      // bytenode options for 'bytecode'/'strict' types. electron:true enables V8 bytecode
+      // compatibility for the Electron runtime; filename/output are set per-file by the encrypt module.
+      bytecodeOptions: {
+        electron: true,
       },
     },
   },
