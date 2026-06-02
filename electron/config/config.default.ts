@@ -35,6 +35,7 @@ export default (): Partial<Config> => {
       redactCensor: '[Redacted]',
       timestamp: true,
       depthLimit: 5,
+      timezone: 'Asia/Shanghai',
       name: 'ee',
       appLogName: 'ee.log',
       coreLogName: 'ee-core.log',

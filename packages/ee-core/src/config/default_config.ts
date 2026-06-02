@@ -67,6 +67,8 @@ export default function defaultConfig(): Config {
       redactCensor: '[Redacted]',
       /** Whether to include timestamp */
       timestamp: true,
+      /** IANA timezone for log timestamps (file JSON logs); 'UTC' or e.g. 'Asia/Shanghai' */
+      timezone: 'UTC',
       /** pino logger name */
       name: 'ee',
       /** Maximum size of a single log file */

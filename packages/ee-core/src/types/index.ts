@@ -212,6 +212,8 @@ export interface LoggerConfig {
   redactCensor?: string | ((value: unknown, path: string[]) => unknown);
   /** Whether logs include timestamps, default true */
   timestamp?: boolean;
+  /** IANA timezone for log timestamps (file JSON logs), default 'UTC'. Set e.g. 'Asia/Shanghai' to emit local time with offset */
+  timezone?: string;
   /** Logger name, displayed in log entries */
   name?: string;
   /** Maximum size of a single log file, auto-rotates when exceeded (e.g. '10m' for 10MB) */
