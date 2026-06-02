@@ -574,14 +574,21 @@ class ServeProcess {
    *    child_process.fork() can load them), other files copied verbatim, structure preserved
    */
   private async _copyUnbundledFiles(cwd: string, outdir: string, bundleConfig: BundleConfig): Promise<void> {
-    // preload/bridge.js: BrowserWindow's preload script is loaded directly from disk by Electron.
+    // Shared esbuild options (format/target/minify/define/...) so unbundled output stays
+    // consistent with main.js. Per-file transpile (bundle:false) is forced inside _transpileDir.
+    const baseOptions = this._resolveBaseBuildOptions(bundleConfig);
+
+    // preload/bridge.*: BrowserWindow's preload script is loaded directly from disk by Electron.
     // It cannot be bundled into main.js (bundled path would be wrong, and Electron requires
-    // preload scripts to be separate files)
-    const bridgeSrc = path.join(cwd, ELECTRON_DIR, 'preload', 'bridge.js');
-    const bridgeDest = path.join(outdir, 'preload', 'bridge.js');
-    if (fs.existsSync(bridgeSrc)) {
-      fs.mkdirSync(path.dirname(bridgeDest), { recursive: true });
-      fs.copyFileSync(bridgeSrc, bridgeDest);
+    // preload scripts to be separate files). The source may be .ts/.js/.mts/... — resolve whichever
+    // exists and transpile it to bridge.js (a plain copy would break for TypeScript sources).
+    const bridgeMatches = globby.sync('preload/bridge.{ts,js,mts,cts,tsx,jsx}', { cwd: path.join(cwd, ELECTRON_DIR) });
+    if (bridgeMatches.length > 0) {
+      const bridgeRel = bridgeMatches[0]!;
+      const bridgeSrc = path.join(cwd, ELECTRON_DIR, bridgeRel);
+      // dest mirrors the source basename so _transpileDir derives the sibling .js correctly
+      const bridgeDest = path.join(outdir, bridgeRel);
+      await this._transpileDir(bridgeSrc, bridgeDest, baseOptions);
     }
 
     // Copy targets kept out of main.js. jobs/ is a framework default (its files run in forked
@@ -589,7 +596,6 @@ class ServeProcess {
     // user-defined entries from bundleConfig.copy. De-duplicated so an explicit 'jobs' won't run twice.
     // Script files are transpiled with the SAME esbuild options as main.js (format/target/minify/
     // define/...), other files (assets, .json) copied verbatim — all handled per-file by _transpileDir.
-    const baseOptions = this._resolveBaseBuildOptions(bundleConfig);
     const copyTargets = [...new Set(['jobs', ...(bundleConfig.copy || [])])];
     for (const target of copyTargets) {
       const src = path.join(cwd, ELECTRON_DIR, target);
