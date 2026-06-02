@@ -113,7 +113,8 @@
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://127.0.0.1:7071/)",
       "Bash(ls -la docs/)",
       "Bash(ls -la docs/bugfix/)",
-      "Bash(ls -la CLAUDE.md .claude/CLAUDE.md)"
+      "Bash(ls -la CLAUDE.md .claude/CLAUDE.md)",
+      "Bash(bitto status *)"
     ]
   }
 }

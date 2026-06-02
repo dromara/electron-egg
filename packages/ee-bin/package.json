@@ -29,7 +29,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "npm run build:esm && npm run build:cjs",
+    "build": "npm run build:esm && npm run build:cjs && npm run build:chmod",
+    "build:chmod": "chmod +x dist/esm/index.js dist/cjs/index.js",
     "build:esm": "tsc -p tsconfig.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "clean": "rm -rf dist",
