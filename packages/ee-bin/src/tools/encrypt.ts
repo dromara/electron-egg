@@ -98,6 +98,8 @@ class Encrypt {
   patterns: string[] | null;
   /** Files that must be processed with confusion only (e.g. preload/bridge.js) */
   specFiles: string[];
+  /** Entry files compiled to .jsc + replaced with a bytenode loader shell (e.g. main.js) */
+  entryFiles: string[];
   /** Matched file path list (lazy init, computed on first call to _getCodeFiles()) */
   codefiles: string[] | undefined;
 
@@ -119,6 +121,7 @@ class Encrypt {
     this.silent = this.config.silent ?? false;
     this.patterns = this.config.files || null;
     this.specFiles = this.config.specificFiles || [];
+    this.entryFiles = this.config.entryFiles || [];
     // codefiles is not initialized in the constructor (deferred until encrypt() is called
     // to avoid wasting I/O when type='none')
   }
@@ -144,7 +147,7 @@ class Encrypt {
    * Frontend bytecode is skipped: the browser renderer process V8 version differs
    * from the compile-time V8, so compiled bytecode cannot execute in the renderer.
    */
-  encrypt(): void {
+  async encrypt(): Promise<void> {
     // Skip if type is 'none' or not in the valid EncryptTypes list
     if (!(EncryptTypes as readonly string[]).includes(this.type)) return;
     // Frontend does not support bytecode (renderer V8 version incompatibility)
@@ -165,14 +168,22 @@ class Encrypt {
       const ext = path.extname(file);
       if (!this.filesExt.includes(ext)) continue;
 
-      // Files in specificFiles are forced to use confusion (e.g. preload/bridge.js
-      // must remain in a readable format for BrowserWindow to load; bytecode won't work)
-      if (this.specFiles.includes(file)) {
-        this.generate(fullpath, 'confusion');
+      // Entry files (e.g. main.js) cannot be renamed to .jsc — the Electron/Node runtime
+      // requires a literal .js entry. In bytecode/strict mode, compile to .jsc and replace
+      // the source with a tiny bytenode loader shell. In confusion mode they behave normally.
+      if (this.entryFiles.includes(file)) {
+        await this.generateEntryLoader(fullpath);
         continue;
       }
 
-      this.generate(fullpath);
+      // Files in specificFiles are forced to use confusion (e.g. preload/bridge.js
+      // must remain in a readable format for BrowserWindow to load; bytecode won't work)
+      if (this.specFiles.includes(file)) {
+        await this.generate(fullpath, 'confusion');
+        continue;
+      }
+
+      await this.generate(fullpath);
     }
     console.log(chalk.blue('[ee-bin] [encrypt] ') + 'end encrypting');
   }
@@ -186,7 +197,7 @@ class Encrypt {
    * strict mode = confusion + bytecode combined: obfuscate first, then compile to bytecode.
    * The obfuscated code is compiled into bytecode for double protection.
    */
-  generate(curPath: string, type?: string): void {
+  async generate(curPath: string, type?: string): Promise<void> {
     const encryptType = type || this.type;
 
     const tips =
@@ -198,12 +209,33 @@ class Encrypt {
     console.log(tips);
     if (encryptType === 'strict') {
       this.generateJSConfuseFile(curPath);
-      this.generateBytecodeFile(curPath);
+      await this.generateBytecodeFile(curPath);
     } else if (encryptType === 'bytecode') {
-      this.generateBytecodeFile(curPath);
+      await this.generateBytecodeFile(curPath);
     } else if (encryptType === 'confusion') {
       this.generateJSConfuseFile(curPath);
     }
+  }
+
+  async generateEntryLoader(curPath: string): Promise<void> {
+    const encryptType = this.type;
+    if (encryptType === 'strict') {
+      this.generateJSConfuseFile(curPath);
+      await this.generateBytecodeFile(curPath, false);
+    } else if (encryptType === 'bytecode') {
+      await this.generateBytecodeFile(curPath, false);
+    } else {
+      await this.generate(curPath);
+      return;
+    }
+
+    const jscName = path.basename(curPath, path.extname(curPath)) + '.jsc';
+    const loaderCode = [
+      "require('bytenode');",
+      `require('./${jscName}');`,
+      '',
+    ].join('\n');
+    fs.writeFileSync(curPath, loaderCode, 'utf8');
   }
 
   /**
@@ -239,7 +271,7 @@ class Encrypt {
    *   3. If .jsc was not generated, throw an error and keep the source file (prevents code loss from failed compilation)
    *   4. Use fs.unlinkSync to delete a single file instead of fs.rmSync (avoids recursive delete risk)
    */
-  generateBytecodeFile(curPath: string): void {
+  async generateBytecodeFile(curPath: string, deleteSource = true): Promise<void> {
     if (path.extname(curPath) !== '.js') {
       return;
     }
@@ -253,10 +285,10 @@ class Encrypt {
       this.bOpt
     );
 
-    bytenode.compileFile(opt);
+    await bytenode.compileFile(opt);
     // Verify .jsc output exists before deleting source file
     if (fs.existsSync(jscFile)) {
-      fs.unlinkSync(curPath);
+      if (deleteSource) fs.unlinkSync(curPath);
     } else {
       throw new Error(`[ee-bin] [encrypt] Bytecode compilation failed: ${jscFile} was not created, keeping source ${curPath}`);
     }
@@ -270,14 +302,14 @@ class Encrypt {
  * Each instance independently determines whether to encrypt and which method to use,
  * based on its own configuration.
  */
-export function encrypt(options: EncryptOptions = {}): void {
+export async function encrypt(options: EncryptOptions = {}): Promise<void> {
   const electronOpt: EncryptOptions = { ...options, target: 'electron' };
   const electronEpt = new Encrypt(electronOpt);
-  electronEpt.encrypt();
+  await electronEpt.encrypt();
 
   const frontendOpt: EncryptOptions = { ...options, target: 'frontend' };
   const frontendEpt = new Encrypt(frontendOpt);
-  frontendEpt.encrypt();
+  await frontendEpt.encrypt();
 }
 
 /**

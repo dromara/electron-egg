@@ -214,7 +214,8 @@ module.exports = {
       silent: true,
     },
     electron: {
-      type: 'confusion',
+      // Encryption type: 'confusion' | 'bytecode' | 'strict' | 'none'
+      type: 'bytecode',
       files: [
         './public/electron/**/*.(js|json)',
       ],

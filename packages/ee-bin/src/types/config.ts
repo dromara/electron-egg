@@ -113,6 +113,11 @@ export interface EncryptConfig {
   fileExt?: string[];
   /** Files that must use confusion mode even when global config is bytecode (e.g. preload/bridge.js) */
   specificFiles?: string[];
+  /** Entry files (e.g. Electron's main.js) that cannot be renamed to .jsc because the
+   *  runtime requires a literal .js entry. For these, the source is compiled to <name>.jsc
+   *  and the original <name>.js is overwritten with a tiny bytenode loader shell that
+   *  requires the .jsc. Only applies in 'bytecode'/'strict' modes. */
+  entryFiles?: string[];
   /** Directory paths to clean after encryption completes */
   cleanFiles?: string[];
   /** Base directory for encryption operations (default './', i.e. project root) */

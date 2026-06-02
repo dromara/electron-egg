@@ -164,6 +164,9 @@ const config: BinConfig = {
       // bridge.js is a BrowserWindow preload script that must remain in readable format,
       // so it is specifically listed to use confusion instead of bytecode.
       specificFiles: ['./public/electron/preload/bridge.js'],
+      // Electron's package entry must remain main.js; in bytecode/strict mode it becomes
+      // a tiny bytenode loader shell that requires main.jsc.
+      entryFiles: ['./public/electron/main.js'],
       encryptDir: './',
       // Suppress javascript-obfuscator's promotional banner during confusion
       silent: false,
