@@ -1,5 +1,5 @@
 {
-  "name": "ee-next",
+  "name": "ee-next-js",
   "version": "5.0.0",
   "description": "A fast, desktop software development framework",
   "main": "./public/electron/main.js",
