@@ -11,7 +11,6 @@ export interface UserRow {
 }
 
 class SqlitedbService extends BasedbService {
-  static toString() { return '[class SqlitedbService]'; }
   private userTableName: string;
 
   constructor () {

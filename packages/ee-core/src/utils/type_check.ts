@@ -22,15 +22,25 @@ export function isFunction(val: unknown): val is (...args: unknown[]) => unknown
 /**
  * Determine if a value is an ES6 class
  *
- * Distinguishes classes from regular functions by checking if the function's toString() output
- * starts with the 'class' keyword.
+ * Primary check is structural: an ES6 class has a non-writable `prototype`
+ * (writable: false), whereas a regular function's prototype is writable, and
+ * arrow/async functions have no prototype at all. This reads the runtime object
+ * shape rather than source text, so it survives minify and bytecode (.jsc) compilation.
+ *
+ * Fallback check keeps the previous behavior: sniff the toString() output for a
+ * leading `class` keyword, covering any edge case the structural check misses.
  * Note: constructor functions declared with function are not recognized as classes.
  *
  * @param val - Value to check
  * @returns true if the value is a class declared with class
  */
 export function isClass(val: unknown): val is new (...args: unknown[]) => unknown {
-  return typeof val === 'function' && /^\s*class\b/.test(val.toString());
+  if (typeof val !== 'function') return false;
+  // Primary: structural check (immune to minify / bytecode compilation)
+  const desc = Object.getOwnPropertyDescriptor(val, 'prototype');
+  if (desc && desc.writable === false) return true;
+  // Fallback: source-string sniffing (preserves prior behavior)
+  return /^\s*class\b/.test(val.toString());
 }
 
 /**

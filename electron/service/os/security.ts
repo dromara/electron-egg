@@ -6,8 +6,6 @@ import { app as electronApp } from 'electron';
  * @class
  */
 class SecurityService {
-  static toString() { return '[class SecurityService]'; }
-
   /**
    * 创建
    */

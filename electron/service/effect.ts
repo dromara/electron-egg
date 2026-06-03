@@ -5,8 +5,6 @@ import { logger } from 'ee-core/log';
  * @class
  */
 class EffectService {
-  static toString() { return '[class EffectService]'; }
-
   /**
    * hello
    */

@@ -18,7 +18,6 @@ interface UpdaterConfig {
 }
 
 class AutoUpdaterService {
-  static toString() { return '[class AutoUpdaterService]'; }
   private config: UpdaterConfig;
 
   constructor() {

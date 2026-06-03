@@ -11,7 +11,6 @@ import type { CrossTargetConfig } from 'ee-core';
  * @class
  */
 class CrossService {
-  static toString() { return '[class CrossService]'; }
 
   info(): string {
     const pids = cross.getPids();

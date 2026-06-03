@@ -2,8 +2,6 @@ import { logger } from 'ee-core/log';
 
 // The service used in the job should not rely on Electron's API, as it may cause errors
 class UserService {
-  static toString() { return '[class UserService]'; }
-
   /**
    * hello
    */

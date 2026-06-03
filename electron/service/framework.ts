@@ -8,7 +8,6 @@ import type { IpcMainEvent } from 'electron';
  * @class
  */
 class FrameworkService {
-  static toString() { return '[class FrameworkService]'; }
   private myTimer: NodeJS.Timeout | null;
   private myJob: ChildJob;
   private myJobPool: ChildPoolJob;

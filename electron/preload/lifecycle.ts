@@ -4,8 +4,6 @@ import { getConfig } from 'ee-core/config';
 import { getMainWindow } from 'ee-core/electron';
 
 class Lifecycle {
-  static toString() { return '[class Lifecycle]'; }
-
   /**
    * core app have been loaded
    */

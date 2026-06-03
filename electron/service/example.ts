@@ -5,8 +5,6 @@ import { logger } from 'ee-core/log';
  * @class
  */
 class ExampleService {
-  static toString() { return '[class ExampleService]'; }
-
   /**
    * test
    */

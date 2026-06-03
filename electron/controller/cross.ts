@@ -5,8 +5,6 @@ import { crossService } from '../service/cross';
  * @class
  */
 class CrossController {
-  static toString() { return '[class CrossController]'; }
-
   /**
    * View process service information
    */

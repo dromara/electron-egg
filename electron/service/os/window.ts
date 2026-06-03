@@ -19,7 +19,6 @@ interface CreateWindowArgs {
 }
 
 class WindowService {
-  static toString() { return '[class WindowService]'; }
   private myNotification: Notification | null;
   private windows: Record<string, BrowserWindow>;
 

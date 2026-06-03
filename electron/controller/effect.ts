@@ -6,8 +6,6 @@ import { getMainWindow } from 'ee-core/electron';
  * @class
  */
 class EffectController {
-  static toString() { return '[class EffectController]'; }
-
   /**
    * select file
    */

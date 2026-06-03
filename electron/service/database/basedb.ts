@@ -8,7 +8,6 @@ import type Database from 'better-sqlite3';
  * @class
  */
 class BasedbService {
-  static toString() { return '[class BasedbService]'; }
   protected dbname: string;
   protected db!: Database.Database;
   protected storage!: SqliteStorage;

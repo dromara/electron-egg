@@ -11,8 +11,6 @@ import { windowService } from '../service/os/window';
  * @class
  */
 class OsController {
-  static toString() { return '[class OsController]'; }
-
   /**
    * All methods receive two parameters
    * @param args Parameters transmitted by the frontend

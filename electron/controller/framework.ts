@@ -35,8 +35,6 @@ interface SqlitedbOperationResult {
 }
 
 class FrameworkController {
-  static toString() { return '[class FrameworkController]'; }
-
   /**
    * 所有方法接收两个参数
    * @param args 前端传的参数

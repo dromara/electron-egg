@@ -3,8 +3,6 @@
  * @class
  */
 class ExampleController {
-  static toString() { return '[class ExampleController]'; }
-
   /**
    * test
    */

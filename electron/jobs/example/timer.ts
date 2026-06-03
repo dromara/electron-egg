@@ -8,7 +8,6 @@ import { welcome } from './hello';
  * @class
  */
 class TimerJob {
-  static toString() { return '[class TimerJob]'; }
   private timer: NodeJS.Timeout | undefined;
   private timeoutTimer: NodeJS.Timeout | undefined;
   private number: number;

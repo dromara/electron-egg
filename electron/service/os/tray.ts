@@ -9,7 +9,6 @@ import { getMainWindow, getCloseAndQuit, setCloseAndQuit } from 'ee-core/electro
  * @class
  */
 class TrayService {
-  static toString() { return '[class TrayService]'; }
   private tray: Tray | null;
   private config: { title: string; icon: string };
 

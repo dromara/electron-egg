@@ -18,7 +18,7 @@
     "build-go-m": "ee-bin move --flag=go_static,go_config,go_package,go_images && ee-bin build --cmds=go_m",
     "build-go-l": "ee-bin move --flag=go_static,go_config,go_package,go_images && ee-bin build --cmds=go_l",
     "build-python": "ee-bin build --cmds=python && ee-bin move --flag=python_dist",
-    "encrypt": "ee-bin encrypt",
+    "encrypt": "pnpm run build-electron && ee-bin encrypt",
     "icon": "ee-bin icon",
     "build-w": "ee-bin build --cmds=win64",
     "build-we": "ee-bin build --cmds=win_e",
@@ -54,6 +54,7 @@
   "dependencies": {
     "axios": "^1.7.9",
     "better-sqlite3": "^12.5.0",
+    "bytenode": "^1.5.7",
     "dayjs": "^1.11.13",
     "ee-core": "workspace:*",
     "electron-updater": "^6.7.3",
