@@ -385,7 +385,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.19.0"
   },
   "scripts": {
     "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run gen-exports",
@@ -402,21 +402,21 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "axios": "^1.7.9",
-    "bytenode": "^1.3.6",
-    "cross-spawn": "^7.0.3",
-    "debug": "^4.3.3",
+    "axios": "^1.16.1",
+    "bytenode": "^1.5.7",
+    "cross-spawn": "^7.0.6",
+    "debug": "^4.4.3",
     "dns-socket": "^4.2.2",
-    "globby": "^10.0.0",
+    "globby": "^16.2.0",
     "koa": "^2.13.4",
     "koa-body": "^5.0.0",
     "koa2-cors": "^2.0.6",
     "pino": "^10.3.1",
     "pino-pretty": "^13.1.3",
     "pino-roll": "^4.0.0",
-    "serialize-javascript": "^6.0.1",
-    "socket.io": "^4.6.1",
-    "socket.io-client": "^4.6.1",
+    "serialize-javascript": "^7.0.5",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "tree-kill": "^1.2.2",
     "urllib": "^2.38.0"
   },
@@ -428,12 +428,12 @@
     "@types/koa__cors": "^5.0.0",
     "@types/node": "^22.15.0",
     "@types/serialize-javascript": "^5.0.4",
-    "@typescript-eslint/eslint-plugin": "^8.59.4",
-    "@typescript-eslint/parser": "^8.59.4",
+    "@typescript-eslint/eslint-plugin": "^8.60.1",
+    "@typescript-eslint/parser": "^8.60.1",
     "electron": "^39.8.10",
     "eslint": "^9.39.4",
     "prettier": "^3.8.3",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.7"
   }
 }

@@ -24,8 +24,8 @@ import { createDebug, chalk, copyDirSync, formatCmds } from '../lib/helpers.js';
 import path from 'path';
 import fs from 'fs';
 import { build, BuildOptions } from 'esbuild';
-import globby from 'globby';
-import chokidar from 'chokidar';
+import { globbySync } from 'globby';
+import { watch as chokidarWatch } from 'chokidar';
 import kill from 'tree-kill';
 import { ChildProcess } from 'child_process';
 import process from 'process';
@@ -141,7 +141,7 @@ class ServeProcess {
       if (electronConfig?.watch) {
         let debounceTimer: ReturnType<typeof setTimeout> | null = null;
         const cmd = 'electron';
-        const watcher = chokidar.watch([ELECTRON_DIR], { persistent: true });
+        const watcher = chokidarWatch([ELECTRON_DIR], { persistent: true });
         watcher.on('change', async (f: string) => {
           console.log(chalk.blue('[ee-bin] [dev] ') + `File [${chalk.cyan(f)}] has been changed`);
 
@@ -559,7 +559,7 @@ class ServeProcess {
     }
 
     // Directory: walk every file, preserving the relative structure under dest
-    const entries = globby.sync('**/*', { cwd: src, onlyFiles: true });
+    const entries = globbySync('**/*', { cwd: src, onlyFiles: true });
     for (const rel of entries) {
       await transpileFile(path.join(src, rel), path.join(dest, rel));
     }
@@ -582,7 +582,7 @@ class ServeProcess {
     // It cannot be bundled into main.js (bundled path would be wrong, and Electron requires
     // preload scripts to be separate files). The source may be .ts/.js/.mts/... — resolve whichever
     // exists and transpile it to bridge.js (a plain copy would break for TypeScript sources).
-    const bridgeMatches = globby.sync('preload/bridge.{ts,js,mts,cts,tsx,jsx}', { cwd: path.join(cwd, ELECTRON_DIR) });
+    const bridgeMatches = globbySync('preload/bridge.{ts,js,mts,cts,tsx,jsx}', { cwd: path.join(cwd, ELECTRON_DIR) });
     if (bridgeMatches.length > 0) {
       const bridgeRel = bridgeMatches[0]!;
       const bridgeSrc = path.join(cwd, ELECTRON_DIR, bridgeRel);

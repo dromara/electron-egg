@@ -23,7 +23,7 @@
  */
 
 import { Plugin, PluginBuild } from 'esbuild';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import path from 'path';
 
 /** Controller registry entry — corresponds to each file under electron/controller/ */
@@ -90,14 +90,14 @@ export function bundleRegistryPlugin(
 
       // Re-scan directories at the start of each build (supports file additions/deletions in rebuild/watch mode)
       build.onStart(() => {
-        const controllerFiles = globby.sync(['**/*.js', '**/*.jsc', '**/*.ts'], { cwd: controllerDir });
+        const controllerFiles = globbySync(['**/*.js', '**/*.jsc', '**/*.ts'], { cwd: controllerDir });
         registryEntries = controllerFiles.map((filepath) => ({
           fullpath: 'controller/' + filepath.replace(/\\/g, '/'),
           properties: computeProperties(filepath),
           relPath: filepath,
         }));
 
-        const configFiles = globby.sync(['**/*.js', '**/*.jsc', '**/*.ts'], { cwd: configDir });
+        const configFiles = globbySync(['**/*.js', '**/*.jsc', '**/*.ts'], { cwd: configDir });
         configEntries = configFiles.map((filepath) => ({
           // Remove extension from filename to match ee-core ConfigLoader's lookup logic:
           // ConfigLoader finds config by name (e.g. 'default'), not including the '.js' extension

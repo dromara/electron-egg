@@ -22,7 +22,7 @@ import fs from 'fs';
 import { chalk } from '../lib/helpers.js';
 import crypto from 'crypto';
 import { zip as compressZip } from 'compressing';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import yaml from 'js-yaml';
 import { loadConfig, writeJsonSync } from '../lib/utils.js';
 import type { UpdaterConfig } from '../types/config.js';
@@ -151,7 +151,7 @@ class IncrUpdater {
 
     // Add extra resource files (e.g. native modules, config files)
     if (cfg.extraResources && cfg.extraResources.length > 0) {
-      const files = globby.sync(cfg.extraResources, { cwd: homeDir });
+      const files = globbySync(cfg.extraResources, { cwd: homeDir });
       for (const extraRes of files) {
         const extraResPath = path.normalize(path.join(homeDir, extraRes));
         if (!fs.existsSync(extraResPath)) {
