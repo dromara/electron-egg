@@ -48,6 +48,45 @@ function normalizeLevel(level: string): string {
 }
 
 /**
+ * Build a pino timestamp function that emits wall-clock time in a specific IANA timezone.
+ *
+ * pino's built-in isoTime always emits UTC (e.g. '...Z'); this preserves that exact behavior for
+ * 'UTC' (fast path via Date.toISOString()), and for any other IANA zone emits a full ISO string
+ * carrying the zone offset (e.g. '2026-06-01T21:42:24.123+08:00'), so file logs read as the
+ * configured timezone regardless of the host machine's TZ. The returned function follows pino's
+ * contract: it returns a string beginning with `,"time":...` to be concatenated into the JSON line.
+ *
+ * @param timeZone - IANA timezone name (e.g. 'Asia/Shanghai'), or 'UTC' for standard 'Z' output
+ */
+function buildTimezoneTimeFn(timeZone: string): () => string {
+  // UTC fast path: standard ISO 'Z' suffix, identical to pino's stdTimeFunctions.isoTime
+  if (timeZone === 'UTC') {
+    return function utcTime(): string {
+      return `,"time":"${new Date().toISOString()}"`;
+    };
+  }
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hour12: false,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    timeZoneName: 'longOffset',
+  });
+  return function timezoneTime(): string {
+    const now = new Date();
+    const parts: Record<string, string> = {};
+    for (const p of dtf.formatToParts(now)) parts[p.type] = p.value;
+    const ms = String(now.getMilliseconds()).padStart(3, '0');
+    // longOffset yields 'GMT+08:00' (or plain 'GMT' for UTC)
+    const raw = parts.timeZoneName || 'GMT';
+    const offset = raw === 'GMT' ? '+00:00' : raw.replace('GMT', '');
+    // Some engines emit '24' for midnight hour; normalize to '00'
+    const hour = parts.hour === '24' ? '00' : parts.hour;
+    return `,"time":"${parts.year}-${parts.month}-${parts.day}T${hour}:${parts.minute}:${parts.second}.${ms}${offset}"`;
+  };
+}
+
+/**
  * Build pino transport target list
  *
  * At minimum includes one pino-roll file output target;
@@ -190,6 +229,9 @@ export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
   const redactCensor = loggerConf.redactCensor || '[Redacted]';
   const name = loggerConf.name || 'ee';
   const timestamp = loggerConf.timestamp ?? true;
+  // Default 'UTC' keeps file logs machine-readable (standard ISO 'Z'); set an IANA zone
+  // (e.g. 'Asia/Shanghai') to emit wall-clock time with offset instead.
+  const timezone = loggerConf.timezone || 'UTC';
   // Unify maxSize to string format supported by pino-roll (e.g., '10m')
   const maxSize = typeof loggerConf.maxSize === 'number'
     ? `${(loggerConf.maxSize as number) / 1024 / 1024}m`
@@ -206,7 +248,7 @@ export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
   const baseOpts: pino.LoggerOptions = {
     level,
     name,
-    timestamp: timestamp ? pino.stdTimeFunctions.isoTime : false,
+    timestamp: timestamp ? buildTimezoneTimeFn(timezone) : false,
     depthLimit,
     safe,
     enabled,

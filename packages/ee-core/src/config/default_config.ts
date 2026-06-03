@@ -67,6 +67,8 @@ export default function defaultConfig(): Config {
       redactCensor: '[Redacted]',
       /** Whether to include timestamp */
       timestamp: true,
+      /** IANA timezone for log timestamps (file JSON logs); 'UTC' or e.g. 'Asia/Shanghai' */
+      timezone: 'UTC',
       /** pino logger name */
       name: 'ee',
       /** Maximum size of a single log file */
@@ -141,6 +143,15 @@ export default function defaultConfig(): Config {
       filterRequest: {
         uris: ['favicon.ico'],
         returnData: '',
+      },
+      /** Koa middleware extension: pre/post middleware chains and a custom error handler (all optional, empty by default) */
+      koaConfig: {
+        /** Middleware executed before route handling (e.g. auth, logging) */
+        preMiddleware: [],
+        /** Middleware executed after route handling (e.g. response formatting) */
+        postMiddleware: [],
+        /** Custom Koa error handler; null falls back to the framework default */
+        errorHandler: null,
       },
     },
 

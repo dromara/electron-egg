@@ -1,6 +1,6 @@
 {
   "name": "ee-bin",
-  "version": "5.0.0-beta.3",
+  "version": "5.0.0-beta.4",
   "description": "ee-bin typescript version",
   "main": "./dist/esm/index.js",
   "module": "./dist/esm/index.js",
@@ -30,9 +30,9 @@
   },
   "scripts": {
     "build": "npm run build:esm && npm run build:cjs && npm run build:chmod",
+    "build:chmod": "chmod +x dist/esm/index.js dist/cjs/index.js",
     "build:esm": "tsc -p tsconfig.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:chmod": "chmod +x dist/esm/index.js dist/cjs/index.js",
     "clean": "rm -rf dist",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
@@ -51,13 +51,15 @@
     "javascript-obfuscator": "^5.4.3",
     "js-yaml": "^4.1.1",
     "json5": "^2.2.3",
-    "tree-kill": "^1.2.2"
+    "tree-kill": "^1.2.2",
+    "wait-on": "^8.0.5"
   },
   "optionalDependencies": {
     "icon-gen": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
+    "@types/wait-on": "^5.3.4",
     "@typescript-eslint/eslint-plugin": "^8.59.4",
     "@typescript-eslint/parser": "^8.59.4",
     "eslint": "^9.39.4",

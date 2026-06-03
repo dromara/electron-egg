@@ -18,7 +18,7 @@ module.exports = {
       directory: './',
       cmd: 'electron',
       args: ['.', '--env=local'],
-      watch: false,
+      watch: true,
       delay: 1000,
     }
   },
@@ -84,11 +84,16 @@ module.exports = {
       */
       define: {},
       /**
-      * 额外复制 electron/ 下的目录或文件到输出目录
+      * 额外复制 electron/ 下的目录或文件到输出目录（不打包进 main.js，保持目录结构）
       * 框架已内置复制: jobs/, preload/bridge.js（不可移除）
-      * 此属性用于添加你自己的资源，如静态数据、配置模板等
-      * 目录示例: copy: ['assets']       → electron/assets/ → public/electron/assets/
-      * 文件示例: copy: ['data/db.json']  → electron/data/db.json → public/electron/data/db.json
+      * 智能处理: .ts/.js/.mts/.cts/.tsx/.jsx 源码会被编译成 Node 可直接 require 的 CJS .js
+      *           （bundle:false，相对导入和 ee-core/* 仍保留为运行时 require）；
+      *           其它文件（如 .json、图片）原样复制
+      * 适用场景: 静态资源，或不打包进 main.js、但需在运行时被 require()/child_process.fork() 加载的源码
+      * 目录示例: copy: ['assets']        → electron/assets/ → public/electron/assets/（原样复制）
+      *           copy: ['workers']       → 编译 electron/workers/ → public/electron/workers/
+      * 文件示例: copy: ['data/db.json']   → electron/data/db.json → public/electron/data/db.json（原样复制）
+      *           copy: ['scripts/task.ts']→ 编译 electron/scripts/task.ts → public/electron/scripts/task.js
       */
       copy: [],
       /**
@@ -205,11 +210,12 @@ module.exports = {
         stringArrayCallsTransform: true,
         numbersToExpressions: true,
         target: 'browser',
-        silent: true,
-      }
+      },
+      silent: true,
     },
     electron: {
-      type: 'confusion',
+      // Encryption type: 'confusion' | 'bytecode' | 'strict' | 'none'
+      type: 'bytecode',
       files: [
         './public/electron/**/*.(js|json)',
       ],
@@ -226,8 +232,8 @@ module.exports = {
         stringArrayCallsTransform: true,
         numbersToExpressions: true,
         target: 'node',
-        silent: true,
-      }
+      },
+      silent: false,
     }
   },
 

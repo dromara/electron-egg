@@ -148,8 +148,8 @@ program
   .description('Code encryption')
   .option('--config <folder>', 'config file')
   .option('--out <folder>', 'output directory')
-  .action(function (this: Command) {
-    encrypt(this.opts());
+  .action(async function (this: Command) {
+    await encrypt(this.opts());
   });
 
 /**

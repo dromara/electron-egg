@@ -24,6 +24,7 @@ import { createDebug, chalk, copyDirSync, formatCmds } from '../lib/helpers.js';
 import path from 'path';
 import fs from 'fs';
 import { build, BuildOptions } from 'esbuild';
+import globby from 'globby';
 import chokidar from 'chokidar';
 import kill from 'tree-kill';
 import { ChildProcess } from 'child_process';
@@ -382,6 +383,45 @@ class ServeProcess {
   }
 
   /**
+   * Resolve the esbuild options shared by the main bundle and the per-file copy transpile.
+   *
+   * Both the bundled main.js and the separately-transpiled jobs/copy files must use identical
+   * compilation settings, otherwise main process code and job code would diverge (e.g. main.js
+   * minified but jobs not, or different module format / target / define). This method centralizes
+   * everything that should be consistent; callers add only the mode-specific keys (bundle,
+   * entryPoints/outfile, externals, plugins, banner, logLevel).
+   *
+   * sourcemap auto mode: dev → inline (debuggable), prod → off (smaller output).
+   */
+  private _resolveBaseBuildOptions(bundleConfig: BundleConfig): BuildOptions {
+    const isDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'local';
+    let sourcemap: boolean | 'inline';
+    if (bundleConfig.sourcemap === 'inline' || bundleConfig.sourcemap === true) {
+      sourcemap = 'inline';
+    } else if (bundleConfig.sourcemap === 'external') {
+      sourcemap = true;
+    } else {
+      sourcemap = isDev ? 'inline' : false;
+    }
+
+    const format: 'cjs' | 'esm' = bundleConfig.format || 'cjs';
+
+    return {
+      platform: 'node',
+      target: 'node20',
+      format,
+      sourcemap,
+      minify: bundleConfig.minify ?? false,
+      keepNames: bundleConfig.keepNames ?? false,
+      ...(bundleConfig.drop ? { drop: bundleConfig.drop } : {}),
+      ...(bundleConfig.legalComments ? { legalComments: bundleConfig.legalComments } : {}),
+      define: {
+        ...(bundleConfig.define || {}),
+      },
+    };
+  }
+
+  /**
    * Bundle Electron code using esbuild + registry plugin
    *
    * esbuild configuration strategy:
@@ -408,19 +448,6 @@ class ServeProcess {
     const outdir = path.join(cwd, BUNDLE_DIR);
     const outfile = path.join(outdir, 'main.js');
 
-    const format: 'cjs' | 'esm' = bundleConfig.format || 'cjs';
-
-    const isDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'local';
-    let sourcemap: boolean | 'inline';
-    if (bundleConfig.sourcemap === 'inline' || bundleConfig.sourcemap === true) {
-      sourcemap = 'inline';
-    } else if (bundleConfig.sourcemap === 'external') {
-      sourcemap = true;
-    } else {
-      // Auto mode: dev → inline sourcemap for debugging, prod → disabled for smaller output
-      sourcemap = isDev ? 'inline' : false;
-    }
-
     // Framework internal externals: these packages must be loaded from node_modules at runtime,
     // not bundled into main.js. Reasons:
     //   - ee-core: child_process.fork() needs its entry point as a real file on disk
@@ -441,10 +468,12 @@ class ServeProcess {
     const plugin = bundleRegistryPlugin(controllerDir, entryMain, configDir);
 
     const options: BuildOptions = {
+      // Shared compilation settings (format/target/sourcemap/minify/keepNames/drop/legalComments/define)
+      // — kept identical to the per-file copy transpile so main.js and jobs/copy code never diverge
+      ...this._resolveBaseBuildOptions(bundleConfig),
+      // Mode-specific: bundle everything reachable from the virtual entry into a single file
       entryPoints: ['app:bundle-entry'],
       bundle: true,
-      platform: 'node',
-      target: 'node20',
       // packages: 'external' tells esbuild to treat all npm packages as external
       // (already refined by the explicit external list above)
       packages: 'external',
@@ -453,21 +482,12 @@ class ServeProcess {
         ...frameworkExternal,
         ...userExternal,
       ],
-      format,
-      minify: bundleConfig.minify ?? false,
-      keepNames: bundleConfig.keepNames ?? false,
-      ...(bundleConfig.drop ? { drop: bundleConfig.drop } : {}),
-      ...(bundleConfig.legalComments ? { legalComments: bundleConfig.legalComments } : {}),
-      sourcemap,
       // Banner injects EE_BUNDLED marker: ee-core checks this value to use the registry
       // instead of filesystem scanning when in bundle mode
       banner: {
         js: 'process.env.EE_BUNDLED = "true";',
       },
       plugins: [plugin],
-      define: {
-        ...(bundleConfig.define || {}),
-      },
       logLevel: 'info',
     };
 
@@ -488,52 +508,101 @@ class ServeProcess {
     }
 
     // Copy non-bundlable files (child_process.fork and BrowserWindow preload need separate files)
-    this._copyUnbundledFiles(cwd, outdir, bundleConfig);
+    await this._copyUnbundledFiles(cwd, outdir, bundleConfig);
 
     console.log(chalk.blue('[ee-bin] ') + `Bundle output: ${outfile}`);
   }
 
   /**
-   * Copy non-bundlable files — three-tier copy strategy
+   * Copy a directory or single file from electron/ to the bundle output WITH per-file transpilation.
    *
-   * 1. Framework-required copies: jobs/ directory (child_process.fork() requires separate files)
-   * 2. preload/bridge.js (BrowserWindow preload script must be a separate file, loaded directly by Electron)
-   * 3. User-defined copies (extra resources specified in bundleConfig.copy)
+   * Script files (.ts/.js/.mts/.cts/.tsx/.jsx) are compiled to Node-loadable .js using
+   * esbuild with bundle:false, so their imports stay as runtime require()/import calls:
+   *   - relative imports (./foo) resolve to the sibling transpiled .js
+   *   - ee-core/* and other packages resolve from node_modules at runtime
+   * Non-script files (e.g. .json) are copied verbatim. Directory structure is preserved.
+   *
+   * @param src        Absolute path to a source directory or file
+   * @param dest       Absolute path to the destination directory (for a dir src) or file (for a file src)
+   * @param baseOptions Shared esbuild options from _resolveBaseBuildOptions — same compilation
+   *                    settings (format/target/minify/define/...) as the main bundle, so copied
+   *                    code stays consistent with main.js. bundle:false is forced for per-file output.
    */
-  private _copyUnbundledFiles(cwd: string, outdir: string, bundleConfig: BundleConfig): void {
-    // Framework-required: jobs/ directory (child_process.fork cannot find child process
-    // entry points from a bundled file — they must exist as separate files on disk)
-    const copyTargets = ['jobs'];
+  private async _transpileDir(src: string, dest: string, baseOptions: BuildOptions): Promise<void> {
+    if (!fs.existsSync(src)) return;
+
+    const scriptExts = new Set(['.ts', '.js', '.mts', '.cts', '.tsx', '.jsx']);
+
+    const transpileFile = async (srcFile: string, destFile: string): Promise<void> => {
+      const ext = path.extname(srcFile);
+      if (!scriptExts.has(ext)) {
+        // Non-script asset (e.g. .json): copy verbatim
+        fs.mkdirSync(path.dirname(destFile), { recursive: true });
+        fs.copyFileSync(srcFile, destFile);
+        return;
+      }
+      // Output as sibling .js, preserving the directory structure. Per-file transpile (bundle:false)
+      // so imports stay as runtime require()/import calls resolved on disk.
+      await build({
+        ...baseOptions,
+        entryPoints: [srcFile],
+        outfile: destFile.slice(0, -ext.length) + '.js',
+        bundle: false,
+        logLevel: 'silent',
+      });
+    };
+
+    // Single file: dest is the target file path
+    if (fs.statSync(src).isFile()) {
+      await transpileFile(src, dest);
+      return;
+    }
+
+    // Directory: walk every file, preserving the relative structure under dest
+    const entries = globby.sync('**/*', { cwd: src, onlyFiles: true });
+    for (const rel of entries) {
+      await transpileFile(path.join(src, rel), path.join(dest, rel));
+    }
+  }
+
+  /**
+   * Copy non-bundlable files — two-tier strategy
+   *
+   * 1. preload/bridge.js (BrowserWindow preload script must be a separate file, loaded directly by Electron)
+   * 2. Copy targets: framework defaults (jobs/) + user-defined (bundleConfig.copy), all handled
+   *    per-file by _transpileDir — script files transpiled to CJS .js (so Node's require()/
+   *    child_process.fork() can load them), other files copied verbatim, structure preserved
+   */
+  private async _copyUnbundledFiles(cwd: string, outdir: string, bundleConfig: BundleConfig): Promise<void> {
+    // Shared esbuild options (format/target/minify/define/...) so unbundled output stays
+    // consistent with main.js. Per-file transpile (bundle:false) is forced inside _transpileDir.
+    const baseOptions = this._resolveBaseBuildOptions(bundleConfig);
+
+    // preload/bridge.*: BrowserWindow's preload script is loaded directly from disk by Electron.
+    // It cannot be bundled into main.js (bundled path would be wrong, and Electron requires
+    // preload scripts to be separate files). The source may be .ts/.js/.mts/... — resolve whichever
+    // exists and transpile it to bridge.js (a plain copy would break for TypeScript sources).
+    const bridgeMatches = globby.sync('preload/bridge.{ts,js,mts,cts,tsx,jsx}', { cwd: path.join(cwd, ELECTRON_DIR) });
+    if (bridgeMatches.length > 0) {
+      const bridgeRel = bridgeMatches[0]!;
+      const bridgeSrc = path.join(cwd, ELECTRON_DIR, bridgeRel);
+      // dest mirrors the source basename so _transpileDir derives the sibling .js correctly
+      const bridgeDest = path.join(outdir, bridgeRel);
+      await this._transpileDir(bridgeSrc, bridgeDest, baseOptions);
+    }
+
+    // Copy targets kept out of main.js. jobs/ is a framework default (its files run in forked
+    // child processes loaded by ee-core's require()-based loader, which cannot execute .ts), then
+    // user-defined entries from bundleConfig.copy. De-duplicated so an explicit 'jobs' won't run twice.
+    // Script files are transpiled with the SAME esbuild options as main.js (format/target/minify/
+    // define/...), other files (assets, .json) copied verbatim — all handled per-file by _transpileDir.
+    const copyTargets = [...new Set(['jobs', ...(bundleConfig.copy || [])])];
     for (const target of copyTargets) {
       const src = path.join(cwd, ELECTRON_DIR, target);
       const dest = path.join(outdir, target);
-      if (fs.existsSync(src)) {
-        copyDirSync(src, dest);
-      }
-    }
-
-    // preload/bridge.js: BrowserWindow's preload script is loaded directly from disk by Electron.
-    // It cannot be bundled into main.js (bundled path would be wrong, and Electron requires
-    // preload scripts to be separate files)
-    const bridgeSrc = path.join(cwd, ELECTRON_DIR, 'preload', 'bridge.js');
-    const bridgeDest = path.join(outdir, 'preload', 'bridge.js');
-    if (fs.existsSync(bridgeSrc)) {
-      fs.mkdirSync(path.dirname(bridgeDest), { recursive: true });
-      fs.copyFileSync(bridgeSrc, bridgeDest);
-    }
-
-    // User-defined: extra resources (e.g. assets directory, data/db.json)
-    const userCopyTargets = bundleConfig.copy || [];
-    for (const target of userCopyTargets) {
-      const src = path.join(cwd, ELECTRON_DIR, target);
-      const dest = path.join(outdir, target);
       if (!fs.existsSync(src)) continue;
-      if (fs.statSync(src).isDirectory()) {
-        copyDirSync(src, dest);
-      } else {
-        fs.mkdirSync(path.dirname(dest), { recursive: true });
-        fs.copyFileSync(src, dest);
-      }
+      await this._transpileDir(src, dest, baseOptions);
+      console.log(chalk.blue('[ee-bin] ') + `Copied: ${dest}`);
     }
   }
 
