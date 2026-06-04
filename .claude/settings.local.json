@@ -125,7 +125,8 @@
       "Bash(grep -rln \"globby\" ee-bin/src)",
       "Bash(ls node_modules/.bin/vitest)",
       "Bash(ls packages/ee-core/node_modules/vitest)",
-      "Bash(ls packages/ee-core/node_modules/.bin/vitest)"
+      "Bash(ls packages/ee-core/node_modules/.bin/vitest)",
+      "Bash(npm list *)"
     ]
   }
 }

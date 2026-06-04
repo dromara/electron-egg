@@ -6,6 +6,7 @@
  * All path information comes from process.env environment variables set in boot.ts.
  */
 import path from 'path';
+import * as is from '../utils/is.js';
 
 /** Get all environment variables of the current process */
 export function allEnv(): NodeJS.ProcessEnv {
@@ -72,7 +73,11 @@ export function appVersion(): string {
  * Production: {userHome}/.{appName}/data
  */
 export function getDataDir(): string {
-  const base = isDev() ? getBaseDir() : getUserHomeHiddenAppDir();
+  let base = isDev() ? getBaseDir() : getUserHomeHiddenAppDir();
+  // 权限问题，openharmony 环境下，自定义应用目录
+  if (isProd() && is.openharmony()) {
+    base = getAppCustomDataDir();
+  }
   return path.join(base, 'data');
 }
 
@@ -83,7 +88,11 @@ export function getDataDir(): string {
  * Production: {userHome}/.{appName}/logs
  */
 export function getLogDir(): string {
-  const base = isDev() ? getBaseDir() : getUserHomeHiddenAppDir();
+  let base = isDev() ? getBaseDir() : getUserHomeHiddenAppDir();
+  // 权限问题，openharmony 环境下，自定义应用目录
+  if (isProd() && is.openharmony()) {
+    base = getAppCustomDataDir();
+  }
   return path.join(base, 'logs');
 }
 
@@ -152,8 +161,11 @@ export function getExtraResourcesDir(): string {
   if (packaged) {
     dir = path.join(execDir, 'resources', 'extraResources');
     // macOS app bundle structure: exe is in Contents/MacOS/, resources are in Contents/Resources/
-    if (process.platform === 'darwin') {
+    if (is.macOS()) {
       dir = path.join(execDir, '..', 'Resources', 'extraResources');
+    } else if (is.openharmony()) {
+      // todo: 处理 openharmony 下的资源目录
+      dir = path.join(execDir, "..", "Resources", "extraResources");
     }
   } else {
     dir = path.join(execDir, 'build', 'extraResources');
@@ -181,13 +193,20 @@ export function getExecDir(): string {
   return process.env.EE_EXEC_DIR || '';
 }
 
-/** Get the OS user home directory */
+/** 
+ * Get the OS user home directory 
+ * 权限原因：openharmony 下返回 appUserData 目录
+*/
 export function getUserHomeDir(): string {
+  if (is.openharmony()) {
+    return getAppUserDataDir();
+  }
   return process.env.EE_USER_HOME || '';
 }
 
 /**
  * Get the hidden app directory under the user home directory
+ * Permission issue, custom data directory for application in OpenHarmony environment
  *
  * Path format: {userHome}/.{appName}/
  * Used for storing data, logs, and other persistent files in production.
@@ -296,4 +315,14 @@ export function getArgumentByName(name: string, args?: string[]): string | undef
     }
   }
   return undefined;
+}
+
+/**
+ * Get the application custom data directory
+ *
+ * Used on OpenHarmony where the user home directory is not writable.
+ * Path format: {appUserData}/{appName}/
+ */
+export function getAppCustomDataDir(): string {
+  return path.join(getAppUserDataDir(), appName());
 }
