@@ -10,10 +10,10 @@ hero:
   actions:
     - theme: brand
       text: ⛵️ v5.0.0 文档
-      link: /pages/987b1c/
+      link: /00.docs/010.getting-started/001.major-update
     - theme: alt
       text: 快速开始
-      link: /pages/909757/
+      link: /00.docs/010.getting-started/040.quick-start
 features:
   - icon: 🧬
     title: 入门简单

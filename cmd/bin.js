@@ -37,7 +37,7 @@ module.exports = {
       /**
       * 构建方式
       * 'bundle' - 用 esbuild 打包成单文件（默认）
-      * 'copy'   - 原样复制 electron/ 目录，不做打包（仅用于调试）
+      * 'copy'   - 原样复制 electron/ 目录，不做打包（不推荐使用）
       */
       bundleType: 'bundle',
       /**
@@ -55,7 +55,7 @@ module.exports = {
       */
       sourcemap: false,
       /**
-      * 压缩代码（生产环境推荐）
+      * 压缩代码
       * true  - 压缩空白、标识符、语法
       * false - 不压缩（默认）
       */
@@ -215,7 +215,7 @@ module.exports = {
     },
     electron: {
       // Encryption type: 'confusion' | 'bytecode' | 'strict' | 'none'
-      type: 'bytecode',
+      type: 'confusion',
       files: [
         './public/electron/**/*.(js|json)',
       ],

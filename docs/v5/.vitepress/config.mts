@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitepress'
-import { rewrites, sidebarZh, sidebarEn } from './buildData.mjs'
+import { sidebarZh, sidebarEn } from './buildData.mjs'
 
 // Analytics + ads, ported from the old VuePress head.js / htmlModules.js
 const head: any[] = [
@@ -16,12 +16,12 @@ const head: any[] = [
 
 const navZh = [
   { text: '首页', link: '/' },
-  { text: 'v5', link: '/pages/909757/' },
-  { text: '插件', link: '/pages/300556/' },
-  { text: 'API', link: '/pages/a99b72/' },
-  { text: 'demo', link: '/pages/132909/' },
-  { text: '案例', link: '/pages/eadf46/' },
-  { text: '交流', link: '/pages/c2720e/' },
+  { text: 'v5', link: '/00.docs/010.getting-started/001.major-update' },
+  { text: '插件', link: '/08.plugins/01.introduction' },
+  { text: 'API', link: '/09.api/001.tutorial/001.usage-guide' },
+  { text: 'demo', link: '/07.features/01.demo' },
+  { text: '案例', link: '/04.others/020.case-study-01' },
+  { text: '交流', link: '/04.others/011.communication' },
   {
     text: '开源',
     items: [
@@ -33,12 +33,12 @@ const navZh = [
 
 const navEn = [
   { text: 'Home', link: '/en/' },
-  { text: 'v5', link: '/en/pages/909757/' },
-  { text: 'Plugins', link: '/en/pages/300556/' },
-  { text: 'API', link: '/en/pages/a99b72/' },
-  { text: 'demo', link: '/en/pages/132909/' },
-  { text: 'Tips', link: '/en/pages/1f0f51/' },
-  { text: 'Cases', link: '/en/pages/eadf46/' },
+  { text: 'v5', link: '/en/00.v4/010.getting-started/010.introduction' },
+  { text: 'Plugins', link: '/en/08.plugins/01.introduction' },
+  { text: 'API', link: '/en/09.api-v4/001.tutorial/001.usage-guide' },
+  { text: 'demo', link: '/en/07.features/01.demo' },
+  { text: 'Tips', link: '/en/05.tips/010.nvm' },
+  { text: 'Cases', link: '/en/04.others/020.case-study-01' },
   {
     text: 'Open Source',
     items: [
@@ -52,7 +52,6 @@ export default defineConfig({
   // 源文件目录，Markdown 文档从该目录下读取（相对于项目根）
   srcDir: 'docs',
   // 路径重写规则，将源文件路径映射为最终的访问 URL
-  rewrites,
   // 注入到每个页面 <head> 中的标签（图标、SEO meta、统计与广告脚本等）
   head,
   // 干净链接，去掉 URL 中的 .html 后缀
