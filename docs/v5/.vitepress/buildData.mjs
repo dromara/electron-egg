@@ -40,6 +40,7 @@ const displayNameMap = {
   'tasks': '任务',
   'tutorial': '教程',
   'version-relation': '版本关系',
+  'config': '配置',
 }
 
 // Read a file's title from frontmatter.
