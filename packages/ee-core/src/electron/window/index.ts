@@ -20,10 +20,10 @@ import { env, isDev, getBaseDir } from '../../ps/index.js';
 import { coreLogger } from '../../log/index.js';
 import { loadFile } from '../../loader/index.js';
 import { isFileProtocol } from '../../utils/index.js';
-import { getHtmlFilepath } from '../../html/index.js';
 import { fileIsExist, sleep } from '../../utils/helper.js';
 import { extend } from '../../utils/extend.js';
 import { cross } from '../../cross/index.js';
+import type { DevConfig, DevFrontendConfig, DevElectronConfig } from '../../types/index.js';
 
 const debugLog = debug('ee-core:electron:window');
 
@@ -166,33 +166,33 @@ export async function loadServer(): Promise<void> {
   // Development environment
   if (isDev()) {
     const binFile = path.join(getBaseDir(), './cmd/bin.js');
-    const binConfig = loadFile(binFile) as Record<string, { frontend?: Record<string, unknown>; electron?: Record<string, unknown> }>;
-    const dev = binConfig?.dev || {};
+    const binConfig = loadFile(binFile) as { dev: DevConfig };
+    const dev = binConfig?.dev || {} as DevConfig;
     const frontendConf = extend(true, {
       protocol: 'http://',
       hostname: 'localhost',
       port: 8080,
       indexPath: 'index.html',
       directory: 'frontend/dist',
-    }, dev.frontend || {}) as Record<string, unknown>;
+    }, (dev.frontend || {}) as Record<string, unknown>) as DevFrontendConfig;
     const electronConf = extend(true, {
       loadingPage: '/public/html/loading.html',
-    }, dev.electron || {}) as Record<string, unknown>;
+    }, (dev.electron || {}) as Record<string, unknown>) as DevElectronConfig;
 
-    let url = (frontendConf.protocol as string) + (frontendConf.hostname as string) + ':' + (frontendConf.port as number);
+    let url = frontendConf.protocol + frontendConf.hostname + ':' + frontendConf.port;
     let load: 'url' | 'file' = 'url';
     // file:// protocol loads local file directly
-    if (isFileProtocol(frontendConf.protocol as string)) {
-      url = path.join(getBaseDir(), frontendConf.directory as string, frontendConf.indexPath as string);
+    if (isFileProtocol(frontendConf.protocol)) {
+      url = path.join(getBaseDir(), frontendConf.directory, frontendConf.indexPath);
       load = 'file';
     }
 
     // HTTP mode: show startup page first, wait for frontend dev server to be ready
     if (load === 'url') {
       // Load startup page
-      let lp = getHtmlFilepath('boot.html');
+      let lp = path.join(getBaseDir(), 'public/html/loading.html');
       if (electronConf.loadingPage) {
-        lp = path.join(getBaseDir(), electronConf.loadingPage as string);
+        lp = path.join(getBaseDir(), electronConf.loadingPage);
       }
       _loadingPage(lp);
 
@@ -203,7 +203,7 @@ export async function loadServer(): Promise<void> {
 
       if (frontendReady === false && frontendConf.force !== true) {
         // Frontend service not ready, show failure page
-        const bootFailurePage = getHtmlFilepath('failure.html');
+        const bootFailurePage = path.join(getBaseDir(), 'public/html/failure.html');
         const win = getMainWindow();
         if (win) {
           win.loadFile(bootFailurePage);
@@ -324,7 +324,7 @@ async function crossTakeover(): Promise<void> {
 
   if (!serviceReady) {
     // Service not ready, show failure page
-    const bootFailurePage = getHtmlFilepath('cross-failure.html');
+    const bootFailurePage = path.join(getBaseDir(), 'public/html/cross-failure.html');
     const mainWindow = getMainWindow();
     if (mainWindow) {
       mainWindow.loadFile(bootFailurePage);

@@ -176,26 +176,6 @@
         "default": "./dist/cjs/exception/*.js"
       }
     },
-    "./html": {
-      "import": {
-        "types": "./dist/esm/html/index.d.ts",
-        "default": "./dist/esm/html/index.js"
-      },
-      "require": {
-        "types": "./dist/cjs/html/index.d.ts",
-        "default": "./dist/cjs/html/index.js"
-      }
-    },
-    "./html/*": {
-      "import": {
-        "types": "./dist/esm/html/*.d.ts",
-        "default": "./dist/esm/html/*.js"
-      },
-      "require": {
-        "types": "./dist/cjs/html/*.d.ts",
-        "default": "./dist/cjs/html/*.js"
-      }
-    },
     "./jobs": {
       "import": {
         "types": "./dist/esm/jobs/index.d.ts",
