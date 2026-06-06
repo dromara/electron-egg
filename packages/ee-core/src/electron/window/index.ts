@@ -91,19 +91,11 @@ export function getMainWindow(): BrowserWindow | null {
  * @returns BrowserWindow instance
  */
 export function createMainWindow(): BrowserWindow {
-  const { openDevTools, windowsOption } = getConfig() as {
-    openDevTools: boolean | Electron.OpenDevToolsOptions;
+  const { windowsOption } = getConfig() as {
     windowsOption: ConstructorParameters<typeof BrowserWindow>[0];
   };
   const win = new BrowserWindow(windowsOption);
   Instance.mainWindow = win;
-
-  // Developer tools
-  if (isObject(openDevTools)) {
-    win.webContents.openDevTools(openDevTools as unknown as Electron.OpenDevToolsOptions);
-  } else if (openDevTools === true) {
-    win.webContents.openDevTools({ mode: 'bottom' });
-  }
 
   eventBus.emitLifecycle(WindowReady);
   return win;
@@ -237,13 +229,26 @@ export async function loadServer(): Promise<void> {
  * @param load - Load method: 'url' uses loadURL, 'file' uses loadFile
  */
 function loadMainUrl(type: string, url: string, load = 'url'): void {
-  const { mainServer } = getConfig() as { mainServer: { options: Electron.LoadURLOptions & Electron.LoadFileOptions } };
+  const { openDevTools, mainServer } = getConfig() as {
+    openDevTools: boolean | Electron.OpenDevToolsOptions;
+    mainServer: { options: Electron.LoadURLOptions & Electron.LoadFileOptions };
+  };
   const win = getMainWindow();
   if (!win) return;
 
   coreLogger.info('Env: %s, Type: %s', env(), type);
   coreLogger.info('App running at: %s', url);
   debugLog('[loadMainUrl] type:%s, url:%s', type, url);
+
+  // Open DevTools after the final page finishes loading, avoiding disconnection during page transitions
+  win.webContents.once('did-finish-load', () => {
+    if (isObject(openDevTools)) {
+      win.webContents.openDevTools(openDevTools as unknown as Electron.OpenDevToolsOptions);
+    } else if (openDevTools === true) {
+      win.webContents.openDevTools({ mode: 'bottom' });
+    }
+  });
+
   if (load === 'file') {
     win.loadFile(url, mainServer.options)
       .catch((err) => {
