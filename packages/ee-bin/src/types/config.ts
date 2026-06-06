@@ -63,6 +63,7 @@ export interface DevElectronConfig extends ExecConfig {
 export interface DevConfig {
   frontend: DevFrontendConfig;
   electron: DevElectronConfig;
+  [key: string]: ExecConfig | undefined;
 }
 
 /** esbuild bundle config — controls Electron main process code bundling behavior */

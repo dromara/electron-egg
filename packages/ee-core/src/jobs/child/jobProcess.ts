@@ -28,6 +28,7 @@ export interface JobProcessOptions {
   processArgs?: Record<string, unknown>;
   /** Fork options (cwd, env, stdio, etc.) */
   processOptions?: ForkOptions;
+  [key: string]: unknown;
 }
 
 /** Message format: Main process -> Child process */

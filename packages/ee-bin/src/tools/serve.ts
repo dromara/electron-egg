@@ -282,7 +282,7 @@ class ServeProcess {
    *   - async mode uses crossSpawn for non-blocking execution; stored in execProcess for later kill
    *   - async processes listen for exit events; in dev mode, a message is logged when a process exits
    */
-  multiExec(opt: { binCmd: string; binCmdConfig: Record<string, ExecConfig>; command: string }): void {
+  multiExec(opt: { binCmd: string; binCmdConfig: Record<string, ExecConfig | undefined>; command: string }): void {
     const { binCmd, binCmdConfig, command } = opt;
     const commands = formatCmds(command || '');
 
