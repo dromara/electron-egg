@@ -1,14 +1,14 @@
 <template>
-  <div id="effect-login-index">
-    <div class="one-block-1">
-      <span>
-          1. 登录
-      </span>
-    </div>  
-    <div class="one-block-2">
-      <a-space>
-        <a-button @click="loginWindow()">切换为登录窗口</a-button>
-      </a-space>
+  <div id="effect-login-index" class="page-container">
+    <div class="card-grid">
+      <div class="feature-card feature-card--full">
+        <div class="feature-card__title">1. 登录</div>
+        <div class="feature-card__body">
+          <a-space>
+            <a-button @click="loginWindow()">切换为登录窗口</a-button>
+          </a-space>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -25,17 +25,4 @@ function loginWindow() {
 }
 </script>
 <style lang="less" scoped>
-#effect-login-index {
-  padding: 0px 10px;
-  text-align: left;
-  width: 100%;
-  .one-block-1 {
-      font-size: 16px;
-      padding-top: 10px;
-  }
-  .one-block-2 {
-      padding-top: 10px;
-  }
-}
 </style>
-  

@@ -12,7 +12,7 @@ export default (): Partial<Config> => {
     windowsOption: {
       title: 'electron-egg',
       width: 980,
-      height: 650,
+      height: 850,
       minWidth: 400,
       minHeight: 300,
       webPreferences: {

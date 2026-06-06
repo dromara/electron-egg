@@ -1,55 +1,50 @@
 <template>
-  <div id="app-os-subwindow-ipc">
-    <div class="one-block-1">
-      <span>
-        1. 发送异步消息
-      </span>
-    </div>  
-    <div class="one-block-2">
-      <a-space>
-        <a-button @click="handleInvoke">发送 - 回调</a-button>
-        结果：{{ message1 }}
-      </a-space>
-      <p></p>
-      <a-space>
-        <a-button @click="handleInvoke2">发送 - async/await</a-button>
-        结果：{{ message2 }}
-      </a-space>            
-    </div>   
-    <div class="one-block-1">
-      <span>
-        <!-- 尽量不要使用，任何错误都容易引起卡死 -->
-        2. 同步消息（不推荐，阻塞执行）
-      </span>
-    </div>  
-    <div class="one-block-2">
-      <a-space>
-        <a-button @click="handleSendSync">同步消息</a-button>
-        结果：{{ message3 }}
-      </a-space>   
-    </div>        
-    <div class="one-block-1">
-      <span>
-        3. 长消息： 服务端持续向前端页面发消息
-      </span>
-    </div>  
-    <div class="one-block-2">
-      <a-space>
-        <a-button @click="sendMsgStart">开始</a-button>
-        <a-button @click="sendMsgStop">结束</a-button>
-        结果：{{ messageString }}
-      </a-space>
+  <div id="app-os-subwindow-ipc" class="page-container">
+    <div class="card-grid">
+      <div class="feature-card feature-card--full">
+        <div class="feature-card__title">1. 发送异步消息</div>
+        <div class="feature-card__body">
+          <a-space>
+            <a-button @click="handleInvoke">发送 - 回调</a-button>
+            结果：{{ message1 }}
+          </a-space>
+          <p></p>
+          <a-space>
+            <a-button @click="handleInvoke2">发送 - async/await</a-button>
+            结果：{{ message2 }}
+          </a-space>
+        </div>
+      </div>
+      <div class="feature-card feature-card--full">
+        <div class="feature-card__title">
+          2. 同步消息（不推荐，阻塞执行）
+        </div>
+        <div class="feature-card__body">
+          <a-space>
+            <a-button @click="handleSendSync">同步消息</a-button>
+            结果：{{ message3 }}
+          </a-space>
+        </div>
+      </div>
+      <div class="feature-card feature-card--full">
+        <div class="feature-card__title">3. 长消息： 服务端持续向前端页面发消息</div>
+        <div class="feature-card__body">
+          <a-space>
+            <a-button @click="sendMsgStart">开始</a-button>
+            <a-button @click="sendMsgStop">结束</a-button>
+            结果：{{ messageString }}
+          </a-space>
+        </div>
+      </div>
+      <div class="feature-card feature-card--full">
+        <div class="feature-card__title">4. 多窗口通信：窗口之间互相通信</div>
+        <div class="feature-card__body">
+          <a-space>
+            <a-button @click="sendTosubWindow()">向主窗口发消息</a-button>
+          </a-space>
+        </div>
+      </div>
     </div>
-    <div class="one-block-1">
-      <span>
-        4. 多窗口通信：窗口之间互相通信
-      </span>
-    </div>  
-    <div class="one-block-2">
-      <a-space>
-        <a-button @click="sendTosubWindow()">向主窗口发消息</a-button>
-      </a-space>
-    </div>       
   </div>
 </template>
 <script setup>
@@ -72,15 +67,13 @@ function init() {
     console.log('[ipcRenderer] [socketMsgStart] result:', result);
 
     messageString.value = result;
-    // 调用后端的另一个接口
     event.sender.send(ipcApiRoute.framework.hello, 'electron-egg');
   })
 
-  // 监听主窗口发来的消息
   ipc.removeAllListeners(ipcApiRoute.os.window1ToWindow2);
   ipc.on(ipcApiRoute.os.window1ToWindow2, (event, arg) => {
       message.info(arg);
-  })  
+  })
 }
 
 function sendMsgStart() {
@@ -126,18 +119,4 @@ function sendTosubWindow () {
 }
 </script>
 <style lang="less" scoped>
-#app-os-subwindow-ipc {
-  padding: 0px 10px;
-  text-align: left;
-  width: 100%;
-  height: 100%;
-  background-color: #f0f2f5;
-  .one-block-1 {
-    font-size: 16px;
-    padding-top: 10px;
-  }
-  .one-block-2 {
-    padding-top: 10px;
-  }
-}
 </style>

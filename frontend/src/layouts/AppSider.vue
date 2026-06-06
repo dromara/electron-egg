@@ -4,21 +4,21 @@
       v-model="collapsed"
       theme="light"
       class="layout-sider"
-      width="100"
+      width="72"
     >
       <div class="logo">
         <img class="pic-logo" src="~@/assets/logo.png">
       </div>
-      <a-menu 
-        class="menu-item" 
-        theme="light" 
+      <a-menu
+        class="menu-item"
+        theme="light"
         mode="inline"
         :selectedKeys="[current]"
         @click="menuHandle"
       >
         <a-menu-item v-for="(menuInfo, index) in menu" :key="index">
           <icon-font :type="menuInfo.icon" />
-          {{ menuInfo.title }} 
+          <!-- <span class="menu-title">{{ menuInfo.title }}</span> -->
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -69,43 +69,67 @@ onMounted(() => {
 });
 
 function menuHandle(e) {
-  console.log('sider menu e:', e);
   if (e) {
     current.value = e.key;
   }
-  console.log('sider menu current:', current.value);
-
   const linkInfo = menu.value[current.value];
-  console.log('[home] load linkInfo:', linkInfo);
   router.push({ name: linkInfo.pageName, params: linkInfo.params });
 }
 </script>
 <style lang="less" scoped>
-// 嵌套
 #app-layout-sider {
-  height: 100%;
+  height: 100vh;
+
   .logo {
     border-bottom: 1px solid #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 0;
   }
+
   .pic-logo {
-    height: 32px;
-    //background: rgba(139, 137, 137, 0.2);
-    margin: 10px;
+    height: 36px;
+    margin: 0;
   }
+
   .layout-sider {
     border-top: 1px solid #e8e8e8;
     border-right: 1px solid #e8e8e8;
+    background-color: #fafafa !important;
+    height: 100vh;
   }
+
   .menu-item {
     .ant-menu-item {
-      background-color: #fff;
-      margin-top: 0px;
-      margin-bottom: 0px;
-      padding: 0 0px !important;
+      margin-top: 0;
+      margin-bottom: 0;
+      padding: 0 12px !important;
+      height: 48px;
+      line-height: 48px;
+      border-radius: 8px;
+      margin: 4px 8px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background-color: #e6f7ff !important;
+      }
+
+      &.ant-menu-item-selected {
+        background-color: rgba(7, 193, 96, 0.08) !important;
+        color: #07C160 !important;
+
+        .menu-title {
+          color: #07C160;
+        }
+      }
     }
   }
+
   .layout-content {
-    //background-color: #fff;
+    background-color: #f0f2f5;
+    height: 100%;
+    overflow: hidden;
   }
 }
 </style>
