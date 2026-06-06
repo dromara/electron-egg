@@ -213,10 +213,10 @@ export function create(config: Partial<LoggerConfig> = {}): PinoLoggers {
   if (Object.keys(config).length === 0) {
     // No custom configuration: use system configuration to override defaults
     const sysConfig = getConfig();
-    loggerConf = extend(true, { ...defaults } as unknown as Record<string, unknown>, sysConfig.logger as unknown as Record<string, unknown>) as unknown as LoggerConfig;
+    loggerConf = extend(true, { ...defaults }, sysConfig.logger) as LoggerConfig;
   } else {
     // Has custom configuration: use custom configuration to override defaults
-    loggerConf = extend(true, { ...defaults } as unknown as Record<string, unknown>, config as unknown as Record<string, unknown>) as unknown as LoggerConfig;
+    loggerConf = extend(true, { ...defaults }, config) as LoggerConfig;
   }
 
   const logDir = loggerConf.dir || getLogDir();

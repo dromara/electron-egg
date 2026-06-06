@@ -509,8 +509,6 @@ export interface DevFrontendConfig {
   force: boolean;
   /** Whether to execute synchronously */
   sync: boolean;
-  /** Allow additional properties for extend() compatibility */
-  [key: string]: unknown;
 }
 
 /**
@@ -533,8 +531,6 @@ export interface DevElectronConfig {
   sync: boolean;
   /** Debounce delay in watch mode (milliseconds) */
   delay: number;
-  /** Allow additional properties for extend() compatibility */
-  [key: string]: unknown;
 }
 
 /**

@@ -65,7 +65,7 @@ export class ConfigLoader {
     // Load framework default configuration
     const defaultConf = defaultConfig();
     // Deep merge: business configuration overrides default configuration
-    const config = extend(true, defaultConf as Record<string, unknown>, appConfig) as Config;
+    const config = extend(true, defaultConf, appConfig) as Config;
     debugLog('[load] config: %o', config);
 
     this.timing.end('Load Config');

@@ -23,6 +23,7 @@ import { isFileProtocol } from '../../utils/index.js';
 import { fileIsExist, sleep } from '../../utils/helper.js';
 import { extend } from '../../utils/extend.js';
 import { cross } from '../../cross/index.js';
+import { getHtmlFilepath } from '../../html/index.js';
 import type { DevConfig, DevFrontendConfig, DevElectronConfig } from '../../types/index.js';
 
 const debugLog = debug('ee-core:electron:window');
@@ -174,10 +175,8 @@ export async function loadServer(): Promise<void> {
       port: 8080,
       indexPath: 'index.html',
       directory: 'frontend/dist',
-    }, (dev.frontend || {}) as Record<string, unknown>) as DevFrontendConfig;
-    const electronConf = extend(true, {
-      loadingPage: '/public/html/loading.html',
-    }, (dev.electron || {}) as Record<string, unknown>) as DevElectronConfig;
+    }, dev.frontend || {}) as DevFrontendConfig;
+    const electronConf = (dev.electron || {}) as DevElectronConfig;
 
     let url = frontendConf.protocol + frontendConf.hostname + ':' + frontendConf.port;
     let load: 'url' | 'file' = 'url';
@@ -189,12 +188,10 @@ export async function loadServer(): Promise<void> {
 
     // HTTP mode: show startup page first, wait for frontend dev server to be ready
     if (load === 'url') {
-      // Load startup page
-      let lp = path.join(getBaseDir(), 'public/html/loading.html');
+      // Load loading page
       if (electronConf.loadingPage) {
-        lp = path.join(getBaseDir(), electronConf.loadingPage);
+        _loadingPage(path.join(getBaseDir(), electronConf.loadingPage));
       }
-      _loadingPage(lp);
 
       // Poll to check if frontend dev server is ready
       const retryTimes = frontendConf.force === true ? 3 : 60;
@@ -203,7 +200,7 @@ export async function loadServer(): Promise<void> {
 
       if (frontendReady === false && frontendConf.force !== true) {
         // Frontend service not ready, show failure page
-        const bootFailurePage = path.join(getBaseDir(), 'public/html/failure.html');
+        const bootFailurePage = getHtmlFilepath('failure.html');
         const win = getMainWindow();
         if (win) {
           win.loadFile(bootFailurePage);
@@ -324,7 +321,7 @@ async function crossTakeover(): Promise<void> {
 
   if (!serviceReady) {
     // Service not ready, show failure page
-    const bootFailurePage = path.join(getBaseDir(), 'public/html/cross-failure.html');
+    const bootFailurePage = getHtmlFilepath('cross-failure.html');
     const mainWindow = getMainWindow();
     if (mainWindow) {
       mainWindow.loadFile(bootFailurePage);
