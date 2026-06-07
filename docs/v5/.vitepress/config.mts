@@ -76,9 +76,32 @@ export default defineConfig({
     // 根语言（默认语言），访问根路径时使用，此处为简体中文
     root: {
       // 语言切换菜单中显示的名称
+      label: 'English',
+      // 该语言的 HTML lang 属性值
+      lang: 'en',
+      // 该语言独立的主题配置
+      themeConfig: {
+        // 顶部导航栏菜单（英文）
+        nav: navEn,
+        // 侧边栏菜单（英文），限定作用于 /en/ 路径
+        sidebar: { '/en/': sidebarEn },
+        // 右侧大纲（TOC）标题与显示的标题层级
+        outline: { label: 'On this page', level: [2, 6] },
+        // 页脚信息（版权等）
+        footer: {
+          copyright:
+            'Copyright © 2023 <a href="http://www.kaka996.com" target="_blank">electron-egg</a>',
+        },
+      },
+    },
+    // 英文语言配置
+    cn: {
+      // 语言切换菜单中显示的名称
       label: '简体中文',
       // 该语言的 HTML lang 属性值
       lang: 'zh-CN',
+      // 该语言的访问路径前缀
+      link: '/cn/',
       // 该语言独立的主题配置，会与外层 themeConfig 合并
       themeConfig: {
         // 顶部导航栏菜单（中文）
@@ -102,30 +125,7 @@ export default defineConfig({
           copyright:
             'Copyright © 2023 <a href="http://www.kaka996.com" target="_blank">哆啦好梦</a> | <a href="http://beian.miit.gov.cn/" target="_blank">京ICP备15041380号-2</a>',
         },
-      },
-    },
-    // 英文语言配置
-    en: {
-      // 语言切换菜单中显示的名称
-      label: 'English',
-      // 该语言的 HTML lang 属性值
-      lang: 'en',
-      // 该语言的访问路径前缀
-      link: '/en/',
-      // 该语言独立的主题配置
-      themeConfig: {
-        // 顶部导航栏菜单（英文）
-        nav: navEn,
-        // 侧边栏菜单（英文），限定作用于 /en/ 路径
-        sidebar: { '/en/': sidebarEn },
-        // 右侧大纲（TOC）标题与显示的标题层级
-        outline: { label: 'On this page', level: [2, 6] },
-        // 页脚信息（版权等）
-        footer: {
-          copyright:
-            'Copyright © 2023 <a href="http://www.kaka996.com" target="_blank">electron-egg</a>',
-        },
-      },
+      },      
     },
   },
 })
