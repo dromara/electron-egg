@@ -66,7 +66,6 @@ class Lifecycle {
     logger.info('[lifecycle] before-close');
   }
 }
-Lifecycle.toString = () => '[class Lifecycle]';
 
 module.exports = {
   Lifecycle

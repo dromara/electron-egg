@@ -22,7 +22,6 @@ class ExampleService {
     return obj;
   }
 }
-ExampleService.toString = () => '[class ExampleService]';
 
 module.exports = {
   ExampleService,

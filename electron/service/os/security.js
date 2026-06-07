@@ -25,7 +25,6 @@ class SecurityService {
     }
   }
 }
-SecurityService.toString = () => '[class SecurityService]';
 
 module.exports = {
   securityService: new SecurityService()

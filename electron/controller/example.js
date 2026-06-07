@@ -13,6 +13,5 @@ class ExampleController {
     return 'hello electron-egg';
   }
 }
-ExampleController.toString = () => '[class ExampleController]';
 
 module.exports = ExampleController;  

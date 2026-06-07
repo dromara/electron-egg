@@ -81,5 +81,4 @@ class TimerJob {
   }
 }
 
-TimerJob.toString = () => '[class TimerJob]';
 module.exports = TimerJob;

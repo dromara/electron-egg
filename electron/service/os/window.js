@@ -129,7 +129,6 @@ class WindowService {
   }
 
 }
-WindowService.toString = () => '[class WindowService]';
 
 module.exports = {
   WindowService,

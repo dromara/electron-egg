@@ -59,6 +59,5 @@ class EffectController {
     win.focus();
   }   
 }
-EffectController.toString = () => '[class EffectController]';
 
 module.exports = EffectController;  

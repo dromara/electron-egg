@@ -44,7 +44,6 @@ class BasedbService {
     this.db = this.storage.db;   
   }
 }  
-BasedbService.toString = () => '[class BasedbService]';
 
 module.exports = {
   BasedbService,

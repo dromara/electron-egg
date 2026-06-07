@@ -264,6 +264,5 @@ class FrameworkController {
     logger.info('hello ', args);
   }   
 }
-FrameworkController.toString = () => '[class FrameworkController]';
 
 module.exports = FrameworkController;  

@@ -161,7 +161,6 @@ class AutoUpdaterService {
     return size;
   }  
 }
-AutoUpdaterService.toString = () => '[class AutoUpdaterService]';
 
 module.exports = {
   autoUpdaterService: new AutoUpdaterService()

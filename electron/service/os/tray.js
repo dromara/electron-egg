@@ -68,7 +68,6 @@ class TrayService {
     })
   }
 }
-TrayService.toString = () => '[class TrayService]';
 
 module.exports = {
   trayService: new TrayService()

@@ -169,6 +169,5 @@ class OsController {
     return true
   }   
 }
-OsController.toString = () => '[class OsController]';
 
 module.exports = OsController;  

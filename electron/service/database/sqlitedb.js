@@ -105,7 +105,6 @@ class SqlitedbService extends BasedbService {
     return;
   }
 }
-SqlitedbService.toString = () => '[class SqlitedbService]';
 
 module.exports = {
   SqlitedbService,

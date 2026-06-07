@@ -143,7 +143,6 @@ class CrossService {
     return null;
   }  
 }
-CrossService.toString = () => '[class CrossService]';
 
 module.exports = {
   CrossService,
