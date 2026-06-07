@@ -233,7 +233,7 @@ module.exports = {
         numbersToExpressions: true,
         target: 'node',
       },
-      silent: false,
+      silent: true,
     }
   },
 
