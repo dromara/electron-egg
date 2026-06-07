@@ -1,11 +1,10 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
-const { getExtraResourcesDir, getLogDir } = require('ee-core/ps');
-const path = require("path");
-const axios = require('axios');
-const { is } = require('ee-core/utils');
-const { cross } = require('ee-core/cross');
+import { logger } from 'ee-core/log';
+import { getExtraResourcesDir, getLogDir } from 'ee-core/ps';
+import path from "path";
+import axios from 'axios';
+import { is } from 'ee-core/utils';
+import { cross } from 'ee-core/cross';
+import type { CrossTargetConfig } from 'ee-core';
 
 /**
  * cross
@@ -13,12 +12,12 @@ const { cross } = require('ee-core/cross');
  */
 class CrossService {
 
-  info() {
+  info(): string {
     const pids = cross.getPids();
     logger.info('cross pids:', pids);
 
     let num = 1;
-    pids.forEach(pid => {
+    pids.forEach((pid: string) => {
       let entity = cross.getProc(pid);
       logger.info(`server-${num} name:${entity.name}`);
       logger.info(`server-${num} config:`, entity.config);
@@ -28,12 +27,12 @@ class CrossService {
     return 'hello electron-egg';
   }
 
-  getUrl(name) {
+  getUrl(name: string): string {
     const serverUrl = cross.getUrl(name);
     return serverUrl;
   }
 
-  killServer(type, name) {
+  killServer(type: string, name: string): void {
     if (type == 'all') {
       cross.killAll();
     } else {
@@ -46,13 +45,13 @@ class CrossService {
    * In the default configuration, services can be started with applications. 
    * Developers can turn off the configuration and create it manually.
    */   
-  async createGoServer() {
+  async createGoServer(): Promise<void> {
     // method 1: Use the default Settings
     //const entity = await cross.run(serviceName);
 
     // method 2: Use custom configuration
     const serviceName = "go";
-    const opt = {
+    const opt: CrossTargetConfig = {
       name: 'goapp',
       cmd: path.join(getExtraResourcesDir(), 'goapp'),
       directory: getExtraResourcesDir(),
@@ -70,10 +69,10 @@ class CrossService {
   /**
    * create java server
    */
-  async createJavaServer() {
+  async createJavaServer(): Promise<void> {
     const serviceName = "java";
     const jarPath = path.join(getExtraResourcesDir(), 'java-app.jar');
-    const opt = {
+    const opt: CrossTargetConfig = {
       name: 'javaapp',
       cmd: path.join(getExtraResourcesDir(), 'jre1.8.0_201/bin/javaw.exe'),
       directory: getExtraResourcesDir(),
@@ -101,13 +100,13 @@ class CrossService {
    * In the default configuration, services can be started with applications. 
    * Developers can turn off the configuration and create it manually.
    */   
-  async createPythonServer() {
+  async createPythonServer(): Promise<void> {
     // method 1: Use the default Settings
     //const entity = await cross.run(serviceName);
 
     // method 2: Use custom configuration
     const serviceName = "python";
-    const opt = {
+    const opt: CrossTargetConfig = {
       name: 'pyapp',
       cmd: path.join(getExtraResourcesDir(), 'py', 'pyapp'),
       directory: path.join(getExtraResourcesDir(), 'py'),
@@ -123,7 +122,7 @@ class CrossService {
     return;
   }
 
-  async requestApi(name, urlPath, params) {
+  async requestApi(name: string, urlPath: string, params?: Record<string, unknown>): Promise<unknown> {
     const serverUrl = cross.getUrl(name);
     const apiHello = serverUrl + urlPath;
     console.log('Server Url:', serverUrl);
@@ -143,9 +142,4 @@ class CrossService {
     return null;
   }  
 }
-CrossService.toString = () => '[class CrossService]';
-
-module.exports = {
-  CrossService,
-  crossService: new CrossService()
-};  
+export const crossService = new CrossService();  

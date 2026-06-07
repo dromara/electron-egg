@@ -1,18 +1,26 @@
-'use strict';
-
-const path = require('path');
-const { BrowserWindow, Notification } = require('electron');
-const { getMainWindow } = require('ee-core/electron');
-const { isDev, isProd, getBaseDir } = require('ee-core/ps');
-const { getConfig } = require('ee-core/config');
-const { isFileProtocol } = require('ee-core/utils');
-const { logger } = require('ee-core/log');
+import path from 'path';
+import { BrowserWindow, BrowserWindowConstructorOptions, Notification, NotificationConstructorOptions, IpcMainEvent, Event } from 'electron';
+import { getMainWindow } from 'ee-core/electron';
+import { isDev, isProd, getBaseDir } from 'ee-core/ps';
+import { getConfig } from 'ee-core/config';
+import { isFileProtocol } from 'ee-core/utils';
+import { logger } from 'ee-core/log';
+import type { Config } from 'ee-core';
 
 /**
  * Window
  * @class
  */
+interface CreateWindowArgs {
+  type: string;
+  content: string;
+  windowName: string;
+  windowTitle: string;
+}
+
 class WindowService {
+  private myNotification: Notification | null;
+  private windows: Record<string, BrowserWindow>;
 
   constructor() {
     this.myNotification = null;
@@ -22,9 +30,9 @@ class WindowService {
   /**
    * Create a new window
    */
-  createWindow(args) {
+  createWindow(args: CreateWindowArgs): number {
     const { type, content, windowName, windowTitle } = args;
-    let contentUrl = null;
+    let contentUrl: string | null = null;
     if (type == 'html') {
       contentUrl = path.join('file://', getBaseDir(), content)
     } else if (type == 'web') {
@@ -32,11 +40,11 @@ class WindowService {
     } else if (type == 'vue') {
       let addr = 'http://localhost:8080'
       if (isProd()) {
-        const { mainServer } = getConfig();
+        const mainServer = getConfig().mainServer as Config['mainServer'] & { host?: string; port?: number };
         if (isFileProtocol(mainServer.protocol)) {
           addr = mainServer.protocol + path.join(getBaseDir(), mainServer.indexPath);
         } else {
-          addr = mainServer.protocol + mainServer.host + ':' + mainServer.port;
+          addr = mainServer.protocol + (mainServer.host ?? '') + (mainServer.port ? ':' + mainServer.port : '');
         }
       }
 
@@ -46,7 +54,7 @@ class WindowService {
     }
 
     logger.info('[createWindow] url: ', contentUrl);
-    const opt = {
+    const opt: BrowserWindowConstructorOptions = {
       title: windowTitle,
       x: 10,
       y: 10,
@@ -59,7 +67,9 @@ class WindowService {
     }
     const win = new BrowserWindow(opt);
     const winContentsId = win.webContents.id;
-    win.loadURL(contentUrl);
+    if (contentUrl) {
+      win.loadURL(contentUrl);
+    }
     if (isDev()) {
       win.webContents.openDevTools();
     }
@@ -72,14 +82,15 @@ class WindowService {
   /**
    * Get window contents id
    */
-  getWCid(args) {
+  getWCid(args: { windowName: string }): number | null {
     const { windowName } = args;
-    let win;
+    let win: BrowserWindow | null;
     if (windowName == 'main') {
       win = getMainWindow();
     } else {
       win = this.windows[windowName];
     }
+    if (!win) return null;
     
     return win.webContents.id;
   }
@@ -87,10 +98,11 @@ class WindowService {
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  communicate(args) {
+  communicate(args: { receiver: string; content: unknown }): void {
     const { receiver, content } = args;
     if (receiver == 'main') {
       const win = getMainWindow();
+      if (!win) return;
       win.webContents.send('controller/os/window2ToWindow1', content);
     } else if (receiver == 'window2') {
       const win = this.windows[receiver];
@@ -101,13 +113,13 @@ class WindowService {
   /**
    * createNotification
    */
-  createNotification(options, event) {
+  createNotification(options: NotificationConstructorOptions & { clickEvent?: boolean; closeEvent?: boolean }, event: IpcMainEvent): void {
     const channel = 'controller/os/sendNotification';
     this.myNotification = new Notification(options);
 
     if (options.clickEvent) {
-      this.myNotification.on('click', (e) => {
-        let data = {
+      this.myNotification.on('click', (_e: Event) => {
+        const data = {
           type: 'click',
           msg: '您点击了通知消息'
         }
@@ -116,8 +128,8 @@ class WindowService {
     }
 
     if (options.closeEvent) {
-      this.myNotification.on('close', (e) => {
-        let data = {
+      this.myNotification.on('close', (_e: Event) => {
+        const data = {
           type: 'close',
           msg: '您关闭了通知消息'
         }
@@ -129,9 +141,4 @@ class WindowService {
   }
 
 }
-WindowService.toString = () => '[class WindowService]';
-
-module.exports = {
-  WindowService,
-  windowService: new WindowService()
-};  
+export const windowService = new WindowService();  

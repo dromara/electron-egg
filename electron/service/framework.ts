@@ -1,13 +1,17 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
-const { ChildJob, ChildPoolJob } = require('ee-core/jobs');
+import { logger } from 'ee-core/log';
+import { ChildJob, ChildPoolJob } from 'ee-core/jobs';
+import type { JobProcess } from 'ee-core/jobs/child/jobProcess';
+import type { IpcMainEvent } from 'electron';
 
 /**
  * framework
  * @class
  */
 class FrameworkService {
+  private myTimer: NodeJS.Timeout | null;
+  private myJob: ChildJob;
+  private myJobPool: ChildPoolJob;
+  private taskForJob: Record<string, JobProcess>;
 
   constructor() {
     // 在构造函数中初始化一些变量
@@ -20,7 +24,7 @@ class FrameworkService {
   /**
    * test
    */
-  async test(args) {
+  async test(args: unknown): Promise<{ status: string; params: unknown }> {
     let obj = {
       status:'ok',
       params: args
@@ -32,7 +36,7 @@ class FrameworkService {
   /**
    * ipc通信(双向)
    */
-  bothWayMessage(type, content, event) {
+  bothWayMessage(type: string, content: string, event: IpcMainEvent): string {
     // 前端ipc频道 channel
     const channel = 'controller/framework/ipcSendMsg';
 
@@ -47,7 +51,7 @@ class FrameworkService {
 
       return '开始了'
     } else if (type == 'end') {
-      clearInterval(this.myTimer);
+      clearInterval(this.myTimer!);
       return '停止了'    
     } else {
       return 'ohther'
@@ -57,16 +61,16 @@ class FrameworkService {
   /**
    * 执行任务
    */ 
-  doJob(jobId, action, event) {
-    let res = {};
-    let oneTask;
+  doJob(jobId: string, action: string, event: IpcMainEvent): Record<string, unknown> {
+    let res: Record<string, unknown> = {};
+    let oneTask: JobProcess | undefined;
     const channel = 'controller/framework/timerJobProgress';
   
     if (action == 'create') {
       // 执行任务及监听进度
       let eventName = 'job-timer-progress-' + jobId;
       const timerTask = this.myJob.exec('./jobs/example/timer', {jobId});
-      timerTask.emitter.on(eventName, (data) => {
+      timerTask.emitter.on(eventName, (data: unknown) => {
         logger.info('[main-process] timerTask, from TimerJob data:', data);
         // 发送数据到渲染进程
         event.sender.send(`${channel}`, data)
@@ -106,9 +110,9 @@ class FrameworkService {
   /**
    * 创建pool
    */ 
-  doCreatePool(num, event) {
+  doCreatePool(num: number, event: IpcMainEvent): void {
     const channel = 'controller/framework/createPoolNotice';
-    this.myJobPool.create(num).then(pids => {
+    this.myJobPool.create(num).then((pids: string[]) => {
       event.reply(`${channel}`, pids);
     });
   }
@@ -116,8 +120,8 @@ class FrameworkService {
   /**
    * 通过进程池执行任务
    */
-  async doJobByPool(jobId, action, event) {
-    let res = {};
+  async doJobByPool(jobId: string, action: string, event: IpcMainEvent): Promise<Record<string, unknown>> {
+    let res: Record<string, unknown> = {};
     const channel = 'controller/framework/timerJobProgress';
     if (action == 'run') {
       // 异步-执行任务及监听进度
@@ -126,14 +130,14 @@ class FrameworkService {
       // 监听器名称唯一，否则会出现重复监听。
       // 任务完成时，需要移除监听器，防止内存泄漏
       let eventName = 'job-timer-progress-' + jobId;
-      task.emitter.on(eventName, (data) => {
+      task.emitter.on(eventName, (data: unknown) => {
         logger.info('[main-process] [ChildPoolJob] timerTask, from TimerJob data:', data);
 
         // 发送数据到渲染进程
         event.sender.send(`${channel}`, data)
 
         // 如果收到任务完成的消息，移除监听器
-        if (data.end) {
+        if (data && typeof data === 'object' && 'end' in data && (data as Record<string, unknown>).end) {
           task.emitter.removeAllListeners(eventName);
         }
       });
@@ -146,7 +150,7 @@ class FrameworkService {
   /**
    * 获取正在运行的 job 进程 
    */ 
-  monitorJob() {
+  monitorJob(): void {
     setInterval(() => {
       let jobPids = this.myJob.getPids();
       let jobPoolPids = this.myJobPool.getPids();
@@ -155,9 +159,4 @@ class FrameworkService {
   }
 
 }
-FrameworkService.toString = () => '[class FrameworkService]';
-
-module.exports = {
-  FrameworkService,
-  frameworkService: new FrameworkService()
-};  
+export const frameworkService = new FrameworkService();  

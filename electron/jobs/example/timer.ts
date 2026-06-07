@@ -1,54 +1,44 @@
-'use strict';
-
-const { logger } = require('ee-core/log');
-const { isChildJob, exit } = require('ee-core/ps');
-const { childMessage } = require('ee-core/message');
-const { welcome } = require('./hello');
-const { UserService } = require('../../service/job/user');
-const { sqlitedbService } = require('../../service/database/sqlitedb');
+import { logger } from 'ee-core/log';
+import { isChildJob, exit } from 'ee-core/ps';
+import { childMessage } from 'ee-core/message';
+import { welcome } from './hello';
 
 /**
  * example - TimerJob
  * @class
  */
 class TimerJob {
+  private timer: NodeJS.Timeout | undefined;
+  private timeoutTimer: NodeJS.Timeout | undefined;
+  private number: number;
+  private countdown: number;
 
   constructor() {
     this.timer = undefined;
     this.timeoutTimer = undefined;
     this.number = 0;
     this.countdown = 10; // 倒计时
-    sqlitedbService.init();
   }
 
   /**
    * handle()方法是必要的，且会被自动调用
    * params 传递的参数
    */
-  async handle(params) {
+  async handle(params: { jobId: string }): Promise<void> {
     logger.info("[child-process] TimerJob params: ", params);
     const { jobId } = params;
-
-    // 子进程中使用service
-    // 1. 确保引入的 service 中不能有electron 的 api或依赖， electron 不支持
-    const userService = new UserService();
-    userService.hello('job');
 
     // 执行任务
     // 多次运行时，重置倒计时
     this.number = 0;
     this.countdown = 10;
     this.doTimer(jobId);
-
-    // sqlite
-    const userList = await sqlitedbService.getAllTestDataSqlite();
-    logger.info('[child-process] Sqlite userList:', userList);
   }
-  
+
   /**
    * 暂停任务运行
    */
-  async pause(jobId) {
+  async pause(jobId: string): Promise<void> {
     logger.info("[child-process] Pause timerJob, jobId: ", jobId);
     clearInterval(this.timer);
     clearInterval(this.timeoutTimer);
@@ -57,15 +47,15 @@ class TimerJob {
   /**
    * 恢复任务运行
    */
-  async resume(jobId, pid) {
+  async resume(jobId: string, pid: number): Promise<void> {
     logger.info("[child-process] Resume timerJob, jobId: ", jobId, ", pid: ", pid);
     this.doTimer(jobId);
-  }  
+  }
 
   /**
    * 运行任务
    */
-  async doTimer(jobId) {
+  async doTimer(jobId: string): Promise<void> {
     // 计时器模拟任务
     const eventName = 'job-timer-progress-' + jobId;
     this.timer = setInterval(() => {
@@ -93,5 +83,4 @@ class TimerJob {
   }
 }
 
-TimerJob.toString = () => '[class TimerJob]';
-module.exports = TimerJob;
+export default TimerJob;

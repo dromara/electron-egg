@@ -1,25 +1,23 @@
 <template>
-  <div id="app-socket-server">
-    <div class="one-block-1">
-      <span>
-        1. 使用socket与主进程通信
-      </span>
-    </div>
-    <div class="one-block-2">
-      <a-space>
-        <p>* 状态：{{ currentStatus }}</p>
-      </a-space>
-      <p>* 地址：{{ servicAddress }}</p>
-    </div>
-    <div class="one-block-1">
-      <span>
-        2. 发送请求
-      </span>
-    </div>    
-    <div class="one-block-2">
-      <a-space>
-        <a-button @click="sendRequest('downloads')"> 打开【我的下载】 </a-button>
-      </a-space>
+  <div id="app-socket-server" class="page-container">
+    <div class="card-grid">
+      <div class="feature-card feature-card--full">
+        <div class="feature-card__title">1. 使用socket与主进程通信</div>
+        <div class="feature-card__body">
+          <a-space>
+            <p>* 状态：{{ currentStatus }}</p>
+          </a-space>
+          <p>* 地址：{{ servicAddress }}</p>
+        </div>
+      </div>
+      <div class="feature-card feature-card--full">
+        <div class="feature-card__title">2. 发送请求</div>
+        <div class="feature-card__body">
+          <a-space>
+            <a-button @click="sendRequest('downloads')"> 打开【我的下载】 </a-button>
+          </a-space>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -53,24 +51,11 @@ function sendRequest(id) {
     return;
   }
 
-  const method = ipcApiRoute.framework.doSocketRequest; 
+  const method = ipcApiRoute.framework.doSocketRequest;
   client.socket.emit('socket-channel', { cmd: method, args: {id} }, (response) => {
-    // response为返回值
     console.log('response:', response)
   });
-} 
+}
 </script>
 <style lang="less" scoped>
-#app-socket-server {
-  padding: 0px 10px;
-  text-align: left;
-  width: 100%;
-  .one-block-1 {
-    font-size: 16px;
-    padding-top: 10px;
-  }
-  .one-block-2 {
-    padding-top: 10px;
-  }
-}
 </style>

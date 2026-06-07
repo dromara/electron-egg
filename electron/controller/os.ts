@@ -1,18 +1,16 @@
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
-const {
-  app: electronApp, dialog, shell, Notification, 
-} = require('electron');
-const { windowService } = require('../service/os/window');
+import fs from 'fs';
+import path from 'path';
+import {
+  app as electronApp, dialog, shell, Notification, IpcMainEvent,
+  NotificationConstructorOptions,
+} from 'electron';
+import { windowService } from '../service/os/window';
 
 /**
  * example
  * @class
  */
 class OsController {
-
   /**
    * All methods receive two parameters
    * @param args Parameters transmitted by the frontend
@@ -22,7 +20,7 @@ class OsController {
   /**
    * Message prompt dialog box
    */
-  messageShow() {
+  messageShow(): string {
     dialog.showMessageBoxSync({
       type: 'info', // "none", "info", "error", "question" 或者 "warning"
       title: 'Custom Title',
@@ -36,7 +34,7 @@ class OsController {
   /**
    * Message prompt and confirmation dialog box
    */
-  messageShowConfirm() {
+  messageShowConfirm(): string {
     const res = dialog.showMessageBoxSync({
       type: 'info',
       title: 'Custom Title',
@@ -54,7 +52,7 @@ class OsController {
   /**
    * Select Directory
    */
-  selectFolder() {
+  selectFolder(): string | null {
     const filePaths = dialog.showOpenDialogSync({
       properties: ['openDirectory', 'createDirectory']
     });
@@ -69,7 +67,7 @@ class OsController {
   /**
    * open directory
    */
-  openDirectory(args) {
+  openDirectory(args: { id: string }): boolean {
     const { id } = args;
     if (!id) {
       return false;
@@ -78,7 +76,7 @@ class OsController {
     if (path.isAbsolute(id)) {
       dir = id;
     } else {
-      dir = electronApp.getPath(id);
+    dir = electronApp.getPath(id as Parameters<typeof electronApp.getPath>[0]);
     }
 
     shell.openPath(dir);
@@ -88,7 +86,7 @@ class OsController {
   /**
    * Select Picture
    */
-  selectPic() {
+  selectPic(): string | null {
     const filePaths = dialog.showOpenDialogSync({
       title: 'select pic',
       properties: ['openFile'],
@@ -113,7 +111,7 @@ class OsController {
   /**
    * Open a new window
    */
-  createWindow(args) {
+  createWindow(args: { type: string; content: string; windowName: string; windowTitle: string }): number {
     const wcid = windowService.createWindow(args);
     return wcid;
   }
@@ -121,7 +119,7 @@ class OsController {
   /**
    * Get Window contents id
    */
-  getWCid(args) {
+  getWCid(args: { windowName: string }): number | null {
     const wcid = windowService.getWCid(args);
     return wcid;
   }
@@ -129,40 +127,40 @@ class OsController {
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window1ToWindow2(args, event) {
-    windowService.communicate(args, event);
+  window1ToWindow2(args: { receiver: string; content: unknown }, _event: IpcMainEvent): void {
+    windowService.communicate(args);
     return;
   }
 
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window2ToWindow1(args, event) {
-    windowService.communicate(args, event);
+  window2ToWindow1(args: { receiver: string; content: unknown }, _event: IpcMainEvent): void {
+    windowService.communicate(args);
     return;
   }
 
   /**
    * Create system notifications
    */
-  sendNotification(args, event) {
+  sendNotification(args: { title?: string; subtitle?: string; body?: string; silent?: boolean }, event: IpcMainEvent): boolean | string {
     const { title, subtitle, body, silent} = args;
 
     if (!Notification.isSupported()) {
       return '当前系统不支持通知';
     }
 
-    let options = {};
-    if (!title) {
+    const options: NotificationConstructorOptions = {};
+    if (title) {
       options.title = title;
     }
-    if (!subtitle) {
+    if (subtitle) {
       options.subtitle = subtitle;
     }
-    if (!body) {
+    if (body) {
       options.body = body;
     }
-    if (!silent) {
+    if (silent !== undefined) {
       options.silent = silent;
     }
     windowService.createNotification(options, event);
@@ -170,6 +168,4 @@ class OsController {
     return true
   }   
 }
-OsController.toString = () => '[class OsController]';
-
-module.exports = OsController;  
+export default OsController;

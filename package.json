@@ -18,9 +18,8 @@
     "build-go-m": "ee-bin move --flag=go_static,go_config,go_package,go_images && ee-bin build --cmds=go_m",
     "build-go-l": "ee-bin move --flag=go_static,go_config,go_package,go_images && ee-bin build --cmds=go_l",
     "build-python": "ee-bin build --cmds=python && ee-bin move --flag=python_dist",
-    "encrypt": "ee-bin encrypt",
+    "encrypt": "npm run build-electron && ee-bin encrypt",
     "icon": "ee-bin icon",
-    "re-sqlite": "electron-rebuild -f -w better-sqlite3",
     "build-w": "ee-bin build --cmds=win64",
     "build-we": "ee-bin build --cmds=win_e",
     "build-m": "ee-bin build --cmds=mac",
@@ -29,7 +28,9 @@
     "debug-dev": "cross-env DEBUG=ee-* ee-bin dev",
     "debug-encrypt": "ee-bin encrypt",
     "debug-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",
-    "debug-move": "ee-bin move --flag=frontend_dist"
+    "debug-move": "ee-bin move --flag=frontend_dist",
+    "packages-build": "pnpm --filter ee-bin run build && pnpm --filter ee-core run build",
+    "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
@@ -45,15 +46,17 @@
     "@types/node": "^22.19.1",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
-    "ee-bin": "^5.0.0-beta.2",
+    "ee-bin": "^5.0.0-beta.5",
     "electron": "^39.8.10",
-    "electron-builder": "^26.3.5"
+    "electron-builder": "^26.3.5",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "axios": "^1.7.9",
     "better-sqlite3": "^12.5.0",
+    "bytenode": "^1.5.7",
     "dayjs": "^1.11.13",
-    "ee-core": "^5.0.0-beta.2",
+    "ee-core": "^5.0.0-beta.5",
     "electron-updater": "^6.7.3"
   }
 }
