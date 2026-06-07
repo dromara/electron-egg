@@ -39,6 +39,33 @@ export interface ExecConfig {
   loadingPage?: string;
 }
 
+/** Dev frontend config — dev.frontend specific fields with required defaults */
+export interface DevFrontendConfig extends ExecConfig {
+  args: string[];
+  protocol: string;
+  hostname: string;
+  port: number;
+  indexPath: string;
+  force: boolean;
+  sync: boolean;
+}
+
+/** Dev electron config — dev.electron specific fields with required defaults */
+export interface DevElectronConfig extends ExecConfig {
+  args: string[];
+  loadingPage: string;
+  watch: boolean;
+  sync: boolean;
+  delay: number;
+}
+
+/** Dev mode config — top-level structure for the "dev" section */
+export interface DevConfig {
+  frontend: DevFrontendConfig;
+  electron: DevElectronConfig;
+  [key: string]: ExecConfig | undefined;
+}
+
 /** esbuild bundle config — controls Electron main process code bundling behavior */
 export interface BundleConfig {
   /** Bundle mode: 'bundle' uses esbuild to bundle into a single file, 'copy' copies the directory as-is */
@@ -178,8 +205,8 @@ export interface BuildConfig {
 
 /** ee-bin top-level config — corresponds to the full structure of ./cmd/bin.js */
 export interface BinConfig {
-  /** Dev mode configuration (sub-commands like frontend, electron) */
-  dev: Record<string, ExecConfig>;
+  /** Dev mode configuration (frontend and electron subprocess configs) */
+  dev: DevConfig;
   /** Build configuration (electron is BundleConfig, others are ExecConfig) */
   build: BuildConfig;
   /** Resource move configuration (e.g. frontend dist → public/dist) */

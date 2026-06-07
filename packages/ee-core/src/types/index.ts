@@ -484,3 +484,61 @@ export interface ProcessExitEventData {
   /** PID of the exited process, undefined if unavailable */
   pid: number | undefined;
 }
+
+/**
+ * Dev frontend config — mirrors ee-bin's DevFrontendConfig
+ *
+ * Used by ee-core to type the dev.frontend section loaded from cmd/bin.js.
+ */
+export interface DevFrontendConfig {
+  /** Process working directory (relative to project root) */
+  directory: string;
+  /** Command to execute */
+  cmd: string;
+  /** Command argument array */
+  args: string[];
+  /** Frontend dev server protocol */
+  protocol: string;
+  /** Frontend dev server hostname */
+  hostname: string;
+  /** Frontend dev server port */
+  port: number;
+  /** Frontend index page filename */
+  indexPath: string;
+  /** Whether to force-refresh the page */
+  force: boolean;
+  /** Whether to execute synchronously */
+  sync: boolean;
+}
+
+/**
+ * Dev electron config — mirrors ee-bin's DevElectronConfig
+ *
+ * Used by ee-core to type the dev.electron section loaded from cmd/bin.js.
+ */
+export interface DevElectronConfig {
+  /** Process working directory (relative to project root) */
+  directory: string;
+  /** Command to execute */
+  cmd: string;
+  /** Command argument array */
+  args: string[];
+  /** Electron loading page path */
+  loadingPage: string;
+  /** Whether to watch for file changes and auto-restart */
+  watch: boolean;
+  /** Whether to execute synchronously */
+  sync: boolean;
+  /** Debounce delay in watch mode (milliseconds) */
+  delay: number;
+}
+
+/**
+ * Dev mode config — mirrors ee-bin's DevConfig
+ *
+ * Used by ee-core to type the dev section loaded from cmd/bin.js.
+ */
+export interface DevConfig {
+  frontend: DevFrontendConfig;
+  electron: DevElectronConfig;
+}

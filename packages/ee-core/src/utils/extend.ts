@@ -88,36 +88,39 @@ function isPlainObject(obj: unknown): obj is Record<string, unknown> {
  * extend({ deep: true }, { a: { x: 1 } }, { a: { y: 2 } }); // { a: { x: 1, y: 2 } }
  * ```
  */
-export function extend(
+export function extend<T extends Record<string, unknown>>(
   deep: boolean | ExtendOptions,
-  target: Record<string, unknown>,
-  ...sources: Array<Record<string, unknown> | undefined | null>
-): Record<string, unknown> {
-  // Parse deep parameter: boolean used directly, object takes its deep property, defaults to shallow merge
+  target: T,
+  ...sources: Array<Partial<T> | Record<string, unknown> | undefined | null>
+): T {
+  // Use Record<string, unknown> for internal mutations to avoid
+  // "generic type T can only be indexed for reading" error
+  const result = target as Record<string, unknown>;
   const isDeep = typeof deep === 'boolean' ? deep : deep?.deep ?? false;
 
   for (const source of sources) {
     // Skip null and undefined sources
     if (!source) continue;
+    const src = source as Record<string, unknown>;
 
-    for (const key of Object.keys(source)) {
+    for (const key of Object.keys(src)) {
       // Prevent prototype chain pollution: __proto__ property is not merged
       if (key === '__proto__') continue;
-      const val = source[key];
-      const src = target[key];
+      const val = src[key];
+      const existing = result[key];
       // Detect self-reference: skip when target and val are the same reference, preventing infinite recursion
-      if (target === val) continue;
+      if (result === val) continue;
       // Deep merge: when value is a plain object, recursively merge instead of overwrite
       if (isDeep && val && isPlainObject(val)) {
         // If target's corresponding property is also a plain object, recursively merge on the original object; otherwise create a new object
-        const clone = src && isPlainObject(src) ? src : {};
-        target[key] = extend(true, clone as Record<string, unknown>, val as Record<string, unknown>);
+        const clone = existing && isPlainObject(existing) ? existing : {};
+        result[key] = extend(true, clone as Record<string, unknown>, val as Record<string, unknown>);
       } else if (typeof val !== 'undefined') {
         // Non-undefined values directly overwrite; undefined values do not overwrite existing properties
-        target[key] = val;
+        result[key] = val;
       }
     }
   }
 
-  return target;
+  return result as T;
 }

@@ -3,30 +3,6 @@
   "version": "1.0.0",
   "configurations": [
     {
-      // 一键启动：前端 + 主进程调试
-      "name": "Debug Full App",
-      "type": "node",
-      "request": "launch",
-      "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
-      "runtimeArgs": [
-        "--inspect=9229",
-        ".",
-        "--env=local"
-      ],
-      "env": {
-        "NODE_ENV": "dev"
-      },
-      "console": "integratedTerminal",
-      "outputCapture": "std",
-      "sourceMaps": true,
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/electron/**",
-        "${workspaceFolder}/public/electron/**"
-      ],
-      "preLaunchTask": "ee-dev-all"
-    },
-    {
       // 仅调试主进程（需手动启动前端）
       "name": "Debug Electron",
       "type": "node",
@@ -49,6 +25,30 @@
         "${workspaceFolder}/public/electron/**"
       ],
       "preLaunchTask": "ee-build-dev"
+    },
+    {
+      // 一键启动：前端 + 主进程调试
+      "name": "Debug Full App",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron",
+      "runtimeArgs": [
+        "--inspect=9229",
+        ".",
+        "--env=local"
+      ],
+      "env": {
+        "NODE_ENV": "dev"
+      },
+      "console": "integratedTerminal",
+      "outputCapture": "std",
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/electron/**",
+        "${workspaceFolder}/public/electron/**"
+      ],
+      "preLaunchTask": "ee-dev-all"
     },
   ]
 }

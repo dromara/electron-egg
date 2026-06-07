@@ -7,7 +7,6 @@ const { crossService } = require('../service/cross');
  * @class
  */
 class CrossController {
-
   /**
    * View process service information
    */

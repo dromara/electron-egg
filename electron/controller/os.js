@@ -12,7 +12,6 @@ const { windowService } = require('../service/os/window');
  * @class
  */
 class OsController {
-
   /**
    * All methods receive two parameters
    * @param args Parameters transmitted by the frontend

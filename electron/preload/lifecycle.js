@@ -6,7 +6,6 @@ const { getConfig } = require('ee-core/config');
 const { getMainWindow } = require('ee-core/electron');
 
 class Lifecycle {
-
   /**
    * core app have been loaded
    */
@@ -45,7 +44,7 @@ class Lifecycle {
     const mainScreen = screen.getPrimaryDisplay();
     const { width, height } = mainScreen.workAreaSize;
     const windowWidth = Math.floor(width * 0.6);
-    const windowHeight = Math.floor(height * 0.8);
+    const windowHeight = Math.floor(height * 0.7);
     const x = Math.floor((width - windowWidth) / 2);
     const y = Math.floor((height - windowHeight) / 2);
     win.setBounds({ x, y, width: windowWidth, height: windowHeight })

@@ -6,7 +6,7 @@
 module.exports = () => {
   return {
     openDevTools: {
-      mode: 'bottom'
+      mode: 'detach'
     },
     jobs: {
       messageLog: false

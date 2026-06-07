@@ -13,7 +13,7 @@ module.exports = () => {
     windowsOption: {
       title: 'electron-egg',
       width: 980,
-      height: 650,
+      height: 850,
       minWidth: 400,
       minHeight: 300,
       webPreferences: {
@@ -28,7 +28,6 @@ module.exports = () => {
     },
     logger: {
       level: 'info', // 'fatal', 'error', 'warn', 'info', 'debug', 'trace' or 'silent'
-      prettyPrint: true,
       rotator: 'daily', // daily, hourly
       dateFormat: 'yyyy-MM-dd',
       maxSize: '100m',

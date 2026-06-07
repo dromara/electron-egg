@@ -8,7 +8,6 @@ const { app: electronApp } = require('electron');
  * @class
  */
 class SecurityService {
-
   /**
    * 创建
    */

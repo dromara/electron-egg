@@ -1,6 +1,6 @@
 {
   "name": "ee-bin",
-  "version": "5.0.0-beta.4",
+  "version": "5.0.0-beta.5",
   "description": "ee-bin typescript version",
   "main": "./dist/esm/index.js",
   "module": "./dist/esm/index.js",
@@ -26,7 +26,7 @@
     "config"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.19.0"
   },
   "scripts": {
     "build": "npm run build:esm && npm run build:cjs && npm run build:chmod",
@@ -42,17 +42,17 @@
   "license": "ISC",
   "dependencies": {
     "bytenode": "^1.5.7",
-    "chokidar": "^4.0.3",
+    "chokidar": "^5.0.0",
     "commander": "^14.0.3",
     "compressing": "^2.1.1",
     "cross-spawn": "^7.0.6",
     "esbuild": "^0.28.0",
-    "globby": "^11.1.0",
+    "globby": "^16.2.0",
     "javascript-obfuscator": "^5.4.3",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.2.0",
     "json5": "^2.2.3",
     "tree-kill": "^1.2.2",
-    "wait-on": "^8.0.5"
+    "wait-on": "^9.0.10"
   },
   "optionalDependencies": {
     "icon-gen": "^5.0.0"
@@ -60,11 +60,11 @@
   "devDependencies": {
     "@types/node": "^22.15.0",
     "@types/wait-on": "^5.3.4",
-    "@typescript-eslint/eslint-plugin": "^8.59.4",
-    "@typescript-eslint/parser": "^8.59.4",
+    "@typescript-eslint/eslint-plugin": "^8.60.1",
+    "@typescript-eslint/parser": "^8.60.1",
     "eslint": "^9.39.4",
     "prettier": "^3.8.3",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.7"
   }
 }

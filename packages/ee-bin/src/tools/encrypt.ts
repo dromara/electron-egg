@@ -26,7 +26,7 @@ import fs from 'fs';
 import { chalk } from '../lib/helpers.js';
 import bytenode from 'bytenode';
 import JavaScriptObfuscator from 'javascript-obfuscator';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import { loadConfig, toArray } from '../lib/utils.js';
 import type { EncryptConfig, ConfusionOptions, BytecodeOptions } from '../types/config.js';
 
@@ -137,7 +137,7 @@ class Encrypt {
   private _getCodeFiles(): string[] | undefined {
     if (this.codefiles !== undefined) return this.codefiles;
     if (!this.patterns) return undefined;
-    this.codefiles = globby.sync(this.patterns, { cwd: this.basePath });
+    this.codefiles = globbySync(this.patterns, { cwd: this.basePath });
     return this.codefiles;
   }
 

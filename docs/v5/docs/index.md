@@ -1,45 +1,44 @@
 ---
 layout: home
 hero:
-  name: Electron-Egg
-  text: 企业级桌面软件开发框架
-  tagline: 一个入门简单、跨平台、企业级桌面软件开发框架
+  name: ElectronEgg
+  tagline: A simple-to-start, cross-platform, enterprise-grade desktop software development framework
   image:
     src: /img/logo_200.png
-    alt: Electron-Egg
+    alt: ElectronEgg
   actions:
     - theme: brand
-      text: ⛵️ v5.0.0 文档
-      link: /pages/987b1c/
+      text: ⛵️ v5.0.0 Docs
+      link: /00.docs/010.getting-started/001.major-update
     - theme: alt
-      text: 快速开始
-      link: /pages/909757/
+      text: Quick Start
+      link: /00.docs/010.getting-started/040.quick-start
 features:
   - icon: 🧬
-    title: 入门简单
-    details: 支持 Javascript、Typescript、CommonJS、ESM
+    title: Easy to Start
+    details: Supports Javascript, Typescript, CommonJS, ESM
   - icon: 🧩
-    title: 跨平台
-    details: windows、Mac、鸿蒙、Linux
+    title: Cross-Platform
+    details: Windows, Mac, HarmonyOS, Linux
   - icon: 🍱
-    title: 开源免费
-    details: GitHub、Gitee
+    title: Open Source & Free
+    details: GitHub, Gitee
 ---
 
-## 🍬 特性
+## 🍬 Features
 
-- **跨平台**：一套代码，可以打包成 windows 版、Mac 版、鸿蒙OS、Linux 版、国产 UOS、Deepin、麒麟等。
-- **架构**：单业务进程/模块化/多任务(进程，线程，渲染进程)，让开发大型项目变的简单。
-- **简单高效**：支持 Javascript、Typescript、CommonJS、ESM。
-- **前端独立**：支持任何前端技术，如：vue、react、html、vite 等等。
-- **工程化**：可以用前端、服务端的开发思维，来编写桌面软件。
-- **高性能**：事件驱动、非阻塞式 IO。
-- **功能丰富**：配置、通信、任务、插件、数据库、升级、打包、工具...等等。
-- **安全**：支持字节码加密、压缩混淆加密。
-- **业务扩展**：业务可以扩展其它语言，如 c/c++、python、go、java 等。
+- **Cross-Platform**: One codebase, packaged for Windows, Mac, HarmonyOS, Linux, domestic UOS, Deepin, Kylin, and more.
+- **Architecture**: Single business process / modular / multi-task (process, thread, renderer process), simplifying large-scale project development.
+- **Simple & Efficient**: Supports Javascript, Typescript, CommonJS, ESM.
+- **Frontend Independent**: Supports any frontend technology, such as Vue, React, HTML, Vite, and more.
+- **Engineering**: Apply frontend and server-side development practices to desktop software development.
+- **High Performance**: Event-driven, non-blocking IO.
+- **Feature-Rich**: Configuration, communication, tasks, plugins, database, upgrades, packaging, tools, and more.
+- **Security**: Supports bytecode encryption, compression and obfuscation encryption.
+- **Business Extension**: Business logic can extend to other languages, such as C/C++, Python, Go, Java, etc.
 
-## 🎉 致谢
+## 🎉 Acknowledgements
 
-**Electron-Egg** 自从 2020 年开源以来，获得了很多人的支持。目前社区群总计超千人，收获 Star 超 **8000+**。
+**Electron-Egg** has received support from many people since it was open-sourced in 2020. The community now has over a thousand members, with over **8,000+** Stars earned.
 
-我们会继续朝着：**让所有开发者都能学会桌面软件研发** 的理念，继续前进。
+We will continue advancing toward our vision: **empowering all developers to learn desktop software development**.

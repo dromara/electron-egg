@@ -1,16 +1,108 @@
+/* === Light Theme Variables === */
+@light-bg-deep: #f0f2f5;
+@light-bg-base: #fafafa;
+@light-bg-card: #ffffff;
+@light-bg-elevated: #ffffff;
+@light-border: #e8e8e8;
+@light-border-light: #f0f0f0;
+@light-text-primary: #2c3e50;
+@light-text-secondary: #666666;
+@light-text-muted: #999999;
+@accent-green: #07C160;
+@accent-green-hover: #0ad672;
+@accent-green-subtle: rgba(7, 193, 96, 0.08);
+
+/* === App Root === */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: @light-text-primary;
   height: 100%;
+  background-color: @light-bg-deep;
 }
 
-/* 滚动条 */
-::-webkit-scrollbar{width:8px;height:4px}
-::-webkit-scrollbar-button{width:10px;height:0}
-::-webkit-scrollbar-track{background:0 0}
-::-webkit-scrollbar-thumb{background:#E6FFEE;-webkit-transition:.3s;transition:.3s}
-::-webkit-scrollbar-thumb:hover{background-color:#07C160}
-::-webkit-scrollbar-thumb:active{background-color:#07C160}
+/* === Scrollbar === */
+::-webkit-scrollbar { width: 6px; height: 4px; }
+::-webkit-scrollbar-button { width: 0; height: 0; }
+::-webkit-scrollbar-track { background: @light-bg-deep; }
+::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; transition: .3s; }
+::-webkit-scrollbar-thumb:hover { background-color: @accent-green; }
+::-webkit-scrollbar-thumb:active { background-color: @accent-green; }
+
+/* === Page Container === */
+.page-container {
+  padding: 20px;
+  text-align: left;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* === Card Grid Layout === */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1400px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* === Feature Card === */
+.feature-card {
+  background-color: @light-bg-card;
+  border: 1px solid @light-border;
+  border-radius: 12px;
+  padding: 20px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+
+  &:hover {
+    border-color: @accent-green;
+    box-shadow: 0 4px 16px rgba(7, 193, 96, 0.1);
+  }
+}
+
+.feature-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: @light-text-primary;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid @light-border;
+}
+
+.feature-card__body {
+  color: @light-text-secondary;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.feature-card__subtitle {
+  font-size: 13px;
+  color: @light-text-muted;
+  margin-top: 4px;
+}
+
+.feature-card--full {
+  grid-column: 1 / -1;
+}

@@ -22,7 +22,7 @@
 import debug from 'debug';
 import fs from 'fs';
 import path from 'path';
-import globby from 'globby';
+import { globby, globbySync } from 'globby';
 import { isClass, isFunction, isPrimitive, isGeneratorFunction, isAsyncFunction } from '../../utils/type_check.js';
 import { loadFile, loadFileAsync, filePatterns, isBytecodeClass } from '../utils/index.js';
 import { getProperties } from '../../utils/wrap.js';
@@ -199,7 +199,7 @@ export class FileLoader {
     debugLog('[parse] directories %o', directories);
 
     for (const directory of directories) {
-      const filepaths = globby.sync(files, { cwd: directory });
+      const filepaths = globbySync(files, { cwd: directory });
       debugLog('[parse] filepaths %o', filepaths);
       for (const filepath of filepaths) {
         const fullpath = path.join(directory, filepath);

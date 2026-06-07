@@ -8,7 +8,6 @@ const { getMainWindow } = require('ee-core/electron');
  * @class
  */
 class EffectController {
-
   /**
    * select file
    */

@@ -11,7 +11,6 @@
  * - core: core utilities (file loading, timer)
  * - electron: Electron app and window management
  * - exception: global exception handling
- * - html: HTML file paths
  * - loader: file loading utilities
  * - log: logging system
  * - message: child process messages
@@ -51,9 +50,6 @@ export { electronApp, createElectron, getMainWindow, createMainWindow, restoreMa
 
 // --- exception handling ---
 export { loadException } from './exception/index.js';
-
-// --- html file paths ---
-export { getHtmlFilepath } from './html/index.js';
 
 // --- loader file loading ---
 export { loadFile as loaderLoadFile, requireFile, execFile, resolveModule, getFullpath } from './loader/index.js';
@@ -109,6 +105,9 @@ export type {
   AppInfo,
   MessageData,
   ProcessExitEventData,
+  DevFrontendConfig,
+  DevElectronConfig,
+  DevConfig,
 } from './types/index.js';
 
 export type {

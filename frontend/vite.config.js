@@ -29,7 +29,7 @@ export default defineConfig(({ command, mode }) => {
       preprocessorOptions: {
         less: {
           modifyVars: {
-            '@border-color-base': '#dce3e8',
+            '@border-color-base': '#d9d9d9',
           },
           javascriptEnabled: true,
         },

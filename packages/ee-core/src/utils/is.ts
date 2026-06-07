@@ -78,6 +78,15 @@ export function linux(): boolean {
 }
 
 /**
+ * Detect whether the current operating system is OpenHarmony
+ *
+ * @returns true if currently running on OpenHarmony
+ */
+export function openharmony(): boolean {
+  return (process.platform as string) === 'openharmony';
+}
+
+/**
  * Detect whether the processor architecture is x86 (32-bit)
  *
  * Based on process.arch === 'ia32'.

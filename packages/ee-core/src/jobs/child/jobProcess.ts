@@ -28,6 +28,7 @@ export interface JobProcessOptions {
   processArgs?: Record<string, unknown>;
   /** Fork options (cwd, env, stdio, etc.) */
   processOptions?: ForkOptions;
+  [key: string]: unknown;
 }
 
 /** Message format: Main process -> Child process */
@@ -103,9 +104,9 @@ export class JobProcess {
 
     const options = extend(
       true,
-      defaultOptions as unknown as Record<string, unknown>,
-      opt as unknown as Record<string, unknown>,
-    ) as unknown as JobProcessOptions;
+      defaultOptions,
+      opt,
+    ) as JobProcessOptions;
 
     this.emitter = new EventEmitter();
     this.host = host;
