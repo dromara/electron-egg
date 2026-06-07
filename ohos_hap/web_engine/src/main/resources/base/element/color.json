@@ -1,0 +1,24 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "button_background",
+      "value": "#007DFF"
+    },
+    {
+      "name": "button_font",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "checkbox_selected",
+      "value": "#007DFF"
+    },
+    {
+      "name": "print_tip_button",
+      "value": "#ff0a34a2"
+    }
+  ]
+}

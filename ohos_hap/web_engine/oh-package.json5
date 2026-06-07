@@ -1,0 +1,15 @@
+{
+  "name": "web_engine",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "Index.ets",
+  "author": "",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    'libadapter.so': 'file:./src/main/cpp/types/libadapter',
+  },
+  "dependencies": {
+    "inversify": "^6.0.1",
+    "reflect-metadata": "^0.1.13"
+  }
+}
