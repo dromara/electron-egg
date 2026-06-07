@@ -50,7 +50,7 @@ const navEn = [
 
 export default defineConfig({
   // 站点标题（浏览器标签页和导航栏显示）
-  title: 'Electron-Egg',
+  title: 'ElectronEgg',
   // 源文件目录，Markdown 文档从该目录下读取（相对于项目根）
   srcDir: 'docs',
   // 路径重写规则，将源文件路径映射为最终的访问 URL

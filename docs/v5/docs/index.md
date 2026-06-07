@@ -6,7 +6,7 @@ hero:
   tagline: 一个入门简单、跨平台、企业级桌面软件开发框架
   image:
     src: /img/logo_200.png
-    alt: Electron-Egg
+    alt: ElectronEgg
   actions:
     - theme: brand
       text: ⛵️ v5.0.0 文档

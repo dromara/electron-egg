@@ -27,7 +27,6 @@ export default (): Partial<Config> => {
     },
     logger: {
       level: 'info', // 'fatal', 'error', 'warn', 'info', 'debug', 'trace' or 'silent'
-      prettyPrint: true,
       rotator: 'daily', // daily, hourly
       dateFormat: 'yyyy-MM-dd',
       maxSize: '100m',

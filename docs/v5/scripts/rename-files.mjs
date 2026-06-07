@@ -70,7 +70,7 @@ const nameMap = {
   '01.开始.md': '01.getting-started.md',
   '03.开发.md': '03.development.md',
   // 00.文档 根目录
-  '049.从v3升级v4.md': '049.upgrade-from-v3.md',
+  '049.从v4升级v5.md': '049.upgrade.md',
   '050.更新记录.md': '050.changelog.md',
   '060.常见问题.md': '060.faq.md',
   
