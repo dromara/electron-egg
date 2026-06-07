@@ -9,17 +9,38 @@ const DOCS = path.resolve(__dirname, '../docs')
 // Top-level content dirs, in display order (numeric prefix drives sort anyway).
 const INCLUDE_DIRS = ['00.docs', '08.plugins', '09.api', '07.features', '06.support', '04.others']
 
-function getDisplayName(name) {
-  const stripped = name.replace(/^\d+\./, '')
-  return displayNameMap[stripped] || stripped
-}
 const numPrefix = (name) => {
   const m = name.match(/^(\d+)\.?/)
   return m ? parseInt(m[1], 10) : 9999
 }
 
-// 英文目录名到中文显示名的映射
-const displayNameMap = {
+// English directory names to English display names
+const displayNameMapEn = {
+  // Level 1 directories
+  'docs': 'Documentation',
+  'plugins': 'Plugins',
+  'features': 'Features',
+  'support': 'Support',
+  'others': 'Others',
+  // Level 2 directories
+  'getting-started': 'Getting Started',
+  'basic-features': 'Basic Features',
+  'build-software': 'Build Software',
+  'upgrade': 'Upgrade',
+  'cross-language': 'Cross-Language',
+  'tips': 'Tips',
+  // Level 3 directories
+  'frontend-module': 'Frontend Module',
+  'communication': 'Communication',
+  'database': 'Database',
+  'tasks': 'Tasks',
+  'tutorial': 'Tutorial',
+  'version-relation': 'Version Relation',
+  'config': 'Config',
+}
+
+// Chinese directory names to Chinese display names
+const displayNameMapZh = {
   // 一级目录
   'docs': '文档',
   'plugins': '插件',
@@ -43,6 +64,11 @@ const displayNameMap = {
   'config': '配置',
 }
 
+function getDisplayName(name, map) {
+  const stripped = name.replace(/^\d+\./, '')
+  return map[stripped] || stripped
+}
+
 // Read a file's title from frontmatter.
 function readMeta(absFile) {
   const { data } = matter(fs.readFileSync(absFile, 'utf8'))
@@ -57,44 +83,45 @@ function sortedEntries(dir) {
     .sort((a, b) => numPrefix(a.name) - numPrefix(b.name) || a.name.localeCompare(b.name))
 }
 
-// Convert file path to VitePress route path
-// e.g. 00.文档/010.开始/010.简介.md -> /00.文档/010.开始/010.简介
-function fileToRoute(relPath) {
-  // Remove .md extension and ensure leading slash
-  return '/' + relPath.replace(/\.md$/, '')
+// Convert file path to VitePress route path with optional locale prefix
+function fileToRoute(relPath, prefix = '') {
+  // Remove .md extension and ensure leading slash with prefix
+  return (prefix ? `/${prefix}/` : '/') + relPath.replace(/\.md$/, '')
 }
 
 // Recursively build a VitePress sidebar group from a directory.
-function buildGroup(absDir, relDir, collapsed = true) {
+function buildGroup(absDir, relDir, nameMap, routePrefix, collapsed = true) {
   const items = []
   for (const entry of sortedEntries(absDir)) {
     const abs = path.join(absDir, entry.name)
     const rel = relDir ? `${relDir}/${entry.name}` : entry.name
     if (entry.isDirectory()) {
-      const children = buildGroup(abs, rel, collapsed)
-      if (children.length) items.push({ text: getDisplayName(entry.name), collapsed, items: children })
+      const children = buildGroup(abs, rel, nameMap, routePrefix, collapsed)
+      if (children.length) items.push({ text: getDisplayName(entry.name, nameMap), collapsed, items: children })
     } else {
       const { title } = readMeta(abs)
-      items.push({ text: title, link: fileToRoute(rel) })
+      items.push({ text: title, link: fileToRoute(rel, routePrefix) })
     }
   }
   return items
 }
 
-function buildSidebar() {
+function buildSidebar(baseDir, nameMap, routePrefix) {
   const sidebar = []
   let isFirst = true
   for (const dir of INCLUDE_DIRS) {
-    const abs = path.join(DOCS, dir)
+    const abs = path.join(baseDir, dir)
     if (!fs.existsSync(abs)) continue
-    const items = buildGroup(abs, dir)
+    const items = buildGroup(abs, dir, nameMap, routePrefix)
     if (items.length) {
-      sidebar.push({ text: getDisplayName(dir), collapsed: !isFirst, items })
+      sidebar.push({ text: getDisplayName(dir, nameMap), collapsed: !isFirst, items })
       isFirst = false
     }
   }
   return sidebar
 }
 
-export const sidebarZh = buildSidebar()
-export const sidebarEn = sidebarZh // same structure; link targets shared
+// English sidebar: from docs/, links start with /
+export const sidebarEn = buildSidebar(DOCS, displayNameMapEn, '')
+// Chinese sidebar: from docs/zh/, links start with /zh/
+export const sidebarZh = buildSidebar(path.join(DOCS, 'zh'), displayNameMapZh, 'zh')
