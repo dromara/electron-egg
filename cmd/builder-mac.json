@@ -6,6 +6,7 @@
     "output": "out"
   },
   "asar": true,
+  "electronLanguages": ["en-US", "zh-CN"],
   "files": [
     "**/*",
     "!cmd/",
@@ -16,7 +17,11 @@
     "!out/",
     "!go/",
     "!ohos_hap/",
-    "!python/"
+    "!python/",
+    "!**/.claude",
+    "!**/.trae",
+    "!**/.vscode",
+    "!CLAUDE.md"
   ],
   "extraResources": [
     {

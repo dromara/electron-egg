@@ -126,7 +126,8 @@
       "Bash(ls node_modules/.bin/vitest)",
       "Bash(ls packages/ee-core/node_modules/vitest)",
       "Bash(ls packages/ee-core/node_modules/.bin/vitest)",
-      "Bash(npm list *)"
+      "Bash(npm list *)",
+      "Bash(npx electron-builder *)"
     ]
   }
 }
