@@ -272,7 +272,8 @@ module.exports = {
    */
   updater: {
     windows_64: {
-      asarFile: './out/win-unpacked/resources/app.asar',
+      appFile: './out/win-unpacked/resources/app.asar',
+      builderConfig: './cmd/builder.json',
       extraResources: [
         './build/extraResources/read.txt'
       ],
@@ -286,7 +287,8 @@ module.exports = {
       metadata: './out/latest.yml',
     },
     macos_intel: {
-      asarFile: './out/mac/ee.app/Contents/Resources/app.asar',
+      appFile: './out/mac/ee.app/Contents/Resources/app.asar',
+      builderConfig: './cmd/builder-mac.json',
       extraResources: [
         './build/extraResources/readme.txt'
       ],
@@ -300,7 +302,8 @@ module.exports = {
       metadata: './out/latest-mac.yml',
     },
     macos_apple: {
-      asarFile: './out/mac-arm64/ee.app/Contents/Resources/app.asar',
+      appFile: './out/mac-arm64/ee.app/Contents/Resources/app.asar',
+      builderConfig: './cmd/builder-mac-arm64.json',
       extraResources: [
         './build/extraResources/readme.txt'
       ],
