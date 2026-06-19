@@ -1,0 +1,42 @@
+{
+  // VS Code 任务配置版本
+  "version": "2.0.0",
+  "tasks": [
+    {
+      // 构建 electron 主进程（dev 环境，含 inline sourcemap）
+      "label": "ee-build-dev",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["exec", "ee-bin", "build", "--cmds=electron", "--env=dev"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      // 启动前端开发服务器（后台运行）
+      "label": "ee-frontend-dev",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["dev-frontend"],
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE",
+          "endsPattern": "ready in"
+        }
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      // 复合任务：先构建 electron，再并行启动前端 + 调试主进程
+      "label": "ee-dev-all",
+      "dependsOn": ["ee-build-dev", "ee-frontend-dev"],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    }
+  ]
+}
