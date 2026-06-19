@@ -194,6 +194,24 @@ export interface UpdaterConfig {
   cleanCache?: boolean;
 }
 
+/** Ohos resource copy config — follows electron-builder's FileSet pattern (from/to/filter).
+ *  Used to extract build artifacts to HarmonyOS HAP resource directories.
+ */
+export interface OhosResourceConfig {
+  /** Source path (relative to project root) */
+  from: string;
+  /** Destination path (relative to project root) */
+  to: string;
+  /** Glob filter patterns with negation support (e.g. "!compiled"), defaults to ["**\/*"] */
+  filter?: string[];
+}
+
+/** Ohos config — top-level structure for the "ohos" section */
+export interface OhosConfig {
+  /** Resource copy configurations (supports multiple from/to pairs) */
+  resources: OhosResourceConfig[];
+}
+
 /** Build config — top-level structure for the "build" section.
  *  The "electron" key is always BundleConfig (bundling config),
  *  all other keys (frontend, win32, win64, etc.) are ExecConfig (command execution config).
@@ -221,4 +239,6 @@ export interface BinConfig {
   exec: Record<string, ExecConfig>;
   /** Incremental update configuration (optional, per-platform) */
   updater?: Record<string, UpdaterConfig>;
+  /** HarmonyOS resource extraction configuration (optional) */
+  ohos?: OhosConfig;
 }

@@ -28,6 +28,7 @@ import { move } from './tools/move.js';
 import { encrypt, cleanEncrypt } from './tools/encrypt.js';
 import { incrUpdater } from './tools/incrUpdater.js';
 import { run as iconGenRun } from './tools/iconGen.js';
+import { ohos } from './tools/ohos.js';
 
 program
   .name('ee-bin')
@@ -217,6 +218,24 @@ program
   .option('--force <flag>', 'force update full')
   .action(async function (this: Command) {
     await incrUpdater.run(this.opts());
+  });
+
+/**
+ * ohos command - Extract build artifacts to HarmonyOS resource directory
+ *
+ * Copies files from the Electron build output to the ohos HAP resource directory,
+ * following electron-builder's extraResources FileSet pattern (from/to/filter).
+ * Supports glob filter patterns with negation (e.g. "!compiled" to exclude files).
+ *
+ * Options:
+ *   --config <folder>  Path to custom bin.js config file
+ */
+program
+  .command('ohos')
+  .description('Extract build artifacts to ohos resource directory')
+  .option('--config <folder>', 'config file')
+  .action(function (this: Command) {
+    ohos(this.opts());
   });
 
 program.parse();
