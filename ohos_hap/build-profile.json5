@@ -4,7 +4,7 @@
       {
         "name": "default",
         "signingConfig": "default",
-        "compatibleSdkVersion": "5.0.5(17)",
+        "compatibleSdkVersion": "6.1.0(23)",
         "compatibleSdkVersionStage": "release",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
@@ -28,13 +28,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "C:\\Users\\Administrator\\.ohos\\config\\default_ohos_hap_NhrShYtqssIv0Vkh2mk12dlX1nZFNR3eGYIfW0fsW4g=.cer",
+          "certpath": "/Users/gsx/.ohos/config/default_ohos_hap_j-6EmdySmjsxO1YA6FK_PG3_ERAL1BSAH6zRjw0Im8A=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001B59E6C4BF171D19DF01831C379B06E889B9075B13FDAE51E09F7F9753A324FA570D86727A4F1157",
-          "profile": "C:\\Users\\Administrator\\.ohos\\config\\default_ohos_hap_NhrShYtqssIv0Vkh2mk12dlX1nZFNR3eGYIfW0fsW4g=.p7b",
+          "keyPassword": "0000001A70997D468A475532CEAF12F9BE6B23D41D3CA83A72D8B5BB47BD2AD37E298D8BB6E8CA88E19D",
+          "profile": "/Users/gsx/.ohos/config/default_ohos_hap_j-6EmdySmjsxO1YA6FK_PG3_ERAL1BSAH6zRjw0Im8A=.p7b",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\Administrator\\.ohos\\config\\default_ohos_hap_NhrShYtqssIv0Vkh2mk12dlX1nZFNR3eGYIfW0fsW4g=.p12",
-          "storePassword": "0000001BD8991560CDC40F7CAB6C2CB9AB21FA714BFBD0E123A21BDBB42E39EA88E449B94F4ED552072653"
+          "storeFile": "/Users/gsx/.ohos/config/default_ohos_hap_j-6EmdySmjsxO1YA6FK_PG3_ERAL1BSAH6zRjw0Im8A=.p12",
+          "storePassword": "0000001ADCF5BEA6934735E0B9DDB05D78C9FA8C0B2A23A60C007C6848730407E092756928779EEB85B9"
         }
       }
     ]

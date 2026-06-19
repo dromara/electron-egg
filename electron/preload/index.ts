@@ -14,13 +14,13 @@ export function preload(): void {
   logger.info('[preload] load 5');
   trayService.create();
   securityService.create();
-  autoUpdaterService.create();
+  //autoUpdaterService.create();
 
   // go server
-  crossService.createGoServer();
+  //crossService.createGoServer();
 
   // init sqlite db
-  sqlitedbService.init();
+  //sqlitedbService.init();
 }
 
 
