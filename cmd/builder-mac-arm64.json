@@ -5,7 +5,7 @@
   "directories": {
     "output": "out"
   },
-  "asar": true,
+  "asar": false,
   "files": [
     "**/*",
     "!cmd/",
