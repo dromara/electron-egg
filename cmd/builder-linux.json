@@ -1,9 +1,9 @@
 {
-  "productName": "ee",
-  "appId": "com.bilibili.ee",
+  "productName": "ee-dev",
+  "appId": "com.electron.ee-dev",
   "copyright": "© 2025 duola Technology Co., Ltd.",
-  "directories": {
-    "output": "out"
+  "directories": {  
+    "output": "out" 
   },
   "asar": true,
   "electronLanguages": ["en-US", "zh-CN"],
@@ -16,6 +16,7 @@
     "!logs/",
     "!out/",
     "!go/",
+    "!docs/",
     "!ohos_hap/",
     "!python/",
     "!**/.claude",

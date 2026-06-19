@@ -288,7 +288,7 @@ module.exports = {
       metadata: './out/latest.yml',
     },
     macos_intel: {
-      appFile: './out/mac/ee.app/Contents/Resources/app.asar',
+      appFile: './out/mac/ee-dev.app/Contents/Resources/app.asar',
       builderConfig: './cmd/builder-mac.json',
       extraResources: [
         './build/extraResources/readme.txt'
@@ -303,7 +303,7 @@ module.exports = {
       metadata: './out/latest-mac.yml',
     },
     macos_apple: {
-      appFile: './out/mac-arm64/ee.app/Contents/Resources/app.asar',
+      appFile: './out/mac-arm64/ee-dev.app/Contents/Resources/app.asar',
       builderConfig: './cmd/builder-mac-arm64.json',
       extraResources: [
         './build/extraResources/readme.txt'

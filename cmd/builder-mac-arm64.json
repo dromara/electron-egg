@@ -1,6 +1,6 @@
 {
-  "productName": "ee",
-  "appId": "com.bilibili.ee",
+  "productName": "ee-dev",
+  "appId": "com.electron.ee-dev",
   "copyright": "© 2025 duola Technology Co., Ltd.",
   "directories": {
     "output": "out"
@@ -16,6 +16,7 @@
     "!logs/",
     "!out/",
     "!go/",
+    "!docs/",
     "!ohos_hap/",
     "!python/",
     "!**/.claude",

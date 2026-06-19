@@ -126,7 +126,27 @@
       "Bash(ls node_modules/.bin/vitest)",
       "Bash(ls packages/ee-core/node_modules/vitest)",
       "Bash(ls packages/ee-core/node_modules/.bin/vitest)",
-      "Bash(npm list *)"
+      "Bash(npm list *)",
+      "Bash(timeout 10 npx electron . --env=prod)",
+      "Bash(npx electron *)",
+      "Bash(kill %1)",
+      "Bash(wait %1)",
+      "Bash(log show *)",
+      "Read(//Users/gsx/Library/Application Support/ee-next/**)",
+      "Bash(curl -s -o /tmp/ee-error-screenshot.jpg \"https://maas-log-prod.cn-wlcb.ufileos.com/anthropic/4d174fdb-4acf-402d-b057-8d1bbbf3748f/c50d831a5a51d486ece03fe3ba8af76f.jpg?UCloudPublicKey=TOKEN_e15ba47a-d098-4fbd-9afc-a0dcf0e4e621&Expires=1781870669&Signature=MnNPk11NB0qhX9XDjKj86rJLRvI=\")",
+      "Read(//tmp/**)",
+      "Bash(sips -g all /tmp/ee-error-screenshot.jpg)",
+      "Bash(python3 -c \"import os; print\\(os.path.realpath\\('/Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-core/node_modules/axios'\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('pnpm',{}\\), indent=2\\)\\)\")",
+      "Bash(ls axios/package.json)",
+      "Bash(ls bytenode/package.json)",
+      "Bash(ls koa/package.json)",
+      "Bash(ls electron/package.json)",
+      "Bash(ls typescript/package.json)",
+      "Bash(ls @types/node/package.json)",
+      "Bash(ls @types/koa/package.json)",
+      "Bash(ls @typescript-eslint/parser/package.json)",
+      "Bash(ls @typescript-eslint/eslint-plugin/package.json)"
     ]
   }
 }
