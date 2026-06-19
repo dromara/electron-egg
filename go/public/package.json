@@ -1,11 +1,11 @@
 {
-  "name": "ee",
-  "version": "4.0.1",
+  "name": "ee-next",
+  "version": "5.0.0",
   "description": "A fast, desktop software development framework",
   "main": "./public/electron/main.js",
   "scripts": {
     "dev": "ee-bin dev",
-    "build": "npm run build-frontend && npm run build-electron && ee-bin encrypt",
+    "build": "pnpm run build-frontend && pnpm run build-electron && ee-bin encrypt",
     "start": "ee-bin start",
     "dev-frontend": "ee-bin dev --serve=frontend",
     "dev-electron": "ee-bin dev --serve=electron",
@@ -20,7 +20,6 @@
     "build-python": "ee-bin build --cmds=python && ee-bin move --flag=python_dist",
     "encrypt": "ee-bin encrypt",
     "icon": "ee-bin icon",
-    "re-sqlite": "electron-rebuild -f -w better-sqlite3",
     "build-w": "ee-bin build --cmds=win64",
     "build-we": "ee-bin build --cmds=win_e",
     "build-m": "ee-bin build --cmds=mac",
@@ -29,7 +28,9 @@
     "debug-dev": "cross-env DEBUG=ee-* ee-bin dev",
     "debug-encrypt": "ee-bin encrypt",
     "debug-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",
-    "debug-move": "ee-bin move --flag=frontend_dist"
+    "debug-move": "ee-bin move --flag=frontend_dist",
+    "packages-build": "pnpm --filter ee-bin run build && pnpm --filter ee-core run build",
+    "re-sqlite": "electron-rebuild -f -w better-sqlite3"
   },
   "repository": "https://github.com/dromara/electron-egg.git",
   "keywords": [
@@ -42,18 +43,18 @@
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
     "@types/better-sqlite3": "^7.6.12",
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.19.1",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
-    "ee-bin": "^4.1.4",
-    "electron": "^31.7.6",
-    "electron-builder": "^25.1.8"
+    "ee-bin": "workspace:*",
+    "electron": "^39.8.10",
+    "electron-builder": "^26.3.5"
   },
   "dependencies": {
     "axios": "^1.7.9",
-    "better-sqlite3": "^11.7.0",
+    "better-sqlite3": "^12.5.0",
     "dayjs": "^1.11.13",
-    "ee-core": "^4.0.1",
-    "electron-updater": "^6.3.8"
+    "ee-core": "workspace:*",
+    "electron-updater": "^6.7.3"
   }
 }

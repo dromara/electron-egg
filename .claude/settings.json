@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path'); if echo \"$f\" | grep -q 'packages/ee-core/src/'; then cd /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-core && pnpm run build; elif echo \"$f\" | grep -q 'packages/ee-bin/src/'; then cd /Users/gsx/www/gofile/src/gowork/ee-dev/packages/ee-bin && pnpm run build; fi",
+            "timeout": 120,
+            "statusMessage": "Building package..."
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": false
+  }
+}
