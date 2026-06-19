@@ -17,13 +17,18 @@ ee-dev/
 │   │   └── src/
 │   │       ├── app/        # boot, application, events, dir
 │   │       ├── config/     # Config loading/merging
-│   │       ├── controller/ # Controller loader (registry + globby)
+│   │       ├── const/      # IPC constants (Processes, SocketIO, Events, Receiver)
+│   │       ├── controller/ # Controller loader (registry + scanDirSync)
 │   │       ├── core/       # FileLoader, utils
-│   │       ├── cross/      # IPC communication
+│   │       ├── cross/      # External process manager (Go/Python/etc.)
 │   │       ├── electron/   # Electron app/window management
+│   │       ├── exception/  # Global exception handling (uncaught/unhandled)
+│   │       ├── html/       # Static HTML page paths (failure.html, etc.)
 │   │       ├── jobs/       # ChildJob, ChildPoolJob, LoadBalancer
 │   │       ├── loader/     # loadFile, requireFile, resolveModule
 │   │       ├── log/        # Pino-based logging (pino-roll + pino-pretty)
+│   │       ├── message/    # ChildMessage (child → main process messaging)
+│   │       ├── ps/         # Process state & path utilities (env, paths, isDev, etc.)
 │   │       ├── socket/     # socketServer, httpServer, ipcServer
 │   │       ├── storage/    # SqliteStorage (better-sqlite3)
 │   │       ├── types/      # TypeScript type definitions
@@ -31,11 +36,12 @@ ee-dev/
 │   └── ee-bin/          # TypeScript CLI build tool (dual CJS/ESM)
 │       └── src/
 │           ├── config/     # bin_default.ts
-│           ├── plugins/    # controller_registry_plugin.ts (esbuild)
+│           ├── plugins/    # bundle_registry_plugin.ts (esbuild)
 │           ├── tools/      # serve, encrypt, move, iconGen, incrUpdater
+│           ├── lib/        # extend, helpers, utils (lightweight replacements)
 │           └── types/      # BinConfig, BundleConfig, etc.
 ├── electron/            # Application code (main process source)
-│   ├── main.js          # Entry point
+│   ├── main.js          # Entry point (also main.ts supported)
 │   ├── config/          # config.default.js / config.local.js / config.prod.js
 │   ├── controller/      # Business controllers
 │   ├── service/         # Business services
@@ -56,28 +62,43 @@ After `pnpm build-electron`, `public/electron/` contains:
 ```
 public/electron/
 ├── main.js              # Bundled main process (controllers, services, config all bundled in)
-├── jobs/                # Copied as-is (child_process.fork requires separate files)
+├── jobs/                # Per-file transpiled (esbuild bundle:false; child_process.fork requires separate files)
 └── preload/
-    └── bridge.js        # Copied as-is (BrowserWindow preload script)
+    └── bridge.js        # Transpiled from bridge.{ts,js,...} (BrowserWindow preload script)
 ```
 
 ## Key Patterns
 
 ### Controller Loading Pipeline
 
-**Build time** (ee-bin): `controllerRegistryPlugin` esbuild plugin scans `electron/controller/`, computes property paths (replicating `defaultCamelize` with `caseStyle: 'lower'`), and generates a virtual module `ee-core:controller-registry` that sets `global.__EE_CONTROLLER_REGISTRY__` with **lazy getters** (`get module() { return require('./path'); }`).
+**Build time** (ee-bin): `bundleRegistryPlugin` esbuild plugin scans `electron/controller/`, computes property paths (replicating `defaultCamelize` with `caseStyle: 'lower'`), and generates a virtual module `app:controller-registry` that sets `global.__EE_CONTROLLER_REGISTRY__` with **lazy getters** (`get module() { return require('./path'); }`).
 
-**Bundle entry** (`ee-core:bundle-entry`): First requires the registry module, then requires the real `main.js`. This ensures controllers are registered before the app starts but only loaded when `FileLoader.parseFromRegistry()` runs (avoiding initialization order issues).
+**Bundle entry** (`app:bundle-entry`): First requires the config registry module, then the controller registry module, then requires the real `main.js`. This ensures registries are populated before the app starts, but modules only loaded when `FileLoader.parseFromRegistry()` runs (avoiding initialization order issues).
 
-**Runtime** (ee-core): `ControllerLoader.load()` checks `globalThis.__EE_CONTROLLER_REGISTRY__`. If present (bundle mode), `FileLoader.parseFromRegistry()` reads from the registry. If absent (dev without bundle), falls back to globby filesystem scanning + `require()`.
+**Runtime** (ee-core): `ControllerLoader.load()` checks `globalThis.__EE_CONTROLLER_REGISTRY__`. If present (bundle mode), `FileLoader.parseFromRegistry()` reads from the registry. If absent (dev without bundle), falls back to `scanDirSync()` filesystem scanning + `require()`.
 
 ### ElectronEgg Lifecycle
 
-Boot → loadConfig → loadLog → loadDir → loadController → loadSocket → loadElectron
+Two phases:
 
-### IPC Communication
+1. **init()** (in constructor): `loadException → loadConfig → loadDir → loadLog`
+2. **run()/runAsync()** (called by user): `loadController → loadSocket → emitLifecycle(Ready) → loadElectron`
 
-Main ↔ renderer via `ee-core/cross` (IPC, socket.io, HTTP server). Channels follow pattern `controller/{name}/{method}`.
+Order is strict: exception handling must be first to catch subsequent errors; config is needed by all modules; directories must exist before logging; controllers before communication; Ready event after foundation + business loaded.
+
+### Lifecycle Events
+
+`EventBus` manages five framework milestones: `Ready`, `ElectronAppReady`, `WindowReady`, `BeforeClose`, `Preload`. Business code registers hooks via `app.register(eventName, handler)`. Custom events via `eventBus.on()/emit()`.
+
+### Communication Services
+
+Three channels created in order: `SocketServer` → `HttpServer` → `IpcServer`. All share the same `resolveControllerFn()` routing mechanism.
+
+- **IpcServer**: Main ↔ renderer via `ipcMain.handle/on` + `ipcRenderer.invoke/send`. Channels: `controller/{name}/{method}`.
+- **HttpServer**: Koa RESTful API for external HTTP clients.
+- **SocketServer**: SocketIO for third-party processes (Go/Python backends).
+
+The `cross` module manages external child processes (Go/Python), not renderer IPC.
 
 ### Config Loading Pipeline
 
@@ -91,9 +112,9 @@ Main ↔ renderer via `ee-core/cross` (IPC, socket.io, HTTP server). Channels fo
 
 `config.default.js` → `config.local.js` / `config.prod.js`, merged by ee-core config loader.
 
-### Format Auto-Detection
+### Format Detection
 
-`_bundleWithRegistry()` detects entry file type: `electron/main.js` → CJS output, `electron/main.ts` → ESM output.
+`_bundleWithRegistry()` detects which entry file exists (`main.ts` preferred over `main.js`). Output format is independently controlled by `bundleConfig.format` (default `'cjs'`). TypeScript entry does NOT imply ESM output — you can have `main.ts` with CJS format.
 
 ## Commands
 
@@ -154,12 +175,12 @@ electron: {
   external: [],          // User-defined externals (packages: 'external' covers most)
   sourcemap: false,      // 'inline' | 'external' | false; default: dev→inline, prod→off
   minify: false,         // true | false; minify code for production
-  drop: undefined,       // ['console', 'debugger']; remove statements for production
+  drop: [],              // ['console', 'debugger']; remove statements for production
   keepNames: false,      // true | false; preserve function/class names when minifying
-  legalComments: undefined, // 'inline' | 'eof' | 'none'; handle license comments
-  define: undefined,     // { 'process.env.X': '"value"' }; compile-time constants
-  copy: undefined,       // ['assets', 'data/db.json']; extra dirs/files from electron/ to copy
-  format: undefined,     // 'cjs' | 'esm'; default: 'cjs' (recommended for Electron)
+  legalComments: 'none', // 'inline' | 'eof' | 'none'; handle license comments
+  define: {},            // { 'process.env.X': '"value"' }; compile-time constants
+  copy: [],              // ['assets', 'data/db.json']; extra dirs/files from electron/ to copy
+  format: 'cjs',         // 'cjs' | 'esm'; default: 'cjs' (recommended for Electron)
 }
 ```
 
