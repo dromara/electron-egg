@@ -204,15 +204,15 @@ program
  *
  * Options:
  *   --config <folder>      Path to custom bin.js config file
- *   --asar-file <file>     Path to the asar package file
- *   --platform <flag>      Target platform (e.g. "mac", "win64", "linux")
+ *   --app-file <file>      Path to the app package file (asar or directory)
+ *   --platform <flag>      Target platform (e.g. "macos_apple", "windows_64", "linux")
  *   --force <flag>         Force full update ("true" to enable)
  */
 program
   .command('updater')
   .description('updater commands')
   .option('--config <folder>', 'config file')
-  .option('--asar-file <file>', 'asar file path')
+  .option('--app-file <file>', 'app file path')
   .option('--platform <flag>', 'platform')
   .option('--force <flag>', 'force update full')
   .action(async function (this: Command) {

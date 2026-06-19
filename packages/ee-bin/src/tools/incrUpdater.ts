@@ -6,13 +6,14 @@
  * with the full package, significantly reducing update download size.
  *
  * Generation flow:
- *   1. Read metadata YAML (obtain version number, file list, SHA512 hashes)
- *   2. Determine target asar file path
- *   3. Create a zip archive (containing asar + extraResources + asarUnpacked modules)
- *   4. Generate SHA1 hash of the zip (for quick verification) and SHA512 hash of the full package
- *   5. Verify SHA512 matches the hash recorded in metadata (ensures integrity)
- *   6. Write JSON metadata file (version, filename, size, hash, force-update flag, etc.)
- *   7. Optionally clean up per-platform temporary extraction directories
+ *   1. Read builder config to detect asar setting, auto-adjust appFile path
+ *   2. Read metadata YAML (obtain version number, file list, SHA512 hashes)
+ *   3. Determine target app file path
+ *   4. Create a zip archive (containing app + extraResources + asarUnpacked modules)
+ *   5. Generate SHA1 hash of the zip (for quick verification) and SHA512 hash of the full package
+ *   6. Verify SHA512 matches the hash recorded in metadata (ensures integrity)
+ *   7. Write JSON metadata file (version, filename, size, hash, force-update flag, etc.)
+ *   8. Optionally clean up per-platform temporary extraction directories
  *
  * Dependencies: compressing (zip compression), js-yaml (YAML parsing), crypto (hash calculation), globby (file scanning)
  */
@@ -24,13 +25,13 @@ import crypto from 'crypto';
 import { zip as compressZip } from 'compressing';
 import { globbySync } from 'globby';
 import yaml from 'js-yaml';
-import { loadConfig, writeJsonSync } from '../lib/utils.js';
+import { loadConfig, readJsonSync, writeJsonSync } from '../lib/utils.js';
 import type { UpdaterConfig } from '../types/config.js';
 
 /** Incremental updater CLI options */
 interface UpdaterOptions {
   config?: string;
-  asarFile?: string;
+  appFile?: string;
   platform?: string;
   force?: string;
 }
@@ -66,11 +67,11 @@ class IncrUpdater {
   /**
    * Incremental update entry point
    *
-   * @param options - CLI options (config file path, asarFile path, target platform, force update flag)
+   * @param options - CLI options (config file path, appFile path, target platform, force update flag)
    */
   async run(options: UpdaterOptions = {}): Promise<void> {
     console.log('[ee-bin] [updater] Start');
-    const { config, asarFile, platform, force } = options;
+    const { config, appFile, platform, force } = options;
     const binCfg = loadConfig(config);
     const cfg = binCfg.updater;
     const forceUpdate = force === 'true';
@@ -79,9 +80,51 @@ class IncrUpdater {
       throw new Error('[ee-bin] [updater] Error: updater config or platform does not exist');
     }
 
-    await this.generateFile(cfg, asarFile, platform, forceUpdate);
+    await this.generateFile(cfg, appFile, platform, forceUpdate);
 
     console.log('[ee-bin] [updater] End');
+  }
+
+  /**
+   * Resolve the app file path, auto-adjusting .asar extension based on builder config
+   *
+   * - If builderConfig is specified, reads the builder JSON to detect asar:true/false
+   * - When asar:false, strips .asar from the appFile path
+   * - When asar:true, keeps .asar in the appFile path
+   * - CLI --app-file takes priority over config appFile
+   *
+   * @param cfg - UpdaterConfig for the target platform
+   * @param cliAppFile - CLI --app-file override (takes priority)
+   * @returns Resolved app file path
+   */
+  private _resolveAppFilePath(cfg: UpdaterConfig, cliAppFile: string | undefined): string {
+    // CLI override takes priority
+    const configAppFile = cliAppFile || cfg.appFile;
+    if (!configAppFile) return '';
+
+    const homeDir = process.cwd();
+    let appFilePath = path.normalize(path.join(homeDir, configAppFile));
+
+    // Read builder config to detect asar setting
+    const builderConfigPath = cfg.builderConfig;
+    if (builderConfigPath) {
+      const builderFilePath = path.join(homeDir, builderConfigPath);
+      if (fs.existsSync(builderFilePath)) {
+        const builderConfig = readJsonSync(builderFilePath);
+        const asarEnabled = builderConfig.asar !== false;
+        if (!asarEnabled && appFilePath.endsWith('.asar')) {
+          // asar:false — strip .asar extension, the app is a directory not an archive
+          appFilePath = appFilePath.slice(0, -5); // remove '.asar'
+          console.log(chalk.blue('[ee-bin] [updater] ') + `builder asar:false, adjusted appFile: ${appFilePath}`);
+        } else if (asarEnabled && !appFilePath.endsWith('.asar')) {
+          // asar:true but path doesn't end with .asar — append it
+          appFilePath = appFilePath + '.asar';
+          console.log(chalk.blue('[ee-bin] [updater] ') + `builder asar:true, adjusted appFile: ${appFilePath}`);
+        }
+      }
+    }
+
+    return appFilePath;
   }
 
   /**
@@ -89,16 +132,17 @@ class IncrUpdater {
    *
    * Complete steps:
    *   1. Look up the updater config for the target platform
-   *   2. Read metadata YAML to get version number and file list
-   *   3. Determine asar file path (CLI argument takes priority, then config asarFile)
-   *   4. Generate a platform+version-named zip package
-   *   5. Add asar + extraResources + asarUnpacked modules to the zip
-   *   6. Calculate SHA1 of the zip and SHA512 of the full package
-   *   7. Verify SHA512 matches the metadata
-   *   8. Write JSON metadata file
-   *   9. Optionally clean temporary directories
+   *   2. Resolve app file path (auto-adjust .asar based on builder config)
+   *   3. Read metadata YAML to get version number and file list
+   *   4. Determine app file path (CLI argument takes priority, then config appFile with auto-adjustment)
+   *   5. Generate a platform+version-named zip package
+   *   6. Add app + extraResources + asarUnpacked modules to the zip
+   *   7. Calculate SHA1 of the zip and SHA512 of the full package
+   *   8. Verify SHA512 matches the metadata
+   *   9. Write JSON metadata file
+   *   10. Optionally clean temporary directories
    */
-  async generateFile(config: Record<string, UpdaterConfig>, asarFile: string | undefined, platform: string, force = false): Promise<void> {
+  async generateFile(config: Record<string, UpdaterConfig>, cliAppFile: string | undefined, platform: string, force = false): Promise<void> {
     const cfg = config[platform];
     if (!cfg) {
       throw new Error(`[ee-bin] [updater] Error: ${platform} config does not exist`);
@@ -114,16 +158,11 @@ class IncrUpdater {
     }
     const metadataObj = yaml.load(fs.readFileSync(metadataPath, 'utf8')) as Metadata;
 
-    // Determine asar file path: CLI --asar-file takes priority, then config asarFile
-    let asarFilePath = '';
-    if (asarFile) {
-      asarFilePath = path.normalize(path.join(homeDir, asarFile));
-    } else if (cfg.asarFile) {
-      asarFilePath = path.normalize(path.join(homeDir, cfg.asarFile));
-    }
+    // Resolve app file path: CLI --app-file > config, with auto .asar adjustment
+    const appFilePath = this._resolveAppFilePath(cfg, cliAppFile);
 
-    if (!asarFilePath || !fs.existsSync(asarFilePath)) {
-      throw new Error(`[ee-bin] [updater] Error: ${asarFilePath || '(empty path)'} does not exist`);
+    if (!appFilePath || !fs.existsSync(appFilePath)) {
+      throw new Error(`[ee-bin] [updater] Error: ${appFilePath || '(empty path)'} does not exist`);
     }
 
     const version = metadataObj.version;
@@ -146,8 +185,14 @@ class IncrUpdater {
 
     // Create zip archive
     const zipStream = new compressZip.Stream();
-    // First add the asar archive itself (incremental update needs the full asar file)
-    zipStream.addEntry(asarFilePath, { relativePath: path.basename(asarFilePath) });
+    // Add the app file/directory to the zip
+    if (fs.statSync(appFilePath).isDirectory()) {
+      // asar:false — the app is a directory, add all contents preserving structure
+      this._addFolderToZip(zipStream, appFilePath, 'app');
+    } else {
+      // asar:true — the app is a single .asar file
+      zipStream.addEntry(appFilePath, { relativePath: path.basename(appFilePath) });
+    }
 
     // Add extra resource files (e.g. native modules, config files)
     if (cfg.extraResources && cfg.extraResources.length > 0) {

@@ -9,6 +9,11 @@
 - 双格式输出 → `docs/framework/04.dual-format.md`
 - 框架与应用集成 → `docs/framework/03.integration.md`
 
+**文档同步规则**：修改 ee-core 或 ee-bin 源码后，必须同步更新 `docs/framework/` 中对应的文档，确保文档与代码一致。映射关系：
+- `packages/ee-core/src/{module}/` → `docs/framework/01.ee-core/{对应编号}.{module}.md`
+- `packages/ee-bin/src/{module}/` → `docs/framework/02.ee-bin/{对应编号}.{module}.md`
+- 跨模块变更 → `docs/framework/05.bundle-runtime-flow.md`
+
 ## 项目概览
 
 **electron-egg (ee-dev-v5)** — 基于 Electron 的企业级桌面应用框架。项目使用 TypeScript 包（`ee-core`、`ee-bin`）输出双 CJS + ESM 格式，替代原有的 JS 版本（`ee-core-js`、`ee-bin-js`）。

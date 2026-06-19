@@ -173,8 +173,10 @@ export interface MoveConfig {
 export interface UpdaterConfig {
   /** Path to the metadata YAML file (contains version, releaseDate, files, SHA512 hashes) */
   metadata: string;
-  /** Path to the asar package file (can be overridden by CLI --asar-file argument) */
-  asarFile?: string;
+  /** Path to the app package file (asar or directory). The .asar extension is auto-stripped when the corresponding builder config has asar:false. Can be overridden by CLI --app-file argument */
+  appFile?: string;
+  /** Builder config file path for the target platform (used to detect asar:true/false and auto-adjust appFile path) */
+  builderConfig?: string;
   /** Output configuration */
   output: {
     /** Output directory */
