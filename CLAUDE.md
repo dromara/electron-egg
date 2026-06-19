@@ -2,57 +2,24 @@
 
 本文件为 Claude Code (claude.ai/code) 在此仓库中工作时提供指引。
 
-**框架技术文档**：`docs/framework/` 包含 ee-core 和 ee-bin 的完整实现分析（28 篇，388KB）。涉及 ee-core 或 ee-bin 的代码修改、架构讨论、故障排查时，优先阅读对应文档再动手：
-- ee-core 模块 → `docs/framework/01.ee-core/`
-- ee-bin 模块 → `docs/framework/02.ee-bin/`
-- 构建时→运行时数据流 → `docs/framework/05.bundle-runtime-flow.md`
-- 双格式输出 → `docs/framework/04.dual-format.md`
-- 框架与应用集成 → `docs/framework/03.integration.md`
+**框架源码仓库**：ee-core 和 ee-bin 的源码在独立的开发仓库 `ee-dev` 中（pnpm workspace monorepo），本 demo 项目通过 npm 安装发布版本。如需修改框架源码，请切换到 `ee-dev` 仓库。
 
 ## 项目概览
 
-**electron-egg (ee-dev-v5)** — 基于 Electron 的企业级桌面应用框架。项目使用 TypeScript 包（`ee-core`、`ee-bin`）输出双 CJS + ESM 格式，替代原有的 JS 版本（`ee-core-js`、`ee-bin-js`）。
+**electron-egg (ee-v5)** — 基于 Electron 的企业级桌面应用框架。使用 TypeScript 包（`ee-core`、`ee-bin`）作为 npm 依赖安装，框架本身输出双 CJS + ESM 格式，替代原有的 JS 版本（`ee-core-js`、`ee-bin-js`）。本仓库是框架的应用 demo 项目。
 
 ## 架构
 
-pnpm workspace monorepo：
+应用 demo 项目，`ee-core` 和 `ee-bin` 通过 npm 安装：
 
 ```
-ee-dev/
-├── packages/
-│   ├── ee-core/        # TypeScript 框架核心（双 CJS/ESM）
-│   │   └── src/
-│   │       ├── app/        # boot, application, events, dir
-│   │       ├── config/     # 配置加载/合并
-│   │       ├── const/      # IPC 常量（Processes, SocketIO, Events, Receiver）
-│   │       ├── controller/ # 控制器加载（registry + scanDirSync）
-│   │       ├── core/       # FileLoader, utils
-│   │       ├── cross/      # 外部进程管理（Go/Python 等）
-│   │       ├── electron/   # Electron app/window 管理
-│   │       ├── exception/  # 全局异常处理（uncaught/unhandled）
-│   │       ├── html/       # 静态 HTML 页面路径（failure.html 等）
-│   │       ├── jobs/       # ChildJob, ChildPoolJob, LoadBalancer
-│   │       ├── loader/     # loadFile, requireFile, resolveModule
-│   │       ├── log/        # Pino 日志（pino-roll + pino-pretty）
-│   │       ├── message/    # ChildMessage（子进程→主进程消息）
-│   │       ├── ps/         # 进程状态与路径工具（env, paths, isDev 等）
-│   │       ├── socket/     # socketServer, httpServer, ipcServer
-│   │       ├── storage/    # SqliteStorage (better-sqlite3)
-│   │       ├── types/      # TypeScript 类型定义
-│   │       └── utils/      # extend, is, json, wrap, helper
-│   └── ee-bin/          # TypeScript CLI 构建工具（双 CJS/ESM）
-│       └── src/
-│           ├── config/     # bin_default.ts
-│           ├── plugins/    # bundle_registry_plugin.ts (esbuild)
-│           ├── tools/      # serve, encrypt, move, iconGen, incrUpdater
-│           ├── lib/        # extend, helpers, utils（轻量替代库）
-│           └── types/      # BinConfig, BundleConfig 等
+ee-demo/
 ├── electron/            # 应用代码（主进程源码）
-│   ├── main.js          # 入口文件（也支持 main.ts）
-│   ├── config/          # config.default.js / config.local.js / config.prod.js
+│   ├── main.ts          # 入口文件
+│   ├── config/          # config.default.ts / config.local.ts / config.prod.ts
 │   ├── controller/      # 业务控制器
 │   ├── service/         # 业务服务
-│   ├── preload/         # bridge.js, lifecycle.js
+│   ├── preload/         # bridge.ts, index.ts, lifecycle.ts
 │   └── jobs/            # 后台任务（child_process.fork）
 ├── frontend/            # Vue 3 + Ant Design (Vite)
 ├── cmd/                 # bin.js（项目配置），builder*.json
@@ -64,7 +31,7 @@ ee-dev/
 
 ### Bundle 输出结构
 
-`pnpm build-electron` 后，`public/electron/` 包含：
+`npm run build-electron` 后，`public/electron/` 包含：
 
 ```
 public/electron/
@@ -117,7 +84,7 @@ public/electron/
 
 ### 配置分层（仅 dev 模式）
 
-`config.default.js` → `config.local.js` / `config.prod.js`，由 ee-core 配置加载器合并。
+`config.default.ts` → `config.local.ts` / `config.prod.ts`，由 ee-core 配置加载器合并。
 
 ### 格式检测
 
@@ -127,49 +94,34 @@ public/electron/
 
 ### 开发
 ```bash
-pnpm dev              # 启动完整开发（frontend + electron）
-pnpm dev-frontend     # 仅开发前端
-pnpm dev-electron     # 仅开发 electron
-pnpm dev-go           # 运行 Go 后端
-pnpm dev-python       # 运行 Python 后端
-pnpm start            # 生产模式启动
+npm run dev              # 启动完整开发（frontend + electron）
+npm run dev-frontend     # 仅开发前端
+npm run dev-electron     # 仅开发 electron
+npm run dev-go           # 运行 Go 后端
+npm run dev-python       # 运行 Python 后端
+npm run start            # 生产模式启动
 ```
 
 ### 构建
 ```bash
-pnpm build            # 构建 frontend + electron + 加密
-pnpm build-frontend   # 构建并移动前端 dist
-pnpm build-electron   # 构建 electron（esbuild bundle）
+npm run build            # 构建 frontend + electron + 加密
+npm run build-frontend   # 构建并移动前端 dist
+npm run build-electron   # 构建 electron（esbuild bundle）
 ```
 
 ### 平台打包
 ```bash
-pnpm build-w          # Windows (64-bit)
-pnpm build-m          # macOS
-pnpm build-m-arm64    # macOS ARM64
-pnpm build-l          # Linux
-```
-
-### 包开发
-```bash
-cd packages/ee-core
-npm run build          # 构建 CJS + ESM + 生成 exports map
-npm run build:cjs      # 仅构建 CommonJS
-npm run build:esm      # 仅构建 ESM
-npm run typecheck      # TypeScript 类型检查
-npm run test           # 运行 vitest
-
-cd packages/ee-bin
-npm run build          # 构建 CJS + ESM
-npm run typecheck      # TypeScript 类型检查
-npm run test           # 运行 vitest
+npm run build-w          # Windows (64-bit)
+npm run build-m          # macOS
+npm run build-m-arm64    # macOS ARM64
+npm run build-l          # Linux
 ```
 
 ### 其他
 ```bash
-pnpm encrypt           # 字节码/混淆加密
-pnpm icon              # 生成应用图标
-pnpm re-sqlite         # 为 Electron 重建 better-sqlite3
+npm run encrypt           # 字节码/混淆加密
+npm run icon              # 生成应用图标
+npm run re-sqlite         # 为 Electron 重建 better-sqlite3
 ```
 
 ## 构建配置（cmd/bin.js）
@@ -209,33 +161,24 @@ electron: {
 **诊断启动或运行问题时，先启用 DEBUG 日志。** ee-core 使用 `debug` 库的命名空间日志器（`ee-core:config:*`、`ee-core:controller:*`、`ee-core:core:loader:*` 等）。开启后可直接看到运行时实际状态（合并配置、加载的注册表、解析的路径），远比读源码推断行为更快。
 
 ```bash
-pnpm debug-electron                      # 所有 ee-* 命名空间 (DEBUG=ee-*)
-pnpm debug-dev                           # 所有 ee-* 命名空间，完整开发（frontend + electron）
-DEBUG='ee-core:config:*' pnpm dev-electron     # 限定到某个子系统，如配置加载
+npm run debug-electron                      # 所有 ee-* 命名空间 (DEBUG=ee-*)
+npm run debug-dev                           # 所有 ee-* 命名空间，完整开发（frontend + electron）
+DEBUG='ee-core:config:*' npm run dev-electron     # 限定到某个子系统，如配置加载
 ```
 
 推荐故障排查流程：
-1. **先重新构建包，确保运行的代码是最新的。** ee-core 和 ee-bin 从 `node_modules/*/dist` 运行（symlink 到 `packages/*`），过期的 `dist` 是"修复无效"的常见原因——先重建两者再排查：
-   ```bash
-   (cd packages/ee-core && pnpm run build) && (cd packages/ee-bin && pnpm run build)
-   ```
+1. **先确保依赖是最新的。** 如需使用框架最新版本，更新 `ee-core` 和 `ee-bin`：`npm update ee-core ee-bin`
 2. 用最窄的 DEBUG 命名空间重现问题，先读运行时实际输出（如合并后的配置对象）再假设原因。
 3. 如果两个相关功能同时失败（如 http + socket 服务器都没启动），怀疑共享上游（配置/注册表加载），而非各自的实现。
-4. 每次修改 ee-core/ee-bin 源码后，重建对应包再测试——否则运行的是旧代码。
-
-详见 `docs/bugfix/` 中的具体排查案例。`docs/framework/` 中有框架核心模块的完整技术文档。
+4. 框架源码修改需在独立的 `ee-dev` 仓库中进行，重建发布后再在此项目更新版本。
 
 ## 重要注意事项
 
-- **ee-core 和 ee-bin 是独立的 npm 包**：将独立发布到 npm。当前 pnpm workspace monorepo（`packages/ee-core`、`packages/ee-bin`，根 `package.json` 中 `workspace:*`）仅为本地开发便利。生产使用时，用户通过 `npm install ee-core ee-bin` 安装。
+- **ee-core 和 ee-bin 是独立的 npm 包**：通过 `npm install` 安装，版本为 `^5.0.0-beta.5`。框架源码在独立的 `ee-dev` 仓库中开发和维护。
 - **ee-core 不打包进 main.js**：ee-core 是 esbuild external，运行时从 `node_modules` 加载。这让 `child_process.fork()` 能在 `node_modules/ee-core/` 中找到子进程入口 (`app.js`) 作为真实磁盘文件。ee-bin 是 CLI 构建工具，不参与 Electron 应用运行时。
 
-- **包管理器**：仅 pnpm（`.npmrc` 设置 `shamefully-hoist=true` 以兼容 Electron）
+- **包管理器**：推荐 pnpm（`.npmrc` 配置了 `shamefully-hoist=true`、`node-linker=hoisted` 以兼容 Electron），也支持 npm
 - **镜像源**：`.npmrc` 配置了 npmmirror
-- **根 `package.json` 以 `workspace:*` 引用 ee-core 和 ee-bin**——包变更立即生效
-- **ee-core 源码中 ESM import 必须带 `.js` 扩展名**（`module: NodeNext` 要求）：`import { X } from './foo.js'` 而非 `from './foo'`
-- **ee-core 的 `package.json` 中 `exports` map 由脚本自动生成**——`scripts/gen-exports.js`，勿手动编辑；添加新子路径模块后运行 `npm run gen-exports`
-- **better-sqlite3 需要为 Electron 原生重建**：遇到原生模块错误时使用 `pnpm re-sqlite`
+- **better-sqlite3 需要为 Electron 原生重建**：遇到原生模块错误时使用 `npm run re-sqlite`
 - **Node.js 最低版本**：v20
-- **修改 ee-core 或 ee-bin TypeScript 源码后**，需在对应包目录下 `npm run build` 重建再测试
 - **`debug-dev` 和 `debug-electron` 脚本**使用 `cross-env DEBUG=ee-*` 输出详细日志
