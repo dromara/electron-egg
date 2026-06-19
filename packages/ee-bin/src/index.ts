@@ -234,6 +234,7 @@ program
   .command('ohos')
   .description('Extract build artifacts to ohos resource directory')
   .option('--config <folder>', 'config file')
+  .option('--cmds <flag>', 'ohos config keys (e.g. "resources")')
   .action(function (this: Command) {
     ohos(this.opts());
   });

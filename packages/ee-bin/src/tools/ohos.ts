@@ -16,7 +16,7 @@
 import path from 'path';
 import fs from 'fs';
 import { globbySync } from 'globby';
-import { chalk } from '../lib/helpers.js';
+import { chalk, formatCmds } from '../lib/helpers.js';
 import { loadConfig, rm } from '../lib/utils.js';
 import type { OhosResourceConfig } from '../types/config.js';
 
@@ -26,6 +26,8 @@ const homeDir = process.cwd();
 interface OhosOptions {
   /** Path to custom bin.js config file */
   config?: string;
+  /** Comma-separated ohos config keys to execute (e.g. "resources") */
+  cmds?: string;
 }
 
 /**
@@ -119,23 +121,62 @@ function copyResource(resConfig: OhosResourceConfig, index: number, total: numbe
 export function ohos(options: OhosOptions = {}): void {
   console.log(chalk.blue('[ee-bin] [ohos] ') + 'Start extracting resources');
 
-  const { config } = options;
+  const { config, cmds } = options;
   const binCfg = loadConfig(config);
   const ohosConfig = binCfg.ohos;
 
-  if (!ohosConfig || !ohosConfig.resources || !Array.isArray(ohosConfig.resources)) {
-    console.log(chalk.blue('[ee-bin] [ohos] ') + chalk.red('Error: ohos.resources config does not exist'));
+  if (!ohosConfig) {
+    console.log(chalk.blue('[ee-bin] [ohos] ') + chalk.red('Error: ohos config does not exist'));
     return;
   }
 
-  const resources = ohosConfig.resources;
-  const total = resources.length;
+  // Parse comma-separated cmds string into individual command names
+  const cmdList = formatCmds((cmds || '').trim());
 
-  for (let i = 0; i < total; i++) {
-    const res = resources[i];
-    if (!res) continue;
-    copyResource(res, i, total);
+  // Build the list of resource entries to process based on cmds
+  const resourceEntries: Array<{ key: string; config: OhosResourceConfig[] }> = [];
+  for (const key of cmdList) {
+    const val = ohosConfig[key as keyof typeof ohosConfig];
+    if (!val) {
+      console.log(chalk.blue('[ee-bin] [ohos] ') + chalk.red(`Error: ohos.${key} config does not exist`));
+      continue;
+    }
+    if (Array.isArray(val)) {
+      resourceEntries.push({ key, config: val });
+    } else {
+      console.log(chalk.blue('[ee-bin] [ohos] ') + chalk.red(`Error: ohos.${key} is not an array`));
+    }
   }
 
+  // If no cmds specified, process all array-type properties in ohos config
+  if (cmdList.length === 0) {
+    for (const key of Object.keys(ohosConfig)) {
+      const val = ohosConfig[key as keyof typeof ohosConfig];
+      if (Array.isArray(val)) {
+        resourceEntries.push({ key, config: val });
+      }
+    }
+  }
+
+  if (resourceEntries.length === 0) {
+    console.log(chalk.blue('[ee-bin] [ohos] ') + chalk.yellow('Warning: no resource entries to process'));
+    return;
+  }
+
+  // Process each resource group
+  let totalCopied = 0;
+  for (const entry of resourceEntries) {
+    console.log(chalk.blue('[ee-bin] [ohos] ') + chalk.green(`ohos.${entry.key}`));
+    const resources = entry.config;
+    const total = resources.length;
+    for (let i = 0; i < total; i++) {
+      const res = resources[i];
+      if (!res) continue;
+      copyResource(res, i, total);
+      totalCopied++;
+    }
+  }
+
+  console.log(chalk.blue('[ee-bin] [ohos] ') + `Total: ${totalCopied} resource entries processed`);
   console.log(chalk.blue('[ee-bin] [ohos] ') + 'End');
 }
