@@ -6,6 +6,7 @@
     "output": "out"
   },
   "asar": true,
+  "electronLanguages": ["en-US", "zh-CN"],
   "files": [
     "**/*",
     "!cmd/",
@@ -15,7 +16,14 @@
     "!logs/",
     "!out/",
     "!go/",
-    "!python/"
+    "!ohos_hap/",
+    "!python/",
+    "!**/.claude",
+    "!**/.trae",
+    "!**/.vscode",
+    "!**/ee-bin",
+    "!packages/ee-bin",
+    "!CLAUDE.md" 
   ],
   "extraResources": [
     {

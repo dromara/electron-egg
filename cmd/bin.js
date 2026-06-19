@@ -267,4 +267,59 @@ module.exports = {
       stdio: "inherit", // ignore
     },
   },  
+
+  /**
+   * generate code zip
+   */
+  updater: {
+    windows_64: {
+      asarFile: './out/win-unpacked/resources/app.asar',
+      extraResources: [
+        './build/extraResources/read.txt'
+      ],
+      asarUnpacked:[],
+      output: {
+        directory: './out',
+        file: 'incremental-latest.json',
+        zip: 'app.zip',
+      },
+      cleanCache: false,
+      metadata: './out/latest.yml',
+    },
+    macos_intel: {
+      asarFile: './out/mac/ee.app/Contents/Resources/app.asar',
+      extraResources: [
+        './build/extraResources/readme.txt'
+      ],
+      asarUnpacked:[],
+      output: {
+        directory: './out',
+        file: 'incremental-latest.json',
+        zip: 'app.zip',
+      },
+      cleanCache: false,
+      metadata: './out/latest-mac.yml',
+    },
+    macos_apple: {
+      asarFile: './out/mac-arm64/ee.app/Contents/Resources/app.asar',
+      extraResources: [
+        './build/extraResources/readme.txt'
+      ],
+      asarUnpacked:[],
+      output: {
+        directory: './out',
+        file: 'incremental-latest.json',
+        zip: 'app.zip',
+      },
+      cleanCache: false,
+      metadata: './out/latest-mac.yml',
+    },
+  },
+  /**
+   * 提取构建产物到鸿蒙资源目录
+   */
+  ohos: {
+    type: 'javascript',
+    bundleType: 'copy'
+  },      
 };
