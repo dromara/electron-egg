@@ -321,7 +321,23 @@ module.exports = {
    * 提取构建产物到鸿蒙资源目录
    */
   ohos: {
-    type: 'javascript',
-    bundleType: 'copy'
-  },    
+    resources: [
+      {
+        from: './out/mac-arm64/ee.app/Contents/Resources/app',
+        to: './ohos_hap/web_engine/src/main/resources/resfile/resources/app',
+        filter: [
+          "**/*", 
+          "!README.md", 
+          "!README.zh-CN.md"
+        ]
+      },
+      {
+        from: './out/mac-arm64/ee.app/Contents/Resources/extraResources',
+        to: './ohos_hap/web_engine/src/main/resources/resfile/resources/extraResources',
+        filter: [
+          "**/*"
+        ]
+      }
+    ]
+  },     
 };

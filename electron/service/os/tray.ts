@@ -59,6 +59,9 @@ class TrayService {
       event.preventDefault();
     });
 
+    // 隐藏应用菜单栏
+    mainWindow.setMenuBarVisibility(false);
+
     // 实例化托盘
     this.tray = new Tray(iconPath);
     this.tray.setToolTip(cfg.title);
