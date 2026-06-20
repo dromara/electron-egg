@@ -26,14 +26,9 @@ import { extend } from '../utils/extend.js';
 import { getPort } from '../utils/port/index.js';
 import type { ProcessExitEventData } from '../types/index.js';
 
-/** Additional options when running a child process */
-export interface CrossRunOptions {
-  [key: string]: unknown;
-  /** Override startup arguments */
-  args?: string[];
-  /** Specify port number */
-  port?: number;
-}
+/** Additional options when running a child process.
+ *  All CrossTargetConfig properties are optional here since they override config defaults. */
+export type CrossRunOptions = Partial<CrossTargetConfig>;
 
 /**
  * Cross - cross-process communication manager
