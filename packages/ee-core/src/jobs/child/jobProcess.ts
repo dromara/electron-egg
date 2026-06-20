@@ -15,7 +15,9 @@ import { fork, type ChildProcess, type Serializable, type ForkOptions } from 'ch
 import serialize from 'serialize-javascript';
 import { coreLogger } from '../../log/index.js';
 import { getBaseDir, isPackaged, allEnv } from '../../ps/index.js';
+import * as is from '../../utils/is.js';
 import { getConfig } from '../../config/index.js';
+import { electronApp } from '../../electron/app/index.js';
 import { Processes, Events, Receiver } from '../../const/channel.js';
 import { getRandomString } from '../../utils/helper.js';
 import { getFullpath } from '../../loader/index.js';
@@ -89,6 +91,10 @@ export class JobProcess {
       cwd = path.join(getBaseDir(), '..');
     }
 
+    // Temporary debug: log execPath comparison and full env for OpenHarmony fork issue
+    coreLogger.info(`[jobs/child] execPath: ${process.execPath}, exePath: ${electronApp.getPath('exe')}, platform: ${process.platform}`);
+    coreLogger.info(`[jobs/child] process.env: ${JSON.stringify(process.env)}`);
+
     const defaultOptions: JobProcessOptions = {
       processArgs: {
         type: 'childJob',
@@ -99,6 +105,10 @@ export class JobProcess {
         cwd,
         env: allEnv(),
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'] as ForkOptions['stdio'],
+        // On OpenHarmony, process.execPath is not a valid executable in the sandbox filesystem,
+        // causing ENOENT when fork() uses it as the child runtime. Use the actual app executable
+        // path instead, which correctly resolves to the runnable binary on OpenHarmony.
+        execPath: is.openharmony() ? electronApp.getPath('exe') : undefined,
       },
     };
 

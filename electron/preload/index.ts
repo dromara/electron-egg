@@ -8,7 +8,7 @@ import { securityService } from '../service/os/security';
 import { autoUpdaterService } from '../service/os/auto_updater';
 import { crossService } from '../service/cross';
 import { sqlitedbService } from '../service/database/sqlitedb';
-const { windowService } = require('../service/os/window');
+import { windowService } from '../service/os/window';
 
 export function preload(): void {
   // 示例功能模块，可选择性使用和修改
