@@ -339,5 +339,5 @@ module.exports = {
         ]
       }
     ]
-  },     
+  }     
 };
