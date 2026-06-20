@@ -8,23 +8,9 @@
   "asar": false,
   "electronLanguages": ["en-US", "zh-CN"],
   "files": [
-    "**/*",
-    "!cmd/",
-    "!data/",
-    "!electron/",
-    "!frontend/",
-    "!logs/",
-    "!out/",
-    "!go/",
-    "!docs/",
-    "!ohos_hap/",
-    "!python/",
-    "!**/.claude",
-    "!**/.trae",
-    "!**/.vscode",
-    "!**/ee-bin",
-    "!packages/ee-bin",
-    "!CLAUDE.md"
+    "public",
+    "package.json",
+    "node_modules/**/*"
   ],
   "extraResources": [
     {
