@@ -46,9 +46,16 @@ export async function createSocketServer(): Promise<SocketServer> {
 
 /**
  * Get SocketIO server instance
+ *
+ * @returns SocketServer instance
+ * @throws Error if socketServer has not been created yet
  */
-export function getSocketServer(): SocketServer | null {
-  return Instance.socketServer;
+export function getSocketServer(): SocketServer {
+  const server = Instance.socketServer;
+  if (!server) {
+    throw new Error('[ee-core] getSocketServer() called before socketServer was created. Ensure this code runs after the Ready lifecycle event.');
+  }
+  return server;
 }
 
 /**
@@ -63,9 +70,16 @@ export async function createHttpServer(): Promise<HttpServer> {
 
 /**
  * Get HTTP server instance
+ *
+ * @returns HttpServer instance
+ * @throws Error if httpServer has not been created yet
  */
-export function getHttpServer(): HttpServer | null {
-  return Instance.httpServer;
+export function getHttpServer(): HttpServer {
+  const server = Instance.httpServer;
+  if (!server) {
+    throw new Error('[ee-core] getHttpServer() called before httpServer was created. Ensure this code runs after the Ready lifecycle event.');
+  }
+  return server;
 }
 
 /**
@@ -80,9 +94,16 @@ export function createIpcServer(): IpcServer {
 
 /**
  * Get IPC server instance
+ *
+ * @returns IpcServer instance
+ * @throws Error if ipcServer has not been created yet
  */
-export function getIpcServer(): IpcServer | null {
-  return Instance.ipcServer;
+export function getIpcServer(): IpcServer {
+  const server = Instance.ipcServer;
+  if (!server) {
+    throw new Error('[ee-core] getIpcServer() called before ipcServer was created. Ensure this code runs after the Ready lifecycle event.');
+  }
+  return server;
 }
 
 /**
