@@ -1,21 +1,16 @@
 {
-  "productName": "ee",
-  "appId": "com.bilibili.ee",
+  "productName": "ee-dev",
+  "appId": "com.electron.ee-dev",
   "copyright": "© 2025 duola Technology Co., Ltd.",
-  "directories": {
-    "output": "out"
+  "directories": {  
+    "output": "out" 
   },
   "asar": true,
+  "electronLanguages": ["en-US", "zh-CN"],
   "files": [
-    "**/*",
-    "!cmd/",
-    "!data/",
-    "!electron/",
-    "!frontend/",
-    "!logs/",
-    "!out/",
-    "!go/",
-    "!python/"
+    "public",
+    "package.json",
+    "node_modules/**/*"
   ],
   "extraResources": [
     {

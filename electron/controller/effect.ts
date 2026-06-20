@@ -27,7 +27,6 @@ class EffectController {
   loginWindow(args: { width?: number; height?: number }): void {
     const { width, height } = args;
     const win = getMainWindow();
-    if (!win) return;
 
     const size = {
       width: width || 400,
@@ -46,7 +45,6 @@ class EffectController {
   restoreWindow(args: { width?: number; height?: number }): void {
     const { width, height } = args;
     const win = getMainWindow();
-    if (!win) return;
 
     const size = {
       width: width || 980,

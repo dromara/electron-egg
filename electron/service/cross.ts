@@ -27,7 +27,7 @@ class CrossService {
     return 'hello electron-egg';
   }
 
-  getUrl(name: string): string {
+  getUrl(name: string): string | undefined {
     const serverUrl = cross.getUrl(name);
     return serverUrl;
   }
@@ -124,6 +124,7 @@ class CrossService {
 
   async requestApi(name: string, urlPath: string, params?: Record<string, unknown>): Promise<unknown> {
     const serverUrl = cross.getUrl(name);
+    if (!serverUrl) return null;
     const apiHello = serverUrl + urlPath;
     console.log('Server Url:', serverUrl);
 

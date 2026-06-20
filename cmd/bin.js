@@ -267,4 +267,78 @@ module.exports = {
       stdio: "inherit", // ignore
     },
   },  
+
+  /**
+   * generate code zip
+   */
+  updater: {
+    windows_64: {
+      appFile: './out/win-unpacked/resources/app.asar',
+      builderConfig: './cmd/builder.json',
+      extraResources: [
+        './build/extraResources/read.txt'
+      ],
+      asarUnpacked:[],
+      output: {
+        directory: './out',
+        file: 'incremental-latest.json',
+        zip: 'app.zip',
+      },
+      cleanCache: false,
+      metadata: './out/latest.yml',
+    },
+    macos_intel: {
+      appFile: './out/mac/ee-dev.app/Contents/Resources/app.asar',
+      builderConfig: './cmd/builder-mac.json',
+      extraResources: [
+        './build/extraResources/readme.txt'
+      ],
+      asarUnpacked:[],
+      output: {
+        directory: './out',
+        file: 'incremental-latest.json',
+        zip: 'app.zip',
+      },
+      cleanCache: false,
+      metadata: './out/latest-mac.yml',
+    },
+    macos_apple: {
+      appFile: './out/mac-arm64/ee-dev.app/Contents/Resources/app.asar',
+      builderConfig: './cmd/builder-mac-arm64.json',
+      extraResources: [
+        './build/extraResources/readme.txt'
+      ],
+      asarUnpacked:[],
+      output: {
+        directory: './out',
+        file: 'incremental-latest.json',
+        zip: 'app.zip',
+      },
+      cleanCache: false,
+      metadata: './out/latest-mac.yml',
+    },
+  },
+  /**
+   * 提取构建产物到鸿蒙资源目录
+   */
+  ohos: {
+    resources: [
+      {
+        from: './out/mac-arm64/ee-dev.app/Contents/Resources/app',
+        to: './ohos_hap/web_engine/src/main/resources/resfile/resources/app',
+        filter: [
+          "**/*", 
+          "!README.md", 
+          "!README.zh-CN.md"
+        ]
+      },
+      {
+        from: './out/mac-arm64/ee-dev.app/Contents/Resources/extraResources',
+        to: './ohos_hap/web_engine/src/main/resources/resfile/resources/extraResources',
+        filter: [
+          "**/*"
+        ]
+      }
+    ]
+  },      
 };
