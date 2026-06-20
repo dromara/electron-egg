@@ -23,12 +23,11 @@ class TrayService {
   /**
    * 创建托盘
    */
-  create (): void {
+  init(): void {
     logger.info('[tray] load');
 
     const cfg = this.config;
     const mainWindow = getMainWindow();
-    if (!mainWindow) return;
 
     // tray icon
     const iconPath = path.join(getBaseDir(), cfg.icon);

@@ -28,6 +28,14 @@ class WindowService {
   }
 
   /**
+   * 窗口初始化
+   */
+  init() {
+    const mainWin = getMainWindow();
+    mainWin.setMenuBarVisibility(false);
+  }
+
+  /**
    * Create a new window
    */
   createWindow(args: CreateWindowArgs): number {
@@ -87,12 +95,12 @@ class WindowService {
     let win: BrowserWindow | null;
     if (windowName == 'main') {
       win = getMainWindow();
+      return win.webContents.id;
     } else {
-      win = this.windows[windowName];
+      win = this.windows[windowName] ?? null;
+      if (!win) return null;
+      return win.webContents.id;
     }
-    if (!win) return null;
-    
-    return win.webContents.id;
   }
 
   /**
@@ -102,7 +110,6 @@ class WindowService {
     const { receiver, content } = args;
     if (receiver == 'main') {
       const win = getMainWindow();
-      if (!win) return;
       win.webContents.send('controller/os/window2ToWindow1', content);
     } else if (receiver == 'window2') {
       const win = this.windows[receiver];

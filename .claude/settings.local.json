@@ -156,7 +156,9 @@
       "Bash(cp -rL /Users/gsx/www/gofile/src/gowork/ee-dev/node_modules/@leichtgewicht/ip-codec /tmp/test-nm/@leichtgewicht/ip-codec)",
       "Bash(rm -rf /tmp/test-nm)",
       "Bash([[ \"$dep\" == *@/* ]])",
-      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); deps=d.get\\('dependencies',{}\\); [print\\(k,v\\) for k,v in deps.items\\(\\) if 'socket' in k.lower\\(\\)]\")"
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); deps=d.get\\('dependencies',{}\\); [print\\(k,v\\) for k,v in deps.items\\(\\) if 'socket' in k.lower\\(\\)]\")",
+      "Bash(npm whoami *)",
+      "Bash(npm config *)"
     ]
   }
 }
