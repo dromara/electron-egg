@@ -82,6 +82,9 @@ class WindowService {
       win.webContents.openDevTools();
     }
 
+    // sub window 
+    win.setMenuBarVisibility(false);
+
     this.windows[windowName] = win;
 
     return winContentsId;
