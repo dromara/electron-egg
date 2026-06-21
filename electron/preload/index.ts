@@ -10,15 +10,15 @@ import { crossService } from '../service/cross';
 import { sqlitedbService } from '../service/database/sqlitedb';
 import { windowService } from '../service/os/window';
 
-export function preload(): void {
+export async function preload(): Promise<void> {
   // 示例功能模块，可选择性使用和修改
   logger.info('[preload] load 5');
   windowService.init();
   trayService.init();
   securityService.init();
   autoUpdaterService.init();
-  // init sqlite db
-  sqlitedbService.init();
+  // init sqlite db (lazy loads better-sqlite3 on first use)
+  await sqlitedbService.init();
   // go server
   crossService.createGoServer();
 }
