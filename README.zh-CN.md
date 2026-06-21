@@ -4,7 +4,6 @@
 [![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://gitee.com/dromara/electron-egg/blob/master/LICENSE)
 
 <div align=center>
-<img src="https://wallace5303.gitee.io/ee/images/electron-egg/logo.png" width="150" height="150" />
 <h3>🎉🎉🎉 ElectronEgg V5 已发布! 🎉🎉🎉</h3>
 </div>
 <br>
