@@ -1,13 +1,17 @@
+'use strict';
+
 /**
  * example
  * @class
  */
 class ExampleController {
+
   /**
    * test
    */
-  async test (): Promise<string> {
+  async test () {
     return 'hello electron-egg';
   }
 }
-export default ExampleController;
+
+module.exports = ExampleController;  

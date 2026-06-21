@@ -1,14 +1,17 @@
-import { logger } from 'ee-core/log';
+'use strict';
+
+const { logger } = require('ee-core/log');
 
 /**
  * 示例服务
  * @class
  */
 class ExampleService {
+
   /**
    * test
    */
-  async test(args: unknown): Promise<{ status: string; params: unknown }> {
+  async test(args) {
     let obj = {
       status:'ok',
       params: args
@@ -19,4 +22,8 @@ class ExampleService {
     return obj;
   }
 }
-export const exampleService = new ExampleService();
+
+module.exports = {
+  ExampleService,
+  exampleService: new ExampleService()
+};

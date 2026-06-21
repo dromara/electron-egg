@@ -1,39 +1,21 @@
-import dayjs from 'dayjs';
-import path from 'path';
-import fs from 'fs';
-import { exec } from 'child_process';
-import { app as electronApp, shell, IpcMainEvent } from 'electron';
-import { getExtraResourcesDir } from 'ee-core/ps';
-import { logger } from 'ee-core/log';
-import { getConfig } from 'ee-core/config';
-import type { Config } from 'ee-core';
-import { frameworkService } from '../service/framework';
-import { sqlitedbService } from '../service/database/sqlitedb';
-import type { UserRow } from '../service/database/sqlitedb';
-import { autoUpdaterService } from '../service/os/auto_updater';
-import type { Context } from 'koa';
+'use strict';
+
+const dayjs = require('dayjs');
+const path = require('path');
+const fs = require('fs');
+const { exec } = require('child_process');
+const { app: electronApp, shell } = require('electron');
+const { getExtraResourcesDir } = require('ee-core/ps');
+const { logger } = require('ee-core/log');
+const { getConfig } = require('ee-core/config');
+const { frameworkService } = require('../service/framework');
+const { sqlitedbService } = require('../service/database/sqlitedb');
+const { autoUpdaterService } = require('../service/os/auto_updater');
 
 /**
  * framework - demo
  * @class
  */
-interface SqlitedbOperationArgs {
-  action: string;
-  info?: { name: string; age: number };
-  delete_name?: string;
-  update_name?: string;
-  update_age?: number;
-  search_age?: number;
-  data_dir?: string;
-}
-
-interface SqlitedbOperationResult {
-  action: string;
-  result: boolean | string | UserRow[] | null;
-  all_list: UserRow[];
-  code: number;
-}
-
 class FrameworkController {
   /**
    * 所有方法接收两个参数
@@ -44,10 +26,10 @@ class FrameworkController {
   /**
    * sqlite数据库操作
    */   
-  async sqlitedbOperation(args: SqlitedbOperationArgs): Promise<SqlitedbOperationResult> {
+  async sqlitedbOperation(args) {
     const { action, info, delete_name, update_name, update_age, search_age, data_dir } = args;
 
-    const data: SqlitedbOperationResult = {
+    const data = {
       action,
       result: null,
       all_list: [],
@@ -65,9 +47,7 @@ class FrameworkController {
 
     switch (action) {
       case 'add' :
-        if (info) {
-          data.result = await sqlitedbService.addTestDataSqlite(info);
-        }
+        data.result = await sqlitedbService.addTestDataSqlite(info);;
         break;
       case 'del' :
         data.result = await sqlitedbService.delTestDataSqlite(delete_name);;
@@ -82,9 +62,7 @@ class FrameworkController {
         data.result = await sqlitedbService.getDataDir();
         break;
       case 'setDataDir' :
-        if (data_dir) {
-          await sqlitedbService.setCustomDataDir(data_dir);
-        }
+        data.result = await sqlitedbService.setCustomDataDir(data_dir);
         break;            
     }
 
@@ -97,7 +75,7 @@ class FrameworkController {
    * 调用其它程序（exe、bash等可执行程序）
    * 
    */
-  openSoftware(args: { softName: string }): boolean {
+  openSoftware(args) {
     const { softName } = args;
     const softwarePath = path.join(getExtraResourcesDir(), softName);
     logger.info('[openSoftware] softwarePath:', softwarePath);
@@ -119,8 +97,8 @@ class FrameworkController {
   /**
    * 检测http服务是否开启
    */ 
-  async checkHttpServer(): Promise<{ enable: boolean; server: string }> {
-    const { enable, protocol, host, port } = (getConfig() as Config).httpServer;
+  async checkHttpServer() {
+    const { enable, protocol, host, port } = getConfig().httpServer;
     const url = protocol + host + ':' + port;
     console.log('[checkHttpServer] url:', url);
     const data = {
@@ -134,8 +112,8 @@ class FrameworkController {
    * 一个 http 请求
    * args 是 前端传的参数
    * ctx 是 koa 的 ctx 对象
-   */
-  async doHttpRequest(args: { id: string }, ctx: Context & { request: { body?: unknown } }): Promise<boolean> {
+   */ 
+  async doHttpRequest(args, ctx) {
     const httpInfo = {
       args,
       method: ctx.request.method,
@@ -148,21 +126,21 @@ class FrameworkController {
     if (!id) {
       return false;
     }
-    const dir = electronApp.getPath(id as Parameters<typeof electronApp.getPath>[0]);
+    const dir = electronApp.getPath(id);
     shell.openPath(dir);
-
+    
     return true;
-  }
-
+  } 
+ 
   /**
    * 一个socket io请求访问此方法
-   */
-  async doSocketRequest(args: { id: string }): Promise<boolean> {
+   */ 
+  async doSocketRequest(args) {
     const { id } = args;
     if (!id) {
       return false;
     }
-    const dir = electronApp.getPath(id as Parameters<typeof electronApp.getPath>[0]);
+    const dir = electronApp.getPath(id);
     shell.openPath(dir);
     
     return true;
@@ -171,7 +149,7 @@ class FrameworkController {
   /**
    * 异步消息类型
    */ 
-  async ipcInvokeMsg(args: string): Promise<string> {
+  async ipcInvokeMsg(args) {
     let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
     const data = args + ' - ' + timeNow;
     
@@ -181,7 +159,7 @@ class FrameworkController {
   /**
    * 同步消息类型
    */ 
-  async ipcSendSyncMsg(args: string): Promise<string> {
+  async ipcSendSyncMsg(args) {
     let timeNow = dayjs().format('YYYY-MM-DD HH:mm:ss');
     const data = args + ' - ' + timeNow;
     
@@ -191,7 +169,7 @@ class FrameworkController {
   /**
    * 双向异步通信
    */
-  ipcSendMsg(args: { type: string; content: string }, event: IpcMainEvent): string {
+  ipcSendMsg(args, event) {
     const { type, content } = args;
     const data = frameworkService.bothWayMessage(type, content, event);
 
@@ -200,10 +178,10 @@ class FrameworkController {
 
   /**
    * 任务
-   */
-  someJob(args: { jobId: string; action: string }, event: IpcMainEvent): { jobId: string; action: string; result: Record<string, unknown> | undefined } {
+   */ 
+  someJob(args, event) {
     const { jobId, action} = args;
-    let result: Record<string, unknown> | undefined;
+    let result;
 
     switch (action) {
       case 'create':
@@ -232,7 +210,7 @@ class FrameworkController {
   /**
    * 创建任务池
    */ 
-  async createPool(args: { number: number }, event: IpcMainEvent): Promise<void> {
+  async createPool(args, event) {
     let num = args.number;
     frameworkService.doCreatePool(num, event);
 
@@ -245,9 +223,9 @@ class FrameworkController {
   /**
    * 通过进程池执行任务
    */
-  async someJobByPool(args: { jobId: string; action: string }, event: IpcMainEvent): Promise<{ jobId: string; action: string; result: Record<string, unknown> }> {
+  async someJobByPool(args, event) {
     const { jobId, action } = args;
-    let result: Record<string, unknown> = {};
+    let result;
     switch (action) {
       case 'run':
         result = await frameworkService.doJobByPool(jobId, action, event);
@@ -266,7 +244,7 @@ class FrameworkController {
   /**
    * 检查是否有新版本
    */
-  checkForUpdater(): void { 
+  checkForUpdater() { 
     autoUpdaterService.checkUpdate();
     return;
   }
@@ -274,7 +252,7 @@ class FrameworkController {
   /**
    * 下载新版本
    */
-  downloadApp(): void {
+  downloadApp() {
     autoUpdaterService.download();
     return;
   }
@@ -282,8 +260,9 @@ class FrameworkController {
   /**
    * 测试接口
    */ 
-  hello(args: unknown): void {
+  hello(args) {
     logger.info('hello ', args);
   }   
 }
-export default FrameworkController;
+
+module.exports = FrameworkController;  

@@ -1,20 +1,22 @@
-import { app as electronApp, screen } from 'electron';
-import { logger } from 'ee-core/log';
-import { getConfig } from 'ee-core/config';
-import { getMainWindow } from 'ee-core/electron';
+'use strict';
+
+const { app: electronApp, screen } = require('electron');
+const { logger } = require('ee-core/log');
+const { getConfig } = require('ee-core/config');
+const { getMainWindow } = require('ee-core/electron');
 
 class Lifecycle {
   /**
    * core app have been loaded
    */
-  async ready(): Promise<void> {
+  async ready() {
     logger.info('[lifecycle] ready');
   }
 
   /**
    * electron app ready
    */
-  async electronAppReady(): Promise<void> {
+  async electronAppReady() {
     logger.info('[lifecycle] electron-app-ready');
 
     // When double clicking the icon, display the opened window
@@ -31,13 +33,13 @@ class Lifecycle {
   /**
    * main window have been loaded
    */
-  async windowReady(): Promise<void> {
+  async windowReady() {
     logger.info('[lifecycle] window-ready');
 
     const win = getMainWindow();
 
     // The window is centered and scaled proportionally
-    // Obtain the size information of the main screen, calculate the width and height of the window as a percentage of the screen,
+    // Obtain the size information of the main screen, calculate the width and height of the window as a percentage of the screen, 
     // and calculate the coordinates of the upper left corner when the window is centered
     const mainScreen = screen.getPrimaryDisplay();
     const { width, height } = mainScreen.workAreaSize;
@@ -60,10 +62,11 @@ class Lifecycle {
   /**
    * before app close
    */  
-  async beforeClose(): Promise<void> {
+  async beforeClose() {
     logger.info('[lifecycle] before-close');
   }
 }
-export {
+
+module.exports = {
   Lifecycle
 };

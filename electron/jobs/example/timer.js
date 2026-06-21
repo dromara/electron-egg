@@ -1,17 +1,15 @@
-import { logger } from 'ee-core/log';
-import { isChildJob, exit } from 'ee-core/ps';
-import { childMessage } from 'ee-core/message';
-import { welcome } from './hello';
+'use strict';
+
+const { logger } = require('ee-core/log');
+const { isChildJob, exit } = require('ee-core/ps');
+const { childMessage } = require('ee-core/message');
+const { welcome } = require('./hello');
 
 /**
  * example - TimerJob
  * @class
  */
 class TimerJob {
-  private timer: NodeJS.Timeout | undefined;
-  private timeoutTimer: NodeJS.Timeout | undefined;
-  private number: number;
-  private countdown: number;
 
   constructor() {
     this.timer = undefined;
@@ -24,7 +22,7 @@ class TimerJob {
    * handle()方法是必要的，且会被自动调用
    * params 传递的参数
    */
-  async handle(params: { jobId: string }): Promise<void> {
+  async handle(params) {
     logger.info("[child-process] TimerJob params: ", params);
     const { jobId } = params;
 
@@ -38,7 +36,7 @@ class TimerJob {
   /**
    * 暂停任务运行
    */
-  async pause(jobId: string): Promise<void> {
+  async pause(jobId) {
     logger.info("[child-process] Pause timerJob, jobId: ", jobId);
     clearInterval(this.timer);
     clearInterval(this.timeoutTimer);
@@ -47,7 +45,7 @@ class TimerJob {
   /**
    * 恢复任务运行
    */
-  async resume(jobId: string, pid: number): Promise<void> {
+  async resume(jobId, pid) {
     logger.info("[child-process] Resume timerJob, jobId: ", jobId, ", pid: ", pid);
     this.doTimer(jobId);
   }
@@ -55,7 +53,7 @@ class TimerJob {
   /**
    * 运行任务
    */
-  async doTimer(jobId: string): Promise<void> {
+  async doTimer(jobId) {
     // 计时器模拟任务
     const eventName = 'job-timer-progress-' + jobId;
     this.timer = setInterval(() => {
@@ -83,4 +81,4 @@ class TimerJob {
   }
 }
 
-export default TimerJob;
+module.exports = TimerJob;

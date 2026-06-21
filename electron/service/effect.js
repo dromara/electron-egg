@@ -1,14 +1,17 @@
-import { logger } from 'ee-core/log';
+'use strict';
+
+const { logger } = require('ee-core/log');
 
 /**
  * effect
  * @class
  */
 class EffectService {
+
   /**
    * hello
    */
-  async hello(args: unknown): Promise<{ status: string; params: unknown }> {
+  async hello(args) {
     let obj = {
       status:'ok',
       params: args
@@ -19,4 +22,8 @@ class EffectService {
   }
 
 }
-export const effectService = new EffectService();  
+
+module.exports = {
+  EffectService,
+  effectService: new EffectService()
+};  

@@ -1,5 +1,7 @@
-import { dialog } from 'electron';
-import { getMainWindow } from 'ee-core/electron';
+'use strict';
+
+const { dialog } = require('electron');
+const { getMainWindow } = require('ee-core/electron');
 
 /**
  * effect - demo
@@ -9,7 +11,7 @@ class EffectController {
   /**
    * select file
    */
-  selectFile(): string | null {
+  selectFile() {
     const filePaths = dialog.showOpenDialogSync({
       properties: ['openFile']
     });
@@ -24,10 +26,10 @@ class EffectController {
   /**
    * login window
    */
-  loginWindow(args: { width?: number; height?: number }): void {
+  loginWindow(args) {
     const { width, height } = args;
     const win = getMainWindow();
-
+    
     const size = {
       width: width || 400,
       height: height || 300
@@ -38,11 +40,11 @@ class EffectController {
     win.show();
     win.focus();
   }
-
+  
   /**
    * restore window
    */
-  restoreWindow(args: { width?: number; height?: number }): void {
+  restoreWindow(args) {
     const { width, height } = args;
     const win = getMainWindow();
 
@@ -57,4 +59,5 @@ class EffectController {
     win.focus();
   }   
 }
-export default EffectController;
+
+module.exports = EffectController;  

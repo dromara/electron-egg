@@ -1,11 +1,12 @@
-import path from 'path';
-import { getBaseDir } from 'ee-core/ps';
-import type { Config } from 'ee-core';
+'use strict';
+
+const path = require('path');
+const { getBaseDir } = require('ee-core/ps');
 
 /**
  * 默认配置
  */
-export default (): Partial<Config> => {
+module.exports = () => {
   return {
     openDevTools: false,
     singleLock: true,
@@ -34,7 +35,6 @@ export default (): Partial<Config> => {
       redactCensor: '[Redacted]',
       timestamp: true,
       depthLimit: 5,
-      timezone: 'Asia/Shanghai',
       name: 'ee',
       appLogName: 'ee.log',
       coreLogName: 'ee-core.log',
@@ -61,25 +61,14 @@ export default (): Partial<Config> => {
     httpServer: {
       enable: true,
       https: {
-        enable: false,
+        enable: false, 
         key: '/public/ssl/localhost+1.key',
         cert: '/public/ssl/localhost+1.pem'
       },
-      protocol: 'http://',
       host: '127.0.0.1',
       port: 7071,
-      cors: { origin: '*' },
-      body: {
-        multipart: false,
-        formidable: { keepExtensions: false }
-      },
-      filterRequest: {
-        uris: [],
-        returnData: ''
-      },
     },
     mainServer: {
-      protocol: 'file://',
       indexPath: '/public/dist/index.html',
       channelSeparator: '/',
     }

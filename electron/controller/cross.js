@@ -1,4 +1,6 @@
-import { crossService } from '../service/cross';
+'use strict';
+
+const { crossService } = require('../service/cross');
 
 /**
  * Cross
@@ -8,7 +10,7 @@ class CrossController {
   /**
    * View process service information
    */
-  info(): string {
+  info() {
     crossService.info();
     return 'hello electron-egg';
   }
@@ -16,7 +18,7 @@ class CrossController {
   /**
    * Get service url
    */  
-  async getUrl(args: { name: string }): Promise<string> {
+  async getUrl(args) {
     const { name } = args;
     const serverUrl = crossService.getUrl(name);
     return serverUrl;
@@ -26,7 +28,7 @@ class CrossController {
    * kill service
    * By default (modifiable), killing the process will exit the electron application.
    */  
-  async killServer(args: { type: string; name: string }): Promise<void> {
+  async killServer(args) {
     const { type, name } = args;
     crossService.killServer(type, name);
     return;
@@ -35,7 +37,7 @@ class CrossController {
   /**
    * create service
    */   
-  async createServer(args: { program: string }): Promise<void> {
+  async createServer(args) {
     const { program } = args;
     if (program == 'go') {
       crossService.createGoServer();
@@ -51,10 +53,11 @@ class CrossController {
   /**
    * Access the api for the cross service
    */
-  async requestApi(args: { name: string; urlPath: string; params?: Record<string, unknown> }): Promise<unknown> {
+  async requestApi(args) {
     const { name, urlPath, params} = args;
     const data = await crossService.requestApi(name, urlPath, params);
     return data;
   }
 }
-export default CrossController;
+
+module.exports = CrossController;  

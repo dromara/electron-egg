@@ -1,10 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import {
-  app as electronApp, dialog, shell, Notification, IpcMainEvent,
-  NotificationConstructorOptions,
-} from 'electron';
-import { windowService } from '../service/os/window';
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const {
+  app: electronApp, dialog, shell, Notification, 
+} = require('electron');
+const { windowService } = require('../service/os/window');
 
 /**
  * example
@@ -20,7 +21,7 @@ class OsController {
   /**
    * Message prompt dialog box
    */
-  messageShow(): string {
+  messageShow() {
     dialog.showMessageBoxSync({
       type: 'info', // "none", "info", "error", "question" 或者 "warning"
       title: 'Custom Title',
@@ -34,7 +35,7 @@ class OsController {
   /**
    * Message prompt and confirmation dialog box
    */
-  messageShowConfirm(): string {
+  messageShowConfirm() {
     const res = dialog.showMessageBoxSync({
       type: 'info',
       title: 'Custom Title',
@@ -52,7 +53,7 @@ class OsController {
   /**
    * Select Directory
    */
-  selectFolder(): string | null {
+  selectFolder() {
     const filePaths = dialog.showOpenDialogSync({
       properties: ['openDirectory', 'createDirectory']
     });
@@ -67,7 +68,7 @@ class OsController {
   /**
    * open directory
    */
-  openDirectory(args: { id: string }): boolean {
+  openDirectory(args) {
     const { id } = args;
     if (!id) {
       return false;
@@ -76,7 +77,7 @@ class OsController {
     if (path.isAbsolute(id)) {
       dir = id;
     } else {
-    dir = electronApp.getPath(id as Parameters<typeof electronApp.getPath>[0]);
+      dir = electronApp.getPath(id);
     }
 
     shell.openPath(dir);
@@ -86,7 +87,7 @@ class OsController {
   /**
    * Select Picture
    */
-  selectPic(): string | null {
+  selectPic() {
     const filePaths = dialog.showOpenDialogSync({
       title: 'select pic',
       properties: ['openFile'],
@@ -111,7 +112,7 @@ class OsController {
   /**
    * Open a new window
    */
-  createWindow(args: { type: string; content: string; windowName: string; windowTitle: string }): number {
+  createWindow(args) {
     const wcid = windowService.createWindow(args);
     return wcid;
   }
@@ -119,7 +120,7 @@ class OsController {
   /**
    * Get Window contents id
    */
-  getWCid(args: { windowName: string }): number | null {
+  getWCid(args) {
     const wcid = windowService.getWCid(args);
     return wcid;
   }
@@ -127,40 +128,40 @@ class OsController {
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window1ToWindow2(args: { receiver: string; content: unknown }, _event: IpcMainEvent): void {
-    windowService.communicate(args);
+  window1ToWindow2(args, event) {
+    windowService.communicate(args, event);
     return;
   }
 
   /**
    * Realize communication between two windows through the transfer of the main process
    */
-  window2ToWindow1(args: { receiver: string; content: unknown }, _event: IpcMainEvent): void {
-    windowService.communicate(args);
+  window2ToWindow1(args, event) {
+    windowService.communicate(args, event);
     return;
   }
 
   /**
    * Create system notifications
    */
-  sendNotification(args: { title?: string; subtitle?: string; body?: string; silent?: boolean }, event: IpcMainEvent): boolean | string {
+  sendNotification(args, event) {
     const { title, subtitle, body, silent} = args;
 
     if (!Notification.isSupported()) {
       return '当前系统不支持通知';
     }
 
-    const options: NotificationConstructorOptions = {};
-    if (title) {
+    let options = {};
+    if (!title) {
       options.title = title;
     }
-    if (subtitle) {
+    if (!subtitle) {
       options.subtitle = subtitle;
     }
-    if (body) {
+    if (!body) {
       options.body = body;
     }
-    if (silent !== undefined) {
+    if (!silent) {
       options.silent = silent;
     }
     windowService.createNotification(options, event);
@@ -168,4 +169,5 @@ class OsController {
     return true
   }   
 }
-export default OsController;
+
+module.exports = OsController;  

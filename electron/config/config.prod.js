@@ -1,9 +1,9 @@
-import type { Config } from 'ee-core';
+'use strict';
 
 /**
  *  coverage config.default.js
  */
-export default (): Partial<Config> => {
+module.exports = () => {
   return {
     openDevTools: false,
   };
