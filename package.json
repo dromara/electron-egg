@@ -58,7 +58,7 @@
     "better-sqlite3": "^12.5.0",
     "bytenode": "^1.5.7",
     "dayjs": "^1.11.13",
-    "ee-core": "^5.0.0",
+    "ee-core": "^5.0.1",
     "electron-updater": "^6.7.3"
   }
 }
