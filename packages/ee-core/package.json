@@ -1,6 +1,6 @@
 {
   "name": "ee-core",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "ee core - TypeScript edition with dual module support",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

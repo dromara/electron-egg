@@ -9,27 +9,39 @@
  * - Prevent path traversal attacks (validates that ".." is not present in the name during construction)
  * - Provide a unified interface for obtaining database file paths
  *
+ * better-sqlite3 is lazily imported — only loaded when `init()` is called to open the database.
+ * This avoids loading the native .node binding at module import time, which would happen unconditionally
+ * even if the consumer never uses SQLite.
+ *
  * Usage examples:
  * ```ts
  * // Name-only mode: file stored at {dataDir}/db/{name}.db
  * const db1 = new SqliteStorage('myapp.db');
+ * await db1.init();
  *
  * // Relative path mode: file stored at {dataDir}/db/sub/myapp.db
  * const db2 = new SqliteStorage('sub/myapp.db');
+ * await db2.init();
  *
  * // Absolute path mode: file stored at the specified path
  * const db3 = new SqliteStorage('/tmp/data/myapp.db');
+ * await db3.init();
  *
  * // In-memory mode: not persisted, data is lost when the process exits
  * const db4 = new SqliteStorage(':memory:');
+ * await db4.init();
  * ```
  */
 import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
-import Database from 'better-sqlite3';
 import { mkdir } from '../utils/helper.js';
 import { getDataDir } from '../ps/index.js';
+
+// Type-only import: better-sqlite3's TypeScript types are available for type checking,
+// but the actual module is not loaded at import time. The real dynamic import() happens
+// lazily inside init() when a SqliteStorage instance is actually initialized.
+import type Database from 'better-sqlite3';
 
 /**
  * SqliteStorage - SQLite database storage class
@@ -47,6 +59,12 @@ import { getDataDir } from '../ps/index.js';
  * Security:
  * The constructor validates the database name for path traversal, disallowing ".." in the name
  * to prevent malicious input from accessing files outside the intended directory.
+ *
+ * Lazy loading:
+ * better-sqlite3 is a native module that requires electron-rebuild for Electron.
+ * The constructor only computes paths (synchronous). The `init()` method lazily imports
+ * better-sqlite3 and opens the database connection. Projects that don't use SQLite
+ * never load the native binding.
  */
 export class SqliteStorage {
   /** Database name (original input value) */
@@ -61,28 +79,24 @@ export class SqliteStorage {
   /** Database filename (only the filename part, excluding directory) */
   fileName: string;
 
-  /** better-sqlite3 database instance */
-  db: Database.Database;
+  /** better-sqlite3 database instance (set after init()) */
+  db!: Database.Database;
 
   /**
-   * Create a SqliteStorage instance
+   * Create a SqliteStorage instance (path computation only, DB not yet opened)
    *
-   * Initialization flow:
-   * 1. Validate that the name is non-empty and does not contain path traversal characters ".."
-   * 2. Infer storage mode from the name (getMode)
-   * 3. Create the database file directory (_createDatabaseDir)
-   * 4. Extract the filename part (_formatFileName)
-   * 5. Open the database connection (_initDB)
+   * The constructor only validates the name, infers the storage mode, computes paths,
+   * and creates the database directory. It does NOT open the database connection —
+   * call `init()` to lazily load better-sqlite3 and open the DB.
    *
    * @param name - Database name or path. Supports the following formats:
    *   - ":memory:" - In-memory database
    *   - "app.db" - Filename only, stored under {dataDir}/db/
    *   - "sub/app.db" - Relative path, relative to {dataDir}/db/
    *   - "/tmp/app.db" - Absolute path
-   * @param opt - better-sqlite3 database options, defaults merged with timeout: 5000
    * @throws Asserts error if name is empty or contains ".." path traversal characters
    */
-  constructor(name: string, opt: Record<string, unknown> = {}) {
+  constructor(name: string) {
     assert(name, `db name ${name} Cannot be empty`);
     // Prevent path traversal attacks: disallow ".." in the name to avoid directory backtracking
     assert(!name.includes('..'), `db name ${name} contains path traversal`);
@@ -91,24 +105,26 @@ export class SqliteStorage {
     this.mode = this.getMode(name);
     this.dbDir = this._createDatabaseDir();
     this.fileName = this._formatFileName(name);
-    this.db = this._initDB(opt);
   }
 
   /**
    * Initialize the database connection
    *
-   * Determines the database path based on storage mode:
-   * - memory mode: Uses ":memory:" as the path, better-sqlite3 creates the database in memory
-   * - file mode: Uses getFilePath() to get the full database file path
+   * Lazily imports better-sqlite3 via dynamic import() and opens the database.
+   * This is the only point where the native .node binding is loaded.
    *
-   * In file mode, additionally validates that the database file was created successfully.
-   * If the file does not exist, throws an assertion error (possibly due to insufficient directory permissions, etc.).
+   * Must be called after construction before using `this.db`.
    *
    * @param opt - better-sqlite3 database options, defaults merged with { timeout: 5000 }
-   * @returns better-sqlite3 Database instance
+   * @returns this SqliteStorage instance (for chaining: `const db = await new SqliteStorage('app.db').init()`)
    * @throws Asserts error if the database file was not created successfully in file mode
    */
-  _initDB(opt: Record<string, unknown> = {}): Database.Database {
+  async init(opt: Record<string, unknown> = {}): Promise<this> {
+    // Lazy import: better-sqlite3 is only loaded when actually needed.
+    // This avoids loading the native .node binding at module import time.
+    // better-sqlite3 is a CJS package; dynamic import() resolves it correctly.
+    const { default: Database } = await import('better-sqlite3');
+
     const options = Object.assign({ timeout: 5000 }, opt);
 
     // Storage type: db file, in-memory (:memory:)
@@ -117,14 +133,14 @@ export class SqliteStorage {
       dbPath = this.getFilePath();
     }
 
-    const db = new Database(dbPath, options as Database.Options);
+    this.db = new Database(dbPath, options as Database.Options);
 
     // For file mode, check if the file was created successfully
     if (this.mode !== 'memory') {
       assert(fs.existsSync(dbPath), `error: db ${dbPath} not exists`);
     }
 
-    return db;
+    return this;
   }
 
   /**
