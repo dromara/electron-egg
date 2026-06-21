@@ -1,11 +1,13 @@
-'use strict';
+import type { Config } from 'ee-core';
 
 /**
  * Development environment configuration, coverage config.default.js
  */
-module.exports = () => {
+export default (): Partial<Config> => {
   return {
-    openDevTools: false,
+    openDevTools: {
+      mode: 'detach'
+    },
     jobs: {
       messageLog: false
     }

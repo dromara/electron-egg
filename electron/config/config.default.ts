@@ -1,19 +1,18 @@
-'use strict';
-
-const path = require('path');
-const { getBaseDir } = require('ee-core/ps');
+import path from 'path';
+import { getBaseDir } from 'ee-core/ps';
+import type { Config } from 'ee-core';
 
 /**
  * 默认配置
  */
-module.exports = () => {
+export default (): Partial<Config> => {
   return {
     openDevTools: false,
     singleLock: true,
     windowsOption: {
       title: 'electron-egg',
       width: 980,
-      height: 650,
+      height: 850,
       minWidth: 400,
       minHeight: 300,
       webPreferences: {
@@ -27,18 +26,26 @@ module.exports = () => {
       icon: path.join(getBaseDir(), 'public', 'images', 'logo-32.png'),
     },
     logger: {
-      level: 'INFO',
-      outputJSON: false,
+      level: 'info', // 'fatal', 'error', 'warn', 'info', 'debug', 'trace' or 'silent'
+      rotator: 'daily', // daily, hourly
+      dateFormat: 'yyyy-MM-dd',
+      maxSize: '100m',
+      redact: [],
+      redactCensor: '[Redacted]',
+      timestamp: true,
+      depthLimit: 5,
+      timezone: 'Asia/Shanghai',
+      name: 'ee',
       appLogName: 'ee.log',
       coreLogName: 'ee-core.log',
-      errorLogName: 'ee-error.log' 
+      errorLogName: 'ee-error.log'
     },
     remote: {
       enable: false,
       url: 'http://electron-egg.kaka996.com/'
     },
     socketServer: {
-      enable: false,
+      enable: true,
       port: 7070,
       path: "/socket.io/",
       connectTimeout: 45000,
@@ -52,16 +59,27 @@ module.exports = () => {
       channel: 'socket-channel'
     },
     httpServer: {
-      enable: false,
+      enable: true,
       https: {
-        enable: false, 
+        enable: false,
         key: '/public/ssl/localhost+1.key',
         cert: '/public/ssl/localhost+1.pem'
       },
+      protocol: 'http://',
       host: '127.0.0.1',
       port: 7071,
+      cors: { origin: '*' },
+      body: {
+        multipart: false,
+        formidable: { keepExtensions: false }
+      },
+      filterRequest: {
+        uris: [],
+        returnData: ''
+      },
     },
     mainServer: {
+      protocol: 'file://',
       indexPath: '/public/dist/index.html',
       channelSeparator: '/',
     }

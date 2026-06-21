@@ -1,6 +1,6 @@
-const { ElectronEgg } = require('ee-core');
-const { Lifecycle } = require('./preload/lifecycle');
-const { preload } = require('./preload');
+import { ElectronEgg } from 'ee-core';
+import { Lifecycle } from './preload/lifecycle';
+import { preload } from './preload';
 
 // new app
 const app = new ElectronEgg();

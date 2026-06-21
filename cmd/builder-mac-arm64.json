@@ -6,16 +6,11 @@
     "output": "out"
   },
   "asar": true,
+  "electronLanguages": ["en-US", "zh-CN"],
   "files": [
-    "**/*",
-    "!cmd/",
-    "!data/",
-    "!electron/",
-    "!frontend/",
-    "!logs/",
-    "!out/",
-    "!go/",
-    "!python/"
+    "public",
+    "package.json",
+    "node_modules/**/*"
   ],
   "extraResources": [
     {
