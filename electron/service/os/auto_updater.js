@@ -24,7 +24,7 @@ class AutoUpdaterService {
   /**
    * 创建
    */
-  create () {
+  init() {
     logger.info('[autoUpdater] load');
     const cfg = this.config;
     if ((is.windows() && cfg.windows) || (is.macOS() && cfg.macOS) || (is.linux() && cfg.linux)) {

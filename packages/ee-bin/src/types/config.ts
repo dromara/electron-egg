@@ -173,8 +173,10 @@ export interface MoveConfig {
 export interface UpdaterConfig {
   /** Path to the metadata YAML file (contains version, releaseDate, files, SHA512 hashes) */
   metadata: string;
-  /** Path to the asar package file (can be overridden by CLI --asar-file argument) */
-  asarFile?: string;
+  /** Path to the app package file (asar or directory). The .asar extension is auto-stripped when the corresponding builder config has asar:false. Can be overridden by CLI --app-file argument */
+  appFile?: string;
+  /** Builder config file path for the target platform (used to detect asar:true/false and auto-adjust appFile path) */
+  builderConfig?: string;
   /** Output configuration */
   output: {
     /** Output directory */
@@ -190,6 +192,24 @@ export interface UpdaterConfig {
   asarUnpacked?: string[];
   /** Whether to clean per-platform temporary extraction directories after generation */
   cleanCache?: boolean;
+}
+
+/** Ohos resource copy config — follows electron-builder's FileSet pattern (from/to/filter).
+ *  Used to extract build artifacts to HarmonyOS HAP resource directories.
+ */
+export interface OhosResourceConfig {
+  /** Source path (relative to project root) */
+  from: string;
+  /** Destination path (relative to project root) */
+  to: string;
+  /** Glob filter patterns with negation support (e.g. "!compiled"), defaults to ["**\/*"] */
+  filter?: string[];
+}
+
+/** Ohos config — top-level structure for the "ohos" section */
+export interface OhosConfig {
+  /** Resource copy configurations (supports multiple from/to pairs) */
+  resources: OhosResourceConfig[];
 }
 
 /** Build config — top-level structure for the "build" section.
@@ -219,4 +239,6 @@ export interface BinConfig {
   exec: Record<string, ExecConfig>;
   /** Incremental update configuration (optional, per-platform) */
   updater?: Record<string, UpdaterConfig>;
+  /** HarmonyOS resource extraction configuration (optional) */
+  ohos?: OhosConfig;
 }

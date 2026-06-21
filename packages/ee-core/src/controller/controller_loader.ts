@@ -5,7 +5,7 @@
  *
  * Loading modes:
  * - Bundle mode (registry): Reads pre-registered controller modules from globalThis.__EE_CONTROLLER_REGISTRY__
- * - Dev mode (globby): Scans the filesystem, using globby to match files
+ * - Dev mode (filesystem): Scans the filesystem recursively
  *
  * Class controller processing flow:
  * 1. The class is wrapped by wrapClass(), which traverses all methods on the prototype chain
@@ -47,7 +47,7 @@ export class ControllerLoader {
   /**
    * Load controllers synchronously
    *
-   * Uses registry first (bundle mode), otherwise falls back to globby file scanning (dev mode).
+   * Uses registry first (bundle mode), otherwise falls back to filesystem scanning (dev mode).
    *
    * @returns Controller method mapping object, structured as { controller: { module: { method: fn } } }
    */
@@ -69,7 +69,7 @@ export class ControllerLoader {
       },
     };
     const target = new FileLoader(opt).load();
-    debugLog('[load] controllers (%s): %o', registry ? 'registry' : 'globby', target);
+    debugLog('[load] controllers (%s): %o', registry ? 'registry' : 'filesystem', target);
     this.timing.end('Load Controller');
     return target;
   }
@@ -100,7 +100,7 @@ export class ControllerLoader {
       },
     };
     const target = await new FileLoader(opt).loadAsync();
-    debugLog('[loadAsync] controllers (%s): %o', registry ? 'registry' : 'globby', target);
+    debugLog('[loadAsync] controllers (%s): %o', registry ? 'registry' : 'filesystem', target);
     this.timing.end('Load Controller');
     return target;
   }

@@ -22,7 +22,7 @@ class TrayService {
   /**
    * 创建托盘
    */
-  create () {
+  init() {
     logger.info('[tray] load');
 
     const cfg = this.config;

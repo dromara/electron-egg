@@ -22,9 +22,11 @@
     "icon": "ee-bin icon",
     "build-w": "ee-bin build --cmds=win64",
     "build-we": "ee-bin build --cmds=win_e",
-    "build-m": "ee-bin build --cmds=mac",
-    "build-m-arm64": "ee-bin build --cmds=mac_arm64",
+    "build-m": "ee-bin build --cmds=mac_arm64 && ee-bin updater --platform=macos_apple",
+    "build-m-x86": "ee-bin build --cmds=mac",
+    "build-m-arm64": "ee-bin build --cmds=mac_arm64 && ee-bin updater --platform=macos_apple",
     "build-l": "ee-bin build --cmds=linux",
+    "ohos-resources": "ee-bin ohos --cmds=resources",
     "debug-dev": "cross-env DEBUG=ee-* ee-bin dev",
     "debug-encrypt": "ee-bin encrypt",
     "debug-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",
@@ -57,8 +59,6 @@
     "bytenode": "^1.5.7",
     "dayjs": "^1.11.13",
     "ee-core": "workspace:*",
-    "electron-updater": "^6.7.3",
-    "pino-pretty": "^13.1.3",
-    "pino-roll": "^4.0.0"
+    "electron-updater": "^6.7.3"
   }
 }

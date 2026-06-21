@@ -11,7 +11,7 @@ class SecurityService {
   /**
    * 创建
    */
-  create () {
+  init() {
     logger.info('[security] load');
     const runWithDebug = process.argv.find(function(e){
       let isHasDebug = e.includes("--inspect") || e.includes("--inspect-brk") || e.includes("--remote-debugging-port");

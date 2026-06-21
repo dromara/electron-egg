@@ -22,9 +22,8 @@
 import debug from 'debug';
 import fs from 'fs';
 import path from 'path';
-import { globby, globbySync } from 'globby';
 import { isClass, isFunction, isPrimitive, isGeneratorFunction, isAsyncFunction } from '../../utils/type_check.js';
-import { loadFile, loadFileAsync, filePatterns, isBytecodeClass } from '../utils/index.js';
+import { loadFile, loadFileAsync, isBytecodeClass } from '../utils/index.js';
 import { getProperties } from '../../utils/wrap.js';
 import type { FileLoaderOptions } from '../../types/index.js';
 
@@ -57,6 +56,60 @@ const defaults = {
   /** File match patterns (overrides default filePatterns) */
   match: undefined as string[] | undefined,
 };
+
+/** Script file extensions to scan */
+const SCRIPT_EXTENSIONS = ['.js', '.ts', '.mts', '.cts', '.tsx', '.jsx', '.mjs', '.cjs'];
+
+/**
+ * Recursively scan directory for script files
+ *
+ * Replaces globbySync to avoid ESM-only dependency in CJS mode.
+ * Returns relative file paths (e.g. 'user.js', 'admin/login.js').
+ *
+ * @param dir - Absolute directory path to scan
+ * @param prefix - Current relative path prefix (used internally for recursion)
+ * @returns Array of relative file paths
+ */
+function scanDirSync(dir: string, prefix = ''): string[] {
+  const results: string[] = [];
+  if (!fs.existsSync(dir)) return results;
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const relPath = prefix ? prefix + '/' + entry.name : entry.name;
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...scanDirSync(fullPath, relPath));
+    } else if (entry.isFile() && SCRIPT_EXTENSIONS.includes(path.extname(entry.name))) {
+      results.push(relPath);
+    }
+  }
+  return results;
+}
+
+/**
+ * Recursively scan directory for script files (async)
+ *
+ * @param dir - Absolute directory path to scan
+ * @param prefix - Current relative path prefix (used internally for recursion)
+ * @returns Array of relative file paths
+ */
+async function scanDirAsync(dir: string, prefix = ''): Promise<string[]> {
+  const results: string[] = [];
+  if (!fs.existsSync(dir)) return results;
+
+  const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const relPath = prefix ? prefix + '/' + entry.name : entry.name;
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...await scanDirAsync(fullPath, relPath));
+    } else if (entry.isFile() && SCRIPT_EXTENSIONS.includes(path.extname(entry.name))) {
+      results.push(relPath);
+    }
+  }
+  return results;
+}
 
 /**
  * FileLoader — File loader
@@ -177,17 +230,11 @@ export class FileLoader {
   /**
    * Parse files synchronously from filesystem
    *
-   * Uses globby to scan directories and require() to load files.
-   * Suitable for CJS dev mode.
+   * Uses fs.readdirSync recursive scanning and require() to load files.
    *
    * @returns Load item list
    */
   parse(): LoaderItem[] {
-    let files: string[] = (this.options.match || filePatterns()) as string[];
-    if (!Array.isArray(files)) {
-      files = [files];
-    }
-
     let directories: string[];
     if (Array.isArray(this.options.directory)) {
       directories = this.options.directory;
@@ -199,11 +246,10 @@ export class FileLoader {
     debugLog('[parse] directories %o', directories);
 
     for (const directory of directories) {
-      const filepaths = globbySync(files, { cwd: directory });
+      const filepaths = scanDirSync(directory);
       debugLog('[parse] filepaths %o', filepaths);
       for (const filepath of filepaths) {
         const fullpath = path.join(directory, filepath);
-        if (!fs.statSync(fullpath).isFile()) continue;
 
         const properties = getProperties(filepath, { caseStyle: this.options.caseStyle! });
         // Take the last level of the directory as the property prefix (e.g. 'controller')
@@ -257,7 +303,7 @@ export class FileLoader {
   /**
    * Load files asynchronously and build target object
    *
-   * Uses globby async scanning and import() dynamic loading.
+   * Uses fs.promises recursive scanning and import() dynamic loading.
    * Suitable for ESM dev mode.
    *
    * @returns Nested property object organized by directory structure
@@ -270,17 +316,12 @@ export class FileLoader {
   /**
    * Parse files asynchronously from filesystem
    *
-   * Uses globby async scanning and fs.promises.stat for async file checking.
+   * Uses fs.promises recursive scanning and import() dynamic loading.
    * Suitable for ESM dev mode.
    *
    * @returns Load item list
    */
   async parseAsync(): Promise<LoaderItem[]> {
-    let files: string[] = (this.options.match || filePatterns()) as string[];
-    if (!Array.isArray(files)) {
-      files = [files];
-    }
-
     let directories: string[];
     if (Array.isArray(this.options.directory)) {
       directories = this.options.directory;
@@ -292,12 +333,10 @@ export class FileLoader {
     debugLog('[parseAsync] directories %o', directories);
 
     for (const directory of directories) {
-      const filepaths = await globby(files, { cwd: directory });
+      const filepaths = await scanDirAsync(directory);
       debugLog('[parseAsync] filepaths %o', filepaths);
       for (const filepath of filepaths) {
         const fullpath = path.join(directory, filepath);
-        const stat = await fs.promises.stat(fullpath);
-        if (!stat.isFile()) continue;
 
         const properties = getProperties(filepath, { caseStyle: this.options.caseStyle! });
         const dirName = directory.split(/[/\\]/).slice(-1)[0] || 'unknown';

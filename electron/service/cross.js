@@ -125,6 +125,7 @@ class CrossService {
 
   async requestApi(name, urlPath, params) {
     const serverUrl = cross.getUrl(name);
+    if (!serverUrl) return null;
     const apiHello = serverUrl + urlPath;
     console.log('Server Url:', serverUrl);
 

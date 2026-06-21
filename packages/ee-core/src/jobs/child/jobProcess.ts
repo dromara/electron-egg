@@ -98,7 +98,7 @@ export class JobProcess {
       processOptions: {
         cwd,
         env: allEnv(),
-        stdio: ['ignore', 'pipe', 'pipe', 'ipc'] as ForkOptions['stdio'],
+        stdio: ['ignore', 'pipe', 'pipe', 'ipc'] as ForkOptions['stdio']
       },
     };
 

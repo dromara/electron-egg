@@ -75,10 +75,15 @@ const Instance: {
 /**
  * Get main window instance
  *
- * @returns BrowserWindow instance, or null if not created
+ * @returns BrowserWindow instance
+ * @throws Error if mainWindow has not been created yet (lifecycle ordering bug)
  */
-export function getMainWindow(): BrowserWindow | null {
-  return Instance.mainWindow;
+export function getMainWindow(): BrowserWindow {
+  const win = Instance.mainWindow;
+  if (!win) {
+    throw new Error('[ee-core] getMainWindow() called before mainWindow was created. Ensure this code runs after the WindowReady event.');
+  }
+  return win;
 }
 
 /**
@@ -108,13 +113,12 @@ export function createMainWindow(): BrowserWindow {
  * Used when a second instance starts to activate the existing instance's window.
  */
 export function restoreMainWindow(): void {
-  if (Instance.mainWindow) {
-    if (Instance.mainWindow.isMinimized()) {
-      Instance.mainWindow.restore();
-    }
-    Instance.mainWindow.show();
-    Instance.mainWindow.focus();
+  const win = getMainWindow();
+  if (win.isMinimized()) {
+    win.restore();
   }
+  win.show();
+  win.focus();
 }
 
 /**
@@ -147,8 +151,6 @@ export async function loadServer(): Promise<void> {
     remote: { enable: boolean; url: string };
     mainServer: { protocol: string; indexPath: string; takeover: string; loadingPage: string };
   };
-  const win = getMainWindow();
-  if (!win) return;
 
   // Remote mode: load remote URL directly
   if (remote.enable) {
@@ -193,10 +195,7 @@ export async function loadServer(): Promise<void> {
       if (frontendReady === false && frontendConf.force !== true) {
         // Frontend service not ready, show failure page
         const bootFailurePage = getHtmlFilepath('failure.html');
-        const win = getMainWindow();
-        if (win) {
-          win.loadFile(bootFailurePage);
-        }
+        getMainWindow().loadFile(bootFailurePage);
         coreLogger.error(`Please check the ${url} !`);
         return;
       }
@@ -234,7 +233,6 @@ function loadMainUrl(type: string, url: string, load = 'url'): void {
     mainServer: { options: Electron.LoadURLOptions & Electron.LoadFileOptions };
   };
   const win = getMainWindow();
-  if (!win) return;
 
   coreLogger.info('Env: %s, Type: %s', env(), type);
   coreLogger.info('App running at: %s', url);
@@ -273,7 +271,6 @@ function loadMainUrl(type: string, url: string, load = 'url'): void {
  */
 function _loadingPage(filepath: string): void {
   const win = getMainWindow();
-  if (!win) return;
 
   if (fileIsExist(filepath)) {
     win.loadFile(filepath);
@@ -327,10 +324,7 @@ async function crossTakeover(): Promise<void> {
   if (!serviceReady) {
     // Service not ready, show failure page
     const bootFailurePage = getHtmlFilepath('cross-failure.html');
-    const mainWindow = getMainWindow();
-    if (mainWindow) {
-      mainWindow.loadFile(bootFailurePage);
-    }
+    getMainWindow().loadFile(bootFailurePage);
     throw new Error(`[ee-core] Please check cross service [${service}] ${url} !`);
   }
 

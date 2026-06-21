@@ -8,19 +8,19 @@ const { securityService } = require('../service/os/security');
 const { autoUpdaterService } = require('../service/os/auto_updater');
 const { crossService } = require('../service/cross');
 const { sqlitedbService } = require('../service/database/sqlitedb');
+const { windowService } = require('../service/os/window');
 
 function preload() {
   // 示例功能模块，可选择性使用和修改
   logger.info('[preload] load 5');
-  trayService.create();
-  securityService.create();
-  autoUpdaterService.create();
-
-  // go server
-  crossService.createGoServer();
-
+  windowService.init();
+  trayService.init();
+  securityService.init();
+  autoUpdaterService.init();
   // init sqlite db
   sqlitedbService.init();
+  // go server
+  crossService.createGoServer();
 }
 
 /**

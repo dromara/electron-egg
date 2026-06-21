@@ -1,6 +1,6 @@
 {
   "name": "ee-core",
-  "version": "5.0.0-beta.5",
+  "version": "5.0.0",
   "description": "ee core - TypeScript edition with dual module support",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -407,7 +407,6 @@
     "cross-spawn": "^7.0.6",
     "debug": "^4.4.3",
     "dns-socket": "^4.2.2",
-    "globby": "^16.2.0",
     "koa": "^2.13.4",
     "koa-body": "^5.0.0",
     "koa2-cors": "^2.0.6",

@@ -28,6 +28,7 @@ import { move } from './tools/move.js';
 import { encrypt, cleanEncrypt } from './tools/encrypt.js';
 import { incrUpdater } from './tools/incrUpdater.js';
 import { run as iconGenRun } from './tools/iconGen.js';
+import { ohos } from './tools/ohos.js';
 
 program
   .name('ee-bin')
@@ -204,19 +205,38 @@ program
  *
  * Options:
  *   --config <folder>      Path to custom bin.js config file
- *   --asar-file <file>     Path to the asar package file
- *   --platform <flag>      Target platform (e.g. "mac", "win64", "linux")
+ *   --app-file <file>      Path to the app package file (asar or directory)
+ *   --platform <flag>      Target platform (e.g. "macos_apple", "windows_64", "linux")
  *   --force <flag>         Force full update ("true" to enable)
  */
 program
   .command('updater')
   .description('updater commands')
   .option('--config <folder>', 'config file')
-  .option('--asar-file <file>', 'asar file path')
+  .option('--app-file <file>', 'app file path')
   .option('--platform <flag>', 'platform')
   .option('--force <flag>', 'force update full')
   .action(async function (this: Command) {
     await incrUpdater.run(this.opts());
+  });
+
+/**
+ * ohos command - Extract build artifacts to HarmonyOS resource directory
+ *
+ * Copies files from the Electron build output to the ohos HAP resource directory,
+ * following electron-builder's extraResources FileSet pattern (from/to/filter).
+ * Supports glob filter patterns with negation (e.g. "!compiled" to exclude files).
+ *
+ * Options:
+ *   --config <folder>  Path to custom bin.js config file
+ */
+program
+  .command('ohos')
+  .description('Extract build artifacts to ohos resource directory')
+  .option('--config <folder>', 'config file')
+  .option('--cmds <flag>', 'ohos config keys (e.g. "resources")')
+  .action(function (this: Command) {
+    ohos(this.opts());
   });
 
 program.parse();

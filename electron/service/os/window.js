@@ -20,6 +20,14 @@ class WindowService {
   }
 
   /**
+   * 窗口初始化
+   */
+  init() {
+    const mainWin = getMainWindow();
+    mainWin.setMenuBarVisibility(false);
+  }
+
+  /**
    * Create a new window
    */
   createWindow(args) {
@@ -64,6 +72,9 @@ class WindowService {
       win.webContents.openDevTools();
     }
 
+    // sub window 
+    win.setMenuBarVisibility(false);
+
     this.windows[windowName] = win;
 
     return winContentsId;
@@ -77,11 +88,12 @@ class WindowService {
     let win;
     if (windowName == 'main') {
       win = getMainWindow();
+      return win.webContents.id;
     } else {
-      win = this.windows[windowName];
+      win = this.windows[windowName] ?? null;
+      if (!win) return null;
+      return win.webContents.id;
     }
-    
-    return win.webContents.id;
   }
 
   /**
