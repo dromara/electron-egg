@@ -20,29 +20,31 @@ class BasedbService {
   /*
    * 初始化
    */
-  _init(): void {
+  async _init(): Promise<void> {
     // 定义数据文件
     const dbFile = path.join(getDataDir(), "db", this.dbname);
     const sqliteOptions = {
       timeout: 6000,
       verbose: console.log
     }
-    this.storage = new SqliteStorage(dbFile, sqliteOptions);
+    this.storage = new SqliteStorage(dbFile);
+    await this.storage.init(sqliteOptions);
     this.db = this.storage.db;
   }
 
   /*
    * change data dir (sqlite)
    */
-  changeDataDir(dir: string): void {
+  async changeDataDir(dir: string): Promise<void> {
     // the absolute path of the db file
     const dbFile = path.join(dir, this.dbname);
     const sqliteOptions = {
       timeout: 6000,
       verbose: console.log
     }
-    this.storage = new SqliteStorage(dbFile, sqliteOptions);
-    this.db = this.storage.db;   
+    this.storage = new SqliteStorage(dbFile);
+    await this.storage.init(sqliteOptions);
+    this.db = this.storage.db;
   }
-}  
+}
 export { BasedbService };
