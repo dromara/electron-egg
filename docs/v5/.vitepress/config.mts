@@ -20,7 +20,7 @@ const navEn = [
     text: 'Version',
     items: [
       { text: 'v5 (Current)', link: '/00.docs/010.getting-started/001.major-update' },
-      { text: 'v4 (Archive)', link: '/v4/' },
+      { text: 'v4 (Archive)', link: '/zh/v4/' },
     ],
   },
   { text: 'Plugins', link: '/08.plugins/01.introduction' },
