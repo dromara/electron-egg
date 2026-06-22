@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitepress'
-import { sidebarZh, sidebarEn } from './buildData.mjs'
+import { sidebarZh, sidebarEn, sidebarZhV4 } from './buildData.mjs'
 
 // Analytics + ads
 const head: any[] = [
@@ -16,7 +16,13 @@ const head: any[] = [
 
 const navEn = [
   { text: 'Home', link: '/' },
-  { text: 'v5', link: '/00.docs/010.getting-started/001.major-update' },
+  {
+    text: 'Version',
+    items: [
+      { text: 'v5 (Current)', link: '/00.docs/010.getting-started/001.major-update' },
+      { text: 'v4 (Archive)', link: '/v4/' },
+    ],
+  },
   { text: 'Plugins', link: '/08.plugins/01.introduction' },
   { text: 'API', link: '/09.api/001.tutorial/001.usage-guide' },
   { text: 'Demo', link: '/07.features/01.demo' },
@@ -33,7 +39,13 @@ const navEn = [
 
 const navZh = [
   { text: '首页', link: '/zh/' },
-  { text: 'v5', link: '/zh/00.docs/010.getting-started/001.major-update' },
+  {
+    text: '版本',
+    items: [
+      { text: 'v5 (当前版本)', link: '/zh/00.docs/010.getting-started/001.major-update' },
+      { text: 'v4 (归档版本)', link: '/zh/v4/' },
+    ],
+  },
   { text: '插件', link: '/zh/08.plugins/01.introduction' },
   { text: 'API', link: '/zh/09.api/001.tutorial/001.usage-guide' },
   { text: 'demo', link: '/zh/07.features/01.demo' },
@@ -75,7 +87,7 @@ export default defineConfig({
       lang: 'en',
       themeConfig: {
         nav: navEn,
-        sidebar: sidebarEn,
+        sidebar: [...sidebarEn, { text: 'v4 (Archive)', collapsed: true, items: [{ text: 'v4 Archive', link: '/v4/' }] }],
         outline: { label: 'On this page', level: [2, 6] },
         footer: {
           copyright:
@@ -90,7 +102,7 @@ export default defineConfig({
       link: '/zh/',
       themeConfig: {
         nav: navZh,
-        sidebar: { '/zh/': sidebarZh },
+        sidebar: { '/zh/': [...sidebarZh, ...sidebarZhV4] },
         outline: { label: '本页目录', level: [2, 6] },
         docFooter: { prev: '上一页', next: '下一页' },
         lastUpdatedText: '上次更新',

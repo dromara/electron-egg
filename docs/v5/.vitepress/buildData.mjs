@@ -106,10 +106,10 @@ function buildGroup(absDir, relDir, nameMap, routePrefix, collapsed = true) {
   return items
 }
 
-function buildSidebar(baseDir, nameMap, routePrefix) {
+function buildSidebar(baseDir, nameMap, routePrefix, includeDirs = INCLUDE_DIRS) {
   const sidebar = []
   let isFirst = true
-  for (const dir of INCLUDE_DIRS) {
+  for (const dir of includeDirs) {
     const abs = path.join(baseDir, dir)
     if (!fs.existsSync(abs)) continue
     const items = buildGroup(abs, dir, nameMap, routePrefix)
@@ -121,7 +121,51 @@ function buildSidebar(baseDir, nameMap, routePrefix) {
   return sidebar
 }
 
+// v4 archive directories (under docs/zh/v4/)
+const INCLUDE_DIRS_V4 = ['00.v4', '04.others', '05.tips', '06.support', '07.features', '08.plugins', '09.api-v4']
+
+// v4 archive Chinese display names
+const displayNameMapZhV4 = {
+  // Level 1 directories
+  'v4': 'v4 归档文档',
+  'api-v4': 'API (v4)',
+  'others': '其它',
+  'tips': '知识点',
+  'support': '支持',
+  'features': '功能',
+  'plugins': '插件',
+  // Level 2 directories
+  'getting-started': '快速入门',
+  'basic-features': '基础功能',
+  'build-software': '生成软件',
+  'upgrade': '升级',
+  'cross-language': '跨语言支持',
+  'tutorial': '教程',
+  // Level 3 directories
+  'frontend-module': '前端模块',
+  'communication': '通信',
+  'database': '数据库',
+  'tasks': '任务',
+  'version-relation': '版本关系',
+  'addon': '扩展',
+  'this-app': '本应用',
+  'config': '配置',
+  // Go sub-sections
+  'go': 'Go',
+  'java': 'Java',
+  'python': 'Python',
+}
+
 // English sidebar: from docs/, links start with /
 export const sidebarEn = buildSidebar(DOCS, displayNameMapEn, '')
 // Chinese sidebar: from docs/zh/, links start with /zh/
 export const sidebarZh = buildSidebar(path.join(DOCS, 'zh'), displayNameMapZh, 'zh')
+
+// v4 archive Chinese sidebar: from docs/zh/v4/, links start with /zh/v4/
+// Wrapped in a collapsed group labeled "v4 (归档版本)"
+export const sidebarZhV4 = (() => {
+  const v4Base = path.join(DOCS, 'zh', 'v4')
+  if (!fs.existsSync(v4Base)) return []
+  const items = buildSidebar(v4Base, displayNameMapZhV4, 'zh/v4', INCLUDE_DIRS_V4)
+  return [{ text: 'v4 (归档版本)', collapsed: true, items }]
+})()
