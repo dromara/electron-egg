@@ -60,7 +60,6 @@
     "bytenode": "^1.5.7",
     "dayjs": "^1.11.13",
     "ee-core": "^5.0.1",
-    "ee-incremental-updater": "^5.1.0",
     "electron-updater": "^6.7.3"
   }
 }

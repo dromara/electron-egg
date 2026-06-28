@@ -24,9 +24,9 @@ class SqlitedbService extends BasedbService {
   /*
    * 初始化
    */
-  init(): void {
+  async init(): Promise<void> {
     // 初始化数据库
-    this._init();
+    await this._init();
 
     // 检查表是否存在
     const masterStmt = this.db.prepare('SELECT * FROM sqlite_master WHERE type=? AND name = ?');
@@ -105,8 +105,8 @@ class SqlitedbService extends BasedbService {
       return;
     }
 
-    this.changeDataDir(dir);
-    this.init();
+    await this.changeDataDir(dir);
+    await this.init();
     return;
   }
 }
