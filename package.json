@@ -49,7 +49,7 @@
     "@types/node": "^22.19.1",
     "cross-env": "^7.0.3",
     "debug": "^4.4.0",
-    "ee-bin": "^5.0.0-beta.7",
+    "ee-bin": "^5.0.0",
     "electron": "^39.8.10",
     "electron-builder": "^26.3.5",
     "typescript": "^5.9.3"
@@ -59,7 +59,7 @@
     "better-sqlite3": "^12.5.0",
     "bytenode": "^1.5.7",
     "dayjs": "^1.11.13",
-    "ee-core": "^5.0.0-beta.8",
+    "ee-core": "^5.0.1",
     "ee-incremental-updater": "^5.1.0",
     "electron-updater": "^6.7.3"
   }
