@@ -16,11 +16,11 @@ export async function preload(): Promise<void> {
   windowService.init();
   trayService.init();
   securityService.init();
-  autoUpdaterService.init();
+  //autoUpdaterService.init();
   // init sqlite db (lazy loads better-sqlite3 on first use)
   await sqlitedbService.init();
   // go server
-  crossService.createGoServer();
+  //crossService.createGoServer();
 }
 
 
