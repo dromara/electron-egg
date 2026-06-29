@@ -105,47 +105,75 @@ function formatArg(a: unknown): string {
  * @param getter - Deferred function to get pino.Logger instance
  * @returns EeLogger proxy object
  */
-function createLoggerProxy(getter: () => pino.Logger): EeLogger {
+/** Log levels that are aggregated into errorLogger (ee-error.log) */
+const ERROR_LEVELS = new Set(['error', 'fatal']);
+
+/**
+ * Invoke a single pino method, normalizing the multiple supported calling styles.
+ *
+ * Shared by the direct write and the error/fatal aggregation forward so both
+ * paths interpret arguments identically.
+ */
+function applyLog(l: pino.Logger, prop: string, args: unknown[]): void {
+  const method = (l as unknown as Record<string, (...args: unknown[]) => void>)[prop];
+  if (!method) return;
+
+  // Single argument, call directly
+  if (args.length <= 1) {
+    method.call(l, ...args);
+    return;
+  }
+
+  const first = args[0];
+  // pino standard: first argument is a plain object → (mergeObj, msg, ...args)
+  if (typeof first === 'object' && first !== null && !(first instanceof Error)) {
+    method.call(l, ...args);
+    return;
+  }
+  // pino printf: first argument contains %s/%d formatting → keep as-is
+  if (typeof first === 'string' && /%[sdijo]/.test(first)) {
+    method.call(l, ...args);
+    return;
+  }
+  // Concatenation mode: logger.info('msg:', value) → 'msg: value'
+  method.call(l, args.map(formatArg).join(' '));
+}
+
+/**
+ * Create log proxy object
+ *
+ * @param getter - Deferred function to get pino.Logger instance
+ * @param source - Origin tag ('app' / 'core'); when set, error/fatal records are
+ *   additionally aggregated into errorLogger (ee-error.log) with a `from` binding.
+ *   errorLogger itself passes no source, so it never forwards to avoid double writes.
+ * @returns EeLogger proxy object
+ */
+function createLoggerProxy(getter: () => pino.Logger, source?: string): EeLogger {
   return new Proxy({} as unknown as EeLogger, {
     get(_target, prop) {
-      // child() returns sub-logger proxy
+      // child() returns sub-logger proxy (preserves source so children still aggregate)
       if (prop === 'child') {
-        return (bindings: pino.Bindings) => createLoggerProxy(() => getter().child(bindings));
+        return (bindings: pino.Bindings) => createLoggerProxy(() => getter().child(bindings), source);
       }
       if (!LOG_METHODS.has(prop as string)) return undefined;
 
       return (...args: unknown[]) => {
         const l = getter();
-        const method = (l as unknown as Record<string, (...args: unknown[]) => void>)[prop as string];
-        if (!method) return;
+        applyLog(l, prop as string, args);
 
-        // Single argument, call directly
-        if (args.length <= 1) {
-          method.call(l, ...args);
-          return;
+        // Aggregate error/fatal into ee-error.log (single writer = errorLogger).
+        // Skipped for errorLogger itself (source undefined) to prevent double writes.
+        if (source && ERROR_LEVELS.has(prop as string)) {
+          applyLog(_getLoggerBy('errorLogger').child({ from: source }), prop as string, args);
         }
-
-        const first = args[0];
-        // pino standard: first argument is a plain object → (mergeObj, msg, ...args)
-        if (typeof first === 'object' && first !== null && !(first instanceof Error)) {
-          method.call(l, ...args);
-          return;
-        }
-        // pino printf: first argument contains %s/%d formatting → keep as-is
-        if (typeof first === 'string' && /%[sdijo]/.test(first)) {
-          method.call(l, ...args);
-          return;
-        }
-        // Concatenation mode: logger.info('msg:', value) → 'msg: value'
-        method.call(l, args.map(formatArg).join(' '));
       };
     },
   });
 }
 
 /** Application log instance (Proxy wrapped) */
-export const logger: EeLogger = createLoggerProxy(() => _getLoggerBy('logger'));
+export const logger: EeLogger = createLoggerProxy(() => _getLoggerBy('logger'), 'app');
 /** Framework core log instance (Proxy wrapped) */
-export const coreLogger: EeLogger = createLoggerProxy(() => _getLoggerBy('coreLogger'));
-/** Error log instance (Proxy wrapped, error/fatal level only) */
+export const coreLogger: EeLogger = createLoggerProxy(() => _getLoggerBy('coreLogger'), 'core');
+/** Error log instance (Proxy wrapped, error/fatal level only; sole writer of ee-error.log) */
 export const errorLogger: EeLogger = createLoggerProxy(() => _getLoggerBy('errorLogger'));
