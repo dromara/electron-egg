@@ -338,6 +338,17 @@ module.exports = {
           "**/*"
         ]
       }
-    ]
+    ],
+    resources_public: [
+      {
+        from: './public',
+        to: './ohos_hap/web_engine/src/main/resources/resfile/resources/app/public',
+        filter: [
+          "**/*", 
+          "!README.md", 
+          "!README.zh-CN.md"
+        ]
+      }
+    ],    
   }     
 };

@@ -5,8 +5,8 @@
 import { logger } from 'ee-core/log';
 import { trayService } from '../service/os/tray';
 import { securityService } from '../service/os/security';
-import { crossService } from '../service/cross';
-import { sqlitedbService } from '../service/database/sqlitedb';
+// import { crossService } from '../service/cross';
+// import { sqlitedbService } from '../service/database/sqlitedb';
 import { windowService } from '../service/os/window';
 
 export async function preload(): Promise<void> {
