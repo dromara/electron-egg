@@ -15,7 +15,7 @@
 /entry/libs
 /entry/oh_modules
 /electron/oh-package-lock.json5
-/electron/libs
+#/electron/libs
 /electron/oh_modules
 /web_engine/BuildProfile.ets
 /web_engine/oh-package-lock.json5

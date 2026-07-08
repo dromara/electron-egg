@@ -158,7 +158,8 @@
       "Bash([[ \"$dep\" == *@/* ]])",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); deps=d.get\\('dependencies',{}\\); [print\\(k,v\\) for k,v in deps.items\\(\\) if 'socket' in k.lower\\(\\)]\")",
       "Bash(npm whoami *)",
-      "Bash(npm config *)"
+      "Bash(npm config *)",
+      "Bash(echo \"exit=$?\")"
     ]
   }
 }
