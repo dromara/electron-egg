@@ -10,6 +10,8 @@ import { WindowPreferences } from './CommonInterface';
 
 export interface WebProxy {
   getWindowStage: () => window.WindowStage | undefined;
+  updateAvoidAreaStatus: (isFullScreen: boolean) => void;
+  setDeviceModeChangeEvent: (deviceModeChangeEvent: ChangeEventType | undefined) => void;
   getWindow: () => window.Window | undefined;
   getWindowContext: () => common.Context | undefined;
   getWindowId: () => string;
@@ -17,8 +19,6 @@ export interface WebProxy {
   createSubWindow: (name: string) => Promise<window.Window>;
   getOriginWindowId: () => number;
   isUIAbility: () => boolean;
-  updateAvoidAreaStatus: (isFullScreen: boolean) => void;
-  setDeviceModeChangeEvent: (deviceModeChangeEvent: ChangeEventType | undefined) => void;
   // Electron
   getWindowPreferences: () => WindowPreferences;
   setWindowPreferences: (preferences: WindowPreferences) => void;
@@ -45,9 +45,11 @@ export class FakeWebProxy implements WebProxy {
     return -1;
   }
 
+  setWindowTitle(title:string) {}
+
   updateAvoidAreaStatus(isFullScreen: boolean) {}
 
-  setWindowTitle(title:string) {}
+  setDeviceModeChangeEvent(deviceModeChangeEvent: ChangeEventType | undefined) {}
 
   createSubWindow(name: string): Promise<window.Window> {
     return new Promise<window.Window>((resolve, reject) => {
@@ -58,8 +60,6 @@ export class FakeWebProxy implements WebProxy {
   isUIAbility(): boolean {
     return true;
   }
-
-  setDeviceModeChangeEvent(deviceModeChangeEvent: ChangeEventType | undefined) {}
 
   getWindowPreferences(): WindowPreferences {
     return {

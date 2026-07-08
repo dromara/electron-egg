@@ -53,12 +53,6 @@ export class BaseWindowAdapter extends BaseAdapter implements WebProxy {
 
   setWindowTitle(title:string) {}
 
-  isUIAbility(): boolean {
-    return false;
-  }
-
-  setDeviceModeChangeEvent(deviceModeChangeEvent: ChangeEventType | undefined) {}
-
   createSubWindow(name: string): Promise<window.Window> {
     return new Promise<window.Window>((resolve, reject) => {
       reject('no reached.')
@@ -77,4 +71,10 @@ export class BaseWindowAdapter extends BaseAdapter implements WebProxy {
   setWindowPreferences(preferences: WindowPreferences) {}
 
   updateAvoidAreaStatus(isFullScreen: boolean) {}
+
+  setDeviceModeChangeEvent(deviceModeChangeEvent: ChangeEventType | undefined) {}
+
+  isUIAbility(): boolean {
+    return false;
+  }
 }

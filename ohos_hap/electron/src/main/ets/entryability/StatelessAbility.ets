@@ -20,12 +20,8 @@ export default class StatelessAbility extends WebAbility {
     super.onCreate(want, launchParam);
   }
  
-  async onPrepareToTerminateAsync(): Promise<boolean> {
-    return await super.onPrepareToTerminateAsync();
-  }
-
-  async onDestroy(): Promise<void> {
-    await super.onDestroy();
+  onDestroy() {
+    super.onDestroy();
   }
  
   onWindowStageCreate(windowStage: window.WindowStage) {
@@ -45,5 +41,9 @@ export default class StatelessAbility extends WebAbility {
  
   onBackground() {
     super.onBackground();
+  }
+ 
+  override getContentPath(): string {
+    return 'pages/Index';
   }
 };

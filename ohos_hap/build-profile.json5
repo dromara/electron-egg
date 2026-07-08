@@ -30,11 +30,11 @@
         "material": {
           "certpath": "/Users/gsx/.ohos/config/default_ohos_hap_j-6EmdySmjsxO1YA6FK_PG3_ERAL1BSAH6zRjw0Im8A=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001A70997D468A475532CEAF12F9BE6B23D41D3CA83A72D8B5BB47BD2AD37E298D8BB6E8CA88E19D",
+          "keyPassword": "0000001AF04CE16FC25AF88995F998A78ABF8F81A845DCDCCBF16A9CD8D02A2D8D00B6DB63DBF1AD5418",
           "profile": "/Users/gsx/.ohos/config/default_ohos_hap_j-6EmdySmjsxO1YA6FK_PG3_ERAL1BSAH6zRjw0Im8A=.p7b",
           "signAlg": "SHA256withECDSA",
           "storeFile": "/Users/gsx/.ohos/config/default_ohos_hap_j-6EmdySmjsxO1YA6FK_PG3_ERAL1BSAH6zRjw0Im8A=.p12",
-          "storePassword": "0000001ADCF5BEA6934735E0B9DDB05D78C9FA8C0B2A23A60C007C6848730407E092756928779EEB85B9"
+          "storePassword": "0000001ACF673F30D3A840C0F03DEFC6FA3D6F004B3C09353D5F3A3332035EA50A6EDC511CBB0D4CDBE4"
         }
       }
     ]

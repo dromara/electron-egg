@@ -7,6 +7,6 @@
   "main": "",
   "version": "1.0.0",
   "dependencies": {
-    "web_engine": 'file:../web_engine',
+    "web_engine": "file:../web_engine"
   }
 }

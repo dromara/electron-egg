@@ -18,9 +18,9 @@ export class ContextAdapter extends BaseAdapter {
     private abilityManager: AbilityManager;
     private context: Context;
     private activeWindow: string = '';
-    private lastActiveUIAbility: string = '';
     // false: free multi-window model is disabled
     private windowPcmodeSwitchStatus: boolean = false;
+    private lastActiveUIAbility: string = '';
 
     constructor(
         @inject(AbilityManager) abilityManager: AbilityManager,
@@ -46,10 +46,6 @@ export class ContextAdapter extends BaseAdapter {
         }
     }
 
-    public getActiveWindow(): string {
-        return this.activeWindow;
-    }
-
     public getActiveContext(): Context | undefined {
         let activeProxy = this.getActiveProxy();
         if (!activeProxy) {
@@ -59,12 +55,12 @@ export class ContextAdapter extends BaseAdapter {
     }
 
     public getActiveProxy(): WebProxy {
-        let activeProxy = this.abilityManager.getProxy(this.lastActiveUIAbility);
+        let activeProxy = this.abilityManager.getProxy(this.activeWindow);
         if (activeProxy) {
             return activeProxy;
         }
-
-        activeProxy = this.abilityManager.getProxy(this.activeWindow);
+ 
+        activeProxy = this.abilityManager.getProxy(this.lastActiveUIAbility);
         if (activeProxy) {
             return activeProxy;
         }
@@ -94,4 +90,11 @@ export class ContextAdapter extends BaseAdapter {
         }
     }
 
+    @LogMethod
+    public isPadNormalModel(): boolean {
+        if (deviceInfo.deviceType === 'tablet') {
+            return !this.windowPcmodeSwitchStatus;
+        }
+        return false;
+    }
 }

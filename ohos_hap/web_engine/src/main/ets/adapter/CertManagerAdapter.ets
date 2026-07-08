@@ -21,7 +21,7 @@ class ListFileOption {
   public filter: Filter = {};
 }
 
-interface OhosCertInfo {
+export interface OhosCertInfo {
   cert: string;
   uri: string;
 }
@@ -75,34 +75,42 @@ export class CertManagerAdapter extends BaseAdapter {
   }
 
   @LogMethod
-  async getAllPrivateCertificates(callback: Function) {
+  async getAllUserTrustedCertificates(callback: (certInfos: OhosCertInfo[], count: number) => void) {
     const certInfos: OhosCertInfo[] = [];
     try {
-      certificateManager.getPrivateCertificates().then(async (cmResult) => {
-        if (cmResult === undefined || cmResult.credentialList === undefined) {
-          LogUtil.error(TAG, `credentialList is undefined.`);
-          callback(certInfos, 0);
-          return;
-        }
-
-        let list = cmResult.credentialList;
-        for (let i = 0; i < list.length; i++) {
-          let cmResult = await certManager.getPrivateCertificate(list[i].keyUri);
-          if (cmResult && cmResult.credential && cmResult.credential.keyNum > 0) {
-            const certInfo: OhosCertInfo = {
-              uri: list[i].keyUri,
-              cert: this.uint8ArrayToString(cmResult.credential.credentialData)
-            };
-            certInfos.push(certInfo);
+      certificateManager.getAllUserTrustedCertificates()
+        .then(async (cmResult) => {
+          if (!cmResult || !cmResult.certList) {
+            LogUtil.error(TAG, 'certList is undefined.');
+            callback(certInfos, 0);
+            return;
           }
-        }
-        callback(certInfos, certInfos.length);
-      }).catch((err: BusinessError) => {
-        LogUtil.error(TAG, `getPrivateCertificates failed, code: ${err.code}`);
-        callback(certInfos, 0);
-      })
+
+          const list = cmResult.certList;
+          for (let i = 0; i < list.length; i++) {
+            try {
+              const singleResult = await certificateManager.getUserTrustedCertificate(list[i].uri);
+              if (singleResult && singleResult.certInfo) {
+                const certInfo: OhosCertInfo = {
+                  uri: list[i].uri,
+                  cert: this.uint8ArrayToString(singleResult.certInfo.cert),
+                };
+                certInfos.push(certInfo);
+              } else {
+                LogUtil.error(TAG, `getUserTrustedCertificate empty result, uri: ${list[i].uri}`);
+              }
+            } catch (err) {
+              LogUtil.error(TAG, `getUserTrustedCertificate failed for uri: ${list[i].uri}, code: ${err.code}`);
+            }
+          }
+          callback(certInfos, certInfos.length);
+        })
+        .catch((err: BusinessError) => {
+          LogUtil.error(TAG, `getAllUserTrustedCertificates list failed, code: ${err.code}`);
+          callback(certInfos, 0);
+        });
     } catch (error) {
-      LogUtil.error(TAG, `getPrivateCertificates failed, code: ${error.code}`);
+      LogUtil.error(TAG, `getAllUserTrustedCertificates failed, code: ${error.code}`);
       callback(certInfos, 0);
     }
   }
@@ -179,7 +187,6 @@ export class CertManagerAdapter extends BaseAdapter {
       return;
     }
     let filenames = fs.listFileSync(pathDir, option);
-
     for (let i = 0; i < filenames.length; i++) {
       let filePath: string = pathDir + '/' + filenames[i];
       let buf: string = this.readFile(filePath);

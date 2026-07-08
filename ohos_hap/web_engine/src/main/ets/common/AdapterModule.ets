@@ -4,7 +4,6 @@
 
 import { ContainerModule } from 'inversify';
 
-import lazy { AppLifecycleAdapter } from '../adapter/AppLifecycleAdapter';
 import lazy { ContextAdapter } from '../adapter/ContextAdapter';
 import lazy { ContextPathAdapter } from '../adapter/ContextPathAdapter';
 import lazy { DisplayAdapter } from '../adapter/DisplayAdapter';
@@ -18,7 +17,7 @@ import lazy { DialogAdapter } from '../adapter/DialogAdapter';
 
 // Only the adapters which used in WebAbility or WebWindow should be added here.
 export const adapterModule = new ContainerModule((bind) => {
-  bind(AppLifecycleAdapter).toSelf();
+  bind(DeviceInfoAdapter).toSelf();
   bind(ContextAdapter).toSelf();
   bind(ContextPathAdapter).toSelf();
   bind(DisplayAdapter).toSelf();
@@ -28,5 +27,4 @@ export const adapterModule = new ContainerModule((bind) => {
   bind(PermissionManagerAdapter).toSelf();
 
   bind(DialogAdapter).toSelf();
-  bind(DeviceInfoAdapter).toSelf();
 });

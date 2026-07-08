@@ -40,10 +40,6 @@ function setWindowLimits(minWidth: number, minHeight: number, maxWidth: number, 
   implPopupWindowAdapter().setWindowLimits(minWidth, minHeight, maxWidth, maxHeight, id);
 }
 
-function setWindowShadow(id: number, hasShadow: boolean) {
-  implPopupWindowAdapter().setWindowShadow(id, hasShadow);
-}
-
 export class PopupWindowAdapterBind {
   static bind() {
     JsBindingUtils.bindFunction("PopupWindow.CreateWindow", createWindow);
@@ -53,6 +49,5 @@ export class PopupWindowAdapterBind {
     JsBindingUtils.bindFunction("PopupWindow.ActivateWindow", activateWindow);
     JsBindingUtils.bindFunction("PopupWindow.SetBounds", setBounds);
     JsBindingUtils.bindFunction("PopupWindow.SetWindowLimits", setWindowLimits);
-    JsBindingUtils.bindFunction("PopupWindow.SetWindowShadow", setWindowShadow);
   }
 }

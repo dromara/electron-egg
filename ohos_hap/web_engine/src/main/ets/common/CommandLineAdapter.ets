@@ -7,16 +7,6 @@ import LogUtil from '../utils/LogUtil';
 const TAG = 'CommandLineAdapter';
 
 export class CommandLineAdapter {
-  private static readonly UNSUPPORTED_ARGS: string[] = [
-    '--disable-renderer-backgrounding',
-    '--host-rules',
-    '--no-stdio-init',
-    '--force_high_performance_gpu',
-    '--force_low_power_gpu',
-    '--xdg-portal-required-version',
-    '--experimental-network-inspection',
-    '--diagnostic-dir',
-  ];
   private static readonly INSTANCE: CommandLineAdapter = new CommandLineAdapter();
   private args: Array<string> = [];
 
@@ -29,13 +19,10 @@ export class CommandLineAdapter {
   }
 
   /**
-   * Initialize command line. Clears any previously appended args and
-   * re-populates the default argument list. Private because calling this
-   * after startup would discard user-appended switches.
+   * Initialize command line
    */
-  private init(): void {
-    this.args = [];
-    this.appendArgs(this.buildDefaultArgs());
+  public init(): void {
+    this.args = this.buildDefaultArgs();
   }
 
   /**
@@ -44,7 +31,7 @@ export class CommandLineAdapter {
    * @returns true if the switch exists, false otherwise
    */
   public hasSwitch(switchName: string): boolean {
-    const switchArg = `--${switchName.replace(/^--/, '')}`;
+    const switchArg = `--${switchName}`;
     return this.args.some(arg => arg === switchArg || arg.startsWith(`${switchArg}=`));
   }
 
@@ -54,13 +41,13 @@ export class CommandLineAdapter {
    * @returns The switch value or empty string if not found
    */
   public getSwitchValue(switchName: string): string {
-    const switchArg = `--${switchName.replace(/^--/, '')}`;
+    const switchArg = `--${switchName}`;
     for (const arg of this.args) {
       if (arg.startsWith(`${switchArg}=`)) {
         return arg.substring(switchArg.length + 1);
       }
     }
-    return '';
+    return this.args.includes(switchArg) ? '' : '';
   }
 
   /**
@@ -77,11 +64,13 @@ export class CommandLineAdapter {
    * @param value Optional value for the switch
    */
   public appendSwitch(switchName: string, value?: string): void {
-    const switchArg = `--${switchName.replace(/^--/, '')}`;
+    const switchArg = `--${switchName}`;
     if (value !== undefined) {
       this.appendArg(`${switchArg}=${value}`);
+      LogUtil.debug(TAG, `Appended switch --${switchName}=${value}`);
     } else {
       this.appendArg(switchArg);
+      LogUtil.debug(TAG, `Appended switch --${switchName}`);
     }
   }
 
@@ -108,7 +97,6 @@ export class CommandLineAdapter {
    * @param arg Argument to append
    */
   public appendArg(arg: string): void {
-    this.warnIfUnsupported(arg);
     this.args.push(arg);
     LogUtil.debug(TAG, `Appended argument: ${arg}`);
   }
@@ -118,25 +106,11 @@ export class CommandLineAdapter {
    * @param switchName The switch name to remove
    */
   public removeSwitch(switchName: string): void {
-    const switchArg = `--${switchName.replace(/^--/, '')}`;
+    const switchArg = `--${switchName}`;
     this.args = this.args.filter(arg =>
-      arg !== switchArg && !arg.startsWith(`${switchArg}=`)
+    arg !== switchArg && !arg.startsWith(`${switchArg}=`)
     );
-    LogUtil.debug(TAG, `Removed switch ${switchArg}`);
-  }
-
-  /**
-   * Prints warning if the given argument is unsupported in the current
-   * HarmonyOS Electron version.
-   * @param arg A single command line argument (e.g. "--host-rules=xxx").
-   */
-  private warnIfUnsupported(arg: string): void {
-    const argKey = arg.split('=')[0];
-    if (CommandLineAdapter.UNSUPPORTED_ARGS.includes(argKey)) {
-      LogUtil.warn(TAG,
-        `Unsupported commandLine parameter detected: "${argKey}". ` +
-        `It may be invalid or cause exceptions in the current version of HarmonyOS Electron.`);
-    }
+    LogUtil.debug(TAG, `Removed switch --${switchName}`);
   }
 
   /**
@@ -150,13 +124,12 @@ export class CommandLineAdapter {
       "--enable-features=UseOzonePlatform",
       "--ozone-platform=ohos",
       "--enable-logging",
-      "--ozone-dump-file=/data/storage/el2/base/cache/", // 来设置输出图片目录的路径
-      "--no-zygote", // 用它换取工具兼容、调试便利或规避 Zygote bug，但代价是更慢的启动、更高的内存和更低的安全性GitHub
-      "--user-data-dir=/data/storage/el2/base/files/", // 用户数据存储目录
-      "--force-renderer-accessibility=complete",
+      "--ozone-dump-file=/data/storage/el2/base/cache/",
+      "--no-zygote",
+      "--user-data-dir=/data/storage/el2/base/files/",
+      "--force-renderer-accessibility=basic",
       "--disable-gpu-watchdog",
       "--disable-features=EnableDrDc",
-      //"--inspect=9229",
     ];
     return vec_args;
   }

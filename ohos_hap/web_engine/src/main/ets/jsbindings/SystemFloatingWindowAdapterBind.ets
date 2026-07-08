@@ -37,20 +37,12 @@ function setWindowLimits(minWidth: number, minHeight: number, maxWidth: number, 
   implSystemFloatingWindowAdapter().setWindowLimits(minWidth, minHeight, maxWidth, maxHeight, id);
 }
 
-function setEnabled(enable: boolean, id: number): boolean {
-  return implSystemFloatingWindowAdapter().setEnabled(enable, id);
-}
-
 function startWindowMoving(id: number) {
   implSystemFloatingWindowAdapter().startWindowMoving(id);
 }
 
 function getOriginWindowId(id: number): number {
   return implSystemFloatingWindowAdapter().getOriginWindowId(id);
-}
-
-function setWindowShadow(id: number, hasShadow: boolean) {
-  implSystemFloatingWindowAdapter().setWindowShadow(id, hasShadow);
 }
 
 export class SystemFloatingWindowAdapterBind {
@@ -61,9 +53,7 @@ export class SystemFloatingWindowAdapterBind {
     JsBindingUtils.bindFunction("SystemFloatingWindow.HideWindow", hideWindow);
     JsBindingUtils.bindFunction("SystemFloatingWindow.SetBounds", setBounds);
     JsBindingUtils.bindFunction("SystemFloatingWindow.SetWindowLimits", setWindowLimits);
-    JsBindingUtils.bindFunction("SystemFloatingWindow.SetEnabled", setEnabled);
     JsBindingUtils.bindFunction("SystemFloatingWindow.StartWindowMoving", startWindowMoving);
     JsBindingUtils.bindFunction("SystemFloatingWindow.GetOriginWindowId", getOriginWindowId);
-    JsBindingUtils.bindFunction("SystemFloatingWindow.SetWindowShadow", setWindowShadow);
   }
 }

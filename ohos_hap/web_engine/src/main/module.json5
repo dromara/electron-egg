@@ -8,6 +8,9 @@
     ],
     "requestPermissions": [
       {
+        "name": "ohos.permission.SYSTEM_FLOAT_WINDOW"
+      },
+      {
         "name": "ohos.permission.INTERNET"
       },
       {
@@ -38,22 +41,16 @@
         "name": "ohos.permission.WINDOW_TOPMOST"
       },
       {
+        "name": "ohos.permission.kernel.ALLOW_WRITABLE_CODE_MEMORY"
+      },
+      {
         "name": "ohos.permission.GYROSCOPE"
       },
       {
         "name": "ohos.permission.ACCELEROMETER"
       },
       {
-        "name": "ohos.permission.SET_ABILITY_INSTANCE_INFO"
-      },
-      {
         "name": "ohos.permission.GET_FILE_ICON"
-      },
-      {
-        "name": "ohos.permission.LOCK_WINDOW_CURSOR"
-      },
-      {
-        "name": "ohos.permission.WEB_NATIVE_MESSAGING"
       },
       {
         "name": "ohos.permission.READ_PASTEBOARD",
@@ -164,12 +161,15 @@
           ],
           "when":"always"
         }
+      },
+      {
+        "name": "ohos.permission.WEB_NATIVE_MESSAGING"
       }
     ],
     "definePermissions": [
       {
-        "name": "ohos.permission.LOCK_WINDOW_CURSOR"
-      },
+        "name": "ohos.permission.kernel.ALLOW_WRITABLE_CODE_MEMORY"
+      }
     ]
   }
 }

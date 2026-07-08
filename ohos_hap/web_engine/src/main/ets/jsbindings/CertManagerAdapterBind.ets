@@ -4,7 +4,7 @@
 
 import JsBindingUtils from '../utils/JsBindingUtils';
 import Inject from '../common/InjectModule';
-import lazy { CertManagerAdapter } from '../adapter/CertManagerAdapter';
+import lazy { CertManagerAdapter, OhosCertInfo } from '../adapter/CertManagerAdapter';
 
 function implCertManagerAdapter(): CertManagerAdapter {
   return Inject.getOrCreate(CertManagerAdapter);
@@ -14,8 +14,8 @@ function installPersonalCert(certData: ArrayBuffer, certPass: string, alias: str
   implCertManagerAdapter().installPersonalCert(certData, certPass, alias, callback);
 }
 
-function getAllPrivateCertificates(callback: Function): void {
-  implCertManagerAdapter().getAllPrivateCertificates(callback);
+function getAllUserTrustedCertificates(callback: (certInfos: OhosCertInfo[], count: number) => void): void {
+  implCertManagerAdapter().getAllUserTrustedCertificates(callback);
 }
 
 function removeCertByUri(uri: string, callback: Function) {
@@ -41,7 +41,7 @@ function showCertificateManagerDialog(): void {
 export class CertManagerAdapterBind {
   static bind() {
     JsBindingUtils.bindFunction("CertManagerAdapter.InstallPersonalCert", installPersonalCert);
-    JsBindingUtils.bindFunction("CertManagerAdapter.GetAllPrivateCertificates", getAllPrivateCertificates);
+    JsBindingUtils.bindFunction("CertManagerAdapter.GetAllUserTrustedCertificates", getAllUserTrustedCertificates);
     JsBindingUtils.bindFunction("CertManagerAdapter.RemoveCertByUri", removeCertByUri);
     JsBindingUtils.bindFunction("CertManagerAdapter.SignByCertUri", signByCertUri);
     JsBindingUtils.bindFunction("CertManagerAdapter.GetCertCrl", getCertCrl);

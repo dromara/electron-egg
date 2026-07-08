@@ -12,6 +12,7 @@ import { MultiInputAdapter } from '../adapter/MultiInputAdapter';
 import { typeNode as TypedNode, NodeController, FrameNode } from '@ohos.arkui.node';
 import { DragParamManager } from '../common/DragParamManager';
 import { window } from '@kit.ArkUI';
+import { CommandLineAdapter } from '../common/CommandLineAdapter';
 
 interface ComponentConfig {
   moduleName: string,
@@ -39,6 +40,7 @@ class WindowNodeController extends NodeController {
   private xComponentController: XComponentController = new WindowXComponentController();
   private xComponent: TypedNode.XComponent | undefined = undefined;
   private config: ComponentConfig;
+  private kBundleInstallDir = 'bundle-installation-dir';
 
   constructor(config: ComponentConfig) {
     super();
@@ -67,7 +69,8 @@ class WindowNodeController extends NodeController {
       .onLoad(() => {
         LogUtil.info(TAG, 'onLoad xComponentId:' + this.config.xComponentId);
         this.setDefaultBounds();
-        let vec_args = this.buildArgs();
+        CommandLineAdapter.getInstance().appendSwitch(this.kBundleInstallDir, getContext().resourceDir);
+        let vec_args = CommandLineAdapter.getInstance().getArgs();
         this.config.nativeContext.runBrowser(vec_args);
       })
     node.appendChild(this.xComponent);
@@ -100,15 +103,6 @@ class WindowNodeController extends NodeController {
     }
   }
 
-  private buildArgs(): string[] {
-    let default_uri = '';
-    if (this.config.uri.length !== 0) {
-      default_uri = this.config.uri;
-    }
-    let resDir = '--bundle-installation-dir=' + getContext().resourceDir;
-    let vec_args = [resDir, default_uri];
-    return vec_args;
-  }
 }
 
 @Component

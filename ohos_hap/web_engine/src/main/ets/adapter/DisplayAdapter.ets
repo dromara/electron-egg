@@ -11,7 +11,7 @@ import LogMethod from '../common/LogDecorator';
 import { ContextAdapter } from './ContextAdapter';
 import { common } from '@kit.AbilityKit';
 import { WindowBound } from '../interface/CommonInterface';
-import { DeviceInfoAdapter } from '../adapter/DeviceInfoAdapter';
+import { DeviceInfoAdapter } from './DeviceInfoAdapter';
 
 export interface CompleteDisplay {
   id: number;
@@ -224,12 +224,12 @@ export class DisplayAdapter extends BaseAdapter {
             'Failed to obtain all the display objects. Code: ' + JSON.stringify(err));
           return;
         }
- 
+
         baseDisplays.forEach((baseDisplay) => {
           if (this.checkVirtualId(baseDisplay.id)) {
             return;
           }
- 
+
           baseDisplay.on('availableAreaChange', (rect: display.Rect) => {
             this.onAvailableAreaChangeCallback(rect, baseDisplay.id);
           });
@@ -245,7 +245,7 @@ export class DisplayAdapter extends BaseAdapter {
         'Failed to register available area change callback of all the display object. Code: ' + JSON.stringify(exception));
     }
   }
- 
+
   private onAvailableAreaChangeCallback(rect: display.Rect, displayId: number) {
     try {
       let statusBarHeight = 0;
@@ -264,11 +264,11 @@ export class DisplayAdapter extends BaseAdapter {
       LogUtil.error(DisplayAdapter.TAG, 'AvailableAreaChange event callback fail. Code: ' + JSON.stringify(exception));
     }
   }
- 
+
   public setStatusBarHeight(statusBarHeight: number) {
     this.statusBarHeight = statusBarHeight;
   }
- 
+
   public availableAreaUpdateByStatusBar() {
     try {
       if (!this.isAvailableAreaMonitor) {

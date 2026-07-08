@@ -15,7 +15,6 @@ import LogMethod from '../common/LogDecorator';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { deviceInfo } from '@kit.BasicServicesKit';
 import { SystemFloatingWindowManager } from '../common/SystemFloatingWindowManager';
-import { ContextAdapter } from './ContextAdapter';
 
 const TAG: string = 'SubWindow';
 const FEEDBACK_X: number = 2;
@@ -24,7 +23,6 @@ const MAX_TOTAL_SUB_WINDOW_NUM: number = 20;
 @injectable()
 export class SubWindowAdapter extends BaseAdapter {
   private abilityManager: AbilityManager;
-  private ctxAdapter: ContextAdapter;
   private systemFloatingWindowManager: SystemFloatingWindowManager;
   private subWindowList: (ISubWindowInfo)[] = [];
   private reusableSubWindow: Map<string, (ISubWindowInfo)[]> =
@@ -33,12 +31,10 @@ export class SubWindowAdapter extends BaseAdapter {
 
   constructor(
     @inject(AbilityManager) abilityManager: AbilityManager,
-    @inject(ContextAdapter) ctxAdapter: ContextAdapter,
     @inject(SystemFloatingWindowManager) systemFloatingWindowManager: SystemFloatingWindowManager,
   ) {
     super();
     this.abilityManager = abilityManager;
-    this.ctxAdapter = ctxAdapter;
     this.systemFloatingWindowManager = systemFloatingWindowManager;
   }
 
@@ -53,7 +49,8 @@ export class SubWindowAdapter extends BaseAdapter {
             `init_color_argb=${param.init_color_argb}\n` +
             `hide_title_bar=${param.hide_title_bar}\n` +
             `use_dark_mode=${param.use_dark_mode}\n` +
-                        `ability_type=${param.ability_type}\n` + `app_id=${param.app_id}`);
+            `caption_button_visible=${param.caption_button_visible}\n` +
+            `ability_type=${param.ability_type}\n` + `app_id=${param.app_id}`);
     let parentId = param.parent_id
     let fixedBounds = this.adjustBounds(parentId, param.bounds);
     const para: Record<string, IParams> = {
@@ -69,7 +66,6 @@ export class SubWindowAdapter extends BaseAdapter {
 
   @LogMethod
   reuseSubWindow(param: NewWindowParam): string {
-    LogUtil.info(TAG, `[ohoswindow] in SubWindowAdapter reuseSubWindow, param is ${JSON.stringify(param)}`);
     let parentId = param.parent_id
     let fixedBounds = this.adjustBounds(parentId, param.bounds);
     const reusableWindow =
@@ -84,7 +80,8 @@ export class SubWindowAdapter extends BaseAdapter {
               `init_color_argb=${param.init_color_argb}\n` +
               `hide_title_bar=${param.hide_title_bar}\n` +
               `use_dark_mode=${param.use_dark_mode}\n` +
-                            `ability_type=${param.ability_type}\n` + `app_id=${param.app_id}`);
+              `caption_button_visible=${param.caption_button_visible}\n` +
+              `ability_type=${param.ability_type}\n` + `app_id=${param.app_id}`);
       try {
         let paramsLink: SubscribedAbstractProperty<IParams> =
           reusableWindow.localStorage.link('subWindowParams');
@@ -95,7 +92,7 @@ export class SubWindowAdapter extends BaseAdapter {
         this.moveSubWindow(reusableWindow.subWindow, fixedBounds.left, fixedBounds.top, parentId);
         return reusableWindow.id;
       } catch (e) {
-        LogUtil.error(TAG,'[ohoswindow][CPM20251218017238] reuseSubWindow error' + reusableWindow.id);
+        LogUtil.error(TAG,'[ohoswindow] reuseSubWindow error' + reusableWindow.id);
       }
     }
     return "";
@@ -163,9 +160,9 @@ export class SubWindowAdapter extends BaseAdapter {
           }
         }
         if (!found) {
-          LogUtil.error(TAG, '[ohoswindow][CPM20251218017238] Global cache is inconsistent with cache of ' + reusableWindow.parentId);
+          LogUtil.error(TAG, '[ohoswindow] Global cache is inconsistent with cache of ' + reusableWindow.parentId);
         }
-        LogUtil.error(TAG, `[ohoswindow][CPM20251218017238] reusableWindow ${reusableWindow.id} size ${reusableSubWindowList.length}`);
+        LogUtil.error(TAG, `[ohoswindow] reusableWindow ${reusableWindow.id} size ${reusableSubWindowList.length}`);
         this.subWindowList.push(reusableWindow);
         return reusableWindow;
       }
@@ -183,14 +180,11 @@ export class SubWindowAdapter extends BaseAdapter {
       let mainWindowId = this.systemFloatingWindowManager.getMainWindowId(parentId);
       proxy = this.abilityManager.getProxy((mainWindowId as string));
     }
-    if (!proxy) {
-      proxy = this.ctxAdapter.getActiveProxy();
-    }
     proxy?.createSubWindow(id)
       .then((data: window.Window) => {
         this.initSubWindow(data, parentId, id, bounds, subStorage);
       }).catch((error: BusinessError) => {
-      LogUtil.error(TAG, '[ohoswindow][CPM20251218017238] Failed to create the subWindow. Cause: ' + JSON.stringify(error));
+      LogUtil.error(TAG, '[ohoswindow] Failed to create the subWindow. Cause: ' + JSON.stringify(error));
     });
   }
 
@@ -234,14 +228,14 @@ export class SubWindowAdapter extends BaseAdapter {
           .then(() => {
             windowClass.showWindow()
               .catch((err: BusinessError) => {
-                LogUtil.error(TAG, '[ohoswindow][CPM20251218017238] Failed to show SubWindow. Cause: ' + JSON.stringify(err));
+                LogUtil.error(TAG, '[ohoswindow] Failed to show SubWindow. Cause: ' + JSON.stringify(err));
               });
           }).catch(() => {
-          LogUtil.error(TAG, '[ohoswindow][CPM20251218017238] set focusable false failed')
+          LogUtil.error(TAG, '[ohoswindow] set focusable false failed')
         });
       });
     } catch (exception) {
-      LogUtil.error(TAG,'[ohoswindow][CPM20251218017238] Failed to create sub window. Cause: ' + JSON.stringify(exception));
+      LogUtil.error(TAG,'[ohoswindow] Failed to create sub window. Cause: ' + JSON.stringify(exception));
     }
   }
 
@@ -283,7 +277,7 @@ export class SubWindowAdapter extends BaseAdapter {
     } else {
       windowClass.moveWindowTo(x, y, (err) => {
         if (err.code) {
-          LogUtil.error(TAG, '[ohoswindow] Failed to move the subWindow. Cause:' + JSON.stringify(err));
+          LogUtil.error(TAG, 'Failed to move the subWindow. Cause:' + JSON.stringify(err));
         }
       });
     }
@@ -291,7 +285,6 @@ export class SubWindowAdapter extends BaseAdapter {
 
   @LogMethod
   cancelSubWindow(id: string) {
-    LogUtil.error(TAG, '[CPM20251218017238] cancelSubWindow ' + id);
     const index = this.subWindowList.findIndex(item => item?.id === id);
     if (index === -1) {
       LogUtil.error(TAG, 'Failed to find and cancel SubWindow, id' + id);
@@ -306,7 +299,7 @@ export class SubWindowAdapter extends BaseAdapter {
   private addReuseWindow(item: ISubWindowInfo) {
     LogUtil.info(TAG, `[ohoswindow] in SubWindowAdapter addReuseWindow.`);
     if (!item) {
-      LogUtil.error(TAG, '[CPM20251218017238] addReuseWindow fail');
+      LogUtil.error(TAG, 'addReuseWindow fail');
     }
     let total = this.getTotalSubWindowNum();
     this.globalCache.push(item);
@@ -321,7 +314,7 @@ export class SubWindowAdapter extends BaseAdapter {
       if (oldest) {
         let target = this.reusableSubWindow.get(oldest.parentId);
         if (!target) {
-          LogUtil.error(TAG, '[CPM20251218017238] Global cache is inconsistent with cache of ' + oldest.parentId);
+          LogUtil.error(TAG, 'Global cache is inconsistent with cache of ' + oldest.parentId);
         } else {
           let found = false;
           for (let i = 0; i < target.length; i++) {
@@ -332,14 +325,14 @@ export class SubWindowAdapter extends BaseAdapter {
             }
           }
           if (!found) {
-            LogUtil.error(TAG, '[CPM20251218017238] Global cache is inconsistent with cache of ' + oldest.parentId);
+            LogUtil.error(TAG, 'Global cache is inconsistent with cache of ' + oldest.parentId);
           }
         }
         oldest.subWindow.destroyWindow().catch((err: BusinessError) => {
-          LogUtil.error(TAG, '[CPM20251218017238] Failed to destroy the subWindow. Cause:' + JSON.stringify(err));
+          LogUtil.error(TAG, 'Failed to destroy the subWindow. Cause:' + JSON.stringify(err));
         });
       } else {
-        LogUtil.error(TAG, '[CPM20251218017238] Global cache should not be empty at this point');
+        LogUtil.error(TAG, 'Global cache should not be empty at this point');
       }
     }
   }
@@ -351,17 +344,12 @@ export class SubWindowAdapter extends BaseAdapter {
   @LogMethod
   hideSubWindow(id: string) {
     const item = this.findSubWindow(id);
-    if (item) {
-      LogUtil.error(TAG, `[CPM20251218017238] hideSubWindow --- hide ${id}`);
-    } else {
-      LogUtil.error(TAG, `[CPM20251218017238] hideSubWindow --- hide error ${id}`);
-    }
     if (item == undefined) {
       LogUtil.error(TAG, 'Failed to find and hide SubWindow, id: ' + id);
       return;
     }
     item.subWindow.minimize().catch((err: BusinessError) => {
-      LogUtil.error(TAG, '[CPM20251218017238] Failed to hide SubWindow. Cause: ' + JSON.stringify(err));
+      LogUtil.error(TAG, 'Failed to hide SubWindow. Cause: ' + JSON.stringify(err));
     });
   }
 
@@ -369,13 +357,8 @@ export class SubWindowAdapter extends BaseAdapter {
   showSubWindow(id: string) {
     LogUtil.info(TAG, `[ohoswindow] in SubWindowAdapter showSubWindow, id is ${id}`);
     const item = this.findSubWindow(id);
-    if (item) {
-      LogUtil.error(TAG, `[CPM20251218017238] showSubWindow --- show ${id}`);
-    } else {
-      LogUtil.error(TAG, `[CPM20251218017238] showSubWindow --- show error ${id}`);
-    }
     item?.subWindow.showWindow().catch((err: BusinessError) => {
-      LogUtil.error(TAG, '[ohoswindow][CPM20251218017238] Failed to show SubWindow. Cause: ' + JSON.stringify(err));
+      LogUtil.error(TAG, '[ohoswindow] Failed to show SubWindow. Cause: ' + JSON.stringify(err));
     });
   }
 

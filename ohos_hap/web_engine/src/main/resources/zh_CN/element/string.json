@@ -69,6 +69,10 @@
       "value": "是否允许截取屏幕"
     },
     {
+      "name": "screenshot",
+      "value": "是否允许屏幕截图"
+    },
+    {
       "name": "pasteBoard_dialog_title",
       "value": "无法访问系统剪贴板"
     },
@@ -89,6 +93,14 @@
       "value": "前往系统设置"
     },
     {
+      "name": "file_name_str",
+      "value": "名称:"
+    },
+    {
+      "name": "file_size_str",
+      "value": "大小:"
+    },
+    {
       "name": "dialog_cancel_button",
       "value": "取消"
     },
@@ -107,22 +119,6 @@
     {
       "name": "installation_not_supported",
       "value": "不支持安装此格式文件"
-    },
-    {
-      "name": "add_failed_tip",
-      "value": "添加失败"
-    },
-    {
-      "name": "file_name_str",
-      "value": "名称:"
-    },
-    {
-      "name": "file_size_str",
-      "value": "大小:"
-    },
-    {
-      "name": "screenshot",
-      "value": "是否允许屏幕截图"
     }
   ]
 }

@@ -8,12 +8,13 @@ import window from '@ohos.window';
 import Want from '@ohos.app.ability.Want';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import JsBindingUtils from '../utils/JsBindingUtils';
-import { ChangeEventType, NativeContext, WindowPreferences } from '../interface/CommonInterface';
+import { ChangeEventType, NativeContext, WindowPreferences, WindowStatus } from '../interface/CommonInterface';
 import { CommandType, ConfigData, ContextType } from '../common/Constants';
 import CheckEmptyUtils from '../utils/CheckEmptyUtils';
 import { WebProxy } from '../interface/WebProxy';
 import { common } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { WebAbilityStage } from '../application/WebAbilityStage';
 
 const TAG: string = 'WebBaseAbility';
 
@@ -23,11 +24,13 @@ export class WebBaseAbility extends UIAbility implements WebProxy {
   protected windowStage: window.WindowStage | undefined = undefined;
   protected nativeContext: NativeContext =
     JsBindingUtils.getNativeContext(ContextType.kMainProcess);
+  protected deviceModeChangeEvent: ChangeEventType | undefined = undefined;
+  protected initStatus: WindowStatus = WindowStatus.FLOATING;
   protected hideTitleBar: boolean = true;
   protected originWindowId: number = -1;
   protected useDarkMode: boolean = false;
+  protected isStateless: boolean = false;
   protected appId: string = '';
-  protected deviceModeChangeEvent: ChangeEventType | undefined = undefined;
 
   // Electron
   protected cmdArgs: string[] = [];
@@ -68,6 +71,9 @@ export class WebBaseAbility extends UIAbility implements WebProxy {
         });
         LogUtil.info(TAG, 'cmdArgs = ' + JSON.stringify(this.cmdArgs));
       }
+      if (want.parameters["initStatus"] !== undefined) {
+        this.initStatus = want.parameters['initStatus'] as WindowStatus;
+      }
       if (want.parameters["appId"] !== undefined) {
         this.appId = want.parameters['appId'] as string;
       }
@@ -84,7 +90,7 @@ export class WebBaseAbility extends UIAbility implements WebProxy {
   }
 
   protected getContentPath(): string {
-     if (this.nativeContext.IsSupportNodeHandleFeature()) {
+    if (this.nativeContext.IsSupportNodeHandleFeature()) {
       return 'pages/NodeHandleWindow';
     } else {
       return 'pages/Index';
@@ -96,6 +102,10 @@ export class WebBaseAbility extends UIAbility implements WebProxy {
 
     if (CheckEmptyUtils.isEmpty(this.xcomponentId)) {
       LogUtil.info(TAG, 'onCreate, Allocate xcomponent id');
+      if (want.parameters?.openInNewWindow) {
+        this.xcomponentId = WebAbilityStage.X_COMPONENT_ID;
+        return;
+      }
       let widgetId = this.nativeContext.ExecuteCommand(CommandType.kGetWidget, {}).widget_Id;
       this.xcomponentId = ConfigData.WINDOW_PREFIX + widgetId;
     }
@@ -159,14 +169,6 @@ export class WebBaseAbility extends UIAbility implements WebProxy {
     });
   }
 
-  isUIAbility(): boolean {
-    return true;
-  }
-
-  public setDeviceModeChangeEvent(deviceModeChangeEvent: ChangeEventType | undefined) {
-    this.deviceModeChangeEvent = deviceModeChangeEvent;
-  }
-
   getWindowPreferences(): WindowPreferences {
     return {
       hideTitleBar: this.hideTitleBar,
@@ -181,6 +183,10 @@ export class WebBaseAbility extends UIAbility implements WebProxy {
     this.maximizable = preferences.maximizable;
     this.minimizable = preferences.minimizable;
     this.closable = preferences.closable;
+  }
+
+  isUIAbility(): boolean {
+    return true;
   }
 
   public updateAvoidAreaStatus(isFullScreen: boolean) {
@@ -206,5 +212,9 @@ export class WebBaseAbility extends UIAbility implements WebProxy {
     }).catch((err: BusinessError) => {
       LogUtil.error(TAG, `Failed to set the status bar to be invisible. Code is ${err.code}, message is ${err.message}`);
     });
+  }
+
+  public setDeviceModeChangeEvent(deviceModeChangeEvent: ChangeEventType | undefined) {
+    this.deviceModeChangeEvent = deviceModeChangeEvent;
   }
 };

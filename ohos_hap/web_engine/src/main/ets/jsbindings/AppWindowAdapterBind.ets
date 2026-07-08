@@ -1,5 +1,6 @@
 // Copyright (c) 2024 Huawei Device Co., Ltd. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
+import { NodeContent } from '@kit.ArkUI';
 // found in the LICENSE file.
 
 import JsBindingUtils from '../utils/JsBindingUtils';
@@ -7,7 +8,6 @@ import Inject from '../common/InjectModule';
 import lazy { AppWindowAdapter } from '../adapter/AppWindowAdapter';
 import type { NewWindowParam, PointCoordinate, WindowBound, ILoginInfo } from '../interface/CommonInterface';
 import { window } from '@kit.ArkUI';
-import { NodeContent } from '@kit.ArkUI';
 
 function implAppWindowAdapter(): AppWindowAdapter {
   return Inject.getOrCreate(AppWindowAdapter);
@@ -51,8 +51,8 @@ function setBounds(id: number,
   implAppWindowAdapter().setBounds(id, hasFrame, bounds);
 }
 
-function setEnabled(enable: boolean, id: number): boolean {
-  return implAppWindowAdapter().setEnabled(enable, id);
+function setEnabled(enable: boolean, id: number) {
+  implAppWindowAdapter().setEnabled(enable, id);
 }
 
 function setWindowLimits(minWidth: number,
@@ -113,6 +113,7 @@ function setWindowButtonVisibility(id: number, visible: boolean) {
 
 function getWindowButtonVisibility(id: number): boolean {
   return implAppWindowAdapter().getWindowButtonVisibility(id);
+    JsBindingUtils.bindFunction("AppWindow.Bind", bind);
 }
 
 function setAlwaysOnTop(id: number, onTop: boolean) {
@@ -122,6 +123,7 @@ function setAlwaysOnTop(id: number, onTop: boolean) {
 function setContentProtection(id: number, enable: boolean) {
   implAppWindowAdapter().setContentProtection(id, enable);
 }
+    JsBindingUtils.bindFunction("AppWindow.UnBind", unbind);
 
 function setMovable(id: number, movable: boolean) {
   implAppWindowAdapter().setMovable(id, movable);
@@ -173,11 +175,6 @@ function getWindowId(id: number): number {
   return implAppWindowAdapter().getWindowId(id);
 }
 
-function shiftWindowTouchEvent(sourceId: number, targetId: number,
-  fingerId: number, callback: (result: boolean) => void) {
-  implAppWindowAdapter().shiftWindowTouchEvent(sourceId, targetId, fingerId, callback);
-}
-
 function bind(id: string, callback: (nodeContent: NodeContent | undefined) => void) {
   implAppWindowAdapter().bind(id, callback);
 }
@@ -186,8 +183,9 @@ function unbind(id: string, callback: (nodeContent: NodeContent | undefined) => 
   implAppWindowAdapter().unbind(id, callback);
 }
 
-function setWindowShadow(id: number, hasShadow: boolean) {
-  implAppWindowAdapter().setWindowShadow(id, hasShadow);
+function shiftWindowTouchEvent(sourceId: number, targetId: number,
+  fingerId: number, callback: (result: boolean) => void) {
+  implAppWindowAdapter().shiftWindowTouchEvent(sourceId, targetId, fingerId, callback);
 }
 
 export class AppWindowAdapterBind {
@@ -224,14 +222,13 @@ export class AppWindowAdapterBind {
     JsBindingUtils.bindFunction("AppWindow.GetWindowsByCoordinate", getWindowsByCoordinate);
     JsBindingUtils.bindFunction("AppWindow.SetWindowModal", setWindowModal);
     JsBindingUtils.bindFunction("AppWindow.GetWindowStatus", getWindowStatus);
+    JsBindingUtils.bindFunction("AppWindow.ShiftWindowMouseEvent", shiftWindowMouseEvent);
     JsBindingUtils.bindFunction("AppWindow.StartWindowMovingWithOffset", startWindowMovingWithOffset);
     JsBindingUtils.bindFunction("AppWindow.GetOriginWindowIds", getOriginWindowIds);
     JsBindingUtils.bindFunction("AppWindow.ShowHuaweiQuickLogin", showHuaweiQuickLogin);
     JsBindingUtils.bindFunction("AppWindow.GetWindowId", getWindowId);
-    JsBindingUtils.bindFunction("AppWindow.ShiftWindowMouseEvent", shiftWindowMouseEvent);
-    JsBindingUtils.bindFunction("AppWindow.ShiftWindowTouchEvent", shiftWindowTouchEvent);
     JsBindingUtils.bindFunction("AppWindow.Bind", bind);
-    JsBindingUtils.bindFunction("AppWindow.UnBind", unbind);
-    JsBindingUtils.bindFunction("AppWindow.SetWindowShadow", setWindowShadow);
+    JsBindingUtils.bindFunction("AppWindow.Unbind", unbind);
+    JsBindingUtils.bindFunction("AppWindow.ShiftWindowTouchEvent", shiftWindowTouchEvent);
   }
 }

@@ -69,13 +69,6 @@ export class AbilityManager {
     return undefined;
   }
 
-  public getProxyDefault(): WebProxy | undefined {
-    if (this.isEmpty()) {
-      return undefined;
-    }
-    return this.appStorage[0];
-  }
-
   public isEmpty(): boolean {
     return this.appStorage.length === 0;
   }

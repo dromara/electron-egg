@@ -5,7 +5,6 @@
 import bundleManager from '@ohos.bundle.bundleManager';
 import { BusinessError } from '@ohos.base';
 import { Size, window } from '@kit.ArkUI';
-import { deviceInfo } from '@kit.BasicServicesKit';
 
 import { AbilityManager } from '../common/AbilityManager';
 import { BaseWindowAdapter } from '../common/BaseWindowAdapter';
@@ -47,16 +46,6 @@ export class PopupWindowAdapter extends BaseWindowAdapter {
     proxy?.createSubWindow(param.window_id)
       .then((data: window.Window) => {
         this.adjustWindow(data, param, WindowType.SUB_WINDOW);
-
-        try {
-          data.on('displayIdChange', (displayId) => {
-            this.nativeContext.OnWindowDisplayIdChange(param.window_id, displayId);
-          });
-        } catch (exception) {
-          LogUtil.info(TAG, `register displayIdChange listener fail, xcomponentId:${this.xcomponentId},
-                      exception: ${JSON.stringify(exception)}`);
-        }
-        
       }).catch((err: BusinessError) => {
       LogUtil.error(TAG, 'Failed to create the subWindow. Cause: ' + JSON.stringify(err));
     });
@@ -92,7 +81,7 @@ export class PopupWindowAdapter extends BaseWindowAdapter {
       }
     };
     let storage: LocalStorage = new LocalStorage(para);
-    windowClass.loadContent(this.getContentPath(), storage, (err: BusinessError) => {
+    windowClass.loadContent("pages/Index", storage, (err: BusinessError) => {
       let errCode: number = err.code;
       if (errCode) {
         LogUtil.error(TAG, `${windowType} failed to load the content. Cause:${JSON.stringify(err)}`);
@@ -108,14 +97,6 @@ export class PopupWindowAdapter extends BaseWindowAdapter {
         LogUtil.info(TAG, `${windowType} succeeded in showing the window.`);
       });
     });
-  }
-
-  private getContentPath(): string {
-    if (this.nativeContext.IsSupportNodeHandleFeature()) {
-      return 'pages/NodeHandleWindow';
-    } else {
-      return 'pages/Index';
-    }
   }
 
   @LogMethod
@@ -206,21 +187,6 @@ export class PopupWindowAdapter extends BaseWindowAdapter {
         });
     } catch (exception) {
       LogUtil.error(TAG, 'change the window limits exception. Cause:' + JSON.stringify(exception));
-    }
-  }
-
-  @LogMethod
-  setWindowShadow(id: number, hasShadow: boolean) {
-    let windowClass = this.abilityManager.getProxy(id)?.getWindow();
-    if (windowClass === undefined) {
-      LogUtil.error(TAG, `setWindowShadow fail, window is not exist! windowId: ${id}, hasShadow: ${hasShadow}`);
-      return;
-    }
-    const radius: number = hasShadow ? 15 : 0;
-    if (deviceInfo.sdkApiVersion >= 17) {
-      windowClass.setWindowShadowRadius(radius);
-    } else {
-      LogUtil.error(TAG, 'setWindowShadow fail, sdkApiVersion is less than 17');
     }
   }
 };

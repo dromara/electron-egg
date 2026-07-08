@@ -36,8 +36,15 @@ export enum CommandType {
   kNewWebContent,
   kNewWidget,
   kGetWidget,
+  kGetNextWidgetId,
   kGetLastActiveWidget,
   kOpenURL,
   kAppQuit,
-  kAppExit,
-};
+}
+
+// From the setWindowDecorHeight interface description in @ohos.window.ts
+export enum kTitleBarHeightVP{
+  kDefault = 37,
+  kMinimum = 37,
+  kMaximum = 112
+}

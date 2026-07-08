@@ -49,6 +49,9 @@ export class PermissionManagerAdapter extends BaseAdapter {
     ['camera', [
       'ohos.permission.CAMERA',
     ]],
+    ['screenshot', [
+      'ohos.permission.CUSTOM_SCREEN_CAPTURE',
+    ]],
     ['pasteboard', [
       'ohos.permission.READ_PASTEBOARD',
     ]],
@@ -171,7 +174,7 @@ export class PermissionManagerAdapter extends BaseAdapter {
       if (code === ACTIVATE_SUCCESS) {
         this.isInitialized = true;
       } else {
-        LogUtil.error(TAG, '[CPM20251222017870] No URI required for activation or activation failed');
+        LogUtil.error(TAG, 'No URI required for activation or activation failed');
       }
     });
   }
@@ -220,7 +223,7 @@ export class PermissionManagerAdapter extends BaseAdapter {
   @LogMethod
   public activateFileAccessPersist(uris: string[], callback: (code: number) => void) {
     if (uris.length === 0) {
-      LogUtil.error(TAG,'[CPM20251222017870] No URI required to activate');
+      LogUtil.error(TAG,'No URI required to activate');
       callback(EMPTY_ARRAY);
       return;
     }
@@ -235,10 +238,9 @@ export class PermissionManagerAdapter extends BaseAdapter {
     });
     fileShare.activatePermission(policies).then(() => {
       callback(ACTIVATE_SUCCESS);
-      LogUtil.error(TAG, `[CPM20251222017870] activeFileAccessPersist ok`);
     }).catch((err: BusinessError<Array<fileShare.PolicyErrorResult>>) => {
       callback(err.code);
-      LogUtil.error(TAG, `[CPM20251222017870] activeFileAccessPersist failed: ${JSON.stringify(err)}`);
+      LogUtil.error(TAG, `activeFileAccessPersist failed: ${JSON.stringify(err)}`);
     });
   }
 
@@ -282,7 +284,7 @@ export class PermissionManagerAdapter extends BaseAdapter {
       case "pasteboard":
         this.openPasteboardPermissionConfirm(activeContext, confirmParams);
         break;
-      case "screen_capture":
+      case "screenshot":
         this.openScreenshotPermissionConfirm(activeContext, confirmParams);
         break;
       default:

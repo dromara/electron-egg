@@ -21,6 +21,14 @@
       "value": "BrowserAbility"
     },
     {
+      "name": "StatelessAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "StatelessAbility_label",
+      "value": "StatelessAbility"
+    },
+    {
       "name": "button_ok",
       "value": "ok"
     },
@@ -37,16 +45,36 @@
       "value": "Application status bar"
     },
     {
-      "name": "StatelessAbility_desc",
-      "value": "description"
-    },
-    {
-      "name": "StatelessAbility_label",
-      "value": "StatelessAbility"
-    },
-    {
       "name": "OpenNewWindow_label",
       "value": "OpenNewWindow"
+    },
+    {
+      "name": "camera",
+      "value": "Camera requires user_grant permission"
+    },
+    {
+      "name": "microphone",
+      "value": "Microphone requires user_grant permission"
+    },
+    {
+      "name": "access_pasteboard",
+      "value": "Pasteboard requires user_grant permission"
+    },
+    {
+      "name": "location",
+      "value": "Geolocation requires user_grant permission"
+    },
+    {
+      "name": "download_dir",
+      "value": "Download requires user_grant permission"
+    },
+    {
+      "name": "documents_dir",
+      "value": "Documents requires user_grant permission"
+    },
+    {
+      "name": "desktop_dir",
+      "value": "Desktop requires user_grant permission"
     }
   ]
 }

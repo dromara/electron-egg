@@ -12,15 +12,11 @@ import JsBindingUtils from '../utils/JsBindingUtils';
 import { MultiInputAdapter } from '../adapter/MultiInputAdapter';
 import { DragParamManager } from '../common/DragParamManager';
 import { window } from '@kit.ArkUI';
-import { CommandLineAdapter } from '../common/CommandLineAdapter';
-
 import { CommandType } from '../common/Constants';
 import { IMessageBoxParams } from '../adapter/DialogAdapter';
 import { MessageBox } from '../components/MessageBox';
 import { typeNode as TypedNode, NodeController, FrameNode } from '@ohos.arkui.node';
-
-import { DeviceInfoAdapter } from '../adapter/DeviceInfoAdapter';
-import { NativeThemeAdapter } from '../adapter/NativeThemeAdapter'
+import { CommandLineAdapter } from '../common/CommandLineAdapter';
 
 const TAG: string = 'WindowXComponentController';
 
@@ -49,21 +45,17 @@ class WindowNodeController extends NodeController {
   private xComponentController: XComponentController = new WindowXComponentController();
   private xComponent: TypedNode.XComponent | undefined = undefined;
   private config: ComponentConfig;
-  private deviceInfoAdapter: DeviceInfoAdapter | undefined = undefined;
   private kBundleInstallDir = 'bundle-installation-dir';
-  private xRootNode: FrameNode | undefined = undefined;
 
   constructor(config: ComponentConfig) {
     super();
     this.config = config;
     CommandLineAdapter.getInstance().appendArgs(this.config.cmdArgs);
     CommandLineAdapter.getInstance().appendSwitch(this.kBundleInstallDir, getContext().resourceDir);
-    this.deviceInfoAdapter = Inject.get(DeviceInfoAdapter);
   }
 
   makeNode(uiContext: UIContext): FrameNode | null {
     let node = new FrameNode(uiContext);
-    this.xRootNode = node;
     this.xComponent = TypedNode.createNode(uiContext, "XComponent", {
       type: XComponentType.SURFACE,
       controller: this.xComponentController
@@ -98,19 +90,14 @@ class WindowNodeController extends NodeController {
         height: prop.windowRect.height
       }
 
-      let statusBarHeight = 0;
-      if (this.deviceInfoAdapter?.isNormalWindowMode() && this.config.window) {
-        statusBarHeight = this.config.window.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect.height;
-      }
       let drawableRect: WindowBound = {
         left: prop.drawableRect.left,
-        top: prop.drawableRect.top + statusBarHeight,
+        top: prop.drawableRect.top,
         width: prop.drawableRect.width,
-        height: prop.drawableRect.height - statusBarHeight
+        height: prop.drawableRect.height
       }
 
-      let displayId = prop.displayId ?? ConfigData.INVALID_DISPLAY_ID;
-      this.config.nativeContext.OnWindowInitSize(windowRect, drawableRect, displayId);
+      this.config.nativeContext.OnWindowInitSize(windowRect, drawableRect, 0);
     }
 
     let state = this.config.window?.getWindowStatus();
@@ -119,26 +106,16 @@ class WindowNodeController extends NodeController {
     }
   }
 
-  disposeFrameNode () {
-      if (this.xRootNode !== null && this.xComponent !== null) {
-        this.xRootNode?.removeChild(this.xRootNode?.getChild(0));
-        this.xComponent?.dispose();
-        this.xRootNode?.dispose();
-      }
-  }
-
 }
 
 @Component
 export struct WebWindow {
   private static TAG: string = 'WebWindow';
+  @LocalStorageLink('statusBarHeight') statusBarHeight: number = 0;
   @LocalStorageLink('xcomponentId') xComponentId: string = '';
   @LocalStorageLink('startUri') startUri: string = '';
-  @LocalStorageLink('appId') appId: string = '';
   @LocalStorageLink('window') window: window.Window | undefined = undefined;
   @LocalStorageLink('cmdArgs') cmdArgs: string[] = [];
-  @LocalStorageLink('statusBarHeight') statusBarHeight: number = 0;
-  @LocalStorageLink('useDarkMode') useDarkMode: boolean = false;
   private XCOMPONENT_NAME: string = 'xcomponent';
   private MODULE_NAME: string = this.xComponentId + ':' + this.XCOMPONENT_NAME;
   private dragDropAdapter: DragDropAdapter = Inject.get(DragDropAdapter);
@@ -146,8 +123,6 @@ export struct WebWindow {
   private abilityManager = Inject.get(AbilityManager);
   private dragParamManager = Inject.get(DragParamManager);
   private nativeContext: NativeContext = JsBindingUtils.getNativeContext(ContextType.kMainProcess);
-  @State private bgColor: Color | string =
-    this.useDarkMode ? NativeThemeAdapter.DARK_BACKGROUND_COLOR : NativeThemeAdapter.LIGHT_BACKGROUND_COLOR;
 
   @State private messageBoxParams: IMessageBoxParams = {
     messageBoxSettings: undefined,
@@ -201,7 +176,6 @@ export struct WebWindow {
 
   aboutToDisappear(): void {
     this.dragParamManager.removeDragContextData(this.xComponentId);
-    this.windowNodeController.disposeFrameNode();
   }
 
   build() {
@@ -236,11 +210,7 @@ export struct WebWindow {
       .gesture(
         GestureGroup(GestureMode.Exclusive,
           TapGesture({ count: 2})
-            .onAction(() => {
-              // when double tap is triggered, we do nothing, because the event
-              // processing flow in Chromium will converts mouse and touch events to
-              // double tap events.
-            })
+            .onAction(() => {})
         )
       )
       .onDragEnter((event?: DragEvent) => {

@@ -9,6 +9,9 @@ import { BaseAdapter } from '../common/BaseAdapter';
 import LogMethod from '../common/LogDecorator';
 import LaunchHelper from '../utils/LaunchHelper';
 import { ContextAdapter } from './ContextAdapter';
+import LogUtil from '../utils/LogUtil';
+
+const TAG: string = 'ExternalProtocolAdapter';
 
 @injectable()
 export class ExternalProtocolAdapter extends BaseAdapter {

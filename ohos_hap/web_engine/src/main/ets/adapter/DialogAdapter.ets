@@ -10,7 +10,6 @@ import picker from '@ohos.file.picker';
 import { AbilityManager } from '../common/AbilityManager';
 import { BaseAdapter } from '../common/BaseAdapter';
 import { BusinessError } from '@ohos.base';
-import { fileUri } from '@kit.CoreFileKit';
 import { image } from '@kit.ImageKit';
 import { inject, injectable } from 'inversify';
 import { ContextAdapter } from './ContextAdapter';
@@ -84,7 +83,7 @@ export class DialogAdapter extends BaseAdapter {
       callback: callback
     };
     LogUtil.error(TAG, 'parentId ' + boxSettings.parent_id);
-    let parentId = boxSettings.parent_id === -1 ? this.ctxAdapter.getActiveWindow() : boxSettings.parent_id;
+    let parentId = boxSettings.parent_id === -1 ? 1 : boxSettings.parent_id;
     let messageBoxManager: MessageBoxData | undefined = this.abilityManager.getMessageBox(parentId);
     messageBoxManager?.setMessageBoxParams(params);
     messageBoxManager?.dialogController.open();
@@ -114,7 +113,7 @@ export class DialogAdapter extends BaseAdapter {
 
   @LogMethod
   showOpenDialog(settings: string, callback: (filePaths: string[], canceled: boolean) => void) {
-    LogUtil.info(TAG, '[CPM20251222017870] ShowOpenDialog ' + settings);
+    LogUtil.info(TAG, 'ShowOpenDialog ' + settings);
     let DocumentSelectOptions = new picker.DocumentSelectOptions();
     let dialogSettings: IOpenDialogSettings = JSON.parse(settings);
     if (dialogSettings.properties_open_directory) {
@@ -133,29 +132,29 @@ export class DialogAdapter extends BaseAdapter {
       DocumentSelectOptions.fileSuffixFilters = [allFileDescription + "|.*"];
     }
     let dirAndFile: string[] = this.handleDefaultPath(dialogSettings.default_path);
-    LogUtil.info(TAG, '[CPM20251222017870] showOpenDialog dirAndFile: ' + `${dirAndFile[0]}-${dirAndFile[1]}`);
+    LogUtil.info(TAG, 'showOpenDialog dirAndFile: ' + `${dirAndFile[0]}-${dirAndFile[1]}`);
     DocumentSelectOptions.defaultFilePathUri = dirAndFile[0];
     let documentPicker = new picker.DocumentViewPicker();
     documentPicker.select(DocumentSelectOptions).then((DocumentSelectResult: Array<string>) => {
-      LogUtil.info(TAG, '[CPM20251222017870] DocumentViewPicker.select successfully, DocumentSelectResult uri: ' + JSON.stringify(DocumentSelectResult));
+      LogUtil.info(TAG, 'DocumentViewPicker.select successfully, DocumentSelectResult uri: ' + JSON.stringify(DocumentSelectResult));
       if (DocumentSelectResult.length === 0) {
         callback([], true);
       } else {
         callback(DocumentSelectResult, false);
       }
     }).catch((err: BusinessError) => {
-      LogUtil.error(TAG, '[CPM20251222017870] DocumentViewPicker.select failed with err: ' + JSON.stringify(err));
+      LogUtil.error(TAG, 'DocumentViewPicker.select failed with err: ' + JSON.stringify(err));
       callback([], true);
     });
   }
 
   @LogMethod
   showSaveDialog(settings: string, callback: (filePath: string, canceled: boolean) => void) {
-    LogUtil.info(TAG, '[CPM20251222017870] ShowSaveDialog ' + settings);
+    LogUtil.info(TAG, 'ShowSaveDialog ' + settings);
     let dialogSettings: IOpenDialogSettings = JSON.parse(settings);
     let DocumentSaveOptions = new picker.DocumentSaveOptions();
     let dirAndFile: string[] = this.handleDefaultPath(dialogSettings.default_path);
-    LogUtil.info(TAG, '[CPM20251222017870] ShowSaveDialog dirAndFile: ' + `${dirAndFile[0]}-${dirAndFile[1]}`);
+    LogUtil.info(TAG, 'ShowSaveDialog dirAndFile: ' + `${dirAndFile[0]}-${dirAndFile[1]}`);
     DocumentSaveOptions.defaultFilePathUri = dirAndFile[0];
     DocumentSaveOptions.newFileNames = [`${dirAndFile[1]}`];
     const context = this.ctxAdapter.getContext();
@@ -167,14 +166,14 @@ export class DialogAdapter extends BaseAdapter {
     }
     let documentPicker = new picker.DocumentViewPicker();
     documentPicker.save(DocumentSaveOptions).then((DocumentSaveResult: Array<string>) => {
-      LogUtil.info(TAG, '[CPM20251222017870] DocumentViewPicker.save successfully, DocumentSaveResult uri: ' + JSON.stringify(DocumentSaveResult));
+      LogUtil.info(TAG, 'DocumentViewPicker.save successfully, DocumentSaveResult uri: ' + JSON.stringify(DocumentSaveResult));
       if (DocumentSaveResult.length === 0) {
         callback('', true);
       } else {
         callback(DocumentSaveResult[0], false);
       }
     }).catch((err: BusinessError) => {
-      LogUtil.error(TAG, '[CPM20251222017870] DocumentViewPicker.save failed with err: ' + JSON.stringify(err));
+      LogUtil.error(TAG, 'DocumentViewPicker.save failed with err: ' + JSON.stringify(err));
       callback('', true);
     });
   }
@@ -183,26 +182,26 @@ export class DialogAdapter extends BaseAdapter {
     let dirAndFile: string[] = [DialogAdapter.DEFAULT_DIR, ''];
     try {
       let path: string = default_path.trim();
-      let uri = fileUri.getUriFromPath(path);
-      let exist = fs.accessSync(path);
-      let fileNameIndex: number = path.lastIndexOf('/');
-      let fileUriIndex: number = uri.lastIndexOf('/');
-      let dirPath: string = path.slice(0, fileNameIndex);
-      let dirUri: string = uri.slice(0, fileUriIndex);
-      let fileName: string = path.slice(fileNameIndex + 1);
-      if (!exist) {
-        if (fs.accessSync(dirPath)) {
-          dirAndFile[0] = dirUri;
-        }
-        dirAndFile[1] = fileName;
-      } else {
-        let stat = fs.statSync(path);
+      const prefix =  'file://docs/'
+      const isFileUri = path.startsWith(prefix);
+      const protocolPrefix = isFileUri ? prefix : '';
+      let pathWithoutProtocol = isFileUri ? path.substring(prefix.length) : path;
+      let displayPathWithoutProtocol = decodeURIComponent(pathWithoutProtocol)
+      let exist = fs.accessSync(displayPathWithoutProtocol);
+      if(exist) {
+        const lastSlashIdx = displayPathWithoutProtocol.lastIndexOf('/');
+        const dirPart = displayPathWithoutProtocol.substring(0, lastSlashIdx);
+        const targetPartUri = pathWithoutProtocol.substring(lastSlashIdx + 1);
+        let stat = fs.statSync(displayPathWithoutProtocol);
         if (stat.isDirectory()) {
-          dirAndFile[0] = uri;
+          dirAndFile[0] = protocolPrefix + dirPart + '/' + targetPartUri;
+          dirAndFile[1] = '';
         } else if (stat.isFile()) {
-          dirAndFile[0] = dirUri;
-          dirAndFile[1] = fileName;
+          dirAndFile[0] = protocolPrefix + dirPart
+          dirAndFile[1] = targetPartUri
         }
+      } else {
+        LogUtil.error(TAG, 'accessSync file failed, path: ' + displayPathWithoutProtocol + 'not exist');
       }
     } catch (err) {
       LogUtil.error(TAG, 'handleDefaultPath failed with err: ' + JSON.stringify(err));

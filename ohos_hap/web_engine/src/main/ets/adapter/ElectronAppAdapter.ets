@@ -6,12 +6,11 @@ import { injectable, inject } from 'inversify';
 import bundleManager from '@ohos.bundle.bundleManager';
 import { BusinessError } from '@ohos.base';
 import I18n from '@ohos.i18n';
-import { autoStartupManager, common, Want } from '@kit.AbilityKit';
+import { common, Want } from '@kit.AbilityKit';
 
 import { AbilityManager } from '../common/AbilityManager';
 import { BaseAdapter } from '../common/BaseAdapter';
 import { ContextAdapter } from './ContextAdapter';
-import { deviceInfo } from '@kit.BasicServicesKit';
 import { notificationManager } from '@kit.NotificationKit';
 import LogUtil from '../utils/LogUtil';
 import LogMethod from '../common/LogDecorator';
@@ -25,7 +24,6 @@ export class ElectronAppAdapter extends BaseAdapter {
   private bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
                         bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
   private ctxAdapter: ContextAdapter;
-  private appProvisionType: string = "release";
 
   constructor(
     @inject(ContextAdapter) ctxAdapter: ContextAdapter,
@@ -37,7 +35,6 @@ export class ElectronAppAdapter extends BaseAdapter {
     try {
       let data = bundleManager.getBundleInfoForSelfSync(this.bundleFlags);
       this.bundleName = data.name;
-      this.appProvisionType = data.appInfo.appProvisionType;
     } catch (err) {
       let message = (err as BusinessError).message;
       LogUtil.error(TAG, `getBundleInfoForSelfSync failed.: ${message}`);
@@ -121,32 +118,6 @@ export class ElectronAppAdapter extends BaseAdapter {
   }
 
   @LogMethod
-  setLoginItemSettings(): void {
-    let context = this.ctxAdapter.getActiveContext() as common.UIAbilityContext;
-    context.startAbility({
-      bundleName: 'com.huawei.hmos.settings',
-      abilityName: 'com.huawei.hmos.settings.MainAbility',
-      uri: 'pc_app_setup_settings'
-    });
-  }
-
-  @LogMethod
-  getLoginItemSettings(callback: Function): void {
-    if (deviceInfo.sdkApiVersion >= 21) {
-      autoStartupManager.getAutoStartupStatusForSelf().then((isAutoStartup: boolean) => {
-        LogUtil.info(TAG, `getAutoStartupStatusForSelf success, isAutoStartup: ${JSON.stringify(isAutoStartup)}.`);
-        callback(isAutoStartup);
-      }).catch((err: BusinessError) => {
-        LogUtil.error(TAG, `getAutoStartupStatusForSelf failed, err code: ${err.code}, err msg: ${err.message}.`);
-        callback(false);
-      });
-    } else {
-      LogUtil.error(TAG, `getAutoStartupStatusForSelf requires a higher SDK version.`);
-      callback(false);
-    }
-  }
-
-  @LogMethod
   setBadgeCount(count: number): void {
     notificationManager.setBadgeNumber(count).then(() => {
       LogUtil.debug(TAG, "setBadgeNumber success");
@@ -155,9 +126,4 @@ export class ElectronAppAdapter extends BaseAdapter {
     });
   }
 
-  @LogMethod
-  getPackagePublicInfo(): string {
-    LogUtil.info(TAG, `getPackagePublicInfo success: ${this.appProvisionType}.`);
-    return this.appProvisionType;
-  }
 };

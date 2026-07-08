@@ -121,15 +121,6 @@ export class SystemFloatingWindowAdapter extends BaseWindowAdapter {
           this.nativeContext.OnWindowDisplayIdChange(param.window_id, displayId);
         });
       } catch (exception) {
-        LogUtil.info(TAG, `register displayIdChange listener fail, xcomponentId:${this.xcomponentId},
-                      exception: ${JSON.stringify(exception)}`);
-      }
-
-      try {
-        data.on('displayIdChange', (displayId) => {
-          this.nativeContext.OnWindowDisplayIdChange(param.window_id, displayId);
-        });
-      } catch (exception) {
         LogUtil.error(TAG, `register displayIdChange listener fail, xcomponentId:${param.window_id},
                       exception: ${JSON.stringify(exception)}`);
       }
@@ -239,21 +230,6 @@ export class SystemFloatingWindowAdapter extends BaseWindowAdapter {
   }
 
   @LogMethod
-  setEnabled(enable: boolean, id: number): boolean {
-    let windowClass = this.systemFloatingWindowManager.getWindow(id);
-    if (!windowClass) {
-      LogUtil.error(TAG, 'Failed to obtain the system float window.');
-      return false;
-    }
-    windowClass.setWindowTouchable(enable)
-      .catch((err: BusinessError) => {
-        LogUtil.error(TAG, 'Failed to set the window to be touchable. Cause:' + JSON.stringify(err));
-        return false;
-      });
-    return true;
-  }
-
-  @LogMethod
   setWindowLimits(minWidth: number,
                   minHeight: number,
                   maxWidth: number,
@@ -290,8 +266,8 @@ export class SystemFloatingWindowAdapter extends BaseWindowAdapter {
   }
 
   @LogMethod
-  getOriginWindowId(windowId?: number): number {
-    if (!windowId) {
+  override getOriginWindowId(windowId?: number): number {
+    if (windowId === undefined) {
       return -1;
     }
     try {
@@ -304,21 +280,6 @@ export class SystemFloatingWindowAdapter extends BaseWindowAdapter {
       LogUtil.error(TAG, `getOriginWindowId failed, windowId:${windowId}, message:: ${message}`);
     }
     return -1;
-  }
-
-  @LogMethod
-  setWindowShadow(id: number, hasShadow: boolean) {
-    let windowClass = this.abilityManager.getProxy(id)?.getWindow();
-    if (windowClass === undefined) {
-      LogUtil.error(TAG, `setWindowShadow fail, window is not exist! windowId: ${id}, hasShadow: ${hasShadow}`);
-      return;
-    }
-    const radius: number = hasShadow ? 15 : 0;
-    if (deviceInfo.sdkApiVersion >= 17) {
-      windowClass.setWindowShadowRadius(radius);
-    } else {
-      LogUtil.error(TAG, 'setWindowShadow fail, sdkApiVersion is less than 17');
-    }
   }
 
   private adjustBounds(bounds: WindowBound): WindowBound {

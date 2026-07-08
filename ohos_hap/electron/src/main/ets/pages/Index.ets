@@ -5,10 +5,6 @@
 import { WebWindow } from 'web_engine';
 import { KeyCode } from '@kit.InputKit';
 import CustomChildProcess from '../process/CustomChildProcess';
-import LogUtil from 'web_engine/src/main/ets/utils/LogUtil';
-import { uiObserver } from '@kit.ArkUI';
- 
-const TAG: string = 'Index';
  
 interface IStyleData {
   backgroundColor: string,
@@ -39,26 +35,17 @@ struct Index {
   @State private backgroundColor_: string = `#${this.initStyle.backgroundColor}`;
   @State private opacity_: number = this.initStyle.opacity;
 
-  @LocalStorageProp('statusBarHeight') statusBarHeight: number = 0;
-  @State density: number = 0;
-
   aboutToAppear() {
     // registerUpdateStyleFunction
     this.updateStyle.registerUpdateStyleFunction(this.xcomponentId, this.initStyle, (style: IStyleData) => {
       this.backgroundColor_ = `#${style.backgroundColor}`;
       this.opacity_ = style.opacity;
     });
-
-    uiObserver.on('densityUpdate', this.getUIContext(), (info: uiObserver.DensityInfo) => {
-      this.density = info.density;
-    });
   }
 
   aboutToDisappear() {
     // removeUpdateStyleFunction
     this.updateStyle.removeUpdateStyleFunction(this.xcomponentId);
-
-    uiObserver.off('densityUpdate', this.getUIContext());
   }
 
   build() {
@@ -75,13 +62,5 @@ struct Index {
     .opacity(this.opacity_)
     .width('100%')
     .height('100%')
-    .padding({
-      top: this.getStatusBarHeight(),
-    })
-  }
-  
-  getStatusBarHeight(): number {
-    LogUtil.info(TAG, 'Avoidance function, statusBarHeight:' + this.statusBarHeight + ',density:' + this.density);
-    return this.getUIContext().px2vp(this.statusBarHeight);
   }
 }

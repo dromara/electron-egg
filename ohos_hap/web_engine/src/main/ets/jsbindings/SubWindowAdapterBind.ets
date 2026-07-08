@@ -15,10 +15,6 @@ function createSubWindow(param: NewWindowParam) {
   implSubWindowAdapter().createSubWindow(param)
 }
 
-function reuseSubWindow(param: NewWindowParam): string {
-  return implSubWindowAdapter().reuseSubWindow(param);
-}
-
 function showSubWindow(id: string) {
   implSubWindowAdapter().showSubWindow(id);
 }
@@ -33,6 +29,10 @@ function cancelSubWindow(id: string) {
 
 function setSubWindowBounds(id: string, r: WindowBound) {
   implSubWindowAdapter().setSubWindowBounds(id, r);
+}
+
+function reuseSubWindow(param: NewWindowParam): string {
+  return implSubWindowAdapter().reuseSubWindow(param);
 }
 
 export class SubWindowAdapterBind {

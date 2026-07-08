@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import { WindowBound } from '../interface/CommonInterface';
+
 export default class CheckEmptyUtils {
   /**
    * Check obj is empty.
@@ -32,4 +34,14 @@ export default class CheckEmptyUtils {
   static isEmptyArr<T>(arr: T[]): boolean {
     return arr === undefined || arr === null || arr.length === 0;
   }
+
+  /**
+   * Check window bounds is empty.
+   *
+   * @param {WindowBound} bounds A window bounds to check if is empty.
+   * @return {boolean} true(empty)
+   */
+  static isWindowBoundsEmpty(bounds: WindowBound): boolean{
+    return bounds.width === 0 || bounds.height === 0;
+  }  
 };

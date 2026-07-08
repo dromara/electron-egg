@@ -141,12 +141,6 @@ export class WebBaseExtensionAbility extends EmbeddedUIExtensionAbility implemen
     return -1;
   }
 
-  isUIAbility(): boolean {
-    return false;
-  }
-
-  setDeviceModeChangeEvent(deviceModeChangeEvent: ChangeEventType | undefined) {}
-
   getWindowPreferences(): WindowPreferences {
     return {
       hideTitleBar: this.hideTitleBar,
@@ -163,5 +157,11 @@ export class WebBaseExtensionAbility extends EmbeddedUIExtensionAbility implemen
     this.closable = preferences.closable;
   }
 
+  isUIAbility(): boolean {
+    return false;
+  }
+
   updateAvoidAreaStatus(isFullScreen: boolean) {}
+
+  setDeviceModeChangeEvent(deviceModeChangeEvent: ChangeEventType | undefined) {}
 };

@@ -31,6 +31,36 @@ export class ContextPathAdapter extends BaseAdapter {
   }
 
   @LogMethod
+  getCacheDir(): string {
+    return this.ctxAdapter.getActiveContext()?.cacheDir || "";
+  }
+
+  @LogMethod
+  getFilesDir(): string {
+    return this.ctxAdapter.getActiveContext()?.filesDir || "";
+  }
+
+  @LogMethod
+  getTempDir(): string {
+    return this.ctxAdapter.getActiveContext()?.tempDir || "";
+  }
+
+  @LogMethod
+  getUserDocumentDir(): string {
+    return "";
+  }
+
+  @LogMethod
+  getUserDesktopDir(): string {
+    return "";
+  }
+
+  @LogMethod
+  getUserDownloadDir(): string {
+    return "";
+  }
+
+  @LogMethod
   showSystemSettings(uri_value: string, subUri?: string): void {
     let want: Want = {
       bundleName: 'com.huawei.hmos.settings',

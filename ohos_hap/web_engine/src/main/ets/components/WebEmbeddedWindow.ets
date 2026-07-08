@@ -12,6 +12,7 @@ import { MultiInputAdapter } from '../adapter/MultiInputAdapter';
 import { DragParamManager } from '../common/DragParamManager';
 import { UIExtensionContentSession } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
+import { CommandLineAdapter } from '../common/CommandLineAdapter';
 
 @Component
 export struct WebEmbeddedWindow {
@@ -28,6 +29,7 @@ export struct WebEmbeddedWindow {
   private nativeContext: NativeContext = JsBindingUtils.getNativeContext(ContextType.kMainProcess);
   private multiInputAdapter: MultiInputAdapter = Inject.get(MultiInputAdapter);
   private dragParamManager = Inject.get(DragParamManager);
+  private kBundleInstallDir = 'bundle-installation-dir';
 
   aboutToAppear(): void {
     this.dragParamManager.addDragContextData({
@@ -101,7 +103,8 @@ export struct WebEmbeddedWindow {
         LogUtil.info(WebEmbeddedWindow.TAG, 'onLoad xComponentId:' + this.xComponentId);
         if (this.xComponentId === ConfigData.DEFAULT_WINDOW_ID) {
           this.setDefaultBounds();
-          let vec_args = this.buildArgs();
+          CommandLineAdapter.getInstance().appendSwitch(this.kBundleInstallDir, getContext().resourceDir);
+          let vec_args = CommandLineAdapter.getInstance().getArgs();
           this.nativeContext.runBrowser(vec_args);
         } else {
           this.nativeContext.ExecuteCommand(
@@ -151,13 +154,4 @@ export struct WebEmbeddedWindow {
     }
   }
 
-  private buildArgs(): string[] {
-    let default_uri = '';
-    if (this.startUri.length !== 0) {
-      default_uri = this.startUri;
-    }
-    let resDir = '--bundle-installation-dir=' + getContext().resourceDir;
-    let vec_args = [resDir, default_uri];
-    return vec_args;
-  }
 }

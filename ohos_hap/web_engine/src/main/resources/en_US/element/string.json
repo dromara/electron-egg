@@ -69,6 +69,10 @@
       "value": "Screen Capture requires user_grant permission"
     },
     {
+      "name": "screenshot",
+      "value": "Screenshot requires user_grant permission"
+    },
+    {
       "name": "pasteBoard_dialog_title",
       "value": "Unable to access system clipboard"
     },
@@ -89,6 +93,14 @@
       "value": "Go to System Settings"
     },
     {
+      "name": "file_name_str",
+      "value": "File Name:"
+    },
+    {
+      "name": "file_size_str",
+      "value": "File Size:"
+    },
+    {
       "name": "dialog_cancel_button",
       "value": "cancel"
     },
@@ -107,22 +119,6 @@
     {
       "name": "installation_not_supported",
       "value": "Installation of this format file is not supported"
-    },
-    {
-      "name": "add_failed_tip",
-      "value": "Add failed"
-    },
-    {
-      "name": "file_name_str",
-      "value": "File Name:"
-    },
-    {
-      "name": "file_size_str",
-      "value": "File Size:"
-    },
-    {
-      "name": "screenshot",
-      "value": "Screenshot requires user_grant permission"
     }
   ]
 }

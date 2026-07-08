@@ -15,8 +15,13 @@ function setActiveWindow(id: string) {
   implContextAdapter().setActiveWindow(id);
 }
 
+function isPadNormalModel(): boolean {
+  return implContextAdapter().isPadNormalModel();
+}
+
 export class ContextAdapterBind {
   static bind() {
     JsBindingUtils.bindFunction("ContextAdapter.SetActiveWindow", setActiveWindow);
+    JsBindingUtils.bindFunction("ContextAdapter.IsPadNormalModel", isPadNormalModel);
   }
 }

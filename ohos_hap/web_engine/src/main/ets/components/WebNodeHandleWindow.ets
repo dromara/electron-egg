@@ -26,7 +26,7 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 import { NativeContext, WindowBound } from '../interface/CommonInterface';
 import LogUtil from '../utils/LogUtil';
 import JsBindingUtils from '../utils/JsBindingUtils';
@@ -39,7 +39,6 @@ import { CommandLineAdapter } from '../common/CommandLineAdapter';
 import { MessageBox } from '../components/MessageBox';
 import { IMessageBoxParams } from '../adapter/DialogAdapter';
 import { AbilityManager } from '../common/AbilityManager';
-import { DeviceInfoAdapter } from '../adapter/DeviceInfoAdapter';
 
 @Component
 export struct WebNodeHandleWindow {
@@ -53,10 +52,9 @@ export struct WebNodeHandleWindow {
   private nativeContext: NativeContext = JsBindingUtils.getNativeContext(ContextType.kMainProcess);
   private nodeHandleManager = Inject.get(NodeHandleManager);
   private contextAdapter = Inject.get(ContextAdapter);
-  private deviceInfoAdapter =  Inject.get(DeviceInfoAdapter);
-  @State nodeContent: NodeContent = new NodeContent();
-  private kBundleInstallDir = 'bundle-installation-dir';
   private abilityManager = Inject.get(AbilityManager);
+  private kBundleInstallDir = 'bundle-installation-dir';
+  @State nodeContent: NodeContent = new NodeContent();
   @State private messageBoxParams: IMessageBoxParams = {
     messageBoxSettings: undefined,
     icon: undefined,
@@ -88,7 +86,7 @@ export struct WebNodeHandleWindow {
   }
 
   aboutToAppear(): void {
-    LogUtil.info(WebNodeHandleWindow.TAG, 'WebNodeHandleWindow aboutToAppear ' + this.xComponentId);
+    LogUtil.error(WebNodeHandleWindow.TAG, 'WebNodeHandleWindow aboutToAppear ' + this.xComponentId);
     this.nodeHandleManager.addNodeContent(this.xComponentId, this.nodeContent);
     this.nativeContext.OnAbilityStartedCB(this.xComponentId);
     this.contextAdapter.setActiveWindow(this.xComponentId);
@@ -97,6 +95,7 @@ export struct WebNodeHandleWindow {
       setMessageBoxParams: this.setMessageBoxParams(),
       dialogController: this.dialogController
     });
+
     this.setDefaultBounds();
     CommandLineAdapter.getInstance().appendArgs(this.cmdArgs);
     CommandLineAdapter.getInstance().appendSwitch(this.kBundleInstallDir, getContext().resourceDir);
@@ -126,14 +125,6 @@ export struct WebNodeHandleWindow {
         height: prop.windowRect.height
       }
 
-      if (this.deviceInfoAdapter?.isNormalWindowMode() && this.window) {
-        try {
-          this.statusBarHeight = this.window.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect.height;
-        } catch (error) {
-          LogUtil.error(WebNodeHandleWindow.TAG, `getWindowAvoidArea error, error = ${JSON.stringify(error)}`);
-        }
-      }
-
       let drawableRect: WindowBound = {
         left: prop.drawableRect.left,
         top: prop.drawableRect.top + this.statusBarHeight,
@@ -149,4 +140,5 @@ export struct WebNodeHandleWindow {
       this.nativeContext.OnWindowInitState(state);
     }
   }
+ 
 }

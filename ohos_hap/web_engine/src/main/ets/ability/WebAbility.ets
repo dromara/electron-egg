@@ -2,42 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import AbilityConstant from '@ohos.app.ability.AbilityConstant';
-import CheckEmptyUtils from '../utils/CheckEmptyUtils';
-import Inject from '../common/InjectModule';
 import LogUtil from '../utils/LogUtil';
 import window from '@ohos.window';
 import Want from '@ohos.app.ability.Want';
-import { AbilityManager } from '../common/AbilityManager';
-import { AppLifecycleAdapter } from '../adapter/AppLifecycleAdapter';
-import { BrowserCloseResponse, CaptionButtonRect, WindowBound, WindowLimits, IWebAppInfo } from '../interface/CommonInterface';
-import { BusinessError, deviceInfo, settings } from '@kit.BasicServicesKit';
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import { ContextAdapter } from '../adapter/ContextAdapter';
-import { CommandType, ConfigData, WebStatus } from '../common/Constants';
-import { Configuration } from '@ohos.app.ability.Configuration';
-import { common, ConfigurationConstant } from '@kit.AbilityKit';
-import { DeviceInfoAdapter } from '../adapter/DeviceInfoAdapter';
+import { deviceInfo, settings } from '@kit.BasicServicesKit';
 import { DisplayAdapter } from  '../adapter/DisplayAdapter';
 import { NativeThemeAdapter } from '../adapter/NativeThemeAdapter';
-import { PermissionManagerAdapter } from '../adapter/PermissionManagerAdapter';
-import { WindowStyle, IStyleData, IUpdateStyle } from '../common/WindowStyle';
+import { AbilityManager } from '../common/AbilityManager';
+import { Configuration } from '@ohos.app.ability.Configuration';
+import Inject from '../common/InjectModule';
+import { CaptionButtonRect, WindowBound, WinLimits, WindowStatus } from '../interface/CommonInterface';
+import CheckEmptyUtils from '../utils/CheckEmptyUtils';
 import { WebBaseAbility } from './WebBaseAbility';
-import lazy { GlobalThisHelper } from '../utils/GlobalThisHelper';
-import { image } from '@kit.ImageKit';
-import { kvManager, KVStoreInterface } from '../utils/KVStore';
+import { WindowStyle, IStyleData, IUpdateStyle } from '../common/WindowStyle';
+import { CommandType, ConfigData } from '../common/Constants';
+import { PermissionManagerAdapter } from '../adapter/PermissionManagerAdapter';
+import { abilityManager, ConfigurationConstant } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 const TAG: string = 'WebAbility';
 
 export class WebAbility extends WebBaseAbility {
   private static WINDOW_CLOSE: number = 1000;
-  private static SLEEP_INTERVAL_MS = 10;
-  private static MAXIMUM_NUM_OF_SLEEP_CYCLES = 250;
   private abilityManager: AbilityManager | undefined = undefined;
   private displayAdapter : DisplayAdapter | undefined = undefined;
   private nativeThemeAdapter: NativeThemeAdapter | undefined = undefined;
   private contextAdapter: ContextAdapter | undefined = undefined;
-  private deviceInfoAdapter: DeviceInfoAdapter | undefined = undefined;
-  private appLifecycleAdapter: AppLifecycleAdapter | undefined = undefined;
 
   onConfigurationUpdate(config: Configuration) {
     if (config.colorMode !== undefined) {
@@ -50,58 +42,17 @@ export class WebAbility extends WebBaseAbility {
     }
   }
 
-  private async getWebappInfo() : Promise<IWebAppInfo | undefined> {
-    const appIdPrefix: string = "--app-id=";
-    let key = this.appId.startsWith(appIdPrefix) ? this.appId.substring(appIdPrefix.length) : this.appId;
-    const kvStore: KVStoreInterface | undefined = await kvManager.getKVStore('webapp');
-    const webappInfo: string | undefined = await kvStore?.getData(key);
-    if (!webappInfo) {
-      return Promise.resolve(undefined);
-    }
-    return Promise.resolve(JSON.parse(webappInfo));
-  }
-
-  private async updateWebAppIcon() {
-    const webAppInfo = await this.getWebappInfo();
-    const icon = webAppInfo?.icon;
-    const label = webAppInfo?.label;
-    const openAsWindow = webAppInfo?.openAsWindow;
-
-    if (icon && label && openAsWindow) {
-      const imageSource = image.createImageSource(icon);
-      if (!imageSource) {
-        LogUtil.error(TAG, 'imageSource invaild');
-        return;
-      }
-
-      try {
-        const pixelMap: image.PixelMap = await imageSource.createPixelMap();
-        await this.context.setAbilityInstanceInfo(label, pixelMap);
-      } catch (err) {
-        LogUtil.error(TAG, `setAbilityInstanceInfo failed, code is ${err.code}, message is ${err.message}`);
-      }
-    }
-  }
-
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam) {
     LogUtil.info(TAG, '[ohoswindow] in WebAbility onCreate.');
+    this.checkInstanceLimit();
+
     super.onCreate(want, launchParam);
-    kvManager.init(this.context);
-    this.updateWebAppIcon();
 
     this.abilityManager = Inject.get(AbilityManager);
-    this.displayAdapter = Inject.get(DisplayAdapter);
     this.nativeThemeAdapter = Inject.get(NativeThemeAdapter);
     this.contextAdapter = Inject.get(ContextAdapter);
 
     Inject.get(PermissionManagerAdapter).initPermissions();
-
-    this.deviceInfoAdapter = Inject.get(DeviceInfoAdapter);
-    this.appLifecycleAdapter = Inject.get(AppLifecycleAdapter);
-    if (this.appLifecycleAdapter?.getWebStatus() === WebStatus.kDestroy) {
-      LogUtil.warn(TAG, 'app already exit and close this window widget_id:' + this.xcomponentId);
-      this.closeWindow();
-    }
   }
 
   onWindowStageCreate(windowStage: window.WindowStage) {
@@ -124,13 +75,12 @@ export class WebAbility extends WebBaseAbility {
       try {
         data.on('windowStatusChange', (status) => {
           this.nativeContext.OnWindowStatusChange(this.xcomponentId, status);
-
           if (status === window.WindowStatusType.MINIMIZE || this.deviceModeChangeEvent === undefined) {
             return;
           }
           LogUtil.info(TAG, 'Send device mode change event, xcomponentId: ' +
-          this.xcomponentId + ', deviceModeChangeEvent: ' +
-          this.deviceModeChangeEvent + ', status: ' + status);
+                            this.xcomponentId + ', deviceModeChangeEvent: ' +
+                            this.deviceModeChangeEvent + ', status: ' + status);
           this.nativeContext.OnDeviceModeChange(this.xcomponentId, this.deviceModeChangeEvent, status);
           this.setDeviceModeChangeEvent(undefined);
         })
@@ -157,20 +107,11 @@ export class WebAbility extends WebBaseAbility {
         data.on("windowRectChange", (option) => {
           const prop = data.getWindowProperties();
           const rect = option.rect;
-          let statusBarHeight = 0;
-          if (this.deviceInfoAdapter?.isNormalWindowMode()) {
-            statusBarHeight = data.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM).topRect.height;
-            //The current system has a timing issue where the drawableRect lags in updating during mode switching.
-            //Here, when switching to normal mode, the drawableRect is set to 0
-            //to temporarily maintain normal performance until the issue is resolved.
-            prop.drawableRect.height = prop.drawableRect.height + prop.drawableRect.top;
-            prop.drawableRect.top = 0;
-          }
           let windowBound: window.Rect = {
             left: rect.left + prop.drawableRect.left,
-            top: rect.top + prop.drawableRect.top + statusBarHeight,
+            top: rect.top + prop.drawableRect.top,
             width: rect.width - prop.drawableRect.left - prop.drawableRect.left,
-            height: rect.height - prop.drawableRect.left - prop.drawableRect.top - statusBarHeight,
+            height: rect.height - prop.drawableRect.left - prop.drawableRect.top,
           };
           this.nativeContext.OnWindowRectChange(this.xcomponentId,
             windowBound,
@@ -203,7 +144,7 @@ export class WebAbility extends WebBaseAbility {
           this.nativeContext.OnWindowVisibilityChange(this.xcomponentId, visible);
         });
       } catch (exception) {
-        LogUtil.error(TAG, 'Failed to register callback: ' + JSON.stringify(exception));
+       LogUtil.error(TAG, 'Failed to register callback: ' + JSON.stringify(exception));
       }
 
       try {
@@ -222,38 +163,63 @@ export class WebAbility extends WebBaseAbility {
         LogUtil.error(TAG, `register displayIdChange listener fail, xcomponentId:${this.xcomponentId},
                       exception: ${JSON.stringify(exception)}`);
       }
+
+      if (this.initStatus === WindowStatus.MAXIMIZE &&
+        data.getWindowStatus() !== window.WindowStatusType.MAXIMIZE) {
+        data.maximize(window.MaximizePresentation.EXIT_IMMERSIVE).then(() => {
+          LogUtil.warn(TAG,
+            `[ohoswindow] Window starts maximized.`);
+        }).catch((err: BusinessError) => {
+          LogUtil.error(TAG,
+            `[ohoswindow] Window fails to start from {${data.getWindowStatus()}} to maximized. Cause:` +
+            JSON.stringify(err));
+        });
+      }
+
+      if (deviceInfo.deviceType === "tablet") {
+        try {
+          let isLayoutFullScreen = true;
+          data.setWindowLayoutFullScreen(isLayoutFullScreen)
+            .then(() => {
+              LogUtil.info(TAG, 'Succeeded in setting the window layout to full-screen mode.');
+            })
+            .catch((err: BusinessError) => {
+              LogUtil.error(TAG, 'Failed to set the window layout to full-screen mode. Cause:' + JSON.stringify(err));
+            });
+          let promise = data.setSpecificSystemBarEnabled('status', false);
+          promise.then(() => {
+            LogUtil.info(TAG, 'Succeeded in setting the system bar to be invisible.');
+          }).catch((err: BusinessError) => {
+            LogUtil.error(TAG,
+              `Failed to set the system bar to be invisible. Cause code: ${err.code}, message: ${err.message}`);
+          });
+          let sysBarProps: window.SystemBarProperties = {
+            statusBarColor: '#0000FF00',
+            navigationBarColor: '#0000FF00',
+          };
+          data.setWindowSystemBarProperties(sysBarProps)
+            .then(() => {
+              LogUtil.info(TAG, 'Succeeded in setting the system bar properties.');
+            })
+            .catch((err: BusinessError) => {
+              LogUtil.error(TAG, 'Failed to set the system bar properties. Cause: ' + JSON.stringify(err));
+            });
+        } catch (exception) {
+          LogUtil.error(TAG, 'Failed to set window status on pad onWindowStageCreate');
+        }
+      }
     });
-
-    try {
-      windowStage.on("windowStageEvent", (event) => {
-        if (event === window.WindowStageEventType.ACTIVE) {
-          if (!GlobalThisHelper.isWebappWindow(this.xcomponentId)) {
-            GlobalThisHelper.pushActiveBrowserId(this.xcomponentId);
-          }
-        }
-      });
-    } catch (exception) {
-      LogUtil.error(TAG, 'Failed to register windowStageEvent callback: ' + JSON.stringify(exception));
-    }
-
-    this.getWebappInfo()
-      .then((info) => {
-        if (info?.openAsWindow) {
-          GlobalThisHelper.addWindowTypeRec(this.xcomponentId, this.appId);
-        }
-      });
 
     const para: Record<string, Object | string[] | IUpdateStyle> = {
       'xcomponentId': this.xcomponentId,
       'startUri': this.startUri,
+      'appId': this.appId,
       'cmdArgs': this.cmdArgs,
+      'window': windowStage.getMainWindowSync(),
       'updateStyle': {
         'registerUpdateStyleFunction': WindowStyle.registerUpdateStyleFunction,
         'removeUpdateStyleFunction': WindowStyle.removeUpdateStyleFunction
-      },
-      'window': windowStage.getMainWindowSync(),
-      'useDarkMode': this.needDarkMode(),
-      'appId': this.appId,
+      }
     };
     let storage: LocalStorage = new LocalStorage(para);
     windowStage.loadContent(this.getContentPath(), storage, (err, data) => {
@@ -263,29 +229,23 @@ export class WebAbility extends WebBaseAbility {
       }
 
       let window: window.Window = windowStage.getMainWindowSync();
+      // hide title bar
+      window.setWindowDecorVisible(!this.hideTitleBar);
+      if (this.useDarkMode) {
+        this.setDarkModeButton(window);
+      }
+      this.maximizable = this.maximizable && !this.hideTitleBar;
+      this.minimizable = this.minimizable && !this.hideTitleBar;
+      this.closable = this.closable && !this.hideTitleBar;
+      window.setWindowTitleButtonVisible(this.maximizable, this.minimizable, this.closable);
+      window.setResizeByDragEnabled(this.resizable);
 
       let isPCStatus = settings.getValueSync(this.context, 'isSystemModePc', '', settings.domainName.USER_PROPERTY);
       if (deviceInfo.deviceType === 'tablet' && isPCStatus !== 'true') {
         this.onPadWindowStageCreate(window, storage);
       }
 
-      // hide title bar
-      window.setWindowDecorVisible(!this.hideTitleBar);
-
-      if (this.useDarkMode && deviceInfo.deviceType === '2in1') {
-        let buttonStyle: window.DecorButtonStyle = {
-          colorMode: ConfigurationConstant.ColorMode.COLOR_MODE_DARK
-        };
-        window.setDecorButtonStyle(buttonStyle);
-      } else if (this.useDarkMode) {
-        this.setDarkModeButton(window);
-      }
-      this.maximizable = this.maximizable && !this.hideTitleBar;
-      this.minimizable = this.minimizable && !this.hideTitleBar;
-      this.closable = this.closable && !this.hideTitleBar;
-      window.setResizeByDragEnabled(this.resizable);
-      if (this.deviceInfoAdapter?.isNormalWindowMode() === false) {
-        window.setWindowTitleButtonVisible(this.maximizable, this.minimizable, this.closable);
+      if (this.contextAdapter?.isPadNormalModel() === false) {
         window.setWindowTitleMoveEnabled(!this.hideTitleBar);
         windowStage.setWindowModal(this.isModal);
         if (this.isPanel)
@@ -297,16 +257,12 @@ export class WebAbility extends WebBaseAbility {
       // window title button rect change callback must registered after loadContent/setUIContent
       try {
         window.on("windowTitleButtonRectChange", (titleButtonRect) => {
-          let uiContext = window.getUIContext();
           let rect: CaptionButtonRect = {
-            right: uiContext.vp2px(titleButtonRect.right),
-            top: uiContext.vp2px(titleButtonRect.top),
-            width: uiContext.vp2px(titleButtonRect.width),
-            height: uiContext.vp2px(titleButtonRect.height)
+            right: vp2px(titleButtonRect.right),
+            top: vp2px(titleButtonRect.top),
+            width: vp2px(titleButtonRect.width),
+            height: vp2px(titleButtonRect.height)
           };
-          if ((!this.maximizable && !this.minimizable && !this.closable) || !this.hideTitleBar) {
-            rect = { right: 0, top: 0, width: 0, height: 0 };
-          }
           this.nativeContext.OnCaptionButtonRectChange(this.xcomponentId, rect);
         });
       } catch (exception) {
@@ -317,24 +273,27 @@ export class WebAbility extends WebBaseAbility {
         this.nativeContext.RegisterWindowEventFilter(window.getWindowProperties().id);
       }
 
-      try {
-        window.on('displayIdChange', (displayId) => {
-          this.nativeContext.OnWindowDisplayIdChange(this.xcomponentId, displayId);
+      if(deviceInfo.deviceType == 'tablet') {
+        const context: Context = getContext(this);
+        let res: boolean = settings.registerKeyObserver(context,
+          'window_pcmode_switch_status', settings.domainName.USER_PROPERTY, () => {
+          this.contextAdapter?.updateWindowPcmodeSwitchStatus(context);
         });
-      } catch (exception) {
-        LogUtil.info(TAG, `register displayIdChange listener fail, xcomponentId:${this.xcomponentId},
-                      exception: ${JSON.stringify(exception)}`);
+        LogUtil.info(TAG, 'register window_pcmode_switch_status,res:' + res + ',xcomponentId:' + this.xcomponentId);
+        if (res) {
+          this.contextAdapter?.updateWindowPcmodeSwitchStatus(context);
+        }
       }
 
       try {
         if (this.xcomponentId === ConfigData.DEFAULT_WINDOW_ID) {
-          let windowLimits = this.getWindow()?.getWindowLimits();
+          let windowLimits: window.WindowLimits | undefined = this.getWindow()?.getWindowLimits();
           let uiContext = window.getUIContext();
-          let limits: WindowLimits = {
-            maxHeight: Math.ceil(uiContext.px2vp(windowLimits?.maxHeight ?? 0)),
-            maxWidth: Math.ceil(uiContext.px2vp(windowLimits?.maxWidth ?? 0)),
-            minHeight: Math.ceil(uiContext.px2vp(windowLimits?.minHeight ?? 0)),
-            minWidth: Math.ceil(uiContext.px2vp(windowLimits?.minWidth ?? 0))
+          let limits: WinLimits = {
+            max_height: Math.ceil(uiContext.px2vp(windowLimits?.maxHeight ?? 0)),
+            max_width: Math.ceil(uiContext.px2vp(windowLimits?.maxWidth ?? 0)),
+            min_height: Math.ceil(uiContext.px2vp(windowLimits?.minHeight ?? 0)),
+            min_width: Math.ceil(uiContext.px2vp(windowLimits?.minWidth ?? 0))
           }
           this.nativeContext.SetSystemWindowLimits(limits);
         }
@@ -343,6 +302,14 @@ export class WebAbility extends WebBaseAbility {
       }
     });
 
+    try {
+      windowStage.on('windowStageClose', () => {
+        this.nativeContext.OnWindowEvent(this.xcomponentId, WebAbility.WINDOW_CLOSE);
+        return true;
+      });
+    } catch (exception) {
+      console.error(`Failed to enable the listener for window stage close event. Cause code: ${exception.code}, message: ${exception.message}`);
+    }
   }
 
   onWindowStageDestroy() {
@@ -357,13 +324,10 @@ export class WebAbility extends WebBaseAbility {
     }
     // Main window is destroyed, release UI related resources
     this.abilityManager?.removeProxy(this.xcomponentId);
-    GlobalThisHelper.delWindowTypeRec(this.xcomponentId);
-    GlobalThisHelper.delActiveBrowserId(this.xcomponentId);
   }
 
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     LogUtil.info(TAG, `[ohoswindow] in WebAbility onNewWant, want is ${JSON.stringify(want)}, param is ${JSON.stringify(launchParam)}.`);
-    const params = want?.parameters;
     let uriNotNull = want["uri"] !== undefined && want["uri"] !== '';
     if(want!== undefined && want !== null) {
       LogUtil.info(TAG, 'onNewWant begin, want: ' +
@@ -382,40 +346,14 @@ export class WebAbility extends WebBaseAbility {
     if (uriNotNull) {
       let uri = want['uri'] as string;
       if (uri.startsWith("file://docs/")) {
-        this.openNewWindow(uri.replace("file://docs/", "file:///"), false);
+        this.openNewWindow(uri.replace("file://docs/", "file:///"));
+      } else if (uri.startsWith("file:///")) {
+        this.openNewWindow(uri);
       } else {
         LogUtil.debug(TAG, `Trigger open-url event. uri = ${uri}`);
         this.openURL(uri);
       }
-    } else if (params !== undefined && params["appId"] !== undefined) {
-      LogUtil.info(TAG, 'else if params !== undefined');
-      let appId = params["appId"] as string;
-      LogUtil.info(TAG, 'let appId: ' + appId);
-      let xcomponentId = GlobalThisHelper.getWebappWindow(appId);
-      LogUtil.info(TAG, 'get xcomponentId: ' + xcomponentId);
-      if (xcomponentId !== '') {
-        LogUtil.info(TAG, 'xcomponentId !== \'\'');
-        return;
-      } else {
-        LogUtil.info(TAG, 'xcomponentId is empty');
-        let windowClass = this.abilityManager?.getProxy(this.xcomponentId)?.getWindow();
-        let show = windowClass?.isWindowShowing();
-        LogUtil.info(TAG, `${this.xcomponentId} isWindowShowing: ${show}`);
-        if (!show) {
-          windowClass?.minimize()
-            .catch((err: BusinessError) => {
-              LogUtil.error(TAG, 'Failed to minimize the window. Cause: ' + JSON.stringify(err));
-            });
-        }
-        this.openNewWindow(appId, true);
-        LogUtil.info(TAG, 'this.openNewWindow(appId, true), appId: ' + appId);
-      }
-    } else if(GlobalThisHelper.getLastActiveBrowserId() === undefined) {
-      LogUtil.info(TAG, 'GlobalThisHelper.getLastActiveBrowserId() begin');
-      this.openNewWindow(this.startUri, false);
-      LogUtil.info(TAG, 'GlobalThisHelper.getLastActiveBrowserId() end, this.startUri: ' + this.startUri);
     }
-    LogUtil.info(TAG, 'end call onNewWant func');
   }
 
   onPrepareToTerminate(): boolean {
@@ -423,80 +361,13 @@ export class WebAbility extends WebBaseAbility {
     return true;
   }
 
-  async onPrepareToTerminateAsync(): Promise<boolean> {
-    let id: number = Number(this.xcomponentId.substring(ConfigData.WINDOW_PREFIX.length));
-    let response: BrowserCloseResponse = BrowserCloseResponse.kUndetermined;
-    this.nativeContext.OnWindowEvent(this.xcomponentId, WebAbility.WINDOW_CLOSE);
-    for (let i = 0; i < WebAbility.MAXIMUM_NUM_OF_SLEEP_CYCLES; i++) {
-      await this.sleep(WebAbility.SLEEP_INTERVAL_MS);
-      response = this.nativeContext.GetBrowserCloseResponse(id);
-      if (response !== BrowserCloseResponse.kUndetermined) {
-        break;
-      }
-    }
-    if (response === BrowserCloseResponse.kClosingContinue || response === BrowserCloseResponse.kClosed) {
-      return false;
-    }
-    return true;
-  }
-
-  sleep(delay: number) {
-    return new Promise<void>((resolve) => setTimeout(resolve, delay));
-  }
-
-  async onDestroy(): Promise<void> {
-    LogUtil.info(TAG, ' [ohoswindow] onDestroy');
-    let id: number = Number(this.xcomponentId.substring(ConfigData.WINDOW_PREFIX.length));
-    while (true) {
-      await this.sleep(WebAbility.SLEEP_INTERVAL_MS);
-      let response = this.nativeContext.GetBrowserCloseResponse(id);
-      if (this.appLifecycleAdapter?.getWebStatus() === WebStatus.kDestroy ||
-        response === BrowserCloseResponse.kClosed || response === BrowserCloseResponse.kClosedAnyway) {
-        break;
-      }
-    }
-    if (this.abilityManager?.getProxyCount() === 0) {
-      while (true) {
-        await this.sleep(WebAbility.SLEEP_INTERVAL_MS);
-        let destroyed = this.nativeContext.BrowserDestroyed();
-        if (this.appLifecycleAdapter?.getWebStatus() === WebStatus.kDestroy || destroyed) {
-          break;
-        }
-      }
-    }
-    return;
-  }
-
-  private checkSingleInstance(): boolean {
-    if (!CheckEmptyUtils.isEmpty(this.xcomponentId)) {
-      return false;
-    }
-    this.openNewWindow(this.startUri, false);
-    this.closeWindow();
-    return true;
-  }
-
-  private openNewWindow(open_url: string, is_webapp: boolean) {
-    this.nativeContext.ExecuteCommand(CommandType.kNewWindow, { url: open_url, is_webapp: is_webapp });
-  }
-
-  private openURL(url: string) {
-    LogUtil.debug(TAG, 'openURL is called, url: ' + url);
-    this.nativeContext.ExecuteCommand(CommandType.kOpenURL, { url: url });
-  }
-
   private onPadWindowStageCreate(windowClass: window.Window, storage: LocalStorage) {
-    // During window initialization, it is not in full-screen state, so the input is false.
-    // Here set the status bar avoidance and hides the navigation bar.
     this.updateAvoidAreaStatus(false);
 
     let avoidArea = windowClass.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
     let statusBarHeight = avoidArea.topRect.height;
     storage.setOrCreate('statusBarHeight', statusBarHeight);
     this.displayAdapter?.setStatusBarHeight(statusBarHeight);
-
-    const context: Context = getContext(this);
-    this.deviceInfoAdapter?.registerDeviceModeChange(context);
 
     windowClass.on('avoidAreaChange', (data) => {
       if (data.type !== window.AvoidAreaType.TYPE_SYSTEM) {
@@ -507,19 +378,12 @@ export class WebAbility extends WebBaseAbility {
       storage.setOrCreate('statusBarHeight', statusBarHeight);
       LogUtil.info(TAG, 'Avoidarea changes,statusBarHeight:' + statusBarHeight);
       this.displayAdapter?.setStatusBarHeight(statusBarHeight);
+
       if (deviceInfo.sdkApiVersion >= 20) {
         this.nativeContext.OnAvoidAreaChangeCallback(statusBarHeight);
       }
-      if(!this.deviceInfoAdapter?.isNormalWindowMode()) {
-        return;
-      }
-
-      this.displayAdapter?.availableAreaUpdateByStatusBar();
 
       let prop = windowClass.getWindowProperties();
-      //The current system has a timing issue where the drawableRect lags in updating during mode switching.
-      //Here, when switching to normal mode, the drawableRect is set to 0
-      //to temporarily maintain normal performance until the issue is resolved.
       prop.drawableRect.height = prop.drawableRect.height + prop.drawableRect.top;
       prop.drawableRect.top = 0;
 
@@ -533,13 +397,33 @@ export class WebAbility extends WebBaseAbility {
     });
   }
 
-  private needDarkMode(): boolean {
-    let context = this.getWindowContext() as common.UIAbilityContext;
-    let currentColorMode: ConfigurationConstant.ColorMode | undefined = context.config.colorMode;
-    if (!currentColorMode) {
-      LogUtil.warn(TAG, 'Can not get current color mode from window: ' + this.xcomponentId);
+  private checkSingleInstance(): boolean {
+    if (!CheckEmptyUtils.isEmpty(this.xcomponentId)) {
+      return false;
     }
-    return this.useDarkMode || currentColorMode === ConfigurationConstant.ColorMode.COLOR_MODE_DARK;
+    this.openNewWindow(this.startUri);
+    this.closeWindow();
+    return true;
+  }
+
+  private openNewWindow(open_url: string) {
+    this.nativeContext.ExecuteCommand(CommandType.kNewWindow, { url: open_url });
+  }
+
+  private openURL(url: string) {
+    LogUtil.debug(TAG, 'openURL is called, url: ' + url);
+    this.nativeContext.ExecuteCommand(CommandType.kOpenURL, { url: url });
+  }
+
+  private async checkInstanceLimit() {
+    const runningInfos = await abilityManager.getAbilityRunningInfos();
+    const currentAbilityInstances = runningInfos.filter(info =>
+      info.ability.abilityName === 'EntryAbility'
+    );
+
+    if (currentAbilityInstances.length > 1) {
+      console.info('[zh] 检测到多实例启动');
+    }
   }
 
   private setDarkModeButton(window: window.Window) {

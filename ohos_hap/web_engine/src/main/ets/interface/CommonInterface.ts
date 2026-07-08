@@ -44,7 +44,6 @@ export interface CommandParameter {
   url?: string;
   user_data?: string;
   is_sync?: boolean;
-  is_webapp?: boolean;
 }
 
 export interface CommandResult {
@@ -53,11 +52,11 @@ export interface CommandResult {
   last_widget_Id: number;
 }
 
-export interface WindowLimits {
-  maxHeight: number;
-  maxWidth: number;
-  minHeight: number;
-  minWidth: number;
+export interface WinLimits {
+  max_height: number;
+  max_width: number;
+  min_height: number;
+  min_width: number;
 }
 
 export interface NativeContext {
@@ -98,19 +97,18 @@ export interface NativeContext {
   OnDisplayChangeCallback: (even: string, id: number) => void;
   ExecuteCommand: (id: number, param: CommandParameter) => CommandResult;
   GetBrowserCloseResponse: (id: number) => BrowserCloseResponse;
-  GetAppCloseResponse: () => BrowserCloseResponse;
   RegisterWindowEventFilter: (origin_window_id: number) => void;
   ClearWindowEventFilter: (origin_window_id: number) => void;
   OnCaptionButtonRectChange: (id: string, event: CaptionButtonRect) => void;
   UpdateWindowDeviceModeSwitchCB: (mode: DeviceMode) => void;
-  SetSystemWindowLimits: (windowLimits: WindowLimits) => void;
-  OnWindowDisplayIdChange: (xcomponent_id: string, display_id: number) => void;
+  SetSystemWindowLimits: (windowLimits: WinLimits) => void;
   OnDeviceModeChange: (id: string, event: ChangeEventType, status: window.WindowStatusType) => void;
+  OnWindowDisplayIdChange: (id: string, displayId: number) => void;
+  OnAbilityStartedCB: (id: string) => void;
+  IsSupportNodeHandleFeature: () => boolean;
   OnAvoidAreaChangeCallback: (statusBarHeight: number) => void;
   OnBackToLastPage: (id: string) => void;
   GetLastActiveWidgetId: () => number;
-  OnAbilityStartedCB: (id: string) => void;
-  IsSupportNodeHandleFeature: () => boolean;
 }
 
 export interface IParams {
@@ -125,7 +123,7 @@ export interface OhosDragParamToJs {
   url_title: string;
   html: string;
   web_image_file_path: string;
-  electron_file_path: string;
+  electronFilePath: string;
   bookmark_buffer: ArrayBuffer;
   web_custom_buffer: ArrayBuffer;
   pixelmap_buffer: ArrayBuffer;
@@ -259,6 +257,15 @@ export enum WindowType {
   FLOAT_WINDOW
 }
 
+export enum WindowStatus{
+  UNDEFINED,
+  FULL_SCREEN,
+  MAXIMIZE,
+  MINIMIZE,
+  FLOATING,
+  SPLIT_SCREEN
+}
+
 export interface NewWindowParam {
   parent_id: string,
   window_id: string,
@@ -274,9 +281,11 @@ export interface NewWindowParam {
   resizable: boolean,
   is_modal: boolean,
   is_panel: boolean,
+  is_stateless: boolean,
   display_id: number,
   ability_type: AbilityType,
-  app_id: string
+  app_id: string,
+  caption_button_visible: boolean,
 }
 
 export interface ISubWindowInfo {
@@ -316,14 +325,6 @@ export enum BrowserCloseResponse {
   kClosedAnyway,
 }
 
-// Electron
-export interface WindowPreferences {
-  hideTitleBar: boolean,
-  minimizable: boolean,
-  maximizable: boolean,
-  closable: boolean,
-}
-
 export enum DeviceMode {
   kPcMode = 0,
   kNormalWindowMode,
@@ -339,21 +340,6 @@ export enum AbilityType {
   kEntryAbility = 0,
   kStatelessAbility,
   kTaskManagerAbility,
-};
-
-export interface DesktopShortcut {
-  shortcutId: string;
-  label: string;
-  foregroundIconPath: string;
-  backgroundIconPath: string;
-  openAsWindow: boolean;
-};
-
-export interface IWebAppInfo {
-  openAsWindow: boolean;
-  label: string;
-  icon: string;
-  appId: string;
 }
 
 export const kAbilityMap = new Map<AbilityType, string>([
@@ -361,4 +347,10 @@ export const kAbilityMap = new Map<AbilityType, string>([
   [AbilityType.kStatelessAbility, 'StatelessAbility'],
   [AbilityType.kTaskManagerAbility, 'TaskManagerAbility']
 ])
-
+// Electron
+export interface WindowPreferences {
+  hideTitleBar: boolean,
+  minimizable: boolean,
+  maximizable: boolean,
+  closable: boolean,
+}

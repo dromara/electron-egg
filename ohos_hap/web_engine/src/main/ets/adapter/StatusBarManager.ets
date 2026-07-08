@@ -12,7 +12,6 @@ import LogUtil from '../utils/LogUtil';
 import LogMethod from '../common/LogDecorator';
 import emitter from '@ohos.events.emitter';
 import { ContextAdapter } from './ContextAdapter';
-import { deviceInfo } from '@kit.BasicServicesKit';
 
 const TAG: string = 'statusBar';
 const TRAY_IMAGE_EDITABLE: boolean = false;
@@ -42,6 +41,7 @@ interface MenuRawData {
 
 @injectable()
 export class StatusBarManagerAdapter extends BaseAdapter {
+  private TOOLTIPS: string = '';
   private TITLE: string = '';
   private isCreated: boolean = false;
   private quickOperationHeight: number = 100;
@@ -122,13 +122,7 @@ async SetImage(
 
   @LogMethod
   SetToolTips(tooltips: string) {
-    try {
-      if (deviceInfo.sdkApiVersion >= 22) {
-        statusBarManager.updateStatusBarHoverTips(this.ctxAdapter.getActiveContext(), tooltips);
-      }
-    } catch (error) {
-      LogUtil.error(TAG, `updateStatusBarHoverTips failed. error code: ${error.code}, error message: ${error.message}`);
-    }
+    this.TOOLTIPS = tooltips;
   }
 
   @LogMethod
@@ -136,12 +130,9 @@ async SetImage(
     LogUtil.debug(TAG, `JS SetContextMenu:: ${menu_model}`);
     try {
       let menu_json: MenuRawData[] = JSON.parse(menu_model) as MenuRawData[];
-      menu_json.map((item: MenuRawData) => {
-        if (item.visible === false)
-          menu_json.splice(menu_json.indexOf(item), 1);
-      });
       const items: statusBarManager.StatusBarMenuItem[] = this.transformJsonToMenus(menu_json);
-      const menus: statusBarManager.StatusBarGroupMenu[] = this.processData(items) as statusBarManager.StatusBarGroupMenu[];
+      const modified_items: statusBarManager.StatusBarMenuItem[] = this.processData(items) as statusBarManager.StatusBarMenuItem[];
+      const menus: statusBarManager.StatusBarGroupMenu[] = [modified_items];
       try {
         statusBarManager.updateStatusBarMenu(this.ctxAdapter.getActiveContext(), menus, () => {onCompleted && onCompleted(true)});
       } catch (err){
@@ -176,35 +167,23 @@ async SetImage(
     }
   }
 
-  private recurse(items: MenuItem[] | undefined, isTopLevel: boolean = true): undefined | statusBarManager.StatusBarGroupMenu[] {
+  private recurse(items: MenuItem[] | undefined, isTopLevel: boolean = true): undefined | MenuItem[] {
     if (items === undefined) {
-      return undefined;
+      return items;
     }
-    let menus: statusBarManager.StatusBarGroupMenu[] = [];
-    let itemArray: MenuItem[] = [];
     items.map((item: MenuItem) => {
       if (!isTopLevel) {
         item.subTitle = item.title;
         item.title = undefined;
-      } else {
-        if (item.menuAction?.menuCode === '-1') {
-          menus.push(itemArray as statusBarManager.StatusBarMenuItem[]);
-          itemArray = [];
-        } else {
-          itemArray.push(item);
-        }
       }
       this.recurse(item.subMenu, false);
     });
-    if (itemArray.length > 0) {
-      menus.push(itemArray as statusBarManager.StatusBarMenuItem[]);
-    }
-    return menus;
+    return items;
   }
 
-  private processData(rawData: statusBarManager.StatusBarMenuItem[]) : statusBarManager.StatusBarGroupMenu[] {
-    let modifiedData: MenuItem[] = JSON.parse(JSON.stringify(rawData)) as MenuItem[];
-    return this.recurse(modifiedData) as statusBarManager.StatusBarGroupMenu[];
+  private processData(rawData: statusBarManager.StatusBarMenuItem[]) : MenuItem[] {
+    let modifiedData: MenuItem[]  = JSON.parse(JSON.stringify(rawData)) as MenuItem[];
+    return this.recurse(modifiedData) as MenuItem[];
   }
 
 

@@ -21,6 +21,14 @@
       "value": "取消"
     },
     {
+      "name": "StatelessAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "StatelessAbility_label",
+      "value": "StatelessAbility"
+    },
+    {
       "name": "StatusBarEntryAbility_desc",
       "value": "应用状态栏"
     },
@@ -31,6 +39,34 @@
     {
       "name": "OpenNewWindow_label",
       "value": "打开新窗口"
+    },
+    {
+      "name": "camera",
+      "value": "相机需要用户授权"
+    },
+    {
+      "name": "microphone",
+      "value": "麦克风需要用户授权"
+    },
+    {
+      "name": "access_pasteboard",
+      "value": "剪贴板需要用户授权"
+    },
+    {
+      "name": "location",
+      "value": "地理位置需要用户授权"
+    },
+    {
+      "name": "download_dir",
+      "value": "下载目录需要用户授权"
+    },
+    {
+      "name": "documents_dir",
+      "value": "文档目录需要用户授权"
+    },
+    {
+      "name": "desktop_dir",
+      "value": "桌面目录需要用户授权"
     }
   ]
 }

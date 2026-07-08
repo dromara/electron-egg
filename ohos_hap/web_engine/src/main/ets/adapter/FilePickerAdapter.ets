@@ -14,13 +14,17 @@ import { uniformTypeDescriptor } from '@kit.ArkData';
 import { ContextAdapter } from './ContextAdapter';
 import { PermissionManagerAdapter } from './PermissionManagerAdapter';
 import { SaveAsDialogParams, SelectFileDialogParams } from '../interface/CommonInterface';
-import { ComponentContent, promptAction } from '@kit.ArkUI';
+import { promptAction } from '@kit.ArkUI';
 import LaunchHelper from '../utils/LaunchHelper';
 import { Want } from '@kit.AbilityKit';
-import { MenuItem,InstallationParams, WrappedInstallationBuilder} from '../utils/InstallationPackageDialog';
-import { BusinessError } from '@kit.BasicServicesKit';
 
 const TAG: string = "FilePicker";
+
+enum MenuItem {
+  kOpenAppGallery = 0,
+  kContinueDownload,
+  kCancel,
+}
 
 @injectable()
 export class FilePickerAdapter extends BaseAdapter {
@@ -43,8 +47,6 @@ export class FilePickerAdapter extends BaseAdapter {
     let DocumentSelectOptions = new picker.DocumentSelectOptions();
     if (params.multi_files) {
       DocumentSelectOptions.maxSelectNumber = FilePickerAdapter.MAX_SELECT_NUMBER;
-    } else {
-      DocumentSelectOptions.maxSelectNumber = 1;
     }
     const context = this.ctxAdapter.getContext();
     let allFileDescription = context.resourceManager.getStringSync(this.allFIleDescriptionId);
@@ -118,49 +120,52 @@ export class FilePickerAdapter extends BaseAdapter {
 
   @LogMethod
   showInstallationPackageDialog(fileName: string, fileSize: string, callback: (continue_download: boolean) => void) {
-    let uiContext = this.ctxAdapter.getActiveProxy().getWindow()?.getUIContext();
-    if (!uiContext) {
-      LogUtil.error(TAG, "Failed to get uiContext!");
-      callback(true);
-      return;
-    }
-
-    const contentNode = new ComponentContent(
-      uiContext,
-      WrappedInstallationBuilder,
-      new InstallationParams(
-        fileName,
-        fileSize,
-        (index: MenuItem) => {
-          switch (index) {
-            case MenuItem.kOpenAppGallery:
-              const want: Want = {
-                bundleName: 'com.huawei.hmsapp.appgallery',
-                abilityName: 'MainAbility',
-                moduleName: 'entry'
-              }
-              LaunchHelper.Launch(this.ctxAdapter.getActiveContext(), want);
-              callback(false)
-              break;
-            case MenuItem.kContinueDownload:
-              callback(true);
-              break;
-            case MenuItem.kCancel:
-            default:
-              callback(false);
-              break;
+    try {
+      promptAction.showDialog({
+        title: $r('app.string.download'),
+        message: $r('app.string.installation_not_supported'),
+        buttons: [
+          {
+            text: $r('app.string.go_to_app_gallery'),
+            color: '#FF0A59F7',
+            primary: true
+          },
+          {
+            text: $r('app.string.still_download'),
+            color: '#000000'
+          },
+          {
+            text: $r('app.string.dialog_cancel_button'),
+            color: '#000000'
           }
-          (uiContext as UIContext).getPromptAction().closeCustomDialog(contentNode)
+        ],
+      }).then(data => {
+        try {
+          if (data.index == MenuItem.kOpenAppGallery) {
+            const want: Want = {
+              bundleName: 'com.huawei.hmsapp.appgallery',
+              abilityName: 'MainAbility',
+              moduleName: 'entry'
+            }
+            LaunchHelper.Launch(this.ctxAdapter.getActiveContext(), want);
+          }
+          if (data.index != MenuItem.kContinueDownload) {
+            callback(false);
+          } else {
+            callback(true);
+          }
+        } catch (err) {
+          callback(false);
+          LogUtil.error(TAG, `fail ro open AppGallery with err : ${JSON.stringify(err)}`);
         }
-      )
-    )
-
-    uiContext.getPromptAction().openCustomDialog(contentNode, {
-      alignment: DialogAlignment.Center,
-      autoCancel: true
-    } as promptAction.BaseDialogOptions).catch((error: BusinessError) => {
-      LogUtil.error(TAG,`OpenCustomDialog args error code is ${error.code}, message is ${error.message}`);
-    })
+      }).catch((err: Error) => {
+        LogUtil.error(TAG, `showDialog failed, caused by:${JSON.stringify(err)}`);
+        callback(true);
+      });
+    } catch (err) {
+      callback(true);
+      LogUtil.error(TAG, `openDialog failed, caused by:${JSON.stringify(err)}`);
+    }
   }
 
   private dirFilter(docs: string[]): string[] {

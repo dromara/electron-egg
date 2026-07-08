@@ -69,6 +69,10 @@
       "value": "Screen Capture requires user_grant permission"
     },
     {
+      "name": "screenshot",
+      "value": "Screenshot requires user_grant permission"
+    },
+    {
       "name": "pasteBoard_dialog_title",
       "value": "Unable to access system clipboard"
     },
@@ -82,11 +86,19 @@
     },
     {
       "name": "screenshot_dialog_content",
-      "value": "You have disabled the screenshoot access permission. Go to Settings > Privacy & security > Screenshot and enable the screenshot access permission for label"
+      "value": "You have disabled the screenshot access permission. Go to Settings > Privacy & security > Screenshot and enable the screenshot access permission for label"
     },
     {
       "name": "dialog_confirm_button",
       "value": "Go to System Settings"
+    },
+    {
+      "name": "file_name_str",
+      "value": "File Name:"
+    },
+    {
+      "name": "file_size_str",
+      "value": "File Size:"
     },
     {
       "name": "dialog_cancel_button",
@@ -107,18 +119,6 @@
     {
       "name": "installation_not_supported",
       "value": "Installation of this format file is not supported"
-    },
-    {
-      "name": "add_failed_tip",
-      "value": "Add failed"
-    },
-    {
-      "name": "file_name_str",
-      "value": "File Name:"
-    },
-    {
-      "name": "file_size_str",
-      "value": "File Size:"
     }
   ]
 }
