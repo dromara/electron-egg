@@ -39,6 +39,7 @@ Whether you are a frontend, backend, DevOps, game, or client developer, you can 
 - 🍑 **Vision:** All developers can learn desktop software development
 - 🍰 **Gitee:** https://gitee.com/dromara/electron-egg **6000+**
 - 🍨 **GitHub:** https://github.com/dromara/electron-egg **2400+**
+- 🍰 **Gitcode:** https://gitcode.com/dromara/electron-egg
 - 🏆 Gitee Most Valuable Open Source Project
     ![](./public/images/example/ee-zs.png)
 

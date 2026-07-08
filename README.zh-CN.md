@@ -39,6 +39,7 @@
 - 🍑 **愿景：** 所有开发者都能学会桌面软件研发
 - 🍰 **gitee：** https://gitee.com/dromara/electron-egg **6000+**
 - 🍨 **github：** https://github.com/dromara/electron-egg **2400+**
+- 🍰 **gitcode：** https://gitcode.com/dromara/electron-egg
 - 🏆 码云最有价值开源项目
     ![](./public/images/example/ee-zs.png)    
 
