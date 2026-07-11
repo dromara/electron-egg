@@ -20,3 +20,4 @@ python/build/
 python/dist/
 *DS_Store
 .claude/settings.local.json
+ohos_hap/.cache
