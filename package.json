@@ -28,7 +28,7 @@
     "build-l": "ee-bin build --cmds=linux",
     "updater": "ee-bin updater --platform=macos_apple",
     "ohos": "ee-bin ohos --cmds=resources",
-    "ohos-test": "ee-bin ohos --cmds=test",
+    "ohos-test": "npm run build-electron && ee-bin ohos --cmds=test",
     "debug-dev": "cross-env DEBUG=ee-* ee-bin dev",
     "debug-encrypt": "ee-bin encrypt",
     "debug-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",

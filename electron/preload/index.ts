@@ -6,7 +6,7 @@ import { logger } from 'ee-core/log';
 import { trayService } from '../service/os/tray';
 import { securityService } from '../service/os/security';
 // import { crossService } from '../service/cross';
-import { sqlitedbService } from '../service/database/sqlitedb';
+//import { sqlitedbService } from '../service/database/sqlitedb';
 import { windowService } from '../service/os/window';
 
 export async function preload(): Promise<void> {
@@ -16,7 +16,7 @@ export async function preload(): Promise<void> {
   trayService.init();
   securityService.init();
   // init sqlite db (lazy loads better-sqlite3 on first use)
-  await sqlitedbService.init();
+  //await sqlitedbService.init();
   // go server
   //crossService.createGoServer();
 }

@@ -5,6 +5,6 @@ import type { Config } from 'ee-core';
  */
 export default (): Partial<Config> => {
   return {
-    openDevTools: false,
+    openDevTools: true,
   };
 };
