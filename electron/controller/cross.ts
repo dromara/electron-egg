@@ -19,7 +19,7 @@ class CrossController {
   async getUrl(args: { name: string }): Promise<string> {
     const { name } = args;
     const serverUrl = crossService.getUrl(name);
-    return serverUrl;
+    return serverUrl || '';
   }
 
   /**

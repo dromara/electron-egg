@@ -8,8 +8,8 @@ import { logger } from 'ee-core/log';
 import { getConfig } from 'ee-core/config';
 import type { Config } from 'ee-core';
 import { frameworkService } from '../service/framework';
-// import { sqlitedbService } from '../service/database/sqlitedb';
-// import type { UserRow } from '../service/database/sqlitedb';
+import { sqlitedbService } from '../service/database/sqlitedb';
+import type { UserRow } from '../service/database/sqlitedb';
 import { autoUpdaterService } from '../service/os/auto_updater';
 import type { Context } from 'koa';
 
@@ -29,8 +29,8 @@ interface SqlitedbOperationArgs {
 
 interface SqlitedbOperationResult {
   action: string;
-  // result: boolean | string | UserRow[] | null;
-  // all_list: UserRow[];
+  result: boolean | string | UserRow[] | null;
+  all_list: UserRow[];
   code: number;
 }
 
@@ -44,54 +44,54 @@ class FrameworkController {
   /**
    * sqlite数据库操作
    */   
-  // async sqlitedbOperation(args: SqlitedbOperationArgs): Promise<SqlitedbOperationResult> {
-  //   const { action, info, delete_name, update_name, update_age, search_age, data_dir } = args;
+  async sqlitedbOperation(args: SqlitedbOperationArgs): Promise<SqlitedbOperationResult> {
+    const { action, info, delete_name, update_name, update_age, search_age, data_dir } = args;
 
-  //   const data: SqlitedbOperationResult = {
-  //     action,
-  //     result: null,
-  //     all_list: [],
-  //     code: 0
-  //   };
+    const data: SqlitedbOperationResult = {
+      action,
+      result: null,
+      all_list: [],
+      code: 0
+    };
 
-  //   try {
-  //     // test
-  //     sqlitedbService.getDataDir();
-  //   } catch (err) {
-  //     console.log(err);
-  //     data.code = -1;
-  //     return data;
-  //   }
+    try {
+      // test
+      sqlitedbService.getDataDir();
+    } catch (err) {
+      console.log(err);
+      data.code = -1;
+      return data;
+    }
 
-  //   switch (action) {
-  //     case 'add' :
-  //       if (info) {
-  //         data.result = await sqlitedbService.addTestDataSqlite(info);
-  //       }
-  //       break;
-  //     case 'del' :
-  //       data.result = await sqlitedbService.delTestDataSqlite(delete_name);;
-  //       break;
-  //     case 'update' :
-  //       data.result = await sqlitedbService.updateTestDataSqlite(update_name, update_age);
-  //       break;
-  //     case 'get' :
-  //       data.result = await sqlitedbService.getTestDataSqlite(search_age);
-  //       break;
-  //     case 'getDataDir' :
-  //       data.result = await sqlitedbService.getDataDir();
-  //       break;
-  //     case 'setDataDir' :
-  //       if (data_dir) {
-  //         await sqlitedbService.setCustomDataDir(data_dir);
-  //       }
-  //       break;            
-  //   }
+    switch (action) {
+      case 'add' :
+        if (info) {
+          data.result = await sqlitedbService.addTestDataSqlite(info);
+        }
+        break;
+      case 'del' :
+        data.result = await sqlitedbService.delTestDataSqlite(delete_name);;
+        break;
+      case 'update' :
+        data.result = await sqlitedbService.updateTestDataSqlite(update_name, update_age);
+        break;
+      case 'get' :
+        data.result = await sqlitedbService.getTestDataSqlite(search_age);
+        break;
+      case 'getDataDir' :
+        data.result = await sqlitedbService.getDataDir();
+        break;
+      case 'setDataDir' :
+        if (data_dir) {
+          await sqlitedbService.setCustomDataDir(data_dir);
+        }
+        break;            
+    }
 
-  //   data.all_list = await sqlitedbService.getAllTestDataSqlite();
+    data.all_list = await sqlitedbService.getAllTestDataSqlite();
 
-  //   return data;
-  // }  
+    return data;
+  }  
 
   /**
    * 调用其它程序（exe、bash等可执行程序）
