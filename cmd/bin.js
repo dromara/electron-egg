@@ -339,7 +339,7 @@ module.exports = {
         ]
       }
     ],
-    resources_public: [
+    test: [
       {
         from: './public',
         to: './ohos_hap/web_engine/src/main/resources/resfile/resources/app/public',
@@ -348,7 +348,16 @@ module.exports = {
           "!README.md", 
           "!README.zh-CN.md"
         ]
-      }
+      },
+      {
+        from: './ohos_hap/common/better-sqlite3',
+        to: './ohos_hap/web_engine/src/main/resources/resfile/resources/app/node_modules/better-sqlite3',
+        filter: [
+          "**/*", 
+          "!README.md", 
+          "!README.zh-CN.md"
+        ]
+      },
     ],    
   }     
 };
