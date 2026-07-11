@@ -45,7 +45,18 @@ function Database(filenameGiven, options) {
 	// Load the native addon
 	let addon;
 	if (nativeBinding == null) {
-		addon = DEFAULT_ADDON || (DEFAULT_ADDON = require('../build/Release/better_sqlite3.node'));
+		//addon = DEFAULT_ADDON || (DEFAULT_ADDON = require('../build/Release/better_sqlite3.node'));
+		if (DEFAULT_ADDON) {
+			addon = DEFAULT_ADDON;
+		} else {
+			try {
+				addon = require('../build/Release/better_sqlite3.node');
+			} catch (_e) {
+				const soPath = path.join(__dirname, '/data/storage/el1/bundle/libs/arm64/better_sqlite3.node');
+				addon = require(soPath);
+			}
+			DEFAULT_ADDON = addon;
+		}
 	} else if (typeof nativeBinding === 'string') {
 		// See <https://webpack.js.org/api/module-variables/#__non_webpack_require__-webpack-specific>
 		const requireFunc = typeof __non_webpack_require__ === 'function' ? __non_webpack_require__ : require;

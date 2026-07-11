@@ -2,7 +2,7 @@
   "name": "ee",
   "version": "5.0.0",
   "description": "A fast, desktop software development framework",
-  "main": "./public/electron/main.js",
+  "main": "app.js",
   "repository": "https://github.com/dromara/electron-egg.git",
   "author": "哆啦好梦, Inc <530353222@qq.com>",
   "license": "Apache",
