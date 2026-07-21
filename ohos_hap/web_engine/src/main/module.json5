@@ -11,6 +11,10 @@
         "name": "ohos.permission.SYSTEM_FLOAT_WINDOW"
       },
       {
+        "name": "ohos.permission.DISTRIBUTED_DATASYNC",
+        "reason": "$string:distributed_datasync"
+      },
+      {
         "name": "ohos.permission.INTERNET"
       },
       {

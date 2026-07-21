@@ -45,6 +45,10 @@
       "value": "是否允许直接访问下载文件夹"
     },
     {
+      "name": "distributed_datasync",
+      "value": "是否允许不同设备间的数据交换"
+    },
+    {
       "name": "documents_dir",
       "value": "是否允许直接访问文档文件夹"
     },

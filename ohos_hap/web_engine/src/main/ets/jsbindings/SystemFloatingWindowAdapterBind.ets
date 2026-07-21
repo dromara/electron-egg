@@ -45,6 +45,10 @@ function getOriginWindowId(id: number): number {
   return implSystemFloatingWindowAdapter().getOriginWindowId(id);
 }
 
+function setWindowShadow(id: number, hasShadow: boolean) {
+  implSystemFloatingWindowAdapter().setWindowShadow(id, hasShadow);
+}
+
 export class SystemFloatingWindowAdapterBind {
   static bind() {
     JsBindingUtils.bindFunction("SystemFloatingWindow.CreateWindow", createWindow);
@@ -55,5 +59,6 @@ export class SystemFloatingWindowAdapterBind {
     JsBindingUtils.bindFunction("SystemFloatingWindow.SetWindowLimits", setWindowLimits);
     JsBindingUtils.bindFunction("SystemFloatingWindow.StartWindowMoving", startWindowMoving);
     JsBindingUtils.bindFunction("SystemFloatingWindow.GetOriginWindowId", getOriginWindowId);
+    JsBindingUtils.bindFunction("SystemFloatingWindow.SetWindowShadow", setWindowShadow);
   }
 }

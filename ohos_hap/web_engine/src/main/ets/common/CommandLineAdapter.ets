@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import bundleManager from '@ohos.bundle.bundleManager';
+import { BusinessError } from '@ohos.base';
 import LogUtil from '../utils/LogUtil';
-import { deviceInfo } from '@kit.BasicServicesKit';
 
 const TAG = 'CommandLineAdapter';
 
@@ -115,6 +116,37 @@ export class CommandLineAdapter {
   }
 
   /**
+   * Detect electron exec path from module.json5 metadata.
+   * Reads "electron_exec_path_ohos" from the module metadata configuration.
+   * The path is configured based on deployment mode:
+   *   - HAP-bin mode (executableBinaryPaths): /data/storage/el1/bundle/libs/arm64/electron
+   *   - HNP mode (hnpPackages): /data/app/<bundleName>/<moduleName>/bin/electron/electron
+   * @returns The electron exec path, or empty string if not configured
+   */
+  private detectElectronExecPath(): string {
+    try {
+      const bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION |
+                          bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_HAP_MODULE |
+                          bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_METADATA;
+      const bundleInfo = bundleManager.getBundleInfoForSelfSync(bundleFlags);
+      for (const hapModuleInfo of bundleInfo.hapModulesInfo) {
+        const metadata = hapModuleInfo.metadata;
+        if (metadata) {
+          for (const item of metadata) {
+            if (item.name === 'electron_exec_path_ohos' && item.value) {
+              return item.value;
+            }
+          }
+        }
+      }
+    } catch (err) {
+      const message = (err as BusinessError).message;
+      LogUtil.error(TAG, `detectElectronExecPath failed: ${message}`);
+    }
+    return '';
+  }
+
+  /**
    * Build default command line arguments
    * @returns Array of default command line arguments
    */
@@ -133,16 +165,12 @@ export class CommandLineAdapter {
       "--disable-features=EnableDrDc",
     ];
 
-    if (this.isEmulator()) {
-      vec_args.push("--disable-gpu");
-      vec_args.push("--disable-gpu-compositing");
-      LogUtil.warn(TAG, 'Emulator detected, GPU hardware acceleration disabled to avoid EGL driver issues.');
+    // Auto-detect electron exec path from module.json5 metadata and pass to C++ layer.
+    const electronExecPath = this.detectElectronExecPath();
+    if (electronExecPath) {
+      vec_args.push(`--electron-exec-path-ohos=${electronExecPath}`);
     }
 
     return vec_args;
-  }
-
-  private isEmulator(): boolean {
-    return deviceInfo.productModel?.toLowerCase().includes('emulator') === true;
   }
 }

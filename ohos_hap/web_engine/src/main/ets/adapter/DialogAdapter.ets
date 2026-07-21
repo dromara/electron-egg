@@ -6,6 +6,7 @@ import fs from '@ohos.file.fs';
 import LogUtil from '../utils/LogUtil';
 import LogMethod from '../common/LogDecorator';
 import picker from '@ohos.file.picker';
+import { promptAction } from '@kit.ArkUI';
 
 import { AbilityManager } from '../common/AbilityManager';
 import { BaseAdapter } from '../common/BaseAdapter';
@@ -15,6 +16,9 @@ import { inject, injectable } from 'inversify';
 import { ContextAdapter } from './ContextAdapter';
 
 const TAG: string = 'Dialog';
+const DEFAULT_BUTTON_LABEL: string = 'OK';
+const PRIMARY_BUTTON_COLOR: string = '#FF0A59F7';
+const NORMAL_BUTTON_COLOR: string = '#000000';
 
 interface IMessageBoxSettings {
   parent_id: number,
@@ -83,10 +87,74 @@ export class DialogAdapter extends BaseAdapter {
       callback: callback
     };
     LogUtil.error(TAG, 'parentId ' + boxSettings.parent_id);
-    let parentId = boxSettings.parent_id === -1 ? 1 : boxSettings.parent_id;
+    if (boxSettings.parent_id === -1) {
+      this.showParentlessMessageBox(boxSettings, callback);
+      return;
+    }
+
+    let parentId = boxSettings.parent_id;
     let messageBoxManager: MessageBoxData | undefined = this.abilityManager.getMessageBox(parentId);
-    messageBoxManager?.setMessageBoxParams(params);
-    messageBoxManager?.dialogController.open();
+    if (!messageBoxManager) {
+      LogUtil.error(TAG, 'showMessageBox failed, parent message box manager not found: ' + parentId);
+      callback(boxSettings.cancel_id, boxSettings.checkbox_checked);
+      return;
+    }
+    messageBoxManager.setMessageBoxParams(params);
+    messageBoxManager.dialogController.open();
+  }
+
+  private showParentlessMessageBox(boxSettings: IMessageBoxSettings,
+    callback: (button_id: number, checkbox_checked: boolean) => void) {
+    let isCallbackCalled = false;
+    const safeCallback = (buttonId: number) => {
+      if (isCallbackCalled) {
+        return;
+      }
+      isCallbackCalled = true;
+      callback(buttonId, boxSettings.checkbox_checked);
+    };
+
+    promptAction.showDialog({
+      title: boxSettings.title,
+      message: this.getParentlessPromptMessage(boxSettings),
+      buttons: this.getParentlessPromptButtons(boxSettings)
+    }).then(data => {
+      if (typeof data.index === 'number' && data.index >= 0) {
+        safeCallback(data.index);
+      } else {
+        safeCallback(boxSettings.cancel_id);
+      }
+    }).catch((err: BusinessError) => {
+      LogUtil.error(TAG, 'show parentless message box failed with err: ' + JSON.stringify(err));
+      safeCallback(boxSettings.cancel_id);
+    });
+  }
+
+  private getParentlessPromptButtons(boxSettings: IMessageBoxSettings): promptAction.Button[] {
+    const buttonLabels = boxSettings.buttons.length > 0 ? boxSettings.buttons : [DEFAULT_BUTTON_LABEL];
+    const primaryIndex = boxSettings.default_id >= 0 && boxSettings.default_id < buttonLabels.length ?
+      boxSettings.default_id : 0;
+    return buttonLabels.map((button: string, index: number): promptAction.Button => {
+      return {
+        text: button,
+        color: index === primaryIndex ? PRIMARY_BUTTON_COLOR : NORMAL_BUTTON_COLOR,
+        primary: index === primaryIndex
+      };
+    });
+  }
+
+  private getParentlessPromptMessage(boxSettings: IMessageBoxSettings): string {
+    let messages: string[] = [];
+    if (boxSettings.message.length > 0) {
+      messages.push(boxSettings.message);
+    }
+    if (boxSettings.detail.length > 0) {
+      messages.push(boxSettings.detail);
+    }
+    if (boxSettings.checkbox_label.length > 0) {
+      LogUtil.warn(TAG, 'parentless message box uses promptAction.showDialog, checkbox UI is not supported.');
+    }
+    return messages.join('\n\n');
   }
 
   @LogMethod

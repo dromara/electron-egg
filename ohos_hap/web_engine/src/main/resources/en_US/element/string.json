@@ -29,6 +29,10 @@
       "value": "Geolocation requires user_grant permission"
     },
     {
+      "name": "distributed_datasync",
+      "value": "distributed_datasync requires user_grant permission"
+    },
+    {
       "name": "download_dir",
       "value": "Download requires user_grant permission"
     },

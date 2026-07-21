@@ -6,14 +6,16 @@ import { injectable, inject } from 'inversify';
 import bundleManager from '@ohos.bundle.bundleManager';
 import { BusinessError } from '@ohos.base';
 import I18n from '@ohos.i18n';
-import { common, Want } from '@kit.AbilityKit';
+import { autoStartupManager, common, Want } from '@kit.AbilityKit';
 
 import { AbilityManager } from '../common/AbilityManager';
 import { BaseAdapter } from '../common/BaseAdapter';
 import { ContextAdapter } from './ContextAdapter';
+import { deviceInfo } from '@kit.BasicServicesKit';
 import { notificationManager } from '@kit.NotificationKit';
 import LogUtil from '../utils/LogUtil';
 import LogMethod from '../common/LogDecorator';
+import { distributedDeviceManager } from '@kit.DistributedServiceKit';
 
 const TAG: string = 'ElectronApp';
 
@@ -118,6 +120,32 @@ export class ElectronAppAdapter extends BaseAdapter {
   }
 
   @LogMethod
+  setLoginItemSettings(): void {
+    let context = this.ctxAdapter.getActiveContext() as common.UIAbilityContext;
+    context.startAbility({
+      bundleName: 'com.huawei.hmos.settings',
+      abilityName: 'com.huawei.hmos.settings.MainAbility',
+      uri: 'application_settings'
+    });
+  }
+
+  @LogMethod
+  getLoginItemSettings(callback: Function): void {
+    if (deviceInfo.sdkApiVersion >= 21) {
+      autoStartupManager.getAutoStartupStatusForSelf().then((isAutoStartup: boolean) => {
+        LogUtil.info(TAG, `getAutoStartupStatusForSelf success, isAutoStartup: ${JSON.stringify(isAutoStartup)}.`);
+        callback(isAutoStartup);
+      }).catch((err: BusinessError) => {
+        LogUtil.error(TAG, `getAutoStartupStatusForSelf failed, err code: ${err.code}, err msg: ${err.message}.`);
+        callback(false);
+      });
+    } else {
+      LogUtil.error(TAG, `getAutoStartupStatusForSelf requires a higher SDK version.`);
+      callback(false);
+    }
+  }
+
+  @LogMethod
   setBadgeCount(count: number): void {
     notificationManager.setBadgeNumber(count).then(() => {
       LogUtil.debug(TAG, "setBadgeNumber success");
@@ -126,4 +154,19 @@ export class ElectronAppAdapter extends BaseAdapter {
     });
   }
 
+
+  @LogMethod
+  getHostName(): string {
+    try {
+      let context = this.ctxAdapter.getActiveContext() as common.UIAbilityContext;
+      let dmInstance = distributedDeviceManager.createDeviceManager(context.abilityInfo.bundleName);
+      let deviceName: string = dmInstance.getLocalDeviceName();
+      LogUtil.info(TAG, 'local device name: ' + JSON.stringify(deviceName));
+      return deviceName;
+    } catch (err) {
+      let e: BusinessError = err as BusinessError;
+      LogUtil.error(TAG, 'getLocalDeviceName errCode:' + e.code + ',errMessage:' + e.message);
+      return '';
+    }
+  }
 };

@@ -12,6 +12,7 @@ import LogUtil from '../utils/LogUtil';
 import LogMethod from '../common/LogDecorator';
 import emitter from '@ohos.events.emitter';
 import { ContextAdapter } from './ContextAdapter';
+import { deviceInfo } from '@kit.BasicServicesKit';
 
 const TAG: string = 'statusBar';
 const TRAY_IMAGE_EDITABLE: boolean = false;
@@ -41,7 +42,6 @@ interface MenuRawData {
 
 @injectable()
 export class StatusBarManagerAdapter extends BaseAdapter {
-  private TOOLTIPS: string = '';
   private TITLE: string = '';
   private isCreated: boolean = false;
   private quickOperationHeight: number = 100;
@@ -122,7 +122,13 @@ async SetImage(
 
   @LogMethod
   SetToolTips(tooltips: string) {
-    this.TOOLTIPS = tooltips;
+    try {
+      if (deviceInfo.sdkApiVersion >= 22) {
+        statusBarManager.updateStatusBarHoverTips(this.ctxAdapter.getActiveContext(), tooltips);
+      }
+    } catch (error) {
+      LogUtil.error(TAG, `updateStatusBarHoverTips failed. error code: ${error.code}, error message: ${error.message}`);
+    }
   }
 
   @LogMethod
@@ -130,6 +136,10 @@ async SetImage(
     LogUtil.debug(TAG, `JS SetContextMenu:: ${menu_model}`);
     try {
       let menu_json: MenuRawData[] = JSON.parse(menu_model) as MenuRawData[];
+      menu_json.map((item: MenuRawData) => {
+        if (item.visible === false)
+          menu_json.splice(menu_json.indexOf(item), 1);
+      });
       const items: statusBarManager.StatusBarMenuItem[] = this.transformJsonToMenus(menu_json);
       const modified_items: statusBarManager.StatusBarMenuItem[] = this.processData(items) as statusBarManager.StatusBarMenuItem[];
       const menus: statusBarManager.StatusBarGroupMenu[] = [modified_items];

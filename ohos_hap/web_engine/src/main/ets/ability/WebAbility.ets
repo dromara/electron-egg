@@ -263,6 +263,9 @@ export class WebAbility extends WebBaseAbility {
             width: vp2px(titleButtonRect.width),
             height: vp2px(titleButtonRect.height)
           };
+          if ((!this.maximizable && !this.minimizable && !this.closable) || !this.hideTitleBar) {
+            rect = { right: 0, top: 0, width: 0, height: 0 };
+          }
           this.nativeContext.OnCaptionButtonRectChange(this.xcomponentId, rect);
         });
       } catch (exception) {
@@ -271,6 +274,16 @@ export class WebAbility extends WebBaseAbility {
 
       if (deviceInfo.sdkApiVersion >= 15) {
         this.nativeContext.RegisterWindowEventFilter(window.getWindowProperties().id);
+      }
+
+      // display brightness observer
+      if (deviceInfo.sdkApiVersion >= 22) {
+        const context: Context = getContext(this);
+        let res: boolean = settings.registerKeyObserver(context,
+          settings.display.SCREEN_BRIGHTNESS_STATUS, settings.domainName.DEVICE_SHARED, () => {
+            let value: string = settings.getValueSync(context, settings.display.SCREEN_BRIGHTNESS_STATUS, '10');
+            this.nativeContext.UpdateDisplayBrightnessCB(value);
+          });
       }
 
       if(deviceInfo.deviceType == 'tablet') {

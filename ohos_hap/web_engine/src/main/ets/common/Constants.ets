@@ -31,6 +31,8 @@ export enum WebStatus {
   kDestroy,
 }
 
+// Values must stay in sync with CommandType in
+// ohos/adapter/browser/browser_adapter.h.
 export enum CommandType {
   kNewWindow,
   kNewWebContent,
@@ -40,6 +42,7 @@ export enum CommandType {
   kGetLastActiveWidget,
   kOpenURL,
   kAppQuit,
+  kSecondInstance,
 }
 
 // From the setWindowDecorHeight interface description in @ohos.window.ts

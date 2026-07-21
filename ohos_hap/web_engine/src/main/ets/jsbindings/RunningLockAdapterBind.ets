@@ -10,12 +10,12 @@ function implRunningLockAdapter(): RunningLockAdapter {
   return Inject.getOrCreate(RunningLockAdapter);
 }
 
-function start() {
-  implRunningLockAdapter().start();
+function start(lockType: string) {
+  implRunningLockAdapter().start(lockType);
 }
 
-function stop() {
-  implRunningLockAdapter().stop();
+function stop(lockType: string) {
+  implRunningLockAdapter().stop(lockType);
 }
 
 export class RunningLockAdapterBind {

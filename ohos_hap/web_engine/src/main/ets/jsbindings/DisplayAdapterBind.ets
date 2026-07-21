@@ -4,7 +4,7 @@
 
 import JsBindingUtils from '../utils/JsBindingUtils';
 import Inject from '../common/InjectModule';
-import lazy { DisplayAdapter, CompleteDisplay } from '../adapter/DisplayAdapter';
+import lazy { DisplayAdapter, CompleteDisplay, BrightnessInfo } from '../adapter/DisplayAdapter';
 
 function implDisplayAdapter(): DisplayAdapter {
   return Inject.getOrCreate(DisplayAdapter);
@@ -12,6 +12,10 @@ function implDisplayAdapter(): DisplayAdapter {
 
 function getPrimaryDisplay(callback: (completeDisplay: CompleteDisplay) => void) {
   implDisplayAdapter().getPrimaryDisplay(callback);
+}
+
+function getBrightnessInfo(display_id: number, callback: (brightnessInfo: BrightnessInfo) => void) {
+  implDisplayAdapter().getBrightnessInfo(display_id, callback);
 }
 
 function getALLDisplays(callback: (completeDisplays: Array<CompleteDisplay>,
@@ -38,5 +42,6 @@ export class DisplayAdapterBind {
     JsBindingUtils.bindFunction('OhosDisplayAdapter.registerDisplayMonitor', registerDisplayMonitor);
     JsBindingUtils.bindFunction('OhosDisplayAdapter.registerAvailableAreaMonitor', registerAvailableAreaMonitor);
     JsBindingUtils.bindFunction('OhosDisplayAdapter.getFontSizeScale', getFontSizeScale);
+    JsBindingUtils.bindFunction('OhosDisplayAdapter.GetDisplayBrightnessInfo', getBrightnessInfo);
   }
 }

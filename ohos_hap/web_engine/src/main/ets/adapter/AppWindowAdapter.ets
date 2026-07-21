@@ -22,7 +22,7 @@ import { IStyleData, IUpdateStyle, WindowStyle } from '../common/WindowStyle';
 import LaunchHelper from '../utils/LaunchHelper';
 import LogMethod from '../common/LogDecorator';
 import LogUtil from '../utils/LogUtil';
-import { AbilityType, kAbilityMap, NewWindowParam, PointCoordinate, WindowType, WindowBound, WindowPreferences, ILoginInfo, ILogin } from "../interface/CommonInterface"
+import { AbilityType, kAbilityMap, NewWindowParam, PointCoordinate, WindowType, WindowBound, WindowPreferences, ILoginInfo, ILogin, NotificationAdapterImage } from "../interface/CommonInterface"
 
 const TAG: string = 'AppWindow';
 
@@ -444,12 +444,21 @@ export class AppWindowAdapter extends BaseAdapter {
   setAspectRatio(id: number, aspectRatio: number) {
     let windowClass = this.getWindow(id);
     try {
-      let promise = aspectRatio > 0 ? windowClass?.setAspectRatio(aspectRatio) : windowClass?.resetAspectRatio();
-      promise?.then(() => {
-        LogUtil.info(TAG, 'Succeeded in setting aspect ratio of window.');
-      }).catch((err: BusinessError) => {
-        LogUtil.error(TAG, 'Failed to set the aspect ratio of window. Cause:' + JSON.stringify(err));
-      });
+      if ( aspectRatio <= 0 ) {
+        windowClass?.resetAspectRatio()?.then(() => {
+          LogUtil.info(TAG, 'Succeeded in setting aspect ratio of window.');
+        }).catch((err: BusinessError) => {
+          LogUtil.error(TAG, 'Failed to set the aspect ratio of window. Cause:' + JSON.stringify(err));
+        });
+      } else {
+        let promise = deviceInfo.sdkApiVersion < 21 ? windowClass?.setAspectRatio(aspectRatio) : 
+          windowClass?.setContentAspectRatio(aspectRatio, false, true);
+        promise?.then(() => {
+          LogUtil.info(TAG, 'Succeeded in setting aspect ratio of window.');
+        }).catch((err: BusinessError) => {
+          LogUtil.error(TAG, 'Failed to set the aspect ratio of window. Cause:' + JSON.stringify(err));
+        });
+      } 
     } catch (exception) {
       LogUtil.error(TAG, 'Failed to set the aspect ratio of window. Cause: ' + JSON.stringify(exception));
     }
@@ -793,6 +802,50 @@ export class AppWindowAdapter extends BaseAdapter {
     } else {
       LogUtil.error(TAG, 'shiftWindowTouchEvent fail, sdkApiVersion is less than 20');
       callback(false);
+    }
+  }
+
+  @LogMethod
+  setWindowShadow(id: number, hasShadow: boolean) {
+    let window = this.getWindow(id);
+    if (window === undefined) {
+      LogUtil.error(TAG, `setWindowShadow fail, window is not exist! windowId: ${id}, hasShadow: ${hasShadow}`);
+      return;
+    }
+    if (deviceInfo.sdkApiVersion >= 20) {
+      window.setWindowShadowEnabled(hasShadow).catch((err: BusinessError) => {
+        LogUtil.error(TAG, `setWindowShadow fail, error info: ${JSON.stringify(err)}`);
+      });
+    } else {
+      LogUtil.error(TAG, 'setWindowShadow fail, sdkApiVersion is less than 20');
+    }
+  }
+
+  @LogMethod
+  SetWindowIcon(id: number, icon: NotificationAdapterImage) {
+    if (deviceInfo.sdkApiVersion >= 22) {
+      let context = this.abilityManager.getProxy(id)?.getWindowContext() as common.UIAbilityContext;
+      if (context === undefined) {
+        LogUtil.error(TAG, `getWindowContext() failed, windowId: ${id}`);
+        return;
+      }
+      let opts: image.InitializationOptions = {
+        editable: false,
+        pixelFormat: image.PixelMapFormat.BGRA_8888,
+        size: {
+          height: icon.height,
+          width: icon.width
+        }
+      };
+      image.createPixelMap(icon.buff, opts).then((data) => {
+        context.setMissionWindowIcon(data).catch((err: BusinessError) => {
+          LogUtil.error(TAG, `setMissionWindowIcon failed, err: ${JSON.stringify(err)}`);
+        });
+      }).catch((err: BusinessError) => {
+        LogUtil.error(TAG, `createPixelMap failed, err: ${JSON.stringify(err)}`);
+      });
+    } else {
+      LogUtil.error(TAG, 'SetWindowIcon fail, sdkApiVersion is less than 22');
     }
   }
 };

@@ -9,12 +9,14 @@ import LogMethod from '../common/LogDecorator';
 import { BusinessError } from '@ohos.base';
 import window from '@ohos.window';
 import { ContextAdapter } from './ContextAdapter';
+import {runningLock} from '@kit.BasicServicesKit';
 
 const TAG: string = 'RunningLock';
 
 @injectable()
 export class RunningLockAdapter extends BaseAdapter {
   private ctxAdapter: ContextAdapter;
+  private recordLock: runningLock.RunningLock | null = null;
 
   constructor(@inject(ContextAdapter) ctxAdapter: ContextAdapter) {
     super();
@@ -22,13 +24,21 @@ export class RunningLockAdapter extends BaseAdapter {
   }
 
   @LogMethod
-  start() {
-    this.keepScreenOn(true);
+  start(lockType: string) {
+    if (lockType === 'prevent-app-suspension') {
+      this.holdRunningLock(true);
+    } else if (lockType === 'prevent-display-sleep') {
+      this.keepScreenOn(true);
+    }
   }
 
   @LogMethod
-  stop() {
-    this.keepScreenOn(false);
+  stop(lockType: string) {
+    if (lockType === 'prevent-app-suspension') {
+      this.holdRunningLock(false);
+    } else if (lockType === 'prevent-display-sleep') {
+      this.keepScreenOn(false);
+    }
   }
 
   private keepScreenOn(isKeepScreenOn: boolean) {
@@ -47,5 +57,43 @@ export class RunningLockAdapter extends BaseAdapter {
     }).catch((err: BusinessError) => {
       LogUtil.error(TAG, 'Failed to obtain the top window. Cause: ' + JSON.stringify(err));
     });
+  }
+
+  private holdRunningLock(isHold: boolean) {
+    if (isHold) {
+      if (this.recordLock) {
+        return;
+      }
+      runningLock.create('running_lock_test', runningLock.RunningLockType.BACKGROUND, (err: Error, lock: runningLock.RunningLock) => {
+        if (typeof err === 'undefined') {
+          LogUtil.error(TAG, 'create running lock: ' + lock);
+          this.recordLock = lock;
+          try {
+            this.recordLock.hold(-1);
+            LogUtil.info(TAG, 'hold running lock success');
+          } catch(err) {
+            LogUtil.error(TAG, 'hold running lock failed, err: ' + err);
+          }
+        } else {
+          LogUtil.error(TAG, 'create running lock failed, err: ' + err);
+        }
+      });
+    } else {
+      if (this.recordLock) {
+        try {
+          let isHolding = this.recordLock.isHolding();
+          if (!isHolding) {
+            LogUtil.info(TAG, 'hold lock already release');
+            this.recordLock = null;
+            return;
+          }
+          this.recordLock.unhold();
+          this.recordLock = null;
+          LogUtil.info(TAG, 'hold running unlock success');
+        } catch(err) {
+          LogUtil.error(TAG, 'hold running unlock failed, err: ' + err);
+        }
+      }
+    }
   }
 }

@@ -9,7 +9,7 @@
     "configuration": "$profile:configuration",
     "multiAppMode": {
       "multiAppModeType": "multiInstance",
-      "maxCount": 1
+      "maxCount": 2
     }
   }
 }

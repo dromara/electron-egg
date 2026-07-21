@@ -13,7 +13,21 @@
  *
  * Supported parameter types (via TypedValue variant):
  *   number (int32/float/double) / boolean / string /
- *   Array<string> / Array<number>
+ *   Array<string> / Array<number> /
+ *   function / function0
+ *     - JS Function with one parameter -> CallbackArgument
+ *       (ArkTS side declares `(value: AkiValue) => void`)
+ *     - JS Function with zero parameters -> VoidCallbackArgument
+ *       (ArkTS side declares `() => void`)
+ *     The C++ bridge auto-selects between "function" / "function0" based on
+ *     the JS Function's declared arity (Function.length).
+ *     For callbacks expecting a value, avoid default/rest parameters because
+ *     they can make Function.length equal 0, which selects function0.
+ *     Callback arguments are supported only when the total argument count is
+ *     3 or fewer.
+ *     The callback payload supports: undefined / null / boolean / number /
+ *     string. Object/array payloads are not supported and arrive as
+ *     undefined on the JS side.
  *
  * This file contains test methods covering all type combinations
  * to verify correct type passing across C++ <-> AKI <-> ArkTS.

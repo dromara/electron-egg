@@ -5,6 +5,7 @@
 import bundleManager from '@ohos.bundle.bundleManager';
 import { BusinessError } from '@ohos.base';
 import { Size, window } from '@kit.ArkUI';
+import { deviceInfo } from '@kit.BasicServicesKit';
 
 import { AbilityManager } from '../common/AbilityManager';
 import { BaseWindowAdapter } from '../common/BaseWindowAdapter';
@@ -187,6 +188,21 @@ export class PopupWindowAdapter extends BaseWindowAdapter {
         });
     } catch (exception) {
       LogUtil.error(TAG, 'change the window limits exception. Cause:' + JSON.stringify(exception));
+    }
+  }
+
+  @LogMethod
+  setWindowShadow(id: number, hasShadow: boolean) {
+    let windowClass = this.abilityManager.getProxy(id)?.getWindow();
+    if (windowClass === undefined) {
+      LogUtil.error(TAG, `setWindowShadow fail, window is not exist! windowId: ${id}, hasShadow: ${hasShadow}`);
+      return;
+    }
+    const radius: number = hasShadow ? 15 : 0;
+    if (deviceInfo.sdkApiVersion >= 17) {
+      windowClass.setWindowShadowRadius(radius);
+    } else {
+      LogUtil.error(TAG, 'setWindowShadow fail, sdkApiVersion is less than 17');
     }
   }
 };

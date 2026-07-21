@@ -34,10 +34,22 @@ function openApplicationInfoEntry(): void {
   return implElectronAppAdapter().openApplicationInfoEntry();
 }
 
+function setLoginItemSettings(): void {
+  return implElectronAppAdapter().setLoginItemSettings();
+}
+
+function getLoginItemSettings(callback: Function): void {
+  return implElectronAppAdapter().getLoginItemSettings(callback);
+}
+
 function setBadgeCount(count: number): void {
   return implElectronAppAdapter().setBadgeCount(count);
 }
 
+
+function getHostName(): string {
+  return implElectronAppAdapter().getHostName();
+}
 export class ElectronAppAdapterBind {
   static bind() {
     JsBindingUtils.bindFunction("ElectronApp.GetPreferredLanguageList", getPreferredLanguageList);
@@ -46,6 +58,9 @@ export class ElectronAppAdapterBind {
     JsBindingUtils.bindFunction("ElectronApp.GetFileIcon", getFileIcon);
     JsBindingUtils.bindFunction("ElectronApp.Relaunch", relaunch);
     JsBindingUtils.bindFunction("ElectronApp.OpenApplicationInfoEntry", openApplicationInfoEntry);
+    JsBindingUtils.bindFunction("ElectronApp.SetLoginItemSettings", setLoginItemSettings);
+    JsBindingUtils.bindFunction("ElectronApp.GetLoginItemSettings", getLoginItemSettings);
     JsBindingUtils.bindFunction("ElectronApp.SetBadgeCount", setBadgeCount);
+    JsBindingUtils.bindFunction("ElectronApp.GetHostName", getHostName);
   }
 }

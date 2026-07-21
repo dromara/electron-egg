@@ -101,6 +101,7 @@ export interface NativeContext {
   ClearWindowEventFilter: (origin_window_id: number) => void;
   OnCaptionButtonRectChange: (id: string, event: CaptionButtonRect) => void;
   UpdateWindowDeviceModeSwitchCB: (mode: DeviceMode) => void;
+  UpdateDisplayBrightnessCB: (display_brightness: string) => void;
   SetSystemWindowLimits: (windowLimits: WinLimits) => void;
   OnDeviceModeChange: (id: string, event: ChangeEventType, status: window.WindowStatusType) => void;
   OnWindowDisplayIdChange: (id: string, displayId: number) => void;

@@ -9,6 +9,17 @@
       "2in1",
       "tablet"
     ],
+//    "hnpPackages":[
+//      {
+//        "package": "electron.hnp",
+//        "type": "private"
+//      }
+//    ],
+//    "executableBinaryPaths": [
+//      {
+//        "path": "libs/arm64-v8a/electron",
+//      }
+//    ],
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",

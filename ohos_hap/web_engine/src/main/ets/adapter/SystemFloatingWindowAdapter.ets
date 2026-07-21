@@ -282,6 +282,21 @@ export class SystemFloatingWindowAdapter extends BaseWindowAdapter {
     return -1;
   }
 
+  @LogMethod
+  setWindowShadow(id: number, hasShadow: boolean) {
+    let windowClass = this.abilityManager.getProxy(id)?.getWindow();
+    if (windowClass === undefined) {
+      LogUtil.error(TAG, `setWindowShadow fail, window is not exist! windowId: ${id}, hasShadow: ${hasShadow}`);
+      return;
+    }
+    const radius: number = hasShadow ? 15 : 0;
+    if (deviceInfo.sdkApiVersion >= 17) {
+      windowClass.setWindowShadowRadius(radius);
+    } else {
+      LogUtil.error(TAG, 'setWindowShadow fail, sdkApiVersion is less than 17');
+    }
+  }
+
   private adjustBounds(bounds: WindowBound): WindowBound {
     let out_bounds = bounds;
     let mainWindow = this.ctxAdapter.getActiveProxy().getWindow();

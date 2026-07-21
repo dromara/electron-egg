@@ -6,7 +6,7 @@ import { NodeContent } from '@kit.ArkUI';
 import JsBindingUtils from '../utils/JsBindingUtils';
 import Inject from '../common/InjectModule';
 import lazy { AppWindowAdapter } from '../adapter/AppWindowAdapter';
-import type { NewWindowParam, PointCoordinate, WindowBound, ILoginInfo } from '../interface/CommonInterface';
+import type { NewWindowParam, PointCoordinate, WindowBound, ILoginInfo, NotificationAdapterImage } from '../interface/CommonInterface';
 import { window } from '@kit.ArkUI';
 
 function implAppWindowAdapter(): AppWindowAdapter {
@@ -188,6 +188,14 @@ function shiftWindowTouchEvent(sourceId: number, targetId: number,
   implAppWindowAdapter().shiftWindowTouchEvent(sourceId, targetId, fingerId, callback);
 }
 
+function setWindowShadow(id: number, hasShadow: boolean) {
+  implAppWindowAdapter().setWindowShadow(id, hasShadow);
+}
+
+function SetWindowIcon(id: number, icon: NotificationAdapterImage) {
+  implAppWindowAdapter().SetWindowIcon(id, icon);
+}
+
 export class AppWindowAdapterBind {
   static bind() {
     JsBindingUtils.bindFunction("AppWindow.CreateWindow", createWindow);
@@ -230,5 +238,7 @@ export class AppWindowAdapterBind {
     JsBindingUtils.bindFunction("AppWindow.Bind", bind);
     JsBindingUtils.bindFunction("AppWindow.Unbind", unbind);
     JsBindingUtils.bindFunction("AppWindow.ShiftWindowTouchEvent", shiftWindowTouchEvent);
+    JsBindingUtils.bindFunction("AppWindow.SetWindowShadow", setWindowShadow);
+    JsBindingUtils.bindFunction("AppWindow.SetWindowIcon", SetWindowIcon);
   }
 }

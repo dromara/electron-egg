@@ -4,7 +4,7 @@
 
 import { inject, injectable } from 'inversify';
 import { BusinessError } from '@ohos.base';
-import display from '@ohos.display';
+import { display } from '@kit.ArkUI';
 import { BaseAdapter } from '../common/BaseAdapter';
 import LogUtil from '../utils/LogUtil';
 import LogMethod from '../common/LogDecorator';
@@ -17,6 +17,12 @@ export interface CompleteDisplay {
   id: number;
   baseDisplay: display.Display | undefined;
   availArea: display.Rect | undefined;
+}
+
+export interface BrightnessInfo {
+  currentHeadroom: number;
+  maxHeadroom: number;
+  sdrNits: number;
 }
 
 @injectable()
@@ -33,6 +39,12 @@ export class DisplayAdapter extends BaseAdapter {
     id: -1,
     baseDisplay: undefined,
     availArea: undefined,
+  };
+
+  private static invalidBrightnessInfo: BrightnessInfo = {
+    currentHeadroom: -1,
+    maxHeadroom: -1,
+    sdrNits: -1,
   };
 
   constructor(@inject(ContextAdapter) ctxAdapter: ContextAdapter,
@@ -76,6 +88,27 @@ export class DisplayAdapter extends BaseAdapter {
       LogUtil.error(DisplayAdapter.TAG,
         'Failed to obtain the default display object. Code: ' + JSON.stringify(exception));
       callback(DisplayAdapter.invalidDisplay);
+    }
+  }
+
+  @LogMethod
+  getBrightnessInfo(displayId: number, callback: (brightnessInfo: BrightnessInfo) => void) {
+    try {
+      let displayBrightnessInfo = display.getBrightnessInfo(displayId);
+      if (!displayBrightnessInfo) {
+        LogUtil.error(DisplayAdapter.TAG, 'Failed to displayBrightnessInfo.');
+        return;
+      }
+      let brightnessInfo: BrightnessInfo = {
+        currentHeadroom: displayBrightnessInfo.currentHeadroom,
+        maxHeadroom: displayBrightnessInfo.maxHeadroom,
+        sdrNits: displayBrightnessInfo.sdrNits,
+      }
+      callback(brightnessInfo);
+    } catch (exception) {
+      LogUtil.error(DisplayAdapter.TAG,
+        'Failed to obtain the default display object. Code: ' + JSON.stringify(exception));
+      callback(DisplayAdapter.invalidBrightnessInfo);
     }
   }
  
