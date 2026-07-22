@@ -633,17 +633,13 @@ var init_sqlitedb = __esm({
        */
       async init() {
         await this._init();
-        const masterStmt = this.db.prepare("SELECT * FROM sqlite_master WHERE type=? AND name = ?");
-        let tableExists = masterStmt.get("table", this.userTableName);
-        if (!tableExists) {
-          const create_user_table_sql = `CREATE TABLE ${this.userTableName}
+        const create_user_table_sql = `CREATE TABLE IF NOT EXISTS ${this.userTableName}
       (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          name CHAR(50) NOT NULL,
          age INT
       );`;
-          this.db.exec(create_user_table_sql);
-        }
+        this.db.exec(create_user_table_sql);
       }
       /*
        * 增 Test data (sqlite)

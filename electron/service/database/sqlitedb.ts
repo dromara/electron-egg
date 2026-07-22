@@ -28,20 +28,15 @@ class SqlitedbService extends BasedbService {
     // 初始化数据库
     await this._init();
 
-    // 检查表是否存在
-    const masterStmt = this.db.prepare('SELECT * FROM sqlite_master WHERE type=? AND name = ?');
-    let tableExists = masterStmt.get('table', this.userTableName);
-    if (!tableExists) {
-      // 创建表
-      const create_user_table_sql =
-      `CREATE TABLE ${this.userTableName}
+    // 使用幂等 SQL，避免不同平台的 Statement#get() 空结果语义差异
+    const create_user_table_sql =
+      `CREATE TABLE IF NOT EXISTS ${this.userTableName}
       (
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          name CHAR(50) NOT NULL,
          age INT
       );`
-      this.db.exec(create_user_table_sql);
-    }
+    this.db.exec(create_user_table_sql);
   }
 
   /*
