@@ -5,6 +5,7 @@
 import bundleManager from '@ohos.bundle.bundleManager';
 import { BusinessError } from '@ohos.base';
 import LogUtil from '../utils/LogUtil';
+import { deviceInfo } from '@kit.BasicServicesKit';
 
 const TAG = 'CommandLineAdapter';
 
@@ -171,6 +172,16 @@ export class CommandLineAdapter {
       vec_args.push(`--electron-exec-path-ohos=${electronExecPath}`);
     }
 
+    if (this.isEmulator()) {
+      vec_args.push("--disable-gpu");
+      vec_args.push("--disable-gpu-compositing");
+      LogUtil.warn(TAG, 'Emulator detected, GPU hardware acceleration disabled to avoid EGL driver issues.');
+    }
+
     return vec_args;
+  }
+
+  private isEmulator(): boolean {
+    return deviceInfo.productModel?.toLowerCase().includes('emulator') === true;
   }
 }
