@@ -1,289 +1,312 @@
 # AGENT.md
 
-本文件为 AI Agent 在此 `ohos_hap` 目录中工作时提供指引。
+本文件为 AI Agent 在 `ohos_hap/` 目录及其子目录中工作时提供指引。仓库根目录的 `AGENTS.md` 仍然适用；本文件只补充 HarmonyOS HAP 移植层的结构、边界和工作流。若两者冲突，以作用域更具体且更新的指令为准。
 
-## 项目概览
+## 1. 子项目定位
 
-这是 **electron-egg** 的 HarmonyOS HAP 移植层。利用 ArkUI-X 框架将 Electron 桌面应用移植到鸿蒙系统。外层 `ee-demo-ohos/` 是完整的 Electron 应用（Node.js 主进程 + Vue 前端），本目录 (`ohos_hap/`) 负责在鸿蒙设备上提供 Web 渲染容器、Ability 生命周期管理和子进程通信。
+`ohos_hap/` 是 **electron-egg (ee-v5)** 的 HarmonyOS HAP 移植层，基于 ArkUI-X：
 
-- **bundleName**: `com.electronegg.demo`
-- **目标设备**: 2in1、tablet
-- **SDK 版本**: HarmonyOS 6.1.0(23) API
-- **ArkUI-X SDK**: `/Users/gsx/Library/ArkUI-X/Sdk`（见 `local.properties`）
+- 外层 `ee-demo-ohos/` 负责 Electron 主进程、Vue 前端及应用构建。
+- 本目录负责 Ability 生命周期、ArkUI 页面、Web/Electron 容器、多进程适配、原生库和 HAP 打包。
+- 外层应用构建产物由 `ee-bin ohos` 注入 `web_engine` 的 `resfile`，再随 HAP 分发。
+- `electron/` 是入口 HAP 模块；`web_engine/` 是核心 HAR 模块，两者不是外层根目录 `electron/` 主进程源码的同一个目录。
 
-## 架构
+当前关键配置：
 
-```
+| 项目 | 值 |
+|---|---|
+| bundleName | `com.electronegg.demo` |
+| 设备类型 | `2in1`、`tablet` |
+| compatible/target SDK | `HarmonyOS 6.1.0(23)` |
+| APP 模式 | `multiInstance`，最多 2 个实例 |
+| 主 Ability | `EntryAbility` |
+| 构建模块 | `electron@default` |
+
+## 2. 修改边界
+
+先判断问题属于哪一层，再修改对应位置：
+
+| 需求或问题 | 修改位置 |
+|---|---|
+| ElectronEgg 控制器、服务、配置、preload、jobs | 仓库根目录 `electron/` |
+| Vue 页面和浏览器端逻辑 | 仓库根目录 `frontend/` |
+| HAP Ability、ArkUI 页面、模块权限 | `ohos_hap/electron/` |
+| HarmonyOS Web/Electron 容器及平台适配 | `ohos_hap/web_engine/` |
+| HAP 资源注入规则 | 根目录 `cmd/bin.js` 的 `ohos` 配置 |
+| 鸿蒙版 `better-sqlite3` | `ohos_hap/common/` |
+| `ee-core`、`ee-bin` 框架源码 | 独立的 `ee-dev` 仓库，不在本 demo 中修改 |
+
+重要约束：
+
+- `ee-core`、`ee-bin` 是 npm 依赖。不要直接修改 `node_modules/ee-core` 或 `node_modules/ee-bin` 作为正式修复。
+- 不要把外层根目录 `electron/` 与 `ohos_hap/electron/` 混淆：前者是 Node.js 主进程源码，后者是 HarmonyOS entry HAP。
+- 不要手工修改资源注入生成的 `resources/app/` 来代替源代码修复；应修改源文件后重新构建、注入。
+- 签名文件、密码、本地 SDK 路径属于机器私有配置，不要写入文档、日志或提交内容。
+
+## 3. 目录结构
+
+```text
 ohos_hap/
-├── build-profile.json5       # APP 级构建配置（签名、SDK 版本、模块声明）
-├── hvigorfile.ts              # Hvigor 构建脚本入口
+├── AGENT.md
+├── build-profile.json5          # APP 构建、SDK、签名、模块声明
+├── hvigorfile.ts                # APP Hvigor 入口
+├── local.properties             # 本地 ArkUI-X SDK 路径，已忽略
 ├── AppScope/
-│   ├── app.json5              # 应用级配置（bundleName、版本、多实例模式）
-│   └── resources/             # 应用级资源（图标、字符串）
-├── electron/                  # 【入口模块 HAP】鸿蒙 Ability 壳，继承 web_engine 基类
-│   ├── src/main/
-│   │   ├── ets/
-│   │   │   ├── Application/
-│   │   │   │   └── AbilityStage.ets        # 继承 WebAbilityStage
-│   │   │   ├── entryability/
-│   │   │   │   ├── EntryAbility.ets        # 主入口 Ability（继承 WebAbility）
-│   │   │   │   ├── BrowserAbility.ets      # 浏览器进程 Ability（:browser 进程）
-│   │   │   │   ├── StatelessAbility.ets     # 无状态 Ability
-│   │   │   │   ├── StatusBarEntryAbility.ets # 状态栏扩展 Ability
-│   │   │   │   └── TaskManagerAbility.ets
-│   │   │   ├── extensionAbility/
-│   │   │   │   └── BrowserEmbeddedAbility.ets # embeddedUI 扩展（继承 WebEmbeddedAbility）
-│   │   │   ├── pages/                      # ArkUI 页面
-│   │   │   │   ├── Index.ets               # 主页面（加载 WebWindow 组件）
-│   │   │   │   ├── WebPage.ets
-│   │   │   │   ├── Login.ets
-│   │   │   │   ├── SubWindow.ets
-│   │   │   │   ├── EmbeddedWindow.ets
-│   │   │   │   ├── NodeHandleWindow.ets
-│   │   │   │   ├── NodeHandleSubWindow.ets
-│   │   │   │   ├── WindowNode.ets
-│   │   │   │   ├── StatusBarPage.ets
-│   │   │   │   └── QuickLoginButtonComponent.ets
-│   │   │   └── process/
-│   │   │       └── CustomChildProcess.ets  # 子进程（继承 WebChildProcess）
-│   │   ├── module.json5                    # 模块配置（权限、Ability 声明）
-│   │   └── resources/                      # 模块级资源
-│   ├── libs/arm64-v8a/                     # 原生库
-│   └── oh-package.json5                    # 依赖 web_engine（file:../web_engine）
-├── web_engine/                # 【HAR 模块】Web 引擎核心库
-│   ├── Index.ets              # 对外导出接口
-│   ├── src/main/
-│   │   ├── ets/
-│   │   │   ├── ability/      # WebAbility / WebEmbeddedAbility 基类
-│   │   │   ├── application/  # WebAbilityStage 基类
-│   │   │   ├── components/   # WebWindow / WebSubWindow / WebEmbeddedWindow 等
-│   │   │   ├── adapter/      # 适配层
-│   │   │   ├── jsbindings/   # JS 绑定
-│   │   │   ├── process/      # WebChildProcess 基类
-│   │   │   ├── interface/    # 公共接口定义
-│   │   │   ├── common/       # 公共工具
-│   │   │   └── utils/
-│   │   ├── cpp/types/        # NAPI 类型定义（libadapter.so）
-│   │   ├── module.json5
-│   │   └── resources/
-│   ├── childProcess.ets      # 子进程导出
-│   ├── BuildProfile.ets      # 构建配置（自动生成，gitignore）
-│   └── oh-package.json5      # 依赖 inversify + reflect-metadata
-└── common/                    # 原生库编译辅助
-    ├── better-sqlite3-ohos-v138/
-    ├── better-sqlite3/
-    └── better-sqlite3编译指南.md
+│   ├── app.json5                # bundleName、版本、多实例模式
+│   └── resources/               # APP 级资源
+├── electron/                    # entry HAP：Ability 壳和 ArkUI 页面
+│   ├── src/main/ets/
+│   │   ├── Application/         # AbilityStage
+│   │   ├── entryability/        # Entry/Browser/Stateless 等 Ability
+│   │   ├── extensionAbility/    # embeddedUI 扩展
+│   │   ├── pages/               # ArkUI 页面
+│   │   └── process/             # CustomChildProcess
+│   ├── src/main/module.json5    # 权限、Ability、进程、skills
+│   ├── libs/arm64-v8a/          # HAP 原生库
+│   └── oh-package.json5         # file:../web_engine
+├── web_engine/                  # HAR：Web/Electron 引擎核心
+│   ├── Index.ets                # 公共导出
+│   ├── childProcess.ets         # 子进程导出
+│   └── src/main/
+│       ├── ets/
+│       │   ├── ability/         # WebAbility 等基类
+│       │   ├── application/     # WebAbilityStage
+│       │   ├── components/      # WebWindow/WebSubWindow 等
+│       │   ├── adapter/         # HarmonyOS/Electron 适配
+│       │   ├── jsbindings/      # JS 绑定
+│       │   ├── process/         # WebChildProcess
+│       │   ├── interface/       # 公共接口
+│       │   ├── common/
+│       │   └── utils/
+│       ├── cpp/types/           # NAPI 类型定义
+│       └── resources/resfile/   # Electron 运行时和注入的应用资源
+├── common/                      # 鸿蒙原生模块编译辅助
+└── docs/                        # 项目导读和目录说明
 ```
 
-## 核心模式
+## 4. 核心架构与不变量
 
-### 继承体系
+### 4.1 继承与职责分层
 
-`electron` 模块的所有类都继承自 `web_engine` 模块提供的基类：
+`electron` 模块应保持为薄壳，主要生命周期和平台能力实现在 `web_engine`：
 
-| electron 模块类 | web_engine 基类 | 职责 |
+| electron 类 | web_engine 基类 | 职责 |
 |---|---|---|
 | `MyAbilityStage` | `WebAbilityStage` | 应用初始化 |
 | `EntryAbility` | `WebAbility` | 主窗口生命周期 |
-| `BrowserAbility` | `WebAbility` | 浏览器进程（`:browser`） |
+| `BrowserAbility` | `WebAbility` | `:browser` 进程窗口 |
 | `StatelessAbility` | `WebAbility` | 无状态窗口 |
 | `BrowserEmbeddedAbility` | `WebEmbeddedAbility` | embeddedUI 扩展 |
 | `CustomChildProcess` | `WebChildProcess` | 子进程通信 |
 
-子类通过 `super.xxx()` 委托所有生命周期方法给基类，业务逻辑在 `web_engine` 中实现。
+修改生命周期时：
 
-### 多进程架构
+- 先确认逻辑是应用定制还是通用引擎能力。
+- 通用行为优先放在 `web_engine` 基类；应用入口只做必要配置和委托。
+- 覆盖生命周期方法时保留必要的 `super` 调用和原有调用顺序。
+- 不要把只属于 `EntryAbility` 的状态无条件扩散到 `BrowserAbility` 或 `StatelessAbility`。
 
-- **主进程**: `EntryAbility`，运行在默认进程
-- **浏览器进程**: `BrowserAbility` 和 `StatelessAbility`，通过 `module.json5` 中 `"process": ":browser"` 指定独立进程
-- **子进程**: `CustomChildProcess` 继承 `WebChildProcess`，通过 `childProcess.ets` 导出
+### 4.2 多进程与多实例
 
-### 多实例模式
+- `EntryAbility` 运行在默认进程，`launchType` 为 `specified`。
+- `BrowserAbility`、`StatelessAbility` 通过 `module.json5` 的 `process: ':browser'` 运行在独立进程。
+- `CustomChildProcess` 继承 `WebChildProcess`，通过 `web_engine/childProcess.ets` 暴露。
+- APP 使用 `multiInstance`，最大实例数为 2；新增全局状态时必须考虑进程隔离和实例隔离。
+- 不要假设不同 Ability、进程或实例共享同一份内存单例。
 
-`AppScope/app.json5` 配置了 `multiAppMode`:
-- 类型: `multiInstance`（多实例）
-- 最大实例数: 2
+### 4.3 页面入口
 
-`EntryAbility` 的 `launchType` 为 `specified`（指定实例启动模式）。
+`electron/src/main/ets/pages/Index.ets` 是主页面入口：
 
-### 页面结构
+- 通过 `@Entry(storage)` 绑定 `LocalStorage`。
+- 读取 `xcomponentId`、`updateStyle` 等状态。
+- 渲染 `web_engine` 导出的 `WebWindow`。
+- 通过 `registerUpdateStyleFunction` 连接窗口样式更新。
 
-`Index.ets` 是主入口页面，通过 `@Entry(storage)` 装饰器绑定 `LocalStorage`：
-- 从 `LocalStorage` 读取 `xcomponentId` 和 `updateStyle`
-- 渲染 `WebWindow` 组件（来自 `web_engine`）
-- 通过 `registerUpdateStyleFunction` 注册样式更新回调
+调整入口页面时，应保持 `LocalStorage` key、XComponent 标识和引擎侧约定一致。
 
-## 外层 ElectronEgg 集成
+### 4.4 外层 ElectronEgg 运行时
 
-本 HAP 是 ElectronEgg (`ee-demo-ohos/`) 的鸿蒙移植层。外层项目是完整的 Electron 应用（Node.js 主进程 + Vue 前端），通过 `ee-bin ohos` 命令将 Electron 构建产物注入到 HAP 的资源目录中，由 `web_engine` HAR 模块提供 Web 容器在鸿蒙上运行。
+HAP 中运行的应用仍遵循 ee-v5 的构建和加载规则：
 
-### 资源注入机制
+- `npm run build-electron` 将根目录 `electron/` 打包到 `public/electron/main.js`。
+- controller/config registry 在 bundle 构建时生成，并在真实 `main.js` 之前注册。
+- ElectronEgg 初始化顺序为：`loadException → loadConfig → loadDir → loadLog`。
+- 运行阶段顺序为：`loadController → loadSocket → Ready → loadElectron`。
+- 通信服务创建顺序为：`SocketServer → HttpServer → IpcServer`。
+- `ee-core` 不打包进 `main.js`，运行时从注入应用的 `node_modules` 加载；这也是 fork 子进程能找到真实磁盘入口的前提。
 
-外层项目通过两条路径将 Electron 资源注入到 HAP（配置在 `ee-demo-ohos/cmd/bin.js` 的 `ohos` 字段）：
+如果 HAP 启动成功但 ElectronEgg 控制器、配置或通信服务异常，应检查注入的应用资源和 ee-core DEBUG 日志，而不是先修改 Ability。
 
-**生产模式 (`npm run ohos`)**
+## 5. 资源注入
 
-前置条件：需要先执行 `npm run build-m`（macOS ARM64 打包），生成 `./out/mac-arm64/ee.app/`。
+资源规则定义在根目录 `cmd/bin.js` 的 `ohos` 字段。
 
-执行 `ee-bin ohos --cmds=resources`，从打包后的 macOS app 中提取：
+### 5.1 测试模式
+
+适合日常调试，不依赖 electron-builder 的完整 macOS APP：
+
+```bash
+# 在仓库根目录执行
+npm run build-frontend   # 仅当前端有变化时需要
+npm run ohos-test        # 内含 build-electron，然后注入测试资源
+```
+
+注入关系：
 
 | 来源 | 目标 |
-|------|------|
-| `./out/mac-arm64/ee.app/Contents/Resources/app` | `ohos_hap/web_engine/src/main/resources/resfile/resources/app` |
-| `./out/mac-arm64/ee.app/Contents/Resources/extraResources` | `ohos_hap/web_engine/src/main/resources/resfile/resources/extraResources` |
+|---|---|
+| `public/` | `ohos_hap/web_engine/src/main/resources/resfile/resources/app/public/` |
+| `ohos_hap/common/better-sqlite3/` | `.../resources/app/node_modules/better-sqlite3/` |
 
-其中 `app/` 包含完整的 Electron 应用（打包后的 `main.js`、`package.json`、`public/`（前端 dist + electron 主进程）、`node_modules/`）。
+注意：`npm run ohos-test` 会构建 Electron 主进程，但不会自动执行 `build-frontend`。
 
-**测试模式 (`npm run ohos-test`)**
+### 5.2 生产模式
 
-无需 electron-builder 打包，适合开发调试。先执行 `npm run build-electron`（esbuild 打包 `electron/` -> `public/electron/main.js`），再执行 `ee-bin ohos --cmds=test`：
+```bash
+# 在仓库根目录执行
+npm run build-m
+npm run ohos
+```
+
+注入关系：
 
 | 来源 | 目标 |
-|------|------|
-| `./public` | `.../resfile/resources/app/public` |
-| `./ohos_hap/common/better-sqlite3` | `.../resfile/resources/app/node_modules/better-sqlite3` |
+|---|---|
+| `out/mac-arm64/ee.app/Contents/Resources/app/` | `ohos_hap/web_engine/src/main/resources/resfile/resources/app/` |
+| `out/mac-arm64/ee.app/Contents/Resources/extraResources/` | `.../resources/extraResources/` |
 
-`public/` 包含 `dist/`（前端构建产物）、`electron/`（打包后的主进程）、`html/`、`images/`、`ssl/`。`better-sqlite3` 是为鸿蒙 ARM64 编译的原生模块（编译指南见 `common/better-sqlite3编译指南.md`）。
+`npm run ohos` 只提取已有打包产物，因此必须先确认 `out/mac-arm64/ee.app/` 是最新的。
 
-### resfile 目录结构
+### 5.3 resfile 内容分类
 
-`web_engine/src/main/resources/resfile/` 是 HAP 的原生资源目录，包含两类内容：
+`web_engine/src/main/resources/resfile/` 同时包含：
 
-1. **Electron 运行时**（随 web_engine HAR 分发，非 npm 脚本复制）：
-   - `electron` - Electron 二进制
-   - `icudtl.dat` - ICU 国际化数据
-   - `*.pak` - Chromium 资源包
-   - `locales/` - 本地化文件
-   - `v8_context_snapshot.bin` - V8 快照
-   - `vulkan/` - 图形驱动
+1. 随引擎维护的 Electron 运行时：`electron`、`icudtl.dat`、`*.pak`、`locales/`、V8 snapshot、Vulkan 资源等。
+2. 由 `ee-bin ohos` 注入的 ElectronEgg 应用：`resources/app/` 和 `resources/extraResources/`。
 
-2. **ElectronEgg 应用资源**（由 `ee-bin ohos` 注入，`.gitignore` 忽略）：
-   - `resources/app/` - Electron 应用代码（主进程、前端、node_modules）
-   - `resources/extraResources/` - 额外资源（Go/Python 后端等）
+排查时先区分是“运行时文件缺失”还是“应用资源陈旧/未注入”。不要用一次性的手工复制掩盖 `cmd/bin.js` 注入规则问题。
 
-### 两层架构关系
+## 6. 开发与验证
 
-```
-ee-demo-ohos/                     # 外层 ElectronEgg 项目
-├── electron/                     # Electron 主进程源码（TypeScript）
-│   ├── controller/               # 业务控制器（IPC/HTTP/Socket 入口）
-│   ├── service/                  # 业务服务
-│   ├── config/                   # 配置文件
-│   └── main.ts                   # 主进程入口
-├── frontend/                     # Vue 3 前端源码
-├── public/                       # 构建产物（dev 模式）
-│   ├── electron/main.js          # esbuild 打包后的主进程
-│   └── dist/                     # Vite 构建的前端
-├── out/                          # electron-builder 打包产物（prod 模式）
-├── build/extraResources/         # 额外资源（Go/Python 后端等）
-├── cmd/bin.js                    # ee-bin 配置（含 ohos 资源注入规则）
-├── package.json                  # npm scripts（ohos / ohos-test）
-│
-└── ohos_hap/                     # 鸿蒙 HAP 项目（本目录）
-    └── web_engine/src/main/resources/resfile/
-        ├── electron              # Electron 运行时二进制
-        └── resources/app/        # ← 外层注入的 ElectronEgg 应用
-            ├── public/electron/main.js   # 主进程代码
-            ├── public/dist/              # 前端页面
-            ├── node_modules/             # 运行时依赖
-            └── package.json              # 应用配置
-```
+### 6.1 环境要求
 
-### 开发流程
+- Node.js 20 或更高版本。
+- 根项目推荐 pnpm，也兼容 npm；不要无故更换包管理器或重写锁文件。
+- DevEco Studio 和匹配的 HarmonyOS / ArkUI-X SDK。
+- `local.properties` 中 `arkui-x.dir` 指向本机 ArkUI-X SDK。
+- `build-profile.json5` 的本地签名配置有效。
+- 构建 HAP 前，外层应用资源已经按测试或生产流程注入。
 
-```
-# 测试模式（开发调试）
-cd ee-demo-ohos/
-npm run build-frontend            # 构建前端 -> public/dist
-npm run ohos-test                 # 打包 electron + 注入资源到 HAP
+### 6.2 HAP 构建和运行
 
-# 生产模式（完整打包）
-npm run build-m                   # electron-builder 打包 macOS app
-npm run ohos                      # 从打包产物注入资源到 HAP
+在 `ohos_hap/` 中执行：
 
-# 然后在 ohos_hap/ 中构建和运行 HAP
-cd ohos_hap/
+```bash
 build_project --module electron@default
 start_app --module electron --ability EntryAbility
 ```
 
-## 构建与运行
-
-### 前置条件
-
-- DevEco Studio 已安装
-- `local.properties` 中 `arkui-x.dir` 指向 ArkUI-X SDK
-- `build-profile.json5` 中签名配置有效（`/Users/gsx/.ohos/config/` 下的证书文件存在）
-- 外层 ElectronEgg 资源已注入（执行过 `npm run ohos` 或 `npm run ohos-test`）
-
-### 构建命令
+需要构建全部模块时可执行：
 
 ```bash
-# 构建整个 APP（在 ohos_hap 目录下）
-# 使用 DevEco 的 build_project 工具，模块: electron@default
-build_project --module electron@default
-
-# 或构建整个 APP
 build_project
 ```
 
-### 构建模式
+构建模式包括 `debug` 和 `release`；release 混淆规则见 `electron/obfuscation-rules.txt`。
 
-- `debug`（默认）
-- `release`（启用代码混淆，见 `electron/obfuscation-rules.txt`）
+### 6.3 最小验证原则
 
-### 运行
+根据改动范围选择验证，不要默认跳过：
+
+| 改动 | 至少验证 |
+|---|---|
+| 单个 `.ets` 实现 | 对改动文件执行 ArkTS 检查，或运行对应模块构建 |
+| Ability / `module.json5` | 构建 `electron@default`，必要时真机启动 |
+| `web_engine` 公共接口 | 同时检查 HAR 和依赖它的 `electron` 模块 |
+| 外层 Electron 主进程 | `npm run build-electron`，再重新注入 |
+| 前端 | `npm run build-frontend`，再重新注入 |
+| 注入规则 | 检查目标目录内容，并至少执行一次对应的 `ohos-test` 或 `ohos` 流程 |
+| 原生库 | ARM64 产物、ABI、加载路径和 HAP 构建 |
+
+若环境提供 ArkTS 独立检查工具，可使用：
 
 ```bash
-# 构建成功后启动到设备/模拟器
-start_app --module electron --ability EntryAbility
-```
-
-### 静态检查
-
-```bash
-# 对修改的 .ets 文件运行 ArkTS 严格模式检查
 arkts_check --files <file1.ets> <file2.ets>
 ```
 
-## 关键配置
+如果本机没有 `build_project`、`start_app` 或 `arkts_check`，应明确说明未执行的验证及原因，不能把“命令不存在”描述为代码已验证。
 
-### module.json5 权限
+## 7. ArkTS 编码约束
 
-`electron/src/main/module.json5` 声明了大量权限，主要包括：
-- 网络: `INTERNET`、`GET_NETWORK_INFO`
-- 文件: `READ_WRITE_DOWNLOAD_DIRECTORY`、`READ_WRITE_DOCUMENTS_DIRECTORY`、`READ_WRITE_DESKTOP_DIRECTORY`
-- 窗口: `SYSTEM_FLOAT_WINDOW`、`WINDOW_TOPMOST`、`PRIVACY_WINDOW`、`LOCK_WINDOW_CURSOR`
-- 媒体: `CAMERA`、`MICROPHONE`
-- 其他: `ACCESS_BIOMETRIC`、`LOCATION`、`GYROSCOPE`、`ACCELEROMETER`、`PRINT`、`WEB_NATIVE_MESSAGING`
+- 遵循 ArkTS 严格模式和当前目录已有代码风格。
+- 避免 `any`、`unknown`、无上下文对象字面量、动态属性访问和不必要的类型断言。
+- 优先定义明确的 interface/class/type，保持跨模块公共类型稳定。
+- 不要用 JavaScript 的动态技巧绕过 ArkTS 编译器。
+- 涉及系统 API 时检查 SDK 版本、权限声明、错误码和 `BusinessError` 处理。
+- 修改 `Index.ets`、窗口组件或 adapter 时，关注 Ability 生命周期、窗口销毁和跨进程回调清理，避免残留监听器。
 
-### 签名配置
+## 8. 配置、权限与敏感信息
 
-`build-profile.json5` 中的 `signingConfigs` 使用 HarmonyOS 自动签名（`type: "HarmonyOS"`），证书在 `~/.ohos/config/` 下。如果签名失效，需在 DevEco Studio 中重新配置。
+- APP 级 SDK、模块和签名配置位于 `build-profile.json5`。
+- bundle、版本和多实例配置位于 `AppScope/app.json5`。
+- HAP 权限、Ability、ExtensionAbility、进程和 deep link 位于 `electron/src/main/module.json5`。
+- 权限变更应最小化，并同步检查 `reason`、`usedScene`、Ability 名称和系统审核要求。
+- 不要在输出中展示 `build-profile.json5` 内的证书密码、密钥口令或完整私有签名材料。
+- 不要把本机绝对 SDK 路径固化到可共享文档或业务源码中。
 
-## ArkTS 规范
+## 9. 生成物与忽略文件
 
-- 禁止使用 `any`、`unknown`（除非明确允许）
-- 禁止 `as` 类型断言
-- 禁止结构化类型，使用显式继承
-- 对象字面量必须有显式类型上下文
-- 禁止动态属性访问
+以下通常是本地依赖、构建产物或自动生成内容，不应作为常规源码编辑目标：
 
-详见 `arkts-grammar-standards` skill。
+- `local.properties`
+- `.hvigor/`、`**/build/`、`.cxx/`、`.test/`
+- `oh_modules/`、`oh-package-lock.json5`
+- `web_engine/BuildProfile.ets`
+- 注入生成的 `web_engine/src/main/resources/resfile/resources/app/`
+- 前端或引擎生成的 rawfile/resfile 内容（除非任务明确要求维护运行时资源）
 
-## 文件忽略
+开始修改前先检查 `git status`。仓库可能已有用户改动；不要覆盖、清理或回滚无关内容。
 
-`.gitignore` 忽略的关键内容：
-- `local.properties`（本地 SDK 路径）
-- `**/build`、`.hvigor`（构建产物）
-- `**/oh_modules`、`oh-package-lock.json5`（依赖锁文件）
-- `web_engine/BuildProfile.ets`（自动生成）
-- `web_engine/src/main/resources/rawfile`（前端构建产物）
+## 10. 故障排查顺序
 
-## 故障排查
+按层定位，避免在错误层面反复试改。
 
-1. **签名失败**: 检查 `build-profile.json5` 中证书路径是否存在，或在 DevEco Studio 中重新生成签名
-2. **SDK 版本不匹配**: 检查 `build-profile.json5` 中 `compatibleSdkVersion` 与本地 SDK 版本一致
-3. **ArkUI-X SDK 未找到**: 检查 `local.properties` 中 `arkui-x.dir` 路径
-4. **原生库缺失**: `electron/libs/arm64-v8a/` 下的 `.so` 文件需要从 web_engine 构建或预编译获取
-5. **better-sqlite3 编译问题**: 参考 `common/better-sqlite3编译指南.md`
+### 10.1 ElectronEgg 业务未运行
+
+1. 确认根目录依赖和 `ee-core`、`ee-bin` 版本满足需求；需要最新版时使用正常包管理流程更新。
+2. 确认 `public/electron/main.js` 或生产 APP 是最新构建。
+3. 确认 `resources/app/` 已重新注入，且存在 `package.json`、`public/`、运行时 `node_modules`。
+4. 优先开启最窄的 ee-core DEBUG 命名空间复现，例如配置或控制器加载日志。
+5. controller、http、socket 同时失败时，优先检查共享上游：配置 registry、资源注入和 ee-core 加载，而不是分别修改三个服务。
+
+根项目常用诊断命令：
+
+```bash
+npm run debug-electron
+npm run debug-dev
+DEBUG='ee-core:config:*' npm run dev-electron
+```
+
+### 10.2 HAP 构建或启动失败
+
+1. 检查 `local.properties` 的 ArkUI-X SDK 路径。
+2. 检查 SDK 版本是否与 `6.1.0(23)` 匹配。
+3. 检查签名证书文件是否存在；签名失效时在 DevEco Studio 重新配置。
+4. 检查 `electron/libs/arm64-v8a/` 及引擎运行时原生库是否齐全。
+5. 检查 `module.json5` 中 Ability、进程、权限及资源引用。
+
+### 10.3 原生模块失败
+
+- `better-sqlite3` 必须是 HarmonyOS ARM64 对应版本，不能直接复用桌面 Electron 的二进制。
+- 参考 `common/better-sqlite3编译指南.md`，核对 Node/Electron ABI、`.node` 文件位置和注入后的包结构。
+- 桌面 Electron 的 `npm run re-sqlite` 只解决桌面端 Electron 原生模块重建，不能替代 HarmonyOS 原生模块编译。
+
+## 11. 提交前检查
+
+- 改动位于正确层级，没有误改注入产物或 `node_modules`。
+- 未泄露签名密码、本地证书、密钥或机器私有路径。
+- Ability 生命周期中的 `super` 调用和调用顺序未被破坏。
+- 多进程、多实例和资源注入场景已考虑。
+- 已执行与改动匹配的最小构建/检查，并如实记录未执行项。
+- `git diff` 中没有无关格式化、生成物或用户已有改动。
