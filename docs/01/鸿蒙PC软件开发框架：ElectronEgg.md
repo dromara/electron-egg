@@ -87,32 +87,43 @@ v5 版本在此基础上完成了一次全新升级，最重磅的能力之一�
 3. OpenHarmonySdk：`D:\dev_soft\harmony\OhSdk`
 4. 设备管理器：`D:/dev_soft/harmony/emulator`
 
-### 2.4 获取示例项目
+### 2.4 获取一个示例项目
 
-1. 下载项目
+1. 下载示例项目
 
 ```bash
 # atomgit （推荐）
-git clone https://atomgit.com/dromara/electron-egg.git
+
+# 示例项目
+git clone https://atomgit.com/wallace5303/electron-egg-ohos.git
 ```
 
-2. 检出 demo-ohos 分支并切换
+2. 下载官方框架，主要是为了获取 ohos_hap/electron 资源
 
 ```bash
+# 框架项目
+git clone https://atomgit.com/dromara/electron-egg.git
+
+# 检出 demo-ohos 分支并切换
 git checkout -b demo-ohos remotes/origin/ohos/demo-37.2.2
 ```
 
-3. 工程目录结构
+3. 把 electron-egg/ohos_hap/electron/libs 文件夹 复制/替换 到 electron-egg-ohos/ohos_hap/electron/libs
+
+因为 libs 文件比较大，所以没放到electron-egg-ohos示例项目中，开发者自己尽量上传到你自己的仓库中
+
+
+4. 工程目录结构
 
 ```text
-electron-egg
+electron-egg-ohos
 ├── ohos_hap          # 鸿蒙 HAP 工程目录
 │   ├── docs          # 文档目录
 ```
 
 ### 2.5 构建资源
 
-把 ElectronEgg 项目构建产物，同步到 `ohos_hap` 工程的资源目录中。
+把 electron-egg-ohos 项目构建产物，同步到 `ohos_hap` 工程的资源目录中。
 
 > 注意：`cmd/builder-xxx.json` 中的 `asar` 属性需要是 `false`。
 
@@ -175,7 +186,7 @@ npm run ohos-test
 
 过一会，就可以在鸿蒙设备上看到应用了。
 
-![ElectronEgg 应用在鸿蒙设备上的运行结果](./ee-example-5.png)
+![应用在鸿蒙设备上的运行结果](./ee-example-5.png)
 
 ---
 
@@ -198,8 +209,8 @@ npm run ohos-test
 真机设备上，日志目录：
 
 ```text
-/storage/Users/currentUser/appdata/el2/base/com.electronegg.demo/files/应用名(ee-next)/data
-/storage/Users/currentUser/appdata/el2/base/com.electronegg.demo/files/应用名(ee-next)/logs
+/storage/Users/currentUser/appdata/el2/base/com.electronegg.ohos/files/应用名/data
+/storage/Users/currentUser/appdata/el2/base/com.electronegg.ohos/files/应用名/logs
 ```
 
 ---
