@@ -8,6 +8,12 @@
 
 **electron-egg (ee-v5)** — 基于 Electron 的企业级桌面应用框架。使用 TypeScript 包（`ee-core`、`ee-bin`）作为 npm 依赖安装，框架本身输出双 CJS + ESM 格式，替代原有的 JS 版本（`ee-core-js`、`ee-bin-js`）。本仓库是框架的应用 demo 项目。
 
+## 文档写作规范
+
+- 新建或修改 `docs/` 下的技术文章前，必须先阅读并遵循 [`docs/规范.md`](docs/规范.md)。
+- 发布前按规范逐项检查标题、摘要、标题层级、外部信源、图片 ALT、社区引导、AtomGit 链接、鸿蒙 PC 真机截图、Schema.org 结构化数据与 PGC 要求。
+- 尚未取得作者、发布日期、仓库地址、真机截图等事实时保留明确的 TODO，不得编造内容来通过检查。
+
 ## 架构
 
 应用 demo 项目，`ee-core` 和 `ee-bin` 通过 npm 安装：
