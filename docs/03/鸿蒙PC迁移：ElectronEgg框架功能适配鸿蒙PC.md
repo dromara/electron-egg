@@ -39,9 +39,12 @@ ElectronEgg 是面向桌面软件的 Electron 框架。它将主进程、控制�
 @Component
 struct Index {
   build() {
+    // 由 ArkUI-X 提供的容器承载既有 ElectronEgg 前端。
     Row() {
+      // WebWindow 负责创建并管理网页运行窗口。
       WebWindow()
     }
+    // 让容器始终填满 Ability 的可用区域。
     .width('100%')
     .height('100%')
   }
@@ -57,13 +60,17 @@ struct Index {
 日常调试可使用测试注入流程：
 
 ```bash
-# 根目录执行；当前端有变化时先构建前端
+# 根目录执行：先将 Vue 前端编译为 public/dist。
+# 只有前端源码变更时才需要执行此步骤。
 npm run build-frontend
+# 构建主进程，并将调试所需的应用资源注入 HAP 工程。
 npm run ohos-test
 
-# 进入 HAP 工程后构建并启动
+# 切换到 DevEco 的 HAP 工程目录。
 cd ohos_hap
+# 编译默认构建变体中的 electron Entry HAP。
 build_project --module electron@default
+# 启动 EntryAbility，在设备或模拟器中验证注入后的应用。
 start_app --module electron --ability EntryAbility
 ```
 
@@ -86,34 +93,46 @@ ElectronEgg 的控制器、服务和通信路由仍然由主进程负责。框�
 `electron/main.ts` 是外层 ElectronEgg 应用的入口。它创建框架实例，将业务生命周期和预加载函数逐一注册，再由 `run()` 统一启动。迁移时应保留这种“入口只编排、具体逻辑分层实现”的结构，避免把窗口或业务逻辑直接堆进 Ability。
 
 ```ts
-import { ElectronEgg } from 'ee-core';
-import { Lifecycle } from './preload/lifecycle';
-import { preload } from './preload';
+import { ElectronEgg } from 'ee-core'; // ElectronEgg 框架应用对象。
+import { Lifecycle } from './preload/lifecycle'; // 业务生命周期钩子实现。
+import { preload } from './preload'; // 应用启动早期需要初始化的服务。
 
+// 创建唯一的框架实例，作为主进程的启动入口。
 const app = new ElectronEgg();
+// 生命周期逻辑单独封装，入口文件只负责注册和编排。
 const life = new Lifecycle();
 
+// 核心模块加载完成后触发，适合执行框架级准备工作。
 app.register('ready', life.ready);
+// Electron app 就绪后注册平台事件，例如二次启动。
 app.register('electron-app-ready', life.electronAppReady);
+// 主窗口创建完成后调整尺寸、位置和显示时机。
 app.register('window-ready', life.windowReady);
+// 退出前执行清理或记录工作。
 app.register('before-close', life.beforeClose);
+// 在上述业务能力使用前初始化窗口、托盘和安全服务。
 app.register('preload', preload);
 
+// 按框架约定的顺序加载控制器、通信服务与 Electron 能力。
 app.run();
 ```
 
 预加载函数放置启动后需要尽早启用的桌面服务。当前示例先初始化窗口、托盘和安全服务；这些能力是否可用取决于鸿蒙侧引擎和权限声明，新增服务时应逐项在目标设备验证。
 
 ```ts
-import { logger } from 'ee-core/log';
-import { trayService } from '../service/os/tray';
-import { securityService } from '../service/os/security';
-import { windowService } from '../service/os/window';
+import { logger } from 'ee-core/log'; // 统一日志入口，便于设备侧定位启动问题。
+import { trayService } from '../service/os/tray'; // 托盘图标和菜单服务。
+import { securityService } from '../service/os/security'; // 窗口安全相关配置服务。
+import { windowService } from '../service/os/window'; // 主窗口和子窗口管理服务。
 
 export async function preload(): Promise<void> {
+  // 记录预加载阶段已经开始，方便结合运行日志排查顺序。
   logger.info('[preload] load');
+  // 先建立窗口管理所需的事件与状态。
   windowService.init();
+  // 再初始化桌面托盘能力；目标平台是否支持需单独验证。
   trayService.init();
+  // 最后应用安全服务的窗口限制和相关策略。
   securityService.init();
 }
 ```
@@ -122,19 +141,27 @@ export async function preload(): Promise<void> {
 
 ```ts
 async electronAppReady(): Promise<void> {
+  // 已有实例时，系统再次拉起应用会触发该事件。
   electronApp.on('second-instance', () => {
+    // 获取已有主窗口，而不是重复创建一个窗口实例。
     const win = getMainWindow();
+    // 最小化窗口先还原，后续 show 才能恢复到可交互状态。
     if (win.isMinimized()) win.restore();
+    // 将窗口展示到前台并交给用户输入焦点。
     win.show();
     win.focus();
   });
 }
 
 async windowReady(): Promise<void> {
+  // 主窗口已创建，可以安全调整其位置和大小。
   const win = getMainWindow();
+  // workAreaSize 排除任务栏等系统占用区域。
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  // 以工作区的比例计算默认窗口尺寸。
   const windowWidth = Math.floor(width * 0.7);
   const windowHeight = Math.floor(height * 0.8);
+  // 使用剩余空间的一半作为左上角坐标，实现居中。
   win.setBounds({
     x: Math.floor((width - windowWidth) / 2),
     y: Math.floor((height - windowHeight) / 2),
@@ -142,7 +169,9 @@ async windowReady(): Promise<void> {
     height: windowHeight,
   });
 
+  // show 为 false 时，等待网页真正可绘制再显示，减少白屏感知。
   if (getConfig().windowsOption.show === false) {
+    // once 只在首次可展示时执行，避免重复触发。
     win.once('ready-to-show', () => {
       win.show();
       win.focus();
@@ -159,16 +188,22 @@ async windowReady(): Promise<void> {
 
 ```ts
 selectFile(): string | null {
+  // 使用系统文件选择器，仅允许用户选择普通文件。
   const filePaths = dialog.showOpenDialogSync({
     properties: ['openFile'],
   });
+  // 取消选择返回 undefined；成功时只将第一个路径返回前端。
   return filePaths ? filePaths[0] : null;
 }
 
 loginWindow(args: { width?: number; height?: number }): void {
+  // 始终操作当前主窗口，避免前端持有 BrowserWindow 对象。
   const win = getMainWindow();
+  // 调用方未传尺寸时使用登录页的紧凑默认尺寸。
   win.setSize(args.width || 400, args.height || 300);
+  // 切换尺寸后仍允许用户按需要调整窗口。
   win.setResizable(true);
+  // 新尺寸下重新居中，再显示并聚焦窗口。
   win.center();
   win.show();
   win.focus();
@@ -176,6 +211,7 @@ loginWindow(args: { width?: number; height?: number }): void {
 
 restoreWindow(args: { width?: number; height?: number }): void {
   const win = getMainWindow();
+  // 恢复业务主页面对应的默认尺寸，参数可按页面需求覆盖。
   win.setSize(args.width || 980, args.height || 650);
   win.setResizable(true);
   win.center();
@@ -190,16 +226,20 @@ restoreWindow(args: { width?: number; height?: number }): void {
 
 ```ts
 async checkHttpServer(): Promise<{ enable: boolean; server: string }> {
+  // 读取已经合并完成的框架配置，而非在控制器中硬编码地址。
   const { enable, protocol, host, port } =
     (getConfig() as Config).httpServer;
+  // 将多个配置字段整理为前端可直接展示的服务地址。
   return { enable, server: protocol + host + ':' + port };
 }
 
 async ipcInvokeMsg(args: string): Promise<string> {
+  // invoke 对应 Promise 式 IPC；返回值将回传给调用方。
   return `${args} - ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`;
 }
 
 async ipcSendSyncMsg(args: string): Promise<string> {
+  // 同步消息示例复用相同的时间戳格式，便于对比通信路径。
   return `${args} - ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`;
 }
 
@@ -207,6 +247,7 @@ ipcSendMsg(
   args: { type: string; content: string },
   event: IpcMainEvent,
 ): string {
+  // 将事件对象交给服务层，由服务层负责向指定渲染窗口回传消息。
   return frameworkService.bothWayMessage(args.type, args.content, event);
 }
 ```
@@ -217,29 +258,36 @@ ipcSendMsg(
 
 ```ts
 selectFolder(): string | null {
+  // 目录选择器允许选择已有目录，也允许用户创建新目录。
   const filePaths = dialog.showOpenDialogSync({
     properties: ['openDirectory', 'createDirectory'],
   });
+  // 用户取消时明确返回 null，调用端无需判断 undefined。
   return filePaths ? filePaths[0] : null;
 }
 
 selectPic(): string | null {
+  // 限制为常见图片扩展名，缩小可选文件范围。
   const filePaths = dialog.showOpenDialogSync({
     title: 'select pic',
     properties: ['openFile'],
     filters: [{ name: 'Images', extensions: ['jpg', 'png', 'gif'] }],
   });
+  // 未选择文件时不继续读取磁盘。
   if (!filePaths) return null;
+  // 文件内容仅在主进程读取，再以 data URL 安全传给前端预览。
   return `data:image/jpeg;base64,${fs.readFileSync(filePaths[0]).toString('base64')}`;
 }
 
 createWindow(args: {
   type: string; content: string; windowName: string; windowTitle: string;
 }): number {
+  // 窗口服务负责创建和登记子窗口，并返回其 webContents 标识。
   return windowService.createWindow(args);
 }
 
 window1ToWindow2(args: { receiver: string; content: unknown }): void {
+  // 主进程充当中继，按接收方标识把消息转发至目标窗口。
   windowService.communicate(args);
 }
 
@@ -247,13 +295,17 @@ sendNotification(
   args: { title?: string; subtitle?: string; body?: string; silent?: boolean },
   event: IpcMainEvent,
 ): boolean | string {
+  // 先检查平台通知能力，避免在不支持的平台继续调用。
   if (!Notification.isSupported()) return '当前系统不支持通知';
+  // 由受控字段构造通知选项，避免把任意前端对象直接传入系统 API。
   const options: NotificationConstructorOptions = {};
   if (args.title) options.title = args.title;
   if (args.subtitle) options.subtitle = args.subtitle;
   if (args.body) options.body = args.body;
   if (args.silent !== undefined) options.silent = args.silent;
+  // 服务层创建通知，并通过 event 关联调用来源。
   windowService.createNotification(options, event);
+  // 创建请求已被受理；实际展示由平台通知系统完成。
   return true;
 }
 ```
@@ -281,15 +333,20 @@ sendNotification(
 将准备好的 PNG 图标分别复制到以下两个位置：
 
 ```text
+# 桌面构建侧的单一 PNG 图标来源。
 build/icons/icon.png
+  # HAP 安装后的桌面应用图标资源。
   ├─> ohos_hap/AppScope/resources/base/media/app_icon.png
+  # EntryAbility 启动窗口所使用的图标资源。
   └─> ohos_hap/AppScope/resources/base/media/startIcon.png
 ```
 
 可在仓库根目录执行：
 
 ```bash
+# 覆盖 HAP 的应用图标资源；替换后 app.json5 无需改名。
 cp build/icons/icon.png ohos_hap/AppScope/resources/base/media/app_icon.png
+# 覆盖启动窗口图标；如需要不同视觉，可改用另一张同规格 PNG。
 cp build/icons/icon.png ohos_hap/AppScope/resources/base/media/startIcon.png
 ```
 
@@ -302,12 +359,33 @@ cp build/icons/icon.png ohos_hap/AppScope/resources/base/media/startIcon.png
 先确认 `public/electron/main.js` 是否为最新构建，再检查 `resources/app/` 中是否包含 `package.json`、`public/` 与运行时依赖。控制器、HTTP 与 Socket 同时失效时，优先怀疑资源注入、配置注册表或 `ee-core` 加载这一类共享上游。需要更细日志时可在根目录使用：
 
 ```bash
+# 仅打开 ee-core 的配置加载日志，再启动 Electron 开发进程。
 DEBUG='ee-core:config:*' npm run dev-electron
 ```
 
 ### 6.2 HAP 构建或启动失败
 
-依次检查 ArkUI-X SDK 与工程 SDK 是否匹配、签名配置是否有效、`module.json5` 的 Ability/权限/资源声明是否正确，以及 `electron/libs/arm64-v8a/` 和引擎运行时库是否齐全。签名口令、证书路径和本机 SDK 绝对路径属于机器私有信息，不应写进代码仓库或公开文章。
+先区分失败发生在“构建”“安装”还是“启动”三个阶段：构建失败时，检查 ArkUI-X SDK 与工程 SDK 是否匹配，并确认 `ohos_hap/build-profile.json5` 选中的产品配置可用；安装失败时，检查设备连接状态、应用包名与签名是否一致；启动后立即退出时，再检查 `module.json5` 的 Ability、权限和资源声明。签名口令、证书路径和本机 SDK 绝对路径属于机器私有信息，不应写进代码仓库或公开文章。
+
+还应确认 `electron/libs/arm64-v8a/` 中的引擎运行时库齐全，并且构建产物与目标设备的架构一致。不要为了绕过报错而随意替换单个 `.so` 文件；应从同一版本的引擎构建产物中成组更新，再重新构建和安装 HAP，避免出现 ABI 或依赖版本不一致。
+
+### 6.3 修改了前端或主进程，设备上仍显示旧页面
+
+这是迁移调试中最常见的“构建链路未走完整”问题。前端改动后依次执行 `npm run build-frontend` 与 `npm run ohos-test`；主进程改动后至少重新执行 `npm run ohos-test`。前者生成 `public/dist`，后者构建主进程并把运行资源注入 HAP 工程。仅执行 `build_project` 会复用 HAP 中已有的资源，因此不会自动取得根目录中最新的业务代码。
+
+排查时可直接对比根目录的 `public/` 与 `ohos_hap/electron/src/main/resources/app/` 中的生成资源更新时间。不要在 HAP 的资源目录内直接修改打包后的 JavaScript；该目录是注入结果，下一次执行资源注入就会被覆盖。确认资源更新后，重新构建、安装并冷启动应用，再判断问题是否仍然存在。
+
+### 6.4 页面能打开，但 IPC、文件选择或通知没有响应
+
+先用最小调用确认问题边界：页面按钮是否真的发起请求、主进程控制器是否收到调用、平台能力是否返回不支持。IPC 需要在预加载桥接与控制器路由两端使用一致的通道名称；文件选择、通知等桌面能力还受目标引擎实现和系统授权状态影响，不能只根据桌面系统上的运行结果判断鸿蒙 PC 一定可用。
+
+涉及网络、文件访问、剪贴板或窗口能力时，核对 `ohos_hap/electron/src/main/module.json5` 中是否声明了实际需要的权限，并确保声明与功能一一对应。权限声明后仍应在真实鸿蒙 PC 设备上重新安装验证；不要为了调试一次性添加无关的高权限，以免扩大应用权限范围。
+
+### 6.5 多窗口或再次打开应用时状态异常
+
+鸿蒙侧的 Ability 可能在独立进程中运行，多窗口也可能有独立的创建和销毁时机，因此不能假设所有窗口都共享同一个内存单例。再次启动时应优先查找已有主窗口：窗口最小化则先还原，再展示并聚焦；创建子窗口前则确认接收方窗口仍然存在。
+
+定位这类问题时，分别记录 Ability 名称、进程标识、窗口标识和 IPC 通道名。若单窗口正常而第二个窗口异常，先检查窗口注册与消息接收方，而不是把问题归因于前端页面本身。对于尚未在目标设备验证的平台特性，应在文章和产品说明中标明验证边界。
 
 ## 结语
 
