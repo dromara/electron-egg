@@ -10,6 +10,7 @@ import path from 'path';
 import { loadException } from '../exception/index.js';
 import { electronApp } from '../electron/app/index.js';
 import { getArgumentByName, getBundleDir, getElectronCodeDir } from '../ps/index.js';
+import * as is from '../utils/is.js';
 import { loadConfig } from '../config/index.js';
 import { loadLog } from '../log/index.js';
 import { app } from './application.js';
@@ -72,6 +73,13 @@ export class ElectronEgg {
       isPackaged: electronApp.isPackaged,
       execDir: baseDir,
     };
+
+    // OpenHarmony always runs the app from the HAP resfile layout (a packaged form),
+    // but Electron's `app.isPackaged` heuristic (based on process.defaultApp) reports
+    // false there, so force it true to make downstream path/stdio logic take packaged branches.
+    if (is.openharmony()) {
+      options.isPackaged = true;
+    }
 
     // In production and packaged mode, execDir is the directory of the executable (same level as exe/dmg)
     if (environment === 'prod' && options.isPackaged) {

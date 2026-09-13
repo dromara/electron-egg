@@ -150,6 +150,9 @@ export function getPublicDir(): string {
  * Path differs by platform after packaging:
  * - Windows/Linux: {execDir}/resources/extraResources
  * - macOS: {execDir}/../Resources/extraResources
+ * - OpenHarmony: {execDir}/resources/extraResources
+ *   (HAP layout: exe at .../resfile/electron, extraResources at .../resfile/resources/extraResources,
+ *   injected by ee-bin ohos; same "resources" under execDir as Windows/Linux)
  *
  * Before packaging: {execDir}/build/extraResources
  */
@@ -163,10 +166,9 @@ export function getExtraResourcesDir(): string {
     // macOS app bundle structure: exe is in Contents/MacOS/, resources are in Contents/Resources/
     if (is.macOS()) {
       dir = path.join(execDir, '..', 'Resources', 'extraResources');
-    } else if (is.openharmony()) {
-      // todo: 处理 openharmony 下的资源目录
-      dir = path.join(execDir, "..", "Resources", "extraResources");
     }
+    // openharmony uses the default branch ({execDir}/resources/extraResources),
+    // verified against the real HAP layout on device
   } else {
     dir = path.join(execDir, 'build', 'extraResources');
   }
