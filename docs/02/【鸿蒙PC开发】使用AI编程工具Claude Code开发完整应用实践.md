@@ -151,6 +151,53 @@ find ~/.local/share/deveco/skills/arkts-runtime-fix/scripts \
 
 这套流程的关键不是“把命令跑完”，而是形成可追溯闭环：固定来源版本、审查全部文件、说明设备与日志风险、保护已有安装，最后用文件树、语法检查和最小样例证明技能确实可用。
 
+### 2.5 四个技能的源头仓库与更新方式
+
+2.3 与 2.4 安装的四个技能（`arkts-runtime-fix`、`arkts-error-fixes`、`arkts-grammar-standards`、`arkui-knowledge`）并非独立发布的第三方技能，而是 **DevEco Code CLI（`deveco` 命令）的内置资源**。事后逐项溯源与 diff 后，完整链路如下：
+
+```text
+gitcode.com/openharmony-sig/deveco-code          # 官方源头仓库
+└─ packages/opencode/resources/skills/           # 四个技能的源码目录
+     ↓ 构建时内嵌
+@deveco/deveco-code（npm 包，bin/deveco 二进制）
+     ↓ CLI 启动 / 升级时自动解包
+~/.local/share/deveco/skills/                    # 旧版（≤0.1.7）解包位置
+~/.config/deveco/skills/                         # 新版（0.1.12+）解包位置
+     ↓ 手动复制
+~/.claude/skills/                                # Claude Code 的发现目录
+```
+
+本文 2.3 中固定的 GitHub 仓库 `CarSmallGuo/deveco-code` 是该官方仓库的 **fork 镜像**，`0.1.0-TD.4` 对应其上的同名分支。
+
+#### 2.5.1 本地安装与源仓库的实测对比
+
+把本地 `~/.claude/skills/` 与源仓库 `master` 分支及 `v0.1.12` 标签逐文件 `diff -rq` 对比：
+
+| 技能 | 与源仓库 master 的对比结果 |
+| --- | --- |
+| `arkts-error-fixes` | 完全一致 |
+| `arkts-grammar-standards` | 完全一致 |
+| `arkui-knowledge` | 完全一致 |
+| `arkts-runtime-fix` | **本地版更新**：`SKILL.md` / `SKILL_CN.md` 有差异，且多出 `reference/` 崩溃知识库、8 个 `.ts` 源文件与 `.version`。这些增强内容不存在于源仓库任何公开分支，只内嵌于 npm 发布二进制（内部构建产物） |
+
+两点值得注意：其一，`arkts-runtime-fix` 的权威源头是 **npm 二进制**而非 gitcode 公开源码，从仓库克隆更新它反而会降级（丢失 `reference/` 知识库），2.3.2 的「保留现有增强、只补缺失文件」正是这个原因；其二，源仓库的演进快于 npm 发布——master/weekly 分支上已出现 `dfx-analyzer`、`customize-deveco`、`deveco-cli` 等新技能，且 `v0.1.12` 标签中 `arkui-knowledge` 已被合并进 `arkts-grammar-standards` 的新 references，但这些尚未随 npm 版发布。
+
+#### 2.5.2 更新方式
+
+| 场景 | 做法 |
+| --- | --- |
+| 常规更新（推荐） | `deveco upgrade` 升级 CLI，新版会把内置技能解包到 `~/.config/deveco/skills/`，再与 `~/.claude/skills/` 里的副本 diff，确认有变化后重新复制 |
+| 从源头尝鲜 | `git clone https://gitcode.com/openharmony-sig/deveco-code`，取 `packages/opencode/resources/skills/` 下对应目录；**不要**用它更新 `arkts-runtime-fix`（会降级） |
+
+```bash
+# 升级后同步（以解包目录为准，逐项确认差异再覆盖）
+diff -rq ~/.config/deveco/skills/arkts-error-fixes ~/.claude/skills/arkts-error-fixes
+rm -rf ~/.claude/skills/arkts-error-fixes
+cp -R ~/.config/deveco/skills/arkts-error-fixes ~/.claude/skills/
+```
+
+复制前应先确认目标是普通目录还是符号链接（见 2.3.2），并用 `deveco debug skill` 可以列出 CLI 当前实际加载的技能及其路径，用于核对解包位置与版本。本次（0.1.7 → 0.1.12）四个技能内容经 diff 均无变化，无需重新拷贝。
+
 ### 2.4 安装 ArkTS 编译、语法与 ArkUI 知识 Skill
 
 为把 ArkTS 的问题按阶段处理，本次又安装了三个互补技能：`arkts-error-fixes` 用于编译与类型错误的定位和修复；`arkts-grammar-standards` 用于在首次编写或修改 `.ets` 前核对 ArkTS 基础语法、限制及与 TypeScript 的差异；`arkui-knowledge` 覆盖 ArkUI 组件、布局、状态、渲染、导航、交互和 UI 质量检查。它们的发布者均为 CarSmallGuo，审查时固定到 `deveco-code` 的 `0.1.0-TD.4` 标签（提交 `567c83c8fa7299196864b2710566bdcc73f3c271`）。
@@ -198,7 +245,7 @@ diff -qr \
 
 Claude Code 通常会在下一次会话或重新加载技能清单时发现新安装的目录；在当前会话中，应以实际可见的技能清单为准。
 
-### 2.5 创建并配置项目
+### 2.6 创建并配置项目
 
 ElectronEgg 采用「一套代码，桌面 + 鸿蒙」的方式：业务代码照常用 Vue + Electron 编写，构建产物通过 `ee-bin ohos` 同步到鸿蒙 HAP 工程（`ohos_hap/`），由 HAP 的 ArkWeb WebView 加载。因此「创建项目」包含两步。
 
