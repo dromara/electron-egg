@@ -339,4 +339,3 @@ export async function invokeAdv(action, extra = {}) {
 - OpenHarmony 官方文档：[https://docs.openharmony.cn/](https://docs.openharmony.cn/)
 - 华为开发者文档：[https://developer.huawei.com/consumer/cn/doc/](https://developer.huawei.com/consumer/cn/doc/)
 - 开源鸿蒙 PC 社区：[https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)
-- README 迁移能力 T0/T1/T2 范例（ohos_markdownify）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_markdownify](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_markdownify)
