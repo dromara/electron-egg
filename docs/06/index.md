@@ -8,17 +8,17 @@
 
 ## 摘要
 
-Electron / OpenHarmony Electron 应用的代码以 JS 形式随包分发，打包工具默认只做「归档」不做「保护」，源码几乎等于裸奔。electron-egg（ee-v5）框架把代码加密做成了构建链内置能力：`cmd/bin.js` 配置 + `npm run encrypt` 一条命令，即可对主进程与前端产物做**压缩混淆加密**。本文将这套流程应用到本鸿蒙 PC demo 工程上，完整记录配置项解读、执行流程、javascript-obfuscator 高价值参数详解与三档强度实测（基础混淆 +34%，增强混淆约 3.5 倍）、HAP 注入与真机验证结果，并给出可直接抄走的配置与避坑清单——混淆加密对功能零侵入，是当前鸿蒙 PC 项目最务实的代码防护方案。
+Electron 系应用（包括鸿蒙 PC 上的 OpenHarmony Electron）分发出去的主体就是 JS，打包工具默认只做归档、不做保护，解包后源码基本原样可见。electron-egg（ee-v5）把代码加密做成了构建链的一部分：改几行 `cmd/bin.js`，跑一次 `npm run encrypt`，主进程和前端产物就完成压缩混淆。本文在本鸿蒙 PC demo 工程上跑通了这套流程，记录配置项含义、javascript-obfuscator 里真正值得开的参数、三档强度的实测体积（基础档 +34%，增强档约 3.5 倍），以及注入 HAP 后的真机验证结果。
 
 ## 一、为什么桌面应用也需要代码加密
 
-很多开发者以为 `.exe` / `.app` / HAP 里的代码是「编译好的、看不到的」——恰恰相反。Electron 系应用（包括鸿蒙 PC 上的 OpenHarmony Electron）分发的主体就是 JS：
+不少人以为 `.exe` / `.app` / HAP 里的代码是「编译好的、看不到的」，实际正相反。Electron 系应用（包括鸿蒙 PC 上的 OpenHarmony Electron）分发的主体就是 JS：
 
-- 用 `npx asar extract app.asar ./out` 一条命令即可解包，拿到**原始 JS**；
-- asar 只是归档格式，**没有任何加密语义**；
-- 即便经过 esbuild 打包（bundle），产物仍是可读 JS，工具类项目（如我们前几篇的 SQLite Studio、2048 的 AI 算法）的核心逻辑一览无余。
+- `npx asar extract app.asar ./out` 一条命令就能解包，拿到原始 JS；
+- asar 只是归档格式，没有任何加密语义；
+- 就算过了 esbuild 打包，产物依然是可读 JS。前面几篇的 SQLite Studio、2048 的 AI 算法，核心逻辑都能直接读出来。
 
-商业发布至少要做一层防护。electron-egg 把这件事做成了框架构建链的一部分：`npm run encrypt`（即 `npm run build-electron && ee-bin encrypt`），不需要自己接混淆工具。
+商业发布至少要加一层防护。electron-egg 把它做进了框架构建链：`npm run encrypt`（即 `npm run build-electron && ee-bin encrypt`），不用自己接混淆工具。
 
 ## 二、混淆加密的原理与工具链
 
@@ -98,8 +98,9 @@ npm run encrypt
 public/electron/
 ├── main.js                    # 混淆后的主进程 bundle
 ├── preload/bridge.js          # 混淆后的 preload
-└── jobs/example/hello.js      # fork 用的后台任务，同样逐个混淆
-    jobs/example/timer.js
+└── jobs/example/
+    ├── hello.js               # fork 用的后台任务，同样逐个混淆
+    └── timer.js
 ```
 
 混淆后的 `main.js` 开头（真实产物）：
@@ -178,7 +179,7 @@ confusionOptions: {
 }
 ```
 
-对同一份 49,890 字节的明文 `main.js` 做三档实测（固定 `seed` 保证可比）：
+拿同一份 49,890 字节的明文 `main.js` 做了三档对照（固定 `seed`，数字可复现。这次和 3.3 那次整目录实测不是同一次运行，几十字节的出入来自混淆的随机因子）：
 
 | 档位 | 产物大小 | 相对明文 |
 | --- | ---: | --- |
@@ -204,7 +205,7 @@ npm run ohos-test            # 把 public/ 注入 ohos_hap 资源目录
 # DevEco Studio: build_project --module electron@default → start_app
 ```
 
-混淆产物在鸿蒙 PC 真机上的实际验证结果：应用启动正常，IPC 通道调用、控制器/service、jobs 子进程全部回归通过，行为与未混淆版本完全一致。
+混淆产物在鸿蒙 PC 真机上按 T0/T1/T2 走了一遍：
 
 | 阶段             | 目标                            | 验收内容                                                 |
 | ---------------- | ------------------------------- | -------------------------------------------------------- |
@@ -219,22 +220,17 @@ npm run ohos-test            # 把 public/ 注入 ohos_hap 资源目录
 | 问题                              | 原因                                             | 解决办法                                                                                                        |
 | --------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
 | 混淆后偶发代码无法运行            | 混淆输出极端情况下触发关键字/编码冲突            | 官方文档建议：**重新执行 `npm run encrypt`** 即可（混淆带随机因子，重跑即换输出）；重要版本加密后先冒烟 |
-| 体积意外翻倍                      | 打开了`deadCodeInjection`                      | 保持`false`；本文配置实测全量仅 +45%                                                                          |
+| 体积涨得比预期多                  | 要么打开了`deadCodeInjection`，要么文件本身太小 | 死代码注入保持 `false`（本文配置实测全量 +45%）；`bridge.js` 这类薄文件包装开销占比极高，膨胀十倍是正常现象，收益低可直接排除 |
 | 误以为加密=安全，解包还能看到逻辑 | `asar` 只是归档                                | 混淆是底线防护；核心算法另加服务端校验                                                                          |
 | 加密后调试困难                    | 产物不可读                                       | 调试期 type 回`none`；发布流水线里再开加密                                                                    |
-| 小文件混淆后膨胀十倍              | 包装开销（字符串数组、解码函数）对小文件占比极高 | 正常现象；`bridge.js` 这类薄文件收益低，可放 `files` 过滤列表排除                                           |
 
-三点补充经验：
-
-1. **加密发生在构建之后、注入打包之前**，顺序固定为 `build-electron → encrypt → ohos/resources 注入 → HAP 构建`；先 `ohos-test` 再加密的话，注入进 HAP 的还是明文。
-2. **`confusion` 对功能零侵入**：它不改变模块边界和加载方式，控制器注册、`child_process.fork` 的 jobs 文件、JSON 配置统统照常，回归成本很低。
-3. **字符串编码按需升级**：`stringArrayEncoding: ['none']` 已不可读，敏感项目换 `['rc4']`，体积代价略高、运行时解码开销可忽略。
+还有一条顺序上的坑：**加密发生在构建之后、资源注入之前**，固定顺序是 `build-electron → encrypt → ohos 注入 → HAP 构建`。如果先跑 `ohos-test` 再加密，注入进 HAP 的仍是明文。
 
 ## 八、总结
 
-- electron-egg 的代码加密是**构建链内置能力**：`cmd/bin.js` 配置 + `npm run encrypt` 一条命令，主进程与前端两个 target 独立策略；
-- **压缩混淆是当前鸿蒙 PC 的务实选择**：产出仍是标准 JS，对运行时零要求；功能零侵入、体积 +45% 量级、配置十行，实测真机行为与明文版完全一致；
-- 想上更强保护，先把**值得保护的东西放进主进程 service**，让它至少落在混淆覆盖范围内——比前端加密划算得多。
+- 加密是构建链自带的能力，`cmd/bin.js` 里配几行、跑一次 `npm run encrypt` 就行，主进程和前端两个 target 各配各的策略；
+- 压缩混淆产出仍是标准 JS，对运行时没有额外要求，体积涨 45% 量级，真机行为和明文版一致——对鸿蒙 PC 来说这是性价比最高的防护手段；
+- 想再强一点，先把**值得保护的算法挪进主进程 service**。它天然落在混淆覆盖范围内，比前端加密划算得多。
 
 ## 参考与延伸
 

@@ -8,7 +8,7 @@
 
 ## 摘要
 
-本文记录了使用 Claude Code 辅助开发鸿蒙 PC 应用的完整实践，覆盖环境准备、应用开发、运行时诊断、真机调试与打包发布。文章以一个真实项目为例——**3D 看车应用**：用 three.js 程序化构建全尺寸 SUV 车模，支持车漆 / 轮毂换装、展厅 / 户外双场景、预设视角飞行、车灯车门动画与截图，构建后的前端资源最终打包进 HAP 工程，由鸿蒙 PC 的 ArkWeb WebView 加载运行。过程中解决了一批实际问题：three.js r185 API 变更引发的运行时 TypeError、HAP 部署时设备连接故障（ErrorCode:00404039）等。此外，运行时诊断部分引入 `arkts-runtime-fix` Agent Skill，并以一次真实安装为例，说明如何在执行第三方安装操作前核对来源、审查脚本风险、处理已有安装冲突，以及验证技能目录和解析脚本是否完整可用。
+本文记录了用 Claude Code 辅助开发鸿蒙 PC 应用的完整过程，覆盖环境准备、应用开发、运行时诊断、真机调试和打包发布。示例项目是一个 **3D 看车应用**：用 three.js 程序化搭出全尺寸 SUV 车模，支持车漆 / 轮毂换装、展厅 / 户外双场景、预设视角飞行、车灯车门动画和截图，构建好的前端资源打包进 HAP，由鸿蒙 PC 的 ArkWeb WebView 加载。过程中踩了不少坑——three.js r185 的 API 变更引发运行时 TypeError、HAP 部署时设备连接故障（ErrorCode:00404039）——文中都记录了定位过程。另外，环境准备部分用 `arkts-runtime-fix` Agent Skill 的一次真实安装，演示了怎么在执行第三方安装前核对来源、审查脚本风险、处理已有安装冲突，以及验证技能目录和脚本是否完整可用。
 
 ## 一、Claude Code 简介
 
@@ -20,7 +20,7 @@ Claude Code 是 Anthropic 推出的 AI 编程工具，可直接在终端里以�
 
 - **代码生成与补全**：根据一句话需求生成完整工程骨架与业务代码（Vue 页面、three.js 车模、Electron 主进程控制器）
 - **架构设计**：把一段文字需求拆解为可落地的分层结构（页面壳 + three.js 模块 + IPC 控制器 + 内嵌配置）
-- **鸿蒙 ArkTS / ArkUI 语法纠错**：对 ArkTS 工程提供编译与类型错误修复建议（见 2.4 的 `arkts-error-fixes`）
+- **鸿蒙 ArkTS / ArkUI 语法纠错**：对 ArkTS 工程提供编译与类型错误修复建议（见 2.3 的 `arkts-error-fixes`）
 - **鸿蒙系统能力（@ohos.* / @kit.*）API 建议与用法**：给出符合当前 SDK 的接口、权限与替代方案
 - **运行时崩溃（jscrash / hilog）辅助诊断**：通过 `arkts-runtime-fix` Agent Skill 自动提取异常类型、源码位置与调用栈（见 2.3）
 - **鸿蒙 PC 运行适配**：识别 WebView 无 Electron API 的环境差异，落地前端自包含降级方案（见 3.3）
@@ -42,11 +42,11 @@ Claude Code 是 Anthropic 推出的 AI 编程工具，可直接在终端里以�
 
 #### 三处关键变化
 
-**从「查文档」到「对话式生成」**。传统开发有相当一部分时间花在「找 API」上：先确认接口名，再看参数、权限与版本，最后还要贴进工程验证。Claude Code 可以直接根据需求给出可用写法，把「找到可用 API」的耗时压缩到一次对话。不过生成结果是否适用于当前 SDK 版本，仍要以[华为开发者文档](https://developer.huawei.com/consumer/cn/doc/)与 [OpenHarmony 官方文档](https://docs.openharmony.cn/)为准。
+**从「查文档」到「对话式生成」**。传统开发有相当一部分时间花在找 API 上：先确认接口名，再看参数、权限与版本，最后贴进工程验证。现在直接问就能拿到可用写法，耗时压缩到一次对话——不过生成结果是否适配当前 SDK，仍要以[华为开发者文档](https://developer.huawei.com/consumer/cn/doc/)与 [OpenHarmony 官方文档](https://docs.openharmony.cn/)为准。
 
-**从「读报错」到「解释报错」**。ArkTS 在 TypeScript 基础上做了严格类型限制，新手常被一长串编译错误挡住。传统做法是把错误粘贴到搜索框逐条理解；Claude Code 能直接解释错误成因并给出最小修复，把「理解错误」本身变成一项辅助能力。
+**从「读报错」到「解释报错」**。ArkTS 在 TypeScript 之上加了严格类型限制，新手常被一长串编译错误挡住。以前是把错误粘到搜索框逐条理解，现在能直接要到错误成因和一个最小修复。
 
-**从「个人经验」到「可审查的 Skill」**。传统排障依赖个人积累；借助 Agent Skill，可以把一套经过审查的诊断流程交给 AI 按需调用，流程公开、脚本可审查、结论可复现（见第 2.3 节）。这能让「排障能力」从个人属性变成团队资产。
+**从「个人经验」到「可审查的 Skill」**。传统排障靠个人积累；把一套经过审查的诊断流程做成 Agent Skill，就能交给 AI 按需调用，流程公开、脚本可审查、结论可复现（见 2.3 节），排障能力也从个人属性变成了团队资产。
 
 #### 边界与原则
 
@@ -74,10 +74,10 @@ Claude Code 是 Anthropic 推出的 AI 编程工具，可直接在终端里以�
 
 ### 2.2 安装 Claude Code
 
-Claude Code 是 Anthropic 推出的 AI 编程工具，在终端里直接对话式开发。安装方式任选其一：
+一条 npm 命令即可：
 
 ```bash
-# npm 安装（推荐，macOS / Linux / Windows 通用）
+# macOS / Linux / Windows 通用
 npm install -g @anthropic-ai/claude-code
 ```
 
@@ -85,17 +85,25 @@ npm install -g @anthropic-ai/claude-code
 
 > 更详细的安装与配置见 [Claude Code 官方文档](https://code.claude.com/docs)。
 
-### 2.3 安装 ArkTS 运行时诊断 Skill
+### 2.3 安装并审查 Agent Skill
 
-Agent Skill 可以把一套稳定的排障方法、参考资料和辅助脚本交给 AI 编程工具按需调用。本次安装的是 `arkts-runtime-fix`，用于处理 ArkTS/JavaScript 的 `jscrash`、未捕获异常、调用栈、`faultlogger` 和 `hilog` 等运行时问题。技能发布者为 CarSmallGuo，公开介绍页与源码如下：
+Agent Skill 的作用，是把一套稳定的排障方法、参考资料和辅助脚本交给 AI 按需调用。本次一共装了四个：`arkts-runtime-fix` 处理 ArkTS/JavaScript 的 `jscrash`、未捕获异常、调用栈、`faultlogger` 和 `hilog` 这类运行时问题；`arkts-error-fixes` 管编译与类型错误的定位修复；`arkts-grammar-standards` 用在首次编写或修改 `.ets` 之前，核对 ArkTS 基础语法、限制及与 TypeScript 的差异；`arkui-knowledge` 覆盖 ArkUI 的组件、布局、状态、渲染、导航、交互和 UI 质量检查。
+
+四个技能的发布者都是 CarSmallGuo，本次审查固定在 `deveco-code` 的 `0.1.0-TD.4` 标签（提交 `567c83c8fa7299196864b2710566bdcc73f3c271`）：
 
 - 技能介绍：[SkillsMP - arkts-runtime-fix](https://skillsmp.com/creators/carsmallguo/deveco-code/packages-opencode-resources-skills-arkts-runtime-fix)
 - 固定版本源码：[CarSmallGuo/deveco-code 0.1.0-TD.4](https://github.com/CarSmallGuo/deveco-code/tree/0.1.0-TD.4/packages/opencode/resources/skills/arkts-runtime-fix)
-- 本次审查的提交：`567c83c8fa7299196864b2710566bdcc73f3c271`
+
+| 技能 | 用途 | 固定版本目录内容 |
+| --- | --- | --- |
+| `arkts-runtime-fix` | 运行时崩溃诊断 | `SKILL.md`、中英文说明、`evals/evals.json`、可直接执行的 `.mjs` 脚本与 8 个 `.ts` 源文件 |
+| `arkts-error-fixes` | 编译错误与类型不匹配修复 | `README.md`、`SKILL.md`、32 个 ArkTS 示例和 31 篇参考资料，共 65 个文件 |
+| `arkts-grammar-standards` | ArkTS 语法、限制和 TypeScript 差异 | `SKILL.md` 与 4 个 `references/` 文件，共 5 个文件 |
+| `arkui-knowledge` | ArkUI 组件与 UI 开发知识 | `SKILL.md` 与 4 个 `references/` 文件，共 5 个文件 |
 
 #### 2.3.1 安装前先审查来源和完整目录
 
-不要只下载一个 `SKILL.md`。技能的行为还可能由 `scripts/`、`reference/`、`assets/`、`agents/` 等伴随目录决定，遗漏文件会导致说明与实际能力不一致。安装前应同时打开技能介绍页和源码，固定到明确的标签或提交，然后完整阅读 `SKILL.md` 及其引用的文件。可以先把固定版本检出到临时目录：
+不要只下载一个 `SKILL.md`。技能的行为还可能由 `scripts/`、`reference/`、`assets/`、`agents/` 等伴随目录决定，漏了文件，说明就和实际能力对不上。把技能固定到明确的标签或提交，完整读一遍 `SKILL.md` 及其引用的文件：
 
 ```bash
 git clone --depth 1 --branch 0.1.0-TD.4 \
@@ -106,7 +114,7 @@ find /tmp/deveco-code-0.1.0-TD.4/packages/opencode/resources/skills/arkts-runtim
   -type f -print | sort
 ```
 
-本次审查确认，固定版本目录不只有中英文说明，还包含 `evals/evals.json`、可直接执行的 `.mjs` 脚本、对应的 `.ts` 源文件以及 `scripts/shared/` 公共模块。脚本没有发现删除数据、提权、静默上传或安装时访问设备的行为，但运行时存在以下边界：
+`arkts-runtime-fix` 的脚本里没有删除数据、提权、静默上传或安装时访问设备的行为，但运行时有几处边界值得记下来：
 
 | 行为 | 风险与使用建议 |
 | --- | --- |
@@ -115,24 +123,26 @@ find /tmp/deveco-code-0.1.0-TD.4/packages/opencode/resources/skills/arkts-runtim
 | 拉取故障日志到本机 | 文件会写入调用者指定的输出目录，应使用专用目录并检查剩余空间 |
 | 执行 `.ts` 源文件 | `shared/hdc.ts` 依赖原仓库内部模块；脱离仓库时使用自包含的 `.mjs` 脚本 |
 
+另外三个技能干净得多：目录里没有 `scripts/`、没有二进制文件、也没有带可执行权限的文件，内容全是 Markdown、JSON 和用于说明的 `.ets` 示例；针对管道执行下载脚本、`rm -rf`、`sudo`、`eval` 这些高风险命令的文本扫描同样没有命中。也就是说，安装它们只是复制本地知识资料，不会自动执行示例或连接设备。要保留的风险意识是另一回事：参考资料和示例可能随 DevEco SDK 与 ArkUI API 演进而过时，`arkts-error-fixes` 给的修改建议必须在当前 SDK 里重新编译、并在目标设备上验证过，才算数。
+
 #### 2.3.2 安装方式与已有安装冲突
 
-Claude Code 通过 `~/.claude/skills/`（用户级）目录发现技能，安装就是把技能以完整目录放进去：目录内含 `SKILL.md`（带 `name` / `description` frontmatter）及其引用的 `scripts/`、`reference/` 等伴随文件。发布方以 Git 标签发布技能，因此本次先把固定版本检出到临时目录（见 2.3.1），再将 `arkts-runtime-fix` 目录放入 `~/.claude/skills/`。
+Claude Code 通过 `~/.claude/skills/`（用户级）目录发现技能，所谓安装就是把完整目录放进去——目录内含带 `name` / `description` frontmatter 的 `SKILL.md`，以及它引用的 `scripts/`、`reference/` 等伴随文件。发布方用 Git 标签发布，所以先把固定版本检出到临时目录（见 2.3.1），再往 `~/.claude/skills/` 放。
 
-放入后还要确认发现路径，不能仅凭复制完成判断安装成功。本次机器上已经存在系统级 DevEco 技能目录，并通过符号链接提供给 Claude Code 发现：
+放完还要确认发现路径，不能凭"复制完了"就认为装好了。本次机器上已经存在系统级 DevEco 技能目录，并通过符号链接提供给 Claude Code：
 
 ```text
 ~/.local/share/deveco/skills/arkts-runtime-fix   # 唯一内容源
 ~/.claude/skills/arkts-runtime-fix               # 指向上方目录的符号链接
 ```
 
-现有版本还带有扩展的 `reference/` 崩溃知识库，而固定标签版本没有这些增强内容。直接复制完整目录可能因目标是符号链接而失败，也可能覆盖或降级已有内容。因此本次没有盲目覆盖，而是把固定版本与现有目录逐项比较：固定版本的全部 `.mjs` 文件与本地版本字节一致，本地仅缺少 8 个 `.ts` 源码伴随文件。最终保留现有 `SKILL.md`、`SKILL_CN.md`、`.version` 和 `reference/`，只补齐缺失的 `.ts` 文件，继续维持单一全局内容源。
+现有版本带一套扩展的 `reference/` 崩溃知识库，固定标签版本没有。直接复制完整目录，可能因目标是符号链接而失败，也可能覆盖或降级已有内容。所以这里没有盲目覆盖，而是逐项比对：固定版本的 `.mjs` 文件与本地字节一致，本地只缺 8 个 `.ts` 源文件。最终保留现有的 `SKILL.md`、`SKILL_CN.md`、`.version` 和 `reference/`，只补上缺的那几个 `.ts`，继续维持单一全局内容源。
 
-如果是全新环境，可以把固定版本目录整体复制到 `~/.claude/skills/`；如果目标已经存在，应先确认它是普通目录还是符号链接，再比较文件树和内容差异。不要直接覆盖，更不要把系统级技能复制进单个项目形成多个失去同步的副本。
+另外三个技能没有这类冲突，直接从固定标签源码复制完整目录到 `~/.claude/skills/` 即可，注意保留相对结构，别只拷单个 `SKILL.md`。装之前先把 DevEco 目录里的旧版本挪到备份目录，这样既不会把 `SKILL.md` 拆出来，也不会在项目里留下难以同步的副本。全新环境可以整目录复制；目标已存在时，先确认它是普通目录还是符号链接，再比较文件树和内容差异——不要直接覆盖，更不要把系统级技能复制进单个项目，弄出好几份失去同步的副本。
 
 #### 2.3.3 安装后验证
 
-验证分为目录完整性、脚本语法和最小功能三层。首先检查发现路径、符号链接目标和关键文件：
+分三层验：目录完整性、脚本语法、最小功能。先看发现路径、符号链接目标和关键文件：
 
 ```bash
 readlink ~/.claude/skills/arkts-runtime-fix
@@ -140,20 +150,29 @@ test -f ~/.local/share/deveco/skills/arkts-runtime-fix/SKILL.md
 find ~/.local/share/deveco/skills/arkts-runtime-fix -type f -print | sort
 ```
 
-然后检查所有可执行 JavaScript 脚本的语法：
+再检查所有可执行 JavaScript 脚本的语法：
 
 ```bash
 find ~/.local/share/deveco/skills/arkts-runtime-fix/scripts \
   -name '*.mjs' -exec node --check {} \;
 ```
 
-本次结果为：`SKILL.md`、中英文说明、评测文件、脚本、共享模块、8 个 `.ts` 源码伴随文件和本地扩展参考资料全部存在；全部 `.mjs` 通过 `node --check`。最后用一段脱敏的 `TypeError` 日志做冒烟测试，解析器返回 `status: detected`、`error_type: TypeError`，并正确提取了疑似源码文件与行列号。该测试只解析本地样例，没有连接鸿蒙 PC 设备。
+本次结果是：`SKILL.md`、中英文说明、评测文件、脚本、共享模块、8 个 `.ts` 源文件和本地扩展参考资料全在，所有 `.mjs` 通过 `node --check`。独立安装的三个技能也逐个确认了不是符号链接，文件数分别为 65 / 5 / 5，与固定标签源码 `diff -qr` 完全一致：
 
-这套流程的关键不是“把命令跑完”，而是形成可追溯闭环：固定来源版本、审查全部文件、说明设备与日志风险、保护已有安装，最后用文件树、语法检查和最小样例证明技能确实可用。
+```bash
+for skill in arkts-error-fixes arkts-grammar-standards arkui-knowledge; do
+  test -d ~/.claude/skills/$skill && test ! -L ~/.claude/skills/$skill
+  find ~/.claude/skills/$skill -type f | wc -l
+done
+```
 
-### 2.5 四个技能的源头仓库与更新方式
+最后用一段脱敏的 `TypeError` 日志做冒烟测试，解析器返回 `status: detected`、`error_type: TypeError`，并正确提取了疑似源码文件与行列号。这次测试只解析本地样例，没有连接设备。
 
-2.3 与 2.4 安装的四个技能（`arkts-runtime-fix`、`arkts-error-fixes`、`arkts-grammar-standards`、`arkui-knowledge`）并非独立发布的第三方技能，而是 **DevEco Code CLI（`deveco` 命令）的内置资源**。事后逐项溯源与 diff 后，完整链路如下：
+关键不在于把命令跑完，而在于形成可追溯的闭环：固定来源版本、审完全部文件、把设备和日志风险写在明面上、保护已有安装，最后用文件树、语法检查和最小样例证明技能真的可用。Claude Code 通常在下一次会话或重新加载技能清单时才会发现新目录，当前会话里以实际可见的技能清单为准。
+
+#### 2.3.4 溯源：这四个技能从哪来、以后怎么更新
+
+事后逐项溯源加 diff 才发现，这四个技能并不是独立发布的第三方技能，而是 **DevEco Code CLI（`deveco` 命令）的内置资源**。完整链路是这样：
 
 ```text
 gitcode.com/openharmony-sig/deveco-code          # 官方源头仓库
@@ -167,27 +186,18 @@ gitcode.com/openharmony-sig/deveco-code          # 官方源头仓库
 ~/.claude/skills/                                # Claude Code 的发现目录
 ```
 
-本文 2.3 中固定的 GitHub 仓库 `CarSmallGuo/deveco-code` 是该官方仓库的 **fork 镜像**，`0.1.0-TD.4` 对应其上的同名分支。
+2.3 里固定的 `CarSmallGuo/deveco-code` 是这个官方仓库的 **fork 镜像**，`0.1.0-TD.4` 对应其上的同名分支。
 
-#### 2.5.1 本地安装与源仓库的实测对比
+把本地 `~/.claude/skills/` 与源仓库 master 分支、`v0.1.12` 标签逐文件 `diff -rq` 对比，结果很干净：`arkts-error-fixes`、`arkts-grammar-standards`、`arkui-knowledge` 三个完全一致；只有 `arkts-runtime-fix` 是本地版更新，多出 `reference/` 崩溃知识库、8 个 `.ts` 源文件和 `.version`——而这些内容不存在于源仓库的任何公开分支，只内嵌在 npm 发布二进制里。
 
-把本地 `~/.claude/skills/` 与源仓库 `master` 分支及 `v0.1.12` 标签逐文件 `diff -rq` 对比：
+由此得出一个反直觉的结论：**`arkts-runtime-fix` 的权威源头是 npm 二进制，不是 gitcode 上的公开源码**。从仓库克隆来更新它反而会降级（丢掉 `reference/` 知识库），2.3.2 里「保留现有增强、只补缺失文件」就是这个原因。另外，源仓库的演进快于 npm 发布：master / weekly 分支上已经出现 `dfx-analyzer`、`customize-deveco`、`deveco-cli` 等新技能，`v0.1.12` 标签里 `arkui-knowledge` 也被并进了 `arkts-grammar-standards`，但这些都还没随 npm 版发出来。
 
-| 技能 | 与源仓库 master 的对比结果 |
-| --- | --- |
-| `arkts-error-fixes` | 完全一致 |
-| `arkts-grammar-standards` | 完全一致 |
-| `arkui-knowledge` | 完全一致 |
-| `arkts-runtime-fix` | **本地版更新**：`SKILL.md` / `SKILL_CN.md` 有差异，且多出 `reference/` 崩溃知识库、8 个 `.ts` 源文件与 `.version`。这些增强内容不存在于源仓库任何公开分支，只内嵌于 npm 发布二进制（内部构建产物） |
-
-两点值得注意：其一，`arkts-runtime-fix` 的权威源头是 **npm 二进制**而非 gitcode 公开源码，从仓库克隆更新它反而会降级（丢失 `reference/` 知识库），2.3.2 的「保留现有增强、只补缺失文件」正是这个原因；其二，源仓库的演进快于 npm 发布——master/weekly 分支上已出现 `dfx-analyzer`、`customize-deveco`、`deveco-cli` 等新技能，且 `v0.1.12` 标签中 `arkui-knowledge` 已被合并进 `arkts-grammar-standards` 的新 references，但这些尚未随 npm 版发布。
-
-#### 2.5.2 更新方式
+更新方式：
 
 | 场景 | 做法 |
 | --- | --- |
 | 常规更新（推荐） | `deveco upgrade` 升级 CLI，新版会把内置技能解包到 `~/.config/deveco/skills/`，再与 `~/.claude/skills/` 里的副本 diff，确认有变化后重新复制 |
-| 从源头尝鲜 | `git clone https://gitcode.com/openharmony-sig/deveco-code`，取 `packages/opencode/resources/skills/` 下对应目录；**不要**用它更新 `arkts-runtime-fix`（会降级） |
+| 从源头尝鲜 | 克隆 `gitcode.com/openharmony-sig/deveco-code`，取 `packages/opencode/resources/skills/` 下对应目录；**不要**用它更新 `arkts-runtime-fix`（会降级） |
 
 ```bash
 # 升级后同步（以解包目录为准，逐项确认差异再覆盖）
@@ -196,58 +206,11 @@ rm -rf ~/.claude/skills/arkts-error-fixes
 cp -R ~/.config/deveco/skills/arkts-error-fixes ~/.claude/skills/
 ```
 
-复制前应先确认目标是普通目录还是符号链接（见 2.3.2），并用 `deveco debug skill` 可以列出 CLI 当前实际加载的技能及其路径，用于核对解包位置与版本。本次（0.1.7 → 0.1.12）四个技能内容经 diff 均无变化，无需重新拷贝。
+复制前先确认目标是普通目录还是符号链接（见 2.3.2）。`deveco debug skill` 能列出 CLI 当前实际加载的技能及路径，用来核对解包位置与版本。本次从 0.1.7 升到 0.1.12，四个技能 diff 下来都没变化，不需要重新拷。
 
-### 2.4 安装 ArkTS 编译、语法与 ArkUI 知识 Skill
+### 2.4 创建并配置项目
 
-为把 ArkTS 的问题按阶段处理，本次又安装了三个互补技能：`arkts-error-fixes` 用于编译与类型错误的定位和修复；`arkts-grammar-standards` 用于在首次编写或修改 `.ets` 前核对 ArkTS 基础语法、限制及与 TypeScript 的差异；`arkui-knowledge` 覆盖 ArkUI 组件、布局、状态、渲染、导航、交互和 UI 质量检查。它们的发布者均为 CarSmallGuo，审查时固定到 `deveco-code` 的 `0.1.0-TD.4` 标签（提交 `567c83c8fa7299196864b2710566bdcc73f3c271`）。
-
-| 技能 | 用途 | 固定版本目录内容 |
-| --- | --- | --- |
-| `arkts-error-fixes` | 编译错误与类型不匹配修复 | `README.md`、`SKILL.md`、32 个 ArkTS 示例和 31 篇参考资料，共 65 个文件 |
-| `arkts-grammar-standards` | ArkTS 语法、限制和 TypeScript 差异 | `SKILL.md` 与 4 个 `references/` 文件，共 5 个文件 |
-| `arkui-knowledge` | ArkUI 组件与 UI 开发知识 | `SKILL.md` 与 4 个 `references/` 文件，共 5 个文件 |
-
-#### 2.4.1 审查结论与安装边界
-
-安装前同时打开了三个 SkillsMP 介绍页和对应的固定标签源码，完整阅读各自的 `SKILL.md`，并检查目录树、伴随文件和可执行权限。三个目录中没有 `scripts/`、二进制文件或带可执行权限的文件；内容为 Markdown、JSON 和用于说明的 `.ets` 示例。针对常见高风险命令（如管道执行下载脚本、`rm -rf`、`sudo`、`eval`）的文本扫描没有命中。也就是说，安装动作仅复制本地知识资料，不会自动执行示例或连接设备。
-
-仍需保留两类风险意识：参考资料和示例可能随 DevEco SDK 与 ArkUI API 演进而过时；`arkts-error-fixes` 给出的修改建议应在当前 SDK 中重新编译，并在目标鸿蒙 PC 设备或模拟器中验证，不能把示例结论直接当作无条件修复方案。固定标签安装的目的，是避免把审查后新增的上游变更一并引入。
-
-#### 2.4.2 按目录约定安装与旧版本备份
-
-三个技能与 `arkts-runtime-fix` 一样，位于发布方仓库深层的 `packages/opencode/resources/skills/` 下，因此直接从固定标签源码复制完整目录到 `~/.claude/skills/`，而不是只复制单个 `SKILL.md`。复制时保留相对结构，避免技能内部引用失效。
-
-已有版本需要先处理冲突：把 DevEco 目录中 `arkts-error-fixes` 和 `arkts-grammar-standards` 的旧版本先移动到 `/private/tmp/deveco-skill-backup-20260814/` 备份，随后再安装固定版本。这样既不会把 `SKILL.md` 单独拆出，也不会在项目目录中留下难以同步的副本。
-
-```bash
-# 以固定标签源码目录为输入；对每个技能复制完整目录，而非单个 SKILL.md
-cp -pR /private/tmp/deveco-code-skills-review/packages/opencode/resources/skills/arkui-knowledge \
-  ~/.claude/skills/arkui-knowledge
-```
-
-#### 2.4.3 安装后验证
-
-安装后逐个确认三个 Claude Code 目标目录含有 `SKILL.md`、且不是符号链接；随后使用 `diff -qr` 将安装目录与固定标签源码逐文件比较。结果为三个目录均完全一致，文件数分别为 65、5、5。可复用以下命令进行验证：
-
-```bash
-for skill in arkts-error-fixes arkts-grammar-standards arkui-knowledge; do
-  test -d ~/.claude/skills/$skill
-  test ! -L ~/.claude/skills/$skill
-  test -f ~/.claude/skills/$skill/SKILL.md
-  find ~/.claude/skills/$skill -type f | wc -l
-done
-
-diff -qr \
-  /private/tmp/deveco-code-skills-review/packages/opencode/resources/skills/arkui-knowledge \
-  ~/.claude/skills/arkui-knowledge
-```
-
-Claude Code 通常会在下一次会话或重新加载技能清单时发现新安装的目录；在当前会话中，应以实际可见的技能清单为准。
-
-### 2.6 创建并配置项目
-
-ElectronEgg 采用「一套代码，桌面 + 鸿蒙」的方式：业务代码照常用 Vue + Electron 编写，构建产物通过 `ee-bin ohos` 同步到鸿蒙 HAP 工程（`ohos_hap/`），由 HAP 的 ArkWeb WebView 加载。因此「创建项目」包含两步。
+ElectronEgg 采用「一套代码，桌面 + 鸿蒙」的方式：业务代码照常用 Vue + Electron 编写，构建产物通过 `ee-bin ohos` 同步到鸿蒙 HAP 工程（`ohos_hap/`），由 HAP 的 ArkWeb WebView 加载。所以「创建项目」分三步。
 
 **第一步：获取 ElectronEgg 示例工程并安装依赖**
 
@@ -327,7 +290,7 @@ setPaint (id) {
 
 ### 3.3 鸿蒙运行能力接入
 
-这是本项目最有价值的部分：**构建后的前端资源要跑在鸿蒙 PC 上，而鸿蒙端没有 Electron 的 IPC / 文件系统能力**。ElectronEgg 的鸿蒙方案是——业务代码照常依赖 Electron，但构建产物交给 HAP 工程的 ArkWeb WebView 加载。于是前端必须做到「无 Electron 也能降级运行」。
+这是本项目最有价值的部分：**构建后的前端资源要跑在鸿蒙 PC 上，而鸿蒙端没有 Electron 的 IPC / 文件系统能力**。ElectronEgg 的做法是业务代码照常依赖 Electron，构建产物则交给 HAP 工程的 ArkWeb WebView 加载。于是前端必须做到「无 Electron 也能降级运行」。
 
 做法是在一个工具函数里判定运行环境：
 
@@ -342,8 +305,8 @@ const isEE = ipc ? true : false   // 存在 ipcRenderer 才是 Electron 环境
 
 再配合两处工程配置，保证构建产物可直接以 `file://` / HAP resfile 相对路径加载：
 
-- Vite 设置 `base: './'`——产物内的资源引用改为相对路径
-- 路由使用 hash 模式（`createWebHashHistory`）——WebView 加载 `index.html` 后无需服务端路由支持
+- Vite 设置 `base: './'`：产物内的资源引用改为相对路径
+- 路由使用 hash 模式（`createWebHashHistory`）：WebView 加载 `index.html` 后无需服务端路由支持
 
 这套「同构配置 + 双模式截图」让一份代码同时跑在 Electron 桌面与鸿蒙 PC 上，是本案例中 Claude Code 给出的最有迁移价值的降级方案。
 
@@ -366,7 +329,7 @@ if (dist < 0.003) { m.color.copy(this.paintTarget) }
 
 ## 四、调试与真机运行
 
-本节覆盖从「把 HAP 部署到鸿蒙 PC」到「运行时与部署故障定位」的完整调试链路：4.1 用 DevEco Studio + hdc 把应用跑起来，4.2 讲运行时崩溃定位（ArkTS 与前端各一例），4.3 记录一次 HAP 部署报错的完整排障过程。
+这一章走一遍从「把 HAP 部署到鸿蒙 PC」到「运行时与部署故障定位」的链路：4.1 用 DevEco Studio + hdc 把应用跑起来，4.2 讲运行时崩溃怎么定位，4.3 是一次 HAP 部署报错的完整排障记录。
 
 ### 4.1 运行到鸿蒙 PC
 
@@ -394,7 +357,7 @@ hdc list targets            # 查看已连接设备 / 模拟器
 
 遇到 ArkTS/JavaScript 运行时崩溃时，可以让 Claude Code 调用前文安装的 `arkts-runtime-fix`：先从已有 `jscrash` 日志中提取异常类型、源码位置和调用栈；证据不足时再通过 `hdc` 检查 `faultlogger`、拉取故障日志或采集限定时间范围的 `hilog`。日志采集与代码修改应分开进行，先保留原始证据，再根据最小复现定位根因，修复后重新构建并在同一设备上验证。
 
-本文项目还遇到一次**前端运行期 TypeError**：用户在点击「俯瞰」「户外」时页面报 `CarViewer.js:178 Uncaught TypeError: m.color.distanceTo is not a function`。定位思路与 ArkTS 崩溃一致——先拿到异常类型与调用位置，再核对依赖版本：当前安装的 three `^0.185.1` 已移除 `Color.distanceTo`，而生成代码仍调用旧 API。修复只改收敛判断一处（用手写欧氏距离替代），完整过程见 3.4。
+前端侧也遇到过一次运行期 TypeError（three.js r185 移除了 `Color.distanceTo`），定位思路和上面完全一样：先拿到异常类型和调用位置，再回头核对依赖版本。那次生成代码还在调用已删除的 API，修复只动了收敛判断一处，过程见 3.4。
 
 ### 4.3 HAP 部署故障定位（ErrorCode:00404039）
 
@@ -432,7 +395,7 @@ hdc list targets -v        # 设备重新在线
 
 ## 五、打包与发布
 
-HAP 打包分两步：先由 ElectronEgg 侧构建并同步资源，再由 DevEco Studio 编译出 HAP。本节覆盖本地打包与调试签名，正式上架细节以华为官方文档为准。
+HAP 打包分两步：先由 ElectronEgg 侧构建并同步资源，再由 DevEco Studio 编译出 HAP。这里只讲本地打包与调试签名，正式上架的细节以华为官方文档为准。
 
 ### 5.1 打包 HAP
 
@@ -459,26 +422,22 @@ npm run ohos               # 把产物同步到 ohos_hap 资源目录（ee-bin o
 
 | 问题 | 原因 | 解决办法 |
 | --- | --- | --- |
-| 本地已由 DevEco 管理同一 Skill，Claude Code 也需要发现它 | 分别复制到两个目录会形成多份内容，升级或修复时容易产生版本漂移 | 以 `~/.local/share/deveco/skills/<skill>` 作为唯一内容源，再在 `~/.claude/skills/<skill>` 创建同名符号链接；创建前确认链接目标和目录完整性 |
-| 已存在的 Skill 无法直接重装 | 发现路径是符号链接，且本地内容比远端固定版本更完整 | 固定远端版本，比较完整目录，仅合并缺失文件并保留单一内容源 |
 | 日志解析脚本可运行，但设备日志采集失败 | `hdc` 不可用、设备未连接或目标设备选择错误 | 先检查 `hdc` 和设备列表，再运行设备侧采集脚本 |
-| 故障日志包含不宜公开的信息 | `faultlogger`/`hilog` 可能记录路径、Bundle 名称和运行时数据 | 对外粘贴或提交日志前进行脱敏 |
 | 从其他 AI 工具生态迁移技能，Claude Code 未发现该技能 | 技能 `SKILL.md` 缺少 Claude Code 要求的 `name` / `description` frontmatter | 补齐 frontmatter 后重启会话或重新加载技能清单 |
 | `hdc: command not found` | hdc 未加入系统 PATH（DevEco 内置 hdc 在应用安装目录内） | 定位 DevEco SDK 下的 hdc 并加入 PATH，或用全路径调用 |
 | `hdc shell` 提示 `need connect-key? please confirm a device` | 模拟器同时注册 TCP 与 USB 两个设备条目，hdc 要求明确选择 | 用 `hdc -t <target>` 显式指定目标设备 |
 
-如果本地已经通过 DevEco 管理某项技能，推荐使用软链接而不是再复制一份：DevEco 目录保存完整技能，Claude Code 目录只负责发现。这样维护、升级和回滚都只作用于唯一内容源。若希望 Claude Code 独立管理技能，则像本次新增的三个技能一样直接安装到 `~/.claude/skills/`，不要同时把两份目录都当作可写主副本。
+技能安装阶段的几个坑（符号链接冲突、日志脱敏、覆盖降级）都写在 2.3 里了，这里不重复。
 
 ## 七、总结
 
-从「参照 hima.auto 生成 3D 看车程序」这一句话需求，到同时跑通 Electron 桌面与鸿蒙 PC 的可运行应用，整个开发过程验证了 Claude Code 在鸿蒙 PC 应用开发中的实际价值：
+从一句「参照 hima.auto 生成 3D 看车程序」，到同时在 Electron 桌面和鸿蒙 PC 上跑通，这一路下来有几点感受比较实在。
 
-1. **把模糊需求变成工程方案**：一句话需求被拆成页面、3D 模块、控制器、内嵌配置的清晰分层，生成代码贴合项目既有风格与框架约定。
-2. **代码质量仍靠人工把关**：程序化车模、材质系统、IPC 控制器等核心逻辑一次成型，但运行期仍可能暴露问题（如 r185 API 变更），靠「先拿证据、最小修复」解决，不能盲信。
-3. **鸿蒙适配的降级思路最值得复用**：`isEE` 判定 + 内嵌配置 + 双模式截图，让同一份前端在 Electron 与 ArkWeb 下都可用。
-4. **部署排障靠证据链**：00404039 这类设备相关报错，先用 hdc 实测（空间、权限、重跑命令）排除设备侧，再定位到 hdc server 病态，比凭报错文案猜快得多。
+一句话需求确实能被拆成页面、3D 模块、控制器、内嵌配置这样清晰的分层，生成代码也贴合项目已有的风格和框架约定。但**代码对不对，最终还是人说了算**——程序化车模、材质系统、IPC 控制器这些核心逻辑虽然一次成型，运行期照样会暴露问题（比如 r185 那次 API 变更），靠「先拿证据、再做最小修复」解决，不能盲信。
 
-后续进阶方向：接入更精细的高模模型与 PBR 贴图；把车漆 / 轮毂配置服务化（运行时拉取）；截图从 `toDataURL` 升级为主进程原生截图；探索鸿蒙端更多系统能力（窗口、分享、文件）与 Electron 侧的对应实现。Claude Code 适合做「把想法快速变成可运行原型」的加速器，而工程化与正确性，始终需要开发者自己把关。
+**最值得复用的是那套降级思路**：`isEE` 判定 + 内嵌配置 + 双模式截图，让同一份前端在 Electron 和 ArkWeb 下都能用。而**部署排障一定得靠证据链**——00404039 这种设备相关报错，先用 hdc 实测空间、权限、重跑命令，把设备侧排除掉，再定位到 hdc server 病态，比对着报错文案猜要快得多。
+
+往后能继续做的：接更精细的高模模型和 PBR 贴图；把车漆 / 轮毂配置服务化、运行时拉取；截图从 `toDataURL` 升级成主进程原生截图；再探探鸿蒙端更多系统能力（窗口、分享、文件）和 Electron 侧的对应实现。Claude Code 适合当「把想法快速变成可运行原型」的加速器，工程化和正确性终究得自己兜着。
 
 ## 参考与延伸
 

@@ -8,7 +8,7 @@
 
 ## 摘要
 
-better-sqlite3 是 Node.js / Electron 生态中使用最广泛的 SQLite 原生绑定，以同步 API、预编译语句和极快的执行速度著称。但它是一个 C++ 原生模块（`.node`），必须针对目标平台单独编译，无法直接在鸿蒙 PC（OpenHarmony）上运行。本文完整记录了把 better-sqlite3 12.x 交叉编译到 `aarch64-linux-ohos`，并集成进 electron-egg（Electron 37）框架 demo 工程的过程：从获取源码、准备 Electron 头文件与编译工具链、修改 `binding.gyp` 接入 `libshim.a`，到符号校验、把 `better_sqlite3.node` 部署进 HAP，最终实现一个名为 **SQLite Studio** 的数据库桌面应用，并在鸿蒙 PC 上完成增删改查、事务、聚合、Pragma 等全部演示。
+better-sqlite3 是 Node.js / Electron 生态里用得最多的 SQLite 绑定，同步 API 加预编译语句，本地读写比 `sqlite3` 快不少。代价是它是 C++ 原生模块（`.node`），必须针对目标平台单独编译，没法直接拿到鸿蒙 PC 上用。本文记录了把 better-sqlite3 12.x 交叉编译到 `aarch64-linux-ohos`、集成进 electron-egg（Electron 37）demo 工程的全过程：准备 Electron 头文件与工具链、改 `binding.gyp` 接入 `libshim.a`、校验符号、把 `better_sqlite3.node` 部署进 HAP，最后落成一个叫 **SQLite Studio** 的数据库桌面应用，在鸿蒙 PC 上把增删改查、事务、聚合、Pragma 全部跑通。
 
 ## 一、为什么要做 better-sqlite3 鸿蒙 PC 适配
 
@@ -16,14 +16,7 @@ better-sqlite3 是 Node.js / Electron 生态中使用最广泛的 SQLite 原生�
 
 better-sqlite3 是一个把 SQLite 封装成 Node.js 原生模块的开源库（MIT 协议），与异步风格的 `sqlite3` 不同，它采用**同步 API**：所有数据库操作直接返回结果，无需回调或 Promise。配合**预编译语句**（`prepare().run()/get()/all()`），它在本地数据库读写场景下比 `sqlite3` 快数倍，因此大量 Electron 桌面应用选择它作为本地存储引擎。
 
-核心能力包括：
-
-- 同步 API：`new Database()` 打开连接，后续操作全部同步返回
-- 预编译语句：`db.prepare(sql)` 返回可复用的 `Statement`，支持命名参数（`@name`）与位置参数（`?`）
-- 事务：`db.transaction(fn)` 保证整批操作原子提交或回滚
-- 高级读取：`iterate()` 惰性游标、`pluck()` 取首列、`columns()` 列元信息
-- 运行时控制：`db.pragma()`、`db.exec()` 执行 DDL
-- 零运行时依赖，核心由 C++ 编写，把 SQLite 源码直接编译进绑定
+日常用到的 API 就那几个：`new Database()` 开连接、`db.prepare(sql)` 拿可复用语句（支持 `@name` 命名参数和 `?` 位置参数）、`db.transaction(fn)` 包事务，再加上 `iterate()`、`pluck()`、`columns()` 几个高级读取方法和 `db.pragma()`。整个库零运行时依赖，C++ 写成，SQLite 源码直接编进绑定——5.3 节的演示表会把这些逐项过一遍。
 
 ### 1.2 鸿蒙 PC 适配的难点
 
@@ -36,7 +29,7 @@ better-sqlite3 是一个把 SQLite 封装成 Node.js 原生模块的开源库（
 | Electron 版本对应的 Node ABI | 本项目基于 Electron 37，对应模块版本（module_version）为 **138**，`.node` 必须匹配该 ABI，且需按 Electron 源码特性传入 V8 编译宏 |
 | Electron 运行时符号 | Electron 运行时与官方 Node 在 V8 内部 API 上有差异，需要 `libshim.a` 补齐 `SlowGetAlignedPointerFromInternalField` 等符号 |
 
-此外，Electron 官方发布的 Node 头文件与开源 Node 的头文件存在差异，直接用官方头文件编译容易对不上 Electron 37 的运行时，所以环境准备阶段要先解压**整理好的 Electron 头文件**。
+还有一个容易被忽略的点：Electron 官方发布的 Node 头文件和开源 Node 的不一样，直接拿来编译对不上 Electron 37 的运行时，所以环境准备阶段要用**整理好的 Electron 头文件**（2.2 节）。
 
 ## 二、编译环境准备
 
@@ -321,15 +314,14 @@ export async function invokeAdv(action, extra = {}) {
 
 再补充三点经验：
 
-1. **产物版本要固定**：`.node` 与 Electron 版本严格绑定（本文为 Electron 37 / module_version 138），升级 Electron 后必须重新编译，不能复用旧 `.node`。
-2. **数据目录要可写**：demo 中 `getDataDir()` 会落到鸿蒙应用的数据目录，演示「切换数据目录」功能时，目标目录必须存在且有写权限。
-3. **审查与验证闭环**：原生模块是二进制，无法靠阅读确认，务必用 readelf 校验符号，并在真机上把 CRUD、事务、聚合、Pragma 等路径逐一跑通后再交付。
+1. **产物版本要固定**：`.node` 与 Electron 版本严格绑定（本文是 Electron 37 / module_version 138），升级 Electron 后必须重新编译，旧 `.node` 不能复用。
+2. **原生模块是二进制，读不出对错**：只能靠 `readelf` 校验符号，再在真机上把 CRUD、事务、聚合、Pragma 这些路径逐一跑通，才敢说适配完成。
 
 ## 七、总结
 
-把 better-sqlite3 适配到鸿蒙 PC 的核心，是**理解「原生模块 = 平台相关二进制」**这件事：准备好 Electron 37 对应的头文件与 `libshim.a`，用 OpenHarmony 的 clang 交叉编译到 `aarch64-linux-ohos`，再按 HAP 的资源约定部署原生库与 JS 包。在这个基础上，electron-egg 框架的 `SqliteStorage` 提供懒加载封装，让我们能用一套业务代码同时支撑桌面端与鸿蒙 PC 端。
+把 better-sqlite3 适配到鸿蒙 PC，本质上就是接受「原生模块 = 平台相关二进制」这个前提：备好 Electron 37 对应的头文件和 `libshim.a`，用 OpenHarmony 的 clang 交叉编译到 `aarch64-linux-ohos`，再按 HAP 的资源约定把原生库和 JS 包放到位。剩下的事交给框架——`SqliteStorage` 的懒加载封装让同一套业务代码同时撑起桌面端和鸿蒙 PC 端。
 
-后续可以继续做三件事：一是覆盖 better-sqlite3 的备份 / 加密扩展（如 `better-sqlite3-multiple-ciphers`）等更多能力；二是把同一套编译脚本抽成可复用的 npm 脚本或 CI 流水线；三是按社区规范在项目 README 中用 **T0 / T1 / T2** 划分迁移能力阶段，方便其他开发者评估复用程度。
+后面还有得做：备份和加密扩展（比如 `better-sqlite3-multiple-ciphers`）都还没覆盖；这套编译脚本值得抽成可复用的 npm 脚本或 CI 流水线；项目 README 里也该按社区规范用 **T0 / T1 / T2** 标出当前迁移到哪一级，方便别人评估能复用多少。
 
 ## 参考与延伸
 

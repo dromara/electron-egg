@@ -8,7 +8,7 @@
 
 ## 摘要
 
-ElectronEgg 是面向桌面软件的 Electron 框架。它将主进程、控制器、服务、前端与构建流程组织为一套工程化结构；而鸿蒙 PC 迁移的关键，不是将业务代码机械改写为 ArkTS，而是让既有 ElectronEgg 应用以 HAP 形式交付，并在鸿蒙侧提供 Ability、窗口容器和资源注入。本文以 `ee-demo-ohos` 为例，记录从桌面工程到鸿蒙 PC HAP 的适配路径，说明哪些能力可以复用、哪些边界必须单独处理，以及如何完成构建和设备验证。
+ElectronEgg 是面向桌面软件的 Electron 框架，主进程、控制器、服务、前端和构建流程被组织成一套工程化结构。迁移到鸿蒙 PC 时，我们没把业务代码改写成 ArkTS，而是让既有应用以 HAP 形式交付，在鸿蒙侧补上 Ability、窗口容器和资源注入。本文以 `ee-demo-ohos` 为例，记录这条适配路径：哪些能直接复用、哪些边界必须单独处理、构建和设备验证怎么做。
 
 项目源码托管在 AtomGit：[electron-egg](https://atomgit.com/dromara/electron-egg)。本文涉及的能力以当前示例工程和鸿蒙 PC 运行截图为准；平台支持仍在持续演进，生产项目应在目标 SDK、目标设备和目标业务场景上重新验收。
 
@@ -16,7 +16,7 @@ ElectronEgg 是面向桌面软件的 Electron 框架。它将主进程、控制�
 
 传统 ElectronEgg 工程由根目录的 `electron/`、`frontend/` 和构建配置组成：前端负责界面，`electron/` 中的 controller、service、preload 承担业务与桌面能力。迁移到鸿蒙 PC 后，这一业务分层仍然保留；新增的 `ohos_hap/` 则负责把运行时封装为 HarmonyOS HAP。
 
-这意味着迁移的主要工作可以拆为两部分：
+迁移的工作量主要落在两块：
 
 1. **复用层**：Vue 前端、ElectronEgg 控制器、服务、配置与大部分 Node.js 业务逻辑继续在应用资源中运行。
 2. **适配层**：使用 ArkUI-X 的 Ability 和 `WebWindow` 承载窗口；将构建结果注入 HAP 的 `resfile`；按鸿蒙应用模型完成打包与启动。
@@ -39,19 +39,17 @@ ElectronEgg 是面向桌面软件的 Electron 框架。它将主进程、控制�
 @Component
 struct Index {
   build() {
-    // 由 ArkUI-X 提供的容器承载既有 ElectronEgg 前端。
+    // ArkUI-X 提供的容器，内部承载既有 ElectronEgg 前端。
     Row() {
-      // WebWindow 负责创建并管理网页运行窗口。
       WebWindow()
     }
-    // 让容器始终填满 Ability 的可用区域。
     .width('100%')
     .height('100%')
   }
 }
 ```
 
-这种结构把 ArkTS 页面限定为系统容器，而不是重复实现桌面前端。下图展示了应用在鸿蒙 PC 环境中的窗口化运行效果。
+这种结构把 ArkTS 页面限定为系统容器，而不是重复实现一遍桌面前端。
 
 ## 三、构建与资源注入：HAP 不能直接读取开发目录
 
@@ -93,24 +91,18 @@ ElectronEgg 的控制器、服务和通信路由仍然由主进程负责。框�
 `electron/main.ts` 是外层 ElectronEgg 应用的入口。它创建框架实例，将业务生命周期和预加载函数逐一注册，再由 `run()` 统一启动。迁移时应保留这种“入口只编排、具体逻辑分层实现”的结构，避免把窗口或业务逻辑直接堆进 Ability。
 
 ```ts
-import { ElectronEgg } from 'ee-core'; // ElectronEgg 框架应用对象。
-import { Lifecycle } from './preload/lifecycle'; // 业务生命周期钩子实现。
-import { preload } from './preload'; // 应用启动早期需要初始化的服务。
+import { ElectronEgg } from 'ee-core';
+import { Lifecycle } from './preload/lifecycle';
+import { preload } from './preload';
 
-// 创建唯一的框架实例，作为主进程的启动入口。
 const app = new ElectronEgg();
-// 生命周期逻辑单独封装，入口文件只负责注册和编排。
 const life = new Lifecycle();
 
-// 核心模块加载完成后触发，适合执行框架级准备工作。
+// 入口只负责注册和编排，具体实现都在 Lifecycle / preload 里。
 app.register('ready', life.ready);
-// Electron app 就绪后注册平台事件，例如二次启动。
 app.register('electron-app-ready', life.electronAppReady);
-// 主窗口创建完成后调整尺寸、位置和显示时机。
 app.register('window-ready', life.windowReady);
-// 退出前执行清理或记录工作。
 app.register('before-close', life.beforeClose);
-// 在上述业务能力使用前初始化窗口、托盘和安全服务。
 app.register('preload', preload);
 
 // 按框架约定的顺序加载控制器、通信服务与 Electron 能力。
@@ -120,19 +112,17 @@ app.run();
 预加载函数放置启动后需要尽早启用的桌面服务。当前示例先初始化窗口、托盘和安全服务；这些能力是否可用取决于鸿蒙侧引擎和权限声明，新增服务时应逐项在目标设备验证。
 
 ```ts
-import { logger } from 'ee-core/log'; // 统一日志入口，便于设备侧定位启动问题。
-import { trayService } from '../service/os/tray'; // 托盘图标和菜单服务。
-import { securityService } from '../service/os/security'; // 窗口安全相关配置服务。
-import { windowService } from '../service/os/window'; // 主窗口和子窗口管理服务。
+import { logger } from 'ee-core/log';
+import { trayService } from '../service/os/tray';
+import { securityService } from '../service/os/security';
+import { windowService } from '../service/os/window';
 
 export async function preload(): Promise<void> {
-  // 记录预加载阶段已经开始，方便结合运行日志排查顺序。
+  // 打一行日志，方便对照设备侧日志排查启动顺序。
   logger.info('[preload] load');
-  // 先建立窗口管理所需的事件与状态。
   windowService.init();
-  // 再初始化桌面托盘能力；目标平台是否支持需单独验证。
+  // 托盘在鸿蒙侧是否可用，需要单独验证。
   trayService.init();
-  // 最后应用安全服务的窗口限制和相关策略。
   securityService.init();
 }
 ```
@@ -141,27 +131,21 @@ export async function preload(): Promise<void> {
 
 ```ts
 async electronAppReady(): Promise<void> {
-  // 已有实例时，系统再次拉起应用会触发该事件。
+  // 复用已有主窗口，不要再创建一个实例。
   electronApp.on('second-instance', () => {
-    // 获取已有主窗口，而不是重复创建一个窗口实例。
     const win = getMainWindow();
-    // 最小化窗口先还原，后续 show 才能恢复到可交互状态。
     if (win.isMinimized()) win.restore();
-    // 将窗口展示到前台并交给用户输入焦点。
     win.show();
     win.focus();
   });
 }
 
 async windowReady(): Promise<void> {
-  // 主窗口已创建，可以安全调整其位置和大小。
   const win = getMainWindow();
-  // workAreaSize 排除任务栏等系统占用区域。
+  // workAreaSize 已排除任务栏占用的区域。
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  // 以工作区的比例计算默认窗口尺寸。
   const windowWidth = Math.floor(width * 0.7);
   const windowHeight = Math.floor(height * 0.8);
-  // 使用剩余空间的一半作为左上角坐标，实现居中。
   win.setBounds({
     x: Math.floor((width - windowWidth) / 2),
     y: Math.floor((height - windowHeight) / 2),
@@ -169,9 +153,8 @@ async windowReady(): Promise<void> {
     height: windowHeight,
   });
 
-  // show 为 false 时，等待网页真正可绘制再显示，减少白屏感知。
+  // 配置要求延迟显示时，等页面真的可绘制了再 show，减少白屏感知。
   if (getConfig().windowsOption.show === false) {
-    // once 只在首次可展示时执行，避免重复触发。
     win.once('ready-to-show', () => {
       win.show();
       win.focus();
@@ -188,22 +171,17 @@ async windowReady(): Promise<void> {
 
 ```ts
 selectFile(): string | null {
-  // 使用系统文件选择器，仅允许用户选择普通文件。
   const filePaths = dialog.showOpenDialogSync({
     properties: ['openFile'],
   });
-  // 取消选择返回 undefined；成功时只将第一个路径返回前端。
+  // 取消选择时返回 null，调用端不用额外判断 undefined。
   return filePaths ? filePaths[0] : null;
 }
 
 loginWindow(args: { width?: number; height?: number }): void {
-  // 始终操作当前主窗口，避免前端持有 BrowserWindow 对象。
   const win = getMainWindow();
-  // 调用方未传尺寸时使用登录页的紧凑默认尺寸。
   win.setSize(args.width || 400, args.height || 300);
-  // 切换尺寸后仍允许用户按需要调整窗口。
   win.setResizable(true);
-  // 新尺寸下重新居中，再显示并聚焦窗口。
   win.center();
   win.show();
   win.focus();
@@ -211,7 +189,6 @@ loginWindow(args: { width?: number; height?: number }): void {
 
 restoreWindow(args: { width?: number; height?: number }): void {
   const win = getMainWindow();
-  // 恢复业务主页面对应的默认尺寸，参数可按页面需求覆盖。
   win.setSize(args.width || 980, args.height || 650);
   win.setResizable(true);
   win.center();
@@ -226,20 +203,17 @@ restoreWindow(args: { width?: number; height?: number }): void {
 
 ```ts
 async checkHttpServer(): Promise<{ enable: boolean; server: string }> {
-  // 读取已经合并完成的框架配置，而非在控制器中硬编码地址。
+  // 读合并后的框架配置，不在控制器里硬编码地址。
   const { enable, protocol, host, port } =
     (getConfig() as Config).httpServer;
-  // 将多个配置字段整理为前端可直接展示的服务地址。
   return { enable, server: protocol + host + ':' + port };
 }
 
 async ipcInvokeMsg(args: string): Promise<string> {
-  // invoke 对应 Promise 式 IPC；返回值将回传给调用方。
   return `${args} - ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`;
 }
 
 async ipcSendSyncMsg(args: string): Promise<string> {
-  // 同步消息示例复用相同的时间戳格式，便于对比通信路径。
   return `${args} - ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`;
 }
 
@@ -247,7 +221,6 @@ ipcSendMsg(
   args: { type: string; content: string },
   event: IpcMainEvent,
 ): string {
-  // 将事件对象交给服务层，由服务层负责向指定渲染窗口回传消息。
   return frameworkService.bothWayMessage(args.type, args.content, event);
 }
 ```
@@ -258,36 +231,31 @@ ipcSendMsg(
 
 ```ts
 selectFolder(): string | null {
-  // 目录选择器允许选择已有目录，也允许用户创建新目录。
   const filePaths = dialog.showOpenDialogSync({
     properties: ['openDirectory', 'createDirectory'],
   });
-  // 用户取消时明确返回 null，调用端无需判断 undefined。
   return filePaths ? filePaths[0] : null;
 }
 
 selectPic(): string | null {
-  // 限制为常见图片扩展名，缩小可选文件范围。
   const filePaths = dialog.showOpenDialogSync({
     title: 'select pic',
     properties: ['openFile'],
     filters: [{ name: 'Images', extensions: ['jpg', 'png', 'gif'] }],
   });
-  // 未选择文件时不继续读取磁盘。
   if (!filePaths) return null;
-  // 文件内容仅在主进程读取，再以 data URL 安全传给前端预览。
+  // 文件只在主进程读取，转成 data URL 再给前端预览。
   return `data:image/jpeg;base64,${fs.readFileSync(filePaths[0]).toString('base64')}`;
 }
 
 createWindow(args: {
   type: string; content: string; windowName: string; windowTitle: string;
 }): number {
-  // 窗口服务负责创建和登记子窗口，并返回其 webContents 标识。
   return windowService.createWindow(args);
 }
 
 window1ToWindow2(args: { receiver: string; content: unknown }): void {
-  // 主进程充当中继，按接收方标识把消息转发至目标窗口。
+  // 主进程充当中继，按接收方标识转发消息。
   windowService.communicate(args);
 }
 
@@ -295,22 +263,18 @@ sendNotification(
   args: { title?: string; subtitle?: string; body?: string; silent?: boolean },
   event: IpcMainEvent,
 ): boolean | string {
-  // 先检查平台通知能力，避免在不支持的平台继续调用。
+  // 平台不支持通知时直接返回提示，不往下走。
   if (!Notification.isSupported()) return '当前系统不支持通知';
-  // 由受控字段构造通知选项，避免把任意前端对象直接传入系统 API。
+  // 逐字段构造选项，不把前端对象原样传给系统 API。
   const options: NotificationConstructorOptions = {};
   if (args.title) options.title = args.title;
   if (args.subtitle) options.subtitle = args.subtitle;
   if (args.body) options.body = args.body;
   if (args.silent !== undefined) options.silent = args.silent;
-  // 服务层创建通知，并通过 event 关联调用来源。
   windowService.createNotification(options, event);
-  // 创建请求已被受理；实际展示由平台通知系统完成。
   return true;
 }
 ```
-
-本节聚焦窗口、通信与系统交互相关实现。
 
 ## 五、迁移分级与验收建议
 
@@ -354,39 +318,38 @@ cp build/icons/icon.png ohos_hap/AppScope/resources/base/media/startIcon.png
 
 ## 六、常见问题与排查顺序
 
-### 6.1 HAP 启动了，但 ElectronEgg 控制器或服务没有工作
+### 6.1 HAP 起来了，但控制器或服务没工作
 
-先确认 `public/electron/main.js` 是否为最新构建，再检查 `resources/app/` 中是否包含 `package.json`、`public/` 与运行时依赖。控制器、HTTP 与 Socket 同时失效时，优先怀疑资源注入、配置注册表或 `ee-core` 加载这一类共享上游。需要更细日志时可在根目录使用：
+先确认 `public/electron/main.js` 是不是最新构建，再检查 `resources/app/` 里有没有 `package.json`、`public/` 和运行时依赖。如果控制器、HTTP、Socket 一起失效，优先怀疑资源注入、配置注册表或 `ee-core` 加载这类共享上游，别急着改 Ability。要更细的日志就开 DEBUG：
 
 ```bash
-# 仅打开 ee-core 的配置加载日志，再启动 Electron 开发进程。
 DEBUG='ee-core:config:*' npm run dev-electron
 ```
 
 ### 6.2 HAP 构建或启动失败
 
-先区分失败发生在“构建”“安装”还是“启动”三个阶段：构建失败时，检查 ArkUI-X SDK 与工程 SDK 是否匹配，并确认 `ohos_hap/build-profile.json5` 选中的产品配置可用；安装失败时，检查设备连接状态、应用包名与签名是否一致；启动后立即退出时，再检查 `module.json5` 的 Ability、权限和资源声明。签名口令、证书路径和本机 SDK 绝对路径属于机器私有信息，不应写进代码仓库或公开文章。
+先分清卡在哪个阶段。**构建失败**查 ArkUI-X SDK 与工程 SDK 是否匹配、`build-profile.json5` 里选中的产品配置是否可用；**安装失败**查设备连接、包名与签名是否一致；**装上了立刻退出**才去看 `module.json5` 的 Ability、权限和资源声明。签名口令、证书路径、本机 SDK 绝对路径属于机器私有信息，别写进仓库或文章。
 
-还应确认 `electron/libs/arm64-v8a/` 中的引擎运行时库齐全，并且构建产物与目标设备的架构一致。不要为了绕过报错而随意替换单个 `.so` 文件；应从同一版本的引擎构建产物中成组更新，再重新构建和安装 HAP，避免出现 ABI 或依赖版本不一致。
+另一种情况是 `electron/libs/arm64-v8a/` 里引擎运行时库不全，或者产物架构和目标设备对不上。别为了绕过报错去单独替换某个 `.so`——从同一版本的引擎产物里成组更新，再重新构建安装，否则很容易踩到 ABI 或依赖版本不一致。
 
-### 6.3 修改了前端或主进程，设备上仍显示旧页面
+### 6.3 改了代码，设备上还是旧页面
 
-这是迁移调试中最常见的“构建链路未走完整”问题。前端改动后依次执行 `npm run build-frontend` 与 `npm run ohos-test`；主进程改动后至少重新执行 `npm run ohos-test`。前者生成 `public/dist`，后者构建主进程并把运行资源注入 HAP 工程。仅执行 `build_project` 会复用 HAP 中已有的资源，因此不会自动取得根目录中最新的业务代码。
+本质是构建链路没走完整。前端改动后依次跑 `npm run build-frontend` 和 `npm run ohos-test`，主进程改动后至少跑 `npm run ohos-test`；只执行 `build_project` 会复用 HAP 里已有的资源，拿不到根目录的新代码（第三章讲过完整流程）。
 
-排查时可直接对比根目录的 `public/` 与 `ohos_hap/electron/src/main/resources/app/` 中的生成资源更新时间。不要在 HAP 的资源目录内直接修改打包后的 JavaScript；该目录是注入结果，下一次执行资源注入就会被覆盖。确认资源更新后，重新构建、安装并冷启动应用，再判断问题是否仍然存在。
+定位时，比对根目录 `public/` 与 `ohos_hap/electron/src/main/resources/app/` 里资源的更新时间最快。另外别在 HAP 资源目录里直接改打包后的 JS——那是注入结果，下次注入就覆盖了。
 
-### 6.4 页面能打开，但 IPC、文件选择或通知没有响应
+### 6.4 页面能打开，但 IPC、文件选择或通知没反应
 
-先用最小调用确认问题边界：页面按钮是否真的发起请求、主进程控制器是否收到调用、平台能力是否返回不支持。IPC 需要在预加载桥接与控制器路由两端使用一致的通道名称；文件选择、通知等桌面能力还受目标引擎实现和系统授权状态影响，不能只根据桌面系统上的运行结果判断鸿蒙 PC 一定可用。
+先用最小调用划清边界：按钮有没有真的发请求、主进程控制器有没有收到、平台能力是不是返回了不支持。IPC 要保证预加载桥接和控制器路由两端的通道名一致；文件选择、通知这类能力还受目标引擎实现和系统授权状态影响，不能拿桌面端的运行结果推断鸿蒙 PC 一定能用。
 
-涉及网络、文件访问、剪贴板或窗口能力时，核对 `ohos_hap/electron/src/main/module.json5` 中是否声明了实际需要的权限，并确保声明与功能一一对应。权限声明后仍应在真实鸿蒙 PC 设备上重新安装验证；不要为了调试一次性添加无关的高权限，以免扩大应用权限范围。
+涉及网络、文件、剪贴板、窗口时，核对 `module.json5` 里的权限声明是否与实际功能一一对应。声明完仍要在真机上重新安装验证，也别为了调试临时加一堆无关的高权限。
 
-### 6.5 多窗口或再次打开应用时状态异常
+### 6.5 多窗口或二次启动时状态异常
 
-鸿蒙侧的 Ability 可能在独立进程中运行，多窗口也可能有独立的创建和销毁时机，因此不能假设所有窗口都共享同一个内存单例。再次启动时应优先查找已有主窗口：窗口最小化则先还原，再展示并聚焦；创建子窗口前则确认接收方窗口仍然存在。
+鸿蒙侧 Ability 可能跑在独立进程里，多窗口的创建销毁时机也各不相同，不能假设所有窗口共享同一个内存单例。二次启动要优先找已有主窗口（最小化就先还原，再展示聚焦），创建子窗口前要确认接收方还在。
 
-定位这类问题时，分别记录 Ability 名称、进程标识、窗口标识和 IPC 通道名。若单窗口正常而第二个窗口异常，先检查窗口注册与消息接收方，而不是把问题归因于前端页面本身。对于尚未在目标设备验证的平台特性，应在文章和产品说明中标明验证边界。
+定位时把 Ability 名称、进程标识、窗口标识、IPC 通道名都记下来。如果单窗口正常、第二个窗口异常，先查窗口注册和消息接收方，而不是怀疑前端页面本身。还没在目标设备上验证过的特性，写文章和产品说明时要把这个边界讲清楚。
 
 ## 结语
 
-ElectronEgg 的鸿蒙 PC 迁移价值在于复用已有桌面业务工程：前端、控制器和服务不必从零开始，而是通过 ArkUI-X 容器和 HAP 资源注入进入鸿蒙运行环境。真正需要投入验证的，是资源是否为最新版本，以及多窗口、多进程、多实例等桌面场景在目标设备上的行为。以 T0、T1、T2 分阶段推进，可以让迁移过程从“成功打开一个页面”逐步走向可维护、可发布的鸿蒙 PC 应用。
+ElectronEgg 的鸿蒙 PC 迁移，省下来的主要是业务层：前端、控制器、服务都不用从头写，靠 ArkUI-X 容器加 HAP 资源注入进到鸿蒙运行环境。真正要花时间去验的，是资源有没有同步到最新，以及多窗口、多进程、多实例这些桌面场景在目标设备上到底什么表现。按 T0 / T1 / T2 分阶段推，能从"打开一个页面"一步步走到能发布的状态。

@@ -6,7 +6,7 @@
 
 ## 摘要
 
-ElectronEgg 是一个基于 Electron 的企业级桌面应用框架，累计获得 8000+ Star，经过大量团队长期实践验证。v5 版本完成了全新升级，最重磅的能力之一是**支持鸿蒙（HarmonyOS）平台**——一套代码，打包 Windows、Mac、Linux，还能直接跑在鸿蒙上。本文将介绍 ElectronEgg 的鸿蒙支持能力、开发环境搭建、资源构建与配置的完整流程，帮助开发者快速上手鸿蒙PC应用开发。
+ElectronEgg 是一个基于 Electron 的企业级桌面应用框架，累计 8000+ Star，经过大量团队长期实践验证。v5 最大的变化之一，是同一套代码除了打包 Windows、Mac、Linux，还能直接跑在鸿蒙上。本文把鸿蒙支持能力、环境搭建、资源构建与配置这条链路完整走一遍。
 
 ## 一、ElectronEgg 简介
 
@@ -14,37 +14,41 @@ ElectronEgg 自开源以来，愿景很简单：**让所有开发者都能学会
 
 ![ElectronEgg 官网展示的跨平台桌面软件开发能力](./ee-example-1.png)
 
-v5 版本在此基础上完成了一次全新升级，最重磅的能力之一，就是——**轻松开发鸿蒙应用**。经过不断尝试，终于把 ElectronEgg 运行在鸿蒙设备上，虽然现在是**测试阶段**，但已经跑通了整个流程。
+v5 在这个基础上做了一次整体升级，其中我们花力气最多的一件事，就是让 ElectronEgg 能跑在鸿蒙设备上。目前还是**测试阶段**，但整条流程已经跑通了。
 
 ### 1.1 鸿蒙支持：一套代码，跑在 HarmonyOS 上
 
-过去，把 Electron 应用搬到鸿蒙上几乎是一件"重新写一遍"的事。v5 会把资源应用到 HarmonyOS HAP 中，由 HAP 工程的 web 引擎加载。**你现有的 ElectronEgg 业务代码，几乎不用改，就能以鸿蒙应用的形式运行。**
+过去把 Electron 应用搬到鸿蒙上，几乎等于重写一遍。v5 的做法是把构建产物放进 HarmonyOS HAP，交给 HAP 工程的 web 引擎加载——现有的 ElectronEgg 业务代码几乎不用动，就能以鸿蒙应用的形式跑起来。
 
-原本在 Windows / Mac 上运行的桌面应用，在鸿蒙端从安装到各项功能都跑得很顺畅。这就是 v5 鸿蒙支持想表达的核心：**跨端不再是口号，鸿蒙是一等公民。**
+原本在 Windows / Mac 上运行的那套应用，在鸿蒙端的安装和各项功能都已经验证过了。
 
 ![ElectronEgg 文档中的 HarmonyOS 鸿蒙支持说明](./ee-example-2.png)
 
 ### 1.2 框架功能
 
-除了鸿蒙支持，v5 还有哪些功能：
+除了鸿蒙支持，v5 还做了这些：
 
-1. **TypeScript 全面重构** ：所有 API 均有完整类型定义。
-2. **双模块格式输出** ：同时支持 CJS 和 ESM 两种格式。
-3. **Node.js 版本提升** ：最低要求 Node.js >= 20.19.0。
-4. **Pino 日志体系** ：更强大的日志记录功能。
-5. **Bundle 注册表机制** ：启动更快。
-6. **异步控制器加载** ：支持 ESM 动态导入，避免同步/异步并发竞争。
-7. **主进程打包** ： 主进程代码可以像前端 bundle 。
-8. **构建注册表插件** ：复现运行时属性名映射逻辑。
-9. **构建配置全面增强** ：新增大量精细控制项。
-10. **构建后独立转译** ：对不可打包文件独立转译。
-11. **加密系统升级** ： 更安全。
-12. **资源原子化移动** ：防止数据丢失。
-13. **ee-bin 全面升级** ：新增完整 TypeScript 类型体系。
-14. **EventBus 事件隔离** ：生命周期事件优化。
-15. **配置加载 ESM 兼容** ：自动解包 `__esModule` 格式，支持函数/类导出。
-16. **控制器并发安全** ：明确保证并发请求间无状态污染。
-17. **Cross 跨进程改进** ：优化。
+**工程与构建**
+
+- **TypeScript 全面重构**：所有 API 都有完整类型定义，ee-bin 也补齐了类型体系
+- **双模块格式输出**：CJS 和 ESM 都支持
+- **主进程打包**：主进程代码可以像前端一样 bundle；配套的构建注册表插件复现了运行时的属性名映射逻辑，打包不了的零散文件（比如 jobs）单独转译
+- **构建配置增强**：新增大量精细控制项（minify、drop、external、copy 等）
+- **资源原子化移动**：避免中途失败丢数据
+
+**运行时**
+
+- **Node.js 版本提升**：最低 Node.js >= 20.19.0
+- **Pino 日志体系**：日志能力整体重做
+- **Bundle 注册表机制**：启动更快
+- **异步控制器加载**：支持 ESM 动态导入，避免同步/异步并发竞争；并发请求之间明确保证无状态污染
+- **配置加载 ESM 兼容**：自动解包 `__esModule`，支持函数/类导出
+- **EventBus 事件隔离**：生命周期事件不再互相干扰
+- **Cross 跨进程改进**：Go / Python 子进程的拉起与日志处理更顺手
+
+**安全**
+
+- **加密系统升级**：混淆加密内置到构建链，一条命令搞定（详见第 06 篇的实测）
 
 ### 1.3 谁适合用
 
@@ -108,17 +112,23 @@ git clone https://atomgit.com/dromara/electron-egg.git
 git checkout -b demo-ohos remotes/origin/ohos/demo-37.2.2
 ```
 
-3. 把 electron-egg/ohos_hap/electron/libs 文件夹 复制/替换 到 electron-egg-ohos/ohos_hap/electron/libs
+3. 把 `electron-egg/ohos_hap/electron/libs` 整个目录复制（或替换）到 `electron-egg-ohos/ohos_hap/electron/libs`。
 
-因为 libs 文件比较大，所以没放到electron-egg-ohos示例项目中，开发者自己尽量上传到你自己的仓库中
-
+   这里放的是构建好的引擎运行时库，体积比较大，没有跟着示例项目一起托管，建议你放进自己的仓库里。
 
 4. 工程目录结构
 
 ```text
 electron-egg-ohos
-├── ohos_hap          # 鸿蒙 HAP 工程目录
-│   ├── docs          # 文档目录
+├── electron/          # 主进程源码（controller / service / preload）
+├── frontend/          # Vue 3 前端
+├── go/                # Go 后端（可选）
+├── cmd/               # bin.js 与 builder*.json 构建配置
+├── public/            # 构建产物与静态资源
+└── ohos_hap/          # 鸿蒙 HAP 工程
+    ├── AppScope/      # 应用级配置与图标资源
+    ├── electron/      # 鸿蒙 entry HAP（Ability、ArkUI 页面）
+    └── web_engine/    # 核心 HAR 引擎层，承载前端资源
 ```
 
 ### 2.5 构建资源
@@ -217,44 +227,35 @@ npm run ohos-test
 
 ## 五、鸿蒙资源配置
 
-### 5.1 介绍
+### 5.1 配置方法
 
-ElectronEgg 支持将应用打包为鸿蒙（HarmonyOS）版本。Electron 构建产物会被提取并拷贝到 HarmonyOS HAP 的资源目录中，由 HAP 工程的 web 引擎加载。
-
-该能力由 `ee-bin` 的 `ohos` 命令实现，遵循 electron-builder 的 `extraResources` FileSet 规范（`from` / `to` / `filter`），可灵活选择资源。
-
-### 5.2 配置方法
-
-在 `bin.js` 配置的 `ohos` 字段下声明要提取的资源，每个条目为一个 FileSet：
+上一节用的现成命令，背后就是这段配置。资源提取由 `ee-bin` 的 `ohos` 命令完成，规则沿用 electron-builder 的 `extraResources` FileSet 规范（`from` / `to` / `filter`）。在 `bin.js` 的 `ohos` 字段下按用途分组声明，每个条目是一个 FileSet：
 
 ```javascript
-// config/bin.js（或 bin.json）
+// cmd/bin.js
 module.exports = {
   // ...其它 ee-bin 配置
   ohos: {
+    // 生产：从打包后的 .app 里取
     resources: [
       {
         from: './out/mac-arm64/ee.app/Contents/Resources/app',
         to: './ohos_hap/web_engine/src/main/resources/resfile/resources/app',
-        filter: [
-          "**/*",
-          "!README.md",
-          "!README.zh-CN.md"
-        ]
+        filter: ["**/*", "!README.md", "!README.zh-CN.md"]
       },
       {
-        from: './out/mac-arm64/ee.app/Contents/Resources/extraResources',
+        // extraResources 用 OHOS 交叉编译产物；mac .app 里的 goapp 是 Mach-O，
+        // 在 OHOS 上 spawn 会报 ENOEXEC
+        from: './build/extraResources-ohos',
         to: './ohos_hap/web_engine/src/main/resources/resfile/resources/extraResources',
-        filter: [
-          "**/*"
-        ]
+        filter: ["**/*"]
       }
     ]
   }
 }
 ```
 
-### 5.3 配置字段说明
+### 5.2 配置字段说明
 
 | 字段       | 类型         | 说明                                                                       |
 | ---------- | ------------ | -------------------------------------------------------------------------- |
@@ -262,43 +263,23 @@ module.exports = {
 | `to`     | `string`   | 目标路径（相对项目根目录），位于 HAP 资源目录内                            |
 | `filter` | `string[]` | glob 匹配规则。`**/*` 匹配所有；`!pattern` 表示排除。默认 `['**/*']` |
 
-### 5.4 使用命令
+### 5.3 使用命令
 
-运行 `package.json` 中定义的 `ohos` 脚本：
-
-```bash
-# 构建并同步资源
-npm run ohos
-
-# 自定义测试命令（不打包，直接复制资源）
-npm run ohos-test
-```
-
-其等价于：
+`package.json` 里的两个脚本分别对应上面两组配置：
 
 ```bash
-# 构建并同步资源
-ee-bin ohos --cmds=resources
-
-# 自定义测试命令
-ee-bin ohos --cmds=resources_public
+npm run ohos        # = ee-bin ohos --cmds=resources，构建并同步资源
+npm run ohos-test   # = ee-bin ohos --cmds=test，不打包，直接复制 public/
 ```
 
-`--cmds` 接受逗号分隔的 `ohos` 下的 key 列表。若省略，则处理 `ohos` 下所有数组类型的配置项。
+`--cmds` 接受逗号分隔的 `ohos` 下的 key 列表；省略则处理 `ohos` 下所有数组类型的配置项。
 
 ---
 
 ## 六、总结
 
-ElectronEgg v5 的鸿蒙支持，让前端开发者无需学习全新的鸿蒙原生开发体系，就能用熟悉的技术栈（Vue / React / HTML + Electron）快速构建鸿蒙PC应用。核心思路是：Electron 构建产物通过 `ee-bin ohos` 命令同步到 HAP 工程资源目录，由鸿蒙 web 引擎加载运行。
+ElectronEgg v5 的鸿蒙支持，让前端开发者不用再去啃一套全新的鸿蒙原生开发体系，用熟悉的技术栈（Vue / React / HTML + Electron）就能做出鸿蒙 PC 应用。整条链路其实就四步：装好 DevEco Studio 和鸿蒙 Electron，`npm run build-m` 出 arm64 产物，`npm run ohos` 同步进 HAP 工程，最后用 DevEco Studio 打开 `ohos_hap`、连真机跑起来。
 
-整个流程可以概括为：
+桌面软件（办公类、个人工具）未来十几年仍然是 PC 端的刚需。框架已经在记账、政务、企业、医疗、学校、股票交易、ERP、娱乐、视频等领域的客户端上跑了很多年，可以放心用。
 
-1. **搭建环境**：安装 DevEco Studio，下载鸿蒙 Electron
-2. **构建产物**：`npm run build-m` 生成 arm64 架构 Electron 产物
-3. **同步资源**：`npm run ohos` 将产物拷贝到 HAP 工程目录
-4. **运行调试**：用 DevEco Studio 打开 `ohos_hap`，连接真机运行
-
-桌面软件（办公方向、个人工具）仍然是未来十几年 PC 端的刚需之一。ElectronEgg 想做的，是让这件事变得简单——而现在，这份"简单"也延伸到了鸿蒙。框架已广泛应用于记账、政务、企业、医疗、学校、股票交易、ERP、娱乐、视频等领域的客户端，欢迎放心使用。
-
-如果对你有帮助，欢迎 Star 支持，也欢迎加入社区一起交流。
+如果这篇对你有帮助，欢迎 Star，也欢迎来社区一起交流。

@@ -8,7 +8,7 @@
 
 ## 摘要
 
-经典开源 2048（gabrielecirulli/2048，MIT 协议）是再熟悉不过的网页小游戏：一个 HTML 文件加几个 JS 模块，就能在浏览器里玩。把它移植到鸿蒙 PC 有两种做法：一是用 ArkTS 从头重写一遍，二是把它交给 ElectronEgg 框架、以 HAP 形式打包，让鸿蒙 PC 的 ArkWeb WebView 直接加载前端资源。本文选择后者，并在此基础上把「纯前端小游戏」升级成真正用上主进程能力的桌面应用：**expectimax AI 求解器跑在主进程 service**，**最高分与排行榜通过 JSON 落盘到 `./data`**，**系统通知、窗口控制、主进程截图**逐一接通，同时用 `isEE` 判定保证同一份前端在 Electron 桌面与鸿蒙 ArkWeb 下都能运行。文中记录完整的移植路径、主进程服务化思路、ArkWeb 降级方案、构建注入流程与 T0/T1/T2 分级验收。
+经典开源 2048（gabrielecirulli/2048，MIT 协议）再熟悉不过：一个 HTML 加几个 JS 模块就能在浏览器里玩。搬到鸿蒙 PC 有两条路——用 ArkTS 从头重写一遍，或者交给 ElectronEgg 打包成 HAP，让鸿蒙 PC 的 ArkWeb WebView 直接加载前端资源。本文走第二条，并且没停在「能跑」就算完：expectimax AI 求解器挪进主进程 service，最高分与排行榜用 JSON 落盘到 `./data`，系统通知、窗口控制、主进程截图逐项接通，再用 `isEE` 判定让同一份前端在 Electron 桌面和鸿蒙 ArkWeb 下都能运行。下面是完整的移植路径、主进程服务化思路、ArkWeb 降级方案和 T0/T1/T2 分级验收。
 
 项目源码托管在 AtomGit：[ee-game-2048](https://atomgit.com/wallace5303/ee-game-2048)。
 
@@ -321,20 +321,14 @@ start_app --module electron --ability EntryAbility
 
 再补充三点经验：
 
-1. **主进程 service 不必依赖框架自动加载**。ee-v5 的 init 阶段 `loadDir` 只负责创建 data/logs 目录，`service/` 下的模块是普通模块，由控制器直接 import，写起来和普通 TypeScript 没有区别。
-2. **纯算法模块放主进程，顺便解决了可测试性**。`service/game/ai.ts` 零依赖，用 esbuild 转成 CJS 后可以在 Node 里直接模拟对局验证强度，不用启动 Electron。
-3. **降级副本必须和主进程逻辑保持同一份**。AI 有主进程 TS 版和前端 JS 版两份实现，改动算法时两端要同步；如果后续算法变复杂，可抽成共享包统一维护。
+1. **主进程 service 不必依赖框架自动加载**。ee-v5 的 init 阶段 `loadDir` 只创建 data/logs 目录，`service/` 下的模块就是普通模块，由控制器直接 import，写起来和普通 TypeScript 没区别。
+2. **降级副本必须和主进程保持同一份逻辑**。AI 有主进程 TS 版和前端 JS 版两份实现，改算法时两端都要动；算法再复杂下去，就该抽成共享包了。
 
 ## 七、总结
 
-把经典开源 2048 移植到鸿蒙 PC，价值不在于「游戏本身」，而在于验证了一条可复用的升级路径：**纯前端小游戏 → ElectronEgg 桌面应用 → HAP 跑在鸿蒙 PC，并在这个过程中把主进程真正用起来**。
+把 2048 搬上鸿蒙 PC，价值不在游戏本身，而在于验证了一条可复用的路径：纯前端网页 → ElectronEgg 桌面应用 → HAP 跑在鸿蒙 PC，中间把主进程真正用起来。AI 放进 `service/` 走 IPC、战绩落 JSON、系统能力逐项接通、`isEE` 负责降级——换成扫雷、俄罗斯方块、数独，做法基本是一样的。
 
-- **主进程服务化**：expectimax AI 放进 `service/`，通过 IPC 暴露，前端只管拿方向、做动画；
-- **轻量持久化**：最高分与排行榜用 JSON 落盘 `./data`，`getDataDir()` 自动适配 dev / 桌面生产 / openharmony 三种环境；
-- **系统能力接入**：通知、窗口控制、主进程截图逐项接通，并在真机验证边界；
-- **ArkWeb 降级**：`isEE` 判定让同一份前端在 Electron 与鸿蒙 WebView 下都可用，AI 有前端副本兜底。
-
-后续可以继续做三件事：一是给排行榜加「联机」——用 ElectronEgg 的 Go 后端 + Socket/HTTP 通道做在线榜，把三条通信通道都演示一遍；二是把 AI 副本抽成共享 npm 包，消除主进程与前端两份实现的漂移；三是按鸿蒙端窗口 / 分享等系统能力，继续补齐 T2 验收场景。这套「网页游戏移植 + 主进程增强」的方法，同样适用于扫雷、俄罗斯方块、数独等大量经典开源小游戏。
+往下还能做三件事：给排行榜加联机，用 ElectronEgg 的 Go 后端配 Socket/HTTP 通道做在线榜，顺便把三条通信通道演示一遍；把 AI 副本抽成共享 npm 包，消掉主进程与前端两份实现的漂移；按鸿蒙端的窗口、分享等系统能力继续补 T2 验收场景。
 
 ## 参考与延伸
 
