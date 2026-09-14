@@ -14,6 +14,9 @@ go/tmp/
 go/public/dist/
 build/extraResources/java-app.jar
 build/extraResources/jre1.8.0_201/
+build/extraResources-ohos/
+build/hnp/
+ohos_hap/hnp/
 python/.venv/
 python/*.spec
 python/build/

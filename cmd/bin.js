@@ -145,6 +145,14 @@ module.exports = {
       cmd: 'go',
       args: ['build', '-o=../build/extraResources/goapp'],
     },
+    // OpenHarmony 交叉编译（GOOS/GOARCH/CGO_ENABLED 由 npm 脚本 cross-env 提供）
+    // 产物单独放 extraResources-ohos，避免覆盖 mac/linux 的 goapp
+    go_ohos: {
+      directory: './go',
+      cmd: 'go',
+      sync: true,
+      args: ['build', '-o=../build/extraResources-ohos/goapp'],
+    },
     python: {
       directory: './python',
       cmd: 'python',
@@ -332,7 +340,9 @@ module.exports = {
         ]
       },
       {
-        from: './out/mac-arm64/ee.app/Contents/Resources/extraResources',
+        // extraResources 使用 OHOS 交叉编译产物（GOOS=linux GOARCH=arm64）；
+        // mac .app 里的 goapp 是 Mach-O，OHOS 上 spawn 会 ENOEXEC
+        from: './build/extraResources-ohos',
         to: './ohos_hap/web_engine/src/main/resources/resfile/resources/extraResources',
         filter: [
           "**/*"
@@ -358,6 +368,14 @@ module.exports = {
           "!README.zh-CN.md"
         ]
       },
-    ],    
+      {
+        // 同 resources：使用 OHOS 交叉编译的 goapp，来源为 build/extraResources-ohos
+        from: './build/extraResources-ohos',
+        to: './ohos_hap/web_engine/src/main/resources/resfile/resources/extraResources',
+        filter: [
+          "**/*"
+        ]
+      }
+    ],
   }     
 };

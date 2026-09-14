@@ -184,6 +184,10 @@ var require_app_config_registry = __commonJS({
 });
 
 // electron/service/cross.ts
+function getOhosGoAppCmd() {
+  const home = process.env.HNP_PRIVATE_HOME || "/data/app";
+  return import_path2.default.join(home, "goapp.org", "goapp_1.0", "bin", "goapp", "goapp");
+}
 var import_log, import_ps2, import_path2, import_axios, import_utils, import_cross, CrossService, crossService;
 var init_cross = __esm({
   "electron/service/cross.ts"() {
@@ -219,22 +223,37 @@ var init_cross = __esm({
       }
       /**
        * create go service
-       * In the default configuration, services can be started with applications. 
+       * In the default configuration, services can be started with applications.
        * Developers can turn off the configuration and create it manually.
        */
       async createGoServer() {
+        if (import_utils.is.openharmony()) {
+          process.env.HOME = (0, import_ps2.getAppUserDataDir)();
+        }
         const serviceName = "go";
         const opt = {
           name: "goapp",
-          cmd: import_path2.default.join((0, import_ps2.getExtraResourcesDir)(), "goapp"),
+          cmd: import_utils.is.openharmony() ? getOhosGoAppCmd() : import_path2.default.join((0, import_ps2.getExtraResourcesDir)(), "goapp"),
           directory: (0, import_ps2.getExtraResourcesDir)(),
           args: ["--port=7073"],
-          appExit: true
+          appExit: false,
+          stdio: import_utils.is.openharmony() ? ["ignore", "pipe", "pipe", "ipc"] : void 0
         };
         const entity = await import_cross.cross.run(serviceName, opt);
         import_log.logger.info("[go] server name:", entity.name);
         import_log.logger.info("[go] server config:", entity.config);
         import_log.logger.info("[go] server url:", entity.getUrl());
+        if (import_utils.is.openharmony()) {
+          const child = entity.child ?? entity.process ?? entity.cp;
+          if (child) {
+            child.stdout?.on("data", (d) => import_log.logger.info("[go][stdout]", d.toString()));
+            child.stderr?.on("data", (d) => import_log.logger.info("[go][stderr]", d.toString()));
+            child.on("exit", (code, signal) => import_log.logger.info("[go][exit]", code, signal));
+            child.on("error", (err) => import_log.logger.info("[go][error]", err.message));
+          } else {
+            import_log.logger.info("[go] no child handle found on entity, keys:", Object.keys(entity));
+          }
+        }
         return;
       }
       /**
@@ -1549,41 +1568,228 @@ var init_security = __esm({
   }
 });
 
+// electron/service/debug.ts
+function buildTree(dir, prefix, depth, lines, opt) {
+  let entries;
+  try {
+    entries = import_fs3.default.readdirSync(dir, { withFileTypes: true });
+  } catch (e) {
+    lines.push(`${prefix}[\u8BFB\u53D6\u5931\u8D25: ${e instanceof Error ? e.message : e}]`);
+    return;
+  }
+  entries.sort((a, b) => {
+    const da = a.isDirectory() ? 0 : 1;
+    const db = b.isDirectory() ? 0 : 1;
+    return da - db || a.name.localeCompare(b.name);
+  });
+  entries.forEach((ent, i) => {
+    const last = i === entries.length - 1;
+    const label = ent.isDirectory() ? `${ent.name}/` : ent.name;
+    lines.push(`${prefix}${last ? "\u2514\u2500\u2500 " : "\u251C\u2500\u2500 "}${label}`);
+    if (!ent.isDirectory()) return;
+    const childPrefix = prefix + (last ? "    " : "\u2502   ");
+    if (opt.skipDirs.includes(ent.name)) {
+      lines.push(`${childPrefix}... (skipped)`);
+      return;
+    }
+    if (depth + 1 >= opt.maxDepth) {
+      lines.push(`${childPrefix}... (depth limit)`);
+      return;
+    }
+    buildTree(import_path8.default.join(dir, ent.name), childPrefix, depth + 1, lines, opt);
+  });
+}
+function printTree(root, options = {}) {
+  const opt = {
+    maxDepth: options.maxDepth ?? 6,
+    skipDirs: options.skipDirs ?? ["node_modules", ".git"]
+  };
+  const lines = [root];
+  buildTree(root, "", 1, lines, opt);
+  lines.forEach((line) => import_log9.logger.info(`[dirs] ${line}`));
+  try {
+    const file = import_path8.default.join((0, import_ps7.getLogDir)(), "dirs-tree.txt");
+    import_fs3.default.appendFileSync(file, lines.join("\n") + "\n\n", "utf-8");
+  } catch (e) {
+    import_log9.logger.info("[dirs] write dirs-tree.txt failed:", e instanceof Error ? e.message : e);
+  }
+  return lines;
+}
+function printEnvTree() {
+  const roots = {
+    exe: import_electron14.app.getPath("exe"),
+    home: import_electron14.app.getPath("home"),
+    appData: import_electron14.app.getPath("appData"),
+    userData: import_electron14.app.getPath("userData"),
+    temp: import_electron14.app.getPath("temp"),
+    baseDir: (0, import_ps7.getBaseDir)(),
+    execDir: (0, import_ps7.getExecDir)(),
+    dataDir: (0, import_ps7.getDataDir)(),
+    logDir: (0, import_ps7.getLogDir)(),
+    extraResourcesDir: (0, import_ps7.getExtraResourcesDir)()
+  };
+  Object.keys(roots).forEach((k) => {
+    import_log9.logger.info(`[dirs] ${k}: ${String(roots[k])}`);
+  });
+  const exePath = roots.exe;
+  const idx = exePath.indexOf("/bundle");
+  const bundleRoot = idx >= 0 ? exePath.slice(0, idx + "/bundle".length) : import_path8.default.dirname(exePath);
+  import_log9.logger.info(`[dirs] bundleRoot: ${bundleRoot}`);
+  printTree(bundleRoot, { maxDepth: 7 });
+}
+function errMsg(e) {
+  return e instanceof Error ? `${e.code ? e.code + " " : ""}${e.message}` : String(e);
+}
+function probeSpawn(bin, args, waitMs = 2500) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (r) => {
+      if (settled) return;
+      settled = true;
+      resolve(r);
+    };
+    let child;
+    try {
+      child = (0, import_child_process2.spawn)(bin, args, { stdio: "ignore" });
+    } catch (e) {
+      done(`sync-throw: ${errMsg(e)}`);
+      return;
+    }
+    child.once("error", (err) => done(`error: ${errMsg(err)}`));
+    child.once(
+      "exit",
+      (code, signal) => done(`exec-ok but process exited early (code=${code} signal=${signal})`)
+    );
+    setTimeout(() => {
+      try {
+        child.kill("SIGKILL");
+      } catch {
+      }
+      done("exec-ok (stayed alive)");
+    }, waitMs);
+  });
+}
+async function probeGoExec() {
+  try {
+    const mounts = import_fs3.default.readFileSync("/proc/mounts", "utf-8");
+    const relevant = mounts.split("\n").filter((l) => /bundle|resfile|\/data(\s|$)|el1|el2|\/mnt\/data/.test(l));
+    import_log9.logger.info(`[exec-probe] /proc/mounts (relevant lines):
+${relevant.join("\n")}`);
+  } catch (e) {
+    import_log9.logger.info(`[exec-probe] read /proc/mounts failed: ${errMsg(e)}`);
+  }
+  const src = import_path8.default.join((0, import_ps7.getExtraResourcesDir)(), "goapp");
+  let srcMode = "stat\u5931\u8D25";
+  let srcOk = false;
+  try {
+    const st = import_fs3.default.statSync(src);
+    srcMode = (st.mode & 511).toString(8);
+    srcOk = true;
+    import_log9.logger.info(`[exec-probe] bundle goapp mode=${srcMode} size=${st.size} path=${src}`);
+  } catch (e) {
+    import_log9.logger.info(`[exec-probe] stat bundle goapp failed: ${errMsg(e)}`);
+  }
+  if (srcOk) {
+    const r = await probeSpawn(src, ["--port=7099"]);
+    import_log9.logger.info(`[exec-probe] spawn from bundle path      -> ${r}`);
+  }
+  try {
+    const dstDir = import_path8.default.join(import_electron14.app.getPath("userData"), "exec-probe");
+    const dst = import_path8.default.join(dstDir, "goapp");
+    import_fs3.default.mkdirSync(dstDir, { recursive: true });
+    import_fs3.default.copyFileSync(src, dst);
+    import_fs3.default.chmodSync(dst, 493);
+    import_log9.logger.info(`[exec-probe] copied to writable dir: ${dst} (mode=${(import_fs3.default.statSync(dst).mode & 511).toString(8)})`);
+    const r = await probeSpawn(dst, ["--port=7099"]);
+    import_log9.logger.info(`[exec-probe] spawn from userData    -> ${r}`);
+    try {
+      import_fs3.default.rmSync(dstDir, { recursive: true, force: true });
+    } catch {
+    }
+  } catch (e) {
+    import_log9.logger.info(`[exec-probe] userData copy failed: ${errMsg(e)}`);
+  }
+  try {
+    const home = process.env.HNP_PRIVATE_HOME || "/data/app";
+    const physical = import_path8.default.join(home, "goapp.org", "goapp_1.0", "bin", "goapp", "goapp");
+    const link = import_path8.default.join(home, "bin", "goapp");
+    import_log9.logger.info(`[exec-probe] HNP_PRIVATE_HOME=${String(process.env.HNP_PRIVATE_HOME)}`);
+    for (const [label, bin] of [
+      ["hnp physical", physical],
+      ["hnp symlink ", link]
+    ]) {
+      if (import_fs3.default.existsSync(bin)) {
+        import_log9.logger.info(`[exec-probe] ${label} found: ${bin} (mode=${(import_fs3.default.statSync(bin).mode & 511).toString(8)})`);
+        const r = await probeSpawn(bin, ["--port=7099"]);
+        import_log9.logger.info(`[exec-probe] spawn ${label} -> ${r}`);
+      } else {
+        import_log9.logger.info(`[exec-probe] ${label} NOT found: ${bin}`);
+      }
+    }
+  } catch (e) {
+    import_log9.logger.info(`[exec-probe] hnp probe failed: ${errMsg(e)}`);
+  }
+}
+var import_fs3, import_path8, import_child_process2, import_electron14, import_log9, import_ps7;
+var init_debug = __esm({
+  "electron/service/debug.ts"() {
+    import_fs3 = __toESM(require("fs"));
+    import_path8 = __toESM(require("path"));
+    import_child_process2 = require("child_process");
+    import_electron14 = require("electron");
+    import_log9 = require("ee-core/log");
+    import_ps7 = require("ee-core/ps");
+  }
+});
+
 // electron/preload/index.ts
 async function preload() {
-  import_log9.logger.info("[preload] load 5");
+  import_log10.logger.info("[preload] load 5");
   windowService.init();
   trayService.init();
   securityService.init();
   await sqlitedbService.init();
+  try {
+    printEnvTree();
+  } catch (e) {
+    import_log10.logger.info("[dirs] printEnvTree failed:", e instanceof Error ? e.message : e);
+  }
+  try {
+    await probeGoExec();
+  } catch (e) {
+    import_log10.logger.info("[exec-probe] failed:", e instanceof Error ? e.message : e);
+  }
+  crossService.createGoServer();
 }
-var import_log9;
+var import_log10;
 var init_preload = __esm({
   "electron/preload/index.ts"() {
-    import_log9 = require("ee-core/log");
+    import_log10 = require("ee-core/log");
     init_tray();
     init_security();
+    init_cross();
     init_sqlitedb();
     init_window();
+    init_debug();
   }
 });
 
 // electron/main.ts
 var main_exports = {};
-var import_ee_core, app, life;
+var import_ee_core, app2, life;
 var init_main = __esm({
   "electron/main.ts"() {
     import_ee_core = require("ee-core");
     init_lifecycle();
     init_preload();
-    app = new import_ee_core.ElectronEgg();
+    app2 = new import_ee_core.ElectronEgg();
     life = new Lifecycle();
-    app.register("ready", life.ready);
-    app.register("electron-app-ready", life.electronAppReady);
-    app.register("window-ready", life.windowReady);
-    app.register("before-close", life.beforeClose);
-    app.register("preload", preload);
-    app.run();
+    app2.register("ready", life.ready);
+    app2.register("electron-app-ready", life.electronAppReady);
+    app2.register("window-ready", life.windowReady);
+    app2.register("before-close", life.beforeClose);
+    app2.register("preload", preload);
+    app2.run();
   }
 });
 

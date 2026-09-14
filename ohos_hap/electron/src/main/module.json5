@@ -9,12 +9,18 @@
       "2in1",
       "tablet"
     ],
-//    "hnpPackages":[
+    // HNP：安装时系统把 .hnp 释放到沙箱 /data/app 下并签名，规避内核 XPM 对未签名二进制的拦截
+    // 包文件由 script/ohos-hnp.js 生成到 ohos_hap/hnp/arm64-v8a/；声明位置见 openharmony-sig/electron hnp-packaging-guide
+    "hnpPackages": [
+      {
+        "package": "goapp.hnp",
+        "type": "private"
+      }
 //      {
 //        "package": "electron.hnp",
 //        "type": "private"
 //      }
-//    ],
+    ],
 //    "executableBinaryPaths": [
 //      {
 //        "path": "libs/arm64-v8a/electron",

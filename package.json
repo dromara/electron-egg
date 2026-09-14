@@ -27,8 +27,13 @@
     "build-m-arm64": "ee-bin build --cmds=mac_arm64 && ee-bin updater --platform=macos_apple",
     "build-l": "ee-bin build --cmds=linux",
     "updater": "ee-bin updater --platform=macos_apple",
+    "build-go-ohos": "cross-env GOOS=linux GOARCH=arm64 CGO_ENABLED=0 ee-bin build --cmds=go_ohos",
+    "build-hnp-ohos": "node ./script/ohos-hnp.js",
+    "build-go-hnp-ohos": "npm run build-go-ohos && npm run build-hnp-ohos",
     "ohos": "ee-bin ohos --cmds=resources",
-    "ohos-test": "npm run build-electron && ee-bin encrypt && ee-bin ohos --cmds=test",
+    "ohos-go": "npm run build-go-hnp-ohos && npm run ohos",
+    "ohos-test": "npm run build-electron && ee-bin ohos --cmds=test",
+    "ohos-test-go": "npm run build-electron && npm run build-go-hnp-ohos && ee-bin ohos --cmds=test",
     "debug-dev": "cross-env DEBUG=ee-* ee-bin dev",
     "debug-encrypt": "ee-bin encrypt",
     "debug-electron": "cross-env DEBUG=ee-* ee-bin dev --serve=electron",
@@ -60,7 +65,7 @@
     "better-sqlite3": "^12.5.0",
     "bytenode": "^1.5.7",
     "dayjs": "^1.11.13",
-    "ee-core": "^5.0.2",
+    "ee-core": "^5.0.3",
     "electron-updater": "^6.7.3"
   }
 }
