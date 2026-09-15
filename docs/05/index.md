@@ -8,15 +8,15 @@
 
 ## 摘要
 
-经典开源 2048（gabrielecirulli/2048，MIT 协议）再熟悉不过：一个 HTML 加几个 JS 模块就能在浏览器里玩。搬到鸿蒙 PC 有两条路——用 ArkTS 从头重写一遍，或者交给 ElectronEgg 打包成 HAP，让鸿蒙 PC 的 ArkWeb WebView 直接加载前端资源。本文走第二条，并且没停在「能跑」就算完：expectimax AI 求解器挪进主进程 service，最高分与排行榜用 JSON 落盘到 `./data`，系统通知、窗口控制、主进程截图逐项接通，再用 `isEE` 判定让同一份前端在 Electron 桌面和鸿蒙 ArkWeb 下都能运行。下面是完整的移植路径、主进程服务化思路、ArkWeb 降级方案和 T0/T1/T2 分级验收。
+经典开源 2048（gabrielecirulli/2048）再熟悉不过，一个 HTML 加几个 JS 模块就能在浏览器里玩。搬到鸿蒙 PC 有两条路，一是用 ArkTS 从头重写，二是交给 ElectronEgg 打包成 HAP，让鸿蒙 PC 的 ArkWeb WebView 直接加载前端资源。本文走第二条，而且没停在「能跑」就算完：expectimax AI 求解器挪进主进程 service，最高分与排行榜用 JSON 落盘到 `./data`，系统通知、窗口控制、主进程截图逐项接通。
 
 项目源码托管在 AtomGit：[ee-game-2048](https://atomgit.com/wallace5303/ee-game-2048)。
 
 ## 一、迁移目标：从「能跑」到「值得写」
 
-选 2048 做鸿蒙 PC 移植对象有三个原因：它是**开源软件**（MIT），代码完全可审查；它是**纯前端**，没有任何原生依赖，是验证「前端资源跑在鸿蒙 WebView」这条移植路径的最短路径；它**玩法经典**，人人都能看懂，很适合作为能力演示载体。
+选 2048 做鸿蒙 PC 移植对象有三个原因：它是 MIT 开源软件，代码完全可审查；它是纯前端项目，没有任何原生依赖，验证「前端资源跑在鸿蒙 WebView」这条路径它最短；它玩法经典，人人都看得懂，拿来演示能力很合适。
 
-但「把 2048 跑上鸿蒙」只算完成了最基础的一步。如果只做到这里，应用和一张网页没有区别——主进程一个空壳，没有任何框架能力被真正使用。为了让这次移植有足够的工程价值，我们给游戏补了三类主进程能力：
+但「把 2048 跑上鸿蒙」只算完成最基础的一步。如果停在这里，应用和一张网页没什么区别，主进程是个空壳，框架能力一样没用上。所以这次移植顺手给游戏补了三类主进程能力：
 
 | 能力               | 落点                                                                               | 说明                                                   |
 | ------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -24,7 +24,7 @@
 | 战绩持久化         | `controller/game/getGameData / saveRecord` + `service/game/storage.ts`         | 最高分与排行榜写成 JSON，落盘到`./data`              |
 | 系统能力           | `controller/game/sendNotify / toggleFullscreen / setAlwaysOnTop / captureScreen` | 达成 2048 弹系统通知、窗口全屏/置顶、主进程截图        |
 
-这三类能力正好覆盖 ElectronEgg 的控制器、服务、IPC 与 Electron 系统 API，让文章有真实的代码和踩坑可以写。整条迁移路径按 T0/T1/T2 分级推进：
+这三类能力覆盖了 ElectronEgg 的控制器、服务、IPC 和 Electron 系统 API，也带出了后面几个真实的坑。整条迁移路径按 T0/T1/T2 分级推进：
 
 | 阶段             | 目标                     | 最小验收内容                                                                                                          |
 | ---------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
@@ -36,9 +36,9 @@
 
 ## 二、前端移植：把网页 2048 改造成 ElectronEgg 应用
 
-原版 2048 是典型的 MVC 结构：`game_manager.js` 管规则，`grid.js` / `tile.js` 管数据，`html_actuator.js` 管渲染，`keyboard_input_manager.js` 管输入。移植到 Vue 3 时不需要重写算法，而是把同样的一套逻辑搬进一个 `.vue` 组件：`Grid`、`Tile`、`GameManager` 三个类保留，DOM 渲染替换成 Vue 响应式。
+原版 2048 是典型的 MVC 结构：`game_manager.js` 管规则，`grid.js` / `tile.js` 管数据，`html_actuator.js` 管渲染，`keyboard_input_manager.js` 管输入。移植到 Vue 3 不用重写算法，把同一套逻辑搬进一个 `.vue` 组件就行：`Grid`、`Tile`、`GameManager` 三个类原样保留，只把 DOM 渲染换成 Vue 响应式。
 
-**移动与合并是游戏的核心**，移植时保持方向常量一致很关键。前端把方向约定为 `0=上 1=右 2=下 3=左`：
+移动与合并是游戏的核心逻辑，移植时方向常量一定要对齐。前端把方向约定为 `0=上 1=右 2=下 3=左`：
 
 ```js
 const keyMap = {
@@ -84,19 +84,19 @@ move (direction) {
 }
 ```
 
-**状态恢复**继续用 `localStorage`：最高分、棋盘、分数、胜负状态都序列化保存，刷新或重启后能回到上次的局面。这一层保持纯前端，后面加主进程持久化时，两者的职责边界会非常清晰——`localStorage` 管「当前进度」，主进程 JSON 管「历史战绩」。
+状态恢复继续用 `localStorage`：最高分、棋盘、分数、胜负状态都序列化保存，刷新或重启后能回到上次的局面。这一层保持纯前端，等后面加主进程持久化时职责边界会很清晰：`localStorage` 管当前进度，主进程 JSON 管历史战绩。
 
 前端就绪后，`npm run build-frontend` 把产物打进 `public/dist`，配合 Vite 的 `base: './'` 和 hash 路由，构建产物可以直接以相对路径被 ArkWeb 加载。
 
 ## 三、主进程能力：让游戏真正用上 ElectronEgg
 
-纯前端的 2048 不需要主进程也能玩，但那样就失去了桌面框架的价值。这一节把游戏的三类能力搬进主进程，控制器统一通过 IPC 暴露给前端。
+纯前端的 2048 不需要主进程也能玩，但那样就没用上桌面框架。游戏的三类能力都搬进主进程，控制器统一通过 IPC 暴露给前端。
 
 ### 3.1 AI 求解器跑在主进程 service
 
-把 expectimax AI 放进主进程而不是前端，有三个理由：**算力**——搜索会展开大量分支，放渲染进程容易让 UI 卡顿；**可复用**——主进程的 service 不仅能被 IPC 调，未来还能被 HTTP / Socket 通道复用；**可测试**——纯算法模块不依赖 Electron，可以在 Node 里直接跑单元验证。
+把 expectimax AI 放进主进程而不是前端，有三个理由。一是算力，搜索会展开大量分支，放渲染进程容易让 UI 卡顿；二是复用，主进程的 service 不只能被 IPC 调，以后还能走 HTTP / Socket 通道；三是可测试，纯算法模块不依赖 Electron，可以直接在 Node 里跑单元验证。
 
-`service/game/ai.ts` 是一个零依赖的纯算法模块，主进程控制器和前端降级副本（见第四章）共用同一套逻辑。核心是 `getBestMove` + `expectimax`：
+`service/game/ai.ts` 是一个零依赖的纯算法模块，主进程控制器与前端内置副本（`utils/ai.js`）共用同一套逻辑。核心是 `getBestMove` + `expectimax`：
 
 ```ts
 class GameAI {
@@ -134,7 +134,7 @@ class GameAI {
 }
 ```
 
-启发式评估综合了四项指标：**平滑度**（相邻方块数值差越小越好）、**单调性**（每行/列尽量沿单一方向递增）、**空格数**（越多越灵活）、**最大方块**（越大越好）。用它模拟对局，AI 多数能合出 512 甚至 1024 方块，作为自动演示完全够用；单步计算约 15ms，也远低于前端的走子间隔。
+启发式评估综合四项指标：平滑度（相邻方块数值差越小越好）、单调性（每行/列尽量沿单一方向递增）、空格数（越多越灵活）、最大方块（越大越好）。用它模拟对局，AI 多数能合出 512 甚至 1024 方块，做自动演示绰绰有余；单步计算约 15ms，远低于前端的走子间隔。
 
 控制器把 AI 暴露成 IPC 通道，前端把 4x4 棋盘序列化后传进来，拿到最优方向：
 
@@ -148,7 +148,7 @@ aiMove(args: { grid?: number[][] }): { direction: number | null } {
 
 ### 3.2 战绩持久化：最高分 + 排行榜落盘 `./data`
 
-游戏得分这类数据，最自然的归宿是主进程的存储。这里刻意选择**简单 JSON 文件**而不是 SQLite：数据量小、结构简单，而且不需要交叉编译任何原生模块，在鸿蒙 PC 上是最低风险的持久化方案。
+游戏得分这类数据，放主进程存储最自然。这里刻意用简单的 JSON 文件，没上 SQLite：数据量小、结构简单，也不需要交叉编译任何原生模块，在鸿蒙 PC 上风险最低。
 
 存储路径用 `ee-core/ps` 的 `getDataDir()`，它在不同环境自动映射到正确的落点：
 
@@ -158,7 +158,7 @@ aiMove(args: { grid?: number[][] }): { direction: number | null } {
 | 生产（桌面）     | `{userHome}/.{appName}/data/game/game-data.json`             |
 | openharmony 生产 | 应用沙箱自定义目录下的`data/game/game-data.json`             |
 
-`service/game/storage.ts` 用一个内存缓存加文件写入，避免每次读取都开文件；文件损坏时降级为默认数据，不让存储问题拖垮主进程启动：
+`service/game/storage.ts` 用一个内存缓存加文件写入，省掉每次读都开文件；文件损坏时退回默认数据，不让存储问题拖垮主进程启动：
 
 ```ts
 class GameStorage {
@@ -200,13 +200,13 @@ class GameStorage {
 }
 ```
 
-控制器提供 `getGameData` / `saveRecord` / `resetGameData` 三个通道。前端在**游戏结束那一帧**（`over` 由 false 变 true 时）把本局得分、最大方块、步数提交给主进程，排行榜即时刷新。真实落盘的效果如下：
+控制器提供 `getGameData` / `saveRecord` / `resetGameData` 三个通道。前端在游戏结束那一帧（`over` 由 false 变 true 时）把本局得分、最大方块、步数提交给主进程，排行榜即时刷新。真实落盘的效果如下：
 
 ![2048 排行榜：对局结束后战绩经 IPC 写入主进程 JSON，列表展示得分 / 最大方块 / 步数 / 时间](./ee-example-19.jpg)
 
 ### 3.3 系统能力：通知、窗口、截图
 
-这三项直接调用 Electron 系统 API，也是在鸿蒙 PC 上**最需要真机验证**的边界。控制器里每一项都做了能力检测或异常兜底，避免不支持时抛错：
+这三项直接调用 Electron 系统 API，也是在鸿蒙 PC 上最需要真机验证的边界。控制器里每一项都做了能力检测或异常兜底，避免平台不支持时直接抛错：
 
 ```ts
 // 系统通知：平台不支持时返回明确提示
@@ -244,46 +244,7 @@ async captureScreen(): Promise<{ ok: boolean; file?: string; msg?: string }> {
 
 前端在达成 2048 时调用 `sendNotify`，全屏 / 置顶 / 截图三个按钮分别触发对应通道。`capturePage` 在鸿蒙 ArkWeb 下是否支持、通知是否真的弹出，都作为 T2 验收项在真机回归。
 
-## 四、鸿蒙 ArkWeb 降级：没有 Electron 也能玩
-
-ElectronEgg 的鸿蒙方案是：业务代码照常依赖 Electron，但构建产物交给 HAP 工程的 ArkWeb WebView 加载。于是鸿蒙端**没有 `window.electron`，也没有 IPC**。为了让同一份前端在两处都能运行，沿用项目既有的 `isEE` 判定模式：
-
-```js
-// frontend/src/utils/ipcRenderer.js
-const ipc = Renderer.ipcRenderer || undefined;
-const isEE = ipc ? true : false;   // 存在 ipcRenderer 才是 Electron 环境
-```
-
-前端取 AI 走法时按环境分支：Electron 走主进程 IPC，ArkWeb / 浏览器降级到前端内置的 AI 副本（`utils/ai.js`，与主进程 `service/game/ai.ts` 同一算法）：
-
-```js
-async function getAiMove () {
-  const values = gridValues()
-  // Electron 环境走主进程 service；ArkWeb / 浏览器降级到前端副本
-  if (isEE && ipc) {
-    try {
-      const res = await ipc.invoke(ipcApiRoute.game.aiMove, { grid: values })
-      if (res && res.direction !== null && res.direction !== undefined) return res.direction
-      return null
-    } catch (e) {
-      return ai.getBestMove(values)
-    }
-  }
-  return ai.getBestMove(values)
-}
-```
-
-三类能力的降级策略各不相同，这也正好体现「哪些能力必须主进程、哪些可以降级」的边界：
-
-| 能力                       | Electron 环境                                          | 鸿蒙 ArkWeb / 浏览器                                     |
-| -------------------------- | ------------------------------------------------------ | -------------------------------------------------------- |
-| AI 求解                    | 主进程`controller/game/aiMove`                       | 前端`utils/ai.js` 本地计算                             |
-| 战绩持久化                 | 写入`./data/game/game-data.json`，排行榜展示真实记录 | 排行榜提示「由主进程维护」；当前进度仍存`localStorage` |
-| 系统能力（通知/窗口/截图） | 调用 Electron 系统 API                                 | 给出环境不支持提示；达成 2048 可尝试 Web Notification    |
-
-这套「主进程优先、ArkWeb 兜底」的结构，让 2048 在鸿蒙 PC 上无论是否具备主进程能力都可用，也让移植的边界一目了然。
-
-## 五、构建、注入与运行
+## 四、构建、注入与运行
 
 游戏代码就绪后，按 ElectronEgg 的鸿蒙流程走三步：
 
@@ -308,7 +269,7 @@ start_app --module electron --ability EntryAbility
 
 > 提醒：修改前端后必须重新执行 `npm run build-frontend`，否则 `ohos-test` 注入的还是旧页面；主进程改动后至少重新执行 `npm run ohos-test`。
 
-## 六、踩坑与经验
+## 五、踩坑与经验
 
 | 问题                                     | 原因                                    | 解决办法                                                                                                                          |
 | ---------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -319,16 +280,16 @@ start_app --module electron --ability EntryAbility
 | AI 单步太慢导致演示卡顿                  | 搜索深度过大                            | 期望节点只采样最多 3 个空格，深度 4，单步约 15ms；演示间隔 180ms 与方块动画 120ms 匹配                                            |
 | 排行榜数据写不进去                       | 目录不存在或只读                        | `persist()` 里 `fs.mkdirSync(dir, { recursive: true })` 自动建目录；写入失败只记日志不抛错                                    |
 
-再补充三点经验：
+再补充两点经验：
 
 1. **主进程 service 不必依赖框架自动加载**。ee-v5 的 init 阶段 `loadDir` 只创建 data/logs 目录，`service/` 下的模块就是普通模块，由控制器直接 import，写起来和普通 TypeScript 没区别。
 2. **降级副本必须和主进程保持同一份逻辑**。AI 有主进程 TS 版和前端 JS 版两份实现，改算法时两端都要动；算法再复杂下去，就该抽成共享包了。
 
-## 七、总结
+## 六、总结
 
-把 2048 搬上鸿蒙 PC，价值不在游戏本身，而在于验证了一条可复用的路径：纯前端网页 → ElectronEgg 桌面应用 → HAP 跑在鸿蒙 PC，中间把主进程真正用起来。AI 放进 `service/` 走 IPC、战绩落 JSON、系统能力逐项接通、`isEE` 负责降级——换成扫雷、俄罗斯方块、数独，做法基本是一样的。
+把 2048 搬上鸿蒙 PC，重点不在游戏本身，而在验证一条可复用的路径：纯前端网页 → ElectronEgg 桌面应用 → HAP 跑在鸿蒙 PC，中间把主进程真正用起来。AI 放进 `service/` 走 IPC、战绩落 JSON、系统能力逐项接通，换成扫雷、俄罗斯方块、数独，做法基本一样。
 
-往下还能做三件事：给排行榜加联机，用 ElectronEgg 的 Go 后端配 Socket/HTTP 通道做在线榜，顺便把三条通信通道演示一遍；把 AI 副本抽成共享 npm 包，消掉主进程与前端两份实现的漂移；按鸿蒙端的窗口、分享等系统能力继续补 T2 验收场景。
+往下还有几件事可做：给排行榜加联机，用 ElectronEgg 的 Go 后端配 Socket / HTTP 通道做在线榜，顺便把三条通信通道演示一遍；把 AI 副本抽成共享 npm 包，消掉主进程与前端两份实现的漂移；按鸿蒙端的窗口、分享等系统能力继续补 T2 验收场景。
 
 ## 参考与延伸
 
