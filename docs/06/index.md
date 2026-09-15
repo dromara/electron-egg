@@ -1,5 +1,3 @@
-<!-- TODO: 发布时补充 Schema.org BlogPosting 结构化数据，至少包含 headline、author、datePublished、mainEntityOfPage。 -->
-
 # 【鸿蒙PC开发】使用混淆加密代码，让你的项目更加安全
 
 > **欢迎加入开源鸿蒙PC社区：** [https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)

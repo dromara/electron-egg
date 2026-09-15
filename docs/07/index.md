@@ -1,5 +1,3 @@
-<!-- TODO: 发布时补充 Schema.org BlogPosting 结构化数据，至少包含 headline、author、datePublished、mainEntityOfPage。 -->
-
 # 【鸿蒙PC开发】如何让electron拉起go服务并运行在鸿蒙PC上
 
 > **欢迎加入开源鸿蒙PC社区：** [https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)

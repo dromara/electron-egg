@@ -1,5 +1,3 @@
-<!-- TODO: 发布时补充 Schema.org 结构化数据（BlogPosting），标注 headline / author / datePublished / mainEntity -->
-
 # 【鸿蒙PC开发】使用AI编程工具Claude Code开发完整应用实践
 
 > **欢迎加入开源鸿蒙PC社区：** [https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)
@@ -133,7 +131,7 @@ ElectronEgg 采用「一套代码，桌面 + 鸿蒙」的方式：业务代码�
 **第一步：获取 ElectronEgg 示例工程并安装依赖**
 
 ```bash
-# AtomGit PC 社区仓（创建中，提 issue 后由社区开通）
+# AtomGit PC 社区仓库
 git clone https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-ability ee-ability
 cd ee-ability
 npm install                # 安装 ee-core / ee-bin 等框架依赖
@@ -379,5 +377,4 @@ npm run ohos               # 把产物同步到 ohos_hap 资源目录（ee-bin o
 - `arkui-knowledge` 技能介绍：[SkillsMP](https://skillsmp.com/creators/carsmallguo/deveco-code/packages-opencode-resources-skills-arkui-knowledge)，固定版本源码：[GitHub](https://github.com/CarSmallGuo/deveco-code/tree/0.1.0-TD.4/packages/opencode/resources/skills/arkui-knowledge)
 - Claude Code 官方文档：[https://code.claude.com/docs](https://code.claude.com/docs)
 - ElectronEgg 框架仓库：[AtomGit](https://atomgit.com/dromara/electron-egg) · 鸿蒙 PC 适配仓：[ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)
-- 本文 demo（3D 看车应用）代码仓库（AtomGit PC 社区，仓库创建中）：[ohos_ee-ability](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-ability)
-- 参照的 3D 看车页：[hima.auto/3d-view](https://hima.auto/3d-view/)
+- 本文 demo（3D 看车应用）代码仓库（AtomGit PC 社区）：[ohos_ee-ability](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-ability)

@@ -1,5 +1,3 @@
-<!-- TODO: 发布时补充 Schema.org BlogPosting 结构化数据，至少包含 headline、author、datePublished、mainEntityOfPage。 -->
-
 # 鸿蒙PC软件开发框架：ElectronEgg，一套代码，从桌面到鸿蒙
 
 > **欢迎加入开源鸿蒙PC社区：** [https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)
@@ -68,8 +66,6 @@ v5 在这个基础上做了一次整体升级，其中我们花力气最多的�
 ---
 
 ## 二、开发准备
-
-> 当前鸿蒙支持处于实验阶段，请持续关注更新。
 
 ### 2.1 开发资料
 

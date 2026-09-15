@@ -1,5 +1,3 @@
-<!-- TODO: 发布时补充 Schema.org BlogPosting 结构化数据，至少包含 headline、author、datePublished、mainEntityOfPage。 -->
-
 # 鸿蒙PC迁移：ElectronEgg框架功能适配鸿蒙PC
 
 > **欢迎加入开源鸿蒙PC社区：** [https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)

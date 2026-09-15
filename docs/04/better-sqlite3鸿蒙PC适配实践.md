@@ -1,5 +1,3 @@
-<!-- TODO: 发布时补充 Schema.org 结构化数据（BlogPosting），标注 headline / author / datePublished / mainEntity -->
-
 # better-sqlite3 鸿蒙 PC 适配实践：交叉编译与 Electron 集成
 
 > **欢迎加入开源鸿蒙PC社区：** [https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)
@@ -339,7 +337,7 @@ T0 和 T1 的分界在原生模块上格外重要：**二进制读不出对错**
 
 - better-sqlite3 源码：[https://github.com/WiseLibs/better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
 - electron-egg 框架（AtomGit）：[https://atomgit.com/dromara/electron-egg](https://atomgit.com/dromara/electron-egg)
-- 本 demo 代码仓库（AtomGit PC 社区，仓库创建中）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-better-sqlite3](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-better-sqlite3)
+- 本 demo 代码仓库（AtomGit PC 社区）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-better-sqlite3](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-better-sqlite3)
 - OpenHarmony 官方文档：[https://docs.openharmony.cn/](https://docs.openharmony.cn/)
 - 华为开发者文档：[https://developer.huawei.com/consumer/cn/doc/](https://developer.huawei.com/consumer/cn/doc/)
 - 开源鸿蒙 PC 社区：[https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)

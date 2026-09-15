@@ -1,5 +1,3 @@
-<!-- TODO: 发布时补充 Schema.org BlogPosting 结构化数据，至少包含 headline、author、datePublished、mainEntityOfPage。 -->
-
 # 鸿蒙PC移植：2048 从网页小游戏到 AI 桌面应用
 
 > **欢迎加入开源鸿蒙PC社区：** [https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)
@@ -10,7 +8,7 @@
 
 经典开源 2048（gabrielecirulli/2048）再熟悉不过，一个 HTML 加几个 JS 模块就能在浏览器里玩。搬到鸿蒙 PC 有两条路，一是用 ArkTS 从头重写，二是交给 ElectronEgg 打包成 HAP，让鸿蒙 PC 的 ArkWeb WebView 直接加载前端资源。本文走第二条，而且没停在「能跑」就算完：expectimax AI 求解器挪进主进程 service，最高分与排行榜用 JSON 落盘到 `./data`，系统通知、窗口控制、主进程截图逐项接通。
 
-项目源码托管在 AtomGit PC 社区：[ohos_ee-game-2048](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-game-2048)（仓库创建中）。
+项目源码托管在 AtomGit PC 社区：[ohos_ee-game-2048](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-game-2048)。
 
 ## 一、迁移目标：从「能跑」到「值得写」
 
@@ -293,9 +291,9 @@ start_app --module electron --ability EntryAbility
 
 ## 参考与延伸
 
-- 经典 2048 原版（MIT）：[https://github.com/gabrielecirulli/2048](https://github.com/gabrielecirulli/2048)
+- 经典 2048 原版：[https://github.com/gabrielecirulli/2048](https://github.com/gabrielecirulli/2048)
 - electron-egg 框架：[https://atomgit.com/dromara/electron-egg](https://atomgit.com/dromara/electron-egg)
-- 本文 demo（2048 移植）代码仓库（AtomGit PC 社区，仓库创建中）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-game-2048](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-game-2048)
+- 本文 demo（2048 移植）代码仓库（AtomGit PC 社区）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-game-2048](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-game-2048)
 - OpenHarmony 官方文档：[https://docs.openharmony.cn/](https://docs.openharmony.cn/)
 - 华为开发者文档：[https://developer.huawei.com/consumer/cn/doc/](https://developer.huawei.com/consumer/cn/doc/)
 - 开源鸿蒙 PC 社区：[https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)
