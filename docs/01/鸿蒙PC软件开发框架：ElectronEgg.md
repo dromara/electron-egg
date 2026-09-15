@@ -1,4 +1,6 @@
-# 鸿蒙PC软件开发框架：ElectronEgg一套代码，从桌面到鸿蒙
+<!-- TODO: 发布时补充 Schema.org BlogPosting 结构化数据，至少包含 headline、author、datePublished、mainEntityOfPage。 -->
+
+# 鸿蒙PC软件开发框架：ElectronEgg，一套代码，从桌面到鸿蒙
 
 > **欢迎加入开源鸿蒙PC社区：** [https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)
 >
@@ -61,7 +63,8 @@ v5 在这个基础上做了一次整体升级，其中我们花力气最多的�
 
 ### 1.4 开源仓库
 
-- AtomGit：[https://atomgit.com/dromara/electron-egg](https://atomgit.com/dromara/electron-egg)
+- 框架仓库（AtomGit）：[https://atomgit.com/dromara/electron-egg](https://atomgit.com/dromara/electron-egg)
+- 鸿蒙 PC 适配仓（AtomGit PC 社区）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)
 ---
 
 ## 二、开发准备
@@ -98,8 +101,8 @@ v5 在这个基础上做了一次整体升级，其中我们花力气最多的�
 ```bash
 # atomgit （推荐）
 
-# 示例项目
-git clone https://atomgit.com/wallace5303/electron-egg-ohos.git
+# 示例项目（鸿蒙 PC 适配仓）
+git clone https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg.git
 ```
 
 2. 下载官方框架，主要是为了获取 ohos_hap/electron 资源
@@ -112,14 +115,14 @@ git clone https://atomgit.com/dromara/electron-egg.git
 git checkout -b demo-ohos remotes/origin/ohos/demo-37.2.2
 ```
 
-3. 把 `electron-egg/ohos_hap/electron/libs` 整个目录复制（或替换）到 `electron-egg-ohos/ohos_hap/electron/libs`。
+3. 把 `electron-egg/ohos_hap/electron/libs` 整个目录复制（或替换）到 `ohos_electron-egg/ohos_hap/electron/libs`。
 
    这里放的是构建好的引擎运行时库，体积比较大，没有跟着示例项目一起托管，建议你放进自己的仓库里。
 
 4. 工程目录结构
 
 ```text
-electron-egg-ohos
+ohos_electron-egg
 ├── electron/          # 主进程源码（controller / service / preload）
 ├── frontend/          # Vue 3 前端
 ├── go/                # Go 后端（可选）
@@ -276,10 +279,39 @@ npm run ohos-test   # = ee-bin ohos --cmds=test，不打包，直接复制 publi
 
 ---
 
-## 六、总结
+## 六、迁移能力分档：T0 / T1 / T2
+
+「能不能跑在鸿蒙上」这个问题的答案，分三档看才准确。下面按 T0 / T1 / T2 给出 ElectronEgg 当前的支持程度，验收口径都落在具体动作上，不做模糊表述。
+
+| 阶段 | 目标 | 验收内容 |
+| --- | --- | --- |
+| **T0：可启动** | HAP 能安装并打开首页 | `npm run build-m` 产出 arm64 产物；`npm run ohos` 同步进 HAP 工程；DevEco Studio 编译签名后安装、启动 EntryAbility，主界面正常显示、无白屏 |
+| **T1：核心业务可用** | 前端资源与主进程能力可用 | Vue 前端资源随 HAP 加载；controller / service 路由正常；IPC 调用有返回；窗口创建、日志落盘正常 |
+| **T2：可发布** | 覆盖产品的实际使用边界 | 多窗口与多实例、托盘、系统通知、网络权限声明、代码加密、自动升级按目标设备与业务场景逐项回归 |
+
+三档的关系是递进的：T0 不通过，后面都是空谈；T1 决定框架能力有没有真的用上；T2 则是把「能跑」推到「能交付」。
+
+有两点需要说清楚：
+
+- **T0、T1 已经在鸿蒙模拟器与真机上跑通**，本文第三章的操作流程就是走这两档。
+- **T2 不是一次性完成的清单**，而取决于业务实际用到了哪些桌面能力——用到托盘就验托盘，用到通知就验通知，每项都要在目标设备上重新确认。桌面端能跑不等于 HAP 自动具备同样权限，这一点在第三篇《功能适配鸿蒙PC》里有展开。
+
+项目的迁移能力与分档结论同样写在仓库的 `README.OpenHarmony_CN.md` 里，随版本更新。
+
+## 七、总结
 
 ElectronEgg v5 的鸿蒙支持，让前端开发者不用再去啃一套全新的鸿蒙原生开发体系，用熟悉的技术栈（Vue / React / HTML + Electron）就能做出鸿蒙 PC 应用。整条链路其实就四步：装好 DevEco Studio 和鸿蒙 Electron，`npm run build-m` 出 arm64 产物，`npm run ohos` 同步进 HAP 工程，最后用 DevEco Studio 打开 `ohos_hap`、连真机跑起来。
 
 桌面软件（办公类、个人工具）未来十几年仍然是 PC 端的刚需。框架已经在记账、政务、企业、医疗、学校、股票交易、ERP、娱乐、视频等领域的客户端上跑了很多年，可以放心用。
 
 如果这篇对你有帮助，欢迎 Star，也欢迎来社区一起交流。
+
+## 参考与延伸
+
+- 开源鸿蒙 PC 社区：[https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)
+- PC 社区项目平台（AtomGit）：[https://atomgit.com/OpenHarmonyPCDeveloper](https://atomgit.com/OpenHarmonyPCDeveloper)
+- ElectronEgg 框架仓库（AtomGit）：[https://atomgit.com/dromara/electron-egg](https://atomgit.com/dromara/electron-egg)
+- ElectronEgg 鸿蒙 PC 适配仓（AtomGit PC 社区）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)
+- DevEco Studio 下载：[https://developer.huawei.com/consumer/cn/download/deveco-studio](https://developer.huawei.com/consumer/cn/download/deveco-studio)
+- OpenHarmony 官方文档：[https://docs.openharmony.cn/](https://docs.openharmony.cn/)
+- 华为开发者文档：[https://developer.huawei.com/consumer/cn/doc/](https://developer.huawei.com/consumer/cn/doc/)

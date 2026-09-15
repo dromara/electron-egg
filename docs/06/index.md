@@ -10,6 +10,8 @@
 
 Electron 系应用（包括鸿蒙 PC 上的 OpenHarmony Electron）分发出去的主体就是 JS，打包工具默认只做归档、不做保护，解包后源码基本原样可见。electron-egg（ee-v5）把代码加密做成了构建链的一部分：改几行 `cmd/bin.js`，跑一次 `npm run encrypt`，主进程和前端产物就完成压缩混淆。本文在本鸿蒙 PC demo 工程上跑通了这套流程，记录配置项含义、javascript-obfuscator 里真正值得开的参数、三档强度的实测体积（基础档 +34%，增强档约 3.5 倍），以及注入 HAP 后的真机验证结果。
 
+项目源码托管在 AtomGit PC 社区：[ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)。
+
 ## 一、为什么桌面应用也需要代码加密
 
 不少人以为 `.exe` / `.app` / HAP 里的代码是「编译好的、看不到的」，实际正相反。Electron 系应用（包括鸿蒙 PC 上的 OpenHarmony Electron）分发的主体就是 JS：
@@ -237,6 +239,7 @@ npm run ohos-test            # 把 public/ 注入 ohos_hap 资源目录
 - electron-egg 官方文档 · 代码加密：[https://github.com/wallace5303/docs/blob/main/docs/zh/00.docs/030.build-software/020.code-encryption.md](https://github.com/wallace5303/docs/blob/main/docs/zh/00.docs/030.build-software/020.code-encryption.md)
 - javascript-obfuscator：[https://github.com/javascript-obfuscator/javascript-obfuscator](https://github.com/javascript-obfuscator/javascript-obfuscator)
 - electron-egg 框架：[https://atomgit.com/dromara/electron-egg](https://atomgit.com/dromara/electron-egg)
+- 本文 demo 工程（AtomGit PC 社区）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)
 - OpenHarmony 官方文档：[https://docs.openharmony.cn/](https://docs.openharmony.cn/)
 - 华为开发者文档：[https://developer.huawei.com/consumer/cn/doc/](https://developer.huawei.com/consumer/cn/doc/)
 - 开源鸿蒙 PC 社区：[https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)

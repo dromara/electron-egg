@@ -133,7 +133,8 @@ ElectronEgg 采用「一套代码，桌面 + 鸿蒙」的方式：业务代码�
 **第一步：获取 ElectronEgg 示例工程并安装依赖**
 
 ```bash
-git clone https://atomgit.com/wallace5303/ee-ability ee-ability
+# AtomGit PC 社区仓（创建中，提 issue 后由社区开通）
+git clone https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-ability ee-ability
 cd ee-ability
 npm install                # 安装 ee-core / ee-bin 等框架依赖
 npm run dev                # 桌面模式开发（frontend + electron）
@@ -332,6 +333,18 @@ npm run ohos               # 把产物同步到 ohos_hap 资源目录（ee-bin o
 
 > 本文聚焦开发与本地部署，正式上架流程（证书申请、AGC 配置、审核）以[华为开发者文档](https://developer.huawei.com/consumer/cn/doc/)为准。
 
+### 5.3 迁移能力分档：T0 / T1 / T2
+
+这个 3D 看车应用迁移到什么程度，按 T0 / T1 / T2 三档说：
+
+| 阶段 | 目标 | 验收内容 |
+| --- | --- | --- |
+| **T0：可启动** | HAP 能安装并打开首页 | `build_project --module electron@default` 编译成功；EntryAbility 启动；3D 车模、顶部信息栏与右侧操作栏正常渲染，无白屏 |
+| **T1：核心业务可用** | 看车交互与主进程能力可用 | 车漆 / 轮毂换装、展厅 / 户外场景切换、预设视角飞行、车灯与车门动画均正常；IPC 取配置返回正确；截图功能返回成功 |
+| **T2：可发布** | 覆盖产品的实际使用边界 | 截图落盘路径、多窗口 / 多实例、发布签名与上架合规项在目标设备上逐项回归 |
+
+值得单独记一笔的是：**这个项目没有 Electron 依赖的降级路径**。3D 看车的前端计算全在渲染进程里，主进程只提供配置读取和截图保存两个接口，所以 T1 的验收点集中在「前端交互本身」和「两个 IPC 接口」，比框架型应用更窄，也更容易一次跑通。
+
 ## 六、踩坑与经验
 
 下表汇总了技能安装与鸿蒙部署阶段最容易撞上的几个问题。
@@ -365,6 +378,6 @@ npm run ohos               # 把产物同步到 ohos_hap 资源目录（ee-bin o
 - `arkts-grammar-standards` 技能介绍：[SkillsMP](https://skillsmp.com/creators/carsmallguo/deveco-code/packages-opencode-resources-skills-arkts-grammar-standards)，固定版本源码：[GitHub](https://github.com/CarSmallGuo/deveco-code/tree/0.1.0-TD.4/packages/opencode/resources/skills/arkts-grammar-standards)
 - `arkui-knowledge` 技能介绍：[SkillsMP](https://skillsmp.com/creators/carsmallguo/deveco-code/packages-opencode-resources-skills-arkui-knowledge)，固定版本源码：[GitHub](https://github.com/CarSmallGuo/deveco-code/tree/0.1.0-TD.4/packages/opencode/resources/skills/arkui-knowledge)
 - Claude Code 官方文档：[https://code.claude.com/docs](https://code.claude.com/docs)
-- ElectronEgg 框架仓库：[AtomGit](https://atomgit.com/dromara/electron-egg) · 示例工程（ohos 分支）：[electron-egg-ohos](https://atomgit.com/wallace5303/electron-egg-ohos.git)
-- 本文 demo（3D 看车应用）代码仓库：[AtomGit](https://atomgit.com/wallace5303/ee-ability)
+- ElectronEgg 框架仓库：[AtomGit](https://atomgit.com/dromara/electron-egg) · 鸿蒙 PC 适配仓：[ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)
+- 本文 demo（3D 看车应用）代码仓库（AtomGit PC 社区，仓库创建中）：[ohos_ee-ability](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-ability)
 - 参照的 3D 看车页：[hima.auto/3d-view](https://hima.auto/3d-view/)

@@ -10,6 +10,8 @@
 
 ElectronEgg（ee-v5）的主进程可以用 `cross` 模块拉起 Go 后端子进程，这一步在桌面上开箱即用。搬到鸿蒙 PC 后多出两个问题：未签名的二进制会被内核 XPM 拦截，得先用 HNP（HarmonyOS Native Package）打包、让系统在安装时签名放行；鸿蒙沙箱的目录权限模型和桌面不一样，`$HOME` 这类常见环境变量在沙箱里不可写，靠它建目录的 Go 程序会直接启动失败。下面按打包签名 → 环境适配 → 构建注入 → 验证的顺序，记录这套链路踩过的坑和最终解法。
 
+项目源码托管在 AtomGit PC 社区：[ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)。
+
 ## 一、总体思路
 
 在鸿蒙 PC 上让 Go 服务跑起来，需要打通三层：
@@ -271,7 +273,19 @@ curl http://127.0.0.1:17073/api/hello
 [go][stderr] INFO  job/index.go:36   [task] hello
 ```
 
-## 六、常见问题清单
+## 六、迁移能力分档：T0 / T1 / T2
+
+Go 子进程这条链路能不能算「跑通」，同样分三档看。这三档正好对应前文三层：签名管「能不能起」、可写目录管「起了会不会活」、资源同步管「改的东西进没进包」。
+
+| 阶段 | 目标 | 验收内容 |
+| --- | --- | --- |
+| **T0：可启动** | 签名放行的二进制能被 exec | HNP 包随 HAP 安装并释放到沙箱；`cross.run()` 不再报 `EACCES`；goapp 进程能被拉起 |
+| **T1：核心业务可用** | 子进程常驻且服务可用 | `ps -ef` 显示完整命令行而非方括号僵尸态；HTTP 端口监听正常，`curl` 有返回；主进程可采集子进程 stdout / stderr 与退出码 |
+| **T2：可发布** | 覆盖实际运行的边界情况 | 设备重启后自启、子进程异常退出后的重启策略、多实例下的端口冲突、release 包与 debug 包行为一致、目标设备回归 |
+
+T0 与 T1 之间的落差最小、也最容易迷惑人：进程能起来不代表能活下来，而两者的表现都是「应用里没反应」。这也是为什么 3.2 节要先打开 `stdio` 把子进程的真实报错捞出来——没有日志，这两档根本分不开。
+
+## 七、常见问题清单
 
 同一批坑换个说法再列一遍没意义，这里只做成速查索引，具体做法看对应小节：
 
@@ -284,7 +298,7 @@ curl http://127.0.0.1:17073/api/hello
 | 代码改了，装到设备上问题依旧 | 两份 `main.js`，先确认资源同步跑过（4.1） |
 | `go mod tidy` 连不上 `proxy.golang.org` | 单次命令临时加 `GOPROXY=https://goproxy.cn,direct`（3.4） |
 
-## 七、总结
+## 八、总结
 
 三层缺一层都跑不起来：**HNP 签名**解决"能不能起"，**可写目录**解决"起了会不会活"，**资源同步**解决"改的东西到底进没进包"。麻烦的是这三者的故障现象高度相似，都是起不来或者起来就死，所以按这个顺序逐层确认，比盯着报错文案猜要快得多。
 
@@ -295,6 +309,7 @@ curl http://127.0.0.1:17073/api/hello
 ## 参考与延伸
 
 - electron-egg 框架：[https://atomgit.com/dromara/electron-egg](https://atomgit.com/dromara/electron-egg)
+- 本文 demo 工程（AtomGit PC 社区）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)
 - ee-go（Go 后端框架）：[https://github.com/wallace5303/ee-go](https://github.com/wallace5303/ee-go)
 - OpenHarmony 官方文档：[https://docs.openharmony.cn/](https://docs.openharmony.cn/)
 - 华为开发者文档：[https://developer.huawei.com/consumer/cn/doc/](https://developer.huawei.com/consumer/cn/doc/)

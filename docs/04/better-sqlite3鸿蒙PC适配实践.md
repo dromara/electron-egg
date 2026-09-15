@@ -301,7 +301,19 @@ export async function invokeAdv(action, extra = {}) {
 
 ![鸿蒙 PC 上运行 SQLite Studio「Pragma 与 DDL」页面：db.pragma / db.exec 演示](ee-example-15.jpg)
 
-## 六、踩坑与经验
+## 六、迁移能力分档：T0 / T1 / T2
+
+原生模块的适配最怕「看起来跑通了」。按 T0 / T1 / T2 三档拆开，能清楚区分「模块能不能加载」和「功能是不是真的对」：
+
+| 阶段 | 目标 | 验收内容 |
+| --- | --- | --- |
+| **T0：可启动** | 原生模块能被主进程加载，应用不崩 | HAP 能安装并启动；`better_sqlite3.node` 随包就位；主进程经 `SqliteStorage` 懒加载，未打开数据库时不触发绑定加载 |
+| **T1：核心业务可用** | 数据库功能在真机全部可用 | 建库建表、增删改查、命名参数与位置参数、`db.transaction` 批量与回滚、`db.pragma` / `db.exec` 逐项通过；数据持久化到 `{dataDir}/db/sqlite-demo.db` |
+| **T2：可发布** | 覆盖产品的实际使用边界 | 目录自动创建、多实例下的读写、加密与备份扩展、Electron 升级后 `.node` 的重编译流程 |
+
+T0 和 T1 的分界在原生模块上格外重要：**二进制读不出对错**，`readelf` 只能证明符号齐全，证明不了运行结果正确。所以这一档必须靠真机上把 CRUD、事务、聚合、Pragma 逐条跑通来兜底。
+
+## 七、踩坑与经验
 
 | 问题 | 原因 | 解决办法 |
 | --- | --- | --- |
@@ -312,22 +324,22 @@ export async function invokeAdv(action, extra = {}) {
 | 渲染进程无法调用原生方法 | 主进程与渲染进程隔离，`nodeIntegration` 未开启 | 在 `config.default.ts` 打开 `nodeIntegration: true`，前端经 IPC 通道调用 |
 | 数据库文件目录不存在 | better-sqlite3 打开文件前目录未创建 | `SqliteStorage` 自动按 `{dataDir}/db` 创建目录 |
 
-再补充三点经验：
+再补充两点经验：
 
 1. **产物版本要固定**：`.node` 与 Electron 版本严格绑定（本文是 Electron 37 / module_version 138），升级 Electron 后必须重新编译，旧 `.node` 不能复用。
 2. **原生模块是二进制，读不出对错**：只能靠 `readelf` 校验符号，再在真机上把 CRUD、事务、聚合、Pragma 这些路径逐一跑通，才敢说适配完成。
 
-## 七、总结
+## 八、总结
 
 把 better-sqlite3 适配到鸿蒙 PC，本质上就是接受「原生模块 = 平台相关二进制」这个前提：备好 Electron 37 对应的头文件和 `libshim.a`，用 OpenHarmony 的 clang 交叉编译到 `aarch64-linux-ohos`，再按 HAP 的资源约定把原生库和 JS 包放到位。剩下的事交给框架——`SqliteStorage` 的懒加载封装让同一套业务代码同时撑起桌面端和鸿蒙 PC 端。
 
-后面还有得做：备份和加密扩展（比如 `better-sqlite3-multiple-ciphers`）都还没覆盖；这套编译脚本值得抽成可复用的 npm 脚本或 CI 流水线；项目 README 里也该按社区规范用 **T0 / T1 / T2** 标出当前迁移到哪一级，方便别人评估能复用多少。
+后面还有得做：备份和加密扩展（比如 `better-sqlite3-multiple-ciphers`）都还没覆盖；这套编译脚本值得抽成可复用的 npm 脚本或 CI 流水线；仓库 README 里已经按社区规范用 **T0 / T1 / T2** 标出了当前迁移到哪一级，随版本继续更新。
 
 ## 参考与延伸
 
 - better-sqlite3 源码：[https://github.com/WiseLibs/better-sqlite3](https://github.com/WiseLibs/better-sqlite3)
-- electron-egg 框架：[https://github.com/wallace5303/electron-egg](https://github.com/wallace5303/electron-egg)
-- 本 demo 代码仓库（AtomGit）：[https://atomgit.com/wallace5303/ee-better-sqlite3](https://atomgit.com/wallace5303/ee-better-sqlite3)
+- electron-egg 框架（AtomGit）：[https://atomgit.com/dromara/electron-egg](https://atomgit.com/dromara/electron-egg)
+- 本 demo 代码仓库（AtomGit PC 社区，仓库创建中）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-better-sqlite3](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_ee-better-sqlite3)
 - OpenHarmony 官方文档：[https://docs.openharmony.cn/](https://docs.openharmony.cn/)
 - 华为开发者文档：[https://developer.huawei.com/consumer/cn/doc/](https://developer.huawei.com/consumer/cn/doc/)
 - 开源鸿蒙 PC 社区：[https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)

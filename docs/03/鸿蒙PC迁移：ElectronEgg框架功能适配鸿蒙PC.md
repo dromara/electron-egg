@@ -10,7 +10,7 @@
 
 ElectronEgg 是面向桌面软件的 Electron 框架，主进程、控制器、服务、前端和构建流程被组织成一套工程化结构。迁移到鸿蒙 PC 时，我们没把业务代码改写成 ArkTS，而是让既有应用以 HAP 形式交付，在鸿蒙侧补上 Ability、窗口容器和资源注入。本文以 `ee-demo-ohos` 为例，记录这条适配路径：哪些能直接复用、哪些边界必须单独处理、构建和设备验证怎么做。
 
-项目源码托管在 AtomGit：[electron-egg](https://atomgit.com/dromara/electron-egg)。本文涉及的能力以当前示例工程和鸿蒙 PC 运行截图为准；平台支持仍在持续演进，生产项目应在目标 SDK、目标设备和目标业务场景上重新验收。
+项目源码托管在 AtomGit PC 社区：[ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)。本文涉及的能力以当前示例工程和鸿蒙 PC 运行截图为准；平台支持仍在持续演进，生产项目应在目标 SDK、目标设备和目标业务场景上重新验收。
 
 ## 一、迁移目标：保留业务层，补齐鸿蒙运行层
 
@@ -353,3 +353,12 @@ DEBUG='ee-core:config:*' npm run dev-electron
 ## 结语
 
 ElectronEgg 的鸿蒙 PC 迁移，省下来的主要是业务层：前端、控制器、服务都不用从头写，靠 ArkUI-X 容器加 HAP 资源注入进到鸿蒙运行环境。真正要花时间去验的，是资源有没有同步到最新，以及多窗口、多进程、多实例这些桌面场景在目标设备上到底什么表现。按 T0 / T1 / T2 分阶段推，能从"打开一个页面"一步步走到能发布的状态。
+
+## 参考与延伸
+
+- 开源鸿蒙 PC 社区：[https://harmonypc.csdn.net/](https://harmonypc.csdn.net/)
+- PC 社区项目平台（AtomGit）：[https://atomgit.com/OpenHarmonyPCDeveloper](https://atomgit.com/OpenHarmonyPCDeveloper)
+- 本文示例工程（AtomGit PC 社区）：[https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg](https://atomgit.com/OpenHarmonyPCDeveloper/ohos_electron-egg)
+- ElectronEgg 框架仓库（AtomGit）：[https://atomgit.com/dromara/electron-egg](https://atomgit.com/dromara/electron-egg)
+- OpenHarmony 官方文档：[https://docs.openharmony.cn/](https://docs.openharmony.cn/)
+- 华为开发者文档：[https://developer.huawei.com/consumer/cn/doc/](https://developer.huawei.com/consumer/cn/doc/)
