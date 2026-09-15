@@ -34,20 +34,23 @@ Whether you are a frontend, backend, DevOps, game, or client developer, you can 
 - [**Click to view**](#project-cases)
 
 ## 📺 Features
+
 - 🍩 **Why use it?** Desktop software (office & personal tools) will remain one of the PC demands for the next decade, boosting work efficiency
 - 🍉 **Simple:** Supports JS, TS, CJS, ESM
 - 🍑 **Vision:** All developers can learn desktop software development
 - 🍰 **Gitee:** https://gitee.com/dromara/electron-egg **6000+**
 - 🍨 **GitHub:** https://github.com/dromara/electron-egg **2400+**
-- 🍰 **Gitcode:** https://gitcode.com/dromara/electron-egg
+- 🍰 **Atomgit:** https://atomgit.com/dromara/electron-egg
 - 🏆 Gitee Most Valuable Open Source Project
-    ![](./public/images/example/ee-zs.png)
+  ![img](./public/images/example/ee-zs.png)
 
 ## 📚 Documentation
+
 - Quick start: [Tutorial Docs](https://www.kaka996.com/)
-    ![](./public/images/example/v3-home.png)
+  ![](./public/images/example/v3-home.png)
 
 ## 📦 Highlights
+
 1. 🍄 Cross-platform: One codebase can be packaged for Windows, macOS, Linux, national UOS, Deepin, Kylin, etc.
 2. 🌹 Architecture: Single business process / modular / multi-task (process, thread, renderer process), making large-scale project development simple.
 3. 🌱 Simple & efficient: Only need to learn JS
@@ -61,74 +64,74 @@ Whether you are a frontend, backend, DevOps, game, or client developer, you can 
 ## ✈️ Use Cases
 
 ### 1. 🚀 Conventional Desktop Software
+
 - 🚖 Windows platform
 
-    ![](./public/images/example/ee-win-home.png)
-
+  ![](./public/images/example/ee-win-home.png)
 - 🚍 macOS platform
-    ![](./public/images/example/ee-mac-home.png)
-
+  ![](./public/images/example/ee-mac-home.png)
 - 🚔 Linux platform - National UOS, Deepin
-    ![](./public/images/example/uos-home.png)
-
+  ![](./public/images/example/uos-home.png)
 - 🚔 Linux platform - Ubuntu
-    ![](./public/images/example/ubuntu-db.png)
+  ![](./public/images/example/ubuntu-db.png)
 
 ### 🚐 2. Convert Vue, React, Angular, and Web apps into Desktop Software
+
 - 🚙 Vue Ant Design (local)
 
-    ![](./public/images/example/vue-antd.png)
-
+  ![](./public/images/example/vue-antd.png)
 - 🚙 Zentao Project Management (web project URL)
 
-    ![](./public/images/example/ee-project-7.png)
+  ![](./public/images/example/ee-project-7.png)
 
 ### 🚂 3. Games (developed with H5-related technologies)
+
 - 🚊 Ninja 100 Floors
 
-    ![](./public/images/example/ee_game_1.png)
-
+  ![](./public/images/example/ee_game_1.png)
 
 ## 📒 Getting Started
 
 - ✒️ [Installation Guide](https://www.kaka996.com/pages/e64ff6/)
 
 ## Project Cases
+
 - 🐟 The framework has been applied to desktop clients in healthcare, education, government, stock trading, ERP, entertainment, video, enterprise, and other domains
 
 ### 🐸 Remote Control
 
 - RQ Center
-![](./public/images/example/rq-1.png)
-![](./public/images/example/rq-2.png)
+  ![](./public/images/example/rq-1.png)
+  ![](./public/images/example/rq-2.png)
 
 ### 🐸 Cloud Storage
 
 - FM Cloud
-![](./public/images/example/fm-p2.png)
-![](./public/images/example/fm-p1.png)
-![](./public/images/example/fm-p4.png)
+  ![](./public/images/example/fm-p2.png)
+  ![](./public/images/example/fm-p1.png)
+  ![](./public/images/example/fm-p4.png)
 
 ### 🐸 IM
 
 - Cede IM
-![](./public/images/example/im-p1.png)
-![](./public/images/example/im-p5.png)
-![](./public/images/example/im-p1.png)
+  ![](./public/images/example/im-p1.png)
+  ![](./public/images/example/im-p5.png)
+  ![](./public/images/example/im-p1.png)
 
 ### 🐸 Wallpaper
 
 - warpar
-![](./public/images/example/aw-3.png)
+  ![](./public/images/example/aw-3.png)
 
 ### 🐸 League of Legends Assistant
 
 - Serendlplty
-![](./public/images/example/lol-zhanji.png)
+  ![](./public/images/example/lol-zhanji.png)
 
 ### 🐸 More
 
 - [More Cases](https://www.kaka996.com/pages/eadf46/)
 
 ## 💬 Community
+
 1. [Discussion](https://www.kaka996.com/pages/c2720e/)
