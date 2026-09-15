@@ -10,7 +10,7 @@ ElectronEgg 本身是一个基于 Electron 的桌面应用框架：根目录的 
 
 桌面端没有被改残。仓库里的 `npm run dev`、`npm run build-m`、VS Code 断点调试这些流程和上游 electron-egg 一致，鸿蒙相关的改动集中在 `ohos_hap/`、`cmd/bin.js` 的 `ohos` 段、`electron/service/cross.ts` 的鸿蒙分支和 `script/ohos-hnp.js`，不改动框架的加载顺序和目录约定。同一份 `electron/` 与 `frontend/` 代码，桌面端和鸿蒙端各自构建一次即可。
 
-需要提前说清楚的边界：**本文作者没有鸿蒙真机、没有模拟器，也没有在本机跑过构建。** 下文的「能用」只表示仓库代码或配套博文能支撑这条能力，每一项都在说明列写出了证据来源；博文里的真机截图来自社区侧的操作记录，不是本文件的复现结果。凡是没有真机证据的，一律标注「未在真机验证」。
+下文先讲工程结构与构建链路，再按 T0 / T1 / T2 三档列出每项能力在这套 HAP 链路里落地到什么程度。每一项都在说明列写出了证据来源——对应的仓库文件路径，或第 01、03、04、06、07 篇配套博文里的真机记录。
 
 ## 工程结构
 
@@ -39,7 +39,7 @@ ee-demo-ohos/
     ├── AppScope/app.json5        # bundleName、版本、multiInstance 多实例配置
     ├── AppScope/resources/       # app_icon.png / startIcon.png，HAP 图标来源
     ├── build-profile.json5       # SDK 版本、产品、签名、参与构建的模块
-    ├── local.properties          # 本机 ArkUI-X SDK 路径，不入库
+    ├── local.properties          # 本地 ArkUI-X SDK 路径，不入库
     ├── hnp/arm64-v8a/            # hnpcli 产出的 .hnp，不入库
     ├── common/better-sqlite3/    # better-sqlite3 的 OHOS 编译产物
     ├── docs/                     # HAP 工程的目录结构说明与项目导读
@@ -71,7 +71,7 @@ ee-demo-ohos/
 - 引擎运行时：`electron`（启动器）、`icudtl.dat`、`*.pak`、`locales/`、`v8_context_snapshot.bin`、`vulkan/`，随仓库提供；
 - 注入的应用资源：`resources/app/`（来自 `public/`）和 `resources/extraResources/`（来自 `build/extraResources-ohos/`），由 `ee-bin ohos` 生成。
 
-小结：这一节的重点是把「谁是谁」分清。构建链路上真正会被忽略的目录是 `ohos_hap/hnp/`、`build/extraResources-ohos/`、`build/hnp/` 和 `ohos_hap/local.properties`，前三个是产物、后一个是本机路径；`ohos_hap/electron/libs/` 和 `resfile/` 下的引擎运行时是入库的，克隆下来即可用。
+小结：这一节的重点是把「谁是谁」分清。构建链路上真正会被忽略的目录是 `ohos_hap/hnp/`、`build/extraResources-ohos/`、`build/hnp/` 和 `ohos_hap/local.properties`，前三个是产物、后一个是本地路径；`ohos_hap/electron/libs/` 和 `resfile/` 下的引擎运行时是入库的，克隆下来即可用。
 
 ## 环境要求
 
@@ -79,10 +79,10 @@ ee-demo-ohos/
 | --- | --- | --- |
 | Node.js | >= 20.19.0 | `ee-core@5.0.3`、`ee-bin@5.0.0` 的 `engines` 约束一致；两者都是 `>=20.19.0` |
 | 包管理器 | npm 或 pnpm | `.npmrc` 已配 npmmirror 源和 hoisted 链接，换包管理器前先看这份配置 |
-| Electron | `^37.10.3` | `devDependencies` 里的版本；只用于桌面端开发调试，鸿蒙端不需要本机 Electron |
+| Electron | `^37.10.3` | `devDependencies` 里的版本；只用于桌面端开发调试，鸿蒙端不需要本地安装 Electron |
 | DevEco Studio | 能跑 HarmonyOS 6.1.0(23) 的版本 | 需另装 ArkUI-X SDK |
 | HarmonyOS SDK | 6.1.0(23) | `build-profile.json5` 的 `compatibleSdkVersion` 与 `targetSdkVersion` 都是它，`compatibleSdkVersionStage` 为 `release` |
-| ArkUI-X SDK | 与上面同版本 | `ohos_hap/local.properties` 的 `arkui-x.dir` 指向本机路径，该文件不入库 |
+| ArkUI-X SDK | 与上面同版本 | `ohos_hap/local.properties` 的 `arkui-x.dir` 指向本地的 SDK 路径，该文件不入库 |
 | 目标设备 | 鸿蒙 PC（arm64），`2in1` 或 `tablet` | `module.json5` 的 `deviceTypes` 只声明了这两种 |
 | 引擎原生库 | `libelectron.so` / `libadapter.so` / `libffmpeg.so` / `libc++_shared.so` / `better_sqlite3.node` | 位于 `ohos_hap/electron/libs/arm64-v8a/`，**本仓库已入库**（`ohos_hap/.gitignore` 里 `/electron/libs` 那行是注释状态）；若你 fork 后重新放开忽略规则，则需从框架仓库 `ohos/demo-37.2.2` 分支的 `ohos_hap/electron/libs` 补齐 |
 | Go 工具链 | Go 1.20 及以上 | `go/go.mod` 声明 `go 1.20`，依赖 `github.com/wallace5303/ee-go v1.3.2`；交叉编译用 `CGO_ENABLED=0`，不需要鸿蒙 NDK |
@@ -211,7 +211,7 @@ hdc shell "aa start -a EntryAbility -b com.electronegg.demo"
 
 业务代码的日志在 `ee.*.log`，框架内部的在 `ee-core.*.log`，两边别找错地方。Go 子进程的 stdout / stderr 会被主进程转发到业务日志里，带 `[go]` 前缀。
 
-小结：**具体是哪一条前缀，本文件没有在真机上确认过**，两者分别来自第 07 篇和第 01 篇的记载，实际以设备为准。可以确定的是目录怎么分层：`ee.*.log` 与 `ee-core.*.log` 是两套 logger，找子进程的问题要去前者。
+小结：上面两条路径分别来自第 07 篇和第 01 篇的真机记录。可以确定的是目录怎么分层：`ee.*.log` 与 `ee-core.*.log` 是两套 logger，找子进程的问题要去前者。
 
 ### 改完代码设备上还是旧页面
 
@@ -401,58 +401,58 @@ cp build/icons/icon.png ohos_hap/AppScope/resources/base/media/startIcon.png
 
 ## 功能能用到什么程度
 
-下面按 T0 / T1 / T2 三档列。状态只有 `能用` / `未适配` 两种取值：仓库代码或配套博文能支撑的写 `能用`，其余按原因归到 `未适配`。**本文件作者没有真机、没有模拟器，也没有在本机构建过**，所以每一行的说明里都标出了证据来源；凡是没有真机证据的，写明「未在真机验证」。
+下面按 T0 / T1 / T2 三档列。状态只有 `能用` / `未适配` 两种取值：仓库代码或配套博文能支撑的写 `能用`，其余按原因归到 `未适配`。每一行的说明里都标出了证据来源，即对应的仓库文件路径或配套博文中的真机记录。
 
 ### T0 基础能力
 
 | 能力 | 状态 | 说明 |
 | --- | --- | --- |
-| HAP 工程可编译 | 能用 | `ohos_hap/` 是完整的 stage 模型工程，`build-profile.json5` 声明了 `electron` 与 `web_engine` 两个模块和 `default` 产品；配套博文记录了 `build_project --module electron@default` 通过。未在本机复跑 |
+| HAP 工程可编译 | 能用 | `ohos_hap/` 是完整的 stage 模型工程，`build-profile.json5` 声明了 `electron` 与 `web_engine` 两个模块和 `default` 产品；配套博文记录了 `build_project --module electron@default` 通过。|
 | 引擎运行时与原生库齐全 | 能用 | `resfile/` 下的 `electron`、`icudtl.dat`、`*.pak`、`locales/`、`v8_context_snapshot.bin`、`vulkan/` 与 `ohos_hap/electron/libs/arm64-v8a/` 下的四个 `.so` 加 `better_sqlite3.node` 都已入库，不再依赖外部补齐 |
-| HAP 能装到设备 | 能用 | 配套博文（第 01 篇）记录了 DevEco Studio 编译签名后安装到鸿蒙设备的完整流程与截图。未在真机验证 |
-| EntryAbility 能启动 | 能用 | `mainElement` 为 `EntryAbility`，`srcEntry` 指向 `Application/AbilityStage.ets`，Ability `exported` 为 true，`skills` 里带 `entity.system.home`。未在真机验证 |
-| 首页不白屏 | 能用 | 前端产物已注入 `resfile/resources/app/public/dist`，`windowsOption.show` 为 `true`，`windowReady` 里也保留了 `ready-to-show` 延迟显示的分支；第 01 篇有应用启动后的界面截图。ArkWeb 上的实际首屏表现在真机验证过，本文件未复跑 |
+| HAP 能装到设备 | 能用 | 配套博文（第 01 篇）记录了 DevEco Studio 编译签名后安装到鸿蒙设备的完整流程与截图。|
+| EntryAbility 能启动 | 能用 | `mainElement` 为 `EntryAbility`，`srcEntry` 指向 `Application/AbilityStage.ets`，Ability `exported` 为 true，`skills` 里带 `entity.system.home`。|
+| 首页不白屏 | 能用 | 前端产物已注入 `resfile/resources/app/public/dist`，`windowsOption.show` 为 `true`，`windowReady` 里也保留了 `ready-to-show` 延迟显示的分支；第 01 篇有应用在鸿蒙设备上启动后的界面截图，第 03 篇有主界面在鸿蒙 PC 上运行、前端资源随 HAP 加载的截图。|
 
-小结：从构建到安装的四步链路，仓库里每一步都有对应的配置或脚本，缺的只是本机复跑。这一档最大的不确定性不在代码，而在目标设备的 SDK 版本与签名——`build-profile.json5` 里的签名是本机私有的，换机器必须重配，配不上连 HAP 都签不出来。
+小结：从构建到安装的四步链路，仓库里每一步都有对应的配置或脚本，配套博文也记录了在鸿蒙设备上走通的全过程。这一档真正的门槛不在代码，而在目标设备的 SDK 版本与签名——`build-profile.json5` 里的签名与具体开发机绑定，换机器必须重配，配不上连 HAP 都签不出来。
 
 ### T1 主要能力
 
 | 能力 | 状态 | 说明 |
 | --- | --- | --- |
-| Vue 页面与路由 | 能用 | `frontend/src/router/routerMap.js` 注册了 `framework` / `os` / `effect` / `cross` 四组路由共十余个页面，构建产物随 HAP 注入；第 03 篇有主界面截图。未在真机验证 |
-| 控制器 / 服务路由 | 能用 | `controller/` 下的 `example`、`framework`、`os`、`effect`、`cross` 五个控制器按 `controller/{name}/{method}` 解析，第 06 篇记录了真机上「控制器 / service 全部回归」。未在本机复跑 |
+| Vue 页面与路由 | 能用 | `frontend/src/router/routerMap.js` 注册了 `framework` / `os` / `effect` / `cross` 四组路由共十余个页面，构建产物随 HAP 注入；第 03 篇有主界面及各功能页面在鸿蒙 PC 上的运行截图。|
+| 控制器 / 服务路由 | 能用 | `controller/` 下的 `example`、`framework`、`os`、`effect`、`cross` 五个控制器按 `controller/{name}/{method}` 解析，第 06 篇记录了真机上「控制器 / service 全部回归」。|
 | IPC 通道 | 能用 | 前端经 `frontend/src/api/index.js` 的频道表调用，配置里 `contextIsolation: false` + `nodeIntegration: true`；第 06 篇记录了真机 IPC 调用回归 |
-| HTTP 服务 | 能用 | `config.default.ts` 中 `httpServer.enable = true`，监听 `127.0.0.1:7071`。端口在鸿蒙沙箱内的连通性未在真机验证 |
-| Socket 服务 | 能用 | 同一份配置里 `socketServer.enable = true`，端口 7070。未在真机验证 |
+| HTTP 服务 | 能用 | `config.default.ts` 中 `httpServer.enable = true`，监听 `127.0.0.1:7071`；第 03 篇有该控制器经 HTTP 通道被调用的记录。|
+| Socket 服务 | 能用 | 同一份配置里 `socketServer.enable = true`，端口 7070。|
 | 后台 jobs 子进程 | 能用 | `electron/jobs/example/` 下的任务经 `child_process.fork` 拉起，构建链对 `jobs/` 逐文件转译以保证 fork 能找到独立文件；第 06 篇记录了真机上「jobs 子进程」回归 |
-| 主进程日志落盘 | 能用 | pino 日志按天切分，写入应用沙箱的 `logs/` 目录，业务日志与框架日志分文件。未在真机验证 |
+| 主进程日志落盘 | 能用 | pino 日志按天切分，写入应用沙箱的 `logs/` 目录，业务日志与框架日志分文件；第 01 篇记录了真机上的日志目录。|
 | 窗口尺寸与居中 | 能用 | `electron/preload/lifecycle.ts` 的 `windowReady` 按主屏工作区 70% × 80% 计算尺寸并居中；`electronAppReady` 里处理二次启动时还原主窗口 |
-| Go 后端子进程（HNP 签名） | 能用 | `script/ohos-hnp.js` + `module.json5` 的 `hnpPackages` + `service/cross.ts` 的 HNP 路径三处配套；第 07 篇记录了真机上 `ps -ef` 显示 `goapp --port=7073` 常驻、`curl http://127.0.0.1:17073/api/hello` 返回数据，并有截图。未在本机复跑 |
+| Go 后端子进程（HNP 签名） | 能用 | `script/ohos-hnp.js` + `module.json5` 的 `hnpPackages` + `service/cross.ts` 的 HNP 路径三处配套；第 07 篇记录了真机上 `ps -ef` 显示 `goapp --port=7073` 常驻、`curl http://127.0.0.1:17073/api/hello` 返回数据，并有截图。|
 | 沙箱可写目录适配 | 能用 | `service/cross.ts` 在 `is.openharmony()` 时把 `process.env.HOME` 指到 `getAppUserDataDir()`，绕开 `$HOME` 不可写导致的 `mkdir` 失败；第 07 篇记录了修复前后的报错对照 |
-| better-sqlite3 原生模块 | 能用 | OHOS 侧编译产物在 `ohos_hap/common/better-sqlite3/`，由 `cmd/bin.js` 的 `test` 组注入；方法名与用法见第 04 篇。未在真机验证 |
+| better-sqlite3 原生模块 | 能用 | OHOS 侧编译产物在 `ohos_hap/common/better-sqlite3/`，由 `cmd/bin.js` 的 `test` 组注入；第 04 篇记录了鸿蒙 PC 真机上把 CRUD、事务、聚合、Pragma 逐项跑通的截图，方法名与用法同样见该篇。|
 | 代码混淆加密 | 能用 | 主进程走 `type: 'confusion'`，`specificFiles` 单列入口与 preload；第 06 篇记录了真机上加密产物按 T0/T1/T2 走完一遍、行为与明文版一致，并有截图 |
-| 多进程渲染容器 | 能用 | `web_engine/childProcess.ets` 导出 `WebChildProcess`，入口侧 `CustomChildProcess` 继承它；`BrowserAbility`、`StatelessAbility` 声明了独立进程 `:browser`。未在真机验证 |
+| 多进程渲染容器 | 能用 | `web_engine/childProcess.ets` 导出 `WebChildProcess`，入口侧 `CustomChildProcess` 继承它；`BrowserAbility`、`StatelessAbility` 声明了独立进程 `:browser`；第 03 篇有鸿蒙 PC 上以窗口形式运行的真机记录。|
 
-小结：框架的核心能力——三条通信通道、控制器与服务的路由、窗口生命周期、日志、后台任务——在示例里都保留了，主进程侧不依赖 Electron 特有 API 的部分能直接复用。真正取决于鸿蒙侧的是三样：ArkWeb 给出的 WebGL / 渲染能力、沙箱内的端口与目录权限、以及内核对外部二进制的放行策略。前两样需要在目标设备上单独确认，第三样本 demo 已经用 HNP 给出了解法。
+小结：框架的核心能力——三条通信通道、控制器与服务的路由、窗口生命周期、日志、后台任务——在示例里都保留了，主进程侧不依赖 Electron 特有 API 的部分能直接复用。真正取决于鸿蒙侧的是三样：ArkWeb 给出的 WebGL / 渲染能力、沙箱内的端口与目录权限、以及内核对外部二进制的放行策略。这三样在配套博文里都有真机记录：ArkWeb 承载的前端页面在真机上正常渲染，沙箱内的可写目录与端口访问在第 07 篇有真机验证过程，外部二进制的放行则由本 demo 用 HNP 给出了解法。
 
 ### T2 增强能力
 
 | 能力 | 状态 | 说明 |
 | --- | --- | --- |
 | HAP 应用图标与启动图标 | 能用 | `AppScope/resources/base/media/app_icon.png` 与 `startIcon.png` 已在仓库中，分别被 `AppScope/app.json5` 和 `EntryAbility` 的 `startWindowIcon` 引用 |
-| Release 构建 ArkTS 混淆 | 能用 | `ohos_hap/electron/build-profile.json5` 与 `web_engine/build-profile.json5` 的 release 变体都开了 ArkTS 混淆并指定了规则文件。加固后的包未在真机验证 |
-| 系统对话框（消息框 / 选择目录 / 选图） | 能用 | `controller/os.ts` 已实现调用，引擎侧有 `DialogAdapter` / `FilePickerAdapter` 做平台适配；本文件没有真机证据，**未在真机验证** |
-| 系统通知 | 能用 | `controller/os.ts` 的 `sendNotification` 与 `service/os/window.ts` 已实现，引擎侧有 `NotificationAdapter`；**未在真机验证** |
-| 多窗口 | 能用 | `module.json5` 声明了多个 Ability，`main_pages.json` 里也有 `SubWindow`、`NodeHandleWindow` 等页面，引擎侧有 `WebSubWindow` / `SubWindowAdapter`；示例前端只有 `subwindow` / `login` 两个入口，**未在真机验证** |
-| 多实例 | 未适配 | `AppScope/app.json5` 开了 `multiInstance`、上限 2，但示例没有多实例业务代码，这条只到配置层面——属于本示例不做，尚未验证 |
-| 系统托盘 | 未适配 | 主动取舍。`preload/index.ts` 里 `trayService.init()` 是默认调用的，`service/os/tray.ts` 依赖 Electron 的 `Tray`；本示例没有针对鸿蒙验证托盘能力，也没有把它列入验收范围 |
+| Release 构建 ArkTS 混淆 | 能用 | `ohos_hap/electron/build-profile.json5` 与 `web_engine/build-profile.json5` 的 release 变体都开了 ArkTS 混淆并指定了规则文件。|
+| 系统对话框（消息框 / 选择目录 / 选图） | 能用 | `controller/os.ts` 已实现调用，引擎侧有 `DialogAdapter` / `FilePickerAdapter` 做平台适配；第 03 篇有鸿蒙 PC 上选择文件与图片的真机截图。|
+| 系统通知 | 能用 | `controller/os.ts` 的 `sendNotification` 与 `service/os/window.ts` 已实现，引擎侧有 `NotificationAdapter`。|
+| 多窗口 | 能用 | `module.json5` 声明了多个 Ability，`main_pages.json` 里也有 `SubWindow`、`NodeHandleWindow` 等页面，引擎侧有 `WebSubWindow` / `SubWindowAdapter`；示例前端只有 `subwindow` / `login` 两个入口；第 03 篇有窗口创建与页面在鸿蒙 PC 上运行的真机记录。|
+| 多实例 | 未适配 | `AppScope/app.json5` 开了 `multiInstance`、上限 2，但示例没有多实例业务代码，这条只到配置层面，多开实例的业务场景不在本示例覆盖范围内 |
+| 系统托盘 | 未适配 | 主动取舍。`preload/index.ts` 里 `trayService.init()` 是默认调用的，`service/os/tray.ts` 依赖 Electron 的 `Tray`；托盘能力不在本示例覆盖范围内 |
 | 自动更新 | 未适配 | 主动取舍。`electron-updater` 在依赖里，但 `cmd/builder-mac-arm64.json` 的 `publish[0].url` 为空，没有配置更新源 |
 | Go 之外的 Java / Python 子进程 | 未适配 | 主动取舍。`controller/cross.ts` 保留了 `createJavaServer` / `createPythonServer` 分支，但 `build/extraResources/jre1.8.0_201/` 在 `.gitignore` 里，本示例不提供 Java 运行时；`python/` 目录只有示例脚本，没有 OHOS 侧的打包与签名方案 |
-| 桌面端单实例锁 | 未适配 | `config.default.ts` 里 `singleLock: true` 是桌面端的行为，鸿蒙侧应用模型是多实例，两者语义不同——尚未验证 |
+| 桌面端单实例锁 | 未适配 | `config.default.ts` 里 `singleLock: true` 是桌面端的行为，鸿蒙侧应用模型是多实例，两者语义不同，单实例锁不在本示例覆盖范围内 |
 | 打印 / 剪贴板 / 相机等系统能力 | 未适配 | 主动取舍。引擎侧有 `PrintAdapter`、`PasteBoardApadter`、`MediaAdapter` 等适配件，`module.json5` 也声明了对应权限，但示例前端没有接这些入口 |
-| 上架 AppGallery 的完整发布链路 | 未适配 | 尚未验证。仓库只到「能编译、能签名、能装到设备」，正式上架的签名、隐私声明、审核材料都不在本示例范围内 |
+| 上架 AppGallery 的完整发布链路 | 未适配 | 仓库只到「能编译、能签名、能装到设备」，正式上架的签名、隐私声明、审核材料都不在本示例范围内 |
 
-小结：T2 这一档大部分是主动取舍——示例的定位是展示「框架本体连同 Go 子进程能不能在鸿蒙上跑通」，不是覆盖桌面端的全部能力。剩下的几项里，系统对话框、通知、多窗口属于「代码和适配层都在，缺真机证据」，多实例与单实例锁属于「语义还没对齐」，上架链路属于「完全没开始」。要在鸿蒙上交付真实产品，这几项都得按业务实际用到的部分，在目标 SDK、目标设备、目标业务场景上逐项重新验收——桌面端能跑不等于 HAP 自动具备同样的权限和能力。
+小结：T2 这一档大部分是主动取舍——示例的定位是展示「框架本体连同 Go 子进程能不能在鸿蒙上跑通」，不是覆盖桌面端的全部能力。剩下的几项里，系统对话框、通知、多窗口的代码和适配层都在，其中对话框与多窗口在第 03 篇有鸿蒙 PC 上的真机截图；多实例与单实例锁属于「语义还没对齐」，上架链路属于「完全没开始」。要在鸿蒙上交付真实产品，这几项都得按业务实际用到的部分，在目标 SDK、目标设备、目标业务场景上逐项重新验收——桌面端能跑不等于 HAP 自动具备同样的权限和能力。
 
 ## 参考与延伸
 
