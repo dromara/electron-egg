@@ -261,7 +261,7 @@ build_project --module electron@default   # 编译 electron Entry HAP
 start_app --module electron --ability EntryAbility
 ```
 
-应用在鸿蒙 PC 模拟器（arm64，M 芯片 Mac）上的运行效果如下：
+应用在鸿蒙 PC 真机上的运行效果如下：
 
 ![2048 在鸿蒙 PC 上运行：点击「AI 演示」后 AI 自动走棋，棋盘中央出现方向提示箭头](./ee-example-20.jpg)
 

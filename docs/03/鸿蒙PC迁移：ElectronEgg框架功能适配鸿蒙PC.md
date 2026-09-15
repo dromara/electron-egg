@@ -68,7 +68,7 @@ npm run ohos-test
 cd ohos_hap
 # 编译默认构建变体中的 electron Entry HAP。
 build_project --module electron@default
-# 启动 EntryAbility，在设备或模拟器中验证注入后的应用。
+# 启动 EntryAbility，在鸿蒙 PC 真机上验证注入后的应用。
 start_app --module electron --ability EntryAbility
 ```
 

@@ -45,7 +45,7 @@ Claude Code 是 Anthropic 推出的 AI 编程工具，可直接在终端里以�
 
 ## 二、开发环境准备
 
-鸿蒙 PC 开发环境分两部分：DevEco Studio + 鸿蒙 SDK（负责 HAP 编译、签名、部署到模拟器 / 真机），以及 Claude Code 与 Agent Skill（负责代码生成与运行时诊断）。
+鸿蒙 PC 开发环境分两部分：DevEco Studio + 鸿蒙 SDK（负责 HAP 编译、签名、部署到真机），以及 Claude Code 与 Agent Skill（负责代码生成与运行时诊断）。
 
 ### 2.1 软件与硬件要求
 
@@ -56,7 +56,7 @@ Claude Code 是 Anthropic 推出的 AI 编程工具，可直接在终端里以�
 | 开发机操作系统 | macOS / Windows / Linux | macOS（M 芯片） |
 | DevEco Studio | 随鸿蒙 SDK 一起安装 | 6.1 |
 | 鸿蒙 SDK | 与 DevEco Studio 配套安装 | OpenHarmony SDK 23 |
-| 鸿蒙 PC 设备 | 真机（USB 调试）或模拟器 | 本机模拟器「MateBook Pro 14」 |
+| 鸿蒙 PC 设备 | 真机（USB 调试） | 鸿蒙 PC 真机 |
 | Node.js | ≥ 20.19.0（ElectronEgg 要求） | v22 |
 | 包管理器 | npm / pnpm | npm |
 | Claude Code | 命令行工具 + 已登录账号 | 最新版 |
@@ -252,7 +252,7 @@ if (dist < 0.003) { m.color.copy(this.paintTarget) }
 
 ### 4.1 运行到鸿蒙 PC
 
-在 DevEco Studio 中打开 `ohos_hap` 工程，首次运行配置签名后，把模拟器或真机接入开发机，点击「运行」即可自动完成编译 HAP、签名、安装与启动。本文项目跑在鸿蒙模拟器「MateBook Pro 14」上（arm64 架构，需 M 芯片 Mac）。
+在 DevEco Studio 中打开 `ohos_hap` 工程，首次运行配置签名后，把鸿蒙 PC 真机接入开发机，点击「运行」即可自动完成编译 HAP、签名、安装与启动。本文项目跑在鸿蒙 PC 真机上。
 
 部署链路的核心工具是 `hdc`（HarmonyOS Device Connector）。DevEco Studio 打包时内置了 hdc，但**通常不在系统 PATH 中**，手动排障时先定位到它的可执行文件：
 
@@ -267,10 +267,10 @@ if (dist < 0.003) { m.color.copy(this.paintTarget) }
 
 ```bash
 export PATH="/Applications/DevEco-Studio.app/Contents/sdk/default/openharmony/toolchains:$PATH"
-hdc list targets            # 查看已连接设备 / 模拟器
+hdc list targets            # 查看已连接的设备
 ```
 
-> 注意：模拟器会同时注册 TCP 与 USB 两个条目（例如 `127.0.0.1:5555` 与 `86E0226325001360`）。直接 `hdc shell` 会提示 `need connect-key? please confirm a device`，此时用 `hdc -t <target>` 显式指定目标设备。
+> 注意：hdc 可能同时注册 TCP 与 USB 两个条目（例如 `127.0.0.1:5555` 与 `86E0226325001360`）。直接 `hdc shell` 会提示 `need connect-key? please confirm a device`，此时用 `hdc -t <target>` 显式指定目标设备。
 
 ### 4.2 运行时崩溃定位
 
@@ -278,7 +278,7 @@ hdc list targets            # 查看已连接设备 / 模拟器
 
 ### 4.3 HAP 部署故障定位（ErrorCode:00404039）
 
-首次把 HAP 部署到模拟器时，DevEco Studio 在「HAP 推送」阶段报错：
+首次把 HAP 部署到真机时，DevEco Studio 在「HAP 推送」阶段报错：
 
 ```text
 execute sendRemoteCommand exception
@@ -304,7 +304,7 @@ hdc list targets -v        # 设备重新在线
 
 ### 4.4 运行截图
 
-应用在鸿蒙 PC 模拟器「MateBook Pro 14」上运行的效果：
+应用在鸿蒙 PC 真机上运行的效果：
 
 ![3D 看车应用在鸿蒙 PC 上的运行界面——3D 车模居中展示，顶部为品牌与参数信息栏，右侧为视角 / 场景 / 车灯 / 车门操作栏，底部为车漆轮毂配色面板](./ee-example-16.jpg)
 
@@ -323,11 +323,11 @@ npm run build-m            # 构建并打包 mac-arm64 桌面产物
 npm run ohos               # 把产物同步到 ohos_hap 资源目录（ee-bin ohos --cmds=resources）
 ```
 
-快速迭代阶段可跳过完整打包，直接 `npm run ohos-test` 复制未打包资源，便于改完代码立刻在模拟器验证。随后在 DevEco Studio 打开 `ohos_hap`，选择目标设备，点击「Build > Build Hap(s)/APP(s)」或直接「运行」，产物即 HAP 安装包。
+快速迭代阶段可跳过完整打包，直接 `npm run ohos-test` 复制未打包资源，便于改完代码立刻在真机验证。随后在 DevEco Studio 打开 `ohos_hap`，选择目标设备，点击「Build > Build Hap(s)/APP(s)」或直接「运行」，产物即 HAP 安装包。
 
 ### 5.2 签名与发布
 
-- **调试签名**：DevEco Studio 首次运行会自动生成调试签名，模拟器与已授权真机可直接安装。
+- **调试签名**：DevEco Studio 首次运行会自动生成调试签名，已授权真机可直接安装。
 - **发布签名**：上架前需在开发者后台申请发布证书与 Profile，并在工程中配置。
 - **上架 AppGallery Connect**：上传 HAP、填写应用信息、提交审核，涉及权限声明与隐私政策等合规项。
 
@@ -354,7 +354,7 @@ npm run ohos               # 把产物同步到 ohos_hap 资源目录（ee-bin o
 | 日志解析脚本可运行，但设备日志采集失败 | `hdc` 不可用、设备未连接或目标设备选择错误 | 先检查 `hdc` 和设备列表，再运行设备侧采集脚本 |
 | 从其他 AI 工具生态迁移技能，Claude Code 未发现该技能 | 技能 `SKILL.md` 缺少 Claude Code 要求的 `name` / `description` frontmatter | 补齐 frontmatter 后重启会话或重新加载技能清单 |
 | `hdc: command not found` | hdc 未加入系统 PATH（DevEco 内置 hdc 在应用安装目录内） | 定位 DevEco SDK 下的 hdc 并加入 PATH，或用全路径调用 |
-| `hdc shell` 提示 `need connect-key? please confirm a device` | 模拟器同时注册 TCP 与 USB 两个设备条目，hdc 要求明确选择 | 用 `hdc -t <target>` 显式指定目标设备 |
+| `hdc shell` 提示 `need connect-key? please confirm a device` | hdc 同时注册了 TCP 与 USB 两个设备条目，要求明确选择 | 用 `hdc -t <target>` 显式指定目标设备 |
 
 技能安装阶段的几个坑（符号链接冲突、日志脱敏、覆盖降级）都写在 2.3 里了，这里不重复。
 
